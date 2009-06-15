@@ -1,0 +1,3 @@
+[submodule "kroll"]
+	path = kroll
+	url = git://github.com/jhaynie/kroll.git
