@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+import os, os.path as path
+
+Import('build')
+
+env = build.env.Clone()
+env.Append(LIBPATH=[
+	build.get_module('tiapp').build_dir,
+	build.get_module('javascript').build_dir])
+env.Append(CPPPATH = [
+	build.kroll_include_dir,
+	'%s/modules/javascript' % build.kroll_source_dir,
+	'%s/modules/ti.App' % build.titanium_source_dir])
+
+build.add_thirdparty(env, 'poco')
+#if not build.is_linux():
+env.Append(LIBS=['tiappmodule','javascriptmodule'])
+if build.is_osx(): env.Append(FRAMEWORKS = ['Cocoa'])
+
+sources = Glob('*.cpp')
+webkit_tp = path.join(build.third_party, 'webkit')
+webkit_lib = path.join(webkit_tp, 'lib')
+webkit_inc = path.join(webkit_tp, 'include')
+
+if build.is_linux():
+	sources = sources + Glob('gtk/*.cpp') + Glob('url/*.cpp')
+
+	curl_tp = path.join(build.third_party, 'libcurl')
+	curl_lib = path.join(curl_tp, 'lib')
+	curl_inc = path.join(curl_tp, 'include')
+
+	env.Append(LIBS=['webkit-1.0', 'curl', 'Xss'])
+	env.Append(LIBPATH=[webkit_lib, curl_lib])
+	env.Append(CPPPATH=[webkit_inc, curl_inc])
+	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext')
+
+elif build.is_win32():
+	sources = sources + Glob('win32/*.cpp') + Glob('win32/*.cc') + Glob('url/*.cpp')
+	sources += Glob('binding/kjs*.cpp')
+	env.Append(LIBPATH=[webkit_lib])
+	env.Append(CPPPATH=[webkit_inc, path.join(webkit_inc, 'webkit'), path.join(webkit_inc, 'JavaScriptCore'), 
+	    path.join(webkit_inc,'WebCore','ForwardingHeaders'),
+		path.join(build.third_party, 'icu', 'include'), '#kroll'])
+	env.Append(LIBS=['WebKitGUID','WebKit', 'kernel32','shell32','user32','ole32','comdlg32','comctl32','gdi32','shlwapi', 'oleaut32', 'icuuc','pthreadVC2','libcurl_imp','khost','comsuppw'])
+	env.Append(CCFLAGS=['/MD'])
+	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
+
+elif build.is_osx():
+	env.Append(FRAMEWORKPATH=[webkit_tp])
+	env.Append(FRAMEWORKS=['Cocoa','Carbon','WebKit','JavaScriptCore','IOKit'])
+	env.Append(CPPPATH=[path.join(webkit_tp, 'WebKit.framework', 'Headers')])
+	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
+	env.Append(CCFLAGS=['-x', 'objective-c++'])
+
+m = build.add_module('ti.UI', env=env)
+s1 = env.SharedLibrary(target = m.build_dir + '/tiuimodule', source = sources)
+build.mark_build_target(s1)
+
+if build.is_osx():
+	if not(path.exists(build.dir + '/modules/tiui')):
+		os.makedirs(build.dir + '/modules/tiui')
+
+	template_dir = path.join(build.runtime_build_dir, 'template')
+
+	c = build.utils.CopyToDir(path.join(build.titanium_support_dir, 'titanium.icns'), template_dir)
+	build.mark_build_target(c)
+
+	for i in Glob('osx/*.xib'):
+		base = path.splitext(path.basename(str(i)))[0]
+		env.AddPostAction(s1, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile %s/%s.nib %s' % (m.build_dir, base, i))
+		env.AddPostAction(s1, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile %s/%s.nib %s' % (template_dir, base, i))

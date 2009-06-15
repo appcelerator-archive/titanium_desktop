@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+Import('build')
+import os
+
+modules = ['App','UI','Network','Growl','Filesystem','Media','Desktop','Platform','Process','Notification','Monkey','Analytics','Database']
+
+for module in modules:
+	module = "ti.%s" % module
+	module_dir = os.path.join(build.dir, 'objs', 'modules', module)
+	SConscript(os.path.join(module,'SConscript'), build_dir=module_dir, duplicate=0)
+

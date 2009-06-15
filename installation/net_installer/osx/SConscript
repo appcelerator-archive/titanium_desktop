@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+import os, os.path as p, distutils.dir_util as dir_util
+
+
+Import('build')
+
+Env = build.env.Clone()
+Env.Append(FRAMEWORKS=['Cocoa'])
+sources = Glob('*.m') + Glob('*.mm')
+
+# Turn off debugging for the installer to try to save space
+ccflags = Env['CCFLAGS']
+if '-g' in ccflags: ccflags.remove('-g')
+ccflags.append('-Oz')
+Env['CCFLAGS'] = ccflags
+
+Env.Append(CPPPATH=[build.kroll_utils_dir])
+sources.extend(build.get_kroll_utils(p.join(build.dir, 'objs', 'netinstaller')))
+
+# We want to build this directly into the runtime dist directory to avoid copying
+# In the end we want something that looks like this inside of build.runtime_build_dir
+#	installer/Installer App.app/Contents/MacOS/Installer App
+#	installer/Installer App.app/Contents/Resources/English.lproj/MainMenu.nib
+#	installer/Installer App.app/Contents/Resources/English.lproj/titanium.icns
+#	installer/Installer App.app/Contents/Info.plist
+#	see installation/distribution_guide.txt
+contents = p.join(build.runtime_build_dir, 'installer', 'Installer App.app', 'Contents')
+inst = Env.Program(p.join(contents, 'MacOS', 'Installer App'), sources)
+build.mark_build_target(inst)
+
+c = build.utils.CopyToDir(Glob('*.plist'), contents)
+build.mark_build_target(c)
+
+resources_out = p.join(contents, 'Resources', 'English.lproj')
+
+files = []
+files.append(p.join(build.titanium_support_dir, 'titanium.icns'))
+files.append(p.join(build.cwd(), 'dialog-warning.png'))
+c = build.utils.CopyToDir(files, resources_out)
+build.mark_build_target(c)
+
+for f in Glob('English.lproj/*.xib'):
+	f = str(f)
+	out = p.join(resources_out, p.splitext(p.basename(f))[0] + '.nib')
+	Env.AddPostAction(inst, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile "%s" "%s"' % (out, f))
+	Env.AddPostAction(inst, 'strip -u -r "%s"' % str(inst[0]))
+

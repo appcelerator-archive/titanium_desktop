@@ -1,0 +1,6 @@
+@import "ui.core.css";
+@import "ui.theme.css";
+@import "ui.allplugins.css";
+
+body { font-size: 10px; font-family: "Lucida Sans"; }
+table { font-size: 1em; }

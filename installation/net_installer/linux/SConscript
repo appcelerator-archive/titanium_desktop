@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+import os.path as path
+
+Import('build')
+
+Env = build.env.Clone()
+Env.Append(LIBS=['curl'])
+
+Env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 gthread-2.0')
+
+sources = Glob('*.cpp')
+
+Env.Append(CPPPATH=[build.kroll_utils_dir])
+sources.extend(build.get_kroll_utils(path.join(build.dir, 'objs', 'netinstaller')))
+
+out = path.join(build.runtime_build_dir, 'installer', 'installer')
+i = Env.Program(out, sources)
+build.mark_build_target(i)

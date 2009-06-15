@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+import os, os.path as path
+Import('build')
+
+env = build.env.Clone();
+
+build.add_thirdparty(env, 'poco')
+env.Append(LIBS=['tiappmodule'])
+env.Append(LIBPATH=[build.get_module('tiapp').build_dir])
+if build.is_osx():
+	env.Append(FRAMEWORKS = ['Cocoa'])
+
+env.Append(CPPDEFINES = ('TITANIUM_FILESYSTEM_API_EXPORT', 1))
+env.Append(CPPPATH = ['#kroll','%s/modules/ti.App' % build.titanium_source_dir])
+env.Append(LIBPATH=[path.join(build.dir, 'modules', 'ti.App')])
+
+
+if build.is_win32():
+	env.Append(CCFLAGS=['/MD'])
+	env.Append(LIBS=['shell32', 'user32', 'comdlg32', 'ole32'])
+	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+
+m = build.add_module('ti.Filesystem', env=env)
+sources = Glob('*.cpp')
+t = env.SharedLibrary(target = m.build_dir + '/tifilesystemmodule', source = sources)
+build.mark_build_target(t)

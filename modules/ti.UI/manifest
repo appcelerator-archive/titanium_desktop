@@ -1,0 +1,4 @@
+name: ti.UI
+version: 0.1
+description: ui module
+os: win32, osx, linux

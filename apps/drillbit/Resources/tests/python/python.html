@@ -1,0 +1,28 @@
+<html>
+	<title>I love Guido</title>
+	<script>
+		function my_global_foo(a)
+		{
+			return 'you '+a;
+		}
+		var my_global_var = 'i love you';
+	</script>
+<body>
+	<div id="a">A</div>
+	<script src="python.py" type="text/python"></script>
+	<script type="text/python">
+		def inline_document():
+			return document.getElementById('a')
+	</script>
+	<script>
+		window.inline_test_result = inline_document().innerHTML;
+		window.external_test_result = external_document().innerHTML;
+		window.require_file_module_result = require_file_module()
+		window.require_file_sub_file_module_result = require_sub_file_module()
+		window.test_window_global_result = test_window_global()
+		window.what_is_love_result = window['what_is_love']()
+		window.test_document_title_result = test_document_title()
+		window.test_external_module_result = test_external_module()
+	</script>
+</body>
+</html>

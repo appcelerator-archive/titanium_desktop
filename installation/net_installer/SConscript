@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+import os.path as p
+Import('build')
+
+script = p.join(build.os, 'SConscript')
+build_dir = p.join(build.dir, 'objs', 'netinstaller')
+SConscript(script, build_dir=build_dir, duplicate=0)

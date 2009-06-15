@@ -1,0 +1,17 @@
+/* 
+   this is Titanium's default stylesheet to attempt to normalize
+   styles across different operating systems 
+*/
+
+body
+{
+	font-family: "sans-serif";
+	background: transparent;
+	-webkit-user-select: none;
+}
+
+a, h1, h2, h3, h4, blockquote
+{
+	-webkit-user-select: text;
+}
+

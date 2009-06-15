@@ -1,0 +1,4 @@
+name: ti.Growl
+version: 0.1
+description: Growl notifications module
+os: osx

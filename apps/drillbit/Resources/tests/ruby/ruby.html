@@ -1,0 +1,29 @@
+<html>
+	<title>I love Matz</title>
+	<script>
+		function my_global_foo(a)
+		{
+			return 'you '+a;
+		}
+		var my_global_var = 'i love you';
+	</script>
+<body>
+	<div id="a">A</div>
+	<script src="ruby.rb" type="text/ruby"></script>
+	<script type="text/ruby">
+		def inline_document
+			document.getElementById 'a'
+		end
+	</script>
+	<script>
+		window.inline_test_result = inline_document().innerHTML;
+		window.external_test_result = external_document().innerHTML;
+		window.require_file_module_result = require_file_module()
+		window.require_file_sub_file_module_result = require_sub_file_module()
+		window.test_window_global_result = test_window_global()
+		window.what_is_love_result = window['what_is_love?']()
+		window.test_document_title_result = test_document_title()
+		window.test_gem_result = test_gem()
+	</script>
+</body>
+</html>

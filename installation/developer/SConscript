@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+import os.path as p, futils
+from app import App
+Import('build')
+
+def package_developer(target, source, env):
+	print "Packaging Titanium SDK Installer..."
+	cwd = build.cwd()
+	developer = App(
+		build,
+		fullname='Titanium SDK Installer', 
+		id='com.titaniumapp.sdk.installer',
+		version=build.version,
+		guid='ABBAE566-6499-4999-8A8E-7A72BA7A5C5D',
+		image='images/default_app_logo.png',
+		publisher='Appcelerator, Inc',
+		url='http://appcelerator.org',
+		sdk=True)
+
+	# Create the basic application shell
+	package_dist = True
+	if 'PACKAGE_DIST' in env:
+		package_dist = env['PACKAGE_DIST']
+
+	destdir = p.join(build.dir, 'Titanium SDK Installer')
+	if build.is_osx(): destdir += ".app"
+
+	developer.stage(destdir, src_resources=p.join(cwd, 'Resources'), bundle=False)
+
+	if package_dist:
+		# Copy the zip files from the dist directory to developer.contents/dist
+		print "    -> Copying sdk zip from %s to %s" % (build.dist_dir, p.join(developer.contents, 'dist'))
+		futils.CopyToDir(p.join(build.dist_dir, "sdk-" + build.version + ".zip"), p.join(developer.contents, 'dist'))
+
+	# The SDK installer application is staged.
+	# -- so now we do pre-package processing
+	to_copy = ['tiapp.xml', 'LICENSE.txt']
+	for item in to_copy:
+		futils.CopyToDir(p.join(cwd, item), developer.contents)
+
+	# Don't mark this application as installed, because we want
+	# the appinstaller to run when it is first executed
+	#futils.Touch(p.join(developer.contents, '.installed'))
+
+	if not build.nopackage:
+		developer.package(
+			out_dir=build.dist_dir,
+			# osx options
+			app_name="Titanium SDK Installer",
+			vol_name="Titanium",
+			dmg_name='titanium-sdkinstaller-' + build.version,
+			icns_file=p.join(cwd, 'osx', 'VolumeIcon.icns'),
+			ds_store_file=p.join(cwd, 'osx', 'installer_DS_Store'),
+			ds_store_extras=[p.join(cwd, 'osx', 'background.jpg')])
+
+build.env.Append(BUILDERS = {'PackageSDK' : Builder(action=package_developer)})
+developer_bundled = build.env.PackageSDK("#dummy-target", [])
+developer_netinst = build.env.PackageSDK("#dummy-target2", [], PACKAGE_DIST=False)
+
+Depends(developer_bundled, ['stage', 'dist'])
+Depends(developer_netinst, ['stage','dist'])
+AlwaysBuild(developer_bundled) # incremental builder doesn't work
+AlwaysBuild(developer_netinst) # incremental builder doesn't work
+
+developer_targets = [developer_bundled]
+Alias('sdkinstaller', developer_targets)
+
+

@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import os, os.path as path
+Import('build')
+
+env = build.env.Clone();
+env.Append(CPPDEFINES = ('TITANIUM_API_EXPORT', 1))
+env.Append(CPPPATH = ['#kroll'])
+build.add_thirdparty(env, 'poco')
+
+if build.is_osx():
+	env.Append(FRAMEWORKS = ['Cocoa'])
+
+if build.is_linux():
+	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10')
+
+sources = Glob('*.cpp')
+
+if build.is_osx():
+	sources += Glob('osx/*.cpp') + Glob('osx/*.mm')
+
+elif build.is_win32():
+	env.Append(CPPPATH=['C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include', path.join(build.kroll_third_party, 'microsoft', 'include')])
+	env.Append(LIBPATH=['C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib'])
+	env.Append(LIBS = ['user32', 'shell32', 'kernel32', 'shlwapi', 'strmiids','ole32','comdlg32','comctl32','oleaut32', 'comsuppw'])
+	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
+	sources += Glob('win32/*.cpp')
+
+elif build.is_linux():
+	sources += Glob('gst/*.cpp')
+
+m = build.add_module('ti.Media', env=env)
+t = env.SharedLibrary(target = m.build_dir + '/timediamodule', source = sources)
+build.mark_build_target(t)
+

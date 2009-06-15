@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+import os
+Import('build')
+
+env = build.env.Clone();
+env.Append(CPPDEFINES = ('TITANIUM_PLATFORM_API_EXPORT', 1))
+env.Append(CPPPATH = ['#kroll'])
+build.add_thirdparty(env, 'poco')
+
+if build.is_win32():
+    env.Append(CCFLAGS=['/MD'])
+    env.Append(LIBS=['Advapi32', 'Iphlpapi'])
+    env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+elif build.is_osx():
+	env.Append(FRAMEWORKS = ['AppKit'])
+
+m = build.add_module('ti.Platform', env=env)
+t = env.SharedLibrary(target = m.build_dir + '/tiplatformmodule', source = Glob('*.cpp'))
+build.mark_build_target(t)

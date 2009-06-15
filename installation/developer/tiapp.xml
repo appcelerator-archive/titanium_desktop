@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:app xmlns:ti="http://ti.appcelerator.org" xmlns:appc="http://www.appcelerator.org">
+   <id>com.titaniumapp.sdk.installer</id>
+   <name>Titanium SDK Installer</name>
+   <version>0.4</version>
+   <window>
+      <id>initial</id>
+      <title>Titanium SDK Installer</title>
+      <url>app://index.html</url>
+      <width>250</width>
+      <height>450</height>
+	  <fullscreen>false</fullscreen>
+	  <maximizable>true</maximizable>
+	  <minimizable>true</minimizable>
+	  <closeable>true</closeable>
+	  <resizable>true</resizable>
+	  <visible>false</visible>
+   </window>
+</ti:app>

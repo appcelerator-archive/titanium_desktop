@@ -1,0 +1,118 @@
+<html>
+<head>
+<style>
+	body{background-color:#e8e8e8;color:#111;margin:0;padding:0;font-family:sans-serif;}
+	#divider{position:absolute;top:0;left:0;right:0;height:1px;border-top:1px solid #b0b0b0;visiblity:visible;}
+	#body{position:relative;top:1px;border-top:1px solid #404040;}
+	body.unfocused.osx #body {border-top:1px solid #878787;}
+	body.unfocused.osx #divider {position:absolute;top:0;left:0;right:0;height:1px;visibility:hidden;}
+	#logo{position:absolute;top:10px;left:10px;width:78px;height:78px;background:transparent;}
+	#logo img {visibility:hidden;}
+	#explain{position:absolute;top:60px;left:110px;right:10px;font-size:12px;font-weight:normal;}
+	#title{position:absolute;top:10px;left:110px;font-weight:bold;font-size:15px;}
+	#notes_header{position:absolute;top:80px;left:110px;overflow:auto;right:10px;font-size:12px;font-weight:bold;}
+	#notes{position:absolute;top:100px;left:110px;overflow:auto;right:20px;height:174px;border:1px solid #888;background-color:#fff;color:#111;padding:0;margin:0;font-size:12px;}
+	#buttons{position:absolute;bottom:30px;right:10px;}
+	#buttons button {margin-right:10px;-webkit-appearance:push-button;}
+	iframe {padding:0;margin:0;height:171px;}
+</style>
+<script type="text/javascript" src="ti://tiui/jquery-1.3.2.js"></script>
+<script>
+   Titanium.UI.currentWindow.addEventListener(function(name)
+   {
+		switch(name)
+		{
+			case 'unfocused':
+			{
+				$(document.body).addClass('unfocused');
+				break;
+			}
+			case 'focused':
+			{
+				$(document.body).removeClass('unfocused');
+				$('#btn_install').focus();
+				break;
+			}
+		}
+   });
+   function frameLoaded()
+   {
+	  // re-write links to open in external system browser
+      var nodes = window.frames['notes_html'].document.getElementsByTagName("A");
+	  for (var c=0;c<nodes.length;c++)
+	  {
+		var node = nodes[c];
+		node.setAttribute('target','ti:systembrowser');
+	  }
+   }
+	$(function()
+	{
+		var currentWindow = Titanium.UI.getCurrentWindow();
+		var name = currentWindow.getDialogParameter('name');
+		var icon = currentWindow.getDialogParameter('icon');
+		var ver_from = currentWindow.getDialogParameter('ver_from');
+		var ver_to = currentWindow.getDialogParameter('ver_to');
+		var notes_url = currentWindow.getDialogParameter('notes_url');
+		var parent = currentWindow.getParent();
+		
+		Titanium.UI.currentWindow.setTitle(name+' Update Available');
+		
+		if (notes_url)
+		{
+			$('#notes_html').attr('src',notes_url);
+		}
+		else
+		{
+			$('#notes_body').css('display','none');
+			currentWindow.setHeight(170);
+			currentWindow.setWidth(450);
+		}
+		$('.name').html(name);
+		$('.tover').html(ver_to);
+		$('.fromver').html(ver_from);
+		
+		$('#btn_later').click(function()
+		{
+			currentWindow.close('later');
+		});
+		
+		$('#btn_install').click(function()
+		{
+			currentWindow.close('install');
+		});
+		
+		if (icon)
+		{
+			$('#icon').get(0).onerror = function()
+			{
+				// hide if we can't find it
+				$('#icon').css('visibility','hidden');
+			};
+			$('#icon').attr('src',icon).css('visibility','visible');
+		}
+		
+	});
+</script>
+</head>
+<body>
+	<div id="divider"></div>
+	<div id="body">
+		<div id="logo"><img id="icon" width="78" height="78"/></div>
+		<div id="title">A new version of <span class="name"></span> is available!</div>
+		<div id="explain">
+			<span class="name"></span> <span class="tover"></span> is now available - you have <span class="fromver"></span>. Would you like to
+			download and install it now?
+		</div>
+		<div id="notes_body">
+			<div id="notes_header">Release Notes:</div>
+			<div id="notes">
+				<iframe onload="frameLoaded()" id="notes_html" name="notes_html" width="100%" frameborder="0" framespacing="0"></iframe>
+			</div>
+		</div>
+	</div>
+	<div id="buttons">
+		<button id="btn_later">Remind Me Later</button>
+		<button id="btn_install">Install Update</button>
+	</div>
+</body>
+</html>

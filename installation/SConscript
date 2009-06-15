@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+import os, os.path as p
+Import('build')
+
+SConscript(p.join('net_installer', 'SConscript'))
+
+if build.is_win32():
+	SConscript(p.join('self_extractor', 'SConscript'))
