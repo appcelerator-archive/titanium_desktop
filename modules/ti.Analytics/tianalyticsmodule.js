@@ -106,25 +106,28 @@
 				{
 					if (success)
 					{
-						var found = false;
 						var list = Titanium.API.getInstalledComponents(refresh_components);
+						var matches = [];
 						for (var x=0;x<list.length;x++)
 						{
 							if (list[x].getName() == details.name)
 							{
-								found = true;
-								if (list[x].getVersion()!=details.version)
+								matches.push(list[x]);
+							}
+						}
+						if (matches.length > 0)
+						{
+							for (var x=0;x<matches.length;x++)
+							{
+								if (matches[x].getVersion()==details.version)
 								{
-									// update detected
-									callback(details);
+									// if we found our version, nothing to do... we're OK
+									return;
 								}
 							}
 						}
-						if (!found)
-						{
-							// update detected because you don't have it installed
-							callback(details);
-						}
+						// update detected because you don't have it installed
+						callback(details);
 						
 						// once we've refreshed we'll only refresh on updates
 						refresh_components=false;
