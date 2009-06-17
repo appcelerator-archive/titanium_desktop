@@ -46,12 +46,13 @@ class DesktopPackager(object):
 		zf.write(kboot,'template/kboot.exe')
 		zf.write(kboot, builder.appname + '.exe')
 		zf.write(installer, 'installer/Installer.exe')
-		for walk in os.walk(builder.options.appdir):
+		for walk in os.walk(builder.base_dir):
 			for file in walk[2]:
 				file = os.path.join(walk[0], file)
-				arcname = file.replace(builder.options.appdir, "")
-				builder.log("Adding " + arcname)
-				zf.write(file, arcname)
+				if file != exe:
+					arcname = file.replace(builder.base_dir, "")
+					builder.log("Adding " + arcname)
+					zf.write(file, arcname)
 		zf.close()
 		return exe
 
