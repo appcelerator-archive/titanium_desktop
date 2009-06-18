@@ -18,7 +18,7 @@ Python and SCons are used to build Titanium but not required for end-development
 or runtime.
 
 To build Titanium, you will need to first checkout the Titanium source code
-from <http://github.com/marshall/titanium/tree/master>. 
+from <http://github.com/appcelerator/titanium_desktop/tree/master>. 
 
 Currently, we are building Titanium for 32-bit architectures but intend to support 64-bit
 very soon. If you have patches or would like to assist, please contact us (see below for
