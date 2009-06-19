@@ -125,7 +125,7 @@ namespace ti {
 		std::wstring frame(frameName);
 		transform(frame.begin(), frame.end(), frame.begin(), tolower);
 
-		if(frame == L"ti:systembrowser")
+		if (frame == L"ti:systembrowser" || frame == L"_blank")
 		{
 			BSTR u;
 			request->URL(&u);

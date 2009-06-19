@@ -498,11 +498,9 @@ namespace ti
 		WebKitNetworkRequest* request,
 		gchar* frame_name)
 	{
-		const char *sbrowser = "ti:systembrowser";
 		gchar* frame_name_case = g_utf8_casefold(frame_name, g_utf8_strlen(frame_name, -1));
-		gchar* system_browser = g_utf8_casefold(sbrowser, g_utf8_strlen(sbrowser, -1));
-	
-		if (g_utf8_collate(frame_name_case, system_browser) == 0)
+		if (g_utf8_collate(frame_name_case, "ti:systembrowser") == 0 ||
+			g_utf8_collate(frame_name_case, "_blank") == 0)
 		{
 			gchar* url = strdup(webkit_network_request_get_uri(request));
 			if (url[strlen(url)-1] == '/')

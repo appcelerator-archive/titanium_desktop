@@ -155,18 +155,17 @@
 	DOMNode *target = [elementDict objectForKey:WebElementDOMNodeKey];
 	DOMElement *anchor = [self findAnchor:target];
 	
-	if (anchor)
+	
+	NSString* target = 0;
+	if (anchor && target = [anchor getAttribute:@"target"])
 	{
-		NSString *target = [anchor getAttribute:@"target"];
-		if (target)
+		if ([target isEqualToString:@"ti:systembrowser"] ||
+			[target isEqualToString:@"_blank"])
 		{
-			if ([target isEqualToString:@"ti:systembrowser"])
-			{
-				NSURL *newURL = [request URL];
-				[[NSWorkspace sharedWorkspace] openURL:newURL];
-				[listener ignore];
-				return NO;
-			}
+			NSURL *newURL = [request URL];
+			[[NSWorkspace sharedWorkspace] openURL:newURL];
+			[listener ignore];
+			return NO;
 		}
 	}
 
