@@ -156,11 +156,11 @@
 	DOMElement *anchor = [self findAnchor:target];
 	
 	
-	NSString* target = 0;
-	if (anchor && target = [anchor getAttribute:@"target"])
+	NSString* frameName = 0;
+	if (anchor && (frameName = [anchor getAttribute:@"target"]))
 	{
-		if ([target isEqualToString:@"ti:systembrowser"] ||
-			[target isEqualToString:@"_blank"])
+		if ([frameName isEqualToString:@"ti:systembrowser"] ||
+			[frameName isEqualToString:@"_blank"])
 		{
 			NSURL *newURL = [request URL];
 			[[NSWorkspace sharedWorkspace] openURL:newURL];
