@@ -19,8 +19,7 @@
 #include <stdlib.h>
 #include "win32_tray_item.h"
 
-#include "../url/app_url.h"
-#include "../url/ti_url.h"
+#include "../url/url_curl.h"
 
 namespace ti
 {
@@ -62,9 +61,9 @@ namespace ti
 		// use _putenv since webkit uses stdlib's getenv which is incompatible with GetEnvironmentVariable
 		std::string var = "CURL_CA_BUNDLE_PATH=" + pemPath;
 		_putenv(var.c_str());
-		
-		curl_register_local_handler(&Titanium_app_url_handler);
-		curl_register_local_handler(&Titanium_ti_url_handler);
+
+		curl_register_local_handler(&TitaniumCurlTiURLHandler);
+		curl_register_local_handler(&TitaniumCurlAppURLHandler);
 	}
 
 	Win32UIBinding::~Win32UIBinding()

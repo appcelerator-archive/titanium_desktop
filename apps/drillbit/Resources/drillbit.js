@@ -274,10 +274,10 @@ window.onload = function()
 	var manifest = TFS.getFile(app.base,'manifest');
 	var manifest_contents = String(mymanifest.read());
 
-	manifest_contents.replace('#appname:UnitTest','#appname:UnitTest Harness');
-	manifest_contents.replace('#appid:com.titaniumapp.unittest.driver','#appid:com.titaniumapp.unittest');
-	manifest_contents.replace('#guid:D83B08F4-B43B-4909-9FEE-336CDB44750B','#guid:CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
-	manifest_contents.replace('#desc:Unit Test Driver','#desc:Unit Test Harness');
+	manifest_contents = manifest_contents.replace('UnitTest','UnitTest Harness');
+	manifest_contents = manifest_contents.replace('com.titaniumapp.unittest.driver','com.titaniumapp.unittest');
+	manifest_contents = manifest_contents.replace('D83B08F4-B43B-4909-9FEE-336CDB44750B','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
+	manifest_contents = manifest_contents.replace('Unit Test Driver','Unit Test Harness');
 
 	manifest.write(manifest_contents);
 	

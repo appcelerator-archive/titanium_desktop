@@ -148,13 +148,16 @@
 		};
 
 
-		var originalClose = dialogWindow.close;
-		dialogWindow.close = function(result)
+		if (dialogWindow._dialogCloseCallback != null)
 		{
-			var onclose = dialogWindow._dialogCloseCallback;
-			dialogWindow._dialogResult = result || null;	
-			originalClose();
-			onclose(dialogWindow._dialogResult);
+			var originalClose = dialogWindow.close;
+			dialogWindow.close = function(result)
+			{
+				var onclose = dialogWindow._dialogCloseCallback;
+				dialogWindow._dialogResult = result || null;	
+				originalClose();
+				onclose(dialogWindow._dialogResult);
+			}
 		}
 
 		//var get_result_text = function(result) { var text = "\n"; for (var x in result) { text += x + ": " + result[x] + "\n"; } return text; }

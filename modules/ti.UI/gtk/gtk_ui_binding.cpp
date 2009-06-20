@@ -16,8 +16,9 @@ namespace ti
 {
 	GtkUIBinding::GtkUIBinding(Host *host) : UIBinding(host)
 	{
-		/* Prepare the custom curl URL handler */
-		curl_register_local_handler(&Titanium_app_url_handler);
+		/* Prepare the custom curl URL handlers */
+		curl_register_local_handler(&CurlTiURLHandler);
+		curl_register_local_handler(&CurlAppURLHandler);
 
 		/* Register the script evaluator */
 		evaluator = new ScriptEvaluator();
