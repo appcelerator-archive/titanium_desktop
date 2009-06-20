@@ -57,6 +57,7 @@ namespace ti {
 			Logger* log = Logger::Get("UI.URL");
 			log->Error("Could not convert %s to a path", tiURL.c_str());
 		}
+		return tiURL;
 	}
 
 	string NormalizeAppURL(string url)
