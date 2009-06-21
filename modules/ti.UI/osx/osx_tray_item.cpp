@@ -51,7 +51,7 @@ namespace ti
 		}
 		else
 		{
-			[delegate setHint:[NSString stringWithCString:label.c_str()]];
+			[delegate setHint:[NSString stringWithCString:label.c_str() encoding:NSUTF8StringEncoding]];
 		}
 	}
 	void OSXTrayItem::Remove()

@@ -67,7 +67,7 @@
 {
 	std::string url_str([[url absoluteString] cStringUsingEncoding:NSUTF8StringEncoding]);
 	url_str = AppConfig::Instance()->InsertAppIDIntoURL(url_str);
-	return [NSURL URLWithString: [NSString stringWithCString:url_str.c_str()]];
+	return [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
 }
 
 +(NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request 

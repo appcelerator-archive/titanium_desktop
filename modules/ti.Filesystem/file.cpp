@@ -739,7 +739,7 @@ namespace ti
 		Poco::Path path(this->filename);
 
 #ifdef OS_OSX
-		NSString *p = [NSString stringWithCString:this->filename.c_str()];
+		NSString *p = [NSString stringWithCString:this->filename.c_str() encoding:NSUTF8StringEncoding];
 		unsigned long avail = [[[[NSFileManager defaultManager] fileSystemAttributesAtPath:p] objectForKey:NSFileSystemFreeSize] longValue];
 		result->SetDouble(avail);
 #elif defined(OS_WIN32)
@@ -773,8 +773,8 @@ namespace ti
 		std::string to = args.at(0)->IsString() ? args.at(0)->ToString() : FileSystemUtils::GetFileName(args.at(0));
 
 #ifdef OS_OSX	//TODO: My spidey sense tells me that Cocoa might have a better way for this. --BTH
-		NSMutableString* originalPath = [NSMutableString stringWithCString:from.c_str()];
-		NSString* destPath = [NSString stringWithCString:to.c_str()];
+		NSMutableString* originalPath = [NSMutableString stringWithCString:from.c_str() encoding:NSUTF8StringEncoding];
+		NSString* destPath = [NSString stringWithCString:to.c_str() encoding:NSUTF8StringEncoding];
 		NSString* cwd = nil;
 		NSFileManager* fm = [NSFileManager defaultManager];
 
@@ -782,7 +782,7 @@ namespace ti
 		if (args.size()>1)
 		{
 			cwd = [fm currentDirectoryPath];
-			NSString *p = [NSString stringWithCString:FileSystemUtils::GetFileName(args.at(1))];
+			NSString *p = [NSString stringWithCString:FileSystemUtils::GetFileName(args.at(1)) encoding:NSUTF8StringEncoding];
 			BOOL isDirectory = NO;
 			if ([fm fileExistsAtPath:p isDirectory:&isDirectory])
 			{

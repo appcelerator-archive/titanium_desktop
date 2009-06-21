@@ -16,7 +16,7 @@ namespace ti
 	#ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
 		// we do that with a nifty helper method in NSString
-		this->filename = [[[NSString stringWithCString:filename_.c_str()] stringByExpandingTildeInPath] fileSystemRepresentation];
+		this->filename = [[[NSString stringWithCString:filename_.c_str() encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath] fileSystemRepresentation];
 	#else
 		this->filename = filename_;
 	#endif

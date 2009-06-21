@@ -46,7 +46,7 @@ namespace ti
 		{
 			@try
 			{
-				NSString *str = [NSString stringWithCString:buf];
+				NSString *str = [NSString stringWithCString:buf encoding:NSUTF8StringEncoding];
 				NSData *data = [str dataUsingEncoding:NSUTF8StringEncoding];
 				[handle writeData:data];
 				result->SetInt([data length]);

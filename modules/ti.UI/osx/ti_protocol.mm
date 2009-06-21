@@ -90,7 +90,7 @@
 
 		if (kroll::FileUtils::IsFile(resourcepath))
 		{
-			NSString *fullpath = [NSString stringWithCString:resourcepath.c_str()];
+			NSString *fullpath = [NSString stringWithCString:resourcepath.c_str() encoding:NSUTF8StringEncoding];
 			[self load:url path:fullpath];
 			return;
 		}

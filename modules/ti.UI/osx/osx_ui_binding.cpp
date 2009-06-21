@@ -144,12 +144,12 @@ namespace ti
 		if (ti::UIModule::IsResourceLocalFile(value) || FileUtils::IsFile(value))
 		{
 			SharedString file = ti::UIModule::GetResourcePath(value.c_str());
-			NSString *path = [NSString stringWithCString:((*file).c_str())];
+			NSString *path = [NSString stringWithCString:((*file).c_str()) encoding:NSUTF8StringEncoding];
 			return [[NSImage alloc] initWithContentsOfFile:path];
 		}
 		else
 		{
-			NSURL *url = [NSURL URLWithString:[NSString stringWithCString:value.c_str()]];
+			NSURL *url = [NSURL URLWithString:[NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding]];
 			return [[NSImage alloc] initWithContentsOfURL:url];
 		}
 	}
@@ -207,7 +207,7 @@ namespace ti
 
 
 		std::string appName = AppConfig::Instance()->GetAppName();
-		NSString * applicationName = [NSString stringWithCString:appName.c_str()];
+		NSString * applicationName = [NSString stringWithCString:appName.c_str() encoding:NSUTF8StringEncoding];
 		NSMenu *aMenu = submenu;
 
 		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"About", nil), applicationName]
@@ -324,7 +324,7 @@ namespace ti
 		{
 			OSXMenuItem *i = item->GetChild(c);
 			const char *label = i->GetLabel();
-			NSString *title = label==NULL ? @"" : [NSString stringWithCString:label];
+			NSString *title = label==NULL ? @"" : [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
 			NSMenuItem *menuItem = [mainMenu addItemWithTitle:title action:NULL keyEquivalent:@""];
 			NSMenu *submenu = [[NSMenu alloc] initWithTitle:title];
 			[mainMenu setSubmenu:submenu forItem:menuItem];
@@ -341,7 +341,7 @@ namespace ti
 	NSMenu* OSXUIBinding::MakeMenu(ti::OSXMenuItem* item)
 	{
 		const char *label = item->GetLabel();
-		NSString *title = label == NULL ? @"" : [NSString stringWithCString:label];
+		NSString *title = label == NULL ? @"" : [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
 		NSMenu *menu = [[NSMenu alloc] initWithTitle:title];
 		int count = item->GetChildCount();
 		for (int c=0;c<count;c++)
@@ -371,7 +371,7 @@ namespace ti
 		NSString *label = @"";
 		if (!value.empty())
 		{
-			label = [NSString stringWithCString:value.c_str()];
+			label = [NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding];
 		}
 		DockTileStandin *tile = (DockTileStandin *)[[NSApplication sharedApplication] dockTile];
 		[tile setBadgeLabel:label];

@@ -515,7 +515,7 @@ namespace ti
 	{
 		if (window != nil)
 		{
-			[window setTitle:[NSString stringWithCString:this->config->GetTitle().c_str()]];
+			[window setTitle:[NSString stringWithCString:this->config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
 		}
 	}
 
@@ -529,7 +529,7 @@ namespace ti
 		if (window != nil)
 		{
 			std::string url_str = AppConfig::Instance()->InsertAppIDIntoURL(config->GetURL());
-			NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str()]];
+			NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
 			[[[window webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 		}
 	}
@@ -732,11 +732,11 @@ namespace ti
 
 		if (!defaultName.empty())
 		{
-			filename = [NSString stringWithCString:defaultName.c_str()];
+			filename = [NSString stringWithCString:defaultName.c_str() encoding:NSUTF8StringEncoding];
 		}
 		if (!path.empty())
 		{
-			begin = [NSString stringWithCString:path.c_str()];
+			begin = [NSString stringWithCString:path.c_str() encoding:NSUTF8StringEncoding];
 		}
 		if (types.size() > 0)
 		{
@@ -744,7 +744,7 @@ namespace ti
 			for (size_t t = 0; t < types.size(); t++)
 			{
 				const char *s = types.at(t).c_str();
-				[filetypes addObject:[NSString stringWithCString:s]];
+				[filetypes addObject:[NSString stringWithCString:s encoding:NSUTF8StringEncoding]];
 			}
 		}
 
@@ -808,7 +808,7 @@ namespace ti
 		while (iter != types.end())
 		{
 			std::string ft = (*iter++);
-			[filetypes addObject:[NSString stringWithCString:ft.c_str()]];
+			[filetypes addObject:[NSString stringWithCString:ft.c_str() encoding:NSUTF8StringEncoding]];
 		}
 
 		NSSavePanel *sp = [NSSavePanel savePanel];
@@ -819,7 +819,7 @@ namespace ti
 			[sp setAllowedFileTypes:filetypes];
 		}
 
-		runResult = [sp runModalForDirectory:[NSString stringWithCString:path.c_str()] file:[NSString stringWithCString:defaultName.c_str()]];
+		runResult = [sp runModalForDirectory:[NSString stringWithCString:path.c_str() encoding:NSUTF8StringEncoding] file:[NSString stringWithCString:defaultName.c_str() encoding:NSUTF8StringEncoding]];
 
 		ValueList args;
 
