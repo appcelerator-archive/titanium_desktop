@@ -339,12 +339,12 @@ namespace ti
 			int y = this->config->GetY();
 	
 			GdkScreen* screen = gdk_screen_get_default();
-			if (x == UserWindow::CENTERED)
+			if (x == UIBinding::CENTERED)
 			{
 				x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
 				this->config->SetX(x);
 			}
-			if (y == UserWindow::CENTERED)
+			if (y == UIBinding::CENTERED)
 			{
 				y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
 				this->config->SetY(y);

@@ -120,13 +120,13 @@ class API(dict):
 		API.count += 1
 		self.name = self['name'] = name
 		self.module = module
-		self.deprecated = False
+		self['deprecated'] = False
 		self['since'] = '0.3'
 		self['description'] = ''
 
 	def add_metadata(self, metadata):
 		self.name = get_property(metadata, 'name', self.name)
-		self.deprecated = get_property(metadata, 'deprecated', self.deprecated)
+		self['deprecated'] = get_property(metadata, 'deprecated', self['deprecated'])
 		self['description'] = get_property(metadata, 'description', self['description'])
 		self['since'] = get_property(metadata, 'since', self['since'], convert=False)
 		if get_property(metadata, 'method', False):

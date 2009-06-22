@@ -67,22 +67,38 @@ describe("UI Module Tests",{
 		value_of(w.getURL()).should_be(url);
 		w.close();
 	},
+	test_event_name_constants: function()
+	{
+		// If these tests fail, perhaps the constant has changed. If that's
+		// the case, just update the tests below and be sure that nothing
+		// else in the system breaks! Hopefully apps do not rely on magic strings.
+		value_of(Titanium.UI.FOCUSED).should_be("focused");
+		value_of(Titanium.UI.UNFOCUSED).should_be("unfocused");
+		value_of(Titanium.UI.OPEN).should_be("open");
+		value_of(Titanium.UI.OPENED).should_be("opened");
+		value_of(Titanium.UI.CLOSE).should_be("close");
+		value_of(Titanium.UI.CLOSED).should_be("closed");
+		value_of(Titanium.UI.HIDDEN).should_be("hidden");
+		value_of(Titanium.UI.SHOWN).should_be("shown");
+		value_of(Titanium.UI.FULLSCREENED).should_be("fullscreened");
+		value_of(Titanium.UI.UNFULLSCREENED).should_be("unfullscreened");
+		value_of(Titanium.UI.MAXIMIZED).should_be("maximized");
+		value_of(Titanium.UI.MINIMIZED).should_be("minimized");
+		value_of(Titanium.UI.RESIZED).should_be("resized");
+		value_of(Titanium.UI.MOVED).should_be("moved");
+		value_of(Titanium.UI.PAGE_INITIALIZED).should_be("page.init");
+		value_of(Titanium.UI.PAGE_LOADED).should_be("page.load");
+	},
 	test_window_listener_as_async: function(callback)
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 
-		var closeMsg = "close";
-		var closedMsg = "closed";
-		var openMsg = "open";
-		var openedMsg = "opened";
-		var hiddenMsg = "hidden";
-
 		var messageLog = { };
-		messageLog[closeMsg]  = false;
-		messageLog[closedMsg]  = false
-		messageLog[openMsg]  = false;
-		messageLog[openedMsg]  = false;
-		messageLog[hiddenMsg]  = false;
+		messageLog[Titanium.UI.CLOSE]  = false;
+		messageLog[Titanium.UI.CLOSED]  = false
+		messageLog[Titanium.UI.OPEN]  = false;
+		messageLog[Titanium.UI.OPENED]  = false;
+		messageLog[Titanium.UI.HIDDEN]  = false;
 
 		w.addEventListener(function(eventName, eventData)
 		{
@@ -93,11 +109,11 @@ describe("UI Module Tests",{
 		setTimeout(function()
 		{
 			w.close();
-			if (messageLog[openMsg] !== true)
+			if (messageLog[Titanium.UI.OPEN] !== true)
 			{
 				callback.failed("Did not detect open message");
 			}
-			else if (messageLog[openedMsg] !== true)
+			else if (messageLog[Titanium.UI.OPENED] !== true)
 			{
 				callback.failed("Did not detect opened message");
 			}
