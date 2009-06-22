@@ -25,13 +25,18 @@ describe("Ti.Database sync database tests",{
 	
 	check_types:function()
 	{
-		value_of(Titanium.Database).should_be_object();
+    	value_of(Titanium.Database).should_be_object();
 		value_of(Titanium.Database.open).should_be_function();
 	},
 	
 	before: function()
 	{
 		this.db = Titanium.Database.open("test_db");
+		
+		// we should do a null check here, the rest of the 
+		// object properties are handled elsewhere.
+		value_of(this.db).should_not_be_null();
+		value_of(this.db).should_be_object();
 	},
 	
 	after: function()
@@ -46,7 +51,7 @@ describe("Ti.Database sync database tests",{
 	},
 	
 	db_basic_object_properties: function()
-	{
+	{    
 		value_of(this.db).should_not_be_null();
 		
 		var methods = ['execute','close','remove'];

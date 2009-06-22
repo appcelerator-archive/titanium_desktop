@@ -1,6 +1,7 @@
 describe("UI Module Tests",{
 	test_user_window_title: function()
 	{
+	    // get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 
 		var title = "blahahahahahahahahahahahahaha";
@@ -36,6 +37,7 @@ describe("UI Module Tests",{
 
 	test_user_window_url: function()
 	{
+	    // get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 
 		var url = "http://www.google.com";
@@ -69,6 +71,7 @@ describe("UI Module Tests",{
 	},
 	test_window_listener_as_async: function(callback)
 	{
+	    // get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 
 		var closeMsg = "close";
@@ -109,6 +112,7 @@ describe("UI Module Tests",{
 	},
 	test_window_maximize_fires_resize_as_async: function(callback)
 	{
+	    // get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		w.open();
 
@@ -149,7 +153,5 @@ describe("UI Module Tests",{
 				stageTwo();
 			}, 300);
 		}, 300);
-
-
 	}
 });

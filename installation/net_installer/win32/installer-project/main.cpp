@@ -196,6 +196,7 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 	}
 	
 	// start the HTTP fetch
+	// cwarner - don't need to specify the 'W' functions since we are compiled with unicode by default.
 	HINTERNET hConnection = InternetConnectW( hINet, szDomainName, 80, L" ", L" ", INTERNET_SERVICE_HTTP, 0, 0 );
 	if ( !hConnection )
 	{
@@ -206,7 +207,6 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 	std::wstring path = wurl.substr(wurl.find(szDomainName)+wcslen(szDomainName));
 	//std::wstring queryString = url.substr(url.rfind("?")+1);
 	//astd::wstring object = path + "?" + queryString;
-	
 	HINTERNET hRequest = HttpOpenRequestW( hConnection, L"GET", path.c_str(), NULL, NULL, NULL, INTERNET_FLAG_RELOAD|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_IGNORE_CERT_CN_INVALID|INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0 );
 
 	if ( !hRequest )
