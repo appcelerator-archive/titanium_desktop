@@ -92,12 +92,23 @@
 	//
 	// override console.log to also send into our API logger
 	//
-	var old_log = console.log;
-	console.log = function(msg)
-	{
-		Titanium.API.debug(msg);
-		return old_log(msg);
-	};
+	// patch from cb1kenobi
+	function _connect(_scope, _meth, _new){
+		var orig = _scope[_meth],
+			fn = function(){
+				var c = arguments.callee;
+				c._orig.apply(console, arguments);
+				c._new.apply(this, arguments);
+			};
+		_scope[_meth] = fn;
+		fn._orig = orig;
+		fn._new = _new;
+	}
+	_connect(console, "debug", function(msg){ Titanium.API.debug(msg); });
+	_connect(console, "log", function(msg){ Titanium.API.log(msg); });
+	_connect(console, "info", function(msg){ Titanium.API.info(msg); });
+	_connect(console, "warn", function(msg){ Titanium.API.warn(msg); });
+	_connect(console, "error", function(msg){ Titanium.API.error(msg); });
 	
 	//
 	// UI Dialog class
