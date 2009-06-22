@@ -3,6 +3,11 @@ describe("HTML 5 database tests",{
 	before:function()
 	{
 		this.db = openDatabase('unittest', '1.0');
+		
+		// test the return object to make sure we got the correct object.
+		value_of(this.db).should_be_object();
+		
+		// add methods to verify that we got the proper object.
 	},
 	
 	after:function()
