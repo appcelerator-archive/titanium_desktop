@@ -12,7 +12,7 @@
 -(id)initWithMenu:(ti::OSXMenuItem*)item menu:(NSMenu*)submenu
 {
 	const char *label = item->GetLabel();
-	NSString *title = label!=NULL ? [NSString stringWithCString:label] : @"";
+	NSString *title = label!=NULL ? [NSString stringWithCString:label encoding:NSUTF8StringEncoding] : @"";
 	self = [super initWithTitle:title action:@selector(invoke:) keyEquivalent:@""];
 	if (self!=nil)
 	{
@@ -24,14 +24,14 @@
 			if (ti::UIModule::IsResourceLocalFile(icon_url))
 			{
 				SharedString file = ti::UIModule::GetResourcePath(icon_url);
-				NSString *path = [NSString stringWithCString:((*file).c_str())];
+				NSString *path = [NSString stringWithCString:((*file).c_str()) encoding:NSUTF8StringEncoding];
 				NSImage *image = [[NSImage alloc] initWithContentsOfFile:path];
 				[self setImage:image];
 				[image release];
 			}
 			else
 			{
-				NSURL *url = [NSURL URLWithString:[NSString stringWithCString:icon_url]];
+				NSURL *url = [NSURL URLWithString:[NSString stringWithCString:icon_url encoding:NSUTF8StringEncoding]];
 				NSImage *image = [[NSImage alloc] initWithContentsOfURL:url];
 				[self setImage:image];
 				[image release];

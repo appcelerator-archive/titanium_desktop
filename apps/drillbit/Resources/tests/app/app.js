@@ -12,7 +12,7 @@ describe("ti.App tests",
 		value_of(Titanium.App.getURL()).should_be('blah.com');
 		value_of(Titanium.App.getCopyright()).should_be('2010');
 		value_of(Titanium.App.getDescription()).should_be('cool like dat');
-		value_of(Titanium.App.getGUID()).should_be('D83B08F4-B43B-4909-9FEE-336CDB44750B');
+		value_of(Titanium.App.getGUID()).should_be('CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
 
 		value_of(Titanium.App.exit).should_be_function();
 		value_of(Titanium.App.loadProperties).should_be_function();

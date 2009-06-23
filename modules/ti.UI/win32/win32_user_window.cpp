@@ -13,6 +13,7 @@
 //#include "webkit_javascript_listener.h"
 #include "win32_tray_item.h"
 #include "string_util.h"
+#include "../url/url.h"
 #include <cmath>
 #include <shellapi.h>
 #include <comutil.h>
@@ -694,12 +695,12 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	
 	GetWindowRect(desktop, &desktopRect);
 	
-	if (bounds.x == UserWindow::CENTERED)
+	if (bounds.x == UIBinding::CENTERED)
 	{
 		bounds.x = (desktopRect.right - bounds.width) / 2;
 		this->config->SetX(bounds.x);
 	}
-	if (bounds.y == UserWindow::CENTERED)
+	if (bounds.y == UIBinding::CENTERED)
 	{
 		bounds.y = (desktopRect.bottom - bounds.height) / 2;
 		this->config->SetY(bounds.y);
@@ -738,7 +739,8 @@ void Win32UserWindow::SetURL(std::string& url_)
 {
 	std::string url = url_;
 
-	url = AppURLNormalizeURL(url, AppConfig::Instance()->GetAppID());
+	//url = NormalizeAppURL(url, AppConfig::Instance()->GetAppID());
+	url = ti::NormalizeAppURL(url);	
 	logger->Debug("SetURL: %s", url.c_str());
 	
 	IWebMutableURLRequest* request = 0;

@@ -278,7 +278,7 @@ namespace ti
 			}
 		}
 		host = parent->GetHost();
-		process = [[TiOSXProcess alloc] initWithPath:[NSString stringWithCString:cmd.c_str()] args:arguments host:parent->GetHost() bound:this];
+		process = [[TiOSXProcess alloc] initWithPath:[NSString stringWithCString:cmd.c_str() encoding:NSUTF8StringEncoding] args:arguments host:parent->GetHost() bound:this];
 		
 		this->Set("command",Value::NewString(cmd));
 		

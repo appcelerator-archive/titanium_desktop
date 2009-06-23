@@ -25,7 +25,7 @@ using kroll::StaticBoundList;
 // X11 defines this again for some reason
 #undef DisplayString
 
-#include "../url/app_url.h"
+#include "../url/url_curl.h"
 #include "script_evaluator.h"
 #include "javascript_module.h"
 #include "gtk_menu_item_impl.h"

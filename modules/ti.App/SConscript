@@ -12,8 +12,8 @@ if build.is_osx():
 	env.Append(CPPPATH=['/usr/include/libxml2'])
 
 if build.is_win32():
-	env.Append(CPPPATH = ['#kroll/thirdparty/win32/libxml/include', '#kroll/thirdparty/win32/icu/include'])
-	env.Append(LIBPATH = ['#kroll/thirdparty/win32/webkit/lib'])
+	env.Append(CPPPATH = [path.join(build.third_party,'libxml','include'), path.join(build.third_party, 'icu','include')])
+	env.Append(LIBPATH = [path.join(build.third_party,'webkit','lib')])
 	env.Append(LIBS=['libxml2', 'pthreadVC2'])
 else:
 	env.Append(ENV = {'PATH' : os.environ['PATH']})

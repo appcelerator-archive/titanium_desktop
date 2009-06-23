@@ -20,7 +20,7 @@ namespace ti
 	OSXSound::OSXSound(std::string &url) : 
 		Sound(url), callback(0), sound(0), playing(false), paused(false)
 	{
-		theurl = [NSURL URLWithString:[NSString stringWithCString:url.c_str()]];
+		theurl = [NSURL URLWithString:[NSString stringWithCString:url.c_str() encoding:NSUTF8StringEncoding]];
 		[theurl retain];
 		delegate = [[SoundDelegate alloc] initWithSound:this];
 		this->Load();

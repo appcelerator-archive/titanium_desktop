@@ -189,7 +189,8 @@ WindowConfig* AppConfig::GetMainWindow()
 
 std::string AppConfig::InsertAppIDIntoURL(std::string url)
 {
-	std::string appid = this->GetAppID();
+	SharedApplication application = Host::GetInstance()->GetApplication();
+	std::string appid = application->id;
 	std::transform(appid.begin(), appid.end(), appid.begin(), tolower);
 
 	std::string lcurl = url;

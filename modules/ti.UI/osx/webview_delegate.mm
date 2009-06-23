@@ -18,7 +18,7 @@
 {
 	AppConfig *appConfig = AppConfig::Instance();
 	std::string appid = appConfig->GetAppID();
-	NSString *appID = [NSString stringWithCString:appid.c_str()];
+	NSString *appID = [NSString stringWithCString:appid.c_str() encoding:NSUTF8StringEncoding];
 	
 	[webView setPreferencesIdentifier:appID];
 	
@@ -43,7 +43,7 @@
 	[webPrefs setUserStyleSheetEnabled:NO];
 	
 	// Setup the DB to store it's DB under our data directory for the app
-	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str()];
+	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str() encoding:NSUTF8StringEncoding];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
 	
 	[webPrefs setFullDocumentTeardownEnabled:YES];

@@ -56,7 +56,7 @@ describe("file-based ajax tests",
 	test_query_string_as_async: function(callback)
 	{
 		var timer = 0;
-		$.getJSON('app://url.js?q=1', function(data)
+		$.getJSON('app://test.js?q=1', function(data)
 		{
 			clearTimeout(timer);
 			try

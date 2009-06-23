@@ -24,7 +24,7 @@ namespace ti
 			~OSXUserWindow();
 		public:
 
-			void OSXUserWindow::OpenChooserDialog(
+			void OpenChooserDialog(
 				bool files,
 				SharedKMethod callback,
 				bool multiple,

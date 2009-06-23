@@ -21,7 +21,7 @@
 	config = cfg;
 	userWindow = uw;
 
-	[self setTitle:[NSString stringWithCString:config->GetTitle().c_str()]];
+	[self setTitle:[NSString stringWithCString:config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
 	[self setOpaque:false];
 	[self setHasShadow:true];
 
@@ -234,7 +234,7 @@
 		requiresDisplay = YES;
 	}
 	std::string url_str = AppConfig::Instance()->InsertAppIDIntoURL(config->GetURL());
-	NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str()]];
+	NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 	[self fireWindowEvent:OPENED];
 }

@@ -107,7 +107,7 @@ namespace ti
 		[remember setObject:[dictionary objectForKey:@"DYLD_LIBRARY_PATH"] forKey:@"DYLD_LIBRARY_PATH"];
 		
 		NSWorkspace* ws = [NSWorkspace sharedWorkspace];
-		NSString *name = [NSString stringWithCString:app.c_str()];
+		NSString *name = [NSString stringWithCString:app.c_str() encoding:NSUTF8StringEncoding];
 #ifdef DEBUG
 		NSLog(@"launching external app: %@",name);
 #endif
@@ -129,14 +129,14 @@ namespace ti
 	bool OSXDesktop::OpenURL(std::string& url)
 	{
 		NSWorkspace * ws = [NSWorkspace sharedWorkspace];
-		BOOL wasOpened = [ws openURL:[NSURL URLWithString:[NSString stringWithCString:url.c_str()]]];
+		BOOL wasOpened = [ws openURL:[NSURL URLWithString:[NSString stringWithCString:url.c_str() encoding:NSUTF8StringEncoding]]];
 		return wasOpened;
 	}
 	
 	void OSXDesktop::TakeScreenshot(std::string &screenshotFile)
 	{
 		ScreenshotTaker *taker = [[ScreenshotTaker alloc] init];
-		[taker takeScreenshot:[NSString stringWithCString:screenshotFile.c_str()]];
+		[taker takeScreenshot:[NSString stringWithCString:screenshotFile.c_str() encoding:NSUTF8StringEncoding]];
 		[taker release];
 	}
 }
