@@ -1,5 +1,26 @@
 describe("ti.Api tests",
 {
+	// test the logging functions
+	test_logging_methods: function()
+	{
+		value_of(Titanium.API.critical).should_be_function();
+		value_of(Titanium.API.debug).should_be_function();
+		value_of(Titanium.API.error).should_be_function();
+		value_of(Titanium.API.fatal).should_be_function();
+		value_of(Titanium.API.log).should_be_function();
+		value_of(Titanium.API.notice).should_be_function();
+		value_of(Titanium.API.trace).should_be_function();
+		value_of(Titanium.API.warn).should_be_function();
+
+		Titanium.API.critical("this is a critical message");
+        Titanium.API.debug("this is a debug message");
+		Titanium.API.error("this is a error message");
+		Titanium.API.fatal("this is a fatal message");
+		Titanium.API.log(1,"this is a log message");
+		Titanium.API.notice("this is a notice message");
+		Titanium.API.trace("this is a trace message");
+		Titanium.API.warn("this is a warn message");
+	},
 	validate_properties: function()
 	{
 	    // get the platform and version.
@@ -11,7 +32,8 @@ describe("ti.Api tests",
         var app = Titanium.API.getApplication();
         
         value_of(app).should_not_be_null();
-        if ( app ) {
+        if ( app ) 
+        {
 		    value_of(app).should_be_object();
 		    value_of(app.getArgumentValue).should_be_function();
 		    value_of(app.getArguments).should_be_function();
@@ -40,25 +62,10 @@ describe("ti.Api tests",
 		    value_of(app.isCurrent).should_be_function();
 		    value_of(app.resolveDependencies).should_be_function();
         }		
-		value_of(Titanium.API.CRITICAL).should_not_be_null();
 
-		value_of(Titanium.API.Component).should_be_object();
-		value_of(Titanium.API.Component.getManifest).should_be_function();
-		value_of(Titanium.API.Component.getName).should_be_function();
-		value_of(Titanium.API.Component.getPath).should_be_function();
-		value_of(Titanium.API.Component.getType).should_be_function();
-		value_of(Titanium.API.Component.getVersion).should_be_function();
-		value_of(Titanium.API.Component.isBundled).should_be_function();
-		value_of(Titanium.API.Component.isLoaded).should_be_function();
-		
+		value_of(Titanium.API.CRITICAL).should_not_be_null();
 		value_of(Titanium.API.DEBUG).should_not_be_null();
 
-		value_of(Titanium.API.Dependency).should_be_object();
-		value_of(Titanium.API.Dependency.getName).should_be_function();
-		value_of(Titanium.API.Dependency.getType).should_be_function();
-		value_of(Titanium.API.Dependency.getVersion).should_be_function();
-		
-		
 		value_of(Titanium.API.EQ).should_not_be_null();
 		value_of(Titanium.API.ERROR).should_not_be_null();
 		value_of(Titanium.API.FATAL).should_not_be_null();
@@ -100,30 +107,233 @@ describe("ti.Api tests",
 		value_of(Titanium.API.unregister).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
 	},
-	// test the logging functions
-	test_logging_methods: function()
+    // test the application components API
+	test_components: function()
 	{
-		value_of(Titanium.API.critical).should_be_function();
-		value_of(Titanium.API.debug).should_be_function();
-		value_of(Titanium.API.error).should_be_function();
-		value_of(Titanium.API.fatal).should_be_function();
-		value_of(Titanium.API.log).should_be_function();
-		value_of(Titanium.API.notice).should_be_function();
-		value_of(Titanium.API.trace).should_be_function();
-		value_of(Titanium.API.warn).should_be_function();
+        // test the objects in API		
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        if ( app ) 
+        {
+		    value_of(app).should_be_object();
+            // get the components loaded by the application
+            var loadedComponents = app.getComponents();
+            var installedComponents = app.getAvailableComponents();
+            var bundledComponents = app.getBundledComponents();
+            
+            
+            value_of(loadedComponents).should_not_be_null();
+            value_of(installedComponents).should_not_be_null();
+            value_of(bundledComponents).should_not_be_null();
 
-		Titanium.API.critical("this is a critical message");
-        Titanium.API.debug("this is a debug message");
-		Titanium.API.error("this is a error message");
-		Titanium.API.fatal("this is a fatal message");
-		Titanium.API.log(1,"this is a log message");
-		Titanium.API.notice("this is a notice message");
-		Titanium.API.trace("this is a trace message");
-		Titanium.API.warn("this is a warn message");
+            if ( loadedComponents && installedComponents && bundledComponents ) {
+                // check any components that are bundled with the app
+                // first we verify that we have a list of components.
+                for ( i =0; i < bundledComponents.length; i++ )
+                {
+                    var  item = bundledComponents[i];
+                    // do we have a component?
+		            value_of(item).should_be_object();
+		            if ( item ) 
+		            {
+		                value_of(item.getManifest).should_be_function();
+		                value_of(item.getName).should_be_function();
+		                value_of(item.getPath).should_be_function();
+		                value_of(item.getType).should_be_function();
+		                value_of(item.getVersion).should_be_function();
+		                value_of(item.isBundled).should_be_function();
+		                value_of(item.isLoaded).should_be_function();
+		            }
+                }
+                
+                // check the components that we think are installed
+                // first we verify that we have a list of components.
+                for ( i =0; i < installedComponents.length; i++ )
+                {
+                    var  item = installedComponents[i];
+                    // do we have a component?
+		            value_of(item).should_be_object();
+		            if ( item ) 
+		            {
+		                value_of(item.getManifest).should_be_function();
+		                value_of(item.getName).should_be_function();
+		                value_of(item.getPath).should_be_function();
+		                value_of(item.getType).should_be_function();
+		                value_of(item.getVersion).should_be_function();
+		                value_of(item.isBundled).should_be_function();
+		                value_of(item.isLoaded).should_be_function();
+		            }
+                }
+                
+                // now validate the loaded components and verify 
+                // that these components are supposed to be here.
+                // these components should be part of the bundle or installed or both.
+                for ( i =0; i < loadedComponents.length; i++ )
+                {
+                    var  item = loadedComponents[i];
+                    // do we have a component?
+		            value_of(item).should_be_object();
+		            if ( item ) 
+		            {
+		                value_of(item.getManifest).should_be_function();
+		                value_of(item.getName).should_be_function();
+		                value_of(item.getPath).should_be_function();
+		                value_of(item.getType).should_be_function();
+		                value_of(item.getVersion).should_be_function();
+		                value_of(item.isBundled).should_be_function();
+		                value_of(item.isLoaded).should_be_function();
+    		            
+		                // loaded components should always indicate so...
+		                value_of(item.isLoaded()).should_be_true();
+
+                        var manifest = item.getManifest();
+                        var name = item.getName();
+                        var path = item.getPath();
+                        var type = item.getType();
+                        var version = item.getVersion();
+    		            
+		                // is this a valid component?  check against 
+		                // the installed components.
+		                if ( bundledComponents.length != 0) 
+		                {
+		                    for ( j=0; j< bundledComponents.length; j++)
+		                    {
+		                        var obj = bundledComponents[i];
+		                        value_of(obj).should_be_object();
+		                        if ( obj ) 
+		                        {
+		                            if ( name == obj.getName() && 
+		                                 path == obj.getPath() && 
+		                                 version == obj.getVersion() ) 
+		                            {
+		                                value_of(obj.isBundled()).should_be_true();
+		                            }
+		                        }
+		                    }
+    		            
+		                }
+		                else {
+		                    // we have not detected any bundled components
+		                    // all components should have this flag as FALSE
+		                    value_of(item.isBundled()).should_be_false();
+		                }
+		                // is this a valid component?  check against 
+		                // the installed components.
+		                for ( j=0; j< installedComponents.length; j++){
+		                    var obj = installedComponents[i];
+	                        value_of(obj).should_be_object();
+	                        if ( obj ) {
+	                            if ( name == obj.getName() && 
+	                                 path == obj.getPath() && 
+	                                 version == obj.getVersion() ) {
+	                                value_of(obj.isLoaded()).should_be_true();
+	                                if ( !obj.isLoaded() )
+	                                {
+	                                    Titanium.API.error("obj " + obj.getName() + " is marked as not loaded");
+	                                }
+	                            }
+	                        }
+		                }
+		            }
+                }
+            }
+		}
 	},
+	// test the application dependancies API
 	test_dependancies: function()
 	{
-	    var dep = Titanium.API.createDependency();
-	    
+        // test the objects in API		
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        if ( app ) 
+        {
+		    value_of(app).should_be_object();
+		    var dependancies = app.getDependencies();
+		    
+		    // retrieve our list of depenancies.  can be NULL
+		    if ( dependancies ) 
+		    {
+		        var components = app.getComponents();
+		        
+		        if ( !components )
+		        {
+		            Titanium.API.error("failed to retrieve the loaded components list.");
+		        }
+		        else 
+		        {
+    		        value_of(components).should_be_object();
+		        }
+		        
+		        value_of(dependancies).should_be_object();
+    		    
+    		    for (i=0; i<dependancies; i++ )
+    		    {
+    		        var dependancy = dependancies[i];
+    		        
+    		        if( dependency )
+    		        {
+		                value_of(dependency).should_be_object();
+		                value_of(dependency.getName).should_be_function();
+		                value_of(dependency.getType).should_be_function();
+		                value_of(dependency.getVersion).should_be_function();
+		                
+		                if (components)
+		                {
+		                    // now that we have an object, check against the components list
+		                    // each dependancy should be matched to a loaded component.
+		                    for (j=0; j<components.length; j++ )
+		                    {
+    		                    var obj = components[j];
+    		                    if ( obj )
+    		                    {
+    		                        value_of(obj).should_be_object();
+    		                        
+    		                        var name = obj.getName();
+    		                        var type = obj.getType();
+    		                        var version = obj.getVersion();
+    		                        
+    		                        if ( name && type && version )
+    		                        {
+    		                            var bName = (name == dependancy.getName())?true:false;
+    		                            var bType = (type == dependancy.getType())?true:false;;
+    		                            var bVersion = (version == dependancy.getVersion())?true:false;;
+    		                            
+    		                            if ( bName && bType && bVersion)
+    		                            {
+    		                                Titanium.API.trace("match dependancies to component");
+    		                                break;
+    		                            }
+    		                            
+    		                            if ( bName )
+    		                                 Titanium.API.trace("matched dependancy name to component");
+    		                            else Titanium.API.error("failed to match dependancy name to component");
+    		                            
+    		                            if ( bType )
+    		                                 Titanium.API.trace("matched dependancy type to component");
+    		                            else Titanium.API.error("failed to match dependancy type to component");
+    		                                
+    		                            if ( bVersion )
+    		                                 Titanium.API.trace("matched dependancy version to component");
+    		                            else Titanium.API.error("failed to match dependancy version to component");
+    		                        }
+    		                        else
+    		                        {
+    		                            Titanium.API.fatal("failed to retrieve component infomation in dependancy check.");
+    		                        }
+    		                    }
+		                    }
+		                }
+    		        }
+    		    }		
+		    }
+		    else
+		    {
+		        Titanium.API.warn("no dependancies detected");
+		    }
+		}
+		// create a dependancy
+	    var dep = Titanium.API.createDependency(Titanium.API.RUNTIME, "test", "0.0.1", Titanium.API.EQ);
 	}
 });
