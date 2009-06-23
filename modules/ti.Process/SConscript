@@ -11,7 +11,7 @@ build.add_thirdparty(env, 'poco')
 sources = ['process_binding.cpp', 'process_module.cpp']
 
 if build.is_osx():
-	sources = sources + Glob('osx/*.cpp')
+	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 elif build.is_win32():
 	sources = sources + Glob('win32/*.cpp')
