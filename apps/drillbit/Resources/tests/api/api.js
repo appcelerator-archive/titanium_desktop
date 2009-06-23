@@ -40,12 +40,12 @@ describe("ti.Api tests",
 		    value_of(app.getAvailableComponents).should_be_function();
 		    value_of(app.getAvailableModules).should_be_function();
 		    value_of(app.getAvailableRuntimes).should_be_function();
-		    value_of(app.getBundledComponents).should_be_function();
+		    value_of(app.getBundledComponents).should_be_function();    // done
 		    value_of(app.getBundledModules).should_be_function();
 		    value_of(app.getBundledRuntimes).should_be_function();
-		    value_of(app.getComponents).should_be_function();
+		    value_of(app.getComponents).should_be_function();           // done
 		    value_of(app.getDataPath).should_be_function();
-		    value_of(app.getDependencies).should_be_function();
+		    value_of(app.getDependencies).should_be_function();         // done
 		    value_of(app.getExecutablePath).should_be_function();
 		    value_of(app.getGUID).should_be_function();
 		    value_of(app.getID).should_be_function();
@@ -89,7 +89,7 @@ describe("ti.Api tests",
 		value_of(Titanium.API.fatal).should_be_function();
 		value_of(Titanium.API.fire).should_be_function();
 		value_of(Titanium.API.get).should_be_function();
-		value_of(Titanium.API.getApplication).should_be_function();
+		value_of(Titanium.API.getApplication).should_be_function();             //done
 		value_of(Titanium.API.getComponentSearchPaths).should_be_function();
 		value_of(Titanium.API.getInstalledComponents).should_be_function();
 		value_of(Titanium.API.getInstalledMobileSDKs).should_be_function();
@@ -333,7 +333,214 @@ describe("ti.Api tests",
 		        Titanium.API.warn("no dependancies detected");
 		    }
 		}
-		// create a dependancy
+		// create a dependancy  what does this mean?  what are we trying to accomplish?
 	    var dep = Titanium.API.createDependency(Titanium.API.RUNTIME, "test", "0.0.1", Titanium.API.EQ);
-	}
+	},
+	// test the runtime component functions
+	test_installed_runtime: function()
+	{
+        // test the objects in API		
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        if ( app ) 
+        {
+		    value_of(app).should_be_object();
+
+            // every module, runtime object and SDK should have a component entry	    
+	        var components = app.getComponents();
+	        
+	        if ( !components )
+	        {
+	            Titanium.API.error("failed to retrieve the loaded components list.");
+	        }
+	        else 
+	        {
+		        value_of(components).should_be_object();
+	            var runtime = app.getRuntime();
+    	        
+	            // this should just be a component in the components list.
+	            if ( runtime )
+	            {
+	                var bFound = false;
+	                value_of(runtime).should_be_object();
+	                for ( i=0; i<components.length; i++ )
+	                {
+	                    if ( runtime.getName() == components[i].getName() &&
+                             runtime.getType() == components[i].getType() &&
+                             runtime.getVersion() == components[i].getVersion())
+                        {
+                            Titanium.API.trace("match runtime to component entry");
+                            bFound = true;
+                            break;
+                        }
+	                }
+	                
+                    if ( !bFound )
+                    {
+                        Titanium.API.fatal("failed to match runtime object to list of loaded components");
+                    }
+
+
+                    // we have now established that the runtime is valid.  
+                    // check the available runtime list
+		            var availableRuntimes = app.getAvailableRuntimes();
+		            if ( availableRuntimes )
+		            {
+		                value_of(availableRuntimes).should_be_object();
+		                bFound = false;
+	                    for ( i=0; i<availableRuntimes.length; i++ )
+	                    {
+	                        if ( runtime.getName() == availableRuntimes[i].getName() &&
+                                 runtime.getType() == availableRuntimes[i].getType() &&
+                                 runtime.getVersion() == availableRuntimes[i].getVersion())
+                            {
+                                Titanium.API.trace("match runtime to available Runtimes entry");
+                                bFound = true;
+                                break;
+                            }
+	                    }
+	                    
+	                    if ( !bFound )
+	                    {
+	                        Titanium.API.fatal("failed to match runtime object to list of available runtime objects");
+	                    }
+		            }
+		            else
+		            {
+		                Titanium.API.fatal("failed to retrieve the available runtime module list");
+		            }
+    		        
+			        var bundledRuntimes = app.getBundledRuntimes();
+		            if ( bundledRuntimes )
+		            {
+		                value_of(bundledRuntimes).should_be_object();
+		                bFound = false;
+	                    for ( i=0; i<bundledRuntimes.length; i++ )
+	                    {
+	                        if ( runtime.getName() == bundledRuntimes[i].getName() &&
+                                 runtime.getType() == bundledRuntimes[i].getType() &&
+                                 runtime.getVersion() == bundledRuntimes[i].getVersion())
+                            {
+                                Titanium.API.trace("match runtime to bundled Runtimes entry");
+                                bFound = true;
+                                break;
+                            }
+	                    }		            
+		            }
+		            else
+		            {
+		                Titanium.API.fatal("failed to retrieve the available runtime module list");
+		            }
+	            }
+	            else 
+	            {
+	                Titanium.API.fatal("failed to retrieve the runtime component");
+	            }
+	        }
+		}
+	},
+	// test the runtime component functions
+	test_installed_modules: function()
+	{
+        // test the objects in API		
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        if ( app ) 
+        {
+		    value_of(app).should_be_object();
+
+            // every module, runtime object and SDK should have a component entry	    
+	        var components = app.getComponents();
+	        
+	        if ( !components )
+	        {
+	            Titanium.API.error("failed to retrieve the loaded components list.");
+	        }
+	        else 
+	        {
+		        value_of(components).should_be_object();
+	        }
+	        
+		    var modules = app.getModules();
+		    
+		    if ( modules )
+		    {
+		        value_of(modules).should_be_object();
+                var bFound = false;
+                for (j=0; j<modules.length; j++ )
+                {
+                    var module = modules[j];
+                    
+                    for ( i=0; i<components.length; i++ )
+                    {
+                        if ( module.getName() == components[i].getName() &&
+                             module.getType() == components[i].getType() &&
+                             module.getVersion() == components[i].getVersion())
+                        {
+                            Titanium.API.trace("match module to component entry");
+                            bFound = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if ( !bFound )
+                {
+                    Titanium.API.fatal("failed to match modules object to list of loaded components");
+                }
+                
+		        var availableModules = app.getAvailableModules();
+      		    if ( availableModules )
+		        {
+		            value_of(availableModules).should_be_object();
+                    var bFound = false;
+                    for (j=0; j<modules.length; j++ )
+                    {
+                        var module = modules[j];
+                        
+                        for ( i=0; i<availableModules.length; i++ )
+                        {
+                            if ( module.getName() == availableModules[i].getName() &&
+                                 module.getType() == availableModules[i].getType() &&
+                                 module.getVersion() == availableModules[i].getVersion())
+                            {
+                                Titanium.API.trace("match avialable module to modules entry");
+                                bFound = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+		        
+		        var bundledModules = app.getBundledModules();
+      		    if ( bundledModules )
+		        {
+		            value_of(bundledModules).should_be_object();
+                    var bFound = false;
+                    for (j=0; j<modules.length; j++ )
+                    {
+                        var module = modules[j];
+                        
+                        for ( i=0; i<bundledModules.length; i++ )
+                        {
+                            if ( module.getName() == bundledModules[i].getName() &&
+                                 module.getType() == bundledModules[i].getType() &&
+                                 module.getVersion() == bundledModules[i].getVersion())
+                            {
+                                Titanium.API.trace("match bundled module to modules entry");
+                                bFound = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+		    }
+		    else 
+		    {
+		        Titanium.API.fatal("Failed to retrieve the list of modules.");
+		    }
+		}
+	},
 });
