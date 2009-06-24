@@ -165,12 +165,14 @@ namespace ti
 			this->SetupIcon();
 			this->SetTopMost(config->IsTopMost());
 			this->SetCloseable(config->IsCloseable());
+			this->SetResizable(config->IsResizable());
+
 			// TI-62: Transparency currently causes bad crashes
-			// this->SetupTransparency();
+			//this->SetupTransparency();
 
 			gtk_widget_grab_focus(GTK_WIDGET(webView));
 			webkit_web_view_open(webView, this->config->GetURL().c_str());
-	
+
 			if (this->IsVisible())
 			{
 				gtk_widget_show_all(window);
@@ -190,7 +192,7 @@ namespace ti
 			{
 				this->Minimize();
 			}
-	
+
 			UserWindow::Open();
 			this->FireEvent(OPENED);
 		}
@@ -326,6 +328,15 @@ namespace ti
 			{
 				hints.min_height = min_height;
 			}
+
+			if (!config->IsResizable())
+			{
+				hints.max_width = this->config->GetWidth();
+				hints.max_height = this->config->GetHeight();
+				hints.min_width = this->config->GetWidth();
+				hints.min_height = this->config->GetHeight();
+			}
+
 			GdkWindowHints mask = (GdkWindowHints) (GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE);
 			gtk_window_set_geometry_hints(this->gtkWindow, NULL, &hints, mask);
 		}
@@ -339,12 +350,12 @@ namespace ti
 			int y = this->config->GetY();
 	
 			GdkScreen* screen = gdk_screen_get_default();
-			if (x == UserWindow::CENTERED)
+			if (x == UIBinding::CENTERED)
 			{
 				x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
 				this->config->SetX(x);
 			}
-			if (y == UserWindow::CENTERED)
+			if (y == UIBinding::CENTERED)
 			{
 				y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
 				this->config->SetY(y);
@@ -921,11 +932,13 @@ namespace ti
 	{
 		return this->config->IsResizable();
 	}
-	
+
 	void GtkUserWindow::SetResizable(bool resizable)
 	{
 		if (this->gtkWindow != NULL)
-			gtk_window_set_resizable(this->gtkWindow, resizable);
+		{
+			gtk_window_set_resizable(this->gtkWindow, resizable ? TRUE : FALSE);
+		}
 	}
 	
 	bool GtkUserWindow::IsMaximizable()

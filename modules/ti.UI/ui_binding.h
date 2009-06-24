@@ -30,6 +30,25 @@ namespace ti
 
 		static UIBinding* GetInstance() { return instance; }
 
+		static int CENTERED;
+		static std::string FOCUSED;
+		static std::string UNFOCUSED;
+		static std::string OPEN;
+		static std::string OPENED;
+		static std::string CLOSE;
+		static std::string CLOSED;
+		static std::string HIDDEN;
+		static std::string SHOWN;
+		static std::string FULLSCREENED;
+		static std::string UNFULLSCREENED;
+		static std::string MAXIMIZED;
+		static std::string MINIMIZED;
+		static std::string RESIZED;
+		static std::string MOVED;
+		static std::string PAGE_INITIALIZED;
+		static std::string PAGE_LOADED;
+		static std::string CREATE;
+
 	protected:
 		Host* host;
 

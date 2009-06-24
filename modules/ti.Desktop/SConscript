@@ -11,13 +11,13 @@ sources = Glob('*.cpp')
 
 if build.is_osx():
 	env.Append(FRAMEWORKS = ['Cocoa'])
-	sources+=Glob('osx/*.cpp')
+	sources += Glob('osx/*.mm')
 elif build.is_win32():
 	env.Append(LIBS=['shell32', 'user32', 'comdlg32', 'ole32', 'gdi32'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
-	sources+=Glob('win32/*.cpp')
+	sources += Glob('win32/*.cpp')
 elif build.is_linux():
-	sources+=Glob('linux/*.cpp')
+	sources += Glob('linux/*.cpp')
 
 m = build.add_module('ti.Desktop', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tidesktopmodule', source=sources)

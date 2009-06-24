@@ -44,9 +44,9 @@ enum UserWindowEvent
 	MINIMIZED,
 	RESIZED,
 	MOVED,
-	INIT,
-	LOAD,
-	CREATE
+	PAGE_INITIALIZED,
+	PAGE_LOADED,
+	CREATE,
 };
 
 class UserWindow : public kroll::StaticBoundObject {
@@ -263,6 +263,7 @@ class UserWindow : public kroll::StaticBoundObject {
 		SharedUserWindow GetSharedPtr();
 
 	protected:
+		Logger* logger;
 		SharedUIBinding binding;
 		Host* host;
 		WindowConfig *config;
@@ -276,10 +277,6 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual SharedUserWindow GetParent();
 		virtual void AddChild(SharedUserWindow);
 		virtual void RemoveChild(SharedUserWindow);
-
-		// These are constants which will eventually
-		// be exposed to the API.
-		static int CENTERED;
 
 	private:
 		DISALLOW_EVIL_CONSTRUCTORS(UserWindow);

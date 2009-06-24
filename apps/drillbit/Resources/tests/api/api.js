@@ -32,11 +32,12 @@ describe("ti.Api tests",
 	},
 	validate_properties: function()
 	{
-	    // get the platform and version.
+		// get the platform and version.
 		value_of(Titanium.platform).should_be_one_of(['win32','osx','linux']);
 		value_of(Titanium.version).should_be_string();
 
 		value_of(Titanium.API.APP_UPDATE).should_not_be_null();
+		
         // test the objects in API		
         var app = Titanium.API.getApplication();
         
@@ -74,7 +75,6 @@ describe("ti.Api tests",
 
 		value_of(Titanium.API.CRITICAL).should_not_be_null();
 		value_of(Titanium.API.DEBUG).should_not_be_null();
-
 		value_of(Titanium.API.EQ).should_not_be_null();
 		value_of(Titanium.API.ERROR).should_not_be_null();
 		value_of(Titanium.API.FATAL).should_not_be_null();
@@ -677,5 +677,4 @@ describe("ti.Api tests",
             }
 		}
 	},
-    // TODO - how to create and manage and manipulate a manifest
 });

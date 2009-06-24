@@ -695,12 +695,12 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	
 	GetWindowRect(desktop, &desktopRect);
 	
-	if (bounds.x == UserWindow::CENTERED)
+	if (bounds.x == UIBinding::CENTERED)
 	{
 		bounds.x = (desktopRect.right - bounds.width) / 2;
 		this->config->SetX(bounds.x);
 	}
-	if (bounds.y == UserWindow::CENTERED)
+	if (bounds.y == UIBinding::CENTERED)
 	{
 		bounds.y = (desktopRect.bottom - bounds.height) / 2;
 		this->config->SetY(bounds.y);

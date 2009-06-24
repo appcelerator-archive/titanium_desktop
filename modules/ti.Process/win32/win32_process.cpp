@@ -29,70 +29,25 @@ namespace ti
 			throw ValueException::FromString(e.what());
 		}
 
-		/**
-		 * @tiapi(property=True,type=string,name=Process.Process.command,version=0.2)
-		 * @tiapi The command used for the Process object
-		 */
 		this->SetString("command", command);
-
-		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.pid,version=0.2)
-		 * @tiapi The process id of the Process object
-		 */
 		this->SetNull("pid");
-
-		/**
-		 * @tiapi(property=True,type=boolean,name=Process.Process.running,version=0.2)
-		 * @tiapi The running status of the Process object
-		 */
 		this->SetBool("running", false);
 
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.err,version=0.2)
-		 * @tiapi The Pipe object of the error stream
-		 */
 		this->err = new Win32Pipe();
 		this->shared_error = new SharedKObject(this->err);
 		this->SetObject("err", *shared_error);
 
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.out,version=0.2)
-		 * @tiapi The Pipe object of the output stream
-		 */
 		this->out = new Win32Pipe();
 		this->shared_output = new SharedKObject(this->out);
 		this->SetObject("out", *shared_output);
 
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.in,version=0.2)
-		 * @tiapi The Pipe object of the input stream
-		 */
 		this->in = new Win32Pipe();
 		this->shared_input = new SharedKObject(this->in);
 		this->SetObject("in", *shared_input);
 
-		/**
-		 * @tiapi(method=True,name=Process.Process.terminate,version=0.2)
-		 * @tiapi Terminates a running process
-		 */
 		this->SetMethod("terminate", &Win32Process::Terminate);
-
-		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.exitCode,version=0.4)
-		 * @tiapi The exit code or null if not yet exited
-		 */
 		this->SetNull("exitCode");
-
-		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onread,since=0.4)
-		 * @tiapi The function handler to call when sys out is read
-		 */
 		this->SetNull("onread");
-
-		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onexit,since=0.4)
-		 * @tiapi The function handler to call when the process exits
-		 */
 		this->SetNull("onexit");
 
 		// setup threads which can read output and also monitor the exit
