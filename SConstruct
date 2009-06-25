@@ -97,6 +97,7 @@ SConscript('kroll/SConscript', exports='debug')
 SConscript('modules/SConscript')
 SConscript('SConscript.dist')
 SConscript('SConscript.docs')
+SConscript('SConscript.test')
 
 SConscript('installation/developer/SConscript')
 
