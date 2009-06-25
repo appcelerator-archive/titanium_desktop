@@ -26,28 +26,25 @@ namespace ti
 		WebKitWebView *webView,
 		GtkMenu *menu,
 		gpointer data);
-	static gint navigation_requested_cb(
+	static gint new_window_policy_decision_callback(
 		WebKitWebView* webView,
-		WebKitWebFrame* web_frame,
-		WebKitNetworkRequest* request);
-	static gint new_window_navigation_requested_cb(
-		WebKitWebView* webView,
-		WebKitWebFrame* web_frame,
+		WebKitWebFrame* frame,
 		WebKitNetworkRequest* request,
-		gchar* frame_name);
+		WebKitWebNavigationAction* navigationAction,
+		WebKitWebPolicyDecision *policyDecision,
+		gchar* frameName);
 	static void load_finished_cb(
 		WebKitWebView* view,
 		WebKitWebFrame* frame,
 		gpointer data);
-	static WebKitWebView* create_inspector_cb(
+	static WebKitWebView* inspect_web_view_cb(
 		WebKitWebInspector* webInspector,
 		WebKitWebView* page,
 		gpointer data);
 	static gboolean inspector_show_window_cb(
 		WebKitWebInspector* inspector,
 		gpointer data);
-	static void hide_window_cb(GtkWidget *widget, gpointer data);
-	
+
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, SharedUserWindow& parent) :
 		UserWindow(config, parent),
 		gdkWidth(-1),
@@ -84,27 +81,15 @@ namespace ti
 				G_OBJECT(webView), "window-object-cleared",
 				G_CALLBACK(window_object_cleared_cb), this);
 			g_signal_connect(
-				G_OBJECT(webView), "navigation-requested",
-				G_CALLBACK(navigation_requested_cb), this);
-			g_signal_connect(
-				G_OBJECT(webView), "new-window-navigation-requested",
-				G_CALLBACK(new_window_navigation_requested_cb), this);
+				G_OBJECT(webView), "new-window-policy-decision-requested",
+				G_CALLBACK(new_window_policy_decision_callback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "populate-popup",
 				G_CALLBACK(populate_popup_cb), this);
 			g_signal_connect(
 				G_OBJECT(webView), "load-finished",
 				G_CALLBACK(load_finished_cb), this);
-	
-			// Tell Titanium what WebKit is using for a user-agent
-			SharedKObject global = host->GetGlobalObject();
-			if (global->Get("userAgent")->IsUndefined())
-			{
-				gchar* user_agent = webkit_web_view_get_user_agent(webView);
-				global->Set("userAgent", Value::NewString(user_agent));
-				g_free(user_agent);
-			}
-	
+
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
 			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
@@ -112,7 +97,7 @@ namespace ti
 			WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
 			g_signal_connect(
 				G_OBJECT(inspector), "inspect-web-view",
-				G_CALLBACK(create_inspector_cb), this);
+				G_CALLBACK(inspect_web_view_cb), this);
 			g_signal_connect(
 				G_OBJECT(inspector), "show-window",
 				G_CALLBACK(inspector_show_window_cb), this);
@@ -137,21 +122,18 @@ namespace ti
 			/* main window vbox */
 			this->vbox = gtk_vbox_new(FALSE, 0);
 			gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(view_container), TRUE, TRUE, 0);
-	
+
 			/* main window */
 			GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 			gtk_widget_set_name(window, this->config->GetTitle().c_str());
 			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
-	
+
 			this->destroyCallbackId = g_signal_connect(
 				G_OBJECT(window), "destroy", G_CALLBACK(destroy_cb), this);
-			g_signal_connect(G_OBJECT(window), "event",
-			                 G_CALLBACK(event_cb), this);
-	
+			g_signal_connect(
+				G_OBJECT(window), "event", G_CALLBACK(event_cb), this);
+
 			gtk_container_add(GTK_CONTAINER(window), vbox);
-	
-			webkit_web_view_register_url_scheme_as_local("app");
-			webkit_web_view_register_url_scheme_as_local("ti");
 	
 			this->gtkWindow = GTK_WINDOW(window);
 			this->webView = webView;
@@ -491,25 +473,16 @@ namespace ti
 	
 		return FALSE;
 	}
-	
-	static gint navigation_requested_cb(
+
+	static gint new_window_policy_decision_callback(
 		WebKitWebView* webView,
-		WebKitWebFrame* web_frame,
-		WebKitNetworkRequest* request)
-	{
-		const gchar* uri = webkit_network_request_get_uri(request);
-		std::string new_uri = AppConfig::Instance()->InsertAppIDIntoURL(uri);
-		webkit_network_request_set_uri(request, new_uri.c_str());
-		return WEBKIT_NAVIGATION_RESPONSE_ACCEPT;
-	}
-	
-	static gint new_window_navigation_requested_cb(
-		WebKitWebView* webView,
-		WebKitWebFrame* web_frame,
+		WebKitWebFrame* frame,
 		WebKitNetworkRequest* request,
-		gchar* frame_name)
+		WebKitWebNavigationAction* navigationAction,
+		WebKitWebPolicyDecision *policyDecision,
+		gchar* frameName)
 	{
-		gchar* frame_name_case = g_utf8_casefold(frame_name, g_utf8_strlen(frame_name, -1));
+		gchar* frame_name_case = g_utf8_casefold(frameName, g_utf8_strlen(frameName, -1));
 		if (g_utf8_collate(frame_name_case, "ti:systembrowser") == 0 ||
 			g_utf8_collate(frame_name_case, "_blank") == 0)
 		{
@@ -520,12 +493,14 @@ namespace ti
 			std::vector<std::string> args;
 			args.push_back(std::string(url));
 			Poco::Process::launch("xdg-open", args);
-			return WEBKIT_NAVIGATION_RESPONSE_IGNORE;
+			webkit_web_policy_decision_ignore(policyDecision);
 		}
 		else
 		{
-			return WEBKIT_NAVIGATION_RESPONSE_ACCEPT;
+			webkit_web_policy_decision_use(policyDecision);
 		}
+
+		return TRUE;
 	}
 	
 	static void load_finished_cb(
@@ -536,10 +511,15 @@ namespace ti
 		JSGlobalContextRef context = webkit_web_frame_get_global_context(frame);
 		JSObjectRef global_object = JSContextGetGlobalObject(context);
 		SharedKObject frame_global = new KKJSObject(context, global_object);
-		std::string uri = webkit_web_frame_get_uri(frame);
-	
-		GtkUserWindow* user_window = static_cast<GtkUserWindow*>(data);
-		user_window->PageLoaded(frame_global, uri, context);
+
+		// If uri is NULL, then likely this is the result of a cancel,
+		// so don't report it as a PageLoad
+		const gchar* uri = webkit_web_frame_get_uri(frame);
+		if (uri) {
+			std::string uriString = uri;
+			GtkUserWindow* user_window = static_cast<GtkUserWindow*>(data);
+			user_window->PageLoaded(frame_global, uriString, context);
+		}
 	}
 	
 	static void window_object_cleared_cb(
@@ -584,7 +564,7 @@ namespace ti
 	}
 	
 
-	static WebKitWebView* create_inspector_cb(
+	static WebKitWebView* inspect_web_view_cb(
 		WebKitWebInspector* webInspector,
 		WebKitWebView* page,
 		gpointer data)
@@ -592,11 +572,7 @@ namespace ti
 		GtkWidget* scrolledWindow;
 		GtkWidget* newWebView;
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-
 		GtkWidget* inspectorWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-		g_signal_connect(
-			G_OBJECT(inspectorWindow), "delete-event",
-			G_CALLBACK(hide_window_cb), userWindow);
 
 		gtk_window_set_title(GTK_WINDOW(inspectorWindow), "Inspector");
 		gtk_window_set_default_size(GTK_WINDOW(inspectorWindow), 400, 300);
@@ -631,16 +607,6 @@ namespace ti
 		else
 		{
 			return FALSE;
-		}
-	}
-
-	static void hide_window_cb(GtkWidget *widget, gpointer data)
-	{
-		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-		GtkWidget* inspectorWindow = userWindow->GetInspectorWindow();
-		if (inspectorWindow)
-		{
-			gtk_widget_hide(inspectorWindow);
 		}
 	}
 
@@ -913,6 +879,7 @@ namespace ti
 	
 	void GtkUserWindow::SetURL(std::string& uri)
 	{
+		printf("loading: %s\n", uri.c_str());
 		if (this->gtkWindow != NULL && this->webView != NULL)
 			webkit_web_view_open(this->webView, uri.c_str());
 	}
