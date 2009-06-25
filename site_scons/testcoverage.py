@@ -41,12 +41,14 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 	for module in apicoverage.keys():
 		module_entries = 0
 		testcoverage['modules'][module] = {}
+		testcoverage['modules'][module]['entries'] = {}
 		for entry in apicoverage[module]:
 			entries += 1
 			module_entries += 1
+			testcoverage['modules'][module]['entries'][entry['name']] = 0
+			
 		testcoverage['modules'][module]['coverage'] = 0
 		testcoverage['modules'][module]['total'] = module_entries
-		testcoverage['modules'][module]['entries'] = {}
 		
 	testcoverage['total'] = entries
 	coverage = 0
@@ -62,7 +64,7 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 					# ignore Titanium.<entry> for now.. they're not documented yet?
 					#entry = module
 					#module = 'Titanium'
-					if entry not in testcoverage['modules'][module]['entries']:
+					if entry not in testcoverage['modules'][module]['entries'] or testcoverage['modules'][module]['entries'][entry] == 0 :
 						testcoverage['modules'][module]['entries'][entry] = 1
 						# only count each entry once in the global/module coverage count
 						coverage += 1
