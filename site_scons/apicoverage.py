@@ -96,7 +96,7 @@ class Module(object):
 	def all_as_dict():
 		d = {}
 		for m in Module.modules.values():
-			d[m.name] = m.api_points
+			d[m.name] = m.api_points_map
 		return d
 
 class API(dict):
@@ -147,7 +147,7 @@ class API(dict):
 		
 	def set_return_type(self,return_type):
 		self['returns'] = return_type
-		
+
 	def set_deprecated(self,msg,version):
 		self.deprecated = True
 		self['deprecated'] = msg
@@ -235,11 +235,10 @@ def generate_api_coverage(dirs,fs):
 				bits = m.group(1).split(',', 2)
 				metadata = {}
 				metadata['type'] = bits[0]
-				metadata['name'] = bits[1]
 				metadata['description'] = m.group(2).strip()
 				if len(bits) > 2:
 					metadata = parse_key_value_pairs(bits[2], metadata=metadata)
-				api = API.create_with_full_name(metadata['name'])
+				api = API.create_with_full_name(bits[1])
 				api.add_metadata(metadata)
 
 				# Record the index of the start of this match so we can

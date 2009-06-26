@@ -23,7 +23,7 @@ webkit_lib = path.join(webkit_tp, 'lib')
 webkit_inc = path.join(webkit_tp, 'include')
 
 if build.is_linux():
-	sources = sources + Glob('gtk/*.cpp') + Glob('url/*.cpp')
+	sources = sources + Glob('gtk/*.cpp') + Glob('url/url.cpp')
 
 	curl_tp = path.join(build.third_party, 'libcurl')
 	curl_lib = path.join(curl_tp, 'lib')

@@ -73,7 +73,7 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 						testcoverage['modules'][module]['entries'][entry] += 1
 
 	testcoverage['coverage'] = coverage
-	outfile.write(simplejson.dumps(testcoverage, sort_keys=False, indent=4))
+	outfile.write(simplejson.dumps(testcoverage, sort_keys=True, indent=4))
 
 if __name__ == '__main__':
 	if len(sys.argv)!=4:
