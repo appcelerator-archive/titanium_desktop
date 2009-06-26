@@ -879,7 +879,6 @@ namespace ti
 	
 	void GtkUserWindow::SetURL(std::string& uri)
 	{
-		printf("loading: %s\n", uri.c_str());
 		if (this->gtkWindow != NULL && this->webView != NULL)
 			webkit_web_view_open(this->webView, uri.c_str());
 	}
