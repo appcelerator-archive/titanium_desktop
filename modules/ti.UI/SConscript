@@ -23,16 +23,16 @@ webkit_lib = path.join(webkit_tp, 'lib')
 webkit_inc = path.join(webkit_tp, 'include')
 
 if build.is_linux():
-	sources = sources + Glob('gtk/*.cpp') + Glob('url/*.cpp')
+	sources = sources + Glob('gtk/*.cpp') + Glob('url/url.cpp')
 
 	curl_tp = path.join(build.third_party, 'libcurl')
 	curl_lib = path.join(curl_tp, 'lib')
 	curl_inc = path.join(curl_tp, 'include')
 
-	env.Append(LIBS=['webkit-1.0', 'curl', 'Xss'])
+	env.Append(LIBS=['webkittitanium-1.0', 'curl', 'Xss'])
 	env.Append(LIBPATH=[webkit_lib, curl_lib])
 	env.Append(CPPPATH=[webkit_inc, curl_inc])
-	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext')
+	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext libsoup-2.4')
 
 elif build.is_win32():
 	sources = sources + Glob('win32/*.cpp') + Glob('win32/*.cc') + Glob('url/*.cpp')

@@ -20,7 +20,7 @@ using kroll::StaticBoundList;
 #include <gdk/gdk.h>
 #include <gdk/gdkx.h>
 #include <webkit/webkit.h>
-#include <webkit/webkitwebscriptevaluator.h>
+#include <webkit/webkittitanium.h>
 
 // X11 defines this again for some reason
 #undef DisplayString
