@@ -383,12 +383,17 @@ describe("ti.API tests",
 		}
 		// create a dependancy  what does this mean?  what are we trying to accomplish?
 	    var dep = Titanium.API.createDependency(Titanium.API.RUNTIME, "test", "0.0.1", Titanium.API.EQ);
-	    // TODO - how to create and manage a dependancy
 	    
-	    
-	    
+        value_of(dep).should_be_object();
+        value_of(dep.getName).should_be_function();
+        value_of(dep.getType).should_be_function();
+        value_of(dep.getVersion).should_be_function();
+        
+        Titanium.API.info("processing dependancy '" + dep.getName() + 
+                          "' type: '"+dep.getType()+
+                          "' version: '"+dep.getVersion()+"'");
 	},
-	// test the runtime component functions
+	// test the installed runtime component functions
 	test_installed_runtime: function()
 	{
         Titanium.API.error("Titanium.API.getInstalledRuntimes()");
@@ -565,7 +570,7 @@ describe("ti.API tests",
 	        }
 		}
 	},
-	// test the modules component functions
+	// test the installed modules component functions
 	test_installed_modules: function()
 	{
         Titanium.API.error("Titanium.API.getInstalledModules()");
@@ -893,7 +898,7 @@ describe("ti.API tests",
             }
 		}
 	},
-
+    // test the api arguments.
     test_api_arguments: function()
     {
         // test the objects in API		
@@ -924,7 +929,7 @@ describe("ti.API tests",
 		    }
         }
     },
-	// test the runtime component functions
+	// test the module component functions
 	test_api_module: function()
 	{
         // test the objects in API		
@@ -951,13 +956,9 @@ describe("ti.API tests",
 		        // we should always be the current app.
 		        value_of(pid).should_be_null();
 		    }
-		    
-		    // TODO  test events  what kind of events happen here?
-		    
-		    // TODO test global attributes  what are they?
-		}
+	    }
 	},
-	// test the runtime component functions
+	// test the application path functions
 	test_api_application_paths: function()
 	{
 	    var componentSearchPaths = Titanium.API.getComponentSearchPaths();
@@ -1003,9 +1004,9 @@ describe("ti.API tests",
 	    
         var path = app.getPath();
         value_of(path).should_not_be_null();
-        Titanium.API.info("Manifest path = "+path);
-	    
+        Titanium.API.info("Manifest path = "+path);    
 	},
+	// test the manifest functions
 	test_api_manifest: function()
 	{
         // get the application object
@@ -1045,6 +1046,15 @@ describe("ti.API tests",
     
     test_api_global_object: function()
     {
-        Titanium.API.info("not implemented");
+        // set a global object
+        Titanium.API.set("foo", "bar" );
+        
+        value_of(Titanium.API.foo).should_be_string();
+        value_of(Titanium.API.foo).should_be("bar");
+        
+        var str = Titanium.API.get("foo");
+        
+        value_of(str).should_be_string();
+        value_of(str).should_be("bar");
     }
 });
