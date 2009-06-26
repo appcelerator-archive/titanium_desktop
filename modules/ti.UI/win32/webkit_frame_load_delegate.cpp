@@ -42,8 +42,8 @@ Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(IWebView *webView, IWebFrame
 }
 
 HRESULT STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::windowScriptObjectAvailable (
-		IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject)
+Win32WebKitFrameLoadDelegate::didClearWindowObject (
+		IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject, IWebFrame *frame)
 {
 	Win32UserWindow* userWindow = this->window;
 	userWindow->RegisterJSContext((JSGlobalContextRef) context);
