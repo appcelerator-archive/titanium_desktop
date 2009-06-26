@@ -1,4 +1,7 @@
-describe("ti.Api tests",
+// TODO - add tests for Titanium.API methods and properties that are called else where in other tests.
+// this test suite contains all of the missing API coverage as of 4-July-20009
+
+describe("ti.API tests",
 {
 	// test the logging functions
 	test_logging_methods: function()
@@ -119,6 +122,30 @@ describe("ti.Api tests",
     // test the application components API
 	test_components: function()
 	{
+        Titanium.API.error("Titanium.API.getInstalledComponents()");
+        // now that the app is finished testing, test the Titanium.API runtime calls.
+        // this should return a valid list of runtime components installed with this app.		
+        var apiInstalledComponents1 = Titanium.API.getInstalledComponents();
+        
+        value_of(apiInstalledComponents1).should_be_object();
+        if ( apiInstalledComponents1.length )
+        {
+            Titanium.API.error("Titanium.API.getInstalledComponents() contains:");
+            for (i=0; i<apiInstalledComponents1.length; i++)
+            {
+                var item = apiInstalledComponents1[i];
+                value_of(item).should_be_object();
+                Titanium.API.info("apiInstalledComponents["+i+"]= name: '" + item.getName() + 
+                                  "' type: '"+item.getType()+
+                                  "' version: '"+item.getVersion()+
+                                  "' path '" + item.getPath() + "'");
+            }
+        }
+        else 
+        {
+            Titanium.API.error("Titanium.API.getInstalledComponents() returned an empty list");
+        }
+
         // test the objects in API		
         var app = Titanium.API.getApplication();
       
@@ -136,29 +163,29 @@ describe("ti.Api tests",
             value_of(installedComponents).should_not_be_null();
             value_of(bundledComponents).should_not_be_null();
 
-            if ( loadedComponents && installedComponents && bundledComponents ) {
+            if ( loadedComponents && installedComponents && bundledComponents ) 
+            {
                 // check any components that are bundled with the app
                 // first we verify that we have a list of components.
                 for ( i =0; i < bundledComponents.length; i++ )
                 {
                     var  item = bundledComponents[i];
                     // do we have a component?
-                    value_of(item).should_not_be_null();
 		            value_of(item).should_be_object();
-		            if ( item ) 
-		            {
-		                value_of(item.getManifest).should_be_function();
-		                value_of(item.getName).should_be_function();
-		                value_of(item.getPath).should_be_function();
-		                value_of(item.getType).should_be_function();
-		                value_of(item.getVersion).should_be_function();
-		                value_of(item.isBundled).should_be_function();
-		                value_of(item.isLoaded).should_be_function();
-		                
-                        Titanium.API.info("processing bundled component '" + item.getName() + 
-                                          "' type: '"+item.getType()+
-                                          "' version: '"+item.getVersion()+"'");
-		            }
+
+	                value_of(item.getManifest).should_be_function();
+	                value_of(item.getName).should_be_function();
+	                value_of(item.getPath).should_be_function();
+	                value_of(item.getType).should_be_function();
+	                value_of(item.getVersion).should_be_function();
+	                value_of(item.isBundled).should_be_function();
+	                value_of(item.isLoaded).should_be_function();
+	                
+                    Titanium.API.info("processing bundled component '" + item.getName() + 
+                                      "' type: '"+item.getType()+
+                                      "' version: '"+item.getVersion()+
+                                      "' path '" + item.getPath() + "'");
+                    value_of(item.isBundled()).should_be_true();
                 }
                 
                 // check the components that we think are installed
@@ -167,22 +194,23 @@ describe("ti.Api tests",
                 {
                     var  item = installedComponents[i];
                     // do we have a component?
-                    value_of(item).should_not_be_null();
 		            value_of(item).should_be_object();
-		            if ( item ) 
-		            {
-		                value_of(item.getManifest).should_be_function();
-		                value_of(item.getName).should_be_function();
-		                value_of(item.getPath).should_be_function();
-		                value_of(item.getType).should_be_function();
-		                value_of(item.getVersion).should_be_function();
-		                value_of(item.isBundled).should_be_function();
-		                value_of(item.isLoaded).should_be_function();
-		                
-                        Titanium.API.info("processing installed component '" + item.getName() + 
-                                          "' type: '"+item.getType()+
-                                          "' version: '"+item.getVersion()+"'");
-		            }
+	                value_of(item.getManifest).should_be_function();
+	                value_of(item.getName).should_be_function();
+	                value_of(item.getPath).should_be_function();
+	                value_of(item.getType).should_be_function();
+	                value_of(item.getVersion).should_be_function();
+	                value_of(item.isBundled).should_be_function();
+	                value_of(item.isLoaded).should_be_function();
+	                
+                    Titanium.API.info("processing installed component '" + item.getName() + 
+                                      "' type: '"+item.getType()+
+                                      "' version: '"+item.getVersion()+
+                                      "' path '" + item.getPath() + "'");
+                                      
+                    // installed components cannot be bundled.
+//                    value_of(item.isBundled()).should_be_false();
+                    Titanium.API.info("item "+item.getName()+".isBundled() returned "+item.isBundled().toString());
                 }
                 
                 // now validate the loaded components and verify 
@@ -194,71 +222,72 @@ describe("ti.Api tests",
                     // do we have a component?
                     value_of(item).should_not_be_null();
 		            value_of(item).should_be_object();
-		            if ( item ) 
-		            {
-		                value_of(item.getManifest).should_be_function();
-		                value_of(item.getName).should_be_function();
-		                value_of(item.getPath).should_be_function();
-		                value_of(item.getType).should_be_function();
-		                value_of(item.getVersion).should_be_function();
-		                value_of(item.isBundled).should_be_function();
-		                value_of(item.isLoaded).should_be_function();
-    		            
-		                // loaded components should always indicate so...
-		                value_of(item.isLoaded()).should_be_true();
+	                value_of(item.getManifest).should_be_function();
+	                value_of(item.getName).should_be_function();
+	                value_of(item.getPath).should_be_function();
+	                value_of(item.getType).should_be_function();
+	                value_of(item.getVersion).should_be_function();
+	                value_of(item.isBundled).should_be_function();
+	                value_of(item.isLoaded).should_be_function();
+		            
+	                // loaded components should always indicate so...
+	                value_of(item.isLoaded()).should_be_true();
 
-                        Titanium.API.info("processing loaded component '" + item.getName() + 
-                                          "' type: '"+item.getType()+
-                                          "' version: '"+item.getVersion()+"'");
+                    Titanium.API.info("processing loaded component '" + item.getName() + 
+                                      "' type: '"+item.getType()+
+                                      "' version: '"+item.getVersion()+
+                                      "' path '" + item.getPath() + "'");
 
-                        var manifest = item.getManifest();
-                        var name = item.getName();
-                        var path = item.getPath();
-                        var type = item.getType();
-                        var version = item.getVersion();
-    		            
-		                // is this a valid component?  check against 
-		                // the installed components.
-		                if ( bundledComponents.length != 0) 
-		                {
-		                    for ( j=0; j< bundledComponents.length; j++)
-		                    {
-		                        var obj = bundledComponents[i];
-		                        value_of(obj).should_be_object();
-		                        if ( obj ) 
-		                        {
-		                            if ( name == obj.getName() && 
-		                                 path == obj.getPath() && 
-		                                 version == obj.getVersion() ) 
-		                            {
-		                                value_of(obj.isBundled()).should_be_true();
-		                            }
-		                        }
-		                    }
-    		            
-		                }
-		                else {
-		                    // we have not detected any bundled components
-		                    // all components should have this flag as FALSE
-		                    value_of(item.isBundled()).should_be_false();
-		                }
-		                // is this a valid component?  check against 
-		                // the installed components.
-		                for ( j=0; j< installedComponents.length; j++){
-		                    var obj = installedComponents[i];
+                    var manifest = item.getManifest();
+                    var name = item.getName();
+                    var path = item.getPath();
+                    var type = item.getType();
+                    var version = item.getVersion();
+		            
+	                // is this a valid component?  check against 
+	                // the installed components.
+	                if ( bundledComponents.length != 0) 
+	                {
+	                    for ( j=0; j< bundledComponents.length; j++)
+	                    {
+	                        var obj = bundledComponents[i];
 	                        value_of(obj).should_be_object();
-	                        if ( obj ) {
+	                        if ( obj ) 
+	                        {
 	                            if ( name == obj.getName() && 
 	                                 path == obj.getPath() && 
-	                                 version == obj.getVersion() ) {
-	                                value_of(obj.isLoaded()).should_be_true();
-	                                if ( !obj.isLoaded() )
-	                                {
-	                                    Titanium.API.error("obj " + obj.getName() + " is marked as not loaded");
-	                                }
+	                                 version == obj.getVersion() ) 
+	                            {
+	                                value_of(obj.isBundled()).should_be_true();
 	                            }
 	                        }
-		                }
+	                    }
+		            
+	                }
+	                else {
+	                    // we have not detected any bundled components
+	                    // all components should have this flag as FALSE
+	                    value_of(item.isBundled()).should_be_false();
+	                }
+	                // is this a valid component?  check against 
+	                // the installed components.
+	                for ( j=0; j< installedComponents.length; j++)
+	                {
+	                    var obj = installedComponents[i];
+                        value_of(obj).should_be_object();
+                        if ( obj ) 
+                        {
+                            if ( name == obj.getName() && 
+                                 path == obj.getPath() && 
+                                 version == obj.getVersion() ) 
+                            {
+                                value_of(obj.isLoaded()).should_be_true();
+                                if ( !obj.isLoaded() )
+                                {
+                                    Titanium.API.error("obj " + obj.getName() + " is marked as not loaded");
+                                }
+                            }
+                        }
 		            }
                 }
             }
@@ -279,7 +308,7 @@ describe("ti.Api tests",
             value_of(dependancies).should_not_be_null();
 	        value_of(dependancies).should_be_object();
 	        
-		    // retrieve our list of depenancies.  can be NULL
+		    // retrieve our list of depenancies.
 		    if ( dependancies ) 
 		    {
 		        var components = app.getComponents();
@@ -300,53 +329,50 @@ describe("ti.Api tests",
     		        
                     value_of(dependancy).should_not_be_null();
 	            
-    		        if( dependancy )
-    		        {
-		                value_of(dependancy).should_be_object();
-		                value_of(dependancy.getName).should_be_function();
-		                value_of(dependancy.getType).should_be_function();
-		                value_of(dependancy.getVersion).should_be_function();
-		                
-                        Titanium.API.info("processing dependancy '" + dependancy.getName() + 
-                                          "' type: '"+dependancy.getType()+
-                                          "' version: '"+dependancy.getVersion()+"'");
-		                if (components)
-		                {
-		                    // now that we have an object, check against the components list
-		                    // each dependancy should be matched to a loaded component.
-		                    for (j=0; j<components.length; j++ )
+	                value_of(dependancy).should_be_object();
+	                value_of(dependancy.getName).should_be_function();
+	                value_of(dependancy.getType).should_be_function();
+	                value_of(dependancy.getVersion).should_be_function();
+	                
+                    Titanium.API.info("processing dependancy '" + dependancy.getName() + 
+                                      "' type: '"+dependancy.getType()+
+                                      "' version: '"+dependancy.getVersion()+"'");
+	                if (components)
+	                {
+	                    // now that we have an object, check against the components list
+	                    // each dependancy should be matched to a loaded component.
+	                    for (j=0; j<components.length; j++ )
+	                    {
+		                    var obj = components[j];
+		                    if ( obj )
 		                    {
-    		                    var obj = components[j];
-    		                    if ( obj )
-    		                    {
-    		                        value_of(obj).should_be_object();
-    		                        
-    		                        var name = obj.getName();
-    		                        var type = obj.getType();
-    		                        var version = obj.getVersion();
-    		                        
-    		                        value_of(name).should_not_be_null();
-    		                        value_of(type).should_not_be_null();
-    		                        value_of(version).should_not_be_null();
-    		                        
-		                            var bName = (name == dependancy.getName())?true:false;
-		                            var bType = (type == dependancy.getType())?true:false;;
-		                            var bVersion = (version == dependancy.getVersion())?true:false;;
-		                            
-		                            if ( bName && bType && bVersion)
-		                            {
-		                                Titanium.API.trace("match dependancy "+name+" to component");
-		                                break;
-		                            }
-		                            
-		                            // don't spam the log file
-		                            if ( !bName || !bType || !bVersion)
-		                            {
-                                        Titanium.API.trace("match dependancy "+name+" to component");
-		                            }
-		                        }
-		                    }
-		                }
+		                        value_of(obj).should_be_object();
+		                        
+		                        var name = obj.getName();
+		                        var type = obj.getType();
+		                        var version = obj.getVersion();
+		                        
+		                        value_of(name).should_not_be_null();
+		                        value_of(type).should_not_be_null();
+		                        value_of(version).should_not_be_null();
+		                        
+	                            var bName = (name == dependancy.getName())?true:false;
+	                            var bType = (type == dependancy.getType())?true:false;;
+	                            var bVersion = (version == dependancy.getVersion())?true:false;;
+	                            
+	                            if ( bName && bType && bVersion)
+	                            {
+	                                Titanium.API.trace("match dependancy "+name+" to component");
+	                                break;
+	                            }
+	                            
+	                            // don't spam the log file
+	                            if ( !bName || !bType || !bVersion)
+	                            {
+                                    Titanium.API.trace("match dependancy "+name+" to component");
+	                            }
+	                        }
+	                    }
     		        }
     		    }		
 		    }
@@ -362,6 +388,32 @@ describe("ti.Api tests",
 	// test the runtime component functions
 	test_installed_runtime: function()
 	{
+        Titanium.API.error("Titanium.API.getInstalledRuntimes()");
+        // now that the app is finished testing, test the Titanium.API runtime calls.
+        // this should return a valid list of runtime components installed with this app.		
+        var apiInstalledRuntimes1 = Titanium.API.getInstalledRuntimes();
+        
+        value_of(apiInstalledRuntimes1).should_be_object();
+        if ( apiInstalledRuntimes1.length )
+        {
+            Titanium.API.error("Titanium.API.getInstalledRuntimes() contains:");
+            for (i=0; i<apiInstalledRuntimes1.length; i++)
+            {
+                var item = apiInstalledRuntimes1[i];
+                value_of(item).should_be_object();
+            
+                Titanium.API.info("apiInstalledRuntimes["+i+"] name: '" + item.getName() + 
+                                  "' type: '"+item.getType()+
+                                  "' version: '"+item.getVersion()+
+                                  "' path '" + item.getPath() + "'");
+            }
+        }
+        else 
+        {
+            Titanium.API.error("Titanium.API.getInstalledRuntimes() returned an empty list");
+        }
+
+
         // test the objects in API		
         var app = Titanium.API.getApplication();
       
@@ -394,23 +446,25 @@ describe("ti.Api tests",
 	                
                     Titanium.API.info("testing runtime component '" + runtime.getName() + 
                                       "' type: '"+runtime.getType()+
-                                      "' version: '"+runtime.getVersion()+"'");
+                                      "' version: '"+runtime.getVersion()+
+                                      "' path '" +runtime.getPath() + "'");
                                       
 	                for ( i=0; i<components.length; i++ )
 	                {
                         Titanium.API.info("processing component '" + components[i].getName() + 
                                           "' type: '"+components[i].getType()+
-                                          "' version: '"+components[i].getVersion()+"'");
-                                          
-	                    if ( runtime.getName() == components[i].getName() &&
+                                          "' version: '"+components[i].getVersion()+
+                                          "' path '" +components[i].getPath() + "'");
+                                     
+                        if ( runtime.getName() == components[i].getName() &&
                              runtime.getType() == components[i].getType() &&
-                             runtime.getVersion() == components[i].getVersion())
+                             runtime.getPath() == components[i].getPath())
                         {
                             Titanium.API.info("match runtime '" + runtime.getName() + "' to component entry");
                             bFound = true;
                             break;
                         }
-	                }
+                    }
 	                
                     if ( !bFound )
                     {
@@ -435,11 +489,12 @@ describe("ti.Api tests",
 	                    {
                             Titanium.API.info("processing available runtime component '" + availableRuntimes[i].getName() + 
                                               "' type: '"+availableRuntimes[i].getType()+
-                                              "' version: '"+availableRuntimes[i].getVersion()+"'");
+                                              "' version: '"+availableRuntimes[i].getVersion()+
+                                              "' path '" + availableRuntimes[i].getPath() + "'");
 
 	                        if ( runtime.getName() == availableRuntimes[i].getName() &&
                                  runtime.getType() == availableRuntimes[i].getType() &&
-                                 runtime.getVersion() == availableRuntimes[i].getVersion())
+                                 runtime.getPath() == availableRuntimes[i].getPath())
                             {
                                 Titanium.API.info("match runtime '" + runtime.getName() + "' to available Runtimes entry");
                                 bFound = true;
@@ -473,10 +528,11 @@ describe("ti.Api tests",
 	                    {
                             Titanium.API.info("processing bundled runtime component '" + bundledRuntimes[i].getName() + 
                                               "' type: '"+bundledRuntimes[i].getType()+
-                                              "' version: '"+bundledRuntimes[i].getVersion()+"'");
+                                              "' version: '"+bundledRuntimes[i].getVersion()+
+                                              "' path '" + bundledRuntimes[i].getPath() + "'");
 	                        if ( runtime.getName() == bundledRuntimes[i].getName() &&
                                  runtime.getType() == bundledRuntimes[i].getType() &&
-                                 runtime.getVersion() == bundledRuntimes[i].getVersion())
+                                 runtime.getPath() == bundledRuntimes[i].getPath())
                             {
                                 Titanium.API.info("match runtime '" + runtime.getName() + "' to bundled Runtimes entry");
                                 bFound = true;
@@ -506,9 +562,34 @@ describe("ti.Api tests",
 	        }
 		}
 	},
-	// test the runtime component functions
+	// test the modules component functions
 	test_installed_modules: function()
 	{
+        Titanium.API.error("Titanium.API.getInstalledModules()");
+        // now that the app is finished testing, test the Titanium.API runtime calls.
+        // this should return a valid list of runtime components installed with this app.		
+        var apiInstalledModules1 = Titanium.API.getInstalledModules();
+        
+        value_of(apiInstalledModules1).should_be_object();
+        if ( apiInstalledModules1.length )
+        {
+            Titanium.API.error("Titanium.API.getInstalledModules() contains:");
+            for (i=0; i<apiInstalledModules1.length; i++)
+            {
+                var item = apiInstalledModules1[i];
+                value_of(item).should_be_object();
+                
+                Titanium.API.info("apiInstalledModules["+i+"] name: '" + item.getName() + 
+                                  "' type: '"+item.getType()+
+                                  "' version: '"+item.getVersion()+
+                                  "' path '" + item.getPath() + "'");
+            }
+        }
+        else 
+        {
+            Titanium.API.error("Titanium.API.getInstalledModules() returned an empty list");
+        }
+
         // test the objects in API		
         var app = Titanium.API.getApplication();
       
@@ -552,13 +633,14 @@ describe("ti.Api tests",
                         bFound = false;
                         Titanium.API.info("processing module '" + module.getName() + 
                                           "' type: '"+module.getType()+
-                                          "' version: '"+module.getVersion()+"'");
+                                          "' version: '"+module.getVersion()+
+                                          "' path '" + module.getPath() + "'");
 
                         for ( i=0; i<components.length; i++ )
                         {
                             if ( module.getName() == components[i].getName() &&
                                  module.getType() == components[i].getType() &&
-                                 module.getVersion() == components[i].getVersion())
+                                 module.getPath() == components[i].getPath())
                             {
                                 Titanium.API.trace("match module "+module.getName() +" to component entry");
                                 bFound = true;
@@ -589,7 +671,8 @@ describe("ti.Api tests",
                         
                         Titanium.API.info("processing module '" + module.getName() + 
                                           "' type: '"+module.getType()+
-                                          "' version: '"+module.getVersion()+"'");
+                                          "' version: '"+module.getVersion()+
+                                          "' path '" + module.getPath() + "'");
 
                         for ( i=0; i<bundledModules.length; i++ )
                         {
@@ -598,11 +681,12 @@ describe("ti.Api tests",
                             
                             Titanium.API.info("processing bundled module component '" + m.getName() + 
                                               "' type: '"+m.getType()+
-                                              "' version: '"+m.getVersion()+"'");
+                                              "' version: '"+m.getVersion()+
+                                              "' path '" + m.getPath() + "'");
 
                             if ( module.getName() == m.getName() &&
                                  module.getType() == m.getType() &&
-                                 module.getVersion() == m.getVersion())
+                                 module.getPath() == m.getPath())
                             {
                                 Titanium.API.trace("match bundled module "+module.getName() +" to modules entry");
                                 bFound = true;
@@ -626,7 +710,8 @@ describe("ti.Api tests",
                         
                         Titanium.API.info("processing module component '" + module.getName() + 
                                           "' type: '"+module.getType()+
-                                          "' version: '"+module.getVersion()+"'");
+                                          "' version: '"+module.getVersion()+
+                                          "' path '" + module.getPath() + "'");
 
                         for ( i=0; i<availableModules.length; i++ )
                         {
@@ -635,11 +720,12 @@ describe("ti.Api tests",
                             
                             Titanium.API.info("processing available module component '" + m.getName() + 
                                               "' type: '"+m.getType()+
-                                              "' version: '"+m.getVersion()+"'");
+                                              "' version: '"+m.getVersion()+
+                                              "' path '" + m.getPath() + "'");
 
                             if ( module.getName() == m.getName() &&
                                  module.getType() == m.getType() &&
-                                 module.getVersion() == m.getVersion())
+                                 module.getPath() == m.getPath())
                             {
                                 Titanium.API.trace("match avialable module "+module.getName() +" to modules entry");
                                 bFound = true;
@@ -661,9 +747,34 @@ describe("ti.Api tests",
 		    }
 		}
 	},
-	// test the runtime component functions
+	// test the API SDK functions
 	test_api_sdk: function()
 	{
+        Titanium.API.error("Titanium.API.getInstalledSDKs()");
+        // now that the app is finished testing, test the Titanium.API runtime calls.
+        // this should return a valid list of runtime components installed with this app.		
+        var apiInstalledSDKs1 = Titanium.API.getInstalledSDKs();
+        
+        value_of(apiInstalledSDKs1).should_be_object();
+        if ( apiInstalledSDKs1.length )
+        {
+            Titanium.API.error("Titanium.API.getInstalledSDKs() contains:");
+            for (i=0; i<apiInstalledSDKs1.length; i++)
+            {
+                var item = apiInstalledSDKs1[i];
+                value_of(item).should_be_object();
+                
+                Titanium.API.info("apiInstalledSDKs["+i+"] name: '" + item.getName() + 
+                                  "' type: '"+item.getType()+
+                                  "' version: '"+item.getVersion()+
+                                  "' path '" + item.getPath() + "'");
+            }
+        }
+        else 
+        {
+            Titanium.API.error("Titanium.API.getInstalledSDKs() returned an empty list");
+        }
+
         // test the objects in API		
         var app = Titanium.API.getApplication();
       
@@ -703,7 +814,8 @@ describe("ti.Api tests",
                     var module = sdks[j];
                     Titanium.API.info("processing SDK component '" + module.getName() + 
                                       "' type: '"+module.getType()+
-                                      "' version: '"+module.getVersion()+"'");
+                                      "' version: '"+module.getVersion()+
+                                      "' path '" + module.getPath() + "'");
                     
                     
                     for ( i=0; i<components.length; i++ )
@@ -713,11 +825,12 @@ describe("ti.Api tests",
                         
                         Titanium.API.info("processing component '" + am.getName() + 
                                           "' type: '"+am.getType()+
-                                          "' version: '"+am.getVersion()+"'");
+                                          "' version: '"+am.getVersion()+
+                                          "' path '" +am.getPath() + "'");
 
                         if ( module.getName() == am.getName() &&
                              module.getType() == am.getType() &&
-                             module.getVersion() == am.getVersion())
+                             module.getPath() == am.getPath())
                         {
                             Titanium.API.trace("match SDK  "+module.getName() +" to component entry");
                             bFound = true;
@@ -731,7 +844,6 @@ describe("ti.Api tests",
                     // fail the test if we don't find a value.	                    
                     Titanium.API.fatal("failed to match SDK object to list of loaded components");
                     // this is not a real bug.  this is only meant for developer environments.
-//                    value_of(bFound).should_be_true();
                 }
 		    }
 		    else 
@@ -749,13 +861,14 @@ describe("ti.Api tests",
                     var module = mobileSDKs[j];
                     Titanium.API.info("processing mobile SDK module '" + module.getName() + 
                                       "' type: '"+module.getType()+
-                                      "' version: '"+module.getVersion()+"'");
+                                      "' version: '"+module.getVersion()+
+                                      "' path '" + module.getPath() + "'");
                     
                     for ( i=0; i<components.length; i++ )
                     {
                         if ( module.getName() == components[i].getName() &&
                              module.getType() == components[i].getType() &&
-                             module.getVersion() == components[i].getVersion())
+                             module.getPath() == components[i].getPath())
                         {
                             Titanium.API.trace("match avialable mobile SDK  "+module.getName() +" to components entry");
                             bFound = true;
@@ -768,13 +881,46 @@ describe("ti.Api tests",
                         // don't fail the test if we don't find a value.  this is really just for titanium development.
                         Titanium.API.warn("failed to match mobile SDK object to list of loaded components");
                         // this is not a real bug.  this is only meant for developer environments.
-//                        value_of(bFound).should_be_true();
                     }
                 }
+            }
+            else 
+            {
+		        Titanium.API.fatal("Failed to retrieve the list of mobile  SDKs.");
             }
 		}
 	},
 
+    test_api_arguments: function()
+    {
+        // test the objects in API		
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        if ( app ) 
+        {
+		    value_of(app).should_be_object();
+		    var argv = app.getArguments();
+
+		    if ( argv )
+		    {
+		        value_of(argv).should_be_object();
+		        value_of(argv.length).should_not_be(0);
+		        
+		        // print out all the arguments to drillbit.
+		        for (i=0; i<argv.length; i++)
+		        {
+		            Titanium.API.info("argv["+i+"] = "+argv[i]);
+		        }
+		        
+		        var bHasit = app.hasArgument("results");
+		        value_of(bHasit).should_be_true();
+		        
+		        var results = app.getArgumentValue("results");
+		        value_of(results).should_not_be_null();
+		    }
+        }
+    },
 	// test the runtime component functions
 	test_api_module: function()
 	{
@@ -785,14 +931,6 @@ describe("ti.Api tests",
         if ( app ) 
         {
 		    value_of(app).should_be_object();
-		    
-		    
-		    var argv = app.getArguments();
-		    
-		    if ( argv )
-		    {
-		        value_of(argv).should_be_object();
-		    }
 		    
             var pid = app.getPID();
             
@@ -814,10 +952,11 @@ describe("ti.Api tests",
 		    // TODO  test events  what kind of events happen here?
 		    
 		    // TODO test global attributes  what are they?
-		    
-		    
 		}
-		
+	},
+	// test the runtime component functions
+	test_api_application_paths: function()
+	{
 	    var componentSearchPaths = Titanium.API.getComponentSearchPaths();
 	    
 	    value_of(componentSearchPaths).should_be_object();
@@ -829,6 +968,39 @@ describe("ti.Api tests",
 	    {
 	        Titanium.API.info(componentSearchPaths[i]);
 	    }
-		
+
+        // get the application object
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+        
+        var dataPath = app.getDataPath();
+        value_of(dataPath).should_not_be_null();
+        Titanium.API.info("data path = "+dataPath);
+        
+        
+	    var argv = app.getArguments();
+	    
+        value_of(argv).should_not_be_null();
+	    if ( argv )
+	    {
+	        var exePath = app.getExecutablePath();
+	        
+	        value_of(exePath).should_not_be_null();
+	        
+	        // argv[0] is the fully qualified name and path to the exe
+	        var index = argv[0].indexOf(exePath);
+	        value_of(index).should_not_be(-1);
+	        
+	    }
+
+        var manifestPath = app.getManifestPath();
+        value_of(manifestPath).should_not_be_null();
+        Titanium.API.info("Manifest path = "+manifestPath);
+	    
+        var path = app.getPath();
+        value_of(path).should_not_be_null();
+        Titanium.API.info("Manifest path = "+path);
+	    
 	},
 });
