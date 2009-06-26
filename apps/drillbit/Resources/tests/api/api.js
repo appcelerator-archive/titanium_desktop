@@ -384,6 +384,9 @@ describe("ti.API tests",
 		// create a dependancy  what does this mean?  what are we trying to accomplish?
 	    var dep = Titanium.API.createDependency(Titanium.API.RUNTIME, "test", "0.0.1", Titanium.API.EQ);
 	    // TODO - how to create and manage a dependancy
+	    
+	    
+	    
 	},
 	// test the runtime component functions
 	test_installed_runtime: function()
@@ -1003,4 +1006,45 @@ describe("ti.API tests",
         Titanium.API.info("Manifest path = "+path);
 	    
 	},
+	test_api_manifest: function()
+	{
+        // get the application object
+        var app = Titanium.API.getApplication();
+      
+        value_of(app).should_not_be_null();
+
+        var manifest  = app.getManifest();
+	    value_of(manifest).should_be_object();
+	    value_of(manifest.length).should_not_be(0);
+	    
+	    for (i=0; i< manifest.length; i++ )
+	    {
+	        value_of(manifest[i].length).should_be(2);
+	        value_of(manifest[i][0]).should_be_string();
+	        value_of(manifest[i][1]).should_be_string();
+	    }
+	},
+    test_api_events_as_async: function(callback)
+    {
+	    // create an event
+		var w = Titanium.API.register("foo", function()
+		    {
+		        callback.passed();
+		    });
+		
+		// make sure we have an id for it
+		value_of(w).should_be_number();
+
+        // fire it off
+        Titanium.API.fire("foo", w);
+        
+        // unregister the event when we are done.
+        Titanium.API.unregister(w);
+        
+    },
+    
+    test_api_global_object: function()
+    {
+        Titanium.API.info("not implemented");
+    }
 });
