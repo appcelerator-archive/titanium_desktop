@@ -390,7 +390,7 @@ TitaniumTest =
 			var script = Titanium.Filesystem.getFile(
 				app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
 			var scriptText = script.read();
-			var lines = scriptText.split("\n");
+			var lines = scriptText.toString().split("\n");
 
 			text.push('<table style="font-family: monospace; font-size: 10pt;">');
 			for (var i = 0; i < lines.length; i++)

@@ -50,7 +50,6 @@ describe("Ti.Filesystem FileStream tests",{
 		value_of(textRead.length).should_be_number();
 		value_of(textRead.length).should_be(textToWrite.length);
 		value_of(textRead.toString()).should_be(textToWrite);
-		value_of(textRead.replace("ABC","EDF")).should_be(textToWrite);
 		value_of(textRead.charAt(0)).should_be(textToWrite.charAt(0));
 		value_of(textRead.substring(0)).should_be(textToWrite.substring(0));
 		value_of(textRead.substring(0,2)).should_be(textToWrite.substring(0,2));
