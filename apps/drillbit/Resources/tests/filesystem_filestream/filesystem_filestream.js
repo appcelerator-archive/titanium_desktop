@@ -47,8 +47,8 @@ describe("Ti.Filesystem FileStream tests",{
 	
 	    // bug #36 - isOpen should return true here.
 	    // both isOpen() and ready() should return true here.
-//		value_of(fs.isOpen()).should_be_true();
-//		value_of(fs.ready()).should_be_true();
+		value_of(fs.isOpen()).should_be_true();
+		value_of(fs.ready()).should_be_true();
 
 		fs.write(textToWrite);
 

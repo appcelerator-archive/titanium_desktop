@@ -429,7 +429,7 @@ namespace ti
 
 	void FileStream::Ready(const ValueList& args, SharedValue result)
 	{
-		Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
+		Poco::FileIOS* fis = this->stream;
 		if(!fis)
 		{
 			result->SetBool(false);
@@ -442,7 +442,7 @@ namespace ti
 
 	void FileStream::IsOpen(const ValueList& args, SharedValue result)
 	{
-		Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
+		Poco::FileIOS* fis = this->stream;
 		result->SetBool(fis!=NULL);
 	}
 
