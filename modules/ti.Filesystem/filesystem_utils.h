@@ -25,7 +25,8 @@ namespace ti
 		public:
 			
 			static SharedString GetFileName(SharedValue);
-		
+			static SharedPtr<File> ToFile(SharedKObject object);
+			
 		private:
 			FileSystemUtils();
 			virtual ~FileSystemUtils();

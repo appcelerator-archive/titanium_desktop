@@ -15,7 +15,7 @@ namespace ti
 	FileSystemUtils::FileSystemUtils() { }
 	FileSystemUtils::~FileSystemUtils() { }
 	
-	
+	/*static*/
 	SharedString FileSystemUtils::GetFileName(SharedValue v)
 	{
 		if (v->IsString())
@@ -33,5 +33,24 @@ namespace ti
 			message += " to filename: don't know what to do";
 			throw ValueException::FromString(message);
 		}
+	}
+	
+	/*static*/
+	SharedPtr<File> FileSystemUtils::ToFile(SharedKObject object)
+	{
+		SharedPtr<File> file = object.cast<File>();
+		if (file.isNull())
+		{
+			SharedPtr<ProfiledBoundObject> pFile = object.cast<ProfiledBoundObject>();
+			if (pFile.isNull()) {
+				throw ValueException::FromString("invalid object type, don't know how to cast to file");
+			}
+			
+			file = pFile->GetDelegate().cast<File>();
+			if (file.isNull()) {
+				throw ValueException::FromString("invalid object type, don't know how to cast to file");
+			}
+		}
+		return file;
 	}
 }

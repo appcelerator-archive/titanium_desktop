@@ -375,15 +375,9 @@ namespace ti
 				files.push_back(FileSystemUtils::GetFileName(v)->c_str());
 			}
 		}
-		else if (args.at(0)->IsObject())
+		else
 		{
-			SharedKObject bo = args.at(0)->ToObject();
-			SharedPtr<File> file = bo.cast<File>();
-			if (file.isNull())
-			{
-				throw ValueException::FromString("invalid type passed as first argument");
-			}
-			files.push_back(file->GetFilename());
+			files.push_back(FileSystemUtils::GetFileName(args.at(0))->c_str());
 		}
 		SharedValue v = args.at(1);
 		std::string destination(FileSystemUtils::GetFileName(v)->c_str());
