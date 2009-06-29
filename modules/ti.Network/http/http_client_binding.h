@@ -51,16 +51,16 @@ namespace ti
 		static bool initialized;
 		
 		static void Run(void*);
-		
-		DECLAREBOUNDMETHOD(Abort)
-		DECLAREBOUNDMETHOD(Open)
-		DECLAREBOUNDMETHOD(SetRequestHeader)
-		DECLAREBOUNDMETHOD(Send)
-		DECLAREBOUNDMETHOD(SendFile)
-		DECLAREBOUNDMETHOD(SendDir)
-		DECLAREBOUNDMETHOD(GetResponseHeader)
-		DECLAREBOUNDMETHOD(SetTimeout)
-		
+
+		void Abort(const ValueList& args, SharedValue result);
+		void Open(const ValueList& args, SharedValue result);
+		void SetRequestHeader(const ValueList& args, SharedValue result);
+		void Send(const ValueList& args, SharedValue result);
+		void SendFile(const ValueList& args, SharedValue result);
+		void SendDir(const ValueList& args, SharedValue result);
+		void GetResponseHeader(const ValueList& args, SharedValue result);
+		void SetTimeout(const ValueList& args, SharedValue result);
+
 		void ChangeState(int readyState);
 	};
 }

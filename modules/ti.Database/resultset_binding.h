@@ -31,14 +31,14 @@ namespace ti
 		void TransformValue(size_t index, SharedValue result);
 		
 
-		DECLAREBOUNDMETHOD(IsValidRow);
-		DECLAREBOUNDMETHOD(Next);
-		DECLAREBOUNDMETHOD(Close);
-		DECLAREBOUNDMETHOD(RowCount);
-		DECLAREBOUNDMETHOD(FieldCount);
-		DECLAREBOUNDMETHOD(FieldName);
-		DECLAREBOUNDMETHOD(Field);
-		DECLAREBOUNDMETHOD(FieldByName);
+		void IsValidRow(const ValueList& args, SharedValue result);
+		void Next(const ValueList& args, SharedValue result);
+		void Close(const ValueList& args, SharedValue result);
+		void RowCount(const ValueList& args, SharedValue result);
+		void FieldCount(const ValueList& args, SharedValue result);
+		void FieldName(const ValueList& args, SharedValue result);
+		void Field(const ValueList& args, SharedValue result);
+		void FieldByName(const ValueList& args, SharedValue result);
 	};
 }
 

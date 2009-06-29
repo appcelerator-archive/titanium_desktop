@@ -636,7 +636,7 @@ namespace ti
 		this->menu = menu;
 		if (focused)
 		{
-			SharedPtr<OSXMenuItem> m = KList::Unwrap(menu.cast<OSXMenuItem>());
+			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
 			this->osx_binding->WindowFocused(this,m.get());
 		}
 	}
