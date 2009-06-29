@@ -1,6 +1,6 @@
 describe("ti.App tests",
 {
-	validate_properties: function()
+	validate_app: function()
 	{
 		value_of(Titanium.platform).should_be_one_of(['win32','osx','linux']);
 		value_of(Titanium.version).should_be_string();
@@ -49,5 +49,64 @@ describe("ti.App tests",
 		value_of(sysProps.getString("testdefaultstring")).should_be("stringvalue");
 		value_of(sysProps.getInt("badint")).should_be(0);
 		value_of(sysProps.getDouble("baddouble")).should_be(0);
+	},
+	
+	test_create_properties: function()
+	{
+		var props = Titanium.App.createProperties();
+		value_of(props.getBool).should_be_function();
+		value_of(props.getInt).should_be_function();
+		value_of(props.getList).should_be_function();
+		value_of(props.getDouble).should_be_function();
+		value_of(props.setString).should_be_function();
+		
+		value_of(props.setBool).should_be_function();
+		value_of(props.setInt).should_be_function();
+		value_of(props.setList).should_be_function();
+		value_of(props.setDouble).should_be_function();
+		value_of(props.setString).should_be_function();
+		value_of(props.hasProperty).should_be_function();
+		value_of(props.listProperties).should_be_function();
+		value_of(props.saveTo).should_be_function();
+		
+		var props2 = Titanium.App.createProperties({
+			"val1": true,
+			"val2": 1.1,
+			"val3": ['a', 'b', 'c'],
+			"val4": "123"
+		});
+		
+		value_of(props2).should_be_object();
+		
+		value_of(props2.listProperties()).should_match_array(["val1","val2","val3","val4"]);
+		value_of(props2.getBool("val1")).should_be_true();
+		value_of(props2.getDouble("val2")).should_be(1.1);
+		
+		var val3 = props2.getList("val3");
+		value_of(val3).should_not_be_null();
+		value_of(val3).should_be_array();
+		
+		value_of(props2.getList("val3")).should_match_array(['a','b','c']);
+		value_of(props2.getString("val4")).should_be("123");
+		
+		var TFS = Titanium.Filesystem;
+		var sep = TFS.getSeparator();
+		var appdir = TFS.getApplicationDataDirectory();
+		var path = appdir+sep+"_testing.properties";
+		
+		props2.saveTo(path);
+		value_of(TFS.getFile(path).exists()).should_be_true();
+	},
+	
+	test_app_properties: function ()
+	{
+		var props = Titanium.App.loadProperties(Titanium.App.appURLToPath("app://app.properties"));
+		value_of(props).should_be_object();
+		value_of(props.getBool("trueval")).should_be_true();
+		value_of(props.getBool("falseval")).should_be_false();
+		value_of(props.getInt("numval")).should_be(1);
+		value_of(props.getString("stringval")).should_be("hey this is just a string");
+		value_of(props.getDouble("doubleval")).should_be(1.1);
+		value_of(props.getList("listval")).should_match_array(["entry1","entry2","entry3"]);
 	}
 });

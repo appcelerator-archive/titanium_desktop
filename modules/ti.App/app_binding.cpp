@@ -107,6 +107,13 @@ namespace ti
 		this->SetMethod("exit",&AppBinding::Exit);
 
 		/**
+		 * @tiapi(method=True,name=App.createProperties,since=1.0) create a new properties object
+		 * @tiarg(for=App.createProperties,type=object,name=initialProperties,optional=True) optional initial properties
+		 * @tiresult(for=App.createProperties,type=App.Properties) returns a new properties instance
+		 */
+		this->SetMethod("createProperties", &AppBinding::CreateProperties);
+		
+		/**
 		 * @tiapi(method=True,name=App.loadProperties,since=0.2) Loads a properties list from a file path
 		 * @tiarg(for=App.loadProperties,type=string,name=path) path to properties file
 		 * @tiresult(for=App.loadProperties,type=list) returns the properties as a list
@@ -197,6 +204,34 @@ namespace ti
 		std::string path = Poco::Environment::get("KR_HOME", "");
 
 		result->SetString(std::string(path + KR_PATH_SEP + kAppURLPrefix + KR_PATH_SEP + url).c_str());
+	}
+
+	void AppBinding::CreateProperties(const ValueList& args, SharedValue result)
+	{
+		SharedPtr<PropertiesBinding> properties = new PropertiesBinding();
+		result->SetObject(properties);
+		
+		if (args.size() > 0 && args.at(0)->IsObject())
+		{
+			SharedKObject p = args.at(0)->ToObject();
+			SharedStringList names = p->GetPropertyNames();
+			for (size_t i = 0; i < names->size(); i++)
+			{
+				SharedValue value = p->Get(names->at(i));
+				ValueList setterArgs;
+				setterArgs.push_back(Value::NewString(names->at(i)));
+				setterArgs.push_back(value);
+				PropertiesBinding::Type type;
+				
+				if (value->IsList()) type = PropertiesBinding::List;
+				else if (value->IsInt()) type = PropertiesBinding::Int;
+				else if (value->IsDouble()) type = PropertiesBinding::Double;
+				else if (value->IsBool()) type = PropertiesBinding::Bool;
+				else type = PropertiesBinding::String;
+				
+				properties->Setter(setterArgs, type);
+			}
+		}
 	}
 
 	void AppBinding::LoadProperties(const ValueList& args, SharedValue result)

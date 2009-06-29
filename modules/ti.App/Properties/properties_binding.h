@@ -37,7 +37,15 @@ namespace ti
 		void SetList(const ValueList& args, SharedValue result);
 		void HasProperty(const ValueList& args, SharedValue result);
 		void ListProperties(const ValueList& args, SharedValue result);
-
+		void SaveTo(const ValueList& args, SharedValue result);
+		
+		typedef enum
+		{
+			Bool, Double, Int, String, List
+		} Type;
+		void Getter(const ValueList& args, SharedValue result, Type type);
+		void Setter(const ValueList& args, Type type);
+		
 		Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetConfig()
 		{
 			return config;
@@ -45,14 +53,8 @@ namespace ti
 
 		protected:
 		Logger* logger;
-		enum Type
-		{
-			Bool, Double, Int, String
-		};
 
 		void Init();
-		void Getter(const ValueList& args, SharedValue result, Type type);
-		void Setter(const ValueList& args, Type type);
 
 		Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> config;
 		std::string file_path;

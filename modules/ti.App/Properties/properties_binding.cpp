@@ -114,6 +114,12 @@ namespace ti
 		 * @tiresult(for=App.Properties.listProperties,type=list) returns a list of property values
 		 */
 		SetMethod("listProperties", &PropertiesBinding::ListProperties);
+		/**
+		 * @tiapi(method=True,name=App.Properties.saveTo,since=0.2) save this properties object to a file
+		 * @tiarg(for=App.Properties.saveTo,name=filename,type=string) the filename
+		 */
+		SetMethod("saveTo", &PropertiesBinding::SaveTo);
+	
 	}
 
 	PropertiesBinding::~PropertiesBinding()
@@ -185,7 +191,7 @@ namespace ti
 	void PropertiesBinding::Setter(const ValueList& args, Type type)
 	{
 		if (args.size() >= 2 && args.at(0)->IsString())
-			{
+		{
 			std::string eprefix = "PropertiesBinding::Set: ";
 			try
 			{
@@ -204,6 +210,10 @@ namespace ti
 					case String:
 						config->setString(property, args.at(1)->ToString());
 						break;
+					case List: {
+						SharedValue result;
+						this->SetList(args, result);
+					}
 					default: break;
 				}
 
@@ -336,5 +346,17 @@ namespace ti
 			property_list->Append(name_value);
 		}
 		result->SetList(property_list);
+	}
+	
+	void PropertiesBinding::SaveTo(const ValueList& args, SharedValue result)
+	{
+		if (args.size() == 0 || !args.at(0)->IsString())
+		{
+			throw ValueException::FromString("Error saving properties, no filename given (or filename wasn't a string)");
+		}
+		
+		std::string filename = args.at(0)->ToString();
+		this->file_path = filename;
+		config->save(this->file_path);
 	}
 }
