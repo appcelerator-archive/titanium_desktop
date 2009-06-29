@@ -284,9 +284,9 @@ namespace ti
 		this->Set("command",Value::NewString(cmd));
 		
 		this->SetBool("running", false);
-		this->SetNull("exitCode")
-		this->SetNull("onread")
-		this->SetNull("onexit")
+		this->SetNull("exitCode");
+		this->SetNull("onread");
+		this->SetNull("onexit");
 		this->SetMethod("terminate",&OSXProcess::Terminate);
 		this->SetInt("pid", -1);
 
