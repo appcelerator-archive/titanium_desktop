@@ -252,7 +252,8 @@ namespace ti
 		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsList())
 		{
-			menu = args.at(0)->ToList().cast<MenuItem>();
+			SharedKList list = KList::Unwrap(args.at(0)->ToList());
+			menu = list.cast<MenuItem>();
 		}
 		UIModule::SetMenu(menu);
 		this->SetMenu(menu);
@@ -263,8 +264,7 @@ namespace ti
 		SharedPtr<MenuItem> menu = UIModule::GetMenu();
 		if (menu.get() != NULL)
 		{
-			SharedKList list = menu;
-			result->SetList(list);
+			result->SetList(menu);
 		}
 		else
 		{
@@ -277,7 +277,8 @@ namespace ti
 		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsList())
 		{
-			menu = args.at(0)->ToList().cast<MenuItem>();
+			SharedKList list = KList::Unwrap(args.at(0)->ToList());
+			menu = list.cast<MenuItem>();
 		}
 		UIModule::SetContextMenu(menu);
 		this->SetContextMenu(menu);
@@ -347,7 +348,8 @@ namespace ti
 		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsList())
 		{
-			menu = args.at(0)->ToList().cast<MenuItem>();
+			SharedKList list = KList::Unwrap(args.at(0)->ToList());
+			menu = list.cast<MenuItem>();
 		}
 		this->SetDockMenu(menu);
 	}

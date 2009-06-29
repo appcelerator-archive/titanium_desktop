@@ -138,7 +138,7 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			SharedKObject obj = args.at(0)->ToObject();
+			SharedKObject obj = KObject::Unwrap(args.at(0)->ToObject());
 			SharedPtr<Blob> blob = obj.cast<Blob>();
 			if (!blob.isNull())
 			{

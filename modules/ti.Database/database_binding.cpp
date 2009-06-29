@@ -55,7 +55,7 @@ namespace ti
 			else
 			{
 				char msg[255];
-				sprintf(msg, "unknown supported type: %s for argument", arg->ToTypeString());
+				sprintf(msg, "unknown supported type: %s for argument", arg->GetType().c_str());
 				throw ValueException::FromString(msg);
 			}
 		} 
@@ -218,8 +218,9 @@ namespace ti
 		}
 		else
 		{
-			char msg[255];
-			sprintf(msg, "unknown supported type: %s for argument",arg->ToTypeString());
+			std::string msg = "Unsupported type for argument (";
+			msg.append(arg->GetType());
+			msg.append(")");
 			throw ValueException::FromString(msg);
 		}
 	}

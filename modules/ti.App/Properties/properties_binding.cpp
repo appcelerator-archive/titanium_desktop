@@ -312,7 +312,7 @@ namespace ti
 				}
 				else
 				{
-					std::cerr << "skipping object: " << arg->ToTypeString() << std::endl;
+					std::cerr << "skipping object: " << arg->GetType() << std::endl;
 				}
 			}
 			config->setString(property, value);

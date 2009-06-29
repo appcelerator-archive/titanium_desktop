@@ -36,6 +36,8 @@ describe("ti.Media tests", {
 	
 	test_play_sound_as_async: function(callback)
 	{
+		// This test has to be rewritten to work asynchronously
+
 		var sound = Titanium.Media.createSound(Titanium.App.appURLToPath("app://sound.wav"));
 		sound.play();
 		

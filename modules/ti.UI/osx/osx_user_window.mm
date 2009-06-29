@@ -636,7 +636,7 @@ namespace ti
 		this->menu = menu;
 		if (focused)
 		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
+			SharedPtr<OSXMenuItem> m = KList::Unwrap(menu.cast<OSXMenuItem>());
 			this->osx_binding->WindowFocused(this,m.get());
 		}
 	}
@@ -651,7 +651,7 @@ namespace ti
 		this->focused = true;
 		if (!menu.isNull())
 		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
+			SharedPtr<OSXMenuItem> m = KList::Unwrap(menu.cast<OSXMenuItem>());
 			this->osx_binding->WindowFocused(this,m.get());
 		}
 	}
@@ -661,7 +661,7 @@ namespace ti
 		this->focused = false;
 		if (!menu.isNull())
 		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
+			SharedPtr<OSXMenuItem> m = KList::Unwrap(menu.cast<OSXMenuItem>());
 			this->osx_binding->WindowUnfocused(this,m.get());
 		}
 	}

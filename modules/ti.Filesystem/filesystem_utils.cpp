@@ -29,7 +29,7 @@ namespace ti
 		else
 		{
 			std::string message = "can't convert object of type ";
-			message += v->ToTypeString();
+			message += v->GetType();
 			message += " to filename: don't know what to do";
 			throw ValueException::FromString(message);
 		}
@@ -38,19 +38,8 @@ namespace ti
 	/*static*/
 	SharedPtr<File> FileSystemUtils::ToFile(SharedKObject object)
 	{
-		SharedPtr<File> file = object.cast<File>();
-		if (file.isNull())
-		{
-			SharedPtr<ProfiledBoundObject> pFile = object.cast<ProfiledBoundObject>();
-			if (pFile.isNull()) {
-				throw ValueException::FromString("invalid object type, don't know how to cast to file");
-			}
-			
-			file = pFile->GetDelegate().cast<File>();
-			if (file.isNull()) {
-				throw ValueException::FromString("invalid object type, don't know how to cast to file");
-			}
-		}
+		SharedKObject unwrapped = KObject::Unwrap(object);
+		SharedPtr<File> file = unwrapped.cast<File>();
 		return file;
 	}
 }
