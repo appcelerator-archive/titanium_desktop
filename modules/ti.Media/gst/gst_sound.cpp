@@ -144,7 +144,7 @@ namespace ti
 		while (i != active.end())
 		{
 			// Don't register the same sound twice
-			if ((*i).get() == sound.get())
+			if ((*i++).get() == sound.get())
 				return;
 		}
 
