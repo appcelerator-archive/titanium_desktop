@@ -27,7 +27,9 @@ namespace ti
 			File(std::string filename);
 			virtual ~File();
 			std::string& GetFilename() { return this->filename; }
-
+			
+			virtual SharedString DisplayString(int levels=3) { return new string(GetFilename()); }
+			
 		private:
 			std::string filename;
 			ti::FileStream* readLineFS;

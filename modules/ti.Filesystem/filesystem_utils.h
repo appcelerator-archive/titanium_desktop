@@ -24,7 +24,7 @@ namespace ti
 	{
 		public:
 			
-			static const char* GetFileName(SharedValue);
+			static SharedString GetFileName(SharedValue);
 		
 		private:
 			FileSystemUtils();

@@ -22,7 +22,8 @@
 
 namespace ti
 {
-	File::File(std::string filename)
+	File::File(std::string filename) :
+		StaticBoundObject("File")
 	{
 
 		Poco::Path pocoPath(Poco::Path::expand(filename));
@@ -466,7 +467,7 @@ namespace ti
 	{
 		try
 		{
-			std::string dest = FileSystemUtils::GetFileName(args.at(0));
+			std::string dest = FileSystemUtils::GetFileName(args.at(0))->c_str();
 			Poco::File from(this->filename);
 			from.copyTo(dest);
 			result->SetBool(true);
@@ -480,7 +481,7 @@ namespace ti
 	{
 		try
 		{
-			std::string dest = FileSystemUtils::GetFileName(args.at(0));
+			std::string dest = FileSystemUtils::GetFileName(args.at(0))->c_str();
 			Poco::File from(this->filename);
 			from.moveTo(dest);
 			result->SetBool(true);
@@ -770,7 +771,7 @@ namespace ti
 			throw ValueException::FromString("createShortcut takes a parameter");
 		}
 		std::string from = this->filename;
-		std::string to = args.at(0)->IsString() ? args.at(0)->ToString() : FileSystemUtils::GetFileName(args.at(0));
+		std::string to = args.at(0)->IsString() ? args.at(0)->ToString() : FileSystemUtils::GetFileName(args.at(0))->c_str();
 
 #ifdef OS_OSX	//TODO: My spidey sense tells me that Cocoa might have a better way for this. --BTH
 		NSMutableString* originalPath = [NSMutableString stringWithCString:from.c_str() encoding:NSUTF8StringEncoding];
@@ -782,7 +783,7 @@ namespace ti
 		if (args.size()>1)
 		{
 			cwd = [fm currentDirectoryPath];
-			NSString *p = [NSString stringWithCString:FileSystemUtils::GetFileName(args.at(1)) encoding:NSUTF8StringEncoding];
+			NSString *p = [NSString stringWithCString:FileSystemUtils::GetFileName(args.at(1))->c_str() encoding:NSUTF8StringEncoding];
 			BOOL isDirectory = NO;
 			if ([fm fileExistsAtPath:p isDirectory:&isDirectory])
 			{
@@ -960,7 +961,7 @@ namespace ti
 		try
 		{
 			Poco::File from(this->filename);
-			Poco::File to(FileSystemUtils::GetFileName(args.at(0)));
+			Poco::File to(FileSystemUtils::GetFileName(args.at(0))->c_str());
 			std::string from_s = from.path();
 			std::string to_s = to.path();
 			if (!to.exists())

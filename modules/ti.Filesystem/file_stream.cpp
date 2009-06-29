@@ -11,7 +11,7 @@
 
 namespace ti 
 {
-	FileStream::FileStream(std::string filename_) : stream(NULL)
+	FileStream::FileStream(std::string filename_) : StaticBoundObject("FileStream"), stream(NULL)
 	{
 	#ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
