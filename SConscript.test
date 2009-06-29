@@ -11,8 +11,16 @@ def testcoverage_builder(target, source, env):
 	sys.stdout.flush()
 	f = open(str(target[0]), 'w')
 	apicoverage = simplejson.loads(open(os.path.join(build.dir, 'apicoverage.json'), 'r').read())
-	testcoverage.generate_test_coverage([os.path.join('apps', 'drillbit', 'Resources', 'tests')], apicoverage, f)
-	print 'done'
+	drillbit_results_path = os.path.join(build.dir, "Drillbit")
+	if build.is_osx():
+		drillbit_results_path = os.path.join(drillbit_results_path + ".app", "Contents")
+	drillbit_results_path = os.path.join(drillbit_results_path, "Resources", "test_results")
+	
+	if not os.path.exists(drillbit_results_path):
+		print >>sys.stderr, "!! Error: you must run drillbit to collect test coverage results"
+	else:	
+		testcoverage.generate_test_coverage([drillbit_results_path], apicoverage, f)
+		print 'done'
 
 
 build.env.Append(BUILDERS = {'TestCoverage' : Builder(

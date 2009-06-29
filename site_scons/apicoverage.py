@@ -50,13 +50,16 @@ def convert_type(value):
 		return float(value)
 	return value
 
-def parse_key_value_pairs(pairs, metadata = {}):
+def parse_key_value_pairs(pairs, metadata):
 	for kvpair in pairs.strip().split(','):
 		key, value = kvpair.split('=')
 		metadata[key.strip()] = value.strip()
 	return metadata
 
 def get_property(h,name,default,convert=True):
+	if not name in h:
+		return default
+	
 	try:
 		if convert:
 			return convert_type(h[name])
@@ -79,19 +82,19 @@ class Module(object):
 			self.api_points.append(api)
 			self.api_points_map[api.name] = api
 			api.module = self
-
+	
 	def get_api_with_name(self, api_name):
 		if not api_name in self.api_points_map.keys():
 			raise Exception("Tried to modify %s API before defining it!" % api.name)
 		else:
 			return self.api_points_map[api_name]
-
+	
 	@staticmethod
 	def get_with_name(name):
 		if not(name in Module.modules.keys()):
 			Module.modules[name] = Module(name)
 		return Module.modules[name]
-
+	
 	@staticmethod
 	def all_as_dict():
 		d = {}
@@ -102,20 +105,27 @@ class Module(object):
 class API(dict):
 	@staticmethod
 	def create_with_full_name(fullName):
-		module_name, api_name = fullName.strip().split('.', 1)
-		module = Module.get_with_name(module_name)
-		api = API(api_name, module)
+		module = None
+		api = None
+		if fullName.find(".") == -1:
+			module = Module.get_with_name('<global>')
+			api = API(fullName, module)
+		else:
+			module_name, api_name = fullName.strip().split('.', 1)
+			module = Module.get_with_name(module_name)
+			api = API(api_name, module)
+		
 		module.add_api(api)
 		print "adding %s -- %s" % (api.module.name, api.name)
 		return api
-
+	
 	@staticmethod
 	def get_with_full_name(fullName):
 		module_name, api_name = fullName.strip().split('.', 1)
 		module = Module.get_with_name(module_name)
 		api = module.get_api_with_name(api_name)
 		return api
-
+	
 	def __init__(self, name, module=None):
 		API.count += 1
 		self.name = self['name'] = name
@@ -123,7 +133,7 @@ class API(dict):
 		self['deprecated'] = False
 		self['since'] = '0.3'
 		self['description'] = ''
-
+	
 	def add_metadata(self, metadata):
 		self.name = get_property(metadata, 'name', self.name)
 		self['deprecated'] = get_property(metadata, 'deprecated', self['deprecated'])
@@ -135,10 +145,10 @@ class API(dict):
 			self['arguments'] = []
 		if get_property(metadata, 'property', False):
 			self['property'] = True
-
+	
 	def __str__(self):
 		return 'API<%s>' % self.name
-
+	
 	def add_argument(self,arg):
 		try:
 			self['arguments'].append(arg)
@@ -147,7 +157,7 @@ class API(dict):
 		
 	def set_return_type(self,return_type):
 		self['returns'] = return_type
-
+	
 	def set_deprecated(self,msg,version):
 		self.deprecated = True
 		self['deprecated'] = msg
@@ -160,7 +170,7 @@ class APIArgument(dict):
 		self.forname = params['for']
 		self['type'] = get_property(params,'type','object')
 		self['optional'] = get_property(params,'optional',False)
-
+	
 	def __str__(self):
 		return 'APIArgument<%s>' % self['name']
 
@@ -169,13 +179,13 @@ class APIReturnType(dict):
 		self.forname = params['for']
 		self['description'] = description
 		self['type'] = get_property(params,'type','void')
-
+	
 	def __str__(self):
 		return 'APIReturnType<%s>' % self['name']
 
 def get_last_method_before(method_index, start):
 	current_start = None
-
+	
 	method_starts = method_index.keys()
 	method_starts.sort()
 	for method_start in method_starts:
@@ -183,7 +193,7 @@ def get_last_method_before(method_index, start):
 			break
 		else:
 			current_start = method_start
-
+	
 	if current_start:
 		return method_index[current_start]
 	else:
@@ -193,15 +203,15 @@ def generate_api_coverage(dirs,fs):
 	API.count = 0
 	Module.modules = {}
 
-	api_pattern = '@tiapi\(([^\)]*)\)(.*)\n'
-	arg_pattern = '@tiarg\(([^\)]*)\)(.*)\n'
-	res_pattern = '@tiresult\(([^\)]*)\)(.*)\n'
-	dep_pattern = '@tideprecated\(([^\)]*)\)(.*)\n'
+	api_pattern = '@tiapi\(([^\)]*)\)(.*)'
+	arg_pattern = '@tiarg\(([^\)]*)\)(.*)'
+	res_pattern = '@tiresult\(([^\)]*)\)(.*)'
+	dep_pattern = '@tideprecated\(([^\)]*)\)(.*)'
 
-	context_sensitive_api_description = '@tiapi (.*)\n'
-	context_sensitive_arg_pattern = '@tiarg\[([^]]+)\](.*)\n'
-	context_sensitive_result_pattern = '@tiresult\[([^]]+)\](.*)\n'
-	tiproperty_pattern = '@tiproperty\[([^]]+)\](.*)\n'
+	context_sensitive_api_description = '@tiapi (.*)'
+	context_sensitive_arg_pattern = '@tiarg\[([^\]]+)\](.*)'
+	context_sensitive_result_pattern = '@tiresult\[([^\]]+)\](.*)'
+	tiproperty_pattern = '@tiproperty\[([^\]]+)\](.*)'
 
 	files = set()
 	files_with_matches = set()
@@ -214,100 +224,96 @@ def generate_api_coverage(dirs,fs):
 			files.add(i)
 
 	for filename in files:
-		content = open(filename).read()
+		current_api = None
 		match = None
-		start_index_to_method = {}
-
-		try:
-			for m in re.finditer(api_pattern, content):
-				match = m
-				metadata = parse_key_value_pairs(m.group(1).strip())
-				metadata['description'] = m.group(2).strip()
-				api = API.create_with_full_name(metadata['name'])
-				api.add_metadata(metadata)
-
-				# Record the index of the start of this match so we can
-				# use context sensitive arguments, etc later.
-				start_index_to_method[m.start()] = api
-
-			for m in re.finditer(tiproperty_pattern, content):
-				match = m
-				bits = m.group(1).split(',', 2)
-				metadata = {}
-				metadata['type'] = bits[0]
-				metadata['description'] = m.group(2).strip()
-				if len(bits) > 2:
-					metadata = parse_key_value_pairs(bits[2], metadata=metadata)
-				api = API.create_with_full_name(bits[1])
-				api.add_metadata(metadata)
-
-				# Record the index of the start of this match so we can
-				# use context sensitive arguments, etc later.
-				start_index_to_method[m.start()] = api
-
-			for m in re.finditer(context_sensitive_arg_pattern, content):
-				match = m
-				api = get_last_method_before(start_index_to_method, m.start())
-				if not api: continue
-
-				bits = m.group(1).split(',', 2)
-				metadata = {}
-				metadata['for'] = api.name
-				metadata['type'] = bits[0].strip()
-				metadata['name'] = bits[1].strip()
-				metadata['description'] = m.group(2).strip()
-				if len(bits) > 2:
-					metadata = parse_key_value_pairs(bits[2], metadata=metadata)
-				api.add_argument(APIArgument(metadata, metadata['description']))
-
-			for m in re.finditer(context_sensitive_result_pattern, content):
-				match = m
-				api = get_last_method_before(start_index_to_method, m.start())
-				if not(api): continue
-
-				metadata = {}
-				metadata['type'] = m.group(1).strip()
-				metadata['description'] = m.group(2).strip()
-				metadata['for'] = api.name
-				api.set_return_type(APIReturnType(metadata, metadata['description']))
-
-			for m in re.finditer(context_sensitive_api_description, content):
-				match = m
-				description = m.group(1)
-				api = get_last_method_before(start_index_to_method, m.start())
-				if api:
-					description = api['description'] + ' ' + description.strip()
-					api['description'] = description.strip()
-
-			for m in re.finditer(arg_pattern,content):
-				match = m
-				description = m.group(2).strip()
-				metadata = parse_key_value_pairs(m.group(1).strip())
-				api = API.get_with_full_name(metadata['for'])
-				api.add_argument(APIArgument(metadata, description))
-
-			for m in re.finditer(res_pattern,content):
-				match = m
-				description = m.group(2).strip()
-				metadata = parse_key_value_pairs(m.group(1).strip())
-				api = API.get_with_full_name(metadata['for'])
-				api.set_return_type(APIReturnType(metadata, description))
-
-			for m in re.finditer(dep_pattern,content):
-				match = m
-				description = m.group(2).strip()
-				metadata = parse_key_value_pairs(m.group(1).strip())
-				api = API.get_with_full_name(metadata['for'])
-				api.set_deprecated(description, metadata['version'])
-
-			if match:
-				files_with_matches.add(filename)
-
-		except Exception, e:
-			print "Exception parsing API metadata in file: %s" % filename
-			if match:
-				print "Error was for: %s" % str(match.group(0))
-			raise
+		for line in open(filename,'r').read().splitlines():
+			try:
+				m = re.search(api_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					metadata = parse_key_value_pairs(m.group(1).strip(), {})
+					metadata['description'] = m.group(2).strip()
+					api = API.create_with_full_name(metadata['name'])
+					api.add_metadata(metadata)
+					current_api = api
+					continue
+			
+				m = re.search(tiproperty_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					bits = m.group(1).split(',', 2)
+					metadata = {}
+					metadata['type'] = bits[0]
+					metadata['description'] = m.group(2).strip()
+					if len(bits) > 2:
+						metadata = parse_key_value_pairs(bits[2], metadata)
+					api = API.create_with_full_name(bits[1])
+					api.add_metadata(metadata)
+					continue
+			
+				m = re.search(context_sensitive_arg_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					if not current_api: continue
+					bits = m.group(1).split(',', 2)
+					metadata = {}
+					metadata['for'] = current_api.name
+					metadata['type'] = bits[0].strip()
+					metadata['name'] = bits[1].strip()
+					metadata['description'] = m.group(2).strip()
+					if len(bits) > 2:
+						metadata = parse_key_value_pairs(bits[2], metadata)
+					current_api.add_argument(APIArgument(metadata, metadata['description']))
+					continue
+			
+				m = re.search(context_sensitive_result_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					if not current_api: continue
+					metadata = {}
+					metadata['type'] = m.group(1).strip()
+					metadata['description'] = m.group(2).strip()
+					metadata['for'] = current_api.name
+					current_api.set_return_type(APIReturnType(metadata, metadata['description']))
+					continue
+			
+				m = re.search(context_sensitive_api_description, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(1)
+					if current_api:
+						description = current_api['description'] + ' ' + description.strip()
+						current_api['description'] = description.strip()
+						continue
+			
+				m = re.search(arg_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(2).strip()
+					metadata = parse_key_value_pairs(m.group(1).strip(), {})
+					api = API.get_with_full_name(metadata['for'])
+					api.add_argument(APIArgument(metadata, description))
+					continue
+			
+				m = re.search(res_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(2).strip()
+					metadata = parse_key_value_pairs(m.group(1).strip(), {})
+					api = API.get_with_full_name(metadata['for'])
+					api.set_return_type(APIReturnType(metadata, description))
+					continue
+			
+				m = re.search(dep_pattern, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(2).strip()
+					metadata = parse_key_value_pairs(m.group(1).strip(), {})
+					api = API.get_with_full_name(metadata['for'])
+					api.set_deprecated(description, metadata['version'])
+			except Exception, e:
+				print"Exception parsing API metadata in file: %s" % filename
+				raise
 
 	fs.write(json.dumps(Module.all_as_dict(), sort_keys=True, indent=4))
 

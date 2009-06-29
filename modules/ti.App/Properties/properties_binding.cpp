@@ -13,7 +13,7 @@ using namespace kroll;
 namespace ti
 {
 	PropertiesBinding::PropertiesBinding(std::string& file_path) :
-		StaticBoundObject(),
+		StaticBoundObject("Properties"),
 		logger(Logger::Get("App.Properties"))
 	{
 		Poco::File file(file_path);

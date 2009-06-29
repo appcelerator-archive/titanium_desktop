@@ -78,13 +78,13 @@ namespace ti
 
 
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=App.version,since=0.2) The Titanium product version
+		 * @tiapi(property=True,immutable=True,type=string,name=version,since=0.2) The Titanium product version
 		 */
 		SharedValue version = Value::NewString(STRING(PRODUCT_VERSION));
 		global->Set("version", version);
 
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=App.platform,since=0.2) The Titanium platform
+		 * @tiapi(property=True,immutable=True,type=string,name=platform,since=0.2) The Titanium platform
 		 */
 		SharedValue platform = Value::NewString(host->GetPlatform());
 		global->Set("platform",platform);

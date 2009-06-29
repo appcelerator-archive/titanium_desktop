@@ -42,7 +42,7 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 		module_entries = 0
 		testcoverage['modules'][module] = {}
 		testcoverage['modules'][module]['entries'] = {}
-		for entry in apicoverage[module]:
+		for entry in apicoverage[module].values():
 			entries += 1
 			module_entries += 1
 			testcoverage['modules'][module]['entries'][entry['name']] = 0
@@ -54,16 +54,21 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 	coverage = 0
 	for dir in dirs:
 		files = set()
-		for f in GlobDirectoryWalker(dir, patterns=['*.js']): files.add(f)
+		for f in GlobDirectoryWalker(dir, patterns=['*.prof']): files.add(f)
 		for file in files:
 			contents = open(file,'r').read()
-			for match in re.finditer(api_regex, contents):
-				module = match.group(1)
-				entry = match.group(3)
-				if entry is not None:
-					# ignore Titanium.<entry> for now.. they're not documented yet?
-					#entry = module
-					#module = 'Titanium'
+			for line in contents.splitlines():
+				tokens = line.split(',')
+				if tokens[1] in ["call", "get"]:
+					entry = tokens[2]
+					entry = entry.replace('Titanium.','')
+					module = '<global>'
+					if entry.find(".") != -1: module = entry[0:entry.find(".")]
+					if entry.find('.') == -1: continue
+					entry = entry[entry.find('.')+1:]
+					
+					print 'found ' + tokens[1] + ' for module: ' + module + ' , API: '+entry
+					
 					if entry not in testcoverage['modules'][module]['entries'] or testcoverage['modules'][module]['entries'][entry] == 0 :
 						testcoverage['modules'][module]['entries'][entry] = 1
 						# only count each entry once in the global/module coverage count

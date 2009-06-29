@@ -10,12 +10,12 @@
 
 namespace ti
 {
-	ResultSetBinding::ResultSetBinding() : eof(true)
+	ResultSetBinding::ResultSetBinding() : StaticBoundObject("ResultSet"), eof(true)
 	{
 		// no results result set
 		Bind();
 	}
-	ResultSetBinding::ResultSetBinding(Poco::Data::RecordSet &r) : eof(false)
+	ResultSetBinding::ResultSetBinding(Poco::Data::RecordSet &r) : StaticBoundObject("ResultSet"), eof(false)
 	{
 		rs = new Poco::Data::RecordSet(r);
 		Bind();
