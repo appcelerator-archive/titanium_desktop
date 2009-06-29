@@ -17,23 +17,10 @@ namespace ti
 		
 		CreatePipe(&read, &write, &attr, 0);
 		
-		/**
-		 * @tiapi(property=True,type=boolean,name=Process.Pipe.closed,since=0.2) Whether or not a pipe is closed
-		 */
+		// don't doc these, apicoverage already picks them up in ../pipe.cpp
 		this->Set("closed",Value::NewBool(false));
-		/**
-		 * @tiapi(method=True,name=Process.Pipe.close,since=0.2) Closes the pipe
-		 */
 		this->SetMethod("close",&Win32Pipe::Close);
-		/**
-		 * @tiapi(method=True,name=Process.Pipe.write,since=0.2) Writes data to the pipe
-		 * @tiarg(for=Process.Pipe.write,type=string,name=data) data to write
-		 */
 		this->SetMethod("write",&Win32Pipe::Write);
-		/**
-		 * @tiapi(method=True,name=Process.Pipe.read,since=0.2) Reads data from the pipe
-		 * @tiresult(for=Process.Pipe.read,type=string) result read from pipe
-		 */
 		this->SetMethod("read",&Win32Pipe::Read);
 	}
 	
