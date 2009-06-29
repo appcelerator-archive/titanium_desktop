@@ -15,7 +15,7 @@
 namespace ti
 {
 	IRCClientBinding::IRCClientBinding(Host* host) : 
-		host(host), global(host->GetGlobalObject()), thread(NULL)
+		StaticBoundObject("IRCClient"), host(host), global(host->GetGlobalObject()), thread(NULL)
 	{
 		/**
 		 * @tiapi(property=True,type=boolean,name=Network.IRCClient.connected,since=0.2) The connected property of an IRCClient object

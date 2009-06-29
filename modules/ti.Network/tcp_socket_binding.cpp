@@ -12,6 +12,7 @@
 namespace ti
 {
 	TCPSocketBinding::TCPSocketBinding(Host* ti_host, std::string host, int port) :
+		StaticBoundObject("TCPSocket"),
 		ti_host(ti_host), host(host), port(port), opened(false), 
 		onRead(NULL), onWrite(NULL), onTimeout(NULL), onReadComplete(NULL)
 	{

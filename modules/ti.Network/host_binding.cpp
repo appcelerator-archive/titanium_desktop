@@ -7,7 +7,7 @@
 
 namespace ti
 {
-	HostBinding::HostBinding(IPAddress addr) : name(addr.toString())
+	HostBinding::HostBinding(IPAddress addr) : StaticBoundObject("Host"), name(addr.toString())
 	{
 		this->Init();
 		try
@@ -25,7 +25,7 @@ namespace ti
 			//TODO: improve this exception so we can properly raise
 		}
 	}
-	HostBinding::HostBinding(std::string name) : name(name)
+	HostBinding::HostBinding(std::string name) : StaticBoundObject("Host"), name(name)
 	{
 		this->Init();
 		try

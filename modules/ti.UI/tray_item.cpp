@@ -9,7 +9,7 @@
 namespace ti
 {
 
-	TrayItem::TrayItem() : StaticBoundObject()
+	TrayItem::TrayItem() : StaticBoundObject("TrayItem")
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Tray.setIcon,since=0.2) Sets a TrayItem's icon

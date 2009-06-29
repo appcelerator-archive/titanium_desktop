@@ -10,7 +10,7 @@
 namespace ti
 {
 
-	MenuItem::MenuItem() : AccessorBoundList()
+	MenuItem::MenuItem() : AccessorBoundList("MenuItem")
 	{
 
 		// query methods

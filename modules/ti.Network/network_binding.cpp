@@ -22,10 +22,10 @@ namespace ti
 {
 	std::vector<SharedKObject> NetworkBinding::bindings;
 	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
-		 host(host),modulePath(modulePath),
-		 global(host->GetGlobalObject()),
-		 proxy(NULL),
-		 next_listener_id(0)
+		host(host),modulePath(modulePath),
+		global(host->GetGlobalObject()),
+		proxy(NULL),
+		next_listener_id(0)
 	{
 		SharedValue online = Value::NewBool(true);
 		/**

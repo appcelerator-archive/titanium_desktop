@@ -16,6 +16,7 @@ using Poco::RunnableAdapter;
 namespace ti
 {
 	Process::Process(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args) :
+		StaticBoundObject("Process"),
 		running(false),
 		complete(false),
 		pid(-1),

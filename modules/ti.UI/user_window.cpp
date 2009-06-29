@@ -11,7 +11,7 @@
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
-	kroll::StaticBoundObject(),
+	kroll::StaticBoundObject("UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
 	host(kroll::Host::GetInstance()),

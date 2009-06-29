@@ -45,6 +45,7 @@ namespace ti
 	bool HTTPClientBinding::initialized = false;
 	
 	HTTPClientBinding::HTTPClientBinding(Host* host, std::string path) :
+		StaticBoundObject("HTTPClient"),
 		host(host),modulePath(path),global(host->GetGlobalObject()),
 		thread(NULL),response(NULL),async(true),filestream(NULL),
 		timeout(30000),shutdown(false)

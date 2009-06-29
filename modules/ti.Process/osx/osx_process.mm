@@ -247,7 +247,8 @@
 
 namespace ti
 {
-	OSXProcess::OSXProcess(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args)
+	OSXProcess::OSXProcess(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args) :
+		StaticBoundObject("Process")
 	{
 		NSMutableArray *arguments = [[NSMutableArray alloc] init];
 		if (args.size()>0)

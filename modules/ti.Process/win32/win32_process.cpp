@@ -12,6 +12,7 @@
 namespace ti
 {
 	Win32Process::Win32Process(ProcessBinding* parent, std::string& command, std::vector<std::string>& args) :
+		StaticBoundObject("Process"),
 		running(false),
 		complete(false),
 		pid(-1),
