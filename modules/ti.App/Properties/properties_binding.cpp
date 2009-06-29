@@ -28,7 +28,8 @@ namespace ti
 		this->Init();
 	}
 	
-	PropertiesBinding::PropertiesBinding()
+	PropertiesBinding::PropertiesBinding() :
+		StaticBoundObject("Properties")
 	{
 		this->file_path = "";
 		this->config = new Poco::Util::PropertyFileConfiguration();
