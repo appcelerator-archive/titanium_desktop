@@ -32,25 +32,25 @@
 		[task setStandardInput: [NSPipe pipe]];
 		
 		// Here we register as an observer of the NSFileHandleReadCompletionNotification, which lets
-	    // us know when there is data waiting for us to grab it in the task's file handle (the pipe
-	    // to which we connected stdout and stderr above). methods will be called when there
-	    // is data waiting.  The reason we need to do this is because if the file handle gets
-	    // filled up, the task will block waiting to send data and we'll never get anywhere.
-	    // So we have to keep reading data from the file handle as we go.
+		// us know when there is data waiting for us to grab it in the task's file handle (the pipe
+		// to which we connected stdout and stderr above). methods will be called when there
+		// is data waiting.  The reason we need to do this is because if the file handle gets
+		// filled up, the task will block waiting to send data and we'll never get anywhere.
+		// So we have to keep reading data from the file handle as we go.
 		[[NSNotificationCenter defaultCenter] addObserver:self 
-	        selector:@selector(getOutData:) 
-	        name: NSFileHandleReadCompletionNotification 
-	        object: [[task standardOutput] fileHandleForReading]];
+			selector:@selector(getOutData:) 
+			name: NSFileHandleReadCompletionNotification 
+			object: [[task standardOutput] fileHandleForReading]];
 	
 		[[NSNotificationCenter defaultCenter] addObserver:self 
-	        selector:@selector(getErrData:) 
-	        name: NSFileHandleReadCompletionNotification 
-	        object: [[task standardError] fileHandleForReading]];
+			selector:@selector(getErrData:) 
+			name: NSFileHandleReadCompletionNotification 
+			object: [[task standardError] fileHandleForReading]];
 
 		[[NSNotificationCenter defaultCenter] addObserver:self 
-	        selector:@selector(terminated:) 
-	        name: NSTaskDidTerminateNotification 
-	        object: task];
+			selector:@selector(terminated:) 
+			name: NSTaskDidTerminateNotification 
+			object: task];
 	
 		input = new ti::OSXPipe([[task standardInput] fileHandleForWriting]);
 		output = new ti::OSXPipe([[task standardOutput] fileHandleForReading]);
@@ -283,23 +283,20 @@ namespace ti
 		
 		this->Set("command",Value::NewString(cmd));
 		
-		SET_BOOL_PROP("running",false);
-		
-		SET_NULL_PROP("exitCode")
-		SET_NULL_PROP("onread")
-		SET_NULL_PROP("onexit")
-
+		this->SetBool("running", false);
+		this->SetNull("exitCode")
+		this->SetNull("onread")
+		this->SetNull("onexit")
 		this->SetMethod("terminate",&OSXProcess::Terminate);
-
-		SET_INT_PROP("pid",-1);
+		this->SetInt("pid", -1);
 
 		[arguments release];
 
 		// start the process
 		@try
 		{
-			[process start];	
-			SET_INT_PROP("pid",[[process task] processIdentifier]);
+			[process start];
+			this->SetInt("pid",[[process task] processIdentifier]);
 		}
 		@catch(NSException *e)
 		{

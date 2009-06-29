@@ -130,12 +130,12 @@ namespace ti
 		/**
 		 * @tiapi(property=True,name=Database.DB.lastInsertRowId) The row id of the last insert operation.
 		 */
-		SET_INT_PROP("lastInsertRowId",0);
+		this->SetInt("lastInsertRowId", 0);
 		
 		/**
 		 * @tiapi(property=True,name=Database.DB.rowsAffected) The number of rows affected by the last execute
 		 */
-		SET_INT_PROP("rowsAffected",0);
+		this->SetInt("rowsAffected", 0);
 	}
 	DatabaseBinding::~DatabaseBinding()
 	{
@@ -268,7 +268,7 @@ namespace ti
 
 			logger->Debug("sql returned: %d rows for result",count);
 
-			SET_INT_PROP("rowsAffected",count);
+			this->SetInt("rowsAffected",count);
 
 			// get the row insert id
 			Statement ss(session->GetSession());
@@ -277,7 +277,7 @@ namespace ti
 			Poco::DynamicAny value = rr.value(0);
 			int i;
 			value.convert(i);
-			SET_INT_PROP("lastInsertRowId",i);
+			this->SetInt("lastInsertRowId",i);
 
 			
 			if (count > 0)

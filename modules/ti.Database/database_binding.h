@@ -29,10 +29,10 @@ namespace ti
 		std::string GetSecurityOrigin(std::string &appid);
 		void Convert(Statement &select, SharedValue arg, std::vector<SharedPtr <void*> >& mem);
 
-		DECLAREBOUNDMETHOD(Open);
-		DECLAREBOUNDMETHOD(Execute);
-		DECLAREBOUNDMETHOD(Close);
-		DECLAREBOUNDMETHOD(Remove);
+		void Open(const ValueList& args, SharedValue result);
+		void Execute(const ValueList& args, SharedValue result);
+		void Close(const ValueList& args, SharedValue result);
+		void Remove(const ValueList& args, SharedValue result);
 		
 		friend class DatabaseModule;
 	};

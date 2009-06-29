@@ -27,14 +27,14 @@ namespace ti
 		SharedKMethod callback;
 		Poco::Net::HTTPServerRequest& request;
 
-		DECLAREBOUNDMETHOD(GetMethod)
-		DECLAREBOUNDMETHOD(GetVersion)
-		DECLAREBOUNDMETHOD(GetURI)
-		DECLAREBOUNDMETHOD(GetContentType)
-		DECLAREBOUNDMETHOD(GetContentLength)
-		DECLAREBOUNDMETHOD(GetHeader)
-		DECLAREBOUNDMETHOD(HasHeader)
-		DECLAREBOUNDMETHOD(Read)
+		void GetMethod(const ValueList& args, SharedValue result);
+		void GetVersion(const ValueList& args, SharedValue result);
+		void GetURI(const ValueList& args, SharedValue result);
+		void GetContentType(const ValueList& args, SharedValue result);
+		void GetContentLength(const ValueList& args, SharedValue result);
+		void GetHeader(const ValueList& args, SharedValue result);
+		void HasHeader(const ValueList& args, SharedValue result);
+		void Read(const ValueList& args, SharedValue result);
 
 		SharedPtr<HttpServerRequest>* sharedPtr;
 	};

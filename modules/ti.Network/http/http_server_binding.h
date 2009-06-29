@@ -40,9 +40,9 @@ namespace ti
 		
 		static void Run(void*);
 		
-		DECLAREBOUNDMETHOD(Bind)
-		DECLAREBOUNDMETHOD(Close)
-		DECLAREBOUNDMETHOD(IsClosed)
+		void Bind(const ValueList& args, SharedValue result);
+		void Close(const ValueList& args, SharedValue result);
+		void IsClosed(const ValueList& args, SharedValue result);
 		
 		void Close();
 		

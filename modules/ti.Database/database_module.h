@@ -39,7 +39,7 @@ namespace ti
 		
 	private:
 		kroll::SharedKObject binding;
-		DECLAREBOUNDMETHOD(Open);
+		void Open(const ValueList& args, SharedValue result);
 	};
 
 }
