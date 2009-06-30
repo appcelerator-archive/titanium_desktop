@@ -218,7 +218,7 @@ describe("UI Module Tests",{
 		};
 		
 		w.open();
-		test_event(Titanium.UI.OPEN);
+		test_event(Titanium.UI.OPENED);
 		
 		w.setVisible(false);
 		test_event(Titanium.UI.HIDDEN);
