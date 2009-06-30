@@ -83,10 +83,10 @@ function TitaniumNotification(window)
 	 */
 	this.show = function(animate,autohide)
 	{
-		//if ('Growl' in Titanium && Titanium.Growl.isRunning()) {
-		//	Titanium.Growl.showNotification(title, message, icon, notificationDelay/1000, callback);
-		//	return;
-		//}
+		if ('Growl' in Titanium && Titanium.Growl.isRunning()) {
+			Titanium.Growl.showNotification(title, message, icon, notificationDelay/1000, callback);
+			return;
+		}
 
 		showing = true;
 		if (hideTimer)
