@@ -160,7 +160,7 @@ WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
 	this->maximizable = config->IsMaximizable();
 	this->minimizable = config->IsMinimizable();
 	this->resizable = config->IsResizable();
-	this->fullscreen = config->IsFullScreen();
+	this->fullscreen = config->IsFullscreen();
 	this->maximized = config->IsMaximized();
 	this->minimized = config->IsMinimized();
 	this->usingChrome = config->IsUsingChrome();

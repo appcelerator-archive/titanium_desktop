@@ -427,9 +427,9 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent)
 	restore_bounds = GetBounds();
 	restore_styles = GetWindowLong(window_handle, GWL_STYLE);
 
-	if (this->config->IsFullScreen())
+	if (this->config->IsFullscreen())
 	{
-		this->SetFullScreen(true);
+		this->SetFullscreen(true);
 	}
 	else if (this->config->IsMaximized())
 	{
@@ -836,7 +836,7 @@ void Win32UserWindow::SetTransparency(double transparency)
 	}
 }
 
-void Win32UserWindow::SetFullScreen(bool fullscreen)
+void Win32UserWindow::SetFullscreen(bool fullscreen)
 {
 	if (fullscreen)
 	{

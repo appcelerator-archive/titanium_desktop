@@ -13,7 +13,7 @@ namespace ti
 	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
-		if (!config->IsUsingChrome() || config->IsFullScreen())
+		if (!config->IsUsingChrome() || config->IsFullscreen())
 		{
 			return NSBorderlessWindowMask | NSTexturedBackgroundWindowMask ;
 		}
@@ -44,7 +44,7 @@ namespace ti
 		// Set up the size and position of the
 		// window using our Set<...> methods so
 		// we avoid duplicating the logic here.
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 			frame = NSMakeRect(0, 0, 10, 10);
 
 		window = [[NativeWindow alloc]
@@ -53,7 +53,7 @@ namespace ti
 			backing: NSBackingStoreBuffered
 			defer: false];
 
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 		{
 			this->real_x = config->GetX();
 			this->real_y = config->GetY();
@@ -210,9 +210,9 @@ namespace ti
 		return this->config->IsUsingScrollbars();
 	}
 
-	bool OSXUserWindow::IsFullScreen()
+	bool OSXUserWindow::IsFullscreen()
 	{
-		return this->config->IsFullScreen();
+		return this->config->IsFullscreen();
 	}
 
 	std::string OSXUserWindow::GetId()
@@ -623,11 +623,11 @@ namespace ti
 		}
 	}
 
-	void OSXUserWindow::SetFullScreen(bool fullscreen)
+	void OSXUserWindow::SetFullscreen(bool fullscreen)
 	{
 		if (window != nil)
 		{
-			[window setFullScreen:fullscreen];
+			[window setFullscreen:fullscreen];
 		}
 	}
 
