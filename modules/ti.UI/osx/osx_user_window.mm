@@ -13,7 +13,7 @@ namespace ti
 	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
-		if (!config->IsUsingChrome() || config->IsFullScreen())
+		if (!config->IsUsingChrome() || config->IsFullscreen())
 		{
 			return NSBorderlessWindowMask | NSTexturedBackgroundWindowMask ;
 		}
@@ -44,7 +44,7 @@ namespace ti
 		// Set up the size and position of the
 		// window using our Set<...> methods so
 		// we avoid duplicating the logic here.
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 			frame = NSMakeRect(0, 0, 10, 10);
 
 		window = [[NativeWindow alloc]
@@ -53,7 +53,7 @@ namespace ti
 			backing: NSBackingStoreBuffered
 			defer: false];
 
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 		{
 			this->real_x = config->GetX();
 			this->real_y = config->GetY();
@@ -147,7 +147,6 @@ namespace ti
 		if (window != nil)
 		{
 			[window miniaturize:window];
-			this->FireEvent(MINIMIZED);
 		}
 	}
 
@@ -176,7 +175,6 @@ namespace ti
 		if (window != nil)
 		{
 			[window zoom:window];
-			this->FireEvent(MAXIMIZED);
 		}
 	}
 	
@@ -210,9 +208,9 @@ namespace ti
 		return this->config->IsUsingScrollbars();
 	}
 
-	bool OSXUserWindow::IsFullScreen()
+	bool OSXUserWindow::IsFullscreen()
 	{
-		return this->config->IsFullScreen();
+		return this->config->IsFullscreen();
 	}
 
 	std::string OSXUserWindow::GetId()
@@ -299,7 +297,6 @@ namespace ti
 			this->real_x = x; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(x, real_y, real_w, real_h);
 			[window setFrameOrigin: newRect.origin];
-			this->FireEvent(MOVED);
 		}
 	}
 
@@ -329,7 +326,6 @@ namespace ti
 			this->real_y = y; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
 			[window setFrameOrigin: newRect.origin];
-			this->FireEvent(MOVED);
 		}
 	}
 
@@ -358,7 +354,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:YES];
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -387,7 +382,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:NO];
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -510,8 +504,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:YES];
-			this->FireEvent(MOVED);
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -623,11 +615,11 @@ namespace ti
 		}
 	}
 
-	void OSXUserWindow::SetFullScreen(bool fullscreen)
+	void OSXUserWindow::SetFullscreen(bool fullscreen)
 	{
 		if (window != nil)
 		{
-			[window setFullScreen:fullscreen];
+			[window setFullscreen:fullscreen];
 		}
 	}
 
@@ -663,7 +655,6 @@ namespace ti
 			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
 			this->osx_binding->WindowFocused(this,m.get());
 		}
-		this->FireEvent(FOCUSED);
 	}
 
 	void OSXUserWindow::Unfocused()
@@ -674,7 +665,6 @@ namespace ti
 			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
 			this->osx_binding->WindowUnfocused(this,m.get());
 		}
-		this->FireEvent(UNFOCUSED);
 	}
 	
 	void OSXUserWindow::SetContextMenu(SharedPtr<MenuItem> value)

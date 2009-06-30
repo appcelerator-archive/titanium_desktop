@@ -160,7 +160,7 @@ namespace ti
 				gtk_widget_show_all(window);
 			}
 	
-			if (this->config->IsFullScreen())
+			if (this->config->IsFullscreen())
 			{
 				gtk_window_fullscreen(this->gtkWindow);
 			}
@@ -633,6 +633,10 @@ namespace ti
 		if (this->gtkWindow != NULL)
 		{
 			gtk_widget_show_all(GTK_WIDGET(this->gtkWindow));
+
+			// There is no GDK event to detect when the window is shown,
+			// so we force the firing of this event here.
+			this->FireEvent(SHOWN);
 		}
 	}
 	
@@ -738,12 +742,12 @@ namespace ti
 		return this->config->IsUsingScrollbars();
 	}
 	
-	bool GtkUserWindow::IsFullScreen()
+	bool GtkUserWindow::IsFullscreen()
 	{
-		return this->config->IsFullScreen();
+		return this->config->IsFullscreen();
 	}
 	
-	void GtkUserWindow::SetFullScreen(bool fullscreen)
+	void GtkUserWindow::SetFullscreen(bool fullscreen)
 	{
 		if (fullscreen && this->gtkWindow != NULL)
 		{

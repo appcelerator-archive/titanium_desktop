@@ -97,7 +97,7 @@ namespace ti
 		bool IsUsingChrome();
 		void SetUsingChrome(bool chrome);
 		bool IsUsingScrollbars();
-		bool IsFullScreen();
+		bool IsFullscreen();
 		std::string GetId();
 		void Open();
 		void Close();
@@ -137,7 +137,7 @@ namespace ti
 		bool IsVisible();
 		double GetTransparency();
 		void SetTransparency(double transparency);
-		void SetFullScreen(bool fullscreen);
+		void SetFullscreen(bool fullscreen);
 		bool IsTopMost();
 		void SetTopMost(bool topmost);
 

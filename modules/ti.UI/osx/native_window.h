@@ -30,7 +30,7 @@ using namespace ti;
 }
 - (void)setupDecorations:(WindowConfig*)config host:(Host*)h userwindow:(UserWindow*)uw;
 - (void)setTransparency:(double)transparency;
-- (void)setFullScreen:(BOOL)yn;
+- (void)setFullscreen:(BOOL)yn;
 - (void)close;
 - (void)open;
 - (void)frameLoaded;

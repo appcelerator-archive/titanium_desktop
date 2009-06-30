@@ -125,7 +125,7 @@ public:
 	void Unfocus();
 	bool IsUsingChrome() { return config->IsUsingChrome(); }
 	bool IsUsingScrollbars() { return config->IsUsingScrollbars(); }
-	bool IsFullScreen() { return config->IsFullScreen(); }
+	bool IsFullscreen() { return config->IsFullscreen(); }
 	std::string GetId() { return config->GetID(); }
 	void Open();
 	void Close();
@@ -163,7 +163,7 @@ public:
 	double GetTransparency() { return config->GetTransparency(); }
 	void SetTransparency(double transparency);
 	std::string GetTransparencyColor();
-	void SetFullScreen(bool fullscreen);
+	void SetFullscreen(bool fullscreen);
 	void SetUsingChrome(bool chrome);
 	void SetMenu(SharedPtr<MenuItem> menu);
 	SharedPtr<MenuItem> GetMenu();

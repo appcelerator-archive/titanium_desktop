@@ -193,70 +193,64 @@ describe("UI Module Tests",{
 		value_of(Titanium.UI.CREATE).should_be_string();
 	},
 	
-	test_window_events: function()
+	test_window_events_as_async: function(callback)
 	{
 		value_of(true).should_be_true();
-		
-		var events = [];
-		var eventObject = 0;
-		var windowEventListener = function(n,e)
+
+		var eventTests = [];
+		var addEventTest = function(eventTrigger, eventsToVerify)
 		{
-			events.unshift(n);
-			eventObject = e;
-		};
-		
+			eventTests.push({ 
+				'trigger': eventTrigger,
+				'events': eventsToVerify
+			});
+		}
+
+		var observedEvents = {};
+		var eventListener = function(eventName, eventData)
+		{
+			observedEvents[eventName] = "Yakko";
+		}
+
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
-		var listenerID = w.addEventListener(windowEventListener);
+		var listenerID = w.addEventListener(eventListener);
 		value_of(listenerID).should_be_number();
-		
-		var test_event = function(e,idx)
-		{
-			if (!idx) idx = 0;
-			
-			value_of(events[0]).should_be(e);
-			value_of(eventObject.window.equals(w)).should_be_true();
-		};
-		
-		w.open();
-		test_event(Titanium.UI.OPENED);
-		
-		w.setVisible(false);
-		test_event(Titanium.UI.HIDDEN);
-		
-		w.setVisible(true);
-		test_event(Titanium.UI.SHOWN);
-		
-		w.setFullScreen(true);
-		test_event(Titanium.UI.FULLSCREENED);
-		
-		w.setFullScreen(false);
-		test_event(Titanium.UI.UNFULLSCREENED);
-		
-		w.maximize();
-		test_event(Titanium.UI.MAXIMIZED);
-		
-		w.minimize();
-		test_event(Titanium.UI.MINIMIZED);
-		
-		var b = w.getBounds();
-		w.setX(b.x+1);
-		test_event(Titanium.UI.MOVED);
-		
-		w.setY(b.y+1);
-		test_event(Titanium.UI.MOVED);
-		
-		w.setWidth(b.width+1);
-		test_event(Titanium.UI.RESIZED);
-		
-		w.setHeight(b.height+1);
-		test_event(Titanium.UI.RESIZED);
-		
-		b.height+=2;
-		b.x+=5;
-		w.setBounds(b);
-		test_event(Titanium.UI.RESIZED);
-		
-		w.close();
-		test_event(Titanium.UI.CLOSE);
+
+		addEventTest(function() { w.open(); }, [Titanium.UI.OPEN, Titanium.UI.OPENED]);
+		addEventTest(function() { w.setVisible(false); }, [Titanium.UI.HIDDEN]);
+		addEventTest(function() { w.setVisible(true); }, [Titanium.UI.SHOWN]);
+		addEventTest(function() { w.setFullScreen(true); }, [Titanium.UI.FULLSCREENED]);
+		addEventTest(function() { w.setFullScreen(false); }, [Titanium.UI.UNFULLSCREENED]);
+		addEventTest(function() { w.maximize(); }, [Titanium.UI.MAXIMIZED]);
+		addEventTest(function() { w.minimize(); }, [Titanium.UI.MINIMIZED]);
+		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.UI.MOVED]);
+		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.UI.MOVED]);
+		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width+1); }, [Titanium.UI.RESIZED]);
+		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.UI.RESIZED]);
+		addEventTest(function() {w.close();}, [Titanium.UI.CLOSE, Titanium.UI.CLOSED]);
+
+		var runNextTest = function() {
+			if (eventTests.length <= 0)
+			{
+				callback.passed();
+				return;
+			}
+
+			var nextTest = eventTests.shift();
+			setTimeout(function() {
+				for (var i = 0; i < nextTest.events.length; i++)
+				{
+					var evname = nextTest.events[i];
+					if (!observedEvents[evname] || observedEvents[evname] !== "Yakko")
+					{
+						callback.failed("Did not receive event:" + evname);
+					}
+				}
+				runNextTest();
+			}, 250);
+			observedEvents = {};
+			nextTest.trigger();
+		}
+		runNextTest();
 	}
 });
