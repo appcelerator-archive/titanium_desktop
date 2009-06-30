@@ -62,6 +62,17 @@ namespace ti
 		this->SetMethod("disable", &MenuItem::_Disable);
 
 		/**
+	     * @tiapi(method=True,name=UI.Menu.mark,since=0.4) Marks a MenuItem
+		 */
+	    this->SetMethod("mark", &MenuItem::_Mark);
+
+	    /**
+		 * @tiapi(method=True,name=UI.Menu.unmark,since=0.4) Unmarks a MenuItem
+	     */
+
+		this->SetMethod("unmark", &MenuItem::_Unmark);
+
+	    /**
 		 * @tiapi(method=True,name=UI.Menu.setLabel,since=0.2) Sets the MenuItem's label
 		 * @tiarg(for=UI.Menu.setLabel,name=label,type=string) label for the menu item
 		 */
@@ -170,6 +181,18 @@ namespace ti
 		this->RawSet("enabled", Value::NewBool(false));
 	}
 
+	void MenuItem::_Mark(const ValueList& args, SharedValue result)
+	{
+	    this->Mark();
+	    this->RawSet("marked", Value::NewBool(true));
+	}
+
+	void MenuItem::_Unmark(const ValueList& args, SharedValue result)
+	{
+	    this->Unmark();
+		this->RawSet("unmarked", Value::NewBool(false));
+	}
+
 	void MenuItem::_SetLabel(const ValueList& args, SharedValue result)
 	{
 		this->RawSet("label", args.at(0));
@@ -181,7 +204,7 @@ namespace ti
 	{
 		this->RawSet("icon", args.at(0));
 		std::string icon_path = std::string(args.at(0)->ToString());
-		this->SetLabel(icon_path);
+		this->SetIcon(icon_path);
 	}
 
 	/* The function below, modify the bound object values

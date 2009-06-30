@@ -48,6 +48,12 @@ namespace ti
 		void _Enable(const ValueList& args, SharedValue result);
 		void _Disable(const ValueList& args, SharedValue result);
 
+		virtual void Mark() = 0;
+	    virtual void Unmark() = 0;
+
+		void _Mark(const ValueList& args, SharedValue result);
+	    void _Unmark(const ValueList& args, SharedValue result);
+
 		void _SetLabel(const ValueList& args, SharedValue result);
 		void _SetIcon(const ValueList& args, SharedValue result);
 		virtual void SetLabel(std::string label) = 0;
