@@ -96,6 +96,7 @@ namespace ti
 		opened = true;
 		[window open];
 		UserWindow::Open();
+		this->FireEvent(OPENED);
 	}
 
 	OSXUserWindow::~OSXUserWindow()
