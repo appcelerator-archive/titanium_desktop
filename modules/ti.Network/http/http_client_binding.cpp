@@ -45,6 +45,7 @@ namespace ti
 	bool HTTPClientBinding::initialized = false;
 	
 	HTTPClientBinding::HTTPClientBinding(Host* host, std::string path) :
+		StaticBoundObject("HTTPClient"),
 		host(host),modulePath(path),global(host->GetGlobalObject()),
 		thread(NULL),response(NULL),async(true),filestream(NULL),
 		timeout(30000),shutdown(false)
@@ -94,62 +95,62 @@ namespace ti
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.readyState,since=0.3) The ready-state status for the connection
 		 */
-		SET_INT_PROP("readyState",0)
+		this->SetInt("readyState",0);
 
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.UNSENT,since=0.3) The UNSENT readyState property
 		 */
-		SET_INT_PROP("UNSENT",0)
+		this->SetInt("UNSENT",0);
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.OPENED,since=0.3) The OPENED readyState property
 		 */
-		SET_INT_PROP("OPENED",1)
+		this->SetInt("OPENED",1);
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.HEADERS_RECEIVED,since=0.3) The HEADERS_RECEIVED readyState property
 		 */
-		SET_INT_PROP("HEADERS_RECEIVED",2)
+		this->SetInt("HEADERS_RECEIVED",2);
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.LOADING,since=0.3) The LOADING readyState property
 		 */
-		SET_INT_PROP("LOADING",3)
+		this->SetInt("LOADING",3);
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.DONE,since=0.3) The DONE readyState property
 		 */
-		SET_INT_PROP("DONE",4)
+		this->SetInt("DONE",4);
 
 		/**
 		 * @tiapi(property=True,type=string,name=Network.HTTPClient.responseText,since=0.3) The response of an HTTP request as text
 		 */
-		SET_NULL_PROP("responseText")
+		this->SetNull("responseText");
 		/**
 		 * @tiapi(property=True,type=object,name=Network.HTTPClient.responseXML,since=0.3) The response of an HTTP request as parsable XML
 		 */
-		SET_NULL_PROP("responseXML")
+		this->SetNull("responseXML");
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.status,since=0.3) The response status code of an HTTP request
 		 */
-		SET_NULL_PROP("status")
+		this->SetNull("status");
 		/**
 		 * @tiapi(property=True,type=string,name=Network.HTTPClient.statusText,since=0.3) The response status text of an HTTP Request
 		 */
-		SET_NULL_PROP("statusText")
+		this->SetNull("statusText");
 		/**
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.connected,since=0.3) Whether an HTTPClient object is connected or not
 		 */
-		SET_BOOL_PROP("connected",false)
+		this->SetBool("connected", false);
 
 		/**
 		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onreadystatechange,since=0.3) The handler function that will be fired when the ready-state code of an HTTPClient object changes
 		 */
-		SET_NULL_PROP("onreadystatechange")
+		this->SetNull("onreadystatechange");
 		/**
 		 * @tiapi(property=True,type=method,name=Network.HTTPClient.ondatastream,since=0.3) The handler function that will be fired as stream data is received from an HTTP request
 		 */
-		SET_NULL_PROP("ondatastream")
+		this->SetNull("ondatastream");
 		/**
 		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onsendstream,since=0.3) The handler function that will be fired as the stream data is sent
 		 */
-		SET_NULL_PROP("onsendstream")
+		this->SetNull("onsendstream");
 
 		this->self = Value::NewObject(this);
 	}
@@ -609,7 +610,7 @@ namespace ti
 	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
 	{
 		this->shutdown=true;
-		SET_BOOL_PROP("connected",false)
+		this->SetBool("connected", false);
 	}
 	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
 	{
@@ -621,7 +622,7 @@ namespace ti
 		this->url = args.at(1)->ToString();
 		if (args.size()>=3)
 		{
-			GET_BOOL_PROP(args.at(2),this->async)
+			args.GetBool(2, this->async);
 		}
 		if (args.size()>=4)
 		{
@@ -677,7 +678,7 @@ namespace ti
 	{
 		static Logger* logger = Logger::Get("Network.HTTPClient");
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
-		SET_INT_PROP("readyState",readyState)
+		this->SetInt("readyState",readyState);
 
 		// Don't call onreadystate change callbacks if we are using this
 		// symchronously. That would put us into deadlock.

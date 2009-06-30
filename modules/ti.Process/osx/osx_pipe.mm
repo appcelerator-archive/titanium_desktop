@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	OSXPipe::OSXPipe(NSFileHandle *handle) : handle(handle), closed(false)
+	OSXPipe::OSXPipe(NSFileHandle *handle) : StaticBoundObject("Pipe"), handle(handle), closed(false)
 	{
 		[handle retain];
 		data = [[NSMutableString alloc] init];

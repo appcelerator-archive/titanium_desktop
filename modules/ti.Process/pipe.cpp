@@ -10,7 +10,7 @@
 
 namespace ti
 {
-	Pipe::Pipe(Poco::PipeIOS* pipe) : pipe(pipe), closed(false)
+	Pipe::Pipe(Poco::PipeIOS* pipe) : StaticBoundObject("Pipe"), pipe(pipe), closed(false)
 	{
 		/**
 		 * @tiapi(property=True,type=boolean,name=Process.Pipe.closed,since=0.2) Whether or not a pipe is closed

@@ -37,6 +37,7 @@ namespace ti
 		void StdOut(const ValueList& args, SharedValue result);
 		void StdErr(const ValueList& args, SharedValue result);
 
+		void CreateProperties(const ValueList& args, SharedValue result);
 		void LoadProperties(const ValueList& args, SharedValue result);
 		void GetSystemProperties(const ValueList& args, SharedValue result);
 	};

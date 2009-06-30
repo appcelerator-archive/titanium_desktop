@@ -22,10 +22,10 @@ namespace ti
 {
 	std::vector<SharedKObject> NetworkBinding::bindings;
 	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
-		 host(host),modulePath(modulePath),
-		 global(host->GetGlobalObject()),
-		 proxy(NULL),
-		 next_listener_id(0)
+		host(host),modulePath(modulePath),
+		global(host->GetGlobalObject()),
+		proxy(NULL),
+		next_listener_id(0)
 	{
 		SharedValue online = Value::NewBool(true);
 		/**
@@ -153,7 +153,7 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject obj = args.at(0)->ToObject();
+			SharedKObject obj = KObject::Unwrap(args.at(0)->ToObject());
 			SharedPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{

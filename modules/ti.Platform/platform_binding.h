@@ -19,7 +19,7 @@ namespace ti
 	private:
 		SharedKObject global;
 		
-		DECLAREBOUNDMETHOD(CreateUUID);
+		void CreateUUID(const ValueList& args, SharedValue result);
 	};
 }
 

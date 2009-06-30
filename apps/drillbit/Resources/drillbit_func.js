@@ -390,7 +390,7 @@ TitaniumTest =
 			var script = Titanium.Filesystem.getFile(
 				app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
 			var scriptText = script.read();
-			var lines = scriptText.split("\n");
+			var lines = scriptText.toString().split("\n");
 
 			text.push('<table style="font-family: monospace; font-size: 10pt;">');
 			for (var i = 0; i < lines.length; i++)
@@ -632,6 +632,16 @@ TitaniumTest.Subject.prototype.should_be_zero = function(expected,lineNumber)
 	}
 };
 
+TitaniumTest.Subject.prototype.should_be_array = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	// better way to check? we need to support our duck-typing too..
+	if (this.target.constructor != Array)
+	{
+		throw new TitaniumTest.Error('should be an array, was: '+this.target,lineNumber);
+	}
+};
+
 TitaniumTest.Subject.prototype.should_contain = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
@@ -650,4 +660,17 @@ TitaniumTest.Subject.prototype.should_be_one_of = function(expected,lineNumber)
 	}
 };
 
-
+TitaniumTest.Subject.prototype.should_match_array = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	if (this.target.length && expected.length && this.target.length == expected.length) {
+		for (var i = 0; i < expected.length; i++) {
+			if (expected[i] != this.target[i]) {
+				throw new TitaniumTest.Error('element ' + i + ' should be: '+expected[i]+' was: '+this.target[i],lineNumber);
+			}
+		}
+	}
+	else {
+		throw new TitaniumTest.Error('array lengths differ, expected: '+expected+', was: '+this.target,lineNumber);
+	}
+};

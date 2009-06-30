@@ -5,6 +5,7 @@
  */
 
 #include "../ui_module.h"
+#include "../url/url.h"
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -14,21 +15,29 @@
 
 namespace ti
 {
-	GtkUIBinding::GtkUIBinding(Host *host) : UIBinding(host)
+	GtkUIBinding::GtkUIBinding(Host *host) :
+		UIBinding(host),
+		evaluator(new ScriptEvaluator())
 	{
-		/* Prepare the custom curl URL handlers */
-		curl_register_local_handler(&CurlTiURLHandler);
-		curl_register_local_handler(&CurlAppURLHandler);
+		/* Prepare the custom URL handlers */
+		webkit_titanium_set_normalize_url_cb(NormalizeURLCallback);
+		webkit_titanium_set_url_to_file_url_cb(URLToFileURLCallback);
 
 		/* Register the script evaluator */
-		evaluator = new ScriptEvaluator();
-		addScriptEvaluator(evaluator);
+		webkit_titanium_add_script_evaluator(evaluator);
 
 		char buf[256];
 		snprintf(buf, 256, "%s/%s", PRODUCT_NAME, STRING(PRODUCT_VERSION));
 		g_set_prgname(buf);
 
-		webkit_titanium_set_inspector_path(host->GetRuntimePath().c_str());
+		std::string webInspectorPath = host->GetRuntimePath();
+		webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
+		webkit_titanium_set_inspector_url(webInspectorPath.c_str());
+
+		// Tell Titanium what WebKit is using for a user-agent
+		SharedKObject global = host->GetGlobalObject();
+		const gchar* user_agent = webkit_titanium_get_user_agent();
+		global->Set("userAgent", Value::NewString(user_agent));
 	}
 
 	SharedUserWindow GtkUIBinding::CreateWindow(

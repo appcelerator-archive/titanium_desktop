@@ -8,7 +8,7 @@
 
 namespace ti
 {
-	Win32Pipe::Win32Pipe() : closed(false)
+	Win32Pipe::Win32Pipe() : StaticBoundObject("Pipe"), closed(false)
 	{
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
@@ -16,6 +16,12 @@ namespace ti
 		attr.bInheritHandle       = FALSE;
 		
 		CreatePipe(&read, &write, &attr, 0);
+		
+		// don't doc these, apicoverage already picks them up in ../pipe.cpp
+		this->Set("closed",Value::NewBool(false));
+		this->SetMethod("close",&Win32Pipe::Close);
+		this->SetMethod("write",&Win32Pipe::Write);
+		this->SetMethod("read",&Win32Pipe::Read);
 	}
 	
 	Win32Pipe::~Win32Pipe()

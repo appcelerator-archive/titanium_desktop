@@ -11,7 +11,7 @@
 
 namespace ti 
 {
-	FileStream::FileStream(std::string filename_) : stream(NULL)
+	FileStream::FileStream(std::string filename_) : StaticBoundObject("FileStream"), stream(NULL)
 	{
 	#ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
@@ -429,7 +429,7 @@ namespace ti
 
 	void FileStream::Ready(const ValueList& args, SharedValue result)
 	{
-		Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
+		Poco::FileIOS* fis = this->stream;
 		if(!fis)
 		{
 			result->SetBool(false);
@@ -442,7 +442,7 @@ namespace ti
 
 	void FileStream::IsOpen(const ValueList& args, SharedValue result)
 	{
-		Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
+		Poco::FileIOS* fis = this->stream;
 		result->SetBool(fis!=NULL);
 	}
 

@@ -62,8 +62,8 @@ namespace ti
 		std::string var = "CURL_CA_BUNDLE_PATH=" + pemPath;
 		_putenv(var.c_str());
 
-		curl_register_local_handler(&TitaniumCurlTiURLHandler);
-		curl_register_local_handler(&TitaniumCurlAppURLHandler);
+		curl_register_local_handler(&CurlTiURLHandler);
+		curl_register_local_handler(&CurlAppURLHandler);
 	}
 
 	Win32UIBinding::~Win32UIBinding()

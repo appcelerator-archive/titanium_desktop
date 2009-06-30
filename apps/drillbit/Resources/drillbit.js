@@ -272,7 +272,7 @@ window.onload = function()
 	
 	var mymanifest = TFS.getFile(TFS.getApplicationDirectory(),'manifest');
 	var manifest = TFS.getFile(app.base,'manifest');
-	var manifest_contents = String(mymanifest.read());
+	var manifest_contents = mymanifest.read().toString();
 
 	manifest_contents = manifest_contents.replace('UnitTest','UnitTest Harness');
 	manifest_contents = manifest_contents.replace('com.titaniumapp.unittest.driver','com.titaniumapp.unittest');

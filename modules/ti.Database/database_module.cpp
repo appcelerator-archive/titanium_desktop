@@ -19,6 +19,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Database.open,since=0.4) Opens a database
 		 * @tiarg(for=Database.open,name=name,type=string) database name
+		 * @tiresult(for=Database.open,type=Database.DB) returns a Database.DB
 		 */
 		this->SetMethod("open",&DatabaseModule::Open);
 

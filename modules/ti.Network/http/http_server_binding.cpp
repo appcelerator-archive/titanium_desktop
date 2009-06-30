@@ -23,12 +23,29 @@
 namespace ti
 {
 	HTTPServerBinding::HTTPServerBinding(Host* host) :
+		StaticBoundObject("HTTPServer"),
 		host(host),global(host->GetGlobalObject()),
 		callback(NULL),socket(NULL),connection(NULL)
 	{
 		this->self = Value::NewObject(this);
+		
+		/**
+		 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
+		 * @tiarg(for=Network.HTTPServer.bind,name=port,type=integer) port to bind on
+		 * @tiarg(for=Network.HTTPServer.bind,name=address,type=string,optional=True) address to bind to
+		 * @tiarg(for=Network.HTTPServer.bind,name=callback,type=function) callback for server logic (in seperate thread)
+		 */
 		SetMethod("bind",&HTTPServerBinding::Bind);
+		
+		/**
+		 * @tiapi(method=True,name=Network.HTTPServer.close,since=0.3) close this server
+		 */
 		SetMethod("close",&HTTPServerBinding::Close);
+		
+		/**
+		 * @tiapi(method=True,name=Network.HTTPServer.isClosed,since=0.3) check to see if this server socket is closed
+		 * @tiresult(for=Network.HTTPServer.isClosed,type=boolean) return whether or not this server socket is closed
+		 */
 		SetMethod("isClosed",&HTTPServerBinding::IsClosed);
 	}
 	HTTPServerBinding::~HTTPServerBinding()

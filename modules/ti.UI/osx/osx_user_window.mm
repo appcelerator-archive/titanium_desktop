@@ -252,12 +252,12 @@ namespace ti
 		NSRect screenFrame = [this->GetWindowScreen() frame];
 		
 		// Center frame, if requested
-		if (y == UserWindow::CENTERED)
+		if (y == UIBinding::CENTERED)
 		{
 			y = (screenFrame.size.height - height) / 2;
 			config->SetY(y);
 		}
-		if (x == UserWindow::CENTERED)
+		if (x == UIBinding::CENTERED)
 		{
 			x = (screenFrame.size.width - width) / 2;
 			config->SetX(x);

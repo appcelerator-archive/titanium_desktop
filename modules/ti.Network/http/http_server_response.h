@@ -21,14 +21,14 @@ namespace ti
 	private:
 		Poco::Net::HTTPServerResponse& response;
 
-		DECLAREBOUNDMETHOD(SetStatus)
-		DECLAREBOUNDMETHOD(SetReason)
-		DECLAREBOUNDMETHOD(SetStatusAndReason)
-		DECLAREBOUNDMETHOD(SetContentType)
-		DECLAREBOUNDMETHOD(SetContentLength)
-		DECLAREBOUNDMETHOD(AddCookie)
-		DECLAREBOUNDMETHOD(SetHeader)
-		DECLAREBOUNDMETHOD(Write)
+		void SetStatus(const ValueList& args, SharedValue result);
+		void SetReason(const ValueList& args, SharedValue result);
+		void SetStatusAndReason(const ValueList& args, SharedValue result);
+		void SetContentType(const ValueList& args, SharedValue result);
+		void SetContentLength(const ValueList& args, SharedValue result);
+		void AddCookie(const ValueList& args, SharedValue result);
+		void SetHeader(const ValueList& args, SharedValue result);
+		void Write(const ValueList& args, SharedValue result);
 
 	};
 }

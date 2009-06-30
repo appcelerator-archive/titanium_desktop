@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+Import('build')
+import os.path as path, futils, testcoverage, sys, simplejson
+import SCons.Variables
+import SCons.Environment
+from SCons.Script import *
+
+def testcoverage_builder(target, source, env):
+	print 'Building test coverage report...',
+	sys.stdout.flush()
+	f = open(str(target[0]), 'w')
+	apicoverage = simplejson.loads(open(os.path.join(build.dir, 'apicoverage.json'), 'r').read())
+	drillbit_results_path = os.path.join(build.dir, "Drillbit")
+	if build.is_osx():
+		drillbit_results_path = os.path.join(drillbit_results_path + ".app", "Contents")
+	drillbit_results_path = os.path.join(drillbit_results_path, "Resources", "test_results")
+	
+	if not os.path.exists(drillbit_results_path):
+		print >>sys.stderr, "!! Error: you must run drillbit to collect test coverage results"
+	else:	
+		testcoverage.generate_test_coverage([drillbit_results_path], apicoverage, f)
+		print 'done'
+
+
+build.env.Append(BUILDERS = {'TestCoverage' : Builder(
+	action=testcoverage_builder,
+	target_factory=SCons.Node.FS.default_fs.Entry,
+	multi=0)})
+
+test_out = path.join(build.dir, 'testcoverage.json')
+testcoveraget = build.env.TestCoverage(test_out, [])
+Alias('testcoverage', testcoveraget)
+Depends(testcoveraget, 'apicoverage')
+AlwaysBuild(testcoveraget)

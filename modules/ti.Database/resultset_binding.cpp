@@ -10,12 +10,12 @@
 
 namespace ti
 {
-	ResultSetBinding::ResultSetBinding() : eof(true)
+	ResultSetBinding::ResultSetBinding() : StaticBoundObject("ResultSet"), eof(true)
 	{
 		// no results result set
 		Bind();
 	}
-	ResultSetBinding::ResultSetBinding(Poco::Data::RecordSet &r) : eof(false)
+	ResultSetBinding::ResultSetBinding(Poco::Data::RecordSet &r) : StaticBoundObject("ResultSet"), eof(false)
 	{
 		rs = new Poco::Data::RecordSet(r);
 		Bind();
@@ -29,7 +29,7 @@ namespace ti
 		this->SetMethod("isValidRow",&ResultSetBinding::IsValidRow);
 
 		/**
-		 * @tiapi(method=True,name=Database.ResultSet.isValidRow,since=0.4) Moves the pointer to the next row of the result set
+		 * @tiapi(method=True,name=Database.ResultSet.Next,since=0.4) Moves the pointer to the next row of the result set
 		 */
 		this->SetMethod("next",&ResultSetBinding::Next);
 

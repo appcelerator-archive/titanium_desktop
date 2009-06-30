@@ -7,7 +7,7 @@
 
 namespace ti
 {
-	Sound::Sound (std::string &s) : url(s)
+	Sound::Sound (std::string &s) : StaticBoundObject("Sound"), url(s)
 	{
 		/**
 		 * @tiapi(method=True,name=Media.Sound.play,since=0.2) Plays the file referenced by a Sound object

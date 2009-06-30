@@ -183,7 +183,7 @@ namespace ti
 			// you can pass in vararg of strings which acts like  a join
 			for (size_t c = 0; c < args.size(); c++)
 			{
-				std::string arg = FileSystemUtils::GetFileName(args.at(c));
+				std::string arg = FileSystemUtils::GetFileName(args.at(c))->c_str();
 				filename = kroll::FileUtils::Join(filename.c_str(), arg.c_str(), NULL);
 			}
 		}
@@ -372,22 +372,15 @@ namespace ti
 			for (unsigned int c = 0; c < list->Size(); c++)
 			{
 				SharedValue v = list->At(c);
-				std::string s(FileSystemUtils::GetFileName(v));
-				files.push_back(s);
+				files.push_back(FileSystemUtils::GetFileName(v)->c_str());
 			}
 		}
-		else if (args.at(0)->IsObject())
+		else
 		{
-			SharedKObject bo = args.at(0)->ToObject();
-			SharedPtr<File> file = bo.cast<File>();
-			if (file.isNull())
-			{
-				throw ValueException::FromString("invalid type passed as first argument");
-			}
-			files.push_back(file->GetFilename());
+			files.push_back(FileSystemUtils::GetFileName(args.at(0))->c_str());
 		}
 		SharedValue v = args.at(1);
-		std::string destination(FileSystemUtils::GetFileName(v));
+		std::string destination(FileSystemUtils::GetFileName(v)->c_str());
 		SharedKMethod method = args.at(2)->ToMethod();
 		SharedKObject copier = new ti::AsyncCopy(this,host,files,destination,method);
 		result->SetObject(copier);

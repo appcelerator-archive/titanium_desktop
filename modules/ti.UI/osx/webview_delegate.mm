@@ -46,7 +46,7 @@
 	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str() encoding:NSUTF8StringEncoding];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
 	
-	[webPrefs setFullDocumentTeardownEnabled:YES];
+	//[webPrefs setFullDocumentTeardownEnabled:YES];
 
 	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
 	[standardUserDefaults setObject:datadir forKey:@"WebDatabaseDirectory"];
@@ -156,11 +156,11 @@
 	DOMElement *anchor = [self findAnchor:target];
 	
 	
-	NSString* starget = 0;
-	if (anchor && (starget = [anchor getAttribute:@"target"]))
+	NSString* frameName = 0;
+	if (anchor && (frameName = [anchor getAttribute:@"target"]))
 	{
-		if ([starget isEqualToString:@"ti:systembrowser"] ||
-			[starget isEqualToString:@"_blank"])
+		if ([frameName isEqualToString:@"ti:systembrowser"] ||
+			[frameName isEqualToString:@"_blank"])
 		{
 			NSURL *newURL = [request URL];
 			[[NSWorkspace sharedWorkspace] openURL:newURL];

@@ -19,6 +19,8 @@ describe("Ti.Filesystem FileStream tests",{
 	{
 		value_of(Titanium.Filesystem.getLineEnding).should_be_function();
 		value_of(Titanium.Filesystem.getSeparator).should_be_function();
+		
+		// these constants are boundt to the same constants bound to Ti.Filesystem
 		value_of(Titanium.Filesystem.MODE_READ).should_not_be_null();
 		value_of(Titanium.Filesystem.MODE_WRITE).should_not_be_null();
 		value_of(Titanium.Filesystem.MODE_APPEND).should_not_be_null();
@@ -31,8 +33,25 @@ describe("Ti.Filesystem FileStream tests",{
 	{
 		var textToWrite = "This is the text to write in the file";
 		var fs = Titanium.Filesystem.getFileStream(this.base, "writeTestFile.txt");
+
+        // these are only defined when you have an instance of filesystem.
+	    value_of(fs.MODE_APPEND).should_be(Titanium.Filesystem.MODE_APPEND);
+	    value_of(fs.MODE_READ).should_be(Titanium.Filesystem.MODE_READ);
+	    value_of(fs.MODE_WRITE).should_be(Titanium.Filesystem.MODE_WRITE);
+
+		// this should return false, file isn't open
+		value_of(fs.isOpen()).should_be_false();
+		value_of(fs.ready()).should_be_false();
+			
 		fs.open(Titanium.Filesystem.MODE_WRITE);
+	
+	    // bug #36 - isOpen should return true here.
+	    // both isOpen() and ready() should return true here.
+		value_of(fs.isOpen()).should_be_true();
+		value_of(fs.ready()).should_be_true();
+
 		fs.write(textToWrite);
+
 		fs.close();
 		
 		var f = Titanium.Filesystem.getFile(this.base, "writeTestFile.txt");
@@ -50,7 +69,6 @@ describe("Ti.Filesystem FileStream tests",{
 		value_of(textRead.length).should_be_number();
 		value_of(textRead.length).should_be(textToWrite.length);
 		value_of(textRead.toString()).should_be(textToWrite);
-		value_of(textRead.replace("ABC","EDF")).should_be(textToWrite);
 		value_of(textRead.charAt(0)).should_be(textToWrite.charAt(0));
 		value_of(textRead.substring(0)).should_be(textToWrite.substring(0));
 		value_of(textRead.substring(0,2)).should_be(textToWrite.substring(0,2));
