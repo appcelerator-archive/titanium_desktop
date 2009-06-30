@@ -68,7 +68,10 @@ def generate_test_coverage(dirs, apicoverage, outfile):
 					entry = entry[entry.find('.')+1:]
 					
 					print 'found ' + tokens[1] + ' for module: ' + module + ' , API: '+entry
-					
+				
+					if module not in testcoverage['modules']:
+						# this API wasn't documented, skip for now
+						continue
 					if entry not in testcoverage['modules'][module]['entries'] or testcoverage['modules'][module]['entries'][entry] == 0 :
 						testcoverage['modules'][module]['entries'][entry] = 1
 						# only count each entry once in the global/module coverage count
