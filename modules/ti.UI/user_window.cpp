@@ -1583,6 +1583,9 @@ void UserWindow::FireEvent(UserWindowEvent eventType, SharedKObject event)
 		case MAXIMIZED:
 			name = UIBinding::MAXIMIZED;
 			break;
+		case MINIMIZED:
+			name = UIBinding::MINIMIZED;
+			break;
 		case RESIZED:
 			name = UIBinding::RESIZED;
 			break;

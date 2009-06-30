@@ -195,64 +195,68 @@ describe("UI Module Tests",{
 	
 	test_window_events: function()
 	{
-		var name = null;
-		var event = null;
+		value_of(true).should_be_true();
 		
-		var window_event_listener = function (n,e) {
-			name = n;
-			event = e;
+		var events = [];
+		var eventObject = 0;
+		var windowEventListener = function(n,e)
+		{
+			events.unshift(n);
+			eventObject = e;
 		};
 		
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
-		var listener_id = w.addEventListener(window_event_listener);
-		value_of(listener_id).should_be_number();
+		var listenerID = w.addEventListener(windowEventListener);
+		value_of(listenerID).should_be_number();
 		
-		function event_should_be(e) {
-			value_of(name).should_be(e);
-			value_of(event.window).should_be(w);
-		}
+		var test_event = function(e,idx)
+		{
+			if (!idx) idx = 0;
+			
+			value_of(events[0]).should_be(e);
+			value_of(eventObject.window.equals(w)).should_be_true();
+		};
 		
 		w.open();
-		event_should_be(Titanium.UI.OPENED);
+		test_event(Titanium.UI.OPEN);
 		
 		w.setVisible(false);
-		event_should_be(Titanium.UI.HIDDEN);
+		test_event(Titanium.UI.HIDDEN);
 		
 		w.setVisible(true);
-		event_should_be(Titanium.UI.SHOWN);
-		
-		w.unfocus();
-		event_should_be(Titanium.UI.UNFOCUSED);
-		
-		w.focus();
-		event_should_be(Titanium.UI.FOCUSED);
+		test_event(Titanium.UI.SHOWN);
 		
 		w.setFullScreen(true);
-		event_should_be(Titanium.UI.FULLSCREENED);
+		test_event(Titanium.UI.FULLSCREENED);
 		
 		w.setFullScreen(false);
-		event_should_be(Titanium.UI.UNFULLSCREENED);
+		test_event(Titanium.UI.UNFULLSCREENED);
 		
 		w.maximize();
-		event_should_be(Titanium.UI.MAXIMIZED);
+		test_event(Titanium.UI.MAXIMIZED);
 		
 		w.minimize();
-		event_should_be(Titanium.UI.MINIMIZED);
+		test_event(Titanium.UI.MINIMIZED);
 		
 		var b = w.getBounds();
 		w.setX(b.x+1);
-		event_should_be(Titanium.UI.MOVED);
+		test_event(Titanium.UI.MOVED);
 		
 		w.setY(b.y+1);
-		event_should_be(Titanium.UI.MOVED);
+		test_event(Titanium.UI.MOVED);
 		
 		w.setWidth(b.width+1);
-		event_should_be(Titanium.UI.RESIZED);
+		test_event(Titanium.UI.RESIZED);
 		
 		w.setHeight(b.height+1);
-		event_should_be(Titanium.UI.RESIZED);
+		test_event(Titanium.UI.RESIZED);
+		
+		b.height+=2;
+		b.x+=5;
+		w.setBounds(b);
+		test_event(Titanium.UI.RESIZED);
 		
 		w.close();
-		event_should_be(Titanium.UI.CLOSED);
+		test_event(Titanium.UI.CLOSE);
 	}
 });
