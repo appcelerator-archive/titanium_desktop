@@ -334,10 +334,9 @@ namespace ti
 		try
 		{
 			Poco::Path path;
-
 			std::vector<std::string> roots;
 			path.listRoots(roots);
-
+		
 			SharedPtr<StaticBoundList> rootList = new StaticBoundList();
 
 			for(size_t i = 0; i < roots.size(); i++)
