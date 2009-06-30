@@ -98,7 +98,7 @@ describe("UI Module Tests",{
 
 		var messageLog = { };
 		messageLog[Titanium.UI.CLOSE]  = false;
-		messageLog[Titanium.UI.CLOSED]  = false
+		messageLog[Titanium.UI.CLOSED]  = false;
 		messageLog[Titanium.UI.OPEN]  = false;
 		messageLog[Titanium.UI.OPENED]  = false;
 		messageLog[Titanium.UI.HIDDEN]  = false;
@@ -159,7 +159,7 @@ describe("UI Module Tests",{
 				callback.failed("Did not detect resized message");
 			}
 			callback.passed();
-		}
+		};
 
 		setTimeout(function()
 		{
@@ -169,5 +169,90 @@ describe("UI Module Tests",{
 				stageTwo();
 			}, 300);
 		}, 300);
+	},
+	
+	test_constants: function()
+	{
+		value_of(Titanium.UI.CENTERED).should_be_number();
+		value_of(Titanium.UI.FOCUSED).should_be_string();
+		value_of(Titanium.UI.UNFOCUSED).should_be_string();
+		value_of(Titanium.UI.OPEN).should_be_string();
+		value_of(Titanium.UI.OPENED).should_be_string();
+		value_of(Titanium.UI.CLOSE).should_be_string();
+		value_of(Titanium.UI.CLOSED).should_be_string();
+		value_of(Titanium.UI.HIDDEN).should_be_string();
+		value_of(Titanium.UI.SHOWN).should_be_string();
+		value_of(Titanium.UI.FULLSCREENED).should_be_string();
+		value_of(Titanium.UI.UNFULLSCREENED).should_be_string();
+		value_of(Titanium.UI.MAXIMIZED).should_be_string();
+		value_of(Titanium.UI.MINIMIZED).should_be_string();
+		value_of(Titanium.UI.RESIZED).should_be_string();
+		value_of(Titanium.UI.MOVED).should_be_string();
+		value_of(Titanium.UI.PAGE_INITIALIZED).should_be_string();
+		value_of(Titanium.UI.PAGE_LOADED).should_be_string();
+		value_of(Titanium.UI.CREATE).should_be_string();
+	},
+	
+	test_window_events: function()
+	{
+		var name = null;
+		var event = null;
+		
+		var window_event_listener = function (n,e) {
+			name = n;
+			event = e;
+		};
+		
+		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
+		var listener_id = w.addEventListener(window_event_listener);
+		value_of(listener_id).should_be_number();
+		
+		function event_should_be(e) {
+			value_of(name).should_be(e);
+			value_of(event.window).should_be(w);
+		}
+		
+		w.open();
+		event_should_be(Titanium.UI.OPENED);
+		
+		w.setVisible(false);
+		event_should_be(Titanium.UI.HIDDEN);
+		
+		w.setVisible(true);
+		event_should_be(Titanium.UI.SHOWN);
+		
+		w.unfocus();
+		event_should_be(Titanium.UI.UNFOCUSED);
+		
+		w.focus();
+		event_should_be(Titanium.UI.FOCUSED);
+		
+		w.setFullScreen(true);
+		event_should_be(Titanium.UI.FULLSCREENED);
+		
+		w.setFullScreen(false);
+		event_should_be(Titanium.UI.UNFULLSCREENED);
+		
+		w.maximize();
+		event_should_be(Titanium.UI.MAXIMIZED);
+		
+		w.minimize();
+		event_should_be(Titanium.UI.MINIMIZED);
+		
+		var b = w.getBounds();
+		w.setX(b.x+1);
+		event_should_be(Titanium.UI.MOVED);
+		
+		w.setY(b.y+1);
+		event_should_be(Titanium.UI.MOVED);
+		
+		w.setWidth(b.width+1);
+		event_should_be(Titanium.UI.RESIZED);
+		
+		w.setHeight(b.height+1);
+		event_should_be(Titanium.UI.RESIZED);
+		
+		w.close();
+		event_should_be(Titanium.UI.CLOSED);
 	}
 });
