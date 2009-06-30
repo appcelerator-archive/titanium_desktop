@@ -147,7 +147,6 @@ namespace ti
 		if (window != nil)
 		{
 			[window miniaturize:window];
-			this->FireEvent(MINIMIZED);
 		}
 	}
 
@@ -176,7 +175,6 @@ namespace ti
 		if (window != nil)
 		{
 			[window zoom:window];
-			this->FireEvent(MAXIMIZED);
 		}
 	}
 	
@@ -299,7 +297,6 @@ namespace ti
 			this->real_x = x; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(x, real_y, real_w, real_h);
 			[window setFrameOrigin: newRect.origin];
-			this->FireEvent(MOVED);
 		}
 	}
 
@@ -329,7 +326,6 @@ namespace ti
 			this->real_y = y; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
 			[window setFrameOrigin: newRect.origin];
-			this->FireEvent(MOVED);
 		}
 	}
 
@@ -358,7 +354,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:YES];
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -387,7 +382,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:NO];
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -510,8 +504,6 @@ namespace ti
 				[window setMaxSize: newFrame.size];
 			}
 			[window setFrame:newFrame display:config->IsVisible() animate:YES];
-			this->FireEvent(MOVED);
-			this->FireEvent(RESIZED);
 		}
 	}
 
@@ -663,7 +655,6 @@ namespace ti
 			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
 			this->osx_binding->WindowFocused(this,m.get());
 		}
-		this->FireEvent(FOCUSED);
 	}
 
 	void OSXUserWindow::Unfocused()
@@ -674,7 +665,6 @@ namespace ti
 			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
 			this->osx_binding->WindowUnfocused(this,m.get());
 		}
-		this->FireEvent(UNFOCUSED);
 	}
 	
 	void OSXUserWindow::SetContextMenu(SharedPtr<MenuItem> value)
