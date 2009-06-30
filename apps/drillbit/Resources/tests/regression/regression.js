@@ -36,41 +36,6 @@ describe('Regression tests', {
 		value_of(sessionFile.exists()).should_be_false();
 	},
 	
-	TI308_modules_in_ti_url_as_async: function(callback)
-	{
-		var timer = 0;
-		
-		$.ajax({
-			type:'GET',
-			dataType:'html',
-			url:'ti://modules/tianalytics/update.html',
-
-			success: function(data)
-			{
-				clearTimeout(timer);
-				try
-				{
-					value_of(data).should_be_string();
-					callback.passed();
-				}
-				catch(e)
-				{
-					callback.failed(e);
-				}
-			},
-			error: function(xhr,status,error)
-			{
-				callback.failed(error);
-			}
-		});
-
-		// fail test after 2s
-		timer = setTimeout(function()
-		{
-			callback.failed('ajax request timed out after 2s');
-		},5000);
-	},
-	
 	TI303_useragent_with_safari: function()
 	{
 		value_of(navigator.userAgent.indexOf('Safari') >= 0).should_be_true();
