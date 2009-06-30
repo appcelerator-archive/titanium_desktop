@@ -12,7 +12,6 @@ namespace ti
 
 	MenuItem::MenuItem() : AccessorBoundList("MenuItem")
 	{
-
 		// query methods
 		/**
 		 * @tiapi(method=True,name=UI.Menu.isSeparator,since=0.2) Checks whether a menu item is a separator
@@ -62,14 +61,13 @@ namespace ti
 		this->SetMethod("disable", &MenuItem::_Disable);
 
 		/**
-	     * @tiapi(method=True,name=UI.Menu.mark,since=0.4) Marks a MenuItem
+		* @tiapi(method=True,name=UI.Menu.mark,since=0.4) Marks a MenuItem
 		 */
-	    this->SetMethod("mark", &MenuItem::_Mark);
-
-	    /**
+		this->SetMethod("mark", &MenuItem::_Mark);
+	
+		/**
 		 * @tiapi(method=True,name=UI.Menu.unmark,since=0.4) Unmarks a MenuItem
-	     */
-
+		 */
 		this->SetMethod("unmark", &MenuItem::_Unmark);
 
 	    /**
@@ -183,13 +181,13 @@ namespace ti
 
 	void MenuItem::_Mark(const ValueList& args, SharedValue result)
 	{
-	    this->Mark();
-	    this->RawSet("marked", Value::NewBool(true));
+		this->Mark();
+		this->RawSet("marked", Value::NewBool(true));
 	}
 
 	void MenuItem::_Unmark(const ValueList& args, SharedValue result)
 	{
-	    this->Unmark();
+		this->Unmark();
 		this->RawSet("unmarked", Value::NewBool(false));
 	}
 

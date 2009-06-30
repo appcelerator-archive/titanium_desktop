@@ -47,11 +47,12 @@ namespace ti
 
 		struct NativeMenuItem
 		{
-			NativeMenuItem()
-				 : menuItemID(0),
-				   menu(NULL),
-				   callback(NULL),
-				   parent_menu(NULL) { }
+			NativeMenuItem() :
+				menuItemID(0),
+				menu(NULL),
+				callback(NULL),
+				parent_menu(NULL) { }
+			
 			int menuItemID; // This item's menu item ID (only 'normal' menu items)
 			HMENU menu; // This item's menu handle (only top-level menu and submenu items)
 			SharedKMethod callback; // This item's callback
