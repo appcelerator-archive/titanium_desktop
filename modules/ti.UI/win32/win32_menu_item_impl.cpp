@@ -275,6 +275,32 @@ namespace ti
 		}
 	}
 
+	void Win32MenuItemImpl::Mark()
+	{
+		std::vector<NativeMenuItem*>::iterator iter;
+		for(iter = this->instances.begin(); iter != this->instances.end(); iter++)
+		{
+			NativeMenuItem* menu_item = (*iter);
+			if (menu_item != NULL)
+			{
+				CheckMenuItem(menu_item->parent_menu, menu_item->menuItemID, MF_BYCOMMAND|MF_CHECKED);
+			}
+		} 
+	}
+
+	void Win32MenuItemImpl::Unmark()
+	{
+		std::vector<NativeMenuItem*>::iterator iter;
+		for(iter = this->instances.begin(); iter != this->instances.end(); iter++)
+		{
+			NativeMenuItem* menu_item = (*iter);
+			if (menu_item != NULL)
+			{
+				CheckMenuItem(menu_item->parent_menu, menu_item->menuItemID, MF_BYCOMMAND|MF_UNCHECKED);
+			}
+		}
+	}
+
 	void Win32MenuItemImpl::SetLabel(std::string label)
 	{
 		if(! this->parent || this->IsSeparator())

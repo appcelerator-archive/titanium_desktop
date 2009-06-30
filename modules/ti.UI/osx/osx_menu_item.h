@@ -23,11 +23,8 @@ namespace ti
 		OSXMenuItem* GetParent();
 
 		SharedValue AddSeparator();
-		SharedValue AddItem(SharedValue label,
-		                    SharedValue callback,
-		                    SharedValue icon_url);
-		SharedValue AddSubMenu(SharedValue label,
-		                       SharedValue icon_url);
+		SharedValue AddItem(SharedValue label, SharedValue callback, SharedValue icon_url);
+		SharedValue AddSubMenu(SharedValue label, SharedValue icon_url);
 
 		SharedValue AppendItem(OSXMenuItem* item);
 
@@ -42,7 +39,10 @@ namespace ti
 		int GetChildCount();
 		OSXMenuItem* GetChild(int c);
 		bool IsEnabled();
-
+		
+		//TODO: implement
+		void Mark() {}
+		void Unmark() {}
 	private:
 		OSXMenuItem *parent; // NULL parent means this is top-level menu.
 		std::vector<OSXMenuItem*> children;

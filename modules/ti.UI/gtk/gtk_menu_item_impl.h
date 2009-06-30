@@ -21,11 +21,8 @@ namespace ti
 		GtkMenuItemImpl* GetParent();
 
 		SharedValue AddSeparator();
-		SharedValue AddItem(SharedValue label,
-		                    SharedValue callback,
-		                    SharedValue icon_url);
-		SharedValue AddSubMenu(SharedValue label,
-		                       SharedValue icon_url);
+		SharedValue AddItem(SharedValue label, SharedValue callback, SharedValue icon_url);
+		SharedValue AddSubMenu(SharedValue label, SharedValue icon_url);
 
 		SharedValue AppendItem(GtkMenuItemImpl* item);
 
@@ -43,6 +40,10 @@ namespace ti
 		void SetLabel(std::string label);
 		void SetIcon(std::string icon_path);
 
+		//TODO: implement
+		void Mark() {}
+		void Unmark() {}
+		
 		struct MenuPieces
 		{
 			MenuPieces()

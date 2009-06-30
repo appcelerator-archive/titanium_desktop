@@ -46,7 +46,7 @@
 	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str() encoding:NSUTF8StringEncoding];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
 	
-	[webPrefs setFullDocumentTeardownEnabled:YES];
+	//[webPrefs setFullDocumentTeardownEnabled:YES];
 
 	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
 	[standardUserDefaults setObject:datadir forKey:@"WebDatabaseDirectory"];

@@ -35,17 +35,14 @@ namespace ti {
 		return this->AppendItem(item);
 	}
 
-	SharedValue OSXMenuItem::AddItem(SharedValue label,
-	                              SharedValue callback,
-	                              SharedValue icon_url)
+	SharedValue OSXMenuItem::AddItem(SharedValue label, SharedValue callback, SharedValue icon_url)
 	{
 		OSXMenuItem* item = new OSXMenuItem();
 		item->MakeItem(label, callback, icon_url);
 		return this->AppendItem(item);
 	}
 
-	SharedValue OSXMenuItem::AddSubMenu(SharedValue label,
-	                                        SharedValue icon_url)
+	SharedValue OSXMenuItem::AddSubMenu(SharedValue label, SharedValue icon_url)
 	{
 		OSXMenuItem* item = new OSXMenuItem();
 		item->MakeSubMenu(label, icon_url);
