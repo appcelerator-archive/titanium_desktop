@@ -19,6 +19,6 @@
 -(void)invoke:(id)sender;
 -(void)setIcon:(NSImage*)path;
 -(void)setHint:(NSString*)hint;
--(void)addMenu:(SharedPtr<ti::MenuItem>)menu;
+-(void)addMenu:(SharedMenu)menu;
 
 @end

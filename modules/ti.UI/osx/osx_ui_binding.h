@@ -24,37 +24,46 @@ namespace ti
 		SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent);
 		void ErrorDialog(std::string);
 
-		SharedPtr<MenuItem> CreateMenu(bool trayMenu);
-		void SetMenu(SharedPtr<MenuItem>);
-		void SetContextMenu(SharedPtr<MenuItem>);
-		void SetIcon(SharedString icon_path);
-		SharedPtr<TrayItem> AddTray(SharedString icon_path, SharedKMethod cb);
+		SharedMenu CreateMenu();
+		SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL);
+		SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod eventListener);
+		SharedMenuItem CreateSeparatorMenuItem();
+		SharedMenu GetMenu();
+		SharedMenu GetContextMenu();
+		SharedMenu GetDockMenu();
+		NSMenu* GetNativeDockMenu();
+		void SetMenu(SharedMenu);
+		void SetContextMenu(SharedMenu);
+		void SetDockMenu(SharedMenu);
 
+		SharedTrayItem AddTray(SharedString icon_path, SharedKMethod cb);
+		void SetIcon(SharedString icon_path);
 		virtual void SetDockIcon(SharedString icon_path);
-		virtual void SetDockMenu(SharedPtr<MenuItem>);
 		virtual void SetBadge(SharedString badge_label);
 		virtual void SetBadgeImage(SharedString badge_path);
-		
-		SharedPtr<MenuItem> GetMenu();
-		SharedPtr<MenuItem> GetContextMenu();
-		SharedPtr<MenuItem> GetDockMenu();
+
+		void WindowFocused(SharedPtr<OSXUserWindow> window);
+		void WindowUnfocused(SharedPtr<OSXUserWindow> window);
+		void SetupMainMenu();
+		void SetupAppMenuParts(NSMenu* mainMenu);
+		void ReplaceMainMenu();
+		void RefreshMainMenu();
+		NSMenu* GetDefaultMenu();
 
 		long GetIdleTime();
 		static NSImage* MakeImage(std::string);
-		static NSMenu* MakeMenu(ti::OSXMenuItem*);
-		static void AttachMainMenu(NSMenu *mainMenu, ti::OSXMenuItem *item);
-		
-		void WindowFocused(UserWindow *window, OSXMenuItem *menu);
-		void WindowUnfocused(UserWindow *window, OSXMenuItem *menu);
-		
-	private:
+
+	protected:
+		NSMenu* defaultMenu;
+		SharedPtr<OSXMenu> menu;
+		NSMenu* nativeMenu;
+		SharedPtr<OSXMenu> contextMenu;
+		SharedPtr<OSXMenu> dockMenu;
+		NSMenu* nativeDockMenu;
 		NSView *savedDockView;
-		SharedPtr<MenuItem> menu;
-		SharedPtr<MenuItem> contextMenu;
-		SharedPtr<MenuItem> dockMenu;
-		NSMenu* appDockMenu;
 		NSObject* application;
-		OSXMenuItem *activeMenu;
+		SharedPtr<OSXMenu> activeMenu;
+		SharedPtr<OSXUserWindow> activeWindow;
 		ScriptEvaluator* scriptEvaluator;
 
 		void InstallMenu (OSXMenuItem*);

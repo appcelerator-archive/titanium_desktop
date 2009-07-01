@@ -55,7 +55,7 @@ namespace ti
 		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsList())
 		{
-			SharedKList menu = KList::Unwrap(args.at(0)->ToList());
+			SharedKList menu = args.at(0)->ToList();
 			menu = menu.cast<MenuItem>();
 		}
 		this->SetMenu(menu);

@@ -113,10 +113,10 @@ namespace ti
 			bool IsTopMost();
 			void SetTopMost(bool topmost);
 
-			void SetMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetMenu();
-			void SetContextMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetContextMenu();
+			void SetMenu(SharedMenu menu);
+			SharedMenu GetMenu();
+			void SetContextMenu(SharedMenu menu);
+			SharedMenu GetContextMenu();
 			void SetIcon(SharedString icon_path);
 			SharedString GetIcon();
 
@@ -130,9 +130,9 @@ namespace ti
 			bool closed;
 			bool topmost;
 			bool focused;
-			SharedPtr<MenuItem> menu;
-			SharedPtr<MenuItem> context_menu;
-			SharedPtr<OSXUIBinding> osx_binding;
+			SharedPtr<OSXMenu> menu;
+			SharedPtr<OSXMenu> contextMenu;
+			SharedPtr<OSXUIBinding> osxBinding;
 			static bool initial;
 
 			NSScreen* GetWindowScreen();
@@ -141,9 +141,6 @@ namespace ti
 			double real_y;
 			double real_w;
 			double real_h;
-
-			void InstallMenu(OSXMenuItem *menu);
-
 			DISALLOW_EVIL_CONSTRUCTORS(OSXUserWindow);
 	};
 }

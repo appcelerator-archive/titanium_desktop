@@ -3,133 +3,199 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
 #include "../ui_module.h"
-#include "osx_menu_item.h"
-#include "osx_menu_delegate.h"
-
-namespace ti {
-
-	OSXMenuItem::OSXMenuItem()
-		 : parent(NULL), enabled(true)
+namespace ti
+{
+	OSXMenuItem::OSXMenuItem(
+		MenuItemType type, std::string label,
+		SharedKMethod callback, std::string iconURL) :
+			MenuItem(type, label, callback, iconURL)
 	{
 	}
+
 	OSXMenuItem::~OSXMenuItem()
 	{
 	}
 
-	void OSXMenuItem::SetParent(OSXMenuItem* parent)
+	void OSXMenuItem::SetLabelImpl(std::string newLabel)
 	{
-		this->parent = parent;
+		if (this->type == SEPARATOR)
+			return;
+		this->UpdateNativeMenuItems();
 	}
 
-	OSXMenuItem* OSXMenuItem::GetParent()
+	void OSXMenuItem::SetIconImpl(std::string newIconPath)
 	{
-		return this->parent;
+		if (this->type == SEPARATOR || this->type == CHECK)
+			return;
+		this->UpdateNativeMenuItems();
 	}
 
-	SharedValue OSXMenuItem::AddSeparator()
+	void OSXMenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
 	{
-		OSXMenuItem* item = new OSXMenuItem();
-		item->MakeSeparator();
-		return this->AppendItem(item);
+		if (this->type == SEPARATOR)
+			return;
+		this->UpdateNativeMenuItems();
 	}
 
-	SharedValue OSXMenuItem::AddItem(SharedValue label, SharedValue callback, SharedValue icon_url)
+	void OSXMenuItem::EnableImpl()
 	{
-		OSXMenuItem* item = new OSXMenuItem();
-		item->MakeItem(label, callback, icon_url);
-		return this->AppendItem(item);
+		if (this->type == SEPARATOR)
+			return;
+		this->UpdateNativeMenuItems();
 	}
 
-	SharedValue OSXMenuItem::AddSubMenu(SharedValue label, SharedValue icon_url)
+	void OSXMenuItem::DisableImpl()
 	{
-		OSXMenuItem* item = new OSXMenuItem();
-		item->MakeSubMenu(label, icon_url);
-		return this->AppendItem(item);
+		if (this->type == SEPARATOR)
+			return;
+		this->UpdateNativeMenuItems();
 	}
 
-	SharedValue OSXMenuItem::AppendItem(OSXMenuItem* item)
+	bool OSXMenuItem::HasSubmenu()
 	{
-		item->SetParent(this);
-		this->children.push_back(item);
-		return MenuItem::AddToListModel(item);
-	}
-	
-	int OSXMenuItem::GetChildCount()
-	{
-		return this->children.size();
-	}
-	
-	OSXMenuItem* OSXMenuItem::GetChild(int c)
-	{
-		return this->children.at(c);
-	}
-	
-	bool OSXMenuItem::IsEnabled()
-	{
-		return this->enabled;
-	}
-	
-
-	/* Crazy mutations below */
-	void OSXMenuItem::Enable()
-	{
-		this->enabled = true;
+		return !this->submenu.isNull();
 	}
 
-	void OSXMenuItem::Disable()
+	void OSXMenuItem::SetNSMenuItemTitle(NSMenuItem* item, std::string& title)
 	{
-		this->enabled = false;
+		NSString* nstitle = [NSString stringWithUTF8String:title.c_str()];
+		[item setTitle:nstitle];
+
+		NSMenu* submenu = [item submenu];
+		if (submenu != nil)
+		{
+			// Need to set the new native menu's title as this item's label. Each
+			// native menu will have to use the title of the item it is attached to.
+			[submenu setTitle:nstitle];
+		}
+		if ([item menu] != nil)
+		{
+			[[item menu] sizeToFit];
+		}
 	}
 
-	void OSXMenuItem::SetLabel(std::string label)
+	void OSXMenuItem::SetNSMenuItemIconPath(
+		NSMenuItem* item,
+		std::string& iconPath,
+		NSImage* image)
 	{
+		bool needsRelease = false;
+
+		// If we weren't passed an image, create one for this call. This allows callers to do
+		// one image creation in cases where the same image is used over and over again --
+		// see SetIconImpl(...)
+		if (image == nil)
+		{
+			NSString *path = [NSString stringWithCString:(iconPath.c_str())];
+			image = [[NSImage alloc] initWithContentsOfFile:path];
+			needsRelease = true;
+		}
+
+		if (!iconPath.empty())
+		{
+			[item setImage:image];
+		}
+		else
+		{
+			[item setImage:nil];
+		}
+		if ([item menu] != nil)
+		{
+			[[item menu] sizeToFit];
+		}
+
+		if (needsRelease)
+		{
+			[image release];
+		}
 	}
 
-	void OSXMenuItem::SetIcon(std::string icon_url)
+	void OSXMenuItem::SetNSMenuItemSubmenu(
+		NSMenuItem* item,
+		SharedMenu submenu,
+		bool registerNative)
 	{
+		if (!submenu.isNull())
+		{
+			SharedPtr<OSXMenu> osxSubmenu = submenu.cast<OSXMenu>();
+			NSMenu* nativeMenu = osxSubmenu->CreateNative(registerNative);
+			[nativeMenu setTitle:[item title]];
+			[item setSubmenu:nativeMenu];
+		}
+		else
+		{
+			[item setSubmenu:nil];
+		}
 	}
-	
-	NSMenuItem* OSXMenuItem::CreateNative()
+
+	void OSXMenuItem::SetNSMenuItemEnabled(NSMenuItem* item, bool enabled)
+	{
+		[item setEnabled:(enabled ? YES : NO)];
+	}
+
+	NSMenuItem* OSXMenuItem::CreateNative(bool registerNative)
 	{
 		if (this->IsSeparator())
 		{
 			return [NSMenuItem separatorItem];
 		}
-		return [[OSXMenuDelegate alloc] initWithMenu:this menu:nil]; 
-	}	
-	
-	void OSXMenuItem::AttachMenu(NSMenu *menu)
-	{
-		if (this->IsSeparator())
-		{
-			[menu addItem:[NSMenuItem separatorItem]];
-		}
 		else
 		{
-			[[[OSXMenuDelegate alloc] initWithMenu:this menu:menu] autorelease]; 
+			NSMenuItem* item = [[NSMenuItem alloc] 
+				initWithTitle:@"Temp" action:@selector(invoke:) keyEquivalent:@""];
+
+			OSXMenuItemDelegate* delegate = [[OSXMenuItemDelegate alloc] initWithMenuItem:this];
+			[item setTarget:delegate];
+
+			SetNSMenuItemTitle(item, this->label);
+			SetNSMenuItemIconPath(item, this->iconPath);
+			SetNSMenuItemEnabled(item, this->enabled);
+			SetNSMenuItemSubmenu(item, this->submenu, registerNative);
+
+			if (registerNative)
+			{
+				this->realizations.push_back(item);
+			}
+
+			return item;
 		}
 	}
-		
-	void OSXMenuItem::Invoke()
+
+	void OSXMenuItem::DestroyNative(NSMenuItem* realization)
 	{
-		//invoke callback
-		SharedValue callback_val = this->RawGet("callback");
-		if (callback_val->IsMethod())
+		std::vector<NSMenuItem*>::iterator i = this->realizations.begin();
+		while (i != this->realizations.end())
 		{
-			SharedKMethod method = callback_val->ToMethod();
-			try
+			NSMenuItem* item = *i;
+			if (item == realization)
 			{
-				ValueList args;
-				method->Call(args);
+				i = this->realizations.erase(i);
+				if (!this->submenu.isNull() && [item submenu] != nil)
+				{
+					SharedPtr<OSXMenu> osxSubmenu = this->submenu.cast<OSXMenu>();
+					osxSubmenu->DestroyNative([item submenu]);
+				}
+				[item release];
 			}
-			catch(...)
+			else
 			{
-				std::cerr << "Menu callback failed" << std::endl;
+				i++;
 			}
 		}
 	}
 
+	void OSXMenuItem::UpdateNativeMenuItems()
+	{
+		std::vector<NSMenuItem*>::iterator i = this->realizations.begin();
+		while (i != this->realizations.end())
+		{
+			NSMenuItem* nativeItem = (*i++);
+			if ([nativeItem menu]) {
+				OSXMenu::UpdateNativeMenu([nativeItem menu]);
+			}
+		}
+	}
 }
+
 

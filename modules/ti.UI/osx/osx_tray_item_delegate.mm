@@ -4,13 +4,8 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #import "../ui_module.h"
-#import "osx_tray_delegate.h"
-#import "osx_tray_item.h"
-#import "osx_menu_item.h"
-#import "osx_ui_binding.h"
 
 @implementation OSXTrayDelegate
-
 -(id)initWithTray:(OSXTrayItem*)d
 {
 	self = [super init];
@@ -51,27 +46,27 @@
 {
 	[item setToolTip:hint];
 }
--(void)addMenu:(SharedPtr<ti::MenuItem>)menu
+-(void)addMenu:(SharedMenu)menu
 {
-	if (submenu)
-	{
-		[submenu release];
-		submenu = nil;
-	}
-	if (menu.isNull())
-	{
-		return;
-	}
-	SharedPtr<ti::OSXMenuItem> osx_menu = menu.cast<ti::OSXMenuItem>();
-	int count = osx_menu->GetChildCount();
-	if (count == 0) return ;
-	submenu = ti::OSXUIBinding::MakeMenu(osx_menu);
-	if ([submenu numberOfItems] == 0)
-	{
-		// this happens if they're all disabled
-		[submenu release];
-		submenu = nil;
-	}
+	//if (submenu)
+	//{
+	//	[submenu release];
+	//	submenu = nil;
+	//}
+	//if (menu.isNull())
+	//{
+	//	return;
+	//}
+	//SharedPtr<ti::OSXMenuItem> osx_menu = menu.cast<ti::OSXMenuItem>();
+	//int count = osx_menu->GetChildCount();
+	//if (count == 0) return ;
+	//submenu = ti::OSXUIBinding::MakeMenu(osx_menu);
+	//if ([submenu numberOfItems] == 0)
+	//{
+	//	// this happens if they're all disabled
+	//	[submenu release];
+	//	submenu = nil;
+	//}
 }
 
 @end

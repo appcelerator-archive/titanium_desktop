@@ -318,7 +318,6 @@ namespace ti
 
 		if (!argObj.isNull())
 		{
-			argObj = KObject::Unwrap(argObj);
 			menu = argObj.cast<MenuItem>();
 		}
 		this->SetMenu(menu);
@@ -345,7 +344,6 @@ namespace ti
 
 		if (!argObj.isNull())
 		{
-			argObj = KObject::Unwrap(argObj);
 			menu = argObj.cast<MenuItem>();
 		}
 		this->SetContextMenu(menu);
@@ -442,7 +440,7 @@ namespace ti
 		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsList())
 		{
-			SharedKList list = KList::Unwrap(args.at(0)->ToList());
+			SharedKList list = args.at(0)->ToList();
 			menu = list.cast<MenuItem>();
 		}
 		this->SetDockMenu(menu);

@@ -3,10 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#include "osx_tray_item.h"
-#include "osx_tray_delegate.h"
-#include "osx_ui_binding.h"
-
+#include "../ui_module.h"
 namespace ti
 {
 	OSXTrayItem::OSXTrayItem(SharedString iconPath, SharedKMethod cb)
@@ -38,7 +35,7 @@ namespace ti
 			[delegate setIcon:image];
 		}
 	}
-	void OSXTrayItem::SetMenu(SharedPtr<MenuItem> menu)
+	void OSXTrayItem::SetMenu(SharedMenu menu)
 	{
 		[delegate addMenu:menu];
 	}

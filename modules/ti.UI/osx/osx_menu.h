@@ -1,0 +1,49 @@
+/**
+ * Appcelerator Titanium - licensed under the Apache Public License 2
+ * see LICENSE in the root folder for details on the license.
+ * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
+ */
+#ifndef _OSX_MENU_H_
+#define _OSX_MENU_H_
+#include <Cocoa/Cocoa.h>
+#include "../menu_item.h"
+#include "../menu.h"
+#include "osx_menu_item.h"
+namespace ti
+{
+	class OSXMenu : public Menu
+	{
+	public:
+		OSXMenu();
+		~OSXMenu();
+
+		void AppendItemImpl(SharedMenuItem item);
+		void InsertItemAtImpl(SharedMenuItem item, unsigned int index);
+		void RemoveItemAtImpl(unsigned int index);
+		void ClearImpl();
+
+		NSMenu* CreateNative(bool registerMenu=true);
+		void FillNativeMainMenu(NSMenu* defaultMenu, NSMenu* nativeMainMenu);
+		static void CopyMenu(NSMenu* from, NSMenu* to);
+		static NSMenuItem* CopyMenuItem(NSMenuItem* item);
+
+		void AddChildrenToNativeMenu(
+			NSMenu* realization, bool registerMenu=true, bool isMainMenu=false);
+		void AddChildrenToNSArray(NSMutableArray* array);
+		void DestroyNative(NSMenu* realization);
+		void UpdateNativeMenus();
+		static void ClearNativeMenu(NSMenu* realization);
+		static void UpdateNativeMenu(NSMenu* nativeMenu);
+		static NSMenu* GetWindowMenu(NSMenu* nsMenu);
+		static NSMenu* GetAppleMenu(NSMenu* nsMenu);
+		static NSMenu* GetServicesMenu(NSMenu* nsMenu);
+		static void EnsureAllItemsHaveSubmenus(NSMenu* menu);
+		static void FixWindowMenu(NSMenu* menu);
+		static bool OSXMenu::IsNativeMenuAMainMenu(NSMenu* menu);
+
+	private:
+		void Clear();
+		std::vector<NSMenu*> nativeMenus;
+	};
+}
+#endif

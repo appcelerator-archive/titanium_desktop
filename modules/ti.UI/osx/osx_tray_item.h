@@ -20,7 +20,7 @@ namespace ti
 		virtual ~OSXTrayItem();
 
 		void SetIcon(SharedString iconPath);
-		void SetMenu(SharedPtr<MenuItem> menu);
+		void SetMenu(SharedMenu menu);
 		void SetHint(SharedString hint);
 		void Remove();
 		
