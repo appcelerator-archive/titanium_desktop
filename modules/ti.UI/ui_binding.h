@@ -27,6 +27,8 @@ namespace ti
 		std::vector<SharedUserWindow>& GetOpenWindows();
 		void AddToOpenWindows(SharedUserWindow);
 		void RemoveFromOpenWindows(SharedUserWindow);
+		void ClearTray();
+		void UnregisterTrayItem(TrayItem*);
 
 		static UIBinding* GetInstance() { return instance; }
 
@@ -59,6 +61,9 @@ namespace ti
 
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
+		void _CreateMenuItem(const ValueList& args, SharedValue result);
+		void _CreateCheckMenuItem(const ValueList& args, SharedValue result);
+		void _CreateSeparatorMenuItem(const ValueList& args, SharedValue result);
 		void _CreateTrayMenu(const ValueList& args, SharedValue result);
 		void _SetMenu(const ValueList& args, SharedValue result);
 		void _GetMenu(const ValueList& args, SharedValue result);
@@ -67,15 +72,16 @@ namespace ti
 		void _SetIcon(const ValueList& args, SharedValue result);
 		void _AddTray(const ValueList& args, SharedValue result);
 		void _ClearTray(const ValueList& args, SharedValue result);
-
-		virtual SharedPtr<MenuItem> CreateMenu(bool trayMenu) = 0;
-		virtual void SetMenu(SharedPtr<MenuItem>) = 0;
-		virtual void SetContextMenu(SharedPtr<MenuItem>) = 0;
-		virtual void SetIcon(SharedString icon_path) = 0;
-		virtual SharedPtr<TrayItem> AddTray(SharedString icon_path,
-		                                    SharedKMethod cb) = 0;
-
 		void _GetIdleTime(const ValueList& args, SharedValue result);
+
+		virtual SharedMenu CreateMenu() = 0;
+		virtual SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL) = 0;
+		virtual SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod callback) = 0;
+		virtual SharedMenuItem CreateSeparatorMenuItem() = 0;
+		virtual void SetMenu(SharedMenu) = 0;
+		virtual void SetContextMenu(SharedMenu>) = 0;
+		virtual void SetIcon(SharedString iconPath) = 0;
+		virtual SharedPtr<TrayItem> CreateTrayItem(SharedString iconPath, SharedKMethod cb) = 0;
 
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
@@ -85,7 +91,7 @@ namespace ti
 
 		/* These have empty impls, because are OS X-only for now */
 		virtual void SetDockIcon(SharedString icon_path) {}
-		virtual void SetDockMenu(SharedPtr<MenuItem>) {}
+		virtual void SetDockMenu(SharedMenuItem) {}
 		virtual void SetBadge(SharedString badge_label) {}
 		virtual void SetBadgeImage(SharedString badge_path) {}
 

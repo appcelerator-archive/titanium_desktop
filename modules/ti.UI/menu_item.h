@@ -3,69 +3,73 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-
 #ifndef _MENU_ITEM_H_
 #define _MENU_ITEM_H_
-
 #include <kroll/kroll.h>
-
 namespace ti
 {
-	class MenuItem : public AccessorBoundList
+	class MenuItem : public StaticBoundObject
 	{
+		public:
+		enum MenuItemType
+		{
+			NORMAL,
+			SEPARATOR,
+			CHECK
+		}
 
-	public:
-		MenuItem();
+		MenuItem(
+			MenuItemType type,
+			std::string label,
+			std::string iconURL,
+			SharedKMethod callback);
 		~MenuItem();
 
-		void SetMethod(const char *name, void (MenuItem::*method)(const ValueList&, SharedValue));
-		void SetParent(MenuItem*);
-		MenuItem* GetParent();
-
-		bool IsSeparator();
-		bool IsSubMenu();
-		bool IsItem();
-		void _IsSeparator(const ValueList& args, SharedValue result);
-		void _IsItem(const ValueList& args, SharedValue result);
-		void _IsSubMenu(const ValueList& args, SharedValue result);
-
-		virtual SharedValue AddSeparator() = 0;
-		virtual SharedValue AddItem(SharedValue label, SharedValue callback, SharedValue icon_url) = 0;
-		virtual SharedValue AddSubMenu(SharedValue label, SharedValue icon_url) = 0;
-		void _AddSeparator(const ValueList& args, SharedValue result);
-		void _AddItem(const ValueList& args, SharedValue result);
-		void _AddSubMenu(const ValueList& args, SharedValue result);
-
-		SharedValue AddToListModel(MenuItem* item);
-
-		void MakeSeparator();
-		void MakeItem(SharedValue label, SharedValue callback, SharedValue icon_url);
-		void MakeSubMenu(SharedValue label, SharedValue icon_url);
-
-		virtual void Enable() = 0;
-		virtual void Disable() = 0;
+		void _IsSeparatorItem(const ValueList& args, SharedValue result);
+		void _IsCheckItem(const ValueList& args, SharedValue result);
+		void _SetLabel(const ValueList& args, SharedValue result);
+		void _GetLabel(const ValueList& args, SharedValue result);
+		void _SetIcon(const ValueList& args, SharedValue result);
+		void _GetIcon(const ValueList& args, SharedValue result);
+		void _AddEventListener(const ValueList& args, SharedValue result);
+		void _RemoveEventListener(const ValueList& args, SharedValue result);
+		void _GetEventListeners(const ValueList& args, SharedValue result);
+		void _SetSubmenu(const ValueList& args, SharedValue result);
+		void _GetSubmenu(const ValueList& args, SharedValue result);
 		void _Enable(const ValueList& args, SharedValue result);
 		void _Disable(const ValueList& args, SharedValue result);
+		void _IsEnabled(const ValueList& args, SharedValue result);
 
-		virtual void Mark() = 0;
-		virtual void Unmark() = 0;
+		void _AddSubmenu(const ValueList& args, SharedValue result);
+		void _AddItem(const ValueList& args, SharedValue result);
+		void _AddSeperatorItem(const ValueList& args, SharedValue result);
+		void _AddCheckItem(const ValueList& args, SharedValue result);
 
-		void _Mark(const ValueList& args, SharedValue result);
-		void _Unmark(const ValueList& args, SharedValue result);
+		void AddEventListener(SharedKMethod eventListener);
+		std::string& GetLabel();
+		std::string& GetIconPath();
+		bool IsSeparator();
+		bool IsCheckbox();
+		bool IsEnabled();
+		void InvokeCallback();
+		void EnsureHasSubmenu();
 
-		void _SetLabel(const ValueList& args, SharedValue result);
-		void _SetIcon(const ValueList& args, SharedValue result);
-		virtual void SetLabel(std::string label) = 0;
-		virtual void SetIcon(std::string icon_path) = 0;
+		// Platform-specific implementation
+		virtual void SetLabelImpl(std::string newLabel) = 0;
+		virtual void SetIconImpl(std::string newIconPath) = 0;
+		virtual void SetCallbackImpl(SharedKMethod callback) = 0;
+		virtual void SetSubmenuImpl(SharedMenu newSubmenu) = 0;
+		virtual void EnableImpl() = 0;
+		virtual void DisableImpl() = 0;
 
-		const char* GetLabel();
-		const char* GetIconURL();
-
-	private:
-		enum Type { SEP, ITEM, SUBMENU };
-
+	protected:
+		MenuItemType type;
+		bool enabled;
+		std::string label;
+		std::string iconPath;
+		SharedKMethod callback;
+		SharedMenu submenu;
+		std::vector<SharedKMethod> eventListeners;
 	};
 }
-
 #endif
