@@ -1276,7 +1276,7 @@ void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue resul
 	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 	if (args.size() > 0 && args.at(0)->IsList())
 	{
-		SharedKList list = KList::Unwrap(args.at(0)->ToList());
+		SharedKList list = args.at(0)->ToList();
 		menu = list.cast<MenuItem>();
 	}
 	this->SetMenu(menu);
@@ -1300,7 +1300,7 @@ void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValu
 	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 	if (args.size() > 0 && args.at(0)->IsList())
 	{
-		SharedKList list = KList::Unwrap(args.at(0)->ToList());
+		SharedKList list = args.at(0)->ToList();
 		menu = list.cast<MenuItem>();
 	}
 	this->SetContextMenu(menu);

@@ -157,7 +157,7 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject obj = KObject::Unwrap(args.at(0)->ToObject());
+			SharedKObject obj = args.at(0)->ToObject();
 			SharedPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{
