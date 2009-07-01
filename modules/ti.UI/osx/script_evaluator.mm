@@ -6,8 +6,8 @@
 #include <kroll/kroll.h>
 #include "../ui_module.h"
 #include "osx_menu_item.h"
-#include "WebFramePrivate.h"
-#include "WebScriptElement.h"
+#include <WebKit/WebFramePrivate.h>
+#include <WebKit/WebScriptElement.h>
 
 @implementation ScriptEvaluator
 	-(ScriptEvaluator*)initWithHost:(Host*)hostin

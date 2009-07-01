@@ -9,7 +9,7 @@
 #import "../ui_module.h"
 #import <Cocoa/Cocoa.h>
 #import "ti_app.h"
-#import "WebInspector.h" 
+#import <WebKit/WebInspector.h>
 
 @class WebViewDelegate;
 
