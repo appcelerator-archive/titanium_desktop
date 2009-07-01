@@ -172,14 +172,12 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (window->web_view)
 			{
 				window->ResizeSubViews();
+				window->FireEvent(RESIZED);
 				if (wParam == SIZE_MAXIMIZED) {
 					window->FireEvent(MAXIMIZED);
 
 				} else if (wParam == SIZE_MINIMIZED) {
 					window->FireEvent(MINIMIZED);
-
-				} else {
-					window->FireEvent(RESIZED);
 				}
 			}
 			break;
