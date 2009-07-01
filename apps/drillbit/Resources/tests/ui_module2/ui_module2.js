@@ -222,10 +222,10 @@ describe("UI Module Tests",{
 		addEventTest(function() { w.setFullScreen(true); }, [Titanium.UI.FULLSCREENED]);
 		addEventTest(function() { w.setFullScreen(false); }, [Titanium.UI.UNFULLSCREENED]);
 		addEventTest(function() { w.maximize(); }, [Titanium.UI.MAXIMIZED]);
-		addEventTest(function() { w.minimize(); }, [Titanium.UI.MINIMIZED]);
+		addEventTest(function() { w.minimize(); w.unminimize() }, [Titanium.UI.MINIMIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.UI.MOVED]);
 		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.UI.MOVED]);
-		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width+1); }, [Titanium.UI.RESIZED]);
+		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.UI.RESIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.UI.RESIZED]);
 		addEventTest(function() {w.close();}, [Titanium.UI.CLOSE, Titanium.UI.CLOSED]);
 
