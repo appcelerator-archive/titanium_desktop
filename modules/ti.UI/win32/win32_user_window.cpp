@@ -234,9 +234,8 @@ void Win32UserWindow::InitWindow()
 		error << "Error Creating Window: " << GetLastError();
 		logger->Error(error.str());
 	}
-	
-	PRINTD("window_handle = " << (int) this->window_handle);
 
+	logger->Debug("Initializing window_handle: %i", window_handle);
 	// make our HWND available to 3rd party devs without needing our headers
 	SharedValue windowHandle = Value::NewVoidPtr((void*) this->window_handle);
 	// these APIs are semi-private -- we probably shouldn't mark them
@@ -530,8 +529,7 @@ void Win32UserWindow::Unfocus()
 
 void Win32UserWindow::Open()
 {
-	PRINTD("Opening window_handle=" << (int) window_handle
-			<< ", view_window_handle=" << (int) view_window_handle);
+	logger->Debug("Opening window_handle=%i, view_window_handle=%i", window_handle,  view_window_handle);
 
 	UpdateWindow(window_handle);
 	UpdateWindow(view_window_handle);

@@ -91,7 +91,9 @@
 -(id)initWithWindow:(NativeWindow*)win host:(Host*)h
 {
 	self = [super init];
-	if (self!=nil)
+
+	logger = Logger::Get("UI.WebViewDelegate");
+	if (self != nil)
 	{
 		window = win;
 		host = h;
@@ -290,7 +292,8 @@
 	}
 	else
 	{
-		PRINTD("Application attempted to navigate to illegal location: " << [[newURL absoluteString] UTF8String]);
+		logger->Warn("Application attempted to navigate to illegal location: %s",
+			[[newURL absoluteString] UTF8String]);
 		[listener ignore];
 	}
 }
@@ -337,8 +340,9 @@
 	// we need to inject even in child frames
 	std::map<WebFrame*,SharedKObject>::iterator iter = frames->find(frame);
 	bool scriptCleared = false;
+
 	SharedKObject global_object = SharedKObject(NULL);
-	if (iter!=frames->end())
+	if (iter != frames->end())
 	{
 		std::pair<WebFrame*,SharedKObject> pair = (*iter);
 		global_object = pair.second;
@@ -347,13 +351,13 @@
 	}
 	else
 	{
-		PRINTD("not found frame = " << frame);
+		logger->Error("Tried to clear a non-existant frame: %lx", (long int) frame);
 	}
 
 	JSGlobalContextRef context = [frame globalContext];
 	if (!scriptCleared)
 	{
-		PRINTD("page loaded with no <script> tags, manually injecting Titanium runtime");
+		logger->Info("Page loaded with no <script> tags, manually injecting Titanium object");
 		// return the global object but don't store it since we're forcely
 		// creating it since we need the global_object to be passed below
 		global_object=[self inject:[frame windowObject] context:context frame:frame store:NO];
@@ -489,7 +493,6 @@
 
 - (void)webView:(WebView *)wv setFrame:(NSRect)frame 
 {
-	PRINTD("webview_delegate::setFrame = "<<self);
 	[[wv window] setFrame:frame display:YES];
 }
 
@@ -527,7 +530,8 @@
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
 {
-	PRINTD("webview_delegate::didFailLoadingWithError = "<<[[error localizedDescription] UTF8String]);
+	logger->Error("didFailLoadingWithError: %s",
+		[[error localizedDescription] UTF8String]);
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFinishLoadingFromDataSource:(WebDataSource *)dataSource
@@ -609,28 +613,24 @@
 
 - (NSString *)webView:(WebView *)wv generateReplacementFile:(NSString *)path 
 {
-	PRINTD("generateReplacementFile: "<<[path UTF8String]);
 	return nil;
 }
 
 
 - (BOOL)webView:(WebView *)wv shouldBeginDragForElement:(NSDictionary *)element dragImage:(NSImage *)dragImage mouseDownEvent:(NSEvent *)mouseDownEvent mouseDraggedEvent:(NSEvent *)mouseDraggedEvent 
 {
-	PRINTD("shouldBeginDragForElement");
 	return YES;
 }
 
 //TODO: in 10.5, this becomes an NSUInteger
 - (unsigned int)webView:(WebView *)wv dragDestinationActionMaskForDraggingInfo:(id <NSDraggingInfo>)draggingInfo 
 {
-	PRINTD("dragDestinationActionMaskForDraggingInfo");
 	return WebDragDestinationActionAny;
 }
 
 
 - (void)webView:(WebView *)webView willPerformDragDestinationAction:(WebDragDestinationAction)action forDraggingInfo:(id <NSDraggingInfo>)draggingInfo 
 {
-	PRINTD("willPerformDragDestinationAction: "<<action);
 	// NSPasteboard *pasteboard = [draggingInfo draggingPasteboard];
 	// PRINTD("pasteboard types: %@",[pasteboard types]);
 }
@@ -688,7 +688,10 @@
 	withError:(NSError *)error
 	forWebFrame:(WebFrame *)webFrame
 {
-	PRINTD("failed to parse javascript from "<<[[theurl absoluteString] UTF8String]<<" at lineNumber: " << lineNumber << ", error: " <<[[error localizedDescription] UTF8String]);
+	logger->Error("Failed to parse javascript from %s at line number %i: %s",
+		[[theurl absoluteString] UTF8String],
+		lineNumber,
+		[[error localizedDescription] UTF8String]);
 }
 
 // just entered a stack frame (i.e. called a function, or started global scope)

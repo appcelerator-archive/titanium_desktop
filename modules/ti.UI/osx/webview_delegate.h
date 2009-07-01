@@ -22,6 +22,7 @@
 	WebInspector *inspector;
 	BOOL initialDisplay;
 	std::map<WebFrame*, SharedKObject> *frames; // this is the frame to clear tracking
+	Logger *logger;
 }
 -(id)initWithWindow:(NativeWindow*)window host:(Host*)h;
 -(void)setURL:(NSURL*)url;
