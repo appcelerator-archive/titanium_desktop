@@ -50,6 +50,7 @@ protected:
 	IWebInspector *web_inspector;
 	std::map<long, SharedKMethod> messageHandlers;
 	bool requires_display;
+	bool is_double_clicked;
 
 	/*
 	 * The window-specific menu.
@@ -72,6 +73,7 @@ protected:
 
 	void RemoveMenu();
 	void ReloadTiWindowConfig();
+	static LRESULT CALLBACK DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
 	static void RegisterWindowClass(HINSTANCE hInstance);

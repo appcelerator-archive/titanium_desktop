@@ -215,9 +215,17 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case TI_TRAY_CLICKED:
 		{
 			UINT uMouseMsg = (UINT) lParam;
-			if(uMouseMsg == WM_LBUTTONDOWN)
+
+			window->is_double_clicked = false;
+			if(uMouseMsg == WM_LBUTTONDBLCLK)
 			{
-				Win32TrayItem::InvokeLeftClickCallback(hWnd, message, wParam, lParam);
+				window->is_double_clicked = true;
+				KillTimer( hWnd, 100 );
+				Win32TrayItem::InvokeLeftDoubleClickCallback(hWnd, message, wParam, lParam);
+			}
+			else if(uMouseMsg == WM_LBUTTONDOWN)
+			{
+				SetTimer(hWnd, 100, GetDoubleClickTime(), (TIMERPROC)DoubleClickTimerProc);
 			}
 			else if (uMouseMsg == WM_RBUTTONDOWN)
 			{
@@ -1355,3 +1363,18 @@ void Win32UserWindow::ParseStringNullSeparated(
 	}
 }
 
+/*static*/
+LRESULT CALLBACK
+Win32UserWindow::DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	Win32UserWindow *window = Win32UserWindow::FromWindow(hWnd);
+	KillTimer( hWnd, 100  );
+
+	if (!(window->is_double_clicked))
+	{
+		Win32TrayItem::InvokeLeftClickCallback(hWnd, message, wParam, lParam);
+	}
+	window->is_double_clicked = false;
+
+	return 0;
+}

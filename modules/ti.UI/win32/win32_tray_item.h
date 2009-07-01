@@ -19,7 +19,7 @@ namespace ti
 class Win32TrayItem: public TrayItem
 {
 public:
-	Win32TrayItem(SharedString iconPath, SharedKMethod cb);
+	Win32TrayItem(SharedString iconPath, SharedKMethod cb_single_click, SharedKMethod cb_double_click);
 	virtual ~Win32TrayItem();
 
 	void SetIcon(SharedString iconPath);
@@ -29,10 +29,14 @@ public:
 
 	static bool InvokeLeftClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static bool InvokeLeftClickCallback(int trayIconID);
+	static bool InvokeLeftDoubleClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static bool InvokeLeftDoubleClickCallback(int trayIconID);
+
 	static bool ShowTrayMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static bool ShowTrayMenu(int trayIconID);
 private:
-	SharedKMethod callback;
+	SharedKMethod callback_single_click;
+	SharedKMethod callback_double_click;
 	SharedPtr<Win32MenuItemImpl> trayMenu;
 	HMENU trayMenuHandle;
 
