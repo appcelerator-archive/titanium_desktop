@@ -120,12 +120,12 @@ namespace ti
 			void SetIcon(SharedString icon_path);
 			SharedString GetIcon();
 
-			NativeWindow* GetNative() { return window; }
+			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
 			void Unfocused();
 
 		private:
-			NativeWindow *window;
+			NativeWindow *nativeWindow;
 			bool opened;
 			bool closed;
 			bool topmost;

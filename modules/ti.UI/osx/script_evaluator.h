@@ -6,11 +6,11 @@
 #import "preinclude.h"
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
-#import "WebViewPrivate.h"
-#import "WebInspector.h"
-#import "WebScriptDebugDelegate.h"
-#import "WebScriptObject.h"
-#import "WebPreferencesPrivate.h"
+#import <WebKit/WebViewPrivate.h>
+#import <WebKit/WebInspector.h>
+#import <WebKit/WebScriptDebugDelegate.h>
+#import <WebKit/WebScriptObject.h>
+#import <WebKit/WebPreferencesPrivate.h>
 
 @interface ScriptEvaluator : NSObject
 {

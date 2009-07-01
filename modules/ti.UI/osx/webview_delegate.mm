@@ -6,7 +6,8 @@
 #include <kroll/kroll.h>
 #include "../ui_module.h"
 #include "osx_menu_item.h"
-#include "WebFramePrivate.h"
+#include <WebKit/WebFramePrivate.h>
+#include <WebKit/WebPreferenceKeysPrivate.h>
 
 @interface NSApplication (DeclarationStolenFromAppKit)
 - (void)_cycleWindowsReversed:(BOOL)reversed;
@@ -45,13 +46,17 @@
 	// Setup the DB to store it's DB under our data directory for the app
 	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str() encoding:NSUTF8StringEncoding];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
-	
-	//[webPrefs setFullDocumentTeardownEnabled:YES];
 
 	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
-	[standardUserDefaults setObject:datadir forKey:@"WebDatabaseDirectory"];
+
+	[standardUserDefaults
+		setObject:[NSNumber numberWithInt:1]
+		forKey:WebKitEnableFullDocumentTeardownPreferenceKey];
+	[standardUserDefaults
+		setObject:datadir
+		forKey:@"WebDatabaseDirectory"];
 	[standardUserDefaults synchronize];
-		
+
 	[webView setPreferences:webPrefs];
 	[webPrefs release];
 
@@ -86,7 +91,9 @@
 -(id)initWithWindow:(NativeWindow*)win host:(Host*)h
 {
 	self = [super init];
-	if (self!=nil)
+
+	logger = Logger::Get("UI.WebViewDelegate");
+	if (self != nil)
 	{
 		window = win;
 		host = h;
@@ -122,12 +129,12 @@
 {
 	WindowConfig *config = [window config];
 	config->SetVisible(true);
-    [window makeKeyAndOrderFront:nil];	
+	[window makeKeyAndOrderFront:nil];
 }
 
 - (NSURL *)url
 {
-    return url;
+	return url;
 }
 
 -(void)setURL:(NSURL*)newURL
@@ -218,7 +225,6 @@
 
 - (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener
 {
-	
 	if (NO == [self newWindowAction:actionInformation request:request listener:listener])
 	{
 		return;
@@ -228,7 +234,6 @@
 
 - (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary*) actionInformation request:(NSURLRequest*) request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
 {
-
 	int type = [[actionInformation objectForKey:WebActionNavigationTypeKey] intValue];
 	
 	switch (type)
@@ -287,7 +292,8 @@
 	}
 	else
 	{
-		PRINTD("Application attempted to navigate to illegal location: " << [[newURL absoluteString] UTF8String]);
+		logger->Warn("Application attempted to navigate to illegal location: %s",
+			[[newURL absoluteString] UTF8String]);
 		[listener ignore];
 	}
 }
@@ -303,7 +309,7 @@
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
-    // Only report feedback for the main frame.
+	// Only report feedback for the main frame.
 	// set the title on the config in case they
 	// programatically set the title on the window
 	// so that it correctly is reflected in the config 
@@ -312,9 +318,9 @@
 	config->SetTitle(t);
 	[window setTitle:title];
 }
+
 - (SharedKObject)inject:(WebScriptObject *)windowScriptObject context:(JSGlobalContextRef)context frame:(WebFrame*)frame store:(BOOL)store
 {
-	
 	UserWindow* userWindow = [window userWindow];
 	userWindow->RegisterJSContext(context);
 
@@ -331,12 +337,12 @@
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-	
 	// we need to inject even in child frames
 	std::map<WebFrame*,SharedKObject>::iterator iter = frames->find(frame);
 	bool scriptCleared = false;
+
 	SharedKObject global_object = SharedKObject(NULL);
-	if (iter!=frames->end())
+	if (iter != frames->end())
 	{
 		std::pair<WebFrame*,SharedKObject> pair = (*iter);
 		global_object = pair.second;
@@ -345,13 +351,13 @@
 	}
 	else
 	{
-		PRINTD("not found frame = " << frame);
+		logger->Error("Tried to clear a non-existant frame: %lx", (long int) frame);
 	}
 
 	JSGlobalContextRef context = [frame globalContext];
 	if (!scriptCleared)
 	{
-		PRINTD("page loaded with no <script> tags, manually injecting Titanium runtime");
+		logger->Info("Page loaded with no <script> tags, manually injecting Titanium object");
 		// return the global object but don't store it since we're forcely
 		// creating it since we need the global_object to be passed below
 		global_object=[self inject:[frame windowObject] context:context frame:frame store:NO];
@@ -431,7 +437,6 @@
 {
 }
 
-
 - (void)webViewClose:(WebView *)wv 
 {
 	[[wv window] close];
@@ -444,12 +449,10 @@
 	}
 }
 
-
 - (void)webViewFocus:(WebView *)wv 
 {
 	[[wv window] makeKeyAndOrderFront:wv];
 }
-
 
 - (void)webViewUnfocus:(WebView *)wv 
 {
@@ -458,7 +461,6 @@
 		[NSApp _cycleWindowsReversed:FALSE];
 	}
 }
-
 
 - (NSResponder *)webViewFirstResponder:(WebView *)wv 
 {
@@ -491,7 +493,6 @@
 
 - (void)webView:(WebView *)wv setFrame:(NSRect)frame 
 {
-	PRINTD("webview_delegate::setFrame = "<<self);
 	[[wv window] setFrame:frame display:YES];
 }
 
@@ -517,20 +518,20 @@
 
 - (id)webView:(WebView *)sender identifierForInitialRequest:(NSURLRequest *)request fromDataSource:(WebDataSource *)dataSource
 {
-    // Return some object that can be used to identify this resource
-	// we just ignore this for now
+	// Return some object that can be used to identify
+	// this resource. We just ignore this for now.
 	return nil;
 }
 
 -(NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponsefromDataSource:(WebDataSource *)dataSource
 {
-	PRINTD("webview_delegate::willSendRequest = "<<self);
-    return request;
+	return request;
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
 {
-	PRINTD("webview_delegate::didFailLoadingWithError = "<<[[error localizedDescription] UTF8String]);
+	logger->Error("didFailLoadingWithError: %s",
+		[[error localizedDescription] UTF8String]);
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFinishLoadingFromDataSource:(WebDataSource *)dataSource
@@ -539,15 +540,13 @@
 
 - (void)webView:(WebView *)wv runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
-	PRINTD("alert = "<<[message UTF8String]);
-	
-	NSRunInformationalAlertPanel([window title],	// title
-								 message,								// message
-								 NSLocalizedString(@"OK", @""),			// default button
-								 nil,									// alt button
-								 nil);									// other button	
+	NSRunInformationalAlertPanel([window title], // title
+		message, // message
+		NSLocalizedString(@"OK", @""), // default button
+		nil, // alt button
+		nil); // other button
 
-	// only show if already visible									
+	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
@@ -557,17 +556,18 @@
 
 - (BOOL)webView:(WebView *)wv runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
-	int result = NSRunInformationalAlertPanel([window title],	// title
-													message,								// message
-													NSLocalizedString(@"OK", @""),			// default button
-													NSLocalizedString(@"Cancel", @""),		// alt button
-													nil);
-	// only show if already visible									
+	int result = NSRunInformationalAlertPanel([window title], // title
+		message, // message
+		NSLocalizedString(@"OK", @""), // default button
+		NSLocalizedString(@"Cancel", @""), // alt button
+		nil);
+
+	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
 	}
-	return NSAlertDefaultReturn == result;	
+	return NSAlertDefaultReturn == result;
 }
 
 
@@ -575,12 +575,13 @@
 {
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
 	[openPanel beginSheetForDirectory:nil 
-								 file:nil 
-					   modalForWindow:window
-						modalDelegate:self
-					   didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
-						  contextInfo:resultListener];	
-	// only show if already visible									
+		file:nil 
+		modalForWindow:window
+		modalDelegate:self
+		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+		contextInfo:resultListener];
+
+	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
@@ -592,7 +593,7 @@
 - (void)openPanelDidEnd:(NSSavePanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo 
 {
 	id <WebOpenPanelResultListener>resultListener = (id <WebOpenPanelResultListener>)contextInfo;
-	// only show if already visible									
+	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
@@ -612,28 +613,24 @@
 
 - (NSString *)webView:(WebView *)wv generateReplacementFile:(NSString *)path 
 {
-	PRINTD("generateReplacementFile: "<<[path UTF8String]);
 	return nil;
 }
 
 
 - (BOOL)webView:(WebView *)wv shouldBeginDragForElement:(NSDictionary *)element dragImage:(NSImage *)dragImage mouseDownEvent:(NSEvent *)mouseDownEvent mouseDraggedEvent:(NSEvent *)mouseDraggedEvent 
 {
-	PRINTD("shouldBeginDragForElement");
 	return YES;
 }
 
 //TODO: in 10.5, this becomes an NSUInteger
 - (unsigned int)webView:(WebView *)wv dragDestinationActionMaskForDraggingInfo:(id <NSDraggingInfo>)draggingInfo 
 {
-	PRINTD("dragDestinationActionMaskForDraggingInfo");
 	return WebDragDestinationActionAny;
 }
 
 
 - (void)webView:(WebView *)webView willPerformDragDestinationAction:(WebDragDestinationAction)action forDraggingInfo:(id <NSDraggingInfo>)draggingInfo 
 {
-	PRINTD("willPerformDragDestinationAction: "<<action);
 	// NSPasteboard *pasteboard = [draggingInfo draggingPasteboard];
 	// PRINTD("pasteboard types: %@",[pasteboard types]);
 }
@@ -674,63 +671,72 @@
 #pragma mark WebScriptDebugDelegate
 
 // some source was parsed, establishing a "source ID" (>= 0) for future reference
-- (void)webView:(WebView *)webView       didParseSource:(NSString *)source
- baseLineNumber:(unsigned int)lineNumber
-		fromURL:(NSURL *)aurl
-	   sourceId:(int)sid
+- (void)webView:(WebView *)webView
+	didParseSource:(NSString *)source
+	baseLineNumber:(unsigned int)lineNumber
+	fromURL:(NSURL *)aurl
+	sourceId:(int)sid
 	forWebFrame:(WebFrame *)webFrame
 {
 }
 
 // some source failed to parse
-- (void)webView:(WebView *)webView  failedToParseSource:(NSString *)source
- baseLineNumber:(unsigned int)lineNumber
-		fromURL:(NSURL *)theurl
-	  withError:(NSError *)error
+- (void)webView:(WebView *)webView
+	failedToParseSource:(NSString *)source
+	baseLineNumber:(unsigned int)lineNumber
+	fromURL:(NSURL *)theurl
+	withError:(NSError *)error
 	forWebFrame:(WebFrame *)webFrame
 {
-	PRINTD("failed to parse javascript from "<<[[theurl absoluteString] UTF8String]<<" at lineNumber: " << lineNumber << ", error: " <<[[error localizedDescription] UTF8String]);
+	logger->Error("Failed to parse javascript from %s at line number %i: %s",
+		[[theurl absoluteString] UTF8String],
+		lineNumber,
+		[[error localizedDescription] UTF8String]);
 }
 
 // just entered a stack frame (i.e. called a function, or started global scope)
-- (void)webView:(WebView *)webView    didEnterCallFrame:(WebScriptCallFrame *)frame
-	   sourceId:(int)sid
-		   line:(int)lineno
+- (void)webView:(WebView *)webView
+	didEnterCallFrame:(WebScriptCallFrame *)frame
+	sourceId:(int)sid
+	line:(int)lineno
 	forWebFrame:(WebFrame *)webFrame
 {
 }
 
 // about to execute some code
-- (void)webView:(WebView *)webView willExecuteStatement:(WebScriptCallFrame *)frame
-	   sourceId:(int)sid
-		   line:(int)lineno
+- (void)webView:(WebView *)webView
+	willExecuteStatement:(WebScriptCallFrame *)frame
+	sourceId:(int)sid
+	line:(int)lineno
 	forWebFrame:(WebFrame *)webFrame
 {
 }
 
 // about to leave a stack frame (i.e. return from a function)
-- (void)webView:(WebView *)webView   willLeaveCallFrame:(WebScriptCallFrame *)frame
-	   sourceId:(int)sid
-		   line:(int)lineno
+- (void)webView:(WebView *)webView
+	willLeaveCallFrame:(WebScriptCallFrame *)frame
+	sourceId:(int)sid
+	line:(int)lineno
 	forWebFrame:(WebFrame *)webFrame
 {
 }
 
 // exception is being thrown
-- (void)webView:(WebView *)webView   exceptionWasRaised:(WebScriptCallFrame *)frame
-	   sourceId:(int)sid
-		   line:(int)lineno
+- (void)webView:(WebView *)webView
+	exceptionWasRaised:(WebScriptCallFrame *)frame
+	sourceId:(int)sid
+	line:(int)lineno
 	forWebFrame:(WebFrame *)webFrame
 {
 }
 
 // return whether or not quota has been reached for a db (enabling db support)
-- (void)webView:(WebView*)webView	frame:(WebFrame*)frame
+- (void)webView:(WebView*)webView
+	frame:(WebFrame*)frame
 	exceededDatabaseQuotaForSecurityOrigin:(id)origin
 	database:(NSString*)dbName
 {
 	const unsigned long long defaultQuota = 5 * 1024 * 1024;
-	
 	[origin performSelector:@selector(setQuota:) withObject:[NSNumber numberWithInt:defaultQuota]];
 }
 @end
