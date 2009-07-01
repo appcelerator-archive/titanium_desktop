@@ -106,7 +106,6 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SharedKMethod handler = window->messageHandlers[message];
 		ValueList args;
 		handler->Call(args);
-
 		return 0;
 	}
 
@@ -114,14 +113,14 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_DESTROY:
 			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_CLOSE:
 			window->Close();
 			window->FireEvent(CLOSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_GETMINMAXINFO:
-		{
-			if(window)
-			{
+			if (window) {
 				MINMAXINFO *mmi = (MINMAXINFO*) lParam;
 				static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
 				static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
@@ -142,95 +141,79 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if (min_height > -1)
 						min_height += window->chromeHeight;
 				}
-				
-				if (max_width == -1)
-				{
+
+				if (max_width == -1) {
 					mmi->ptMaxTrackSize.x = INT_MAX; // Uncomfortably large
-				}
-				else
-				{
+				} else {
 					mmi->ptMaxTrackSize.x = max_width;
 				}
 
-				if (min_width == -1)
-				{
+				if (min_width == -1) {
 					mmi->ptMinTrackSize.x = minXTrackSize;
-				}
-				else
-				{
+				} else {
 					mmi->ptMinTrackSize.x = min_width;
 				}
 
-				if (max_height == -1)
-				{
+				if (max_height == -1) {
 					mmi->ptMaxTrackSize.y = INT_MAX; // Uncomfortably large
-				}
-				else
-				{
+				} else {
 					mmi->ptMaxTrackSize.y = max_height;
 				}
 
-				if (min_height == -1)
-				{
+				if (min_height == -1) {
 					mmi->ptMinTrackSize.y = minYTrackSize;
-				}
-				else
-				{
+				} else {
 					mmi->ptMinTrackSize.y = min_height;
 				}
 			}
-		}
-		break;
+			break;
+
 		case WM_SIZE:
-		if (!window->web_view) break;
-		window->ResizeSubViews();
-		if (wParam == SIZE_MAXIMIZED)
-		{
-			window->FireEvent(MAXIMIZED);
-			window->FireEvent(RESIZED);
-		}
-		else if (wParam == SIZE_MINIMIZED)
-		{
-			window->FireEvent(MINIMIZED);
-		}
-		else if (wParam == SIZE_RESTORED)
-		{
-			window->FireEvent(RESIZED);
-		}
-		break;
+			if (window->web_view)
+			{
+				window->ResizeSubViews();
+				if (wParam == SIZE_MAXIMIZED) {
+					window->FireEvent(MAXIMIZED);
+
+				} else if (wParam == SIZE_MINIMIZED) {
+					window->FireEvent(MINIMIZED);
+
+				} else {
+					window->FireEvent(RESIZED);
+				}
+			}
+			break;
+
 		case WM_SETFOCUS:
-		window->FireEvent(FOCUSED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
+			window->FireEvent(FOCUSED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_KILLFOCUS:
-		window->FireEvent(UNFOCUSED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
+			window->FireEvent(UNFOCUSED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_MOVE:
-		window->FireEvent(MOVED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
+			window->FireEvent(MOVED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_SHOWWINDOW:
-		window->FireEvent(((BOOL)wParam) ? SHOWN : HIDDEN);
-		return DefWindowProc(hWnd, message, wParam, lParam);
+			window->FireEvent(((BOOL)wParam) ? SHOWN : HIDDEN);
+			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case TI_TRAY_CLICKED:
-		{
 			UINT uMouseMsg = (UINT) lParam;
-			if(uMouseMsg == WM_LBUTTONDOWN)
-			{
+			if (uMouseMsg == WM_LBUTTONDOWN) {
 				Win32TrayItem::InvokeLeftClickCallback(hWnd, message, wParam, lParam);
-			}
-			else if (uMouseMsg == WM_RBUTTONDOWN)
-			{
+
+			} else if (uMouseMsg == WM_RBUTTONDOWN) {
 				Win32TrayItem::ShowTrayMenu(hWnd, message, wParam, lParam);
 			}
-		}
-		break;
-		default:
-		LRESULT handled = Win32MenuItemImpl::handleMenuClick(hWnd, message, wParam, lParam);
+			break;
 
-		if(! handled)
-		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
+		default:
+			if (!Win32MenuItemImpl::handleMenuClick(hWnd, message, wParam, lParam)) {
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
 	}
 
 	return 0;
