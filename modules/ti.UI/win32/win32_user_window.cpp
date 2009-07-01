@@ -116,7 +116,6 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		case WM_CLOSE:
 			window->Close();
-			PRINTD("FireEvent: CLOSED");
 			window->FireEvent(CLOSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		case WM_GETMINMAXINFO:
@@ -427,9 +426,9 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent)
 	restore_bounds = GetBounds();
 	restore_styles = GetWindowLong(window_handle, GWL_STYLE);
 
-	if (this->config->IsFullScreen())
+	if (this->config->IsFullscreen())
 	{
-		this->SetFullScreen(true);
+		this->SetFullscreen(true);
 	}
 	else if (this->config->IsMaximized())
 	{
@@ -499,19 +498,16 @@ HWND Win32UserWindow::GetWindowHandle()
 void Win32UserWindow::Hide()
 {
 	ShowWindow(window_handle, SW_HIDE);
-	this->FireEvent(HIDDEN);
 }
 
 void Win32UserWindow::Show()
 {
 	ShowWindow(window_handle, SW_SHOW);
-	this->FireEvent(SHOWN);
 }
 
 void Win32UserWindow::Minimize()
 {
 	ShowWindow(window_handle, SW_MINIMIZE);
-	this->FireEvent(MINIMIZED);
 }
 
 void Win32UserWindow::Unminimize()
@@ -527,7 +523,6 @@ bool Win32UserWindow::IsMinimized()
 void Win32UserWindow::Maximize()
 {
 	ShowWindow(window_handle, SW_MAXIMIZE);
-	this->FireEvent(MAXIMIZED);
 }
 
 void Win32UserWindow::Unmaximize()
@@ -690,8 +685,6 @@ void Win32UserWindow::SetupBounds()
 	bounds.width = this->config->GetWidth();
 	bounds.height = this->config->GetHeight();
 	this->SetBounds(bounds);
-	this->FireEvent(RESIZED);
-	this->FireEvent(MOVED);
 }
 
 void Win32UserWindow::SetBounds(Bounds bounds)
@@ -836,7 +829,7 @@ void Win32UserWindow::SetTransparency(double transparency)
 	}
 }
 
-void Win32UserWindow::SetFullScreen(bool fullscreen)
+void Win32UserWindow::SetFullscreen(bool fullscreen)
 {
 	if (fullscreen)
 	{
@@ -1095,7 +1088,6 @@ void Win32UserWindow::SetupPosition()
 	b.y = this->config->GetY();
 	
 	this->SetBounds(b);
-	this->FireEvent(MOVED);
 }
 
 
@@ -1106,7 +1098,6 @@ void Win32UserWindow::SetupSize()
 	b.height = this->config->GetHeight();
 
 	this->SetBounds(b);
-	this->FireEvent(RESIZED);
 }
 
 void Win32UserWindow::ShowWebInspector()

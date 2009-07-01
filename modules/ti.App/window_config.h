@@ -96,8 +96,8 @@ public:
 	void SetCloseable(bool closeable_) { closeable = closeable_; }
 	bool IsResizable() { return resizable; }
 	void SetResizable(bool resizable_) { resizable = resizable_; }
-	bool IsFullScreen() { return fullscreen; }
-	void SetFullScreen(bool fullscreen_) { fullscreen = fullscreen_; }
+	bool IsFullscreen() { return fullscreen; }
+	void SetFullscreen(bool fullscreen_) { fullscreen = fullscreen_; }
 	bool IsMaximized() { return maximized; }
 	void SetMaximized(bool maximized_) { maximized = maximized_; }
 	bool IsMinimized() { return minimized; }
