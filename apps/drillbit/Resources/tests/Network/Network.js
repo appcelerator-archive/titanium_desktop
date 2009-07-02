@@ -1,4 +1,6 @@
 describe("Network module tests",{
+    // ti.network.HTTP objects are covered in the http_server unit test.
+
     // test the network object and properties.
 	test_network_object:function()
 	{
