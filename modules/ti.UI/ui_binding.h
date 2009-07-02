@@ -16,22 +16,6 @@ namespace ti
 	{
 
 	public:
-		UIBinding(Host *host);
-		virtual ~UIBinding();
-		Host* GetHost();
-
-		virtual void CreateMainWindow(WindowConfig*);
-		virtual SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent) = 0;
-		virtual void ErrorDialog(std::string);
-
-		std::vector<SharedUserWindow>& GetOpenWindows();
-		void AddToOpenWindows(SharedUserWindow);
-		void RemoveFromOpenWindows(SharedUserWindow);
-		void ClearTray();
-		void UnregisterTrayItem(TrayItem*);
-
-		static UIBinding* GetInstance() { return instance; }
-
 		static int CENTERED;
 		static std::string FOCUSED;
 		static std::string UNFOCUSED;
@@ -50,21 +34,38 @@ namespace ti
 		static std::string PAGE_INITIALIZED;
 		static std::string PAGE_LOADED;
 		static std::string CREATE;
+		static std::string ACTIVATE;
+		static std::string CLICKED;
+		UIBinding(Host *host);
 
-	protected:
-		Host* host;
+		virtual ~UIBinding();
+		Host* GetHost();
+		static UIBinding* GetInstance() { return instance; }
+		virtual void CreateMainWindow(WindowConfig*);
+		virtual SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent) = 0;
+		virtual void ErrorDialog(std::string);
 
-	private:
-		static UIBinding* instance;
-		std::vector<SharedUserWindow> openWindows;
-		SharedKList openWindowList;
+		std::vector<SharedUserWindow>& GetOpenWindows();
+		void AddToOpenWindows(SharedUserWindow);
+		void RemoveFromOpenWindows(SharedUserWindow);
+		void ClearTray();
+		void UnregisterTrayItem(TrayItem*);
+		static void SendEventToListeners(
+			std::vector<SharedKMethod> eventListeners,
+			std::string eventType,
+			SharedKObject eventSource,
+			SharedKObject event = new StaticBoundObject());
+		static void SendEventToListener(SharedKMethod listener, SharedKObject event);
 
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
 		void _CreateMenuItem(const ValueList& args, SharedValue result);
 		void _CreateCheckMenuItem(const ValueList& args, SharedValue result);
 		void _CreateSeparatorMenuItem(const ValueList& args, SharedValue result);
-		void _CreateTrayMenu(const ValueList& args, SharedValue result);
+		SharedMenu __CreateMenu(const ValueList& args);
+		SharedMenuItem __CreateMenuItem(const ValueList& args);
+		SharedMenuItem __CreateCheckMenuItem(const ValueList& args);
+		SharedMenuItem __CreateSeparatorMenuItem(const ValueList& args);
 		void _SetMenu(const ValueList& args, SharedValue result);
 		void _GetMenu(const ValueList& args, SharedValue result);
 		void _SetContextMenu(const ValueList& args, SharedValue result);
@@ -74,29 +75,37 @@ namespace ti
 		void _ClearTray(const ValueList& args, SharedValue result);
 		void _GetIdleTime(const ValueList& args, SharedValue result);
 
-		virtual SharedMenu CreateMenu() = 0;
-		virtual SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL) = 0;
-		virtual SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod callback) = 0;
-		virtual SharedMenuItem CreateSeparatorMenuItem() = 0;
-		virtual void SetMenu(SharedMenu) = 0;
-		virtual void SetContextMenu(SharedMenu>) = 0;
-		virtual void SetIcon(SharedString iconPath) = 0;
-		virtual SharedPtr<TrayItem> CreateTrayItem(SharedString iconPath, SharedKMethod cb) = 0;
-
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
 		void _SetDockMenu(const ValueList& args, SharedValue result);
 		void _SetBadge(const ValueList& args, SharedValue result);
 		void _SetBadgeImage(const ValueList& args, SharedValue result);
 
-		/* These have empty impls, because are OS X-only for now */
-		virtual void SetDockIcon(SharedString icon_path) {}
-		virtual void SetDockMenu(SharedMenuItem) {}
-		virtual void SetBadge(SharedString badge_label) {}
-		virtual void SetBadgeImage(SharedString badge_path) {}
-
+		virtual SharedMenu CreateMenu() = 0;
+		virtual SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL) = 0;
+		virtual SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod callback) = 0;
+		virtual SharedMenuItem CreateSeparatorMenuItem() = 0;
+		virtual void SetMenu(SharedMenu) = 0;
+		virtual void SetContextMenu(SharedMenu) = 0;
+		virtual void SetIcon(SharedString iconPath) = 0;
+		virtual SharedTrayItem AddTray(SharedString iconPath, SharedKMethod cb) = 0;
+		virtual SharedMenu GetMenu() = 0;
+		virtual SharedMenu GetContextMenu() = 0;
 		virtual long GetIdleTime() = 0;
 
+		/* These have empty impls, because are OS X-only for now */
+		virtual void SetDockIcon(SharedString icon_path) {}
+		virtual void SetDockMenu(SharedMenu) {}
+		virtual void SetBadge(SharedString badgeLabel) {}
+		virtual void SetBadgeImage(SharedString badgeImagePath) {}
+
+	protected:
+		static UIBinding* instance;
+		Host* host;
+		std::vector<SharedUserWindow> openWindows;
+		SharedKList openWindowList;
+		std::vector<SharedTrayItem> trayItems;
+		std::string iconPath;
 	};
 }
 

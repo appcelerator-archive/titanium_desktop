@@ -27,6 +27,8 @@ namespace ti
 		void Invoke();
 
 	private:
+		NSMenu* nativeMenu;
+		SharedPtr<OSXMenu> menu;
 		SharedKMethod callback;
 		id delegate;
 	};

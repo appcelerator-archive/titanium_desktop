@@ -6,19 +6,8 @@
 #include "ui_module.h"
 #include <string>
 
-#define GET_ARG_OR_RETURN(INDEX, TYPE, VAR) \
-	if ((int) args.size() < INDEX - 1 || !args.at(INDEX)->Is##TYPE()) \
-		return; \
-	VAR = args.at(INDEX)->To##TYPE();
-
-#define GET_ARG(INDEX, TYPE, VAR) \
-	if ((int) args.size() > INDEX && args.at(INDEX)->Is##TYPE()) \
-		VAR = args.at(INDEX)->To##TYPE();
-
-
 namespace ti
 {
-
 	UIBinding* UIBinding::instance = NULL;
 
 	// Module constants
@@ -40,6 +29,8 @@ namespace ti
 	std::string UIBinding::PAGE_INITIALIZED = "page.init";
 	std::string UIBinding::PAGE_LOADED = "page.load";
 	std::string UIBinding::CREATE = "create";
+	std::string UIBinding::ACTIVATE = "activate";
+	std::string UIBinding::CLICKED = "clicked";
 
 	UIBinding::UIBinding(Host *host) : host(host)
 	{
@@ -110,7 +101,7 @@ namespace ti
 		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0) Create a new SeparatorMenuItem object
 		 * @tiresult[UI.SeparatorMenuItem] The new SeparatorMenuItem object
 		 */
-		this->SetMethod("createMenuItem", &UIBinding::_CreateMenuItem);
+		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
 
 		/**
 		 * @tiapi(method=True,name=UI.setMenu,version=0.2) Sets a menu for the application
@@ -149,14 +140,6 @@ namespace ti
 		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
 		 */
 		this->SetMethod("addTray", &UIBinding::_AddTray);
-
-		/**
-		 * @tiapi(method=True,name=UI.createTrayItem,version=1.0)
-		 * @tiapi Create and add a tray icon
-		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
-		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
-		 */
-		this->SetMethod("createTrayItem", &UIBinding::_AddTray);
 
 		/**
 		 * @tiapi(method=True,name=UI.clearTray,version=0.2)
@@ -279,35 +262,50 @@ namespace ti
 
 	void UIBinding::_CreateMenu(const ValueList& args, SharedValue result)
 	{
-		SharedMenu menu = this->CreateMenu();
-		result->SetObject(menu);
+		result->SetObject(__CreateMenu(args));
+	}
+
+	SharedMenu UIBinding::__CreateMenu(const ValueList& args)
+	{
+		return this->CreateMenu();
 	}
 
 	void UIBinding::_CreateMenuItem(const ValueList& args, SharedValue result)
 	{
+		result->SetObject(__CreateMenuItem(args));
+	}
+
+	SharedMenuItem UIBinding::__CreateMenuItem(const ValueList& args)
+	{
 		args.VerifyException("createMenuItem", "?s m|0 s|0");
 		std::string label = args.GetString(0, "");
-		SharedKMethod eventListener = args.GetString(1, NULL);
-		std::string iconURL = args.GetString(1, "");
-
-		SharedMenuItem item = this->CreateMenuItem(label, callback, iconURL);
-		result->SetObject(item);
+		SharedKMethod eventListener = args.GetMethod(1, NULL);
+		std::string iconURL = args.GetString(2, "");
+		return this->CreateMenuItem(label, eventListener, iconURL);
 	}
+
 
 	void UIBinding::_CreateCheckMenuItem(const ValueList& args, SharedValue result)
 	{
-		args.VerifyException("createCheckMenuItem", "?s m|0");
-		std::string label = args.GetString(0, "");
-		SharedKMethod eventListener = args.GetString(1, NULL);
-
-		SharedMenuItem item = this->CreateCheckMenuItem(label, callback);
-		result->SetObject(item);
+		result->SetObject(__CreateCheckMenuItem(args));
 	}
 
-	void UIBinding::_CreateSeparatorItem(const ValueList& args, SharedValue result)
+	SharedMenuItem UIBinding::__CreateCheckMenuItem(const ValueList& args)
 	{
-		SharedMenuItem item = this->CreateSeparatorMenuItem();
-		result->SetObject(item);
+		args.VerifyException("createCheckMenuItem", "?s m|0");
+		std::string label = args.GetString(0, "");
+		SharedKMethod eventListener = args.GetMethod(1, NULL);
+		return this->CreateCheckMenuItem(label, eventListener);
+	}
+
+	void UIBinding::_CreateSeparatorMenuItem(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(__CreateSeparatorMenuItem(args));
+	}
+
+	SharedMenuItem UIBinding::__CreateSeparatorMenuItem(const ValueList& args)
+	{
+		return this->CreateSeparatorMenuItem();
 	}
 
 	void UIBinding::_SetMenu(const ValueList& args, SharedValue result)
@@ -318,7 +316,7 @@ namespace ti
 
 		if (!argObj.isNull())
 		{
-			menu = argObj.cast<MenuItem>();
+			menu = argObj.cast<Menu>();
 		}
 		this->SetMenu(menu);
 	}
@@ -344,7 +342,7 @@ namespace ti
 
 		if (!argObj.isNull())
 		{
-			menu = argObj.cast<MenuItem>();
+			menu = argObj.cast<Menu>();
 		}
 		this->SetContextMenu(menu);
 	}
@@ -352,15 +350,7 @@ namespace ti
 	void UIBinding::_GetContextMenu(const ValueList& args, SharedValue result)
 	{
 		SharedMenu menu = this->GetContextMenu();
-		if (menu.get() != NULL)
-		{
-			SharedKList list = menu;
-			result->SetList(list);
-		}
-		else
-		{
-			result->SetUndefined();
-		}
+		result->SetObject(menu);
 	}
 
 	void UIBinding::_SetIcon(const ValueList& args, SharedValue result)
@@ -371,7 +361,7 @@ namespace ti
 			const char *iconURL = args.at(0)->ToString();
 			iconPath = UIModule::GetResourcePath(iconURL);
 		}
-		this->iconPath = iconPath;
+		this->iconPath = *iconPath;
 		this->SetIcon(iconPath);
 	}
 
@@ -379,16 +369,14 @@ namespace ti
 	{
 		args.VerifyException("createTrayIcon", "s,?m");
 		std::string iconURL = args.GetString(0);
-		SharedString iconPath = UIModule::GetResourcePath(icon_url);
+		SharedString iconPath = UIModule::GetResourcePath(iconURL.c_str());
 		if (iconPath.isNull())
 		{
 			throw ValueException::FromString("Could not add tray icon with icon URL: " + iconURL);
 		}
-
 		SharedKMethod cb = args.GetMethod(1, NULL);
-		SharedTrayItem item = this->AddTray(icon_path, cb);
+		SharedTrayItem item = this->AddTray(iconPath, cb);
 		this->trayItems.push_back(item);
-
 		result->SetObject(item);
 	}
 
@@ -426,22 +414,21 @@ namespace ti
 
 	void UIBinding::_SetDockIcon(const ValueList& args, SharedValue result)
 	{
-		SharedString icon_path = NULL; // a NULL value is an unset
+		SharedString iconPath = NULL; // a NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsString())
 		{
-			const char *icon_url = args.at(0)->ToString();
-			icon_path = UIModule::GetResourcePath(icon_url);
+			const char *iconURL = args.at(0)->ToString();
+			iconPath = UIModule::GetResourcePath(iconURL);
 		}
-		this->SetDockIcon(icon_path);
+		this->SetDockIcon(iconPath);
 	}
 
 	void UIBinding::_SetDockMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsList())
+		SharedPtr<Menu> menu = NULL; // A NULL value is an unset
+		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			SharedKList list = args.at(0)->ToList();
-			menu = list.cast<MenuItem>();
+			menu = args.at(0)->ToObject().cast<Menu>();
 		}
 		this->SetDockMenu(menu);
 	}
@@ -450,31 +437,28 @@ namespace ti
 	{
 		// badges are just labels right now
 		// we might want to support custom images too
-		SharedString badge_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *badge_url = args.at(0)->ToString();
-			if (badge_url!=NULL)
-			{
-				badge_path = SharedString(new std::string(badge_url));
+		SharedString badgePath = NULL; // a NULL value is an unset
+		if (args.size() > 0 && args.at(0)->IsString()) {
+
+			const char *badgeURL = args.at(0)->ToString();
+			if (badgeURL) {
+				badgePath = SharedString(new std::string(badgeURL));
 			}
 		}
-		this->SetBadge(badge_path);
+		this->SetBadge(badgePath);
 	}
 
 	void UIBinding::_SetBadgeImage(const ValueList& args, SharedValue result)
 	{
-		SharedString image_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *image_url = args.at(0)->ToString();
-			if (image_url!=NULL)
-			{
-				image_path = UIModule::GetResourcePath(image_url);
+		SharedString imagePath = NULL; // a NULL value is an unset
+		if (args.size() > 0 && args.at(0)->IsString()) {
+			const char *imageURL = args.at(0)->ToString();
+			if (imageURL) {
+				imagePath = UIModule::GetResourcePath(imageURL);
 			}
 		}
 
-		this->SetBadgeImage(image_path);
+		this->SetBadgeImage(imagePath);
 	}
 
 	void UIBinding::_GetIdleTime(
@@ -482,6 +466,44 @@ namespace ti
 		SharedValue result)
 	{
 		result->SetDouble(this->GetIdleTime());
+	}
+
+	/*static*/
+	void UIBinding::SendEventToListeners(
+		std::vector<SharedKMethod> eventListeners,
+		std::string eventType,
+		SharedKObject eventSource,
+		SharedKObject event)
+	{
+		event->SetObject("source", eventSource);
+		event->SetString("type", eventType);
+
+		std::vector<SharedKMethod>::iterator i = eventListeners.begin();
+		while (i != eventListeners.end())
+		{
+			UIBinding::SendEventToListener((*i++), event);
+		}
+	}
+
+	/*static*/
+	void UIBinding::SendEventToListener(
+		SharedKMethod listener, SharedKObject event)
+	{
+		if (listener.isNull())
+			return;
+
+		try {
+			listener->Call(ValueList(Value::NewObject(event)));
+
+		} catch (ValueException& e) {
+			Logger* logger = Logger::Get("UI.UIBinding");
+			SharedString exceptionSS = e.DisplayString();
+			SharedString eventTypeSS = event->Get("type")->DisplayString();
+			logger->Error(
+				"Event listener for %s event failed with exception: %s",
+				eventTypeSS->c_str(),
+				exceptionSS->c_str());
+		}
 	}
 
 }

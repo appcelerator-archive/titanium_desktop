@@ -16,17 +16,14 @@ namespace ti
 			NORMAL,
 			SEPARATOR,
 			CHECK
-		}
+		};
 
-		MenuItem(
-			MenuItemType type,
-			std::string label,
-			std::string iconURL,
-			SharedKMethod callback);
+		MenuItem(MenuItemType type, std::string label,
+			SharedKMethod eventListener, std::string iconURL);
 		~MenuItem();
 
-		void _IsSeparatorItem(const ValueList& args, SharedValue result);
-		void _IsCheckItem(const ValueList& args, SharedValue result);
+		void _IsSeparator(const ValueList& args, SharedValue result);
+		void _IsCheck(const ValueList& args, SharedValue result);
 		void _SetLabel(const ValueList& args, SharedValue result);
 		void _GetLabel(const ValueList& args, SharedValue result);
 		void _SetIcon(const ValueList& args, SharedValue result);
@@ -42,22 +39,21 @@ namespace ti
 
 		void _AddSubmenu(const ValueList& args, SharedValue result);
 		void _AddItem(const ValueList& args, SharedValue result);
-		void _AddSeperatorItem(const ValueList& args, SharedValue result);
+		void _AddSeparatorItem(const ValueList& args, SharedValue result);
 		void _AddCheckItem(const ValueList& args, SharedValue result);
 
 		void AddEventListener(SharedKMethod eventListener);
 		std::string& GetLabel();
 		std::string& GetIconPath();
 		bool IsSeparator();
-		bool IsCheckbox();
+		bool IsCheck();
 		bool IsEnabled();
-		void InvokeCallback();
+		void MenuItem::HandleClickEvent(SharedKObject source);
 		void EnsureHasSubmenu();
 
 		// Platform-specific implementation
 		virtual void SetLabelImpl(std::string newLabel) = 0;
 		virtual void SetIconImpl(std::string newIconPath) = 0;
-		virtual void SetCallbackImpl(SharedKMethod callback) = 0;
 		virtual void SetSubmenuImpl(SharedMenu newSubmenu) = 0;
 		virtual void EnableImpl() = 0;
 		virtual void DisableImpl() = 0;

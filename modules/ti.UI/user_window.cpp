@@ -349,35 +349,37 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.2) Sets a window's menu
-	 * @tiarg(for=UI.UserWindow.setMenu,type=object,name=menu) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=1.0)
+	 * @tiapi Set this window's menu
+	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the menu or null to unset
 	 */
 	this->SetMethod("setMenu", &UserWindow::_SetMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=0.2) Returns a window's menu
-	 * @tiresult(for=UI.UserWindow.getMenu,type=object) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=1.0) 
+	 * Get this window's menu
+	 * @tiresult[UI.Menu|null] This window's Menu or null if it is unset
 	 */
 	this->SetMethod("getMenu", &UserWindow::_GetMenu);
 
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=0.2) Sets a window's context menu
-	 * @tiarg(for=UI.UserWindow.setContextMenu,type=object,name=menu) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=1.0)
+	 * @tiapi Set this window's context menu
+	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the context menu or null to unset
 	 */
 	this->SetMethod("setContextMenu", &UserWindow::_SetContextMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=0.2) Returns a window's context menu
-	 * @tiresult(for=UI.UserWindow.getContextMenu,type=object) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.getContetMenu,since=1.0)
+	 * Get this window's context menu
+	 * @tiresult[UI.Menu|null] This window's context menu or null if it is unset
 	 */
 	this->SetMethod("getContextMenu", &UserWindow::_GetContextMenu);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setIcon,since=0.2) Sets a window's icon
-	 * @tiarg(for=UI.UserWindow.setIcon,type=string,name=icon) path to the icon file
+	 * @tiarg(for=UI.UserWindow.setIcon,type=String,name=icon) path to the icon file
 	 */
 	this->SetMethod("setIcon", &UserWindow::_SetIcon);
 
@@ -1273,49 +1275,47 @@ void UserWindow::_GetTransparencyColor(const kroll::ValueList& args, kroll::Shar
 
 void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsList())
-	{
-		SharedKList list = args.at(0)->ToList();
-		menu = list.cast<MenuItem>();
+	args.VerifyException("setMenu", "?o");
+	SharedMenu menu = NULL;
+	if (args.size() > 0) {
+		menu = args.at(0)->ToObject().cast<Menu>();
 	}
 	this->SetMenu(menu);
 }
 
 void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedKList menu = this->GetMenu();
+	SharedMenu menu = this->GetMenu();
 	if (!menu.isNull())
 	{
-		result->SetList(menu);
+		result->SetObject(menu);
 	}
 	else
 	{
-		result->SetUndefined();
+		result->SetNull();
 	}
 }
 
 void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsList())
-	{
-		SharedKList list = args.at(0)->ToList();
-		menu = list.cast<MenuItem>();
+	args.VerifyException("setContextMenu", "?o");
+	SharedMenu menu = NULL;
+	if (args.size() > 0) {
+		menu = args.at(0)->ToObject().cast<Menu>();
 	}
 	this->SetContextMenu(menu);
 }
 
 void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedKList menu = this->GetContextMenu();
+	SharedMenu menu = this->GetContextMenu();
 	if (!menu.isNull())
 	{
-		result->SetList(menu);
+		result->SetObject(menu);
 	}
 	else
 	{
-		result->SetUndefined();
+		result->SetNull();
 	}
 }
 

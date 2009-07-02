@@ -11,9 +11,8 @@ namespace ti
 	using std::string;
 	using std::vector;
 
-	MenuItem::MenuItem(
-		MenuItemType type, std::string label,
-		std::string iconURL, SharedKMethod eventListener) :
+	MenuItem::MenuItem(MenuItemType type, std::string label,
+		SharedKMethod eventListener, std::string iconURL) :
 			StaticBoundObject(),
 			type(type),
 			enabled(true),
@@ -28,11 +27,11 @@ namespace ti
 
 		if (!eventListener.isNull())
 		{
-			this->AddEventListener();
+			this->AddEventListener(eventListener);
 		}
 
-		this->SetMethod("isSeparatorItem", &MenuItem::_IsSeparatorItem);
-		this->SetMethod("isCheckItem", &MenuItem::_IsCheckItem);
+		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
+		this->SetMethod("isCheck", &MenuItem::_IsCheck);
 
 		if (this->type == NORMAL || this->type == CHECK)
 		{
@@ -66,12 +65,12 @@ namespace ti
 	{
 	}
 
-	void MenuItem::_IsSeparatorItem(const ValueList& args, SharedValue result)
+	void MenuItem::_IsSeparator(const ValueList& args, SharedValue result)
 	{
 		result->SetBool(this->type == SEPARATOR);
 	}
 
-	void MenuItem::_IsCheckItem(const ValueList& args, SharedValue result)
+	void MenuItem::_IsCheck(const ValueList& args, SharedValue result)
 	{
 		result->SetBool(this->type == CHECK);
 	}
@@ -172,16 +171,12 @@ namespace ti
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 
-		// Create a menu item object
-		binding->_CreateMenuItem(args, result);
-		SharedKObject newObject = result->ToObject();
-		SharedMenuItem newItem = newObject.cast<MenuItem>();
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
 		newItem->EnsureHasSubmenu();
-
-		// Add it to this item's submenu
 		this->EnsureHasSubmenu();
-		SharedResult throwAway = Value::NewUndefined();
-		this->submenu->_AppendItem(ArgList(newItem), throwAway);
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
 	}
 
 	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
@@ -189,28 +184,22 @@ namespace ti
 		args.VerifyException("addItem", "?s m|0 s|0");
 		UIBinding* binding = UIBinding::GetInstance();
 
-		// Create a menu item object
-		binding->_CreateMenuItem(args, result);
-		SharedKObject newItem = result->ToObject();
-
-		// Add it to this item's submenu
+		// Create a menu item object and add it to this item's submenu
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
 		this->EnsureHasSubmenu();
-		SharedResult throwAway = Value::NewUndefined();
-		this->submenu->_AppendItem(ArgList(newItem), throwAway);
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
 	}
 
 	void MenuItem::_AddSeparatorItem(const ValueList& args, SharedValue result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
-
-		// Create a menu item object
-		binding->_CreateSeparatorItem(args, result);
-		SharedKObject newItem = result->ToObject();
-
-		// Add it to this item's submenu
+		SharedMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
 		this->EnsureHasSubmenu();
-		SharedResult throwAway = Value::NewUndefined();
-		this->submenu->_AppendItem(ArgList(newItem), throwAway);
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
 	}
 
 	void MenuItem::_AddCheckItem(const ValueList& args, SharedValue result)
@@ -218,32 +207,11 @@ namespace ti
 		UIBinding* binding = UIBinding::GetInstance();
 
 		// Create a menu item object
-		binding->_CreateCheckboxItem(args, result);
-		SharedKObject newItem = result->ToObject();
-
-		// Add it to this item's submenu
+		SharedMenuItem newItem = binding->__CreateCheckMenuItem(args);
 		this->EnsureHasSubmenu();
-		SharedResult throwAway = Value::NewUndefined();
-		this->submenu->_AppendItem(ArgList(newItem), throwAway);
-	}
+		this->submenu->AppendItem(newItem);
 
-	void MenuItem::InvokeCallback()
-	{
-		if (this->callback.isNull())
-		{
-			return;
-		}
-
-		try
-		{
-			this->callback->Call();
-		}
-		catch (ValueException& e)
-		{
-			Logger* logger = Logger::Get("UI.MenuItem");
-			SharedString ss = e.DisplayString();
-			logger->Error("Menu callback failed with exception: %s", ss->c_str());
-		}
+		result->SetObject(newItem);
 	}
 
 	void MenuItem::AddEventListener(SharedKMethod eventListener)
@@ -258,7 +226,15 @@ namespace ti
 			}
 		}
 
-		this->evenListeners.push_back(eventListener);
+		this->eventListeners.push_back(eventListener);
+	}
+
+	void MenuItem::HandleClickEvent(SharedKObject source)
+	{
+		UIBinding::SendEventToListeners(
+			this->eventListeners,
+			UIBinding::CLICKED,
+			source);
 	}
 
 	std::string& MenuItem::GetLabel()
@@ -271,12 +247,12 @@ namespace ti
 		return this->iconPath;
 	}
 
-	bool MenuItem::IsSeparatorItem()
+	bool MenuItem::IsSeparator()
 	{
 		return this->type == SEPARATOR;
 	}
 
-	bool MenuItem::IsCheckItem()
+	bool MenuItem::IsCheck()
 	{
 		return this->type == CHECK;
 	}
@@ -293,7 +269,7 @@ namespace ti
 			UIBinding* binding = UIBinding::GetInstance();
 			SharedMenu newSubmenu = binding->CreateMenu();
 			this->SetSubmenuImpl(newSubmenu);
-			this->submenu = newSubMenu;
+			this->submenu = newSubmenu;
 		}
 	}
 }

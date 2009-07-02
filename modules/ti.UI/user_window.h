@@ -245,10 +245,10 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual std::string GetTransparencyColor() { return ""; }
 		virtual void SetFullscreen(bool fullscreen) = 0;
 		virtual void SetUsingChrome(bool chrome) = 0;
-		virtual void SetMenu(SharedPtr<MenuItem> menu) = 0;
-		virtual SharedPtr<MenuItem> GetMenu() = 0;
-		virtual void SetContextMenu(SharedPtr<MenuItem> menu) = 0;
-		virtual SharedPtr<MenuItem> GetContextMenu() = 0;
+		virtual void SetMenu(SharedMenu menu) = 0;
+		virtual SharedMenu GetMenu() = 0;
+		virtual void SetContextMenu(SharedMenu menu) = 0;
+		virtual SharedMenu GetContextMenu() = 0;
 		virtual void SetIcon(SharedString icon_path) = 0;
 		virtual SharedString GetIcon() = 0;
 		virtual bool IsTopMost() = 0;

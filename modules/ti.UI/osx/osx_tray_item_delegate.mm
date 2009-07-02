@@ -13,7 +13,7 @@
 	{
 		delegate = d;
 		NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
-	 	item = [statusBar statusItemWithLength:NSVariableStatusItemLength];
+		item = [statusBar statusItemWithLength:NSVariableStatusItemLength];
 		[item setTarget:self];
 		[item setAction:@selector(invoke:)];
 	}
@@ -21,7 +21,6 @@
 }
 -(void)dealloc
 {
-	[submenu release];
 	// make sure we remove our tray when this guys dead
 	NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
 	[statusBar removeStatusItem:item];
@@ -29,13 +28,14 @@
 }
 -(void)invoke:(id)sender
 {
-	// first the event first...
+	// 1. Fire the activated event
 	ti::OSXTrayItem *tray = static_cast<ti::OSXTrayItem*>(delegate);
 	tray->Invoke();
-	// then display the submenu
-	if (submenu)
+
+	// 2. Display the tray icon menu
+	if (menu)
 	{
-		[item popUpStatusItemMenu:submenu];
+		[item popUpStatusItemMenu:menu];
 	}
 }
 -(void)setIcon:(NSImage*)path
@@ -46,27 +46,9 @@
 {
 	[item setToolTip:hint];
 }
--(void)addMenu:(SharedMenu)menu
+-(void)setMenu:(NSMenu*)newMenu
 {
-	//if (submenu)
-	//{
-	//	[submenu release];
-	//	submenu = nil;
-	//}
-	//if (menu.isNull())
-	//{
-	//	return;
-	//}
-	//SharedPtr<ti::OSXMenuItem> osx_menu = menu.cast<ti::OSXMenuItem>();
-	//int count = osx_menu->GetChildCount();
-	//if (count == 0) return ;
-	//submenu = ti::OSXUIBinding::MakeMenu(osx_menu);
-	//if ([submenu numberOfItems] == 0)
-	//{
-	//	// this happens if they're all disabled
-	//	[submenu release];
-	//	submenu = nil;
-	//}
+	menu = newMenu;
 }
 
 @end

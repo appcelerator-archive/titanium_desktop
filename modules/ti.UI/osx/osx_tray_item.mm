@@ -6,10 +6,12 @@
 #include "../ui_module.h"
 namespace ti
 {
-	OSXTrayItem::OSXTrayItem(SharedString iconPath, SharedKMethod cb)
+	OSXTrayItem::OSXTrayItem(SharedString iconPath, SharedKMethod cb) :
+		nativeMenu(0),
+		menu(0),
+		callback(cb),
+		delegate([[OSXTrayDelegate alloc] initWithTray:this])
 	{
-		this->callback = cb;
-		this->delegate = [[OSXTrayDelegate alloc] initWithTray:this];
 		this->SetIcon(iconPath);
 	}
 
@@ -19,6 +21,10 @@ namespace ti
 		{
 			[delegate release];
 			delegate = nil;
+		}
+
+		if (!this->menu.isNull() && this->nativeMenu) {
+			this->menu->DestroyNative(this->nativeMenu);
 		}
 	}
 
@@ -35,10 +41,27 @@ namespace ti
 			[delegate setIcon:image];
 		}
 	}
+
 	void OSXTrayItem::SetMenu(SharedMenu menu)
 	{
-		[delegate addMenu:menu];
+		if (menu.get() == this->menu.get()) {
+			return;
+		}
+
+		SharedPtr<OSXMenu> newMenu = menu.cast<OSXMenu>();
+		NSMenu* newNativeMenu = nil;
+		if (!newMenu.isNull()) {
+			newNativeMenu = newMenu->CreateNative(true);
+		}
+		[delegate setMenu:newNativeMenu];
+
+		if (!this->menu.isNull() && this->nativeMenu) {
+			this->menu->DestroyNative(this->nativeMenu);
+		}
+		this->menu = newMenu;
+		this->nativeMenu = nativeMenu;
 	}
+
 	void OSXTrayItem::SetHint(SharedString hint)
 	{
 		std::string label = *hint;

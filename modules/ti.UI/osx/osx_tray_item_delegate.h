@@ -13,12 +13,12 @@
 {
 	ti::OSXTrayItem *delegate;
 	NSStatusItem *item;
-	NSMenu *submenu;
+	NSMenu *menu;
 }
 -(id)initWithTray:(ti::OSXTrayItem*)item;
 -(void)invoke:(id)sender;
 -(void)setIcon:(NSImage*)path;
 -(void)setHint:(NSString*)hint;
--(void)addMenu:(SharedMenu)menu;
+-(void)setMenu:(NSMenu*)newMenu;
 
 @end

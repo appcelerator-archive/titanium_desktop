@@ -22,10 +22,10 @@ namespace ti
 		void _GetLength(const ValueList& args, SharedValue result);
 		void _Clear(const ValueList& args, SharedValue result);
 
-		void Menu::AppendItem(SharedMenuItem item)
-		SharedMenuItem Menu::GetItemAt(size_t index)
-		void Menu::InsertItemAt(SharedMenuItem item, size_t index)
-		void Menu::RemoveItemAt(size_t index)
+		void Menu::AppendItem(SharedMenuItem item);
+		SharedMenuItem Menu::GetItemAt(size_t index);
+		void Menu::InsertItemAt(SharedMenuItem item, size_t index);
+		void Menu::RemoveItemAt(size_t index);
 
 		// Platform-specific implementation
 		virtual void AppendItemImpl(SharedMenuItem item) = 0;

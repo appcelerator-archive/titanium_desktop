@@ -37,17 +37,9 @@ namespace ti
 	void Menu::_GetItemAt(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("getItemAt", "i");
-		size_t index = static_cast<size_t>(args.GetInt(0))
+		size_t index = static_cast<size_t>(args.GetInt(0));
 		SharedMenuItem item = this->GetItemAt(index);
-
-		if (!item)
-		{
-			result->SetNull();
-		}
-		else
-		{
-			result->SetObject();
-		}
+		result->SetObject(item);
 	}
 
 	void Menu::_InsertItemAt(const ValueList& args, SharedValue result)
@@ -55,7 +47,7 @@ namespace ti
 		args.VerifyException("insertItemAt", "o,i");
 		SharedKObject o = args.at(0)->ToObject();
 		SharedMenuItem item = o.cast<MenuItem>();
-		size_t index = static_cast<size_t>(args.GetInt(1))
+		size_t index = static_cast<size_t>(args.GetInt(1));
 
 		this->InsertItemAt(item, index);
 	}
@@ -63,7 +55,7 @@ namespace ti
 	void Menu::_RemoveItemAt(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("removeItemAt", "i");
-		size_t index = static_cast<size_t>(args.GetInt(0))
+		size_t index = static_cast<size_t>(args.GetInt(0));
 
 		this->RemoveItemAt(index);
 	}
@@ -124,8 +116,8 @@ namespace ti
 	{
 		if (index >= 0 && index < this->children.size())
 		{
-			this->RemoveItemAtImpl(sindex);
-			vector<SharedMenuItem>::iterator i = this->children.begin() + sindex;
+			this->RemoveItemAtImpl(index);
+			vector<SharedMenuItem>::iterator i = this->children.begin() + index;
 			this->children.erase(i);
 		}
 		else

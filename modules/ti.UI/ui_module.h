@@ -10,13 +10,16 @@
 
 namespace ti {
 	class UIBinding;
-	class WindowBinding;
+	class Menu;
 	class MenuItem;
 	class TrayItem;
 	class UserWindow;
 
 	typedef SharedPtr<UserWindow> SharedUserWindow;
 	typedef SharedPtr<UIBinding> SharedUIBinding;
+	typedef SharedPtr<Menu> SharedMenu;
+	typedef SharedPtr<MenuItem> SharedMenuItem;
+	typedef SharedPtr<TrayItem> SharedTrayItem;
 }
 
 #ifdef OS_WIN32
@@ -32,9 +35,11 @@ namespace ti {
 #include <iostream>
 #include "window_config.h"
 #include "user_window.h"
+#include "menu.h"
 #include "menu_item.h"
 #include "tray_item.h"
 #include "ui_binding.h"
+
 
 #ifdef OS_LINUX
 #include "gtk/ui_module_gtk.h"
@@ -79,34 +84,14 @@ namespace ti {
 		static bool IsResourceLocalFile(std::string string);
 
 		static UIModule* GetInstance() { return instance_; }
-
+		SharedUIBinding GetUIBinding() { return uiBinding; }
 		void Exiting(int exitcode);
 		void Start();
 
-		SharedUIBinding GetUIBinding() { return uiBinding; }
-		
-		static void SetMenu(SharedPtr<MenuItem> menu);
-		static SharedPtr<MenuItem> GetMenu();
-		static void SetContextMenu(SharedPtr<MenuItem> menu);
-		static SharedPtr<MenuItem> GetContextMenu();
-		static void SetIcon(SharedString icon_path);
-		static SharedString GetIcon();
-		static void AddTrayItem(SharedPtr<TrayItem>);
-		static void ClearTrayItems();
-		static void UnregisterTrayItem(TrayItem* item);
-		
-
 		protected:
-		static SharedKObject global;
-		static SharedPtr<MenuItem> app_menu;
-		static SharedPtr<MenuItem> app_context_menu;
-		static SharedString icon_path;
-		static std::vector<SharedPtr<TrayItem> > tray_items;
-		static UIModule* instance_;
-		
-		SharedUIBinding uiBinding;
-		
 		DISALLOW_EVIL_CONSTRUCTORS(UIModule);
+		static UIModule* instance_;
+		SharedUIBinding uiBinding;
 
 	};
 }

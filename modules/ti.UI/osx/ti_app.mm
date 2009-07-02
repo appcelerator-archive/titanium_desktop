@@ -24,16 +24,16 @@ static TiApplication *tiAppInstance = NULL;
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
 	OSXUIBinding *ui = static_cast<OSXUIBinding*>(binding);
-	SharedPtr<MenuItem> item = ui->GetDockMenu();
-	if (!item.isNull())
-	{
-		SharedPtr<ti::OSXMenuItem> osx_menu = item.cast<ti::OSXMenuItem>();
-		NSMenu *menu = ti::OSXUIBinding::MakeMenu(osx_menu);
-		[menu setAutoenablesItems:NO];
-		[menu autorelease];
-		return menu;
+	SharedPtr<OSXMenu> menu = ui->GetDockMenu().cast<OSXMenu>();
+
+	if (!menu.isNull()) {
+		NSMenu* nativeMenu = menu->CreateNative(false);
+		[nativeMenu autorelease];
+		return nativeMenu;
+
+	} else {
+		return nil;
 	}
-	return nil;
 }
 - (id)initWithBinding:(ti::UIBinding*)b host:(kroll::Host*)h
 {

@@ -393,7 +393,6 @@
 		return;
 	}
 
-	Logger* logger = Logger::Get("UI.WebViewDelegate");
 	std::string err = [[NSString stringWithFormat:@"Error loading URL: %@. %@", url,[error localizedDescription]] UTF8String];
 	logger->Error(err);
 
@@ -644,27 +643,18 @@
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems
 {
+	NSMutableArray *menuItems = [[[NSMutableArray alloc] init] autorelease];
+
 	UserWindow *uw = [window userWindow];
-	SharedPtr<MenuItem> menu = uw->GetContextMenu();
-	NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
-	// window takes precedent - try him first
-	if (menu.isNull())
-	{
-		// if no window, try the app context
-		menu = UIModule::GetContextMenu();
+	SharedPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
+	if (menu.isNull()) {
+		menu = UIBinding::GetInstance()->GetContextMenu().cast<OSXMenu>();
 	}
-	if (!menu.isNull())
-	{
-		for (unsigned int c=0;c<menu->Size();c++)
-		{
-			SharedKObject item = menu->At(c)->ToObject();
-			SharedPtr<OSXMenuItem> osx_menu = item.cast<OSXMenuItem>();
-			NSMenuItem *native = osx_menu->CreateNative();
-			[array addObject:native]; 
-			[native release];
-		}
+
+	if (!menu.isNull()) {
+		menu->AddChildrenToNSArray(menuItems);
 	}
-	return array;
+	return menuItems;
 }
 
 #pragma mark -

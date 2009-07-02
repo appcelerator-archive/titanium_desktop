@@ -3,9 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#import "native_window.h"
-#import <Carbon/Carbon.h>
-#import "../user_window.h"
+#include "../ui_module.h"
 
 @implementation NativeWindow
 - (BOOL)canBecomeKeyWindow
