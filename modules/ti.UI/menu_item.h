@@ -19,9 +19,7 @@ namespace ti
 		MenuItem();
 		~MenuItem();
 
-		void SetMethod(const char *name,
-		               void (MenuItem::*method)(const ValueList&, SharedValue));
-
+		void SetMethod(const char *name, void (MenuItem::*method)(const ValueList&, SharedValue));
 		void SetParent(MenuItem*);
 		MenuItem* GetParent();
 
@@ -33,11 +31,8 @@ namespace ti
 		void _IsSubMenu(const ValueList& args, SharedValue result);
 
 		virtual SharedValue AddSeparator() = 0;
-		virtual SharedValue AddItem(SharedValue label,
-		                    SharedValue callback,
-		                    SharedValue icon_url) = 0;
-		virtual SharedValue AddSubMenu(SharedValue label,
-		                               SharedValue icon_url) = 0;
+		virtual SharedValue AddItem(SharedValue label, SharedValue callback, SharedValue icon_url) = 0;
+		virtual SharedValue AddSubMenu(SharedValue label, SharedValue icon_url) = 0;
 		void _AddSeparator(const ValueList& args, SharedValue result);
 		void _AddItem(const ValueList& args, SharedValue result);
 		void _AddSubMenu(const ValueList& args, SharedValue result);
@@ -45,11 +40,8 @@ namespace ti
 		SharedValue AddToListModel(MenuItem* item);
 
 		void MakeSeparator();
-		void MakeItem(SharedValue label,
-		              SharedValue callback,
-		              SharedValue icon_url);
-		void MakeSubMenu(SharedValue label,
-		                 SharedValue icon_url);
+		void MakeItem(SharedValue label, SharedValue callback, SharedValue icon_url);
+		void MakeSubMenu(SharedValue label, SharedValue icon_url);
 
 		virtual void Enable() = 0;
 		virtual void Disable() = 0;

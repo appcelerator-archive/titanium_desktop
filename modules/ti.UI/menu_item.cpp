@@ -12,7 +12,6 @@ namespace ti
 
 	MenuItem::MenuItem() : AccessorBoundList("MenuItem")
 	{
-
 		// query methods
 		/**
 		 * @tiapi(method=True,name=UI.Menu.isSeparator,since=0.2) Checks whether a menu item is a separator

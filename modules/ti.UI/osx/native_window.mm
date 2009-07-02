@@ -183,7 +183,7 @@
    	return [super constrainFrameRect:frameRect toScreen:screen];
 }
 
-- (void)setFullScreen:(BOOL)yn
+- (void)setFullscreen:(BOOL)yn
 {
 	if (yn)
 	{
@@ -236,7 +236,6 @@
 	std::string url_str = AppConfig::Instance()->InsertAppIDIntoURL(config->GetURL());
 	NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
-	[self fireWindowEvent:OPENED];
 }
 - (void)close
 {
@@ -267,9 +266,9 @@
 		[self makeKeyAndOrderFront:self];
 		[NSApp activateIgnoringOtherApps:YES];
 		
-		if (config->IsFullScreen())
+		if (config->IsFullscreen())
 		{
-			[self setFullScreen:YES];
+			[self setFullscreen:YES];
 		}
 	}
 	[self invalidateShadow];

@@ -38,8 +38,7 @@ namespace ti
 	/*static*/
 	SharedPtr<File> FileSystemUtils::ToFile(SharedKObject object)
 	{
-		SharedKObject unwrapped = KObject::Unwrap(object);
-		SharedPtr<File> file = unwrapped.cast<File>();
+		SharedPtr<File> file = object.cast<File>();
 		return file;
 	}
 }

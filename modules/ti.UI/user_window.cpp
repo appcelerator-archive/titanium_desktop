@@ -85,16 +85,28 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.2) Checks whether a window is in fullscreen
-	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
+	 * @tiapi(method=True,name=UI.UserWindow.isFullScreen,since=0.2,deprecated=True) Checks whether a window is in fullscreen
+	 * @tiarg(for=UI.UserWindow.isFullScreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
 	 */
-	this->SetMethod("isFullScreen", &UserWindow::_IsFullScreen);
+	this->SetMethod("isFullScreen", &UserWindow::_IsFullscreen);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullScreen,since=0.2) Makes a window fullscreen
+	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=1.0) Checks whether a window is in fullscreen
+	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
+	 */
+	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.setFullScreen,since=0.2,deprecated=True) Makes a window fullscreen
 	 * @tiarg(for=UI.UserWindow.setFullScreen,name=fullscreen,type=boolean) set to true for fullscreen, false if otherwise
 	 */
-	this->SetMethod("setFullScreen", &UserWindow::_SetFullScreen);
+	this->SetMethod("setFullScreen", &UserWindow::_SetFullscreen);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=1.0) Makes a window fullscreen
+	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=boolean) set to true for fullscreen, false if otherwise
+	 */
+	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
 
 	/**
 	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.getID,since=0.2) Returns the id of a window
@@ -676,26 +688,26 @@ void UserWindow::_IsUsingScrollbars(const kroll::ValueList& args, kroll::SharedV
 	}
 }
 
-void UserWindow::_IsFullScreen(const kroll::ValueList& args, kroll::SharedValue result)
+void UserWindow::_IsFullscreen(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	if (this->active)
 	{
-		result->SetBool(this->IsFullScreen());
+		result->SetBool(this->IsFullscreen());
 	}
 	else
 	{
-		result->SetBool(this->config->IsFullScreen());
+		result->SetBool(this->config->IsFullscreen());
 	}
 }
 
-void UserWindow::_SetFullScreen(const kroll::ValueList& args, kroll::SharedValue result)
+void UserWindow::_SetFullscreen(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	args.VerifyException("setFullScreen", "b");
+	args.VerifyException("setFullscreen", "b");
 	bool b = args.at(0)->ToBool();
-	this->config->SetFullScreen(b);
+	this->config->SetFullscreen(b);
 	if (this->active)
 	{
-		this->SetFullScreen(b);
+		this->SetFullscreen(b);
 	}
 }
 
@@ -1264,7 +1276,7 @@ void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue resul
 	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 	if (args.size() > 0 && args.at(0)->IsList())
 	{
-		SharedKList list = KList::Unwrap(args.at(0)->ToList());
+		SharedKList list = args.at(0)->ToList();
 		menu = list.cast<MenuItem>();
 	}
 	this->SetMenu(menu);
@@ -1288,7 +1300,7 @@ void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValu
 	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
 	if (args.size() > 0 && args.at(0)->IsList())
 	{
-		SharedKList list = KList::Unwrap(args.at(0)->ToList());
+		SharedKList list = args.at(0)->ToList();
 		menu = list.cast<MenuItem>();
 	}
 	this->SetContextMenu(menu);
@@ -1582,6 +1594,9 @@ void UserWindow::FireEvent(UserWindowEvent eventType, SharedKObject event)
 			break;
 		case MAXIMIZED:
 			name = UIBinding::MAXIMIZED;
+			break;
+		case MINIMIZED:
+			name = UIBinding::MINIMIZED;
 			break;
 		case RESIZED:
 			name = UIBinding::RESIZED;

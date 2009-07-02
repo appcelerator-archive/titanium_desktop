@@ -80,8 +80,8 @@ class UserWindow : public kroll::StaticBoundObject {
 		void _IsUsingChrome(const kroll::ValueList&, kroll::SharedValue);
 		void _SetUsingChrome(const kroll::ValueList&, kroll::SharedValue);
 		void _IsUsingScrollbars(const kroll::ValueList&, kroll::SharedValue);
-		void _IsFullScreen(const kroll::ValueList&, kroll::SharedValue);
-		void _SetFullScreen(const kroll::ValueList&, kroll::SharedValue);
+		void _IsFullscreen(const kroll::ValueList&, kroll::SharedValue);
+		void _SetFullscreen(const kroll::ValueList&, kroll::SharedValue);
 		void _GetId(const kroll::ValueList&, kroll::SharedValue);
 
 		void _Open(const kroll::ValueList&, kroll::SharedValue);
@@ -201,7 +201,7 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual void Unfocus() = 0;
 		virtual bool IsUsingChrome() = 0;
 		virtual bool IsUsingScrollbars() = 0;
-		virtual bool IsFullScreen() = 0;
+		virtual bool IsFullscreen() = 0;
 		virtual std::string GetId() = 0;
 		virtual void Open();
 		virtual void Close();
@@ -243,7 +243,7 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual double GetTransparency() = 0;
 		virtual void SetTransparency(double transparency) = 0;
 		virtual std::string GetTransparencyColor() { return ""; }
-		virtual void SetFullScreen(bool fullscreen) = 0;
+		virtual void SetFullscreen(bool fullscreen) = 0;
 		virtual void SetUsingChrome(bool chrome) = 0;
 		virtual void SetMenu(SharedPtr<MenuItem> menu) = 0;
 		virtual SharedPtr<MenuItem> GetMenu() = 0;

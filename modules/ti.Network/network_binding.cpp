@@ -30,85 +30,89 @@ namespace ti
 		SharedValue online = Value::NewBool(true);
 		/**
 		 * @tiapi(property=True,name=Network.online,since=0.2) Whether or not the system is connected to the internet
-		 * @tiresult(for=Network.online,type=boolean) true if the system is connected to the internet, false if otherwise
+		 * @tiresult(for=Network.online,type=Boolean) true if the system is connected to the internet, false if otherwise
 		 */
 		this->Set("online", online);
 
 		// methods that are available on Titanium.Network
 		/**
 		 * @tiapi(method=True,name=Network.createTCPSocket,since=0.2) Creates a TCPSocket object
-		 * @tiarg(for=Network.createTCPSocket,name=host,type=string) the hostname to connect to
-		 * @tiarg(for=Network.createTCPSocket,name=port,type=integer) the port to use
-		 * @tiresult(for=Network.createTCPSocket,type=object) a TCPSocket object
+		 * @tiarg(for=Network.createTCPSocket,name=host,type=String) the hostname to connect to
+		 * @tiarg(for=Network.createTCPSocket,name=port,type=Number) the port to use
+		 * @tiresult(for=Network.createTCPSocket,type=Network.TCPSocket) a TCPSocket object
 		 */
 		this->SetMethod("createTCPSocket",&NetworkBinding::CreateTCPSocket);
 		/**
 		 * @tiapi(method=True,name=Network.createIRCClient,since=0.2) Creates an IRCClient object
-		 * @tiresult(for=Network.createIRCClient,type=object) an IRCClient object
+		 * @tiresult(for=Network.createIRCClient,type=Network.IRCClient) an IRCClient object
 		 */
 		this->SetMethod("createIRCClient",&NetworkBinding::CreateIRCClient);
 		/**
 		 * @tiapi(method=True,name=Network.createIPAddress,since=0.2) Creates an IPAddress object
-		 * @tiarg(for=Network.createIPAddress,name=address,type=string) the IP address
-		 * @tiresult(for=Network.createIPAddress,type=object) an IPAddress object
+		 * @tiarg(for=Network.createIPAddress,name=address,type=String) the IP address
+		 * @tiresult(for=Network.createIPAddress,type=Network.IPAddress) an IPAddress object
 		 */
 		this->SetMethod("createIPAddress",&NetworkBinding::CreateIPAddress);
 		/**
-		 * @tiapi(method=True,name=Network.createHTTPClient,since=0.3) Creates an HTTPClient objecy
-		 * @tiresult(for=Network.createHTTPClient,type=object) an HTTPClient object
+		 * @tiapi(method=True,name=Network.createHTTPClient,since=0.3) Creates an HTTPClient object
+		 * @tiresult(for=Network.createHTTPClient,type=Network.HTTPClient) an HTTPClient object
 		 */
 		this->SetMethod("createHTTPClient",&NetworkBinding::CreateHTTPClient);
 		/**
 		 * @tiapi(method=True,name=Network.createHTTPServer,since=0.4) Creates an HTTPServer object
-		 * @tiresult(for=Network.createHTTPServer,type=object) a HTTPServer object
+		 * @tiresult(for=Network.createHTTPServer,type=Network.HTTPServer) a HTTPServer object
 		 */
 		this->SetMethod("createHTTPServer",&NetworkBinding::CreateHTTPServer);
 		/**
 		 * @tiapi(method=True,name=Network.getHostByName,since=0.2) Returns a Host object using a hostname
-		 * @tiarg(for=Network.getHostByName,name=name,type=string) the hostname
-		 * @tiresult(for=Network.getHostByName,type=object) a Host object referencing the hostname
+		 * @tiarg(for=Network.getHostByName,name=name,type=String) the hostname
+		 * @tiresult(for=Network.getHostByName,type=Network.Host) a Host object referencing the hostname
 		 */
 		this->SetMethod("getHostByName",&NetworkBinding::GetHostByName);
 		/**
 		 * @tiapi(method=True,name=Network.getHostByAddress,since=0.2) Returns a Host object using an address
-		 * @tiarg(for=Network.getHostByAddress,name=address,type=string) the address
-		 * @tiresult(for=Network.getHostByAddress,type=object) a Host object referencing the address
+		 * @tiarg(for=Network.getHostByAddress,name=address,type=String) the address
+		 * @tiresult(for=Network.getHostByAddress,type=Network.Host) a Host object referencing the address
 		 */
 		this->SetMethod("getHostByAddress",&NetworkBinding::GetHostByAddress);
 		/**
 		 * @tiapi(method=True,name=Network.encodeURIComponent,since=0.3) Encodes a URI Component
-		 * @tiarg(for=Network.encodeURIComponent,name=value,type=string) value to encode
-		 * @tiresult(for=Network.encodeURIComponent,type=string) the encoded value
+		 * @tiarg(for=Network.encodeURIComponent,name=value,type=String) value to encode
+		 * @tiresult(for=Network.encodeURIComponent,type=String) the encoded value
 		 */
 		this->SetMethod("encodeURIComponent",&NetworkBinding::EncodeURIComponent);
 		/**
 		 * @tiapi(method=True,name=Network.decodeURIComponent,since=0.3) Decodes a URI component
-		 * @tiarg(for=Network.decodeURIComponent,name=value,type=string) value to decode
-		 * @tiresult(for=Network.decodeURIComponent,type=string) the decoded value
+		 * @tiarg(for=Network.decodeURIComponent,name=value,type=String) value to decode
+		 * @tiresult(for=Network.decodeURIComponent,type=String) the decoded value
 		 */
 		this->SetMethod("decodeURIComponent",&NetworkBinding::DecodeURIComponent);
 
 		/**
 		 * @tiapi(method=True,name=Network.addConnectivityListener,since=0.2) Adds a connectivity change listener that fires when the system connects or disconnects from the internet
 		 * @tiarg(for=Network.addConnectivityListener,type=method,name=listener) a callback method to be fired when the system connects or disconnects from the internet
-		 * @tiresult(for=Network.addConnectivityListener,type=integer) a callback id for the event
+		 * @tiresult(for=Network.addConnectivityListener,type=Number) a callback id for the event
 		 */
 		this->SetMethod("addConnectivityListener",&NetworkBinding::AddConnectivityListener);
 		/**
 		 * @tiapi(method=True,name=Network.removeConnectivityListener,since=0.2) Removes a connectivity change listener
-		 * @tiarg(for=Network.removeConnectivityListener,type=integer,name=id) the callback id of the method
+		 * @tiarg(for=Network.removeConnectivityListener,type=Number,name=id) the callback id of the method
 		 */
 		this->SetMethod("removeConnectivityListener",&NetworkBinding::RemoveConnectivityListener);
 
 		/**
-		 * @tiapi(method=True,name=Network.SetProxy,since=0.2) Sets the proxy parameters of the system
-		 * @tiarg(for=Network.SetProxy,type=integer,name=id) true if the proxy parameters were successfully set, false if otherwise
+		 * @tiapi(method=True,name=Network.setProxy,since=0.2) Sets the proxy parameters of the system
+		 * @tiarg(for=Network.setProxy,name=hostname,type=Number) the proxy hostname
+		 * @tiarg(for=Network.setProxy,name=port,type=String) the proxy port
+		 * @tiarg(for=Network.setProxy,name=username,type=String) the proxy username
+		 * @tiarg(for=Network.setProxy,name=password,type=String) the proxy password
+		 * @tiresult(for=Network.setProxy,type=Boolean) returns true if the new values are accepted, false on error.
 		 */
 		this->SetMethod("setProxy",&NetworkBinding::SetProxy);
 
 		/**
-		 * @tiapi(method=True,name=Network.GetProxy,since=0.2) Returns the proxy parameters of the system
-		 * @tiarg(for=Network.GetProxy,type=integer,name=id) a Proxy object
+		 * @tiapi(method=True,name=Network.getProxy,since=0.2) Returns the proxy parameters of the system
+		 * @tiresult(for=Network.getProxy,type=Network.Proxy,name=id) a Proxy object
 		 */
 		this->SetMethod("getProxy",&NetworkBinding::GetProxy);
 
@@ -153,7 +157,7 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject obj = KObject::Unwrap(args.at(0)->ToObject());
+			SharedKObject obj = args.at(0)->ToObject();
 			SharedPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{

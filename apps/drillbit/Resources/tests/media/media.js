@@ -36,30 +36,31 @@ describe("ti.Media tests", {
 	
 	test_play_sound_as_async: function(callback)
 	{
-		// This test has to be rewritten to work asynchronously
+		var sound = Titanium.Media.createSound("app://sound.wav");
+		sound.play();
+		
+		var timer = 0;
+		
+		setTimeout(function(){
+			value_of(sound.isPlaying()).should_be_true();
+			sound.pause();
+			value_of(sound.isPlaying()).should_be_false();
+			value_of(sound.isPaused()).should_be_true();
+			value_of(sound.isLooping()).should_be_false();
 
-		var sound = Titanium.Media.createSound(Titanium.App.appURLToPath("app://sound.wav"));
-		sound.play();
-		
-		value_of(sound.isPlaying()).should_be_true();
-		sound.pause();
-		value_of(sound.isPlaying()).should_be_false();
-		value_of(sound.isPaused()).should_be_true();
-		value_of(sound.isLooping()).should_be_false();
-		
-		// FIXME -- these seem to be broken
-		//sound.setLooping(true);
-		//value_of(sound.isLooping()).should_be_true();
-		//sound.setVolume(55);
-		//value_of(sound.getVolume()).should_be(55);
-		sound.reload();
-		
-		var timer = null;
-		sound.onComplete(function(){
-			clearTimeout(timer);
-			callback.passed();
-		});
-		sound.play();
+			// FIXME -- these seem to be broken
+			//sound.setLooping(true);
+			//value_of(sound.isLooping()).should_be_true();
+			//sound.setVolume(55);
+			//value_of(sound.getVolume()).should_be(55);
+
+			sound.onComplete(function(){
+				clearTimeout(timer);
+				value_of(sound.isPlaying()).should_be_false();
+				callback.passed();
+			});
+			sound.play();
+		}, 1000);
 		
 		timer = setTimeout(function(){
 			callback.failed("sound onComplete timed out");

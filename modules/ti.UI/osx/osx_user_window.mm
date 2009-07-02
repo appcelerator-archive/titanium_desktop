@@ -13,7 +13,7 @@ namespace ti
 	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
-		if (!config->IsUsingChrome() || config->IsFullScreen())
+		if (!config->IsUsingChrome() || config->IsFullscreen())
 		{
 			return NSBorderlessWindowMask | NSTexturedBackgroundWindowMask ;
 		}
@@ -25,12 +25,12 @@ namespace ti
 
 	OSXUserWindow::OSXUserWindow(WindowConfig* config, SharedUserWindow& parent) :
 		UserWindow(config, parent),
-		window(nil),
+		nativeWindow(nil),
 		opened(false),
 		closed(false),
 		osx_binding(binding.cast<OSXUIBinding>())
 	{
-		// Initialization of the window and its properties now happen in Open(),
+		// Initialization of the native window and its properties now happen in Open(),
 		// so that developers can tweak window properties before comitting to them
 		// by calling Open(...)
 	}
@@ -44,29 +44,29 @@ namespace ti
 		// Set up the size and position of the
 		// window using our Set<...> methods so
 		// we avoid duplicating the logic here.
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 			frame = NSMakeRect(0, 0, 10, 10);
 
-		window = [[NativeWindow alloc]
+		nativeWindow = [[NativeWindow alloc]
 			initWithContentRect: frame
 			styleMask: mask
 			backing: NSBackingStoreBuffered
 			defer: false];
 
-		if (!config->IsFullScreen())
+		if (!config->IsFullscreen())
 		{
 			this->real_x = config->GetX();
 			this->real_y = config->GetY();
 			this->real_w = config->GetWidth();
 			this->real_h = config->GetHeight();
 			NSRect rect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
-			[window setFrame:rect display:NO animate:NO];
+			[nativeWindow setFrame:rect display:NO animate:NO];
 
 			this->ReconfigureWindowConstraints();
 			if (!config->IsResizable())
 			{
-				[window setMinSize: rect.size];
-				[window setMaxSize: rect.size];
+				[nativeWindow setMinSize: rect.size];
+				[nativeWindow setMaxSize: rect.size];
 			}
 		}
 
@@ -74,28 +74,29 @@ namespace ti
 		this->SetMaximizable(config->IsMaximizable());
 		this->SetMinimizable(config->IsMinimizable());
 
-		[window setupDecorations:config host:binding->GetHost() userwindow:this];
+		[nativeWindow setupDecorations:config host:binding->GetHost() userwindow:this];
 		if (OSXUserWindow::initial)
 		{
 			OSXUserWindow::initial = false;
-			[window setInitialWindow:YES];
+			[nativeWindow setInitialWindow:YES];
 		}
 
 		this->SetTopMost(config->IsTopMost());
 
 		if (config->IsMaximized())
 		{
-			[window zoom:window];
+			[nativeWindow zoom:nativeWindow];
 		}
 
 		if (config->IsMinimized())
 		{
-			[window miniaturize:window];
+			[nativeWindow miniaturize:nativeWindow];
 		}
 
 		opened = true;
-		[window open];
+		[nativeWindow open];
 		UserWindow::Open();
+		this->FireEvent(OPENED);
 	}
 
 	OSXUserWindow::~OSXUserWindow()
@@ -105,18 +106,18 @@ namespace ti
 
 	void OSXUserWindow::Hide()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->Unfocus();
-			[window fireWindowEvent:HIDDEN];
+			[nativeWindow fireWindowEvent:HIDDEN];
 		}
 	}
 
 	void OSXUserWindow::Focus()
 	{
-		if (window != nil && ![window isKeyWindow])
+		if (nativeWindow != nil && ![nativeWindow isKeyWindow])
 		{
-			[window makeKeyAndOrderFront:nil];
+			[nativeWindow makeKeyAndOrderFront:nil];
 			this->Focused();
 		}
 	}
@@ -125,43 +126,43 @@ namespace ti
 	{
 		// Cocoa doesn't really have a concept of blurring a window, but
 		// we can send the window to the back of the window list.
-		if (window != nil && [window isKeyWindow])
+		if (nativeWindow != nil && [nativeWindow isKeyWindow])
 		{
-			[window orderBack:nil];
+			[nativeWindow orderBack:nil];
 			this->Unfocused();
 		}
 	}
 
 	void OSXUserWindow::Show()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->Focus();
-			[window fireWindowEvent:SHOWN];
+			[nativeWindow fireWindowEvent:SHOWN];
 		}
 	}
 
 	void OSXUserWindow::Minimize()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window miniaturize:window];
+			[nativeWindow miniaturize:nativeWindow];
 		}
 	}
 
 	void OSXUserWindow::Unminimize()
 	{
-		if (window != nil && [window isMiniaturized])
+		if (nativeWindow != nil && [nativeWindow isMiniaturized])
 		{
-			[window deminiaturize:window];
+			[nativeWindow deminiaturize:nativeWindow];
 		}
 	}
 
 	bool OSXUserWindow::IsMinimized()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			return [window isMiniaturized];
+			return [nativeWindow isMiniaturized];
 		}
 		else
 		{
@@ -171,25 +172,25 @@ namespace ti
 
 	void OSXUserWindow::Maximize()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window zoom:window];
+			[nativeWindow zoom:nativeWindow];
 		}
 	}
 	
 	void OSXUserWindow::Unmaximize()
 	{
-		if (window != nil && [window isZoomed])
+		if (nativeWindow != nil && [nativeWindow isZoomed])
 		{
-			[window zoom:window];
+			[nativeWindow zoom:nativeWindow];
 		}
 	}
 
 	bool OSXUserWindow::IsMaximized()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			return [window isZoomed];
+			return [nativeWindow isZoomed];
 		}
 		else
 		{
@@ -207,9 +208,9 @@ namespace ti
 		return this->config->IsUsingScrollbars();
 	}
 
-	bool OSXUserWindow::IsFullScreen()
+	bool OSXUserWindow::IsFullscreen()
 	{
-		return this->config->IsFullScreen();
+		return this->config->IsFullscreen();
 	}
 
 	std::string OSXUserWindow::GetId()
@@ -219,12 +220,12 @@ namespace ti
 
 	void OSXUserWindow::Close()
 	{
-		if (window != nil && !closed)
+		if (nativeWindow != nil && !closed)
 		{
 			opened = false;
 			closed = true;
-			[window close];
-			window = nil; // don't release
+			[nativeWindow close];
+			nativeWindow = nil; // don't release
 			UserWindow::Close();
 		}
 	}
@@ -232,7 +233,7 @@ namespace ti
 	NSScreen* OSXUserWindow::GetWindowScreen()
 	{
 
-		NSScreen* screen = [window screen];
+		NSScreen* screen = [nativeWindow screen];
 		if (screen == nil) 
 		{
 			// Window is offscreen, so set things relative to the main screen.
@@ -247,8 +248,8 @@ namespace ti
 
 	NSRect OSXUserWindow::CalculateWindowFrame(double x, double y, double width, double height)
 	{
-		NSRect frame = [window frame];
-		NSRect contentFrame = [[window contentView] frame];
+		NSRect frame = [nativeWindow frame];
+		NSRect contentFrame = [[nativeWindow contentView] frame];
 		NSRect screenFrame = [this->GetWindowScreen() frame];
 		
 		// Center frame, if requested
@@ -276,12 +277,12 @@ namespace ti
 
 	double OSXUserWindow::GetX()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
 			NSRect screenFrame = [this->GetWindowScreen() frame];
-			return [window frame].origin.x - screenFrame.origin.x;
+			return [nativeWindow frame].origin.x - screenFrame.origin.x;
 		}
 		else
 		{
@@ -291,25 +292,25 @@ namespace ti
 	
 	void OSXUserWindow::SetX(double x)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->real_x = x; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(x, real_y, real_w, real_h);
-			[window setFrameOrigin: newRect.origin];
+			[nativeWindow setFrameOrigin: newRect.origin];
 		}
 	}
 
 	double OSXUserWindow::GetY()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
 			NSRect screenFrame = [this->GetWindowScreen() frame];
-			double y = [window frame].origin.y - screenFrame.origin.y;
+			double y = [nativeWindow frame].origin.y - screenFrame.origin.y;
 
 			// Adjust for the cartesian coordinate system
-			y = screenFrame.size.height - y - [window frame].size.height;
+			y = screenFrame.size.height - y - [nativeWindow frame].size.height;
 			return y;
 		}
 		else
@@ -320,19 +321,19 @@ namespace ti
 
 	void OSXUserWindow::SetY(double y)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->real_y = y; // Preserve input value
 			NSRect newRect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
-			[window setFrameOrigin: newRect.origin];
+			[nativeWindow setFrameOrigin: newRect.origin];
 		}
 	}
 
 	double OSXUserWindow::GetWidth()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			return [[window contentView] frame].size.width;
+			return [[nativeWindow contentView] frame].size.width;
 		}
 		else
 		{
@@ -342,25 +343,25 @@ namespace ti
 
 	void OSXUserWindow::SetWidth(double width)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->real_w = width;
 			NSRect newFrame = CalculateWindowFrame(real_x, real_y, width, real_h);
 
 			if (!config->IsResizable())
 			{
-				[window setMinSize: newFrame.size];
-				[window setMaxSize: newFrame.size];
+				[nativeWindow setMinSize: newFrame.size];
+				[nativeWindow setMaxSize: newFrame.size];
 			}
-			[window setFrame:newFrame display:config->IsVisible() animate:YES];
+			[nativeWindow setFrame:newFrame display:config->IsVisible() animate:YES];
 		}
 	}
 
 	double OSXUserWindow::GetHeight()
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			return [[window contentView] frame].size.height;
+			return [[nativeWindow contentView] frame].size.height;
 		}
 		else
 		{
@@ -370,23 +371,23 @@ namespace ti
 
 	void OSXUserWindow::SetHeight(double height)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->real_h = height;
 			NSRect newFrame = CalculateWindowFrame(real_x, real_y, real_w, real_h);
 
 			if (!config->IsResizable())
 			{
-				[window setMinSize: newFrame.size];
-				[window setMaxSize: newFrame.size];
+				[nativeWindow setMinSize: newFrame.size];
+				[nativeWindow setMaxSize: newFrame.size];
 			}
-			[window setFrame:newFrame display:config->IsVisible() animate:NO];
+			[nativeWindow setFrame:newFrame display:config->IsVisible() animate:NO];
 		}
 	}
 
 	void OSXUserWindow::ReconfigureWindowConstraints()
 	{
-		if (window == nil)
+		if (nativeWindow == nil)
 		{
 			return;
 		}
@@ -433,8 +434,8 @@ namespace ti
 			minSize.height = minHeight;
 		}
 
-		[window setContentMinSize:minSize];
-		[window setContentMaxSize:maxSize];
+		[nativeWindow setContentMinSize:minSize];
+		[nativeWindow setContentMaxSize:maxSize];
 	}
 
 	double OSXUserWindow::GetMaxWidth()
@@ -489,7 +490,7 @@ namespace ti
 
 	void OSXUserWindow::SetBounds(Bounds bounds)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			this->real_x = bounds.x;
 			this->real_y = bounds.y;
@@ -499,10 +500,10 @@ namespace ti
 
 			if (!config->IsResizable())
 			{
-				[window setMinSize: newFrame.size];
-				[window setMaxSize: newFrame.size];
+				[nativeWindow setMinSize: newFrame.size];
+				[nativeWindow setMaxSize: newFrame.size];
 			}
-			[window setFrame:newFrame display:config->IsVisible() animate:YES];
+			[nativeWindow setFrame:newFrame display:config->IsVisible() animate:YES];
 		}
 	}
 
@@ -513,9 +514,9 @@ namespace ti
 
 	void OSXUserWindow::SetTitle(std::string& title)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window setTitle:[NSString stringWithCString:this->config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
+			[nativeWindow setTitle:[NSString stringWithCString:this->config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
 		}
 	}
 
@@ -526,11 +527,11 @@ namespace ti
 
 	void OSXUserWindow::SetURL(std::string& url)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			std::string url_str = AppConfig::Instance()->InsertAppIDIntoURL(config->GetURL());
 			NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
-			[[[window webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
+			[[[nativeWindow webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 		}
 	}
 
@@ -541,18 +542,18 @@ namespace ti
 
 	void OSXUserWindow::SetResizable(bool resizable)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window setShowsResizeIndicator:resizable];
+			[nativeWindow setShowsResizeIndicator:resizable];
 			if (resizable)
 			{
-				[window setContentMinSize: NSMakeSize(config->GetMinWidth(), config->GetMinHeight())];
-				[window setContentMaxSize: NSMakeSize(config->GetMaxWidth(), config->GetMaxHeight())];
+				[nativeWindow setContentMinSize: NSMakeSize(config->GetMinWidth(), config->GetMinHeight())];
+				[nativeWindow setContentMaxSize: NSMakeSize(config->GetMaxWidth(), config->GetMaxHeight())];
 			}
 			else
 			{
-				[window setMinSize: [window frame].size];
-				[window setMaxSize: [window frame].size];
+				[nativeWindow setMinSize: [nativeWindow frame].size];
+				[nativeWindow setMaxSize: [nativeWindow frame].size];
 			}
 		}
 	}
@@ -564,9 +565,9 @@ namespace ti
 
 	void OSXUserWindow::SetMaximizable(bool maximizable)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[[window standardWindowButton:NSWindowZoomButton] setHidden:!maximizable];
+			[[nativeWindow standardWindowButton:NSWindowZoomButton] setHidden:!maximizable];
 		}
 	}
 
@@ -577,9 +578,9 @@ namespace ti
 
 	void OSXUserWindow::SetMinimizable(bool minimizable)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[[window standardWindowButton:NSWindowMiniaturizeButton] setHidden:!minimizable];
+			[[nativeWindow standardWindowButton:NSWindowMiniaturizeButton] setHidden:!minimizable];
 		}
 	}
 
@@ -590,9 +591,9 @@ namespace ti
 
 	void OSXUserWindow::SetCloseable(bool closeable)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[[window standardWindowButton:NSWindowCloseButton] setHidden:!closeable];
+			[[nativeWindow standardWindowButton:NSWindowCloseButton] setHidden:!closeable];
 		}
 	}
 
@@ -608,17 +609,17 @@ namespace ti
 
 	void OSXUserWindow::SetTransparency(double transparency)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window setTransparency:transparency];
+			[nativeWindow setTransparency:transparency];
 		}
 	}
 
-	void OSXUserWindow::SetFullScreen(bool fullscreen)
+	void OSXUserWindow::SetFullscreen(bool fullscreen)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
-			[window setFullScreen:fullscreen];
+			[nativeWindow setFullscreen:fullscreen];
 		}
 	}
 
@@ -694,16 +695,16 @@ namespace ti
 
 	void OSXUserWindow::SetTopMost(bool topmost)
 	{
-		if (window != nil)
+		if (nativeWindow != nil)
 		{
 			if (topmost)
 			{
-				[window setLevel:NSPopUpMenuWindowLevel];
+				[nativeWindow setLevel:NSPopUpMenuWindowLevel];
 				this->topmost = true;
 			}
 			else
 			{
-				[window setLevel:NSNormalWindowLevel];
+				[nativeWindow setLevel:NSNormalWindowLevel];
 				this->topmost = false;
 			}
 		}

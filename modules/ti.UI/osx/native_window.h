@@ -9,7 +9,7 @@
 #import "../ui_module.h"
 #import <Cocoa/Cocoa.h>
 #import "ti_app.h"
-#import "WebInspector.h" 
+#import <WebKit/WebInspector.h>
 
 @class WebViewDelegate;
 
@@ -30,7 +30,7 @@ using namespace ti;
 }
 - (void)setupDecorations:(WindowConfig*)config host:(Host*)h userwindow:(UserWindow*)uw;
 - (void)setTransparency:(double)transparency;
-- (void)setFullScreen:(BOOL)yn;
+- (void)setFullscreen:(BOOL)yn;
 - (void)close;
 - (void)open;
 - (void)frameLoaded;

@@ -71,7 +71,7 @@ namespace ti
 			bool IsUsingChrome();
 			void SetUsingChrome(bool chrome);
 			bool IsUsingScrollbars();
-			bool IsFullScreen();
+			bool IsFullscreen();
 			std::string GetId();
 			void Open();
 			void Close();
@@ -109,7 +109,7 @@ namespace ti
 			bool IsVisible();
 			double GetTransparency();
 			void SetTransparency(double transparency);
-			void SetFullScreen(bool fullscreen);
+			void SetFullscreen(bool fullscreen);
 			bool IsTopMost();
 			void SetTopMost(bool topmost);
 
@@ -120,12 +120,12 @@ namespace ti
 			void SetIcon(SharedString icon_path);
 			SharedString GetIcon();
 
-			NativeWindow* GetNative() { return window; }
+			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
 			void Unfocused();
 
 		private:
-			NativeWindow *window;
+			NativeWindow *nativeWindow;
 			bool opened;
 			bool closed;
 			bool topmost;

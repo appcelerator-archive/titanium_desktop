@@ -106,7 +106,6 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SharedKMethod handler = window->messageHandlers[message];
 		ValueList args;
 		handler->Call(args);
-
 		return 0;
 	}
 
@@ -114,15 +113,14 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_DESTROY:
 			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_CLOSE:
 			window->Close();
-			PRINTD("FireEvent: CLOSED");
 			window->FireEvent(CLOSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
+
 		case WM_GETMINMAXINFO:
-		{
-			if(window)
-			{
+			if (window) {
 				MINMAXINFO *mmi = (MINMAXINFO*) lParam;
 				static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
 				static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
@@ -143,77 +141,64 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if (min_height > -1)
 						min_height += window->chromeHeight;
 				}
-				
-				if (max_width == -1)
-				{
+
+				if (max_width == -1) {
 					mmi->ptMaxTrackSize.x = INT_MAX; // Uncomfortably large
-				}
-				else
-				{
+				} else {
 					mmi->ptMaxTrackSize.x = max_width;
 				}
 
-				if (min_width == -1)
-				{
+				if (min_width == -1) {
 					mmi->ptMinTrackSize.x = minXTrackSize;
-				}
-				else
-				{
+				} else {
 					mmi->ptMinTrackSize.x = min_width;
 				}
 
-				if (max_height == -1)
-				{
+				if (max_height == -1) {
 					mmi->ptMaxTrackSize.y = INT_MAX; // Uncomfortably large
-				}
-				else
-				{
+				} else {
 					mmi->ptMaxTrackSize.y = max_height;
 				}
 
-				if (min_height == -1)
-				{
+				if (min_height == -1) {
 					mmi->ptMinTrackSize.y = minYTrackSize;
-				}
-				else
-				{
+				} else {
 					mmi->ptMinTrackSize.y = min_height;
 				}
 			}
-		}
-		break;
-		case WM_SIZE:
-		if (!window->web_view) break;
-		window->ResizeSubViews();
-		if (wParam == SIZE_MAXIMIZED)
-		{
-			window->FireEvent(MAXIMIZED);
-			window->FireEvent(RESIZED);
-		}
-		else if (wParam == SIZE_MINIMIZED)
-		{
-			window->FireEvent(MINIMIZED);
-		}
-		else if (wParam == SIZE_RESTORED)
-		{
-			window->FireEvent(RESIZED);
-		}
-		break;
-		case WM_SETFOCUS:
-		window->FireEvent(FOCUSED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
-		case WM_KILLFOCUS:
-		window->FireEvent(UNFOCUSED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
-		case WM_MOVE:
-		window->FireEvent(MOVED);
-		return DefWindowProc(hWnd, message, wParam, lParam);
-		case WM_SHOWWINDOW:
-		window->FireEvent(((BOOL)wParam) ? SHOWN : HIDDEN);
-		return DefWindowProc(hWnd, message, wParam, lParam);
+			break;
 
-		case TI_TRAY_CLICKED:
-		{
+		case WM_SIZE:
+			if (window->web_view)
+			{
+				window->ResizeSubViews();
+				window->FireEvent(RESIZED);
+				if (wParam == SIZE_MAXIMIZED) {
+					window->FireEvent(MAXIMIZED);
+
+				} else if (wParam == SIZE_MINIMIZED) {
+					window->FireEvent(MINIMIZED);
+				}
+			}
+			break;
+
+		case WM_SETFOCUS:
+			window->FireEvent(FOCUSED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
+		case WM_KILLFOCUS:
+			window->FireEvent(UNFOCUSED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
+		case WM_MOVE:
+			window->FireEvent(MOVED);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
+		case WM_SHOWWINDOW:
+			window->FireEvent(((BOOL)wParam) ? SHOWN : HIDDEN);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+
+		case TI_TRAY_CLICKED: {
 			UINT uMouseMsg = (UINT) lParam;
 
 			window->is_double_clicked = false;
@@ -231,15 +216,12 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				Win32TrayItem::ShowTrayMenu(hWnd, message, wParam, lParam);
 			}
-		}
-		break;
-		default:
-		LRESULT handled = Win32MenuItemImpl::handleMenuClick(hWnd, message, wParam, lParam);
+		} break;
 
-		if(! handled)
-		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
+		default:
+			if (!Win32MenuItemImpl::handleMenuClick(hWnd, message, wParam, lParam)) {
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
 	}
 
 	return 0;
@@ -260,9 +242,8 @@ void Win32UserWindow::InitWindow()
 		error << "Error Creating Window: " << GetLastError();
 		logger->Error(error.str());
 	}
-	
-	PRINTD("window_handle = " << (int) this->window_handle);
 
+	logger->Debug("Initializing window_handle: %i", window_handle);
 	// make our HWND available to 3rd party devs without needing our headers
 	SharedValue windowHandle = Value::NewVoidPtr((void*) this->window_handle);
 	// these APIs are semi-private -- we probably shouldn't mark them
@@ -435,9 +416,9 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent)
 	restore_bounds = GetBounds();
 	restore_styles = GetWindowLong(window_handle, GWL_STYLE);
 
-	if (this->config->IsFullScreen())
+	if (this->config->IsFullscreen())
 	{
-		this->SetFullScreen(true);
+		this->SetFullscreen(true);
 	}
 	else if (this->config->IsMaximized())
 	{
@@ -556,8 +537,7 @@ void Win32UserWindow::Unfocus()
 
 void Win32UserWindow::Open()
 {
-	PRINTD("Opening window_handle=" << (int) window_handle
-			<< ", view_window_handle=" << (int) view_window_handle);
+	logger->Debug("Opening window_handle=%i, view_window_handle=%i", window_handle,  view_window_handle);
 
 	UpdateWindow(window_handle);
 	UpdateWindow(view_window_handle);
@@ -838,7 +818,7 @@ void Win32UserWindow::SetTransparency(double transparency)
 	}
 }
 
-void Win32UserWindow::SetFullScreen(bool fullscreen)
+void Win32UserWindow::SetFullscreen(bool fullscreen)
 {
 	if (fullscreen)
 	{
