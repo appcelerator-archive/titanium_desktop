@@ -7,8 +7,9 @@
 {
 	ti::OSXMenu* menu;
 	BOOL dirty;
+	BOOL registerNative;
 }
-- (id)initWithMenu:(ti::OSXMenu*)menu;
+- (id)initWithMenu:(ti::OSXMenu*)menu willRegister:(BOOL)willRegister;
 - (void)menuNeedsUpdate:(NSMenu *)menu;
 - (void)markAsDirty;
 @end

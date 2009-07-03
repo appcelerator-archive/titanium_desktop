@@ -3,14 +3,10 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-
 #ifndef _OSX_UI_BINDING_H_
 #define _OSX_UI_BINDING_H_
-
 #include <kroll/kroll.h>
 #include "../ui_module.h"
-
 namespace ti
 {
 	class OSXMenuItem;
@@ -42,12 +38,12 @@ namespace ti
 		virtual void SetBadge(SharedString badge_label);
 		virtual void SetBadgeImage(SharedString badge_path);
 
+		SharedPtr<OSXMenu> GetActiveMenu();
 		void WindowFocused(SharedPtr<OSXUserWindow> window);
 		void WindowUnfocused(SharedPtr<OSXUserWindow> window);
-		void SetupMainMenu();
+		void SetupMainMenu(bool force = false);
 		void SetupAppMenuParts(NSMenu* mainMenu);
 		void ReplaceMainMenu();
-		void RefreshMainMenu();
 		NSMenu* GetDefaultMenu();
 
 		long GetIdleTime();

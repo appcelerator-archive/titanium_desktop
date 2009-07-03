@@ -28,6 +28,8 @@ namespace ti
 		void _GetLabel(const ValueList& args, SharedValue result);
 		void _SetIcon(const ValueList& args, SharedValue result);
 		void _GetIcon(const ValueList& args, SharedValue result);
+		void _SetState(const ValueList& args, SharedValue result);
+		void _GetState(const ValueList& args, SharedValue result);
 		void _AddEventListener(const ValueList& args, SharedValue result);
 		void _RemoveEventListener(const ValueList& args, SharedValue result);
 		void _GetEventListeners(const ValueList& args, SharedValue result);
@@ -45,15 +47,18 @@ namespace ti
 		void AddEventListener(SharedKMethod eventListener);
 		std::string& GetLabel();
 		std::string& GetIconPath();
+		bool GetState();
+		void SetState(bool);
 		bool IsSeparator();
 		bool IsCheck();
 		bool IsEnabled();
-		void MenuItem::HandleClickEvent(SharedKObject source);
+		virtual void HandleClickEvent(SharedKObject source);
 		void EnsureHasSubmenu();
 
 		// Platform-specific implementation
 		virtual void SetLabelImpl(std::string newLabel) = 0;
 		virtual void SetIconImpl(std::string newIconPath) = 0;
+		virtual void SetStateImpl(bool newState) = 0;
 		virtual void SetSubmenuImpl(SharedMenu newSubmenu) = 0;
 		virtual void EnableImpl() = 0;
 		virtual void DisableImpl() = 0;
@@ -66,6 +71,7 @@ namespace ti
 		SharedKMethod callback;
 		SharedMenu submenu;
 		std::vector<SharedKMethod> eventListeners;
+		bool state;
 	};
 }
 #endif

@@ -5,10 +5,6 @@
  */
 #ifndef _OSX_MENU_H_
 #define _OSX_MENU_H_
-#include <Cocoa/Cocoa.h>
-#include "../menu_item.h"
-#include "../menu.h"
-#include "osx_menu_item.h"
 namespace ti
 {
 	class OSXMenu : public Menu
@@ -22,17 +18,18 @@ namespace ti
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 
-		NSMenu* CreateNative(bool registerMenu=true);
+		NSMenu* CreateNativeNow(bool registerMenu=true);
+		NSMenu* CreateNativeLazily(bool registerMenu=true);
 		void FillNativeMainMenu(NSMenu* defaultMenu, NSMenu* nativeMainMenu);
 		static void CopyMenu(NSMenu* from, NSMenu* to);
 		static NSMenuItem* CopyMenuItem(NSMenuItem* item);
 
 		void AddChildrenToNativeMenu(
-			NSMenu* realization, bool registerMenu=true, bool isMainMenu=false);
+			NSMenu* nativeMenu, bool registerMenu=true, bool isMainMenu=false);
 		void AddChildrenToNSArray(NSMutableArray* array);
-		void DestroyNative(NSMenu* realization);
+		void DestroyNative(NSMenu* nativeMenu);
 		void UpdateNativeMenus();
-		static void ClearNativeMenu(NSMenu* realization);
+		static void ClearNativeMenu(NSMenu* nativeMenu);
 		static void UpdateNativeMenu(NSMenu* nativeMenu);
 		static NSMenu* GetWindowMenu(NSMenu* nsMenu);
 		static NSMenu* GetAppleMenu(NSMenu* nsMenu);
@@ -43,6 +40,7 @@ namespace ti
 
 	private:
 		void Clear();
+		NSMenu* CreateNative(bool lazy, bool registerMenu);
 		std::vector<NSMenu*> nativeMenus;
 	};
 }

@@ -5,12 +5,6 @@
  */
 #ifndef TI_OSX_TRAY_ITEM_H_
 #define TI_OSX_TRAY_ITEM_H_
-
-#include <Cocoa/Cocoa.h>
-#include <kroll/kroll.h>
-#include "../tray_item.h"
-#include "../menu_item.h"
-
 namespace ti
 {
 	class OSXTrayItem: public TrayItem

@@ -31,6 +31,13 @@ namespace ti
 		this->UpdateNativeMenuItems();
 	}
 
+	void OSXMenuItem::SetStateImpl(bool newState)
+	{
+		if (this->type != CHECK)
+			return;
+		this->UpdateNativeMenuItems();
+	}
+
 	void OSXMenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
 	{
 		if (this->type == SEPARATOR)
@@ -57,6 +64,7 @@ namespace ti
 		return !this->submenu.isNull();
 	}
 
+	/*static*/
 	void OSXMenuItem::SetNSMenuItemTitle(NSMenuItem* item, std::string& title)
 	{
 		NSString* nstitle = [NSString stringWithUTF8String:title.c_str()];
@@ -75,60 +83,58 @@ namespace ti
 		}
 	}
 
+	/*static*/
 	void OSXMenuItem::SetNSMenuItemIconPath(
-		NSMenuItem* item,
-		std::string& iconPath,
-		NSImage* image)
+		NSMenuItem* item, std::string& iconPath, NSImage* image)
 	{
 		bool needsRelease = false;
 
-		// If we weren't passed an image, create one for this call. This allows callers to do
-		// one image creation in cases where the same image is used over and over again --
-		// see SetIconImpl(...)
-		if (image == nil)
-		{
+		// If we weren't passed an image, create one for this call. This
+		// allows callers to do one image creation in cases where the same
+		// image is used over and over again.
+		if (image == nil) {
 			NSString *path = [NSString stringWithCString:(iconPath.c_str())];
 			image = [[NSImage alloc] initWithContentsOfFile:path];
 			needsRelease = true;
 		}
 
-		if (!iconPath.empty())
-		{
+		if (!iconPath.empty()) {
 			[item setImage:image];
-		}
-		else
-		{
+		} else {
 			[item setImage:nil];
 		}
-		if ([item menu] != nil)
-		{
+
+		if ([item menu] != nil) {
 			[[item menu] sizeToFit];
 		}
 
-		if (needsRelease)
-		{
+		if (needsRelease) {
 			[image release];
 		}
 	}
 
-	void OSXMenuItem::SetNSMenuItemSubmenu(
-		NSMenuItem* item,
-		SharedMenu submenu,
-		bool registerNative)
+	/*static*/
+	void OSXMenuItem::SetNSMenuItemState(NSMenuItem* item, bool state)
 	{
-		if (!submenu.isNull())
-		{
+		[item setState:state ? NSOnState : NSOffState];
+	}
+
+	/*static*/
+	void OSXMenuItem::SetNSMenuItemSubmenu(
+		NSMenuItem* item, SharedMenu submenu, bool registerNative)
+	{
+		if (!submenu.isNull()) {
 			SharedPtr<OSXMenu> osxSubmenu = submenu.cast<OSXMenu>();
-			NSMenu* nativeMenu = osxSubmenu->CreateNative(registerNative);
+			NSMenu* nativeMenu = osxSubmenu->CreateNativeLazily(registerNative);
 			[nativeMenu setTitle:[item title]];
 			[item setSubmenu:nativeMenu];
-		}
-		else
-		{
+
+		} else {
 			[item setSubmenu:nil];
 		}
 	}
 
+	/*static*/
 	void OSXMenuItem::SetNSMenuItemEnabled(NSMenuItem* item, bool enabled)
 	{
 		[item setEnabled:(enabled ? YES : NO)];
@@ -136,12 +142,9 @@ namespace ti
 
 	NSMenuItem* OSXMenuItem::CreateNative(bool registerNative)
 	{
-		if (this->IsSeparator())
-		{
+		if (this->IsSeparator()) {
 			return [NSMenuItem separatorItem];
-		}
-		else
-		{
+		} else {
 			NSMenuItem* item = [[NSMenuItem alloc] 
 				initWithTitle:@"Temp" action:@selector(invoke:) keyEquivalent:@""];
 
@@ -150,12 +153,13 @@ namespace ti
 
 			SetNSMenuItemTitle(item, this->label);
 			SetNSMenuItemIconPath(item, this->iconPath);
+			SetNSMenuItemState(item, this->state);
 			SetNSMenuItemEnabled(item, this->enabled);
 			SetNSMenuItemSubmenu(item, this->submenu, registerNative);
 
 			if (registerNative)
 			{
-				this->realizations.push_back(item);
+				this->nativeItems.push_back(item);
 			}
 
 			return item;
@@ -164,13 +168,13 @@ namespace ti
 
 	void OSXMenuItem::DestroyNative(NSMenuItem* realization)
 	{
-		std::vector<NSMenuItem*>::iterator i = this->realizations.begin();
-		while (i != this->realizations.end())
+		std::vector<NSMenuItem*>::iterator i = this->nativeItems.begin();
+		while (i != this->nativeItems.end())
 		{
 			NSMenuItem* item = *i;
 			if (item == realization)
 			{
-				i = this->realizations.erase(i);
+				i = this->nativeItems.erase(i);
 				if (!this->submenu.isNull() && [item submenu] != nil)
 				{
 					SharedPtr<OSXMenu> osxSubmenu = this->submenu.cast<OSXMenu>();
@@ -187,14 +191,39 @@ namespace ti
 
 	void OSXMenuItem::UpdateNativeMenuItems()
 	{
-		std::vector<NSMenuItem*>::iterator i = this->realizations.begin();
-		while (i != this->realizations.end())
+		std::vector<NSMenuItem*>::iterator i = this->nativeItems.begin();
+		while (i != this->nativeItems.end())
 		{
 			NSMenuItem* nativeItem = (*i++);
 			if ([nativeItem menu]) {
 				OSXMenu::UpdateNativeMenu([nativeItem menu]);
 			}
 		}
+
+		// Must now iterate through the native menus and fix
+		// the main menu -- it will modify this iterator so we
+		// must do it in isolation.
+		i = this->nativeItems.begin();
+		while (i != this->nativeItems.end())
+		{
+			NSMenuItem* nativeItem = (*i++);
+			if ([nativeItem menu] == [NSApp mainMenu]) {
+				OSXUIBinding* binding =
+					dynamic_cast<OSXUIBinding*>(UIBinding::GetInstance());
+				binding->SetupMainMenu(true);
+				break;
+			}
+		}
+	}
+
+	void OSXMenuItem::HandleClickEvent(SharedKObject source)
+	{
+		// NSMenuItem requires a manual state flip-flop
+		//  when a click event happens.
+		if (this->type == CHECK) {
+			this->SetState(!this->GetState());
+		}
+		MenuItem::HandleClickEvent(source);
 	}
 }
 

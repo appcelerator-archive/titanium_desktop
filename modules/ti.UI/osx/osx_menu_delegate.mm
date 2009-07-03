@@ -7,11 +7,12 @@
 
 @implementation OSXMenuDelegate
 
--(id)initWithMenu:(ti::OSXMenu*)inMenu
+- (id)initWithMenu:(ti::OSXMenu*)inMenu willRegister:(BOOL)willRegister
 {
 	if ([super init]) {
 		dirty = YES;
 		menu = inMenu;
+		registerNative = willRegister;
 	}
 	return self;
 }
@@ -23,10 +24,11 @@
 	}
 
 	dirty = NO;
-	menu->AddChildrenToNativeMenu(nativeMenu, true);
+	OSXMenu::ClearNativeMenu(nativeMenu);
+	menu->AddChildrenToNativeMenu(nativeMenu, registerNative ? true : false);
 }
 
-- (void)markAsDirty;
+- (void)markAsDirty
 {
 	dirty = YES;
 }

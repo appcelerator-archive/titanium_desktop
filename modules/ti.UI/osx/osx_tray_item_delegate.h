@@ -3,12 +3,6 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#import <Cocoa/Cocoa.h>
-#import <kroll/kroll.h>
-#import "osx_tray_item.h"
-#import "../menu_item.h"
-
-
 @interface OSXTrayDelegate : NSObject
 {
 	ti::OSXTrayItem *delegate;

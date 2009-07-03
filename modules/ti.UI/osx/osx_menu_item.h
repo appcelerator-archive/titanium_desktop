@@ -5,9 +5,6 @@
  */
 #ifndef _OSX_MENU_ITEM_H_
 #define _OSX_MENU_ITEM_H_
-#include <Cocoa/Cocoa.h>
-#include "../menu_item.h"
-#include "../menu.h"
 namespace ti
 {
 	class OSXMenuItem : public MenuItem
@@ -19,6 +16,7 @@ namespace ti
 
 		void SetLabelImpl(std::string newLabel);
 		void SetIconImpl(std::string newIconPath);
+		void SetStateImpl(bool newState);
 		void SetCallbackImpl(SharedKMethod callback);
 		void SetSubmenuImpl(SharedMenu newSubmenu);
 		void EnableImpl();
@@ -28,20 +26,18 @@ namespace ti
 		NSMenuItem* CreateNative(bool registerNative=true);
 		void DestroyNative(NSMenuItem* realization);
 		void UpdateNativeMenuItems();
+		virtual void HandleClickEvent(SharedKObject source);
 
 	private:
 		static void SetNSMenuItemTitle(NSMenuItem* item, std::string& title);
+		static void SetNSMenuItemState(NSMenuItem* item, bool state);
 		static void SetNSMenuItemIconPath(
-			NSMenuItem* item,
-			std::string& iconPath,
-			NSImage* image = nil);
+			NSMenuItem* item, std::string& iconPath, NSImage* image = nil);
 		static void SetNSMenuItemSubmenu(
-			NSMenuItem* item,
-			SharedMenu submenu,
-			bool registerNative=true);
+			NSMenuItem* item, SharedMenu submenu, bool registerNative=true);
 		static void SetNSMenuItemEnabled(NSMenuItem* item, bool enabled);
 
-		std::vector<NSMenuItem*> realizations;
+		std::vector<NSMenuItem*> nativeItems;
 	};
 }
 #endif

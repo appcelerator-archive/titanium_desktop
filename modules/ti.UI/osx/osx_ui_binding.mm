@@ -38,7 +38,8 @@ namespace ti
 	{
 		[TiProtocol registerSpecialProtocol];
 		[AppProtocol registerSpecialProtocol];
-		application = [[TiApplication alloc] initWithBinding:this host:host];
+		application = [[TiApplicationDelegate alloc] initWithBinding:this];
+		[application retain];
 
 		NSApplication *nsapp = [NSApplication sharedApplication];
 		[nsapp setDelegate:application];
@@ -46,7 +47,7 @@ namespace ti
 
 		// Create a default menu -- so that keybindings and such work out of the box.
 		this->defaultMenu = [NSApp mainMenu];
-		this->ReplaceMainMenu();
+		this->SetupMainMenu(true);
 
 		// Add the custom script evaluator which will dynamically
 		// dispatch unknown script types to loaded Kroll modules.
@@ -87,7 +88,7 @@ namespace ti
 	SharedMenuItem OSXUIBinding::CreateCheckMenuItem(
 		std::string label, SharedKMethod callback)
 	{
-		return new OSXMenuItem(MenuItem::NORMAL, label, callback, std::string());
+		return new OSXMenuItem(MenuItem::CHECK, label, callback, std::string());
 	}
 
 	void OSXUIBinding::ErrorDialog(std::string msg)
@@ -187,11 +188,14 @@ namespace ti
 		return this->defaultMenu;
 	}
 
-	void OSXUIBinding::SetupMainMenu()
+	SharedPtr<OSXMenu> OSXUIBinding::GetActiveMenu()
+	{
+		return this->activeMenu;
+	}
+
+	void OSXUIBinding::SetupMainMenu(bool force)
 	{
 		SharedPtr<OSXMenu> newActiveMenu = NULL;
-		SharedPtr<OSXMenu> oldMenu = this->activeMenu;
-		NSMenu* oldNativeMenu = [NSApp mainMenu];
 
 		// If there is an active window, search there first for the menu
 		if (!this->activeWindow.isNull()) {
@@ -203,49 +207,37 @@ namespace ti
 			newActiveMenu = this->menu;
 		}
 
-		if (newActiveMenu.get() != this->activeMenu.get()) {
-			this->activeMenu = newActiveMenu;
-			this->ReplaceMainMenu();
-		}
+		if (force || newActiveMenu.get() != this->activeMenu.get()) {
+			SharedPtr<OSXMenu> oldMenu = this->activeMenu; // Save a reference
+			NSMenu* oldNativeMenu = [NSApp mainMenu];
 
-		if (!oldMenu.isNull() && oldNativeMenu
-			&& oldNativeMenu != this->GetDefaultMenu()) {
-			oldMenu->DestroyNative(oldNativeMenu);
+			// Actually create and install the new menu
+			NSMenu* newNativeMenu = nil;
+			if (newActiveMenu.isNull()) {
+				newNativeMenu = this->GetDefaultMenu();
+			} else {
+				newNativeMenu = [[NSMenu alloc] init];
+				newActiveMenu->FillNativeMainMenu(defaultMenu, newNativeMenu);
+			}
+			SetupAppMenuParts(newNativeMenu);
+			[NSApp setMainMenu:newNativeMenu];
+			this->activeMenu = newActiveMenu;
+
+			// Cleanup the old native menu
+			if (!oldMenu.isNull() && oldNativeMenu
+				&& oldNativeMenu != this->GetDefaultMenu()) {
+				oldMenu->DestroyNative(oldNativeMenu);
+			}
 		}
 	}
 
 	void OSXUIBinding::SetupAppMenuParts(NSMenu* nativeMainMenu)
 	{
-		//OSXMenu::FixWindowMenu(nativeMainMenu);
+		OSXMenu::FixWindowMenu(nativeMainMenu);
 		[NSApp setWindowsMenu:OSXMenu::GetWindowMenu(nativeMainMenu)];
 		[NSApp performSelector:@selector(setAppleMenu:)
 			withObject:OSXMenu::GetAppleMenu(nativeMainMenu)];
 		[NSApp setServicesMenu:OSXMenu::GetServicesMenu(nativeMainMenu)];
-	}
-
-	void OSXUIBinding::ReplaceMainMenu()
-	{
-		NSMenu* newNativeMenu = nil;
-
-		if (this->activeMenu.isNull()) {
-			newNativeMenu = this->GetDefaultMenu();
-		} else {
-			newNativeMenu = [[NSMenu alloc] init];
-			this->activeMenu->FillNativeMainMenu(defaultMenu, newNativeMenu);
-		}
-
-		SetupAppMenuParts(newNativeMenu);
-		[NSApp setMainMenu:newNativeMenu];
-	}
-
-	void OSXUIBinding::RefreshMainMenu()
-	{
-		NSMenu* mainMenu = [NSApp mainMenu];
-		if (!this->activeMenu.isNull() && mainMenu != defaultMenu) {
-			OSXMenu::ClearNativeMenu(mainMenu);
-			this->activeMenu->FillNativeMainMenu(defaultMenu, mainMenu);
-			SetupAppMenuParts(mainMenu);
-		}
 	}
 
 	void OSXUIBinding::SetDockMenu(SharedMenu menu)

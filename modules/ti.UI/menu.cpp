@@ -17,12 +17,54 @@ namespace ti
 		this->SetMethod("getItemAt", &Menu::_GetItemAt);
 		this->SetMethod("insertItemAt", &Menu::_InsertItemAt);
 		this->SetMethod("removeItemAt", &Menu::_RemoveItemAt);
-		this->SetMethod("getLength", &Menu::_GetLength); this->SetMethod("clear", &Menu::_Clear);
+		this->SetMethod("getLength", &Menu::_GetLength);
+		this->SetMethod("clear", &Menu::_Clear);
+
+		this->SetMethod("addSubmenu", &Menu::_AddSubmenu);
+		this->SetMethod("addItem", &Menu::_AddItem);
+		this->SetMethod("addSeparatorItem", &Menu::_AddSeparatorItem);
+		this->SetMethod("addCheckItem", &Menu::_AddCheckItem);
 	}
 
 	Menu::~Menu()
 	{
 		this->children.clear();
+	}
+
+	void Menu::_AddSubmenu(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		newItem->EnsureHasSubmenu();
+		this->AppendItem(newItem);
+		result->SetObject(newItem);
+	}
+
+	void Menu::_AddItem(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("addItem", "?s m|0 s|0");
+		UIBinding* binding = UIBinding::GetInstance();
+
+		// Create a menu item object and add it to this item's submenu
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		this->AppendItem(newItem);
+		result->SetObject(newItem);
+	}
+
+	void Menu::_AddSeparatorItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+		SharedMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
+		this->AppendItem(newItem);
+		result->SetObject(newItem);
+	}
+
+	void Menu::_AddCheckItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+		SharedMenuItem newItem = binding->__CreateCheckMenuItem(args);
+		this->AppendItem(newItem);
+		result->SetObject(newItem);
 	}
 
 	void Menu::_AppendItem(const ValueList& args, SharedValue result)
@@ -67,16 +109,16 @@ namespace ti
 
 	void Menu::_Clear(const ValueList& args, SharedValue result)
 	{
-		this->ClearImpl();
 		this->children.clear();
+		this->ClearImpl();
 	}
 
 	void Menu::AppendItem(SharedMenuItem item)
 	{
 		if (!item.isNull())
 		{
-			this->AppendItemImpl(item);
 			this->children.push_back(item);
+			this->AppendItemImpl(item);
 		}
 	}
 
@@ -101,10 +143,9 @@ namespace ti
 
 		if (index >= 0 && index <= this->children.size())
 		{
-			this->InsertItemAtImpl(item, index);
-
 			vector<SharedMenuItem>::iterator i = this->children.begin() + index;
 			this->children.insert(i, item);
+			this->InsertItemAtImpl(item, index);
 		}
 		else
 		{
@@ -116,9 +157,9 @@ namespace ti
 	{
 		if (index >= 0 && index < this->children.size())
 		{
-			this->RemoveItemAtImpl(index);
 			vector<SharedMenuItem>::iterator i = this->children.begin() + index;
 			this->children.erase(i);
+			this->RemoveItemAtImpl(index);
 		}
 		else
 		{

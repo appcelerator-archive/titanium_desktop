@@ -51,7 +51,7 @@ namespace ti
 		SharedPtr<OSXMenu> newMenu = menu.cast<OSXMenu>();
 		NSMenu* newNativeMenu = nil;
 		if (!newMenu.isNull()) {
-			newNativeMenu = newMenu->CreateNative(true);
+			newNativeMenu = newMenu->CreateNativeNow(true);
 		}
 		[delegate setMenu:newNativeMenu];
 

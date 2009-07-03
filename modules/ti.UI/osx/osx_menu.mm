@@ -64,7 +64,7 @@ namespace ti
 			NSMenuItem* nativeItem = [nativeMenu itemAtIndex: 0];
 			id delegate = [nativeItem target];
 
-			// This delegate is one of our OSXMenuItem delgates, so grab its
+			// This delegate is one of our OSXMenuItem delegates, so grab its
 			// OSXMenuItem reference and tell it to destroy this native menu item
 			if (delegate && [delegate respondsToSelector:getMenuItemSelector]) {
 				OSXMenuItem* menuItem = (OSXMenuItem*) [delegate performSelector:getMenuItemSelector];
@@ -95,33 +95,56 @@ namespace ti
 	{
 		std::vector<NSMenu*>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end()) {
-			OSXMenu::UpdateNativeMenu(*i);
+			OSXMenu::UpdateNativeMenu(*i++);
+		}
+
+		// If this native menu is the application's current main menu,
+		// we want to force the main menu to reload.
+		OSXUIBinding* binding = dynamic_cast<OSXUIBinding*>(UIBinding::GetInstance());
+		if (binding->GetActiveMenu().get() == this) {
+			binding->SetupMainMenu(true);
 		}
 	}
 
 	/*static*/
 	void OSXMenu::UpdateNativeMenu(NSMenu* nativeMenu)
 	{
-		OSXUIBinding* binding = dynamic_cast<OSXUIBinding*>(UIBinding::GetInstance());
-		// If this native menu is the application's current main menu, we
-		// want to replace replace that menu with a fresh copy reflecting
-		// the modifications.
+		// If this is the application's main menu, just wait until
+		// later to fix it -- it will modify the parent iterator.
 		if (nativeMenu == [NSApp mainMenu]) {
-			binding->RefreshMainMenu();
 
 		// Otherwise, just mark this menu as dirty and the next time OS X
 		// shows it, it will trigger a redraw.
 		} else {
-			[[nativeMenu delegate] performSelector:@selector(markDirty:)];
+			[[nativeMenu delegate] performSelector:@selector(markAsDirty)];
 		}
 	}
 
-	NSMenu* OSXMenu::CreateNative(bool registerNative)
+	NSMenu* OSXMenu::CreateNativeNow(bool registerNative)
+	{
+		return this->CreateNative(false, registerNative);
+	}
+
+	NSMenu* OSXMenu::CreateNativeLazily(bool registerNative)
+	{
+		return this->CreateNative(true, registerNative);
+	}
+
+	NSMenu* OSXMenu::CreateNative(bool lazy, bool registerNative)
 	{
 		// This title should be set by the callee - see OSXMenuItem::NSMenuSetSubmenu
 		NSMenu* menu = [[NSMenu alloc] initWithTitle:@"TopLevelMenu"];
+		OSXMenuDelegate* delegate = [[OSXMenuDelegate alloc] 
+			initWithMenu:this
+			willRegister: registerNative ? YES : NO];
+
+		// Add menu children lazily
+		[delegate markAsDirty];
+		[menu setDelegate:delegate];
 		[menu setAutoenablesItems:NO];
-		this->AddChildrenToNativeMenu(menu, registerNative);
+
+		if (!lazy)
+			this->AddChildrenToNativeMenu(menu, registerNative);
 
 		if (registerNative)
 		{
@@ -132,6 +155,11 @@ namespace ti
 
 	void OSXMenu::FillNativeMainMenu(NSMenu* defaultMenu, NSMenu* nativeMainMenu)
 	{
+		// We are keeping a reference to this NSMenu*, so bump the reference
+		// count. This method must be matched with a DestroyNative(...) call
+		// to avoid a memory leak.
+		[nativeMainMenu retain];
+
 		OSXMenu::CopyMenu(defaultMenu, nativeMainMenu);
 		this->AddChildrenToNativeMenu(nativeMainMenu, true, true);
 

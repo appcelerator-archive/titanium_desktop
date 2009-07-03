@@ -3,9 +3,10 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
+#import "../ui_module.h"
 #import "ti_protocol.h"
 #import "app_protocol.h"
-#import "ti_app.h"
+#import "ti_application_delegate.h"
 
 @implementation TiProtocol
 
@@ -61,7 +62,7 @@
 	NSString *hostpart = [[[url host] stringByReplacingOccurrencesOfString:@"." withString:@""] lowercaseString];
 	NSString *pathpart = [url path];
 	NSString *normpath = [pathpart stringByReplacingOccurrencesOfString:@".." withString:@""];
-	kroll::Host *host = [[TiApplication instance] host];
+	kroll::Host* host = kroll::Host::GetInstance();
 
 	std::string basedir;
 

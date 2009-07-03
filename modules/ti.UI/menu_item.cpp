@@ -17,7 +17,8 @@ namespace ti
 			type(type),
 			enabled(true),
 			label(label),
-			submenu(NULL)
+			submenu(NULL),
+			state(false)
 	{
 		if (!iconURL.empty())
 		{
@@ -57,6 +58,12 @@ namespace ti
 		{
 			this->SetMethod("setIcon", &MenuItem::_SetIcon);
 			this->SetMethod("getIcon", &MenuItem::_GetIcon);
+		}
+
+		if (this->type == CHECK)
+		{
+			this->SetMethod("setState", &MenuItem::_SetState);
+			this->SetMethod("getState", &MenuItem::_GetState);
 		}
 
 	}
@@ -105,6 +112,17 @@ namespace ti
 	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
 	{
 		result->SetString(this->iconPath);
+	}
+
+	void MenuItem::_SetState(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setState", "b");
+		this->SetState(args.GetBool(0));
+	}
+
+	void MenuItem::_GetState(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->state);
 	}
 
 	void MenuItem::_AddEventListener(const ValueList& args, SharedValue result)
@@ -235,6 +253,17 @@ namespace ti
 			this->eventListeners,
 			UIBinding::CLICKED,
 			source);
+	}
+
+	void MenuItem::SetState(bool newState)
+	{
+		this->SetStateImpl(newState);
+		this->state = newState;
+	}
+
+	bool MenuItem::GetState()
+	{
+		return this->state;
 	}
 
 	std::string& MenuItem::GetLabel()

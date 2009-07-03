@@ -5,13 +5,6 @@
  */
 #ifndef OSX_USER_WINDOW_H
 #define OSX_USER_WINDOW_H
-
-#import "preinclude.h"
-#import <WebKit/WebKit.h>
-#import "../menu_item.h"
-#import "../user_window.h"
-#import "native_window.h"
-
 namespace ti
 {
 	class OSXUIBinding;

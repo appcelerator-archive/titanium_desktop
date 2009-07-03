@@ -5,14 +5,14 @@
  */
 #import <Cocoa/Cocoa.h>
 #import <AppKit/AppKit.h>
-#import "ti_app.h"
+#import "../ui_module.h"
 #import "osx_ui_binding.h"
 #import "osx_menu_item.h"
 
-static TiApplication *tiAppInstance = NULL;
+static TiApplicationDelegate *tiAppInstance = NULL;
 
-@implementation TiApplication
-+(TiApplication*)instance
+@implementation TiApplicationDelegate
++(TiApplicationDelegate*)instance
 {
 	return tiAppInstance;
 }
@@ -23,32 +23,23 @@ static TiApplication *tiAppInstance = NULL;
 }
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
-	OSXUIBinding *ui = static_cast<OSXUIBinding*>(binding);
-	SharedPtr<OSXMenu> menu = ui->GetDockMenu().cast<OSXMenu>();
-
+	SharedPtr<OSXMenu> menu = binding->GetDockMenu().cast<OSXMenu>();
 	if (!menu.isNull()) {
-		NSMenu* nativeMenu = menu->CreateNative(false);
-		[nativeMenu autorelease];
+		NSMenu* nativeMenu = menu->CreateNativeNow(false);
 		return nativeMenu;
-
 	} else {
 		return nil;
 	}
 }
-- (id)initWithBinding:(ti::UIBinding*)b host:(kroll::Host*)h
+- (id)initWithBinding:(ti::OSXUIBinding*)b
 {
 	self = [super init];
 	if (self)
 	{
 		binding = b;
-		host = h;
 		tiAppInstance = self;
 	}
 	return self;
-}
--(kroll::Host*)host
-{
-	return host;
 }
 @end
 
