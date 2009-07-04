@@ -49,7 +49,7 @@ enum UserWindowEvent
 	CREATE,
 };
 
-class UserWindow : public kroll::StaticBoundObject {
+class UserWindow : public AccessorBoundObject {
 	public:
 		UserWindow(WindowConfig *config, SharedUserWindow& parent);
 		virtual ~UserWindow();

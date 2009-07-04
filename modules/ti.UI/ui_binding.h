@@ -12,7 +12,7 @@
 
 namespace ti
 {
-	class UIBinding : public StaticBoundObject
+	class UIBinding : public AccessorBoundObject
 	{
 
 	public:
@@ -51,6 +51,7 @@ namespace ti
 
 	protected:
 		Host* host;
+		SharedUserWindow mainWindow;
 
 	private:
 		static UIBinding* instance;
@@ -58,6 +59,7 @@ namespace ti
 		SharedKList openWindowList;
 
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
+		void _GetMainWindow(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
 		void _CreateTrayMenu(const ValueList& args, SharedValue result);
 		void _SetMenu(const ValueList& args, SharedValue result);
