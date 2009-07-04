@@ -11,7 +11,7 @@ namespace ti
 	using std::vector;
 	using std::string;
 
-	Menu::Menu() : StaticBoundObject()
+	Menu::Menu() : StaticBoundObject("UI.Menu")
 	{
 		this->SetMethod("appendItem", &Menu::_AppendItem);
 		this->SetMethod("getItemAt", &Menu::_GetItemAt);

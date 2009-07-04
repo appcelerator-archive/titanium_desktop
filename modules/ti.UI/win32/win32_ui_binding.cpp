@@ -144,7 +144,7 @@ namespace ti
 		}
 	}
 
-	void Win32UIBinding::SetIcon(SharedString icon_path)
+	void Win32UIBinding::SetIcon(std::string& iconPath)
 	{
 		// Notify all windows that the app icon has changed
 		// TODO this kind of notification should really be placed in UIBinding..

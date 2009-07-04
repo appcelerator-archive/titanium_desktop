@@ -879,9 +879,9 @@ SharedPtr<MenuItem> Win32UserWindow::GetContextMenu()
 	return this->contextMenu;
 }
 
-void Win32UserWindow::SetIcon(SharedString icon_path)
+void Win32UserWindow::SetIcon(std::string& iconPath)
 {
-	this->icon_path = icon_path;
+	this->icon_path = iconPath;
 	this->SetupIcon();
 }
 
@@ -911,7 +911,7 @@ void Win32UserWindow::SetupIcon()
 	}
 }
 
-SharedString Win32UserWindow::GetIcon()
+std::string& Win32UserWindow::GetIcon()
 {
 	return icon_path;
 }

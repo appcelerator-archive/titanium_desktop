@@ -60,8 +60,7 @@ namespace ti
 		virtual void SetIconImpl(std::string newIconPath) = 0;
 		virtual void SetStateImpl(bool newState) = 0;
 		virtual void SetSubmenuImpl(SharedMenu newSubmenu) = 0;
-		virtual void EnableImpl() = 0;
-		virtual void DisableImpl() = 0;
+		virtual void SetEnabledImpl(bool enabled) = 0;
 
 	protected:
 		MenuItemType type;

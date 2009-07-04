@@ -19,9 +19,7 @@ namespace ti
 		void SetStateImpl(bool newState);
 		void SetCallbackImpl(SharedKMethod callback);
 		void SetSubmenuImpl(SharedMenu newSubmenu);
-		void EnableImpl();
-		void DisableImpl();
-		bool HasSubmenu();
+		void SetEnabledImpl(bool enabled);
 
 		NSMenuItem* CreateNative(bool registerNative=true);
 		void DestroyNative(NSMenuItem* realization);

@@ -170,13 +170,13 @@ namespace ti
 
 	void MenuItem::_Enable(const ValueList& args, SharedValue result)
 	{
-		this->EnableImpl();
+		this->SetEnabledImpl(true);
 		this->enabled = true;
 	}
 
 	void MenuItem::_Disable(const ValueList& args, SharedValue result)
 	{
-		this->DisableImpl();
+		this->SetEnabledImpl(true);
 		this->enabled = false;
 	}
 

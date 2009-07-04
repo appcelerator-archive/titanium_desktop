@@ -87,7 +87,7 @@ namespace ti
 		virtual SharedMenuItem CreateSeparatorMenuItem() = 0;
 		virtual void SetMenu(SharedMenu) = 0;
 		virtual void SetContextMenu(SharedMenu) = 0;
-		virtual void SetIcon(SharedString iconPath) = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
 		virtual SharedTrayItem AddTray(SharedString iconPath, SharedKMethod cb) = 0;
 		virtual SharedMenu GetMenu() = 0;
 		virtual SharedMenu GetContextMenu() = 0;

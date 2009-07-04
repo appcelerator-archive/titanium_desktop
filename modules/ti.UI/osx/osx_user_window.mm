@@ -665,15 +665,15 @@ namespace ti
 		return this->contextMenu;
 	}
 
-	void OSXUserWindow::SetIcon(SharedString icon_path)
+	void OSXUserWindow::SetIcon(std::string iconPath)
 	{
 		STUB();
 	}
 
-	SharedString OSXUserWindow::GetIcon()
+	std::string& OSXUserWindow::GetIcon()
 	{
 		STUB();
-		return NULL;
+		return "";
 	}
 
 	bool OSXUserWindow::IsTopMost()

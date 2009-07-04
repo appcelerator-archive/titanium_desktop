@@ -45,23 +45,11 @@ namespace ti
 		this->UpdateNativeMenuItems();
 	}
 
-	void OSXMenuItem::EnableImpl()
+	void OSXMenuItem::SetEnabledImpl(bool enabled)
 	{
 		if (this->type == SEPARATOR)
 			return;
 		this->UpdateNativeMenuItems();
-	}
-
-	void OSXMenuItem::DisableImpl()
-	{
-		if (this->type == SEPARATOR)
-			return;
-		this->UpdateNativeMenuItems();
-	}
-
-	bool OSXMenuItem::HasSubmenu()
-	{
-		return !this->submenu.isNull();
 	}
 
 	/*static*/

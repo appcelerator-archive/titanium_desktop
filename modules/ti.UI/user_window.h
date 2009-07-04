@@ -249,8 +249,8 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual SharedMenu GetMenu() = 0;
 		virtual void SetContextMenu(SharedMenu menu) = 0;
 		virtual SharedMenu GetContextMenu() = 0;
-		virtual void SetIcon(SharedString icon_path) = 0;
-		virtual SharedString GetIcon() = 0;
+		virtual void SetIcon(std::string& icon_path) = 0;
+		virtual std::string& GetIcon() = 0;
 		virtual bool IsTopMost() = 0;
 		virtual void SetTopMost(bool topmost) = 0;
 

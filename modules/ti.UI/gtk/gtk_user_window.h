@@ -140,15 +140,13 @@ namespace ti
 		void SetFullscreen(bool fullscreen);
 		bool IsTopMost();
 		void SetTopMost(bool topmost);
+		void SetMenu(SharedMenu);
+		SharedMenu GetMenu();
+		void SetContextMenu(SharedMenu);
+		SharedMenu GetContextMenu();
 
-		void SetMenu(SharedPtr<MenuItem> menu);
-		SharedPtr<MenuItem> GetMenu();
-
-		void SetContextMenu(SharedPtr<MenuItem> menu);
-		SharedPtr<MenuItem> GetContextMenu();
-
-		void SetIcon(SharedString iconPath);
-		SharedString GetIcon();
+		void SetIcon(std::string& iconPath);
+		std::string& GetIcon();
 
 		void SetInspectorWindow(GtkWidget* inspectorWindow);
 		GtkWidget *GetInspectorWindow();
@@ -167,23 +165,12 @@ namespace ti
 		bool topmost;
 		gulong destroyCallbackId;
 
-		// The window-specific menu.
-		SharedPtr<GtkMenuItemImpl> menu;
-
-		// This window's menu -- may just be a pointer to the app menu
-		SharedPtr<GtkMenuItemImpl> menuInUse;
-
-		// The widget this window uses for a menu.
-		GtkWidget* menuBar;
-
-		// The path to this window's icon
-		SharedString iconPath;
-
-		// The widget this window uses for a context menu.
-		SharedPtr<GtkMenuItemImpl> context_menu;
-
-		// This window's web inspector window
-		GtkWidget *inspectorWindow;
+		SharedPtr<GtkMenu> menu; // The window-specific menu.
+		SharedPtr<GtkMenu> activeMenu; // This window's active menu 
+		SharedPtr<GtkMenu> contextMenu; // The window specific context menu 
+		::GtkMenuBar* nativeMenu; // The widget this window uses for a menu.
+		std::string iconPath; // The path to this window's icon
+		GtkWidget *inspectorWindow; // This window's web inspector window
 
 		void _FileChooserWork(const ValueList&, SharedValue);
 		static std::string openFilesDirectory;

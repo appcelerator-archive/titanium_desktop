@@ -53,15 +53,15 @@ namespace ti
 		gdkY(-1),
 		gdkMaximized(false),
 		gdkMinimized(false),
-		gtkWindow(NULL),
-		vbox(NULL),
-		webView(NULL),
+		gtkWindow(0),
+		vbox(0),
+		webView(0),
 		topmost(false),
-		menu(NULL),
-		menuInUse(NULL),
-		menuBar(NULL),
-		iconPath(NULL),
-		context_menu(NULL),
+		menu(0),
+		activeMenu(0),
+		contextMenu(0),
+		nativeMenu(0),
+		iconPath(""),
 		inspectorWindow(0)
 	{
 	}
@@ -378,19 +378,20 @@ namespace ti
 			return;
 	
 		GdkPixbuf* icon = NULL; // NULL is an unset.
-		SharedString iconPath = this->iconPath;
-		if (iconPath.isNull() && !UIModule::GetIcon().isNull())
-			iconPath = UIModule::GetIcon();
+		std::string& iconPath = this->iconPath;
+
+		if (iconPath.empty()) {
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			iconPath = b->GetIcon();
+		}
 	
-		if (!iconPath.isNull())
+		if (!iconPath.empty())
 		{
 			GError* error = NULL;
-			icon = gdk_pixbuf_new_from_file(iconPath->c_str(), &error);
+			icon = gdk_pixbuf_new_from_file(iconPath.c_str(), &error);
 	
-			if (icon == NULL && error != NULL)
-			{
-				std::cerr << "Could not load icon because: "
-				          << error->message << std::endl;
+			if (icon == NULL && error != NULL) {
+				logger->Error("Failed to load icon: %s\n", error->message);
 				g_error_free(error);
 			}
 		}
@@ -539,15 +540,16 @@ namespace ti
 		GtkMenu *menu,
 		gpointer data)
 	{
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		SharedPtr<GtkMenuItemImpl> m =
-			user_window->GetContextMenu().cast<GtkMenuItemImpl>();
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		SharedPtr<GtkMenu> m = userWindow->GetContextMenu().cast<GtkMenu>();
 	
-		if (m.isNull())
-			m = UIModule::GetContextMenu().cast<GtkMenuItemImpl>();
+		if (m.isNull()) {
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			m = b->GetContextMenu().cast<GtkMenu>();
+		}
 	
 		// If we are not in debug mode, remove the default WebKit menu items
-		if (!user_window->GetHost()->IsDebugMode())
+		if (!userWindow->GetHost()->IsDebugMode())
 		{
 			GList* children = gtk_container_get_children(GTK_CONTAINER(menu));
 			for (size_t i = 0; i < g_list_length(children); i++)
@@ -556,11 +558,10 @@ namespace ti
 				gtk_container_remove(GTK_CONTAINER(menu), w);
 			}
 		}
-	
-		if (m.isNull())
-			return;
-	
-		m->AddChildrenTo(GTK_WIDGET(menu));
+
+		if (!m.isNull()) {
+			m->AddChildrenToNativeMenu(GTK_MENU_SHELL(menu), false);
+		}
 	}
 	
 
@@ -971,103 +972,94 @@ namespace ti
 		}
 	}
 	
-	void GtkUserWindow::SetMenu(SharedPtr<MenuItem> value)
+	void GtkUserWindow::SetMenu(SharedMenu value)
 	{
-		SharedPtr<GtkMenuItemImpl> menu = value.cast<GtkMenuItemImpl>();
+		SharedPtr<GtkMenu> menu = value.cast<GtkMenu>();
 		this->menu = menu;
 		this->SetupMenu();
 	}
-	
-	SharedPtr<MenuItem> GtkUserWindow::GetMenu()
+
+	SharedMenu GtkUserWindow::GetMenu()
 	{
 		return this->menu;
 	}
-	
-	void GtkUserWindow::SetContextMenu(SharedPtr<MenuItem> value)
+
+	void GtkUserWindow::SetContextMenu(SharedMenu value)
 	{
-		SharedPtr<GtkMenuItemImpl> menu = value.cast<GtkMenuItemImpl>();
-		this->context_menu = menu;
+		SharedPtr<GtkMenu> menu = value.cast<GtkMenu>();
+		this->contextMenu = menu;
 	}
-	
-	SharedPtr<MenuItem> GtkUserWindow::GetContextMenu()
+
+	SharedMenu GtkUserWindow::GetContextMenu()
 	{
-		return this->context_menu;
+		return this->contextMenu;
 	}
-	
-	
-	void GtkUserWindow::SetIcon(SharedString iconPath)
+
+	void GtkUserWindow::SetIcon(std::string& iconPath)
 	{
 		this->iconPath = iconPath;
 		this->SetupIcon();
 	}
-	
-	SharedString GtkUserWindow::GetIcon()
+
+	std::string& GtkUserWindow::GetIcon()
 	{
 		return this->iconPath;
 	}
-	
+
 	void GtkUserWindow::RemoveOldMenu()
 	{
-	
-		// Only clear a realization if we have one
-		if (!this->menuInUse.isNull() && this->menuBar != NULL)
-			this->menuInUse->ClearRealization(this->menuBar);
-	
-		// Only remove the old menu if we still have a window
-		if (this->gtkWindow != NULL)
-			gtk_container_remove(GTK_CONTAINER(this->vbox), this->menuBar);
-	
-		this->menuInUse = NULL;
-		this->menuBar = NULL;
+		if (!this->activeMenu.isNull() && this->nativeMenu) {
+			this->activeMenu->DestroyNative(GTK_MENU_SHELL(this->nativeMenu));
+		}
+
+		if (this->gtkWindow != NULL) {
+			gtk_container_remove(GTK_CONTAINER(this->vbox), GTK_WIDGET(this->nativeMenu));
+		}
+
+		this->activeMenu = 0;
+		this->nativeMenu = 0;
 	}
-	
+
 	void GtkUserWindow::SetupMenu()
 	{
-		SharedPtr<GtkMenuItemImpl> menu = this->menu;
-		SharedPtr<MenuItem> app_menu = UIModule::GetMenu();
+		SharedPtr<GtkMenu> menu = this->menu;
 	
 		// No window menu, try to use the application menu.
-		if (menu.isNull() && !app_menu.isNull())
+		if (menu.isNull())
 		{
-			menu = app_menu.cast<GtkMenuItemImpl>();
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			menu = b->GetMenu().cast<GtkMenu>();
 		}
 	
 		// Only do this if the menu is actually changing.
-		if (menu == this->menuInUse)
-			return;
-	
-		this->RemoveOldMenu();
-	
-		if (!menu.isNull() && this->gtkWindow != NULL)
-		{
-			GtkWidget* menuBar = menu->GetMenuBar();
-			gtk_box_pack_start(GTK_BOX(this->vbox), menuBar,
-			                   FALSE, FALSE, 2);
-			gtk_box_reorder_child(GTK_BOX(this->vbox), menuBar, 0);
-			gtk_widget_show(menuBar);
-			this->menuBar = menuBar;
+		if (menu.get() != this->activeMenu.get()) {
+			this->RemoveOldMenu();
+
+			if (!menu.isNull() && this->gtkWindow) {
+				GtkMenuBar* newNativeMenu = GTK_MENU_BAR(menu->CreateNativeBar(true));
+				gtk_box_pack_start(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), FALSE, FALSE, 2);
+				gtk_box_reorder_child(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), 0);
+				gtk_widget_show(GTK_WIDGET(newNativeMenu));
+				this->nativeMenu = newNativeMenu;
+			}
+			this->activeMenu = menu;
 		}
-	
-		this->menuInUse = menu;
-	
 	}
-	
+
 	void GtkUserWindow::AppMenuChanged()
 	{
-		if (this->menu.isNull())
-		{
+		if (this->menu.isNull()) {
 			this->SetupMenu();
 		}
 	}
-	
+
 	void GtkUserWindow::AppIconChanged()
 	{
-		if (this->iconPath.isNull())
-		{
+		if (this->iconPath.empty()) {
 			this->SetupIcon();
 		}
 	}
-	
+
 	namespace GtkUserWindowNS
 	{
 		std::string openFilesDirectory = "";

@@ -362,7 +362,7 @@ namespace ti
 			iconPath = UIModule::GetResourcePath(iconURL);
 		}
 		this->iconPath = *iconPath;
-		this->SetIcon(iconPath);
+		this->SetIcon(this->iconPath);
 	}
 
 	void UIBinding::_AddTray(const ValueList& args, SharedValue result)

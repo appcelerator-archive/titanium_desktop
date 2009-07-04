@@ -28,12 +28,12 @@ namespace ti
 	OSXUIBinding::OSXUIBinding(Host *host) :
 		UIBinding(host),
 		defaultMenu(nil),
-		menu(NULL),
+		menu(0),
 		nativeMenu(nil),
-		contextMenu(NULL),
-		dockMenu(NULL),
+		contextMenu(0),
+		dockMenu(0),
 		nativeDockMenu(nil),
-		activeWindow(NULL),
+		activeWindow(0),
 		scriptEvaluator(nil)
 	{
 		[TiProtocol registerSpecialProtocol];
@@ -267,16 +267,15 @@ namespace ti
 		//TODO: need to support allowing custom badge images
 	}
 
-	void OSXUIBinding::SetIcon(SharedString path)
+	void OSXUIBinding::SetIcon(std::string& iconPath)
 	{
-		std::string icon_path = *path;
-		if (icon_path.empty())
+		if (iconPath.empty())
 		{
 			[[NSApplication sharedApplication] setApplicationIconImage:nil];
 		}
 		else
 		{
-			NSImage *image = MakeImage(icon_path);
+			NSImage *image = MakeImage(iconPath);
 			[[NSApplication sharedApplication] setApplicationIconImage:image];
 			[image release];
 		}

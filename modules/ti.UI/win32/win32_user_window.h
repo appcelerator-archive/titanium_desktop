@@ -170,8 +170,8 @@ public:
 	void SetContextMenu(SharedPtr<MenuItem> menu);
 	SharedPtr<MenuItem> GetContextMenu();
 	HMENU GetContextMenuHandle() { return this->contextMenuHandle; }
-	void SetIcon(SharedString icon_path);
-	SharedString GetIcon();
+	void SetIcon(std::string&);
+	std::string& GetIcon();
 	bool IsTopMost();
 	void SetTopMost(bool topmost);
 

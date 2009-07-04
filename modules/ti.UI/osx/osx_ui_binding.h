@@ -33,7 +33,7 @@ namespace ti
 		void SetDockMenu(SharedMenu);
 
 		SharedTrayItem AddTray(SharedString icon_path, SharedKMethod cb);
-		void SetIcon(SharedString icon_path);
+		void SetIcon(std::string& icon_path);
 		virtual void SetDockIcon(SharedString icon_path);
 		virtual void SetBadge(SharedString badge_label);
 		virtual void SetBadgeImage(SharedString badge_path);
