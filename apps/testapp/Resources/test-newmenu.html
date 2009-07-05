@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<style>
+			body { font-family: sans, sans-serif; background-color: white; }
+			div{
+				margin:10px;
+			}
+		</style>
+		<script>
+			var menu = null;
+			var item1 = null;
+			var menu2 = null;
+			var item2 = null;
+			function setMainMenu() {
+				try {
+				menu = Titanium.UI.createMenu();
+				var itemz = menu.addSubmenu("WithImage", function() {'what'}, "app://fonts.png");
+				itemz.addItem("blah1");
+				itemz.addItem("blah20");
+				itemz.addItem("blah30");
+				item1 = menu.addSubmenu("Blahblah");
+				item1.addItem("haha1");
+				item1.addItem("haha2");
+				item1.addItem("haha3", function() {'hey'}, "app://fonts.png");
+				var check_item = item1.addCheckItem("haha4");
+				check_item.setState(true);
+				Titanium.UI.setMenu(menu);
+				Titanium.UI.setContextMenu(menu);
+				Titanium.UI.setDockMenu(menu);
+				} catch (e) {
+					alert(e);
+				}
+			}
+			function setMainMenu2() {
+				try {
+				menu2 = Titanium.UI.createMenu();
+				item2 = menu2.addSubmenu("Menu2");
+				item2.addItem("haha1");
+				item2.addItem("haha2");
+				item2.addItem("haha3");
+				Titanium.UI.setMenu(menu2);
+				Titanium.UI.setContextMenu(menu2);
+				Titanium.UI.setDockMenu(menu2);
+				} catch (e) {
+					alert(e);
+				}
+			}
+			function modifySubmenu() {
+				item1.addItem("BBB");
+			}
+			function modifyMainMenu() {
+				menu.addItem("AAA");
+			}
+		</script>
+	</head>
+	<body>
+		<h2>Titanium New Menu Tests</h2>
+			<div>
+				<button onclick="setMainMenu()">Setup Main Menu1</button>
+				<button onclick="setMainMenu2()">Setup Main Menu2</button>
+				<button onclick="modifySubmenu()">Modify SubMenu</button>
+				<button onclick="modifyMainMenu()">Modify Main Menu</button>
+				<!--
+				<button onclick="playSound()">Play</button>
+				<button onclick="pauseSound()">Pause</button>
+				<button onclick="stopSound()">Stop</button>
+				<button onclick="reloadSound()">Reload</button>
+				<button onclick="setVolume()">SetVolume</button>
+				<button onclick="getVolume()">GetVolume</button>
+				<button onclick="toggleLooping()">ToggleLooping</button>
+				<button onclick="isLooping()">IsLooping</button>
+				<button onclick="isPlaying()">IsPlaying</button>
+				<button onclick="isPaused()">IsPaused</button>
+				-->
+			</div>
+	</body>
+</html>
