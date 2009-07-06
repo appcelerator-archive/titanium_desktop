@@ -665,7 +665,7 @@ namespace ti
 		return this->contextMenu;
 	}
 
-	void OSXUserWindow::SetIcon(std::string iconPath)
+	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
 		STUB();
 	}
@@ -673,7 +673,8 @@ namespace ti
 	std::string& OSXUserWindow::GetIcon()
 	{
 		STUB();
-		return "";
+		static std::string stubby = "";
+		return stubby;
 	}
 
 	bool OSXUserWindow::IsTopMost()

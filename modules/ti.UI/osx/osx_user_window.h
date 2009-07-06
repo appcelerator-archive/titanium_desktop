@@ -110,7 +110,7 @@ namespace ti
 			SharedMenu GetMenu();
 			void SetContextMenu(SharedMenu menu);
 			SharedMenu GetContextMenu();
-			void SetIcon(std::string icon_path);
+			void SetIcon(std::string& icon_path);
 			std::string& GetIcon();
 
 			NativeWindow* GetNative() { return nativeWindow; }

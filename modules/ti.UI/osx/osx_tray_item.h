@@ -17,14 +17,13 @@ namespace ti
 		void SetMenu(SharedMenu menu);
 		void SetHint(SharedString hint);
 		void Remove();
-		
-		void Invoke();
+		void InvokeCallback();
 
 	private:
 		NSMenu* nativeMenu;
 		SharedPtr<OSXMenu> menu;
 		SharedKMethod callback;
-		id delegate;
+		NSStatusItem* nativeItem;
 	};
 }
 
