@@ -251,7 +251,7 @@ window.onload = function()
 	});
 		
 	// get the runtime dir
-	var runtime_dir = TFS.getFile(Titanium.Process.getEnv('KR_RUNTIME'));
+	var runtime_dir = TFS.getFile(Titanium.Process.getCurrentProcess().getEnvironment('KR_RUNTIME'));
 	var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
 	var app_dir = TFS.getApplicationDirectory();
 	
@@ -488,7 +488,7 @@ window.onload = function()
 		profile_path.deleteFile();
 		log_path.deleteFile();
 
-		var args = ['--profile="'+profile_path+'"']
+		var args = [app.executable.nativePath(), '--profile="'+profile_path+'"']
 		args.push('--logpath="'+log_path+'"')
 		args.push('--bundled-component-override="'+app_dir+'"')
 		args.push('--no-console-logging');
@@ -498,11 +498,12 @@ window.onload = function()
 		}
 		
 		args.push('--results-dir="' + results_dir + '"');
-		var process = Titanium.Process.launch(app.executable.nativePath(),args);
+		var process = Titanium.Process.createProcess(args);
 		var passed = 0;
 		var failed = 0;
-		process.onread = function(d)
+		process.setOnRead(function(event)
 		{
+			var d = event.pipe.read();
 			var lines = d.split('\n');
 			for (var l = 0; l < lines.length; l++)
 			{
@@ -537,7 +538,7 @@ window.onload = function()
 					Titanium.API.debug("PROCESS:"+data);
 				}
 			}
-		};
+		});
 		var size = 0;
 		var timer = null;
 		var start_time = new Date().getTime();
@@ -570,7 +571,7 @@ window.onload = function()
 			start_time = t;
 		},1000);
 		
-		process.onexit = function(exitcode)
+		process.setOnExit(function(exitcode)
 		{
 			Titanium.API.debug("test has exited: "+current_test.name);
 			try
@@ -599,7 +600,8 @@ window.onload = function()
 				Titanium.API.error("onexit failure = "+E+" at "+E.line);
 			}
 			run_next_test();
-		};
+		});
+		process.launch();
 	}
 	
 	function run_next_test()

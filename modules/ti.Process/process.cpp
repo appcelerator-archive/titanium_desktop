@@ -12,351 +12,256 @@
 #include <Poco/PipeImpl.h>
 
 using Poco::RunnableAdapter;
+#if defined(OS_OSX)
+# include "osx/osx_process.h"
+#elif defined(OS_WIN32)
+# include "win32/win32_process.h"
+#elif defined(OS_LINUX)
+# include "linux/linux_process.h"
+#endif
 
 namespace ti
 {
-	Process::Process(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args) :
-		StaticBoundObject("Process"),
-		running(false),
-		complete(false),
-		pid(-1),
-		exitCode(-1),
-		errp(0),
-		outp(0),
-		inp(0),
-		logger(Logger::Get("Process.Process"))
+	/*static*/
+	SharedProcess Process::GetCurrentProcess()
 	{
-		this->parent = parent;
-		this->errp = new Poco::Pipe();
-		this->outp = new Poco::Pipe();
-		this->inp = new Poco::Pipe();
-
-		logger->Debug("Running process %s", cmd.c_str());
-		try
+#if defined(OS_OSX)
+		return OSXProcess::GetCurrentProcess();
+#elif defined(OS_WIN32)
+		return Win32Process::GetCurrentProcess();
+#elif defined(OS_LINUX)
+		return LinuxProcess::GetCurrentProcess();
+#endif
+	}
+	
+	/*static*/
+	SharedProcess Process::CreateProcess(
+		SharedKList args, SharedKObject environment,
+		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr)
+	{
+#if defined(OS_OSX)
+		return new OSXProcess(args, environment, stdin, stdout, stderr);
+#elif defined(OS_WIN32)
+		return new Win32Process(args, environment, stdin, stdout, stderr);
+#elif defined(OS_LINUX)
+		return new LinuxProcess(args, environment, stdin, stdout, stderr);
+#endif		
+	}
+	
+	
+	Process::Process() : StaticBoundObject("Process")
+	{
+		InitBindings();
+	}
+	
+	Process::Process(SharedKList args, SharedKObject environment,
+		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) :
+			StaticBoundObject("Process"),
+			stdin(stdin), stdout(stdout), stderr(stderr),
+			args(args), environment(environment), exitCode(-1),
+			onExit(NULL)
+	{
+		if (environment.isNull())
 		{
-			this->arguments = args;
-			this->command = cmd;
+			this->environment = GetCurrentProcess()->CloneEnvironment();
 		}
-		catch (std::exception &e)	
+		
+		if (stdin.isNull())
 		{
-			throw ValueException::FromString(e.what());
+			this->stdin = OutputPipe::CreateOutputPipe();
 		}
-
-		/**
-		 * @tiapi(property=True,type=string,name=Process.Process.command,version=0.2)
-		 * @tiapi The command used for the Process object
-		 */
-		this->SetString("command", cmd);
-
-		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.pid,version=0.2)
-		 * @tiapi The process id of the Process object
-		 */
-		this->SetNull("pid");
-
-		/**
-		 * @tiapi(property=True,type=boolean,name=Process.Process.running,version=0.2)
-		 * @tiapi The running status of the Process object
-		 */
-		this->SetBool("running", false);
-
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.err,version=0.2)
-		 * @tiapi The Pipe object of the error stream
-		 */
-		this->err = new Pipe(new Poco::PipeInputStream(*errp));
-		this->shared_error = new SharedKObject(this->err);
-		this->SetObject("err", *shared_error);
-
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.out,version=0.2)
-		 * @tiapi The Pipe object of the output stream
-		 */
-		this->out = new Pipe(new Poco::PipeInputStream(*outp));
-		this->shared_output = new SharedKObject(this->out);
-		this->SetObject("out", *shared_output);
-
-		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.in,version=0.2)
-		 * @tiapi The Pipe object of the input stream
-		 */
-		this->in = new Pipe(new Poco::PipeOutputStream(*inp));
-		this->shared_input = new SharedKObject(this->in);
-		this->SetObject("in", *shared_input);
-
-		/**
-		 * @tiapi(method=True,name=Process.Process.terminate,version=0.2)
-		 * @tiapi Terminates a running process
-		 */
-		this->SetMethod("terminate", &Process::Terminate);
-
-		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.exitCode,version=0.4)
-		 * @tiapi The exit code or null if not yet exited
-		 */
-		this->SetNull("exitCode");
-
-		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onread,since=0.4)
-		 * @tiapi The function handler to call when sys out is read
-		 */
-		this->SetNull("onread");
-
-		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onexit,since=0.4)
-		 * @tiapi The function handler to call when the process exits
-		 */
-		this->SetNull("onexit");
-
-		// setup threads which can read output and also monitor the exit
-		this->monitorAdapter = new RunnableAdapter<Process>(*this, &Process::Monitor);
-		this->exitMonitorThread.start(*monitorAdapter);
+		if (stdout.isNull())
+		{
+			this->stdout = InputPipe::CreateInputPipe();
+		}
+		if (stderr.isNull())
+		{
+			this->stderr = InputPipe::CreateInputPipe();
+		}
+		InitBindings();
+	}
+	
+	void Process::InitBindings()
+	{
+		//TODO doc me
+		SetMethod("getPID", &Process::_GetPID);
+		SetMethod("getExitCode", &Process::_GetExitCode);
+		SetMethod("getEnvironment", &Process::_GetEnvironment);
+		SetMethod("setEnvironment", &Process::_SetEnvironment);
+		SetMethod("cloneEnvironment", &Process::_CloneEnvironment);
+		SetMethod("launch", &Process::_Launch);
+		SetMethod("terminate", &Process::_Terminate);
+		SetMethod("kill", &Process::_Kill);
+		SetMethod("sendSignal", &Process::_SendSignal);
+		SetMethod("restart", &Process::_Restart);
+		SetMethod("setOnRead", &Process::_SetOnRead);
+		SetMethod("setOnExit", &Process::_SetOnExit);
+		SetMethod("getStdin", &Process::_GetStdin);
+		SetMethod("getStdout", &Process::_GetStdout);
+		SetMethod("getStderr", &Process::_GetStderr);
 	}
 
 	Process::~Process()
 	{
+	}
+
+	void Process::Exited()
+	{
+		if (onExit != NULL && !onExit->isNull())
+		{
+			ValueList args(Value::NewInt(this->exitCode));
+			Host::GetInstance()->InvokeMethodOnMainThread(*this->onExit, args, false);
+		}
+	}
+	
+	// convenience for joining stdout + stderr, and attaching to stdout
+	void Process::SetOnRead(SharedKMethod method)
+	{
+		if (method.isNull())
+		{
+			stdout->SetOnRead(NULL);
+			return;
+		}
+		
+		if (!stderr->IsJoined())
+		{
+			stdout->Join(stderr);
+		}
+
+		stdout->SetOnRead(method);
+	}
+	
+	SharedKObject Process::CloneEnvironment()
+	{
+		SharedStringList properties = environment->GetPropertyNames();
+		SharedKObject clonedEnvironment = new StaticBoundObject();
+		for (size_t i = 0; i < properties->size(); i++)
+		{
+			std::string property = *properties->at(i);
+			std::string value = environment->Get(property.c_str())->ToString();
+			clonedEnvironment->Set(property.c_str(), Value::NewString(value.c_str()));
+		}
+		return clonedEnvironment;
+	}
+
+	void Process::_GetPID(const ValueList& args, SharedValue result)
+	{
+		result->SetInt(GetPID());
+	}
+	
+	void Process::_GetExitCode(const ValueList& args, SharedValue result)
+	{
+		result->SetInt(exitCode);
+	}
+	
+	void Process::_GetEnvironment(const ValueList& args, SharedValue result)
+	{
+		if (args.size() > 0 && args.at(0)->IsString())
+		{
+			SharedValue value = environment->Get(args.at(0)->ToString());
+			result->SetValue(value);
+		}
+		else {
+			result->SetObject(environment);
+		}
+	}
+	
+	void Process::_SetEnvironment(const ValueList& args, SharedValue result)
+	{
+		if (args.size() >= 2 && args.at(0)->IsString() && args.at(1)->IsString())
+		{
+			SetEnvironment(args.at(0)->ToString(), args.at(1)->ToString());
+		}
+	}
+	
+	void Process::_CloneEnvironment(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(CloneEnvironment());
+	}
+	
+	void Process::_Launch(const ValueList& args, SharedValue result)
+	{
+		Launch();
+	}
+	
+	void Process::_Terminate(const ValueList& args, SharedValue result)
+	{
 		Terminate();
-
-		if (this->exitMonitorThread.isRunning())
-		{
-			try
-			{
-				this->exitMonitorThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with exit monitor thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		if (this->stdOutThread.isRunning())
-		{
-			try
-			{
-				this->stdOutThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stdout thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		if (this->stdErrorThread.isRunning())
-		{
-			try
-			{
-				this->stdErrorThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stderr thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		delete monitorAdapter;
-		delete stdOutAdapter;
-		delete stdErrorAdapter;
-		delete shared_output;
-		delete shared_input;
-		delete shared_error;
 	}
-
-	void Process::StartReadThreads()
+	
+	void Process::_Kill(const ValueList& args, SharedValue result)
 	{
-		this->logger->Debug("Starting output handler threads...");
-		if (!stdOutThread.isRunning())
+		Kill();
+	}
+	
+	void Process::_SendSignal(const ValueList& args, SharedValue result)
+	{
+		if (args.size() >= 1 && args.at(0)->IsNumber())
 		{
-			this->stdOutAdapter = new RunnableAdapter<Process>(*this, &Process::ReadStdOut);
-			stdOutThread.start(*stdOutAdapter);
-		}
-
-		if (!stdErrorThread.isRunning())
-		{
-			RunnableAdapter<Process> adapter(*this, &Process::ReadStdError);
-			this->stdErrorAdapter = new RunnableAdapter<Process>(*this, &Process::ReadStdError);
-			stdErrorThread.start(*stdErrorAdapter);
+			SendSignal(args.at(0)->ToInt());
 		}
 	}
-
-	void Process::Monitor()
+	
+	void Process::_Restart(const ValueList& args, SharedValue result)
 	{
-		this->Set("running", Value::NewBool(true));
-		this->running = true;
-
-		try
+		if (args.size() == 0)
 		{
-			Poco::ProcessHandle ph = Poco::Process::launch(
-				this->command, this->arguments,
-				this->inp, this->outp, this->errp);
-			this->StartReadThreads();
-			this->pid = (int) ph.id();
-			this->Set("pid", Value::NewInt(this->pid));
-
-			this->exitCode = ph.wait();
-			this->Set("exitCode", Value::NewInt(this->exitCode));
-			logger->Debug("%s exited with return code %i", 
-				this->command.c_str(), this->exitCode);
-		}
-		catch (Poco::SystemException &se)
-		{
-			logger->Error("System Exception starting: %s, message: %s",
-				this->command.c_str(), se.what());
-		}
-		catch (std::exception &e)
-		{
-			logger->Error("Exception starting: %s, message: %s",
-				this->command.c_str(), e.what());
-		}
-
-		this->Set("running", Value::NewBool(false));
-		this->running = false;
-
-		this->InvokeOnExitCallback();
-
-		// We must set complete to true after we call the callback, so
-		// that it is only called once -- see this->Set(...)
-		this->complete = true;
-
-		this->parent->Terminated(this);
-	}
-
-	void Process::InvokeOnExitCallback()
-	{
-		SharedValue sv = this->Get("onexit");
-		if (!sv->IsMethod())
-		{
-			return;
-		}
-
-		ValueList args(Value::NewInt(this->exitCode));
-		SharedKMethod callback = sv->ToMethod();
-		this->parent->GetHost()->InvokeMethodOnMainThread(
-			callback, args, false);
-	}
-
-	void Process::InvokeOnReadCallback(bool isStdError)
-	{
-		SharedValue sv = this->Get("onread");
-		if (!sv->IsMethod())
-		{
-			return;
-		}
-
-		std::string output;
-		if (isStdError)
-		{
-			Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-			output = stdErrorBuffer.str();
-			stdErrorBuffer.str("");
+			Restart();
 		}
 		else
 		{
-			Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-			output = stdOutBuffer.str();
-			stdOutBuffer.str("");
-		}
-
-		if (!output.empty())
-		{
-			ValueList args(
-				Value::NewString(output),
-				Value::NewBool(isStdError));
-			SharedKMethod callback = sv->ToMethod();
-			this->parent->GetHost()->InvokeMethodOnMainThread(
-				callback, args, false);
-		}
-	}
-
-	void Process::ReadStdOut()
-	{
-		while (this->running)
-		{
-			SharedValue result = Value::NewUndefined();
-			this->out->Read(ValueList(), result);
-
-			if (result->IsString())
+			if (args.at(0)->IsObject())
 			{
-				Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-				stdOutBuffer << result->ToString();
-				this->InvokeOnReadCallback(false);
+				SharedKObject object = args.at(0)->ToObject();
+				SharedKObject env;
+				SharedOutputPipe stdin;
+				SharedInputPipe stdout, stderr;
+				
+				env = object->GetObject("env");
+				stdin = object->GetObject("stdin").cast<OutputPipe>();
+				stdout = object->GetObject("stdout").cast<InputPipe>();
+				stderr = object->GetObject("stderr").cast<InputPipe>();
+				Restart(env, stdin, stdout, stderr);
 			}
 		}
 	}
-
-	void Process::ReadStdError()
+	
+	void Process::_SetOnRead(const ValueList& args, SharedValue result)
 	{
-		while (this->running)
+		if (args.size() > 0 && args.at(0)->IsMethod())
 		{
-			SharedValue result = Value::NewUndefined();
-			this->err->Read(ValueList(), result);
-
-			if (result->IsString())
-			{
-				Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-				stdErrorBuffer << result->ToString();
-				this->InvokeOnReadCallback(true);
-			}
+			SetOnRead(args.at(0)->ToMethod());
 		}
 	}
-
-	void Process::Terminate(const ValueList& args, SharedValue result)
+	
+	void Process::_SetOnExit(const ValueList& args, SharedValue result)
 	{
-		Terminate();
-	}
-
-	void Process::Terminate()
-	{
-		if (running)
+		if (args.size() > 0 && args.at(0)->IsMethod())
 		{
-			this->running = false;
-#ifdef OS_WIN32
-			// win32 needs a kill to terminate process
-			Poco::Process::kill(this->pid);
-#else
-			// this sends a more graceful SIGINT instead of SIGKILL
-			// which is important for programs that manage child processes
-			// and handle their own signals
-			Poco::Process::requestTermination(this->pid);
-#endif			
-			this->Set("running", Value::NewBool(false));
-			this->parent->Terminated(this);
+			this->onExit = new SharedKMethod(args.at(0)->ToMethod());
 		}
 	}
-
-	void Process::Set(const char *name, SharedValue value)
+	
+	void Process::_GetStdin(const ValueList& args, SharedValue result)
 	{
-		// We need to check the previous value of certain incomming values
-		// *before* we actually do the Set(...) on this object.
-		bool flushOnRead = 
-			(!strcmp("onread", name)) && (!this->Get("onread")->IsMethod());
-		bool flushOnExit = 
-			(!strcmp("onexit", name)) && (!this->Get("onexit")->IsMethod());
-
-
-		StaticBoundObject::Set(name, value);
-
-		if (flushOnRead)
-		{
-			// If we had no previous onread callback flush our output
-			// buffers, so that onread will be called even when it is
-			// attached after a process finishes executing.
-			this->InvokeOnReadCallback(false);
-			this->InvokeOnReadCallback(true);
-		}
-
-		// this->complete is the signal that monitor thread has already
-		// attempted to call the onexit callback. If it's false, the monitor
-		// thread will take care of calling it.
-		if (flushOnExit && this->complete)
-		{
-			this->InvokeOnExitCallback();
-		}
+		result->SetObject(stdin);
+	}
+	
+	void Process::_GetStdout(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(stdout);
+	}
+	
+	void Process::_GetStderr(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(stderr);
+	}
+	
+	SharedValue Process::Call(const ValueList& args)
+	{
+		Launch(false);
+		// TODO join stdout/stderr, buffer contents, return
+		return Value::Undefined;
 	}
 }
 

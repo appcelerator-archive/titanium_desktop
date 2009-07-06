@@ -1,56 +1,69 @@
 describe("process tests",
 {
-    test_process_object: function()
-    {
-		value_of(Titanium.Process).should_not_be_null();
-    	value_of(Titanium.Process.getEnv).should_be_function();
-		value_of(Titanium.Process.hasEnv).should_be_function();
-		value_of(Titanium.Process.launch).should_be_function();
-		value_of(Titanium.Process.pid).should_be_number();
-		value_of(Titanium.Process.restart).should_be_function();
-		value_of(Titanium.Process.setEnv).should_be_function();
-
-        // are these tests even valid?
-		value_of(Titanium.Process.Pipe).should_not_be_null();
-		value_of(Titanium.Process.Process).should_not_be_null();
-
-
-    },
-    
-    test_process_env: function()
-    {
-        // setup an environment variable
-        Titanium.Process.setEnv("Foo", "bar");
-        value_of(Titanium.Process.hasEnv("Foo")).should_be_true();
-        value_of(Titanium.Process.getEnv("Foo")).should_be("bar");
-        
-    },
-
-	test_process_as_async: function(test)
+	test_process_object: function()
 	{
 		value_of(Titanium.Process).should_not_be_null();
+		value_of(Titanium.Process.createProcess).should_be_function();
+		value_of(Titanium.Process.createInputPipe).should_be_function();
+		value_of(Titanium.Process.createOutputPipe).should_be_function();
+		value_of(Titanium.Process.getCurrentProcess).should_be_number();
+	},
+	
+	test_current_process: function()
+	{
+		var p = Titanium.Process.getCurrentProcess();
+		value_of(p).should_not_be_null();
+		value_of(p.getEnvironment).should_be_function();
+		value_of(p.setEnvironment).should_be_function();
+		value_of(p.getArguments).should_be_function();
+		value_of(p.stdin).should_be_null();
+		value_of(p.stdout).should_be_object();
+		value_of(p.stderr).should_be_object();
+	},
+	
+	test_current_process_env: function()
+	{
+		var p = Titanium.Process.getCurrentProcess();
+		value_of(p.getEnvironment("foobar")).should_be_null();
+		p.setEnvironment("foobar", "1");
+		value_of(p.getEnvironment("foobar")).should_be("1");
+	},
+	
+	test_current_process_arguments: function()
+	{
+		var p = Titanium.Process.getCurrentProcess();
+		value_of(p.getArguments().length).should_be(Titanium.App.arguments.length+1);
+		for (var i = 1; i < p.getArguments().length; i++)
+		{
+			value_of(p.getArguments()[i]).should_be(Titanium.App.arguments[i]);
+		}
+	},
+	
+	test_process_as_async: function(test)
+	{
 		var p = null;
 		
 		if (Titanium.platform == 'win32')
 		{
-			p = Titanium.Process.launch('C:\\Windows\\system32\\cmd.exe',['/C', 'dir']);
+			p = Titanium.Process.createProcess(['C:\\Windows\\system32\\cmd.exe', '/C', 'dir']);
 		}
 		else
 		{
-			p = Titanium.Process.launch('/bin/ls',['-la']);
+			p = Titanium.Process.createProcess(['/bin/ls', '-la']);
 		}
-
+		
 		var timer = null;
 		var shortTimer = null;
 		value_of(p).should_not_be_null();
 		var output = '';
-        
-		p.onread = function(buf)
+		
+		p.setOnRead(function(event)
 		{
+			var buf = event.pipe.read();
 			output += buf;
-		};
-
-		p.onexit = function()
+		});
+		
+		p.setOnExit(function()
 		{
 			clearTimeout(timer);
 			if (output.length > 0)
@@ -61,9 +74,11 @@ describe("process tests",
 			{
 				test.failed('no output received');
 			}
-		};
-        
-        // if we hit this timeout, then we fail.		
+		});
+		
+		p.launch();
+		
+		// if we hit this timeout, then we fail.		
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');
@@ -72,16 +87,14 @@ describe("process tests",
 	
 	test_process_exception_as_async: function(test)
 	{
-		value_of(Titanium.Process).should_not_be_null();
 		var p = null;
-		
 		if (Titanium.platform == 'win32')
 		{
-			p = Titanium.Process.launch('C:\\Windows\\system32\\cmd.exe',['/c', 'dir']);
+			p = Titanium.Process.createProcess(['C:\\Windows\\system32\\cmd.exe', '/c', 'dir']);
 		}
 		else
 		{
-			p = Titanium.Process.launch('/bin/ls',['-la']);
+			p = Titanium.Process.createProcess(['/bin/ls', '-la']);
 		}
 
 		var timer = null;
@@ -89,19 +102,19 @@ describe("process tests",
 		var output = '';
 		var throwException = true;
 		
-		p.onread = function(buf)
+		p.setOnRead(function(event)
 		{
 			// test throwing exception from onread
 			if (throwException) {
 				throw "this is an exception";
 				throwException = false;
 			}
-		};
-		p.onexit = function()
+		});
+		p.setOnExit(function()
 		{
 			clearTimeout(timer);
 			test.passed();
-		};
+		});
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');

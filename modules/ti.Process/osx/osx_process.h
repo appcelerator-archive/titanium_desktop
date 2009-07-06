@@ -9,50 +9,49 @@
 #include <kroll/kroll.h>
 #include <Cocoa/Cocoa.h>
 #include "../process_binding.h"
-#include "osx_pipe.h"
+#include "../process.h"
+#include "osx_input_pipe.h"
+#include "osx_output_pipe.h"
+#include <signal.h>
 
-@interface TiOSXProcess : NSObject
-{
+namespace ti { class OSXProcess; }
+
+@interface TiOSXProcess : NSObject {
 	NSTask *task;
-	Host *host;
-	SharedKMethod *onread;
-	SharedKMethod *onexit;
-	ti::OSXPipe *input;
-	ti::OSXPipe *output;
-	ti::OSXPipe *error;
-	SharedKObject *shared_input;
-	SharedKObject *shared_output;
-	SharedKObject *shared_error;
-	KObject *bound;
+	ti::OSXProcess *process;
 }
--(id)initWithPath:(NSString*)cmd args:(NSArray*)args host:(Host*)host bound:(KObject*)bo;
+
+-(id)initWithProcess:(ti::OSXProcess*)p;
 -(NSTask*)task;
--(void)start;
--(void)stop;
--(void)setRead: (SharedKMethod*)method;
--(void)setExit: (SharedKMethod*)method;
--(void)getOutData: (NSNotification *)aNotification;
--(void)getErrData: (NSNotification *)aNotification;
--(void)terminated: (NSNotification *)aNotification;
--(ti::OSXPipe*) output;
--(ti::OSXPipe*) error;
+-(void)terminated:(NSNotification *)aNotification;
 @end
 
 namespace ti
 {
-	class OSXProcess : public StaticBoundObject
+	class OSXProcess : public Process
 	{
 	public:
-		OSXProcess(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args);
+		static SharedProcess GetCurrentProcess();
+		OSXProcess(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
 		virtual ~OSXProcess();
-	private:
-		Host *host;
-		TiOSXProcess *process;
-	public:
-
+		
+		virtual int GetPID();
+		virtual void Launch(bool async=true);
+		virtual void Terminate();
+		virtual void Kill();
+		virtual void SendSignal(int signal);
+		virtual void Restart();
+		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		
+		SharedPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
+		SharedPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }
+		SharedPtr<OSXInputPipe> GetStderr() { return stderr.cast<OSXInputPipe>(); }
 	protected:
-		void Bound(const char *name, SharedValue value);
-		void Terminate(const ValueList& args, SharedValue result);
+		TiOSXProcess *delegate;
+		NSProcessInfo *currentProcessInfo;
+		OSXProcess::OSXProcess(NSProcessInfo *processInfo);
+		
+		static SharedPtr<OSXProcess> currentProcess;
 	};
 }
 

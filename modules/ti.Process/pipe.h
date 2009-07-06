@@ -8,26 +8,28 @@
 #define _PIPE_H_
 
 #include <kroll/kroll.h>
-#include <Poco/Process.h>
-#include <Poco/PipeStream.h>
-#include <Poco/Exception.h>
 
 namespace ti
-{
+{	
 	class Pipe : public StaticBoundObject
 	{
 	public:
-		Pipe(Poco::PipeIOS *pipe);
-		virtual ~Pipe();
-	private:
-		Poco::PipeIOS *pipe;
-		bool closed;
-
-	public:
-		void Write(const ValueList& args, SharedValue result);
-		void Read(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void Close();
+		Pipe(const char *type = "Pipe");
+		virtual ~Pipe() {};
+	
+		virtual void Close() = 0;
+		virtual bool IsClosed() = 0;
+		
+		void Closed();
+		void SetOnClose(SharedKMethod onClose);
+		
+	protected:
+		void _Close(const ValueList& args, SharedValue result);
+		void _IsClosed(const ValueList& args, SharedValue result);
+		void _SetOnClose(const ValueList& args, SharedValue result);
+		
+		SharedPtr<Pipe> sharedThis;
+		SharedKMethod *onClose;
 	};
 }
 

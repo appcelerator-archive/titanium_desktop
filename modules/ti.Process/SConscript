@@ -8,7 +8,7 @@ env.Append(CPPDEFINES = ('TITANIUM_PROCESS_API_EXPORT', 1))
 env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
-sources = ['process_binding.cpp', 'process_module.cpp']
+sources = Glob('*.cpp')
 
 if build.is_osx():
 	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')

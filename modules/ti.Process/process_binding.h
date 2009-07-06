@@ -11,36 +11,20 @@
 
 namespace ti
 {
-#ifdef OS_WIN32
-	class Win32Process;
-#else
-	class Process;
-#endif
-
-	class Process;
 	class ProcessBinding : public StaticBoundObject
 	{
 	public:
-		ProcessBinding(Host *, SharedKObject);
+		ProcessBinding();
 		virtual ~ProcessBinding();
-	
-#ifdef OS_WIN32
-		void Terminated(Win32Process* p);
-#else
-		void Terminated(Process* p);
-#endif
-		Host* GetHost() { return host; }
-		
+			
 	private:
-		Host *host;
-		SharedKObject global;
+		std::map<std::string,int> signals;
 		std::vector<SharedKObject> processes;
 		
-		void Launch(const ValueList& args, SharedValue result);
-		void GetEnv(const ValueList& args, SharedValue result);
-		void HasEnv(const ValueList& args, SharedValue result);
-		void SetEnv(const ValueList& args, SharedValue result);
-		void Restart(const ValueList& args, SharedValue result);
+		void CreateProcess(const ValueList& args, SharedValue result);
+		void CreateInputPipe(const ValueList& args, SharedValue result);
+		void CreateOutputPipe(const ValueList& args, SharedValue result);
+		void GetCurrentProcess(const ValueList& args, SharedValue result);
 		
 	};
 }

@@ -15,56 +15,71 @@
 #include <Poco/Mutex.h>
 #include <Poco/Condition.h>
 #include <sstream>
-#include "pipe.h"
 #include "process_binding.h"
+#include "input_pipe.h"
+#include "output_pipe.h"
 
 namespace ti
 {
+	class Process;
+	typedef SharedPtr<Process> SharedProcess;
+	
 	class Process : public StaticBoundObject
 	{
 	public:
-		Process(ProcessBinding* parent, std::string& command, std::vector<std::string>& args);
-
-	protected:
+		Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
 		virtual ~Process();
-		virtual void Set(const char *name, SharedValue value);
-
-	private:
-		ProcessBinding *parent;
-		Poco::Thread exitMonitorThread;
-		Poco::Thread stdOutThread;
-		Poco::Thread stdErrorThread;
-		Poco::RunnableAdapter<Process>* monitorAdapter;
-		Poco::RunnableAdapter<Process>* stdOutAdapter;
-		Poco::RunnableAdapter<Process>* stdErrorAdapter;
-		bool running;
-		bool complete;
-		int pid;
+		static SharedProcess GetCurrentProcess();
+		static SharedProcess CreateProcess(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		
+		virtual SharedValue Call(const ValueList& args);
+		
+		virtual int GetPID() = 0;
+		void SetExitCode(int exitCode) { this->exitCode = exitCode; }
+		virtual int GetExitCode() { return exitCode; }
+		virtual SharedKList GetArgs() { return args; }
+		virtual SharedKObject GetEnvironment() { return environment; }
+		virtual void SetEnvironment(const char *name, const char *value) { environment->SetString(name, value); }
+		virtual SharedKObject CloneEnvironment();
+		virtual void Launch(bool async=true) = 0;
+		virtual void Terminate() = 0;
+		virtual void Kill() = 0;
+		virtual void SendSignal(int signal) = 0;
+		virtual void Restart() = 0;
+		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) = 0;
+		
+		void SetOnRead(SharedKMethod method);
+		void Exited();
+		
+	protected:
+		// empty constructor for creating the current process in platform implementations
+		Process();
+		void InitBindings();
+		
+		void _GetPID(const ValueList& args, SharedValue result);
+		void _GetExitCode(const ValueList& args, SharedValue result);
+		void _GetEnvironment(const ValueList& args, SharedValue result);
+		void _SetEnvironment(const ValueList& args, SharedValue result);
+		void _CloneEnvironment(const ValueList& args, SharedValue result);
+		void _Launch(const ValueList& args, SharedValue result);
+		void _Terminate(const ValueList& args, SharedValue result);
+		void _Kill(const ValueList& args, SharedValue result);
+		void _SendSignal(const ValueList& args, SharedValue result);
+		void _Restart(const ValueList& args, SharedValue result);
+		void _GetStdin(const ValueList& args, SharedValue result);
+		void _GetStdout(const ValueList& args, SharedValue result);
+		void _GetStderr(const ValueList& args, SharedValue result);
+		
+		void _SetOnRead(const ValueList& args, SharedValue result);
+		void _SetOnExit(const ValueList& args, SharedValue result);
+		
+		SharedInputPipe stdout, stderr;
+		SharedOutputPipe stdin;
+		SharedKObject environment;
+		SharedKList args;
+		
 		int exitCode;
-		std::vector<std::string> arguments;
-		std::string command;
-		Pipe *in;
-		Pipe *out;
-		Pipe *err;
-		Poco::Pipe *errp;
-		Poco::Pipe *outp;
-		Poco::Pipe *inp;
-		SharedKObject *shared_input;
-		SharedKObject *shared_output;
-		SharedKObject *shared_error;
-		std::ostringstream stdOutBuffer;
-		std::ostringstream stdErrorBuffer;
-		Logger* logger;
-		Poco::Mutex outputBufferMutex;
-
-		void Terminate(const ValueList& args, SharedValue result);
-		void Terminate();
-		void Monitor();
-		void ReadStdOut();
-		void ReadStdError();
-		void StartReadThreads();
-		void InvokeOnExitCallback();
-		void InvokeOnReadCallback(bool isStdError);
+		SharedKMethod* onExit;
 	};
 }
 
