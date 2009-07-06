@@ -82,8 +82,9 @@ namespace ti
 
 	void TrayItem::_SetMenu(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("setMenu", "o|0");
 		SharedMenu menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsList())
+		if (args.size() > 0 && args.at(0)->IsObject())
 		{
 			menu = args.at(0)->ToObject().cast<Menu>();
 		}

@@ -101,8 +101,9 @@ namespace ti
 		}
 	}
 
-	void GtkUIBinding::SetContextMenu(SharedMenu)
+	void GtkUIBinding::SetContextMenu(SharedMenu newMenu)
 	{
+		this->contextMenu = newMenu.cast<GtkMenu>();
 	}
 
 	void GtkUIBinding::SetIcon(std::string& iconPath)

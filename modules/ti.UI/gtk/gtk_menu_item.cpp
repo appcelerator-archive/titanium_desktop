@@ -8,9 +8,14 @@ namespace ti
 {
 	namespace GtkMenus
 	{
-		void MenuCallback(gpointer data)
+		void MenuCallback(::GtkMenuItem* nativeItem, gpointer data)
 		{
 			GtkMenuItem* item = static_cast<GtkMenuItem*>(data);
+			if (item->IsCheck()) {
+				gtk_check_menu_item_set_active(
+					GTK_CHECK_MENU_ITEM(nativeItem),
+					item->GetState());
+			}
 			item->HandleClickEvent(0);
 		}
 	}
@@ -57,7 +62,7 @@ namespace ti
 
 	void GtkMenuItem::SetStateImpl(bool newState)
 	{
-		if (this->type != CHECK)
+		if (!this->IsCheck())
 			return;
 
 		std::vector< ::GtkMenuItem*>::iterator i = this->nativeItems.begin();
@@ -69,7 +74,7 @@ namespace ti
 
 	void GtkMenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
 	{
-		if (this->type == SEPARATOR)
+		if (this->IsSeparator())
 			return;
 
 		std::vector< ::GtkMenuItem*>::iterator i = this->nativeItems.begin();
@@ -134,7 +139,7 @@ namespace ti
 		SharedPtr<GtkMenu> newGtkSubmenu = newSubmenu.cast<GtkMenu>();
 		::GtkMenuShell* newNativeMenu = 0;
 		if (!newGtkSubmenu.isNull()) {
-			newGtkSubmenu->CreateNative(true);
+			newNativeMenu = newGtkSubmenu->CreateNative(true);
 		}
 		gtk_menu_item_set_submenu(nativeItem, GTK_WIDGET(newNativeMenu));
 	}
@@ -146,7 +151,7 @@ namespace ti
 			return (::GtkMenuItem*) gtk_separator_menu_item_new();
 
 		} else if (this->IsCheck()) {
-			newNativeItem = (::GtkMenuItem*) gtk_menu_item_new();
+			newNativeItem = (::GtkMenuItem*) gtk_check_menu_item_new();
 			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(newNativeItem), this->state);
 
 		} else if (this->iconPath.empty()) {
@@ -161,8 +166,8 @@ namespace ti
 		gtk_menu_item_set_label(newNativeItem, this->label.c_str());
 		gtk_widget_set_sensitive(GTK_WIDGET(newNativeItem), this->enabled);
 		this->SetNativeItemSubmenu(newNativeItem, this->submenu);
-		g_signal_connect_swapped(
-			G_OBJECT(newNativeItem), "activate", G_CALLBACK(GtkMenus::MenuCallback), this);
+		g_signal_connect(G_OBJECT(newNativeItem),
+			 "activate", G_CALLBACK(GtkMenus::MenuCallback), this);
 
 		if (registerNative)
 				this->nativeItems.push_back(newNativeItem);

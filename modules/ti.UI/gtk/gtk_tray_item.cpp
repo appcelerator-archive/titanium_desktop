@@ -111,7 +111,6 @@ namespace ti
 		guint activate_time, gpointer data)
 	{
 		GtkTrayItem* item = static_cast<GtkTrayItem*>(data);
-
 		GtkStatusIcon* trayWidget = item->GetWidget();
 		SharedPtr<GtkMenu> menu = item->GetMenu();
 

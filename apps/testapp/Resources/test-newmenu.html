@@ -11,17 +11,24 @@
 			var item1 = null;
 			var menu2 = null;
 			var item2 = null;
+			function addTrayThing() {
+				var trayIcon = Titanium.UI.addTray("app://fonts.png");
+				if (menu != null)
+				{
+					trayIcon.setMenu(menu);
+				}
+			}
 			function setMainMenu() {
 				try {
 				menu = Titanium.UI.createMenu();
-				var itemz = menu.addSubmenu("WithImage", function() {'what'}, "app://fonts.png");
+				var itemz = menu.addSubmenu("WithImage", function() {alert('what');}, "app://fonts.png");
 				itemz.addItem("blah1");
 				itemz.addItem("blah20");
 				itemz.addItem("blah30");
 				item1 = menu.addSubmenu("Blahblah");
 				item1.addItem("haha1");
 				item1.addItem("haha2");
-				item1.addItem("haha3", function() {'hey'}, "app://fonts.png");
+				item1.addItem("haha3", function() {alert('what');}, "app://fonts.png");
 				var check_item = item1.addCheckItem("haha4");
 				check_item.setState(true);
 				Titanium.UI.setMenu(menu);
@@ -56,6 +63,7 @@
 	<body>
 		<h2>Titanium New Menu Tests</h2>
 			<div>
+				<button onclick="addTrayThing()">Add Tray Thing</button>
 				<button onclick="setMainMenu()">Setup Main Menu1</button>
 				<button onclick="setMainMenu2()">Setup Main Menu2</button>
 				<button onclick="modifySubmenu()">Modify SubMenu</button>

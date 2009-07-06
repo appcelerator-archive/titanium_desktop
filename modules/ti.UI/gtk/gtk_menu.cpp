@@ -148,7 +148,7 @@ namespace ti
 			SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 			::GtkMenuItem* nativeItem = gtkItem->CreateNative(registerNative);
 			gtk_menu_shell_append(GTK_MENU_SHELL(nativeMenu), GTK_WIDGET(nativeItem));
-			gtk_widget_show(GTK_WIDGET(nativeItem));
+			gtk_widget_show_all(GTK_WIDGET(nativeItem));
 		}
 	}
 }

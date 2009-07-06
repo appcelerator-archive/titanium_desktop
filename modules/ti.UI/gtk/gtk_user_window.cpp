@@ -1012,7 +1012,7 @@ namespace ti
 			this->activeMenu->DestroyNative(GTK_MENU_SHELL(this->nativeMenu));
 		}
 
-		if (this->gtkWindow != NULL) {
+		if (this->gtkWindow != NULL && this->nativeMenu) {
 			gtk_container_remove(GTK_CONTAINER(this->vbox), GTK_WIDGET(this->nativeMenu));
 		}
 
@@ -1039,7 +1039,7 @@ namespace ti
 				GtkMenuBar* newNativeMenu = GTK_MENU_BAR(menu->CreateNativeBar(true));
 				gtk_box_pack_start(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), FALSE, FALSE, 2);
 				gtk_box_reorder_child(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), 0);
-				gtk_widget_show(GTK_WIDGET(newNativeMenu));
+				gtk_widget_show_all(GTK_WIDGET(newNativeMenu));
 				this->nativeMenu = newNativeMenu;
 			}
 			this->activeMenu = menu;
