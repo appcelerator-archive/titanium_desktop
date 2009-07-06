@@ -31,6 +31,8 @@ namespace ti
 			Host::GetInstance()->InvokeMethodOnMainThread(*onClose, args, false);
 		}
 		
+		onClose = NULL;
+		
 		// sharedThis = NULL;
 	}
 	

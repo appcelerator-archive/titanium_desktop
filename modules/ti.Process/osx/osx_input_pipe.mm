@@ -50,12 +50,13 @@ namespace ti
 	
 	OSXInputPipe::~OSXInputPipe ()
 	{
+		Close();
 		[[NSNotificationCenter defaultCenter] removeObserver:dataReady
 			name:NSFileHandleDataAvailableNotification
 			object: handle];
 		
-		[handle release];
-		[dataReady release];
+		//[handle release];
+		//[dataReady release];
 		handle = NULL;
 	}
 	
@@ -64,6 +65,7 @@ namespace ti
 		if (!IsClosed()) {
 			closed = true;
 			[handle closeFile];
+			SetOnRead(NULL);
 			Pipe::Closed();
 		}
 	}
@@ -93,12 +95,12 @@ namespace ti
 			}
 		
 			SharedPtr<Blob> blob = new Blob((const char*)[data bytes], [data length]);
-			[data release];
+			//[data release];
 			return blob;
 		}
 		@catch(NSException *e)
 		{
-			Logger::Get("Process.OSXInputPipe")->Error([[e reason] UTF8String]);
+			Logger::Get("OSXInputPipe")->Error([[e reason] UTF8String]);
 		}
 		
 		return NULL;

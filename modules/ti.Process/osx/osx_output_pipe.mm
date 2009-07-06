@@ -50,7 +50,7 @@ namespace ti
 		}
 		@catch(NSException *e)
 		{
-			Logger::Get("Process.OSXOutputPipe")->Error([[e reason] UTF8String]);
+			Logger::Get("OSXOutputPipe")->Error([[e reason] UTF8String]);
 		}
 		
 		return 0;

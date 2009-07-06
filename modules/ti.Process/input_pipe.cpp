@@ -55,11 +55,13 @@ namespace ti
 		//sharedThis = NULL;
 	}
 	
-	void InputPipe::DataReady()
+	void InputPipe::DataReady(SharedInputPipe pipe)
 	{
+		if (pipe.isNull()) pipe = sharedThis;
+		
 		if (attachedOutput)
 		{
-			SharedPtr<Blob> data = this->Read();
+			SharedPtr<Blob> data = pipe->Read();
 			SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
 		}
 		else
@@ -68,7 +70,7 @@ namespace ti
 			{
 				ValueList args;
 				SharedKObject event = new StaticBoundObject();
-				event->SetObject("pipe", sharedThis);
+				event->SetObject("pipe", pipe);
 				
 				args.push_back(Value::NewObject(event));
 				try
@@ -125,10 +127,7 @@ namespace ti
 	
 	void InputPipe::JoinedRead(const ValueList& args, SharedValue result)
 	{
-		if (onRead && !onRead->isNull())
-		{
-			(*onRead)->Call(args);
-		}
+		DataReady(args.at(0)->ToObject().cast<InputPipe>());
 	}
 	
 	void InputPipe::Unjoin(SharedInputPipe other)

@@ -145,12 +145,9 @@ namespace ti
 	}
 	
 	OSXProcess::~OSXProcess()
-	{
-		Logger *logger = Logger::Get("OSXProcess");
-		logger->Debug("OSXProcess destructor called");
-		
+	{	
 		Terminate();
-		[delegate release];
+		//[delegate release];
 	}
 	
 	int OSXProcess::GetPID()

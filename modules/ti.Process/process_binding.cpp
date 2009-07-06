@@ -138,7 +138,14 @@ namespace ti
 			throw ValueException::FromString("TItanium.Process option argument 'args' must have at least 1 element");
 		}
 		
-		result->SetObject(Process::CreateProcess(argList, environment, stdin, stdout, stderr));
+		// Clone args
+		SharedKList argsClone = new StaticBoundList();
+		for (int i = 0; i < argList->Size(); i++)
+		{
+			argsClone->Append(Value::NewString(argList->At(i)->ToString()));
+		}
+		
+		result->SetObject(Process::CreateProcess(argsClone, environment, stdin, stdout, stderr));
 	}
 	
 	void ProcessBinding::CreateInputPipe(const ValueList& args, SharedValue result)

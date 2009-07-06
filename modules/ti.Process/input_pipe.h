@@ -27,7 +27,7 @@ namespace ti
 		
 		virtual SharedPtr<Blob> Read(int bufsize=-1) = 0;
 		
-		void DataReady();
+		void DataReady(SharedInputPipe pipe = NULL);
 		void Closed();
 		
 		void Join(SharedInputPipe other);
