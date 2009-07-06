@@ -32,6 +32,7 @@ namespace ti
 	InputPipe::InputPipe() : Pipe("InputPipe"), joined(false), attachedOutput(NULL), splitPipes(NULL), onRead(NULL), onClose(NULL)
 	{
 		sharedThis = this;
+		logger = Logger::Get("InputPipe");
 		
 		//TODO doc me
 		SetMethod("read", &InputPipe::_Read);
@@ -51,7 +52,7 @@ namespace ti
 	
 	InputPipe::~InputPipe()
 	{
-		sharedThis = NULL;
+		//sharedThis = NULL;
 	}
 	
 	void InputPipe::DataReady()
@@ -70,8 +71,14 @@ namespace ti
 				event->SetObject("pipe", sharedThis);
 				
 				args.push_back(Value::NewObject(event));
-				Logger::Get("InputPipe")->Debug("onRead=%d,methodPtr=%d", onRead, onRead->get());
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args);
+				try
+				{
+					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args);	
+				}
+				catch (ValueException& e)
+				{
+					logger->Error(e.DisplayString()->c_str());
+				}
 			}
 		}
 	}
@@ -85,7 +92,15 @@ namespace ti
 			event->SetObject("pipe", sharedThis);
 			
 			args.push_back(Value::NewObject(event));
-			Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args);
+			
+			try
+			{
+				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args);
+			}
+			catch (ValueException& e)
+			{
+				logger->Error(e.DisplayString()->c_str());
+			}
 		}
 		
 		//sharedThis = NULL;

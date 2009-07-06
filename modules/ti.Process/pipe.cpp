@@ -31,7 +31,7 @@ namespace ti
 			Host::GetInstance()->InvokeMethodOnMainThread(*onClose, args, false);
 		}
 		
-		//sharedThis = NULL;
+		// sharedThis = NULL;
 	}
 	
 	void Pipe::_Close(const ValueList& args, SharedValue result)

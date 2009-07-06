@@ -58,6 +58,7 @@ namespace ti
 		
 		void _GetPID(const ValueList& args, SharedValue result);
 		void _GetExitCode(const ValueList& args, SharedValue result);
+		void _GetArguments(const ValueList& args, SharedValue result);
 		void _GetEnvironment(const ValueList& args, SharedValue result);
 		void _SetEnvironment(const ValueList& args, SharedValue result);
 		void _CloneEnvironment(const ValueList& args, SharedValue result);

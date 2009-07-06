@@ -86,6 +86,7 @@ namespace ti
 		//TODO doc me
 		SetMethod("getPID", &Process::_GetPID);
 		SetMethod("getExitCode", &Process::_GetExitCode);
+		SetMethod("getArguments", &Process::_GetArguments);
 		SetMethod("getEnvironment", &Process::_GetEnvironment);
 		SetMethod("setEnvironment", &Process::_SetEnvironment);
 		SetMethod("cloneEnvironment", &Process::_CloneEnvironment);
@@ -152,6 +153,11 @@ namespace ti
 	void Process::_GetExitCode(const ValueList& args, SharedValue result)
 	{
 		result->SetInt(exitCode);
+	}
+	
+	void Process::_GetArguments(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(this->args);
 	}
 	
 	void Process::_GetEnvironment(const ValueList& args, SharedValue result)

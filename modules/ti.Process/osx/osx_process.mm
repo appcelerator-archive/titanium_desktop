@@ -173,7 +173,13 @@ namespace ti
 		// TODO -- implement sync
 		@try
 		{
-			Logger::Get("OSXProcess")->Debug("Launching. Delegate=%d, task=%d", delegate, [delegate task]);
+			std::ostringstream str;
+			for (int i = 0; i < args->Size(); i++)
+			{
+				str << " \"" << args->At(i)->ToString() << "\" ";
+			}
+			Logger::Get("OSXProcess")->Debug("Launching: %s", str.str().c_str());
+			
 			[[delegate task] launch];
 		}
 		@catch(NSException *e)

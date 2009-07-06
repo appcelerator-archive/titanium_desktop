@@ -6,7 +6,7 @@ describe("process tests",
 		value_of(Titanium.Process.createProcess).should_be_function();
 		value_of(Titanium.Process.createInputPipe).should_be_function();
 		value_of(Titanium.Process.createOutputPipe).should_be_function();
-		value_of(Titanium.Process.getCurrentProcess).should_be_number();
+		value_of(Titanium.Process.getCurrentProcess).should_be_function();
 	},
 	
 	test_current_process: function()
@@ -16,15 +16,15 @@ describe("process tests",
 		value_of(p.getEnvironment).should_be_function();
 		value_of(p.setEnvironment).should_be_function();
 		value_of(p.getArguments).should_be_function();
-		value_of(p.stdin).should_be_null();
-		value_of(p.stdout).should_be_object();
-		value_of(p.stderr).should_be_object();
+		value_of(p.stdin).should_be_undefined();
+		value_of(p.stdout).should_be_undefined();
+		value_of(p.stderr).should_be_undefined();
 	},
 	
 	test_current_process_env: function()
 	{
 		var p = Titanium.Process.getCurrentProcess();
-		value_of(p.getEnvironment("foobar")).should_be_null();
+		value_of(p.getEnvironment("foobar")).should_be_undefined();
 		p.setEnvironment("foobar", "1");
 		value_of(p.getEnvironment("foobar")).should_be("1");
 	},
@@ -60,6 +60,7 @@ describe("process tests",
 		p.setOnRead(function(event)
 		{
 			var buf = event.pipe.read();
+			Titanium.API.debug("pipe="+event.pipe+",buf="+buf);
 			output += buf;
 		});
 		
@@ -115,6 +116,8 @@ describe("process tests",
 			clearTimeout(timer);
 			test.passed();
 		});
+		
+		p.launch();
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');

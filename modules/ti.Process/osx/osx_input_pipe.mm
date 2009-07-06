@@ -21,8 +21,11 @@
 -(void)dataReady:(NSNotification *)aNotification
 {
 	pipe->DataReady();
-	// we need to schedule the file handle to wait for more data in the background again.
-	[[aNotification object] waitForDataInBackgroundAndNotify];	
+	if (!pipe->IsClosed())
+	{
+		// we need to schedule the file handle to wait for more data in the background again.
+		[[aNotification object] waitForDataInBackgroundAndNotify];
+	}
 }
 
 @end
@@ -89,7 +92,7 @@ namespace ti
 				data = [handle readDataOfLength:bufsize];
 			}
 		
-			SharedPtr<Blob> blob = new Blob((const char*)[data bytes]);
+			SharedPtr<Blob> blob = new Blob((const char*)[data bytes], [data length]);
 			[data release];
 			return blob;
 		}

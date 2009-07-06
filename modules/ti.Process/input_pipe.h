@@ -75,6 +75,7 @@ namespace ti
 		SharedKObject* attachedOutput;
 		std::pair<SharedPtr<BlobInputPipe>, SharedPtr<BlobInputPipe> >* splitPipes;
 		SharedInputPipe sharedThis;
+		Logger *logger;
 	};
 }
 
