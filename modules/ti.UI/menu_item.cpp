@@ -86,8 +86,8 @@ namespace ti
 	{
 		args.VerifyException("setLabel", "s|0");
 		string newLabel = args.GetString(0, "");
-		this->SetLabelImpl(newLabel);
 		this->label = newLabel;
+		this->SetLabelImpl(newLabel);
 	}
 
 	void MenuItem::_GetLabel(const ValueList& args, SharedValue result)
@@ -105,8 +105,8 @@ namespace ti
 			SharedString iconPathSS = UIModule::GetResourcePath(newIconURL.c_str());
 			newIconPath = iconPathSS->c_str();
 		}
-		this->SetIconImpl(newIconPath);
 		this->iconPath = newIconPath;
+		this->SetIconImpl(newIconPath);
 	}
 
 	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
@@ -152,8 +152,8 @@ namespace ti
 			newSubmenu = o.cast<Menu>();
 		}
 
-		this->SetSubmenuImpl(newSubmenu);
 		this->submenu = newSubmenu;
+		this->SetSubmenuImpl(newSubmenu);
 	}
 
 	void MenuItem::_GetSubmenu(const ValueList& args, SharedValue result)
@@ -170,14 +170,14 @@ namespace ti
 
 	void MenuItem::_Enable(const ValueList& args, SharedValue result)
 	{
-		this->SetEnabledImpl(true);
 		this->enabled = true;
+		this->SetEnabledImpl(true);
 	}
 
 	void MenuItem::_Disable(const ValueList& args, SharedValue result)
 	{
-		this->SetEnabledImpl(true);
 		this->enabled = false;
+		this->SetEnabledImpl(true);
 	}
 
 	void MenuItem::_IsEnabled(const ValueList& args, SharedValue result)
@@ -257,8 +257,8 @@ namespace ti
 
 	void MenuItem::SetState(bool newState)
 	{
-		this->SetStateImpl(newState);
 		this->state = newState;
+		this->SetStateImpl(newState);
 	}
 
 	bool MenuItem::GetState()

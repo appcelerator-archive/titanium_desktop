@@ -26,7 +26,12 @@ namespace ti
 	HMENU Win32UIBinding::contextMenuInUseHandle = NULL;
 
 
-	Win32UIBinding::Win32UIBinding(Module *uiModule, Host *host) : UIBinding(host), script_evaluator(host)
+	Win32UIBinding::Win32UIBinding(Module *uiModule, Host *host) :
+		UIBinding(host),
+		evaluator(host),
+		menu(0),
+		contextMenu(0),
+		iconPath("")
 	{
 	
 		if (!Win32UIBinding::IsWindowsXP())
@@ -51,7 +56,7 @@ namespace ti
 		InitCommonControlsEx(&InitCtrlEx);
 		
 		InitCurl(uiModule);
-		addScriptEvaluator(&script_evaluator);
+		addScriptEvaluator(&evaluator);
 	}
 	
 	void Win32UIBinding::InitCurl(Module* uiModule)
@@ -97,14 +102,27 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	SharedPtr<MenuItem> Win32UIBinding::CreateMenu(bool trayMenu)
+	SharedMenuItem Win32UIBinding::CreateMenuItem(
+		std::string label, SharedKMethod callback, std::string iconURL)
 	{
-		SharedPtr<MenuItem> menu = new Win32MenuItemImpl(NULL);
-		return menu;
+		return new Win32MenuItem(MenuItem::NORMAL, label, callback, iconURL);
+	}
+
+	SharedMenuItem Win32UIBinding::CreateSeparatorMenuItem()
+	{
+		return new Win32MenuItem(MenuItem::SEPARATOR, std::string(), NULL, std::string());
+	}
+
+	SharedMenuItem Win32UIBinding::CreateCheckMenuItem(
+		std::string label, SharedKMethod callback)
+	{
+		return new Win32MenuItem(MenuItem::CHECK, label, callback, std::string());
 	}
 
 	void Win32UIBinding::SetMenu(SharedPtr<MenuItem>)
 	{
+		this->menu = newMenu.cast<Win32Menu>();
+
 		// Notify all windows that the app menu has changed.
 		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
 		std::vector<SharedUserWindow>::iterator i = windows.begin();
@@ -118,34 +136,15 @@ namespace ti
 		}
 	}
 
-	void Win32UIBinding::SetContextMenu(SharedPtr<MenuItem> menu)
+	void Win32UIBinding::SetContextMenu(SharedMenu menu)
 	{
-		SharedPtr<Win32MenuItemImpl> menu_new = menu.cast<Win32MenuItemImpl>();
-
-		// if same menu, just return
-		if ((menu.isNull() && contextMenuInUse.isNull()) || (menu_new == contextMenuInUse))
-		{
-			return;
-		}
-
-		// delete old menu if available
-		if(! contextMenuInUse.isNull())
-		{
-			contextMenuInUse->ClearRealization(contextMenuInUseHandle);
-			contextMenuInUseHandle = NULL;
-		}
-
-		contextMenuInUse = menu_new;
-
-		// create new menu if needed
-		if(! contextMenuInUse.isNull())
-		{
-			contextMenuInUseHandle = contextMenuInUse->GetMenu();
-		}
+		this->contextMenu = newMenu.cast<Win32Menu>();
 	}
 
 	void Win32UIBinding::SetIcon(std::string& iconPath)
 	{
+		this->iconPath = iconPath;
+
 		// Notify all windows that the app icon has changed
 		// TODO this kind of notification should really be placed in UIBinding..
 		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
@@ -180,5 +179,20 @@ namespace ti
 		long idleTicks = currentTickCount - lii.dwTime;
 
 		return (int)idleTicks;
+	}
+
+	SharedMenu GtkUIBinding::GetMenu()
+	{
+		return this->menu;
+	}
+
+	SharedMenu GtkUIBinding::GetContextMenu()
+	{
+		return this->contextMenu;
+	}
+
+	std::string& GtkUIBinding::GetIcon()
+	{
+		return this->iconPath;
 	}
 }

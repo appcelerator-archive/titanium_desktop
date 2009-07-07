@@ -51,24 +51,12 @@ protected:
 	std::map<long, SharedKMethod> messageHandlers;
 	bool requires_display;
 
-	/*
-	 * The window-specific menu.
-	 */
-	SharedPtr<Win32MenuItemImpl> menu;
-
-	/*
-	 * The menu this window is using. This
-	 * might just be a copy of the app menu.
-	 */
-	SharedPtr<Win32MenuItemImpl> menuInUse;
-
-	HMENU menuBarHandle;
-
-	SharedPtr<Win32MenuItemImpl> contextMenu;
-	HMENU contextMenuHandle;
-
-	SharedString icon_path;
-	HICON initial_icon;
+	SharedPtr<Win32Menu> menu; // The window-specific menu
+	SharedPtr<Win32Menu> activeMenu; // This window's active menu
+	HMENU nativeMenu; // This window's active native menu
+	SharedPtr<Win32Menu> contextMenu; // This window-specific context menu
+	std::string iconPath; // The path to this window's icon
+	HICON defaultIcon;
 
 	void RemoveMenu();
 	void ReloadTiWindowConfig();

@@ -11,8 +11,12 @@
 
 using namespace ti;
 
-Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) : window(window_), ref_count(1) {
-	logger = Logger::Get("UI.Win32WebKitUIDelegate");
+Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) :
+	window(window_),
+	nativeContextMenu(0),
+	logger(Logger::Get("UI.Win32WebKitUIDelegate")),
+	ref_count(1)
+{
 }
 
 HRESULT STDMETHODCALLTYPE
@@ -241,22 +245,28 @@ Win32WebKitUIDelegate::trackCustomPopupMenu(
 	/* [in] */ OLE_HANDLE menu,
 	/* [in] */ LPPOINT point)
 {
-	HMENU contextMenu = this->window->GetContextMenuHandle();
-	if(! contextMenu)
+	SharedPtr<Win32Menu> menu = this->window->GetContextMenu();
+
+	// No window menu, try to use the application menu.
+	if (menu.isNull())
 	{
-		contextMenu = Win32UIBinding::getContextMenuInUseHandle();
-	}
-	if(! contextMenu)
-	{
-		contextMenu = Win32MenuItemImpl::GetDefaultContextMenu();
+		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
+		menu = b->GetContextMenu().cast<Win32Menu>();
 	}
 
-	if(contextMenu)
-	{
-		TrackPopupMenu(contextMenu,
-			TPM_BOTTOMALIGN,
-			point->x, point->y, 0,
+	if (this->nativeContextMenu) {
+		DestroyMenu(this->nativeContextMenu);
+	}
+
+	if (!menu.isNull()) {
+		this->nativeContextMenu = menu->CreateNative(false);
+
+		// Add Web Inspector items here
+
+		TrackPopupMenu(this->nativeContextMenu,
+			TPM_BOTTOMALIGN, point->x, point->y, 0,
 			this->window->GetWindowHandle(), NULL);
+
 	}
 
 	return S_OK;

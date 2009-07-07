@@ -87,7 +87,8 @@ namespace ti
 		return new GtkMenuItem(MenuItem::CHECK, label, callback, std::string());
 	}
 
-	void GtkUIBinding::SetMenu(SharedMenu newMenu) {
+	void GtkUIBinding::SetMenu(SharedMenu newMenu)
+	{
 		this->menu = newMenu.cast<GtkMenu>();
 
 		// Notify all windows that the app menu has changed.

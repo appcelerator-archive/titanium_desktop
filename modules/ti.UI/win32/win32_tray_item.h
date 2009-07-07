@@ -18,23 +18,23 @@ namespace ti
 
 class Win32TrayItem: public TrayItem
 {
-public:
+	public:
 	Win32TrayItem(SharedString iconPath, SharedKMethod cb);
 	virtual ~Win32TrayItem();
 
 	void SetIcon(SharedString iconPath);
-	void SetMenu(SharedPtr<MenuItem> menu);
+	void SetMenu(SharedMenu menu);
 	void SetHint(SharedString hint);
 	void Remove();
+	void ShowTrayMenu();
 
 	static bool InvokeLeftClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	static bool InvokeLeftClickCallback(int trayIconID);
 	static bool ShowTrayMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	static bool ShowTrayMenu(int trayIconID);
-private:
+
+	private:
 	SharedKMethod callback;
-	SharedPtr<Win32MenuItemImpl> trayMenu;
-	HMENU trayMenuHandle;
+	HMENU oldNativeMenu;
 
 	NOTIFYICONDATA* trayIconData;
 	void CreateTrayIcon(std::string &iconPath, std::string &caption);

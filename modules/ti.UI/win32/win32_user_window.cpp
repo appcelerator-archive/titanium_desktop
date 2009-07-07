@@ -374,12 +374,12 @@ void Win32UserWindow::InitWebKit()
 
 Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent) :
 	UserWindow(config, parent),
-	menuBarHandle(NULL),
-	menuInUse(NULL),
-	menu(NULL),
-	contextMenuHandle(NULL),
-	initial_icon(NULL),
-	web_inspector(NULL)
+	menu(0),
+	activeMenu(0),
+	nativeMenu(0),
+	contextMenu(0),
+	defaultIcon(0),
+	web_inspector(0)
 {
 	logger = Logger::Get("UI.Win32UserWindow");
 	
@@ -432,11 +432,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent)
 	// set initial window icon to icon associated with exe file
 	char exePath[MAX_PATH];
 	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	initial_icon = ExtractIcon(win32_host->GetInstanceHandle(), exePath, 0);
-	if (initial_icon)
+	defaultIcon = ExtractIcon(win32_host->GetInstanceHandle(), exePath, 0);
+	if (defaultIcon)
 	{
 		SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
-				(LPARAM) initial_icon);
+				(LPARAM) defaultIcon);
 	}
 
 	SetLayeredWindowAttributes(window_handle, 0, 255, LWA_ALPHA);
@@ -555,6 +555,7 @@ void Win32UserWindow::Open()
 
 void Win32UserWindow::Close()
 {
+	this->RemoveOldMenu();
 	DestroyWindow(window_handle);
 	UserWindow::Close();
 	FireEvent(CLOSED);
@@ -837,74 +838,56 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 	}
 }
 
-void Win32UserWindow::SetMenu(SharedPtr<MenuItem> value)
+void Win32UserWindow::SetMenu(SharedMenu menu)
 {
-	SharedPtr<Win32MenuItemImpl> menu = value.cast<Win32MenuItemImpl> ();
+	SharedPtr<Win32Menu> menu = value.cast<Win32Menu>();
 	this->menu = menu;
 	this->SetupMenu();
 }
 
-SharedPtr<MenuItem> Win32UserWindow::GetMenu()
+SharedMenu Win32UserWindow::GetMenu()
 {
 	return this->menu;
 }
 
-void Win32UserWindow::SetContextMenu(SharedPtr<MenuItem> menu)
+void Win32UserWindow::SetContextMenu(SharedMenu menu)
 {
-	SharedPtr<Win32MenuItemImpl> menu_new = menu.cast<Win32MenuItemImpl> ();
-
-	// if it's the same menu, don't do anything
-	if ((menu_new.isNull() && this->contextMenu.isNull()) || (menu_new
-			== this->contextMenu))
-	{
-		return;
-	}
-
-	// remove old menu if needed
-	if (!this->contextMenu.isNull())
-	{
-		this->contextMenu->ClearRealization(contextMenuHandle);
-		this->contextMenuHandle = NULL;
-	}
-
-	this->contextMenu = menu_new;
-	if (!this->contextMenu.isNull())
-	{
-		this->contextMenuHandle = this->contextMenu->GetMenu();
-	}
+	SharedPtr<Win32Menu> menu = value.cast<Win32Menu>();
+	this->contextMenu = menu;
 }
 
-SharedPtr<MenuItem> Win32UserWindow::GetContextMenu()
+SharedMenu Win32UserWindow::GetContextMenu()
 {
 	return this->contextMenu;
 }
 
 void Win32UserWindow::SetIcon(std::string& iconPath)
 {
-	this->icon_path = iconPath;
+	this->iconPath = iconPath;
 	this->SetupIcon();
 }
 
 void Win32UserWindow::SetupIcon()
 {
-	SharedString icon_path = this->icon_path;
 
-	if (icon_path.isNull() && !UIModule::GetIcon().isNull())
-		icon_path = UIModule::GetIcon();
+	std::string& iconPath = this->iconPath;
 
-	if (icon_path.isNull())
+	if (iconPath.empty())
+		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
+		iconPath = b->GetIcon();
+	}
+
+	if (!iconPath.empty())
 	{
 		// need to remove the icon
 		SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
-				(LPARAM) initial_icon);
-	}
-	else
-	{
-		std::string ext = icon_path->substr(icon_path->length() - 4, 4);
+				(LPARAM) defaultIcon);
+	} else {
+		std::string ext = iconPath.substr(iconPath->length() - 4, 4);
 		if (ext == ".ico")
 		{
 			HANDLE icon = LoadImageA(win32_host->GetInstanceHandle(),
-					icon_path->c_str(), IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+					iconPath.c_str(), IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
 			SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
 					(LPARAM) icon);
 		}
@@ -913,7 +896,7 @@ void Win32UserWindow::SetupIcon()
 
 std::string& Win32UserWindow::GetIcon()
 {
-	return icon_path;
+	return iconPath;
 }
 
 void Win32UserWindow::SetUsingChrome(bool chrome)
@@ -952,50 +935,49 @@ void Win32UserWindow::AppMenuChanged()
 
 void Win32UserWindow::AppIconChanged()
 {
-	if (this->icon_path.isNull())
-	{
+	if (this->iconPath.empty()) {
 		this->SetupIcon();
 	}
 }
 
-void Win32UserWindow::RemoveMenu()
+void Win32UserWindow::RemoveOldMenu()
 {
-	// Check if we are already using a menu
-	// and the window is initialized.
-	if (this->window_handle != NULL && !this->menuInUse.isNull())
-	{
-		this->menuInUse->ClearRealization(this->menuBarHandle);
+	if (!this->activeMenu.isNull() && this->nativeMenu) {
+		this->activeMenu->DestroyNative(this->nativeMenu);
+	}
+
+	if (this->window_handle != NULL && this->nativeMenu) {
 		::SetMenu(this->window_handle, NULL);
 	}
 
-	this->menuInUse = NULL;
+	this->activeMenu = 0;
+	this->nativeMenu = 0;
+
 }
 
 void Win32UserWindow::SetupMenu()
 {
-	SharedPtr<Win32MenuItemImpl> menu = this->menu;
-	SharedPtr<MenuItem> appMenu = UIModule::GetMenu();
+	SharedPtr<Win32Menu> menu = this->menu;
 
 	// No window menu, try to use the application menu.
-	if (menu.isNull() && !appMenu.isNull())
+	if (menu.isNull())
 	{
-		menu = appMenu.cast<Win32MenuItemImpl> ();
+		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
+		menu = b->GetMenu().cast<Win32Menu>();
 	}
 
 	// Only do this if the menu is actually changing.
-	if (menu == this->menuInUse)
-		return;
+	if (menu.get() != this->activeMenu.get()) {
 
-	this->RemoveMenu();
+		if (!menu.isNull() && this->window_handle) {
+			this->RemoveOldMenu();
 
-	if (!menu.isNull() && this->window_handle)
-	{
-		this->menuBarHandle = menu->GetMenuBar();
-		::SetMenu(this->window_handle, menuBarHandle);
-		DrawMenuBar(this->window_handle);
+			HMENU newNativeMenu = menu->CreateNativeTopLevel(true);
+			::SetMenu(this->window_handle, newNativeMenu);
+			this->nativeMenu = newNativeMenu;
+		}
+		this->activeMenu = menu;
 	}
-
-	this->menuInUse = menu;
 }
 
 void Win32UserWindow::ReloadTiWindowConfig()
