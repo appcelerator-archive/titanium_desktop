@@ -19,25 +19,25 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=Network.Proxy.getHostName,since=0.4) Returns the hostname of a Proxy object
-		 * @tiresult(for=Network.Proxy.getHostName, type=string) the hostname of the Proxy object
+		 * @tiresult(for=Network.Proxy.getHostName, type=String) the hostname of the Proxy object
 		 */
 		this->SetMethod("getHostName",&Proxy::getHostName);
 
 		/**
 		 * @tiapi(method=True,name=Network.Proxy.getPort,since=0.4) Returns the port of a Proxy object
-		 * @tiresult(for=Network.Proxy.getPort, type=string) the port of the Proxy object
+		 * @tiresult(for=Network.Proxy.getPort, type=String) the port of the Proxy object
 		 */
 		this->SetMethod("getPort",&Proxy::getPort);
 		
 		/**
 		 * @tiapi(method=True,name=Network.Proxy.getUserName,since=0.4) Returns the username of a Proxy object
-		 * @tiresult(for=Network.Proxy.getUserName, type=string) the username of the Proxy object
+		 * @tiresult(for=Network.Proxy.getUserName, type=String) the username of the Proxy object
 		 */
 		this->SetMethod("getUserName",&Proxy::getUserName);
 		
 		/**
 		 * @tiapi(method=True,name=Network.Proxy.getPassword,since=0.4) Returns the password of a Proxy object
-		 * @tiresult(for=Network.Proxy.getPassword, type=string) the password of the Proxy object
+		 * @tiresult(for=Network.Proxy.getPassword, type=String) the password of the Proxy object
 		 */
 		this->SetMethod("getPassword",&Proxy::getPassword);
 	}

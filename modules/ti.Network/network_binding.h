@@ -44,7 +44,10 @@ namespace ti
 		Host* host;
 		std::string modulePath;
 		SharedKObject global;
-		Proxy * proxy;
+		
+		// this needs to be a shard ptr because it's passed back and forth to kroll.
+		SharedPtr<Proxy> proxy;
+
 		static std::vector<SharedKObject> bindings;
 		struct Listener {
 			SharedKMethod callback;

@@ -210,11 +210,17 @@ namespace ti
 	void IRCClientBinding::SetNick(const ValueList& args, SharedValue result)
 	{
 		const char *nick = args.at(0)->ToString();
+#ifdef DEBUG
+		PRINTD("setNickname " << std::string(nick));
+#endif
 		this->irc.nick((char*)nick);
 	}
 	void IRCClientBinding::GetNick(const ValueList& args, SharedValue result)
 	{
 		std::string nick = this->irc.current_nick();
+#ifdef DEBUG
+		PRINTD("getNickname " << nick);
+#endif
 		result->SetString(nick);
 	}
 	void IRCClientBinding::Join(const ValueList& args, SharedValue result)
