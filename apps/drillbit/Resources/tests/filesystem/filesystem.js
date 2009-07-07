@@ -65,7 +65,7 @@ describe("Ti.Filesystem tests",{
 		value_of(Titanium.Filesystem.getSeparator()).should_not_be_null();
 	},
 	
-	get_file:function()
+	get_file: function()
 	{
 		var f = Titanium.Filesystem.getFile(this.base, "getFileTest.txt");
 		value_of(f).should_not_be_null();
@@ -73,7 +73,7 @@ describe("Ti.Filesystem tests",{
 	
 	get_file_stream:function()
 	{
-		var fs = Titanium.Filesystem.getFile(this.base, "getFileStreamTest.txt");
+		var fs = Titanium.Filesystem.getFileStream(this.base, "getFileStreamTest.txt");
 		value_of(fs).should_not_be_null();
 	},
 	
@@ -150,6 +150,37 @@ describe("Ti.Filesystem tests",{
 			value_of(subDirListings).should_not_be_null();
 			value_of(subDirListings.length==1).should_be_true();
 		});	
+	},
+	
+	test_line_endings: function()
+	{
+		value_of(Titanium.Filesystem.getLineEnding).should_be_function();
+		value_of(Titanium.Filesystem.getLineEnding()).should_not_be_null();
+		
+        if ( Titanium.platform == 'win32' )
+        {
+            // this is weird, we need to investigate further.
+            value_of(Titanium.Filesystem.getLineEnding()).should_be("\n");
+        }
+        else 
+        {
+            value_of(Titanium.Filesystem.getLineEnding()).should_be("\n");
+        }
+	},
+	
+	test_separator: function ()
+	{
+		value_of(Titanium.Filesystem.getSeparator).should_be_function();
+		value_of(Titanium.Filesystem.getSeparator()).should_not_be_null();
+		
+        if ( Titanium.platform == 'win32' )
+        {
+            value_of(Titanium.Filesystem.getSeparator()).should_be("\\");
+        }
+        else 
+        {
+            value_of(Titanium.Filesystem.getSeparator()).should_be("/");
+        }
 	}
 });
 

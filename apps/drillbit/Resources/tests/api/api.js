@@ -386,35 +386,6 @@ describe("ti.API tests",
 	    {
 	        Titanium.API.info(componentSearchPaths[i]);
 	    }
-
-        // get the application object
-        var app = Titanium.API.getApplication();
-      
-        value_of(app).should_not_be_null();
-        
-        var dataPath = app.getDataPath();
-        value_of(dataPath).should_not_be_null();
-        Titanium.API.info("data path = "+dataPath);
-	},
-	
-    test_api_application_arguments: function()
-	{
-        // get the application object
-        var app = Titanium.API.getApplication();
-        value_of(app).should_not_be_null();
-
-	    var argv = app.getArguments();
-        value_of(argv).should_be_array();
-
-	    if ( argv )
-	    {
-	        var exePath = app.getExecutablePath();
-	        value_of(exePath).should_be_string();
-	        
-	        // argv[0] is the fully qualified name and path to the exe
-	        var index = argv[0].indexOf(exePath);
-	        value_of(index).should_not_be(-1);
-	    }
 	},
 	
 	// test the application path functions
