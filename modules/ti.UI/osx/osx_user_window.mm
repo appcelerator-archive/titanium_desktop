@@ -834,5 +834,10 @@ namespace ti
 		callback->Call(ValueList(Value::NewList(results)));
 		this->Show();
 	}
+	
+	void OSXUserWindow::ShowInspector(bool console)
+	{
+		[nativeWindow showInspector:console];
+	}
 }
     

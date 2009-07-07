@@ -74,9 +74,9 @@ namespace ti
 		virtual void SetIcon(SharedString icon_path) = 0;
 		virtual SharedPtr<TrayItem> AddTray(SharedString icon_path,
 		                                    SharedKMethod cb) = 0;
-
 		void _GetIdleTime(const ValueList& args, SharedValue result);
-
+		
+		
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
 		void _SetDockMenu(const ValueList& args, SharedValue result);

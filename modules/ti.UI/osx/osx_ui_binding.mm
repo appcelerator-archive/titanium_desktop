@@ -484,5 +484,4 @@ namespace ti
 		IOObjectRelease(iter);
 		return (long)tHandle;
 	}
-
 }

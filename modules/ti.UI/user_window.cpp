@@ -446,6 +446,13 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	 * @tiresult(for=UI.UserWindow.removeEventListener,type=boolean) true if the listener was removed, false if otherwise
 	 */
 	this->SetMethod("removeEventListener", &UserWindow::_RemoveEventListener);
+	
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=1.0) show the web inspector
+	 * @tiarg(for=UI.UserWindow.showInspector,type=bool,name=console,optional=True) show the interactive console (default false)
+	 */
+	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
+	
 
 	this->api = host->GetGlobalObject()->GetNS("API.fire")->ToMethod();
 	this->FireEvent(CREATE);
@@ -1828,4 +1835,17 @@ double UserWindow::Constrain(double value, double min, double max)
 		value = max;
 	}
 	return value;
+}
+
+void UserWindow::_ShowInspector(const ValueList& args, SharedValue result)
+{
+	if (args.size() > 0 && args.at(0)->IsBool())
+	{
+		bool console = args.at(0)->ToBool();
+		this->ShowInspector(console);
+	}
+	else
+	{
+		this->ShowInspector();
+	}
 }

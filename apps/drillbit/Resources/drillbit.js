@@ -672,6 +672,10 @@ window.onload = function()
 		{
 			debug_tests = true;
 		}
+		else if (arg == '--console')
+		{
+			Titanium.UI.currentWindow.showInspector(true);
+		}
 		else if (arg.indexOf('--tests=')==0)
 		{
 			specific_tests = arg.substring(8).split(',');

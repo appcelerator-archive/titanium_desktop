@@ -391,6 +391,5 @@ namespace ti
 	{
 		result->SetDouble(this->GetIdleTime());
 	}
-
 }
 

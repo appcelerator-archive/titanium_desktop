@@ -158,6 +158,8 @@ class UserWindow : public kroll::StaticBoundObject {
 		void _IsTopMost(const kroll::ValueList&, kroll::SharedValue);
 		void _SetTopMost(const kroll::ValueList&, kroll::SharedValue);
 
+		virtual void _ShowInspector(const ValueList& args, SharedValue result);
+		
 		struct Listener {
 			SharedKMethod callback;
 			long id;
@@ -253,6 +255,7 @@ class UserWindow : public kroll::StaticBoundObject {
 		virtual SharedString GetIcon() = 0;
 		virtual bool IsTopMost() = 0;
 		virtual void SetTopMost(bool topmost) = 0;
+		virtual void ShowInspector(bool console=false) = 0;
 
 		virtual void FireEvent(UserWindowEvent event_type, SharedKObject event=NULL);
 		virtual bool ShouldHaveTitaniumObject(JSGlobalContextRef, JSObjectRef);
