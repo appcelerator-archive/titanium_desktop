@@ -22,17 +22,17 @@ class Win32TrayItem: public TrayItem
 	void Remove();
 	void ShowTrayMenu();
 
-	static bool InvokeLeftClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	static bool InvokeLeftClickCallback(int trayIconID);
-	static bool ShowTrayMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void HandleRightClick();
+	void HandleLeftClick();
+	UINT GetId();
+
+	static void HandleClickEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	private:
 	SharedKMethod callback;
 	HMENU oldNativeMenu;
-	static std::vector<SharedPtr<Win32TrayItem> > trayItems;
-
 	NOTIFYICONDATA* trayIconData;
-	void CreateTrayIcon(std::string &iconPath, std::string &caption);
+	static std::vector<SharedPtr<Win32TrayItem> > trayItems;
 };
 
 }

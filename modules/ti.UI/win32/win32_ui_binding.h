@@ -40,8 +40,8 @@ namespace ti
 		std::string& GetIcon();
 		static UINT nextItemId;
 
-		static HICON LoadImageAsIcon(std::string& path, int sizeX, int sizeY);
-		static HBITMAP LoadImageAsBitmap(std::string& path, int sizeX, int sizeY);
+		static HICON LoadImageAsIcon(std::string& path, int sizeX=0, int sizeY=0);
+		static HBITMAP LoadImageAsBitmap(std::string& path, int sizeX=0, int sizeY=0);
 		static HICON BitmapToIcon(HBITMAP bitmap, int sizeX, int sizeY);
 		static HBITMAP IconToBitmap(HICON icon, int sizeX, int sizeY);
 		static HBITMAP LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY);

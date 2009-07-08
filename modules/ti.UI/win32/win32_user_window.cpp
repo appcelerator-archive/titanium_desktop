@@ -185,12 +185,9 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case TI_TRAY_CLICKED: {
-			UINT uMouseMsg = (UINT) lParam;
-			if (uMouseMsg == WM_LBUTTONDOWN) {
-				Win32TrayItem::InvokeLeftClickCallback(hWnd, message, wParam, lParam);
-
-			} else if (uMouseMsg == WM_RBUTTONDOWN) {
-				Win32TrayItem::ShowTrayMenu(hWnd, message, wParam, lParam);
+			UINT button = (UINT) lParam;
+			if (button == WM_LBUTTONDOWN || button == WM_RBUTTONDOWN) {
+				Win32TrayItem::HandleClickEvent(hWnd, message, wParam, lParam);
 			}
 		} break;
 

@@ -287,9 +287,13 @@ namespace ti
 		HDC hdcmem = CreateCompatibleDC(hdc);
 		HBITMAP bitmap = CreateCompatibleBitmap(hdc, sizeX, sizeY);
 		HBITMAP holdbitmap = (HBITMAP) SelectObject(hdcmem, bitmap);
-		DrawIconEx(hdcmem, 0, 0, icon, sizeX, sizeY, 0, NULL, DI_NORMAL);
-		SelectObject(hdc, holdbitmap);
 
+		RECT rect = { 0, 0, sizeX, sizeY };
+		SetBkColor(hdcmem, RGB(255, 255, 255));
+		ExtTextOut(hdcmem, 0, 0, ETO_OPAQUE, &rect, NULL, 0, NULL);
+		DrawIconEx(hdcmem, 0, 0, icon, sizeX, sizeY, 0, NULL, DI_NORMAL);
+
+		SelectObject(hdc, holdbitmap);
 		DeleteDC(hdcmem);
 
 		return bitmap;

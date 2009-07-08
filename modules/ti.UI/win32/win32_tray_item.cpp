@@ -10,11 +10,36 @@
 namespace ti
 {
 	std::vector<SharedPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	
-	Win32TrayItem::Win32TrayItem(SharedString iconPath, SharedKMethod cb)
+	Win32TrayItem::Win32TrayItem(SharedString iconPath, SharedKMethod cb) :
+		callback(cb),
+		oldNativeMenu(0),
+		trayIconData(0)
 	{
-		this->callback = cb;
-		this->CreateTrayIcon(*iconPath, std::string("Titanium Application"));
+		SharedUserWindow uw = NULL;
+		std::vector<SharedUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
+		std::vector<SharedUserWindow>::iterator i = windows.begin();
+		if (i != windows.end())
+		{
+			uw = *i;
+		}
+	
+		SharedPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
+	
+		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
+		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
+		notifyIconData->hWnd = wuw->GetWindowHandle();
+		notifyIconData->uID = ++Win32UIBinding::nextItemId;
+		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
+
+		std::string iconString = *iconPath;
+		HICON icon = Win32UIBinding::LoadImageAsIcon(iconString);
+		notifyIconData->hIcon = icon;
+	
+		lstrcpy(notifyIconData->szTip, "Titanium Application");
+		Shell_NotifyIcon(NIM_ADD, notifyIconData);
+		this->trayIconData = notifyIconData;
+
 		trayItems.push_back(this);
 	}
 	
@@ -27,15 +52,12 @@ namespace ti
 	{
 		if (this->trayIconData == NULL)
 		{
-			// nothing to do
-			return;
+			return; // nothing to do
 		}
 	
-		this->trayIconData->hIcon = (HICON) LoadImage(
-				::GetModuleHandle(NULL), (*iconPath).c_str(), IMAGE_ICON,
-				GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
-				LR_DEFAULTCOLOR | LR_LOADFROMFILE);
-	
+		std::string iconString = *iconPath;
+		HICON icon = Win32UIBinding::LoadImageAsIcon(iconString);
+		this->trayIconData->hIcon = icon;
 		Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 	}
 	
@@ -69,9 +91,8 @@ namespace ti
 		this->trayIconData = NULL;
 	}
 
-	void Win32TrayItem::ShowTrayMenu()
+	void Win32TrayItem::HandleRightClick()
 	{
-
 		if (this->oldNativeMenu) {
 			DestroyMenu(this->oldNativeMenu);
 			this->oldNativeMenu = 0;
@@ -90,93 +111,43 @@ namespace ti
 		TrackPopupMenu(this->oldNativeMenu, TPM_BOTTOMALIGN, 
 			pt.x, pt.y, 0, this->trayIconData->hWnd, NULL);
 	}
-	
-	/*static*/
-	bool Win32TrayItem::ShowTrayMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-	{
-		int trayIconID = LOWORD(wParam);
 
-		std::vector<SharedPtr<Win32TrayItem>>::iterator i = trayItems.begin();
-		while (i != trayItems.end()) {
-			Win32TrayItem* item = (*i++);
-	
-			if (item->trayIconData && item->trayIconData->uID == trayIconID) {
-				item->ShowTrayMenu();
-				return true;
-			}
+	void Win32TrayItem::HandleLeftClick()
+	{
+		if (callback.isNull())
+			return;
+
+		try {
+			ValueList args;
+			callback->Call(args);
+
+		} catch (ValueException& e) {
+			Logger* logger = Logger::Get("UI.Win32TrayItem");
+			SharedString ss = e.DisplayString();
+			logger->Error("Tray icon callback failed: %s", ss->c_str());
 		}
-		return false;
-	
 	}
 	
-	void Win32TrayItem::CreateTrayIcon(std::string &iconPath, std::string &caption)
+	UINT Win32TrayItem::GetId()
 	{
-		SharedUserWindow uw = NULL;
-	
-		std::vector<SharedUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		if (i != windows.end())
-		{
-			uw = *i;
-		}
-	
-		SharedPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
-	
-		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
-		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
-		notifyIconData->hWnd = wuw->GetWindowHandle();
-		notifyIconData->uID = ++Win32UIBinding::nextItemId;
-		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
-		notifyIconData->hIcon = (HICON) LoadImage(
-				::GetModuleHandle(NULL), iconPath.c_str(), IMAGE_ICON,
-				GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
-				LR_DEFAULTCOLOR | LR_LOADFROMFILE);
-	
-		lstrcpy(notifyIconData->szTip, caption.c_str());
-	
-		Shell_NotifyIcon(NIM_ADD, notifyIconData);
-	
-		this->trayIconData = notifyIconData;
+		return this->trayIconData->uID;
 	}
-	
+
 	/*static*/
-	bool Win32TrayItem::InvokeLeftClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+	void Win32TrayItem::HandleClickEvent(
+		HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		int trayIconID = LOWORD(wParam);
-	
-		return InvokeLeftClickCallback(trayIconID);
-	}
-	
-	/*static*/
-	bool Win32TrayItem::InvokeLeftClickCallback(int trayIconID)
-	{
-		for(size_t i = 0; i < trayItems.size(); i++)
-		{
+		UINT button = (UINT) lParam;
+		int id = LOWORD(wParam);
+
+		for (size_t i = 0; i < trayItems.size(); i++) {
 			SharedPtr<Win32TrayItem> item = trayItems[i];
-	
-			if(item->trayIconData && item->trayIconData->uID == trayIconID)
-			{
-				if(item->callback)
-				{
-					KMethod* cb = (KMethod*) item->callback;
-	
-					// TODO: Handle exceptions in some way
-					try
-					{
-						ValueList args;
-						cb->Call(args);
-					}
-					catch(...)
-					{
-						std::cout << "Menu callback failed" << std::endl;
-					}
-	
-					return true;
-				}
+
+			if (item->GetId() == id && button == WM_LBUTTONDOWN) {
+				item->HandleLeftClick();
+			} else if (item->GetId() == id && button == WM_RBUTTONDOWN) {
+				item->HandleRightClick();
 			}
 		}
-	
-		return false;
 	}
 }
