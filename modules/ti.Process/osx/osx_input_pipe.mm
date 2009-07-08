@@ -104,6 +104,14 @@ namespace ti
 		InputPipe::DataReady();
 	}
 	
+	void OSXInputPipe::Erase(int nBytes)
+	{
+		NSRange range;
+		range.location = 0;
+		range.length = nBytes;
+		[buffer replaceBytesInRange:range withBytes:NULL length:0];
+	}
+	
 	SharedPtr<Blob> OSXInputPipe::Read(int bufsize)
 	{
 		// let danging onRead events pull the last data from the buffer
@@ -124,7 +132,23 @@ namespace ti
 		}
 		
 		SharedPtr<Blob> blob = new Blob((const char *)[buffer bytes], bufsize);
-		[buffer setLength:currentLength-bufsize];
+		this->Erase(bufsize);
+		return blob;
+	}
+	
+	SharedPtr<Blob> OSXInputPipe::ReadLine()
+	{
+		if (closed && [buffer length] == 0)
+		{
+			throw ValueException::FromString("Pipe is already closed");
+		}
+		
+		int charsToErase;
+		int newline = FindFirstLineFeed((char *)[buffer bytes], [buffer length], &charsToErase);
+		if (newline == -1) return NULL;
+		
+		SharedPtr<Blob> blob = new Blob((const char *)[buffer bytes], newline-charsToErase+1);
+		this->Erase(newline+1);
 		return blob;
 	}
 }

@@ -33,11 +33,14 @@ namespace ti
 		virtual void Close();
 		virtual bool IsClosed();
 		virtual SharedPtr<Blob> Read(int bufsize=-1);
+		virtual SharedPtr<Blob> ReadLine();
 		NSPipe* GetPipe() { return pipe; }
 		
 		void DataReady(NSData *data);
 
 	protected:
+		void Erase(int nBytes);
+		
 		NSPipe* pipe;
 		NSFileHandle* handle;
 		TiDataReady* dataReady;

@@ -30,6 +30,24 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
+	SharedPtr<Blob> BlobInputPipe::ReadLine()
+	{
+		Poco::Mutex::ScopedLock lock(mutex);
+		
+		if (!closed)
+		{
+			int charsToErase;
+			int newline = FindFirstLineFeed(&(buffer[0]), buffer.size(), &charsToErase);
+			if (newline == -1) return NULL;
+			
+			SharedPtr<Blob> blob = new Blob(&(buffer[0]), newline-charsToErase+1);
+			buffer.erase(buffer.begin(), buffer.begin()+newline);
+			
+			return blob;
+		}
+		throw ValueException::FromString("This pipe is closed.");
+	}
+	
 	int BlobInputPipe::GetSize()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);

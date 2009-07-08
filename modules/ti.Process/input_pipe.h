@@ -26,7 +26,7 @@ namespace ti
 		static SharedInputPipe CreateInputPipe();
 		
 		virtual SharedPtr<Blob> Read(int bufsize=-1) = 0;
-		
+		virtual SharedPtr<Blob> ReadLine() = 0;
 		void DataReady(SharedInputPipe pipe = NULL);
 		void Closed();
 		
@@ -45,8 +45,10 @@ namespace ti
 		
 		void SetOnRead(SharedKMethod onRead);
 	protected:
+		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		
 		void _Read(const ValueList& args, SharedValue result);
+		void _ReadLine(const ValueList& args, SharedValue result);
 		void _Join(const ValueList& args, SharedValue result);
 		void _Unjoin(const ValueList& args, SharedValue result);
 		void _IsJoined(const ValueList& args, SharedValue result);

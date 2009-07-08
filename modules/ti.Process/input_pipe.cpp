@@ -38,6 +38,7 @@ namespace ti
 		
 		//TODO doc me
 		SetMethod("read", &InputPipe::_Read);
+		SetMethod("readLine", &InputPipe::_ReadLine);
 		SetMethod("join", &InputPipe::_Join);
 		SetMethod("unjoin", &InputPipe::_Unjoin);
 		SetMethod("isJoined", &InputPipe::_IsJoined);
@@ -76,8 +77,7 @@ namespace ti
 				args.push_back(Value::NewObject(event));
 				try
 				{
-					//Host::GetInstance()->InvokeMethodOnMainThread(*(this->onRead), args);
-					(*onRead)->Call(args);
+					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args);
 				}
 				catch (ValueException& e)
 				{
@@ -238,6 +238,31 @@ namespace ti
 		}
 	}
 	
+	int InputPipe::FindFirstLineFeed(char *data, int length, int *charsToErase)
+	{
+		int newline = -1;
+		for (int i = 0; i < length; i++)
+		{
+			if (data[i] == '\n')
+			{
+				newline = i;
+				*charsToErase = 1;
+				break;
+			}
+			else if (data[i] == '\r')
+			{
+				if (i < length-1 && data[i+1] == '\n')
+				{
+					newline = i+1;
+					*charsToErase = 2;
+					break;
+				}
+			}
+		}
+		
+		return newline;
+	}
+	
 	void InputPipe::_Read(const ValueList& args, SharedValue result)
 	{
 		int bufsize = -1;
@@ -248,6 +273,19 @@ namespace ti
 		
 		SharedPtr<Blob> blob = Read(bufsize);
 		result->SetObject(blob);
+	}
+	
+	void InputPipe::_ReadLine(const ValueList& args, SharedValue result)
+	{
+		SharedPtr<Blob> blob = ReadLine();
+		if (blob.isNull())
+		{
+			result->SetNull();
+		}
+		else
+		{
+			result->SetObject(blob);
+		}
 	}
 	
 	void InputPipe::_Join(const ValueList& args, SharedValue result)

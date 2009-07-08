@@ -21,6 +21,7 @@ namespace ti
 			BlobInputPipe();
 			
 			virtual SharedPtr<Blob> Read(int bufsize=-1);
+			virtual SharedPtr<Blob> ReadLine();
 			virtual void Close();
 			virtual bool IsClosed();
 			

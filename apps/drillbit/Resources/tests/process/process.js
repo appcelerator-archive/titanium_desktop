@@ -103,7 +103,7 @@ describe("process tests",
 		value_of(p.getArguments().length).should_be(Titanium.App.arguments.length+1);
 		for (var i = 1; i < p.getArguments().length; i++)
 		{
-			value_of(p.getArguments()[i] in Titanium.App.arguments).should_be_true();
+			value_of(Titanium.App.arguments).should_contain(p.getArguments()[i]);
 		}
 	},
 	

@@ -510,11 +510,8 @@ window.onload = function()
 		var failed = 0;
 		process.setOnRead(function(event)
 		{
-			var d = event.pipe.read();
-			var lines = d.split('\n');
-			for (var l = 0; l < lines.length; l++)
+			for (var data = event.pipe.readLine(); data != null; data = event.pipe.readLine())
 			{
-				var data = lines[l];
 				var i = data.indexOf('DRILLBIT_');
 				if (i != -1)
 				{
