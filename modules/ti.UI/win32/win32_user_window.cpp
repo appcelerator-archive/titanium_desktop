@@ -3,28 +3,12 @@
  * SEE LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-
-#include <kroll/base.h>
-
-#include "win32_user_window.h"
-#include "webkit_frame_load_delegate.h"
-#include "webkit_ui_delegate.h"
-#include "webkit_policy_delegate.h"
-//#include "webkit_javascript_listener.h"
-#include "win32_tray_item.h"
-#include "string_util.h"
-#include "../url/url.h"
-#include <cmath>
-#include <shellapi.h>
-#include <comutil.h>
-#include <commdlg.h>
-#include <shlobj.h>
+#include "../ui_module.h"
 #include <sstream>
+#include <cmath>
 
-#define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
 #define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
 #define UnsetFlag(x,flag) (x &= ~flag)=
-
 using namespace ti;
 
 // slightly off white, there's probably a better way to do this
@@ -208,10 +192,27 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 		} break;
 
-		default:
-			if (!Win32MenuItemImpl::handleMenuClick(hWnd, message, wParam, lParam)) {
-				return DefWindowProc(hWnd, message, wParam, lParam);
+		case WM_MENUCOMMAND: {
+			HMENU nativeMenu = (HMENU) lParam;
+			UINT position = (UINT) wParam;
+			Win32MenuItem::HandleClickEvent(nativeMenu, position);
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+
+		case WM_COMMAND: {
+			int nativeItemId = LOWORD(wParam);
+			if (nativeItemId == WEB_INSPECTOR_MENU_ITEM_ID) {
+				Win32UserWindow* wuw = Win32UserWindow::FromWindow(hWnd);
+				if (wuw) {
+					wuw->ShowWebInspector();
+					break;
+				}
 			}
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	return 0;
@@ -717,21 +718,19 @@ void Win32UserWindow::SetTitle(std::string& title)
 void Win32UserWindow::SetURL(std::string& url_)
 {
 	std::string url = url_;
-
-	//url = NormalizeAppURL(url, AppConfig::Instance()->GetAppID());
 	url = ti::NormalizeAppURL(url);	
 	logger->Debug("SetURL: %s", url.c_str());
 	
 	IWebMutableURLRequest* request = 0;
 	std::wstring method = L"GET" ;
 
-	if (url.length() > 0 && (PathFileExists(url.c_str()) || PathIsUNC(url.c_str())))
-{
-		TCHAR fileURL[INTERNET_MAX_URL_LENGTH];
-		DWORD fileURLLength = sizeof(fileURL)/sizeof(fileURL[0]);
-		if (SUCCEEDED(UrlCreateFromPath(url.c_str(), fileURL, &fileURLLength, 0)))
-			url = fileURL;
-	}
+	//if (url.length() > 0 && (PathFileExists(url.c_str()) || PathIsUNC(url.c_str())))
+	//{
+	//	TCHAR fileURL[INTERNET_MAX_URL_LENGTH];
+	//	DWORD fileURLLength = sizeof(fileURL)/sizeof(fileURL[0]);
+	//	if (SUCCEEDED(UrlCreateFromPath(url.c_str(), fileURL, &fileURLLength, 0)))
+	//		url = fileURL;
+	//}
 	std::wstring wurl = UTF8ToWide(url);
 
 	logger->Debug("CoCreateInstance");
@@ -840,8 +839,7 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 
 void Win32UserWindow::SetMenu(SharedMenu menu)
 {
-	SharedPtr<Win32Menu> menu = value.cast<Win32Menu>();
-	this->menu = menu;
+	this->menu = menu.cast<Win32Menu>();
 	this->SetupMenu();
 }
 
@@ -852,8 +850,7 @@ SharedMenu Win32UserWindow::GetMenu()
 
 void Win32UserWindow::SetContextMenu(SharedMenu menu)
 {
-	SharedPtr<Win32Menu> menu = value.cast<Win32Menu>();
-	this->contextMenu = menu;
+	this->contextMenu = menu.cast<Win32Menu>();
 }
 
 SharedMenu Win32UserWindow::GetContextMenu()
@@ -872,18 +869,17 @@ void Win32UserWindow::SetupIcon()
 
 	std::string& iconPath = this->iconPath;
 
-	if (iconPath.empty())
+	if (iconPath.empty()) {
 		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
 		iconPath = b->GetIcon();
 	}
 
-	if (!iconPath.empty())
-	{
+	if (!iconPath.empty()) {
 		// need to remove the icon
 		SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
 				(LPARAM) defaultIcon);
 	} else {
-		std::string ext = iconPath.substr(iconPath->length() - 4, 4);
+		std::string ext = iconPath.substr(iconPath.size() - 4, 4);
 		if (ext == ".ico")
 		{
 			HANDLE icon = LoadImageA(win32_host->GetInstanceHandle(),
@@ -1312,6 +1308,27 @@ void Win32UserWindow::ParseStringNullSeparated(
 		}
 
 		token.push_back(c);
+	}
+}
+
+void Win32UserWindow::RedrawMenu()
+{
+	if (this->window_handle) {
+		DrawMenuBar(this->window_handle);
+	}
+}
+
+/*static*/
+void Win32UserWindow::RedrawAllMenus()
+{
+	// Notify all windows that the app menu has changed.
+	std::vector<SharedUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
+	std::vector<SharedUserWindow>::iterator i = windows.begin();
+	while (i != windows.end())
+	{
+		SharedPtr<Win32UserWindow> wuw = (*i++).cast<Win32UserWindow>();
+		if (!wuw.isNull())
+			wuw->RedrawMenu();
 	}
 }
 

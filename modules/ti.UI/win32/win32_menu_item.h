@@ -3,13 +3,22 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#ifndef _GTK_MENU_ITEM_H_
-#define _GTK_MENU_ITEM_H_
+#ifndef _WIN32_MENU_ITEM_H_
+#define _WIN32_MENU_ITEM_H_
 namespace ti
 {
 	class Win32MenuItem : public MenuItem
 	{
 	public:
+		// Pieces of information we can use to do a reverse lookup
+		// on an item's position in a parent menu.
+		struct NativeItemBits
+		{
+			UINT id;
+			HMENU parentMenu;
+			HMENU submenu;
+		};
+
 		Win32MenuItem(MenuItemType type, std::string label,
 			SharedKMethod callback, std::string iconURL);
 		virtual ~Win32MenuItem();
@@ -21,15 +30,20 @@ namespace ti
 		void SetSubmenuImpl(SharedMenu newSubmenu);
 		void SetEnabledImpl(bool enabled);
 
-		void ReplaceNativeItem(::Win32MenuItem* nativeItem, ::Win32MenuItem* newNativeItem);
-		void SetNativeItemIcon(::Win32MenuItem* nativeItem, std::string& newIconPath);
-		void SetNativeItemSubmenu(::Win32MenuItem* nativeItem, SharedMenu newSubmenu);
-		::Win32MenuItem* CreateNative(bool registerNative);
-		void DestroyNative(::Win32MenuItem* nativeItem);
+		void RecreateAllNativeItems();
+		void RecreateMenuItem(NativeItemBits* bits);
+		void CreateNative(LPMENUITEMINFO itemInfo,
+			HMENU nativeParentMenu, bool registerNative);
+		void DestroyNative(NativeItemBits* bits);
+		void DestroyNative(HMENU nativeParent, int position);
+		static int GetNativeMenuItemPosition(NativeItemBits* bits);
+		static bool HandleClickEvent(HMENU nativeMenu, UINT position);
 
 	private:
-		std::vector< ::Win32MenuItem* > nativeItems;
+		std::vector<NativeItemBits*> nativeItems;
 		SharedPtr<Win32Menu> oldSubmenu;
+		std::string oldLabel;
+
 	};
 }
 #endif

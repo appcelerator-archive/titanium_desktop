@@ -3,29 +3,12 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-#define _WINSOCKAPI_
-#include <kroll/base.h>
-
-#include <winsock2.h> 
 #include "../ui_module.h"
-#include "win32_menu_item_impl.h"
-
-#include <windows.h>
-#include <commdlg.h>
-#include <shellapi.h>
-#include <shlobj.h>
-#include <string>
-#include <stdlib.h>
-#include "win32_tray_item.h"
-
-#include "../url/url_curl.h"
+#define _WINSOCKAPI_
 
 namespace ti
 {
-	HMENU Win32UIBinding::contextMenuInUseHandle = NULL;
-
-
+	UINT Win32UIBinding::nextItemId = NEXT_ITEM_ID_BEGIN;
 	Win32UIBinding::Win32UIBinding(Module *uiModule, Host *host) :
 		UIBinding(host),
 		evaluator(host),
@@ -102,6 +85,11 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
+	SharedMenu Win32UIBinding::CreateMenu()
+	{
+		return new Win32Menu();
+	}
+
 	SharedMenuItem Win32UIBinding::CreateMenuItem(
 		std::string label, SharedKMethod callback, std::string iconURL)
 	{
@@ -119,7 +107,7 @@ namespace ti
 		return new Win32MenuItem(MenuItem::CHECK, label, callback, std::string());
 	}
 
-	void Win32UIBinding::SetMenu(SharedPtr<MenuItem>)
+	void Win32UIBinding::SetMenu(SharedMenu newMenu)
 	{
 		this->menu = newMenu.cast<Win32Menu>();
 
@@ -136,7 +124,7 @@ namespace ti
 		}
 	}
 
-	void Win32UIBinding::SetContextMenu(SharedMenu menu)
+	void Win32UIBinding::SetContextMenu(SharedMenu newMenu)
 	{
 		this->contextMenu = newMenu.cast<Win32Menu>();
 	}
@@ -181,17 +169,17 @@ namespace ti
 		return (int)idleTicks;
 	}
 
-	SharedMenu GtkUIBinding::GetMenu()
+	SharedMenu Win32UIBinding::GetMenu()
 	{
 		return this->menu;
 	}
 
-	SharedMenu GtkUIBinding::GetContextMenu()
+	SharedMenu Win32UIBinding::GetContextMenu()
 	{
 		return this->contextMenu;
 	}
 
-	std::string& GtkUIBinding::GetIcon()
+	std::string& Win32UIBinding::GetIcon()
 	{
 		return this->iconPath;
 	}

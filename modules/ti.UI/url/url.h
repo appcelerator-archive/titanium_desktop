@@ -6,7 +6,6 @@
 
 #ifndef TITANIUM_URL_H_
 #define TITANIUM_URL_H_
-
 namespace ti
 {
 	std::string TiURLToPath(string tiURL);

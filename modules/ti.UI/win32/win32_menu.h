@@ -3,13 +3,13 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#ifndef _GTK_MENU_H_
-#define _GTK_MENU_H_
+#ifndef _WIN32_MENU_H_
+#define _WIN32_MENU_H_
 namespace ti
 {
 	class Win32Menu : public Menu
 	{
-	public:
+		public:
 		Win32Menu();
 		~Win32Menu();
 
@@ -18,18 +18,22 @@ namespace ti
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 
-		void ClearNativeMenu(::Win32MenuShell* nativeMenu);
-		void RemoveItemAtFromNativeMenu(::Win32MenuShell* nativeMenu, unsigned int index);
-		void DestroyNative(::Win32MenuShell* nativeMenu);
-		Win32MenuShell* CreateNativeBar(bool registerNative);
-		::Win32MenuShell* CreateNative(bool registerNative);
-		void AddChildrenToNativeMenu(::Win32MenuShell* nativeMenu, bool registerNative);
-		void RegisterNativeMenuItem(SharedMenuItem item, ::Win32MenuItem* nativeItem);
-		void DestroyNativeMenuItem(::Win32MenuItem* nativeItem);
+		void ClearNativeMenu(HMENU nativeMenu);
+		void DestroyNative(HMENU nativeMenu);
+		HMENU CreateNative(bool registerNative);
+		HMENU CreateNativeTopLevel(bool registerNative);
+		void AddChildrenToNativeMenu(HMENU nativeMenu, bool registerNative);
 
-	private:
+		static void InsertItemIntoNativeMenu(
+			Win32MenuItem* menuItem, HMENU nativeMenu,
+			bool registerNative, int position=-1);
+		static void RemoveItemAtFromNativeMenu(
+			Win32MenuItem* item, HMENU nativeMenu, int position);
+		void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
+
+		private:
 		std::vector<SharedMenuItem> oldChildren;
-		std::vector< ::Win32MenuShell* > nativeMenus;
+		std::vector<HMENU> nativeMenus;
 	};
 }
 #endif

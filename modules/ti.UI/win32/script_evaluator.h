@@ -6,12 +6,6 @@
 
 #ifndef SCRIPT_EVALUATOR_H_
 #define SCRIPT_EVALUATOR_H_
-
-#include <kroll/base.h>
-#include <windows.h>
-#include "WebKit.h"
-#include <kroll/kroll.h>
-
 class ScriptEvaluator : public IWebScriptEvaluator {
 public:
 	ScriptEvaluator(kroll::Host *host) : host(host), ref_count(1) {}

@@ -3,15 +3,11 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "popup_dialog.h"
-#include <windows.h>
-#include <windowsx.h>
-#include <vector>
-
+#include "../ui_module.h"
 #define ID_INPUT_FIELD 101
 
-
-namespace ti {
+namespace ti 
+{
 	std::map<DWORD, Win32PopupDialog*> Win32PopupDialog::popups;
 
 	class DialogTemplate {

@@ -3,11 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-
-/* This object is that represents Titanium.UI.currentWindow */
-
 #include "ui_module.h"
-#include <stdlib.h>
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :

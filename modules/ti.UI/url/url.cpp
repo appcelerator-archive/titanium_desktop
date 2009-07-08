@@ -3,19 +3,13 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-#include <cstring>
-#include <algorithm>
-#include <cctype>
-
-#include <kroll/base.h>
+#include "../ui_module.h"
 #include <Poco/Environment.h>
 #include <Poco/URI.h>
-#include <kroll/kroll.h>
-
 using Poco::URI;
 using std::string;
-namespace ti {
+namespace ti
+{
 
 	string TiURLToPath(string tiURL)
 	{

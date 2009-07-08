@@ -3,10 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "webkit_ui_delegate.h"
-
-#include "win32_user_window.h"
-#include "win32_ui_binding.h"
+#include "../ui_module.h"
 #include <comutil.h>
 
 using namespace ti;
@@ -242,10 +239,10 @@ Win32WebKitUIDelegate::hasCustomMenuImplementation(
 HRESULT STDMETHODCALLTYPE
 Win32WebKitUIDelegate::trackCustomPopupMenu(
 	/* [in] */ IWebView *sender,
-	/* [in] */ OLE_HANDLE menu,
+	/* [in] */ OLE_HANDLE inMenu,
 	/* [in] */ LPPOINT point)
 {
-	SharedPtr<Win32Menu> menu = this->window->GetContextMenu();
+	SharedPtr<Win32Menu> menu = this->window->GetContextMenu().cast<Win32Menu>();
 
 	// No window menu, try to use the application menu.
 	if (menu.isNull())

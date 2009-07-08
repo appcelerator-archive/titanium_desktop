@@ -249,6 +249,11 @@ namespace ti
 
 	void MenuItem::HandleClickEvent(SharedKObject source)
 	{
+		if (this->IsCheck())
+		{
+			this->SetState(!this->GetState());
+		}
+
 		UIBinding::SendEventToListeners(
 			this->eventListeners,
 			UIBinding::CLICKED,

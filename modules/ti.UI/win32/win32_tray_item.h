@@ -5,14 +5,8 @@
  */
 #ifndef TI_WIN32_TRAY_ITEM_H_
 #define TI_WIN32_TRAY_ITEM_H_
-
-#include <kroll/base.h>
-#include <kroll/kroll.h>
 #include <windows.h>
 #include <shellapi.h>
-#include "../tray_item.h"
-#include "win32_menu_item_impl.h"
-
 namespace ti
 {
 
@@ -35,6 +29,7 @@ class Win32TrayItem: public TrayItem
 	private:
 	SharedKMethod callback;
 	HMENU oldNativeMenu;
+	static std::vector<SharedPtr<Win32TrayItem> > trayItems;
 
 	NOTIFYICONDATA* trayIconData;
 	void CreateTrayIcon(std::string &iconPath, std::string &caption);

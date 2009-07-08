@@ -5,13 +5,7 @@
  */
 #ifndef TI_WEBKIT_WIN32_UI_DELEGATE_H_
 #define TI_WEBKIT_WIN32_UI_DELEGATE_H_
-
-#include <kroll/kroll.h>
 #include <windows.h>
-
-#include "WebKit.h"
-#include "popup_dialog.h"
-
 namespace ti {
 
 class Win32UserWindow;

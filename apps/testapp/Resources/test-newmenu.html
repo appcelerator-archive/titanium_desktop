@@ -11,6 +11,7 @@
 			var item1 = null;
 			var menu2 = null;
 			var item2 = null;
+			var check_item = null;
 			function addTrayThing() {
 				var trayIcon = Titanium.UI.addTray("app://fonts.png");
 				if (menu != null)
@@ -22,15 +23,21 @@
 				try {
 				menu = Titanium.UI.createMenu();
 				var itemz = menu.addSubmenu("WithImage", function() {alert('what');}, "app://fonts.png");
-				itemz.addItem("blah1");
+				var iz = itemz.addItem("blah1");
+				iz.disable();
 				itemz.addItem("blah20");
 				itemz.addItem("blah30");
 				item1 = menu.addSubmenu("Blahblah");
 				item1.addItem("haha1");
 				item1.addItem("haha2");
 				item1.addItem("haha3", function() {alert('what');}, "app://fonts.png");
-				var check_item = item1.addCheckItem("haha4");
+				check_item = item1.addCheckItem("haha4");
 				check_item.setState(true);
+
+				var ci2 = item1.addCheckItem("haha4_disabled");
+				ci2.setState(true);
+				ci2.disable();
+
 				Titanium.UI.setMenu(menu);
 				Titanium.UI.setContextMenu(menu);
 				Titanium.UI.setDockMenu(menu);
@@ -54,6 +61,7 @@
 			}
 			function modifySubmenu() {
 				item1.addItem("BBB");
+				check_item.setState(false);
 			}
 			function modifyMainMenu() {
 				menu.addItem("AAA");

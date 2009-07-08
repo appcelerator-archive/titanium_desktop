@@ -22,12 +22,6 @@ namespace ti {
 	typedef SharedPtr<TrayItem> SharedTrayItem;
 }
 
-#ifdef OS_WIN32
-// A little disorganization; header include order is very sensitive in win32,
-// and the build breaks if this below the other OS_ defines
-#include "win32/win32_user_window.h"
-#endif
-
 #include <JavaScriptCore/JSObjectRef.h>
 #include <JavaScriptCore/JSStringRef.h>
 #include <JavaScriptCore/JSContextRef.h>
@@ -41,7 +35,6 @@ namespace ti {
 #include "tray_item.h"
 #include "ui_binding.h"
 
-
 #ifdef OS_LINUX
 #include "gtk/ui_module_gtk.h"
 #include "gtk/script_evaluator.h"
@@ -50,10 +43,8 @@ namespace ti {
 #include "osx/ui_module_osx.h"
 
 #elif defined(OS_WIN32)
-#include "javascript_module.h"
-#include "win32/win32_ui_binding.h"
+#include "win32/ui_module_win32.h"
 #endif
-
 
 namespace ti {
 
