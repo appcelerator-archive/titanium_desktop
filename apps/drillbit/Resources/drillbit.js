@@ -5,9 +5,9 @@ var TA  = Titanium.App;
 var current_test_load = null;
 var current_test = null;
 var excludes = ['before','before_all','after','after_all','timeout'];
-var total_assertions = 0;
+var total_tests = 0;
 var total_files = 0;
-var running_assertions = 0;
+var running_tests = 0;
 var running_completed = 0;
 var running_passed = 0;
 var running_failed = 0;
@@ -16,6 +16,7 @@ var auto_close = false;
 var debug_tests = false;
 var test_failures = false;
 var specific_tests = null;
+var total_assertions = 0;
 
 function update_status(msg,hide)
 {
@@ -80,7 +81,7 @@ function describe(description,test)
 			var fn = test[p];
 			if (typeof fn == 'function')
 			{
-				total_assertions++;
+				total_tests++;
 				current_test_load.assertion_count++;
 				current_test_load.assertions[p]=false;
 			}
@@ -89,9 +90,15 @@ function describe(description,test)
 	
 	total_files++;
 	
-	$('#header').html(total_assertions+' tests in '+total_files+' files');
+	$('#header').html(total_tests+' tests in '+total_files+' files');
 
 	current_test_load = null;
+}
+
+function add_assertion()
+{
+	total_assertions++;
+	$('#header').html(total_tests+' tests in '+total_files+' files<br/>'+total_assertions+' assertions');
 }
 
 function make_function(f,scope)
@@ -519,17 +526,25 @@ window.onload = function()
 						show_current_test(suite_name,test_name);
 						continue;
 					}
+					else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
+						var comma = data.indexOf(',');
+						var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
+						var line_number = data.substring(comma+1,data.length-1);
+						// do something with metadata eventually?
+						add_assertion();
+						continue;
+					}
 						
-					var test_name = data.substring(15,data.length-1);
+					var test_name = data.substring(15);
 					var test_passed = data.indexOf('_PASS:')!=-1;
 					running_completed++;
 					if (test_passed) { passed++; running_passed++; }
 					else { failed ++; running_failed++; }
 					
 					suite_progress(passed, failed, current_test.assertion_count);
-					total_progress(running_passed, running_failed, total_assertions);
+					total_progress(running_passed, running_failed, total_tests);
 					
-					var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_assertions;
+					var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
 					update_status(msg);
 					Titanium.API.debug("test ["+ test_name + "], passed:"+test_passed);
 				}
@@ -624,7 +639,7 @@ window.onload = function()
 		var entry = executing_tests.shift();
 		current_test = entry;
 		current_test.failed = false;
-		update_status('Executing: '+entry.name+' ... '+running_completed + "/" + running_assertions);
+		update_status('Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
 		test_status(entry.name,'Running');
 		setTimeout(function(){run_test(entry)},1);
 	}
@@ -634,7 +649,7 @@ window.onload = function()
 		run_button.disabled = true;
 		update_status('Building test harness ... one moment');
 		executing_tests = [];
-		running_assertions = 0;
+		running_tests = 0;
 		running_completed = 0;
 		
 		$.each($('#table tr.test'),function()
@@ -645,7 +660,7 @@ window.onload = function()
 			if ($(this).find('.checkbox').is('.checked'))
 			{
 				executing_tests.push(entry);
-				running_assertions+=entry.assertion_count;
+				running_tests+=entry.assertion_count;
 			}
 		});
 		
