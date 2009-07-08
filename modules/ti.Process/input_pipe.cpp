@@ -31,7 +31,7 @@ namespace ti
 	
 	InputPipe::InputPipe() : Pipe("InputPipe"), joined(false), attachedOutput(NULL), splitPipes(NULL), onRead(NULL), onClose(NULL)
 	{
-		sharedThis = this;
+			sharedThis = this;
 		logger = Logger::Get("InputPipe");
 		
 		//TODO doc me
@@ -66,7 +66,7 @@ namespace ti
 		}
 		else
 		{
-			if (onRead && !onRead->isNull())
+			if (onRead != NULL && !onRead->isNull())
 			{
 				ValueList args;
 				SharedKObject event = new StaticBoundObject();
@@ -75,7 +75,8 @@ namespace ti
 				args.push_back(Value::NewObject(event));
 				try
 				{
-					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args);	
+					//Host::GetInstance()->InvokeMethodOnMainThread(*(this->onRead), args);
+					(*onRead)->Call(args);
 				}
 				catch (ValueException& e)
 				{
@@ -211,9 +212,9 @@ namespace ti
 		return attachedOutput != NULL;
 	}
 	
-	void InputPipe::SetOnRead(SharedKMethod onRead)
+	void InputPipe::SetOnRead(SharedKMethod onReadCallback)
 	{
-		if (this->onRead && onRead.get() == this->onRead->get()) return;
+		if (this->onRead && onReadCallback.get() == this->onRead->get()) return;
 		
 		if (IsJoined())
 		{
@@ -228,13 +229,13 @@ namespace ti
 			Detach();
 		}
 		
-	 	if (onRead.isNull())
+	 	if (onReadCallback.isNull())
 		{
 			delete this->onRead;
 		}
 		else
 		{
-			this->onRead = new SharedKMethod(onRead);
+			this->onRead = new SharedKMethod(onReadCallback);
 		}
 	}
 	

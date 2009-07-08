@@ -56,7 +56,7 @@ describe("process tests",
 	test_output_pipe_write: function()
 	{
 		var o = Titanium.Process.createOutputPipe();
-		var blob = Titanium.API.createBlob("some data");
+		var blob = Titanium.CoreTypes.createBlob("some data");
 		var written = o.write(blob);
 		value_of(written).should_be(blob.length);
 		o.close();
@@ -99,6 +99,8 @@ describe("process tests",
 	test_current_process_arguments: function()
 	{
 		var p = Titanium.Process.getCurrentProcess();
+		window.alert(""+p.getArguments());
+		
 		value_of(p.getArguments().length).should_be(Titanium.App.arguments.length+1);
 		for (var i = 1; i < p.getArguments().length; i++)
 		{

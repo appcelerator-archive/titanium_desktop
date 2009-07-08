@@ -35,10 +35,13 @@ namespace ti
 		virtual SharedPtr<Blob> Read(int bufsize=-1);
 		NSPipe* GetPipe() { return pipe; }
 		
+		void DataReady(NSData *data);
+
 	protected:
 		NSPipe* pipe;
 		NSFileHandle* handle;
 		TiDataReady* dataReady;
+		NSMutableData *buffer;
 		bool closed;
 	};
 }

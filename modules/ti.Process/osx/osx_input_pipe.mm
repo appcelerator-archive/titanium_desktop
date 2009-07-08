@@ -5,6 +5,9 @@
  */
 
 #include "osx_input_pipe.h"
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
 @implementation TiDataReady
 
@@ -20,12 +23,13 @@
 
 -(void)dataReady:(NSNotification *)aNotification
 {
-	pipe->DataReady();
-	if (!pipe->IsClosed())
-	{
-		// we need to schedule the file handle to wait for more data in the background again.
-		[[aNotification object] waitForDataInBackgroundAndNotify];
+	NSData *data = [[aNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+	if ([data length]) {
+		pipe->DataReady(data);
 	}
+	
+	// we need to schedule the file handle to wait for more data in the background again.
+	[[aNotification object] readInBackgroundAndNotify];
 }
 
 @end
@@ -34,6 +38,9 @@ namespace ti
 {
 	OSXInputPipe::OSXInputPipe () : closed(false)
 	{
+		buffer = [NSMutableData dataWithCapacity:1024];
+		[buffer retain];
+		
 		pipe = [NSPipe pipe];
 		handle = [pipe fileHandleForReading];
 		[handle retain];
@@ -42,30 +49,46 @@ namespace ti
 		[dataReady retain];
 		[[NSNotificationCenter defaultCenter] addObserver:dataReady 
 			selector:@selector(dataReady:)
-			name:NSFileHandleDataAvailableNotification 
+			name:NSFileHandleReadCompletionNotification 
 			object: handle];
 		
-		[handle waitForDataInBackgroundAndNotify];
+		[handle readInBackgroundAndNotify];
 	}
 	
 	OSXInputPipe::~OSXInputPipe ()
 	{
 		Close();
-		[[NSNotificationCenter defaultCenter] removeObserver:dataReady
-			name:NSFileHandleDataAvailableNotification
-			object: handle];
 		
 		//[handle release];
-		//[dataReady release];
+		[dataReady release];
+		[buffer release];
 		handle = NULL;
 	}
 	
 	void OSXInputPipe::Close()
 	{
 		if (!IsClosed()) {
+			[[NSNotificationCenter defaultCenter] removeObserver:dataReady
+				name:NSFileHandleReadCompletionNotification
+				object:handle];
+			
 			closed = true;
-			[handle closeFile];
+			
+			bool handleClosed = false;
+			@try
+			{
+				[handle offsetInFile];
+			}
+			@catch (NSException* e)
+			{
+				handleClosed = true;
+			}
+			if (!handleClosed) {
+				[handle closeFile];
+			}
+			
 			SetOnRead(NULL);
+			
 			Pipe::Closed();
 		}
 	}
@@ -75,34 +98,33 @@ namespace ti
 		return closed;
 	}
 	
+	void OSXInputPipe::DataReady(NSData *data)
+	{
+		[buffer appendData:data];
+		InputPipe::DataReady();
+	}
+	
 	SharedPtr<Blob> OSXInputPipe::Read(int bufsize)
 	{
-		if (closed)
+		// let danging onRead events pull the last data from the buffer
+		if (closed && [buffer length] == 0)
 		{
 			throw ValueException::FromString("Pipe is already closed");
 		}
 		
-		@try
+		int currentLength = [buffer length];
+		if (currentLength == 0)
 		{
-			NSData *data = nil;
-			if (bufsize == -1)
-			{
-				data = [handle availableData];
-			}
-			else
-			{
-				data = [handle readDataOfLength:bufsize];
-			}
-		
-			SharedPtr<Blob> blob = new Blob((const char*)[data bytes], [data length]);
-			//[data release];
-			return blob;
-		}
-		@catch(NSException *e)
-		{
-			Logger::Get("OSXInputPipe")->Error([[e reason] UTF8String]);
+			return new Blob();
 		}
 		
-		return NULL;
+		if (bufsize == -1 || bufsize > currentLength)
+		{
+			bufsize = currentLength;
+		}
+		
+		SharedPtr<Blob> blob = new Blob((const char *)[buffer bytes], bufsize);
+		[buffer setLength:currentLength-bufsize];
+		return blob;
 	}
 }

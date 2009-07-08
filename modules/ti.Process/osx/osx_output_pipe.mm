@@ -8,7 +8,7 @@
 
 namespace ti
 {
-	OSXOutputPipe::OSXOutputPipe()
+	OSXOutputPipe::OSXOutputPipe() : closed(false)
 	{
 		pipe = [NSPipe pipe];
 		handle = [pipe fileHandleForWriting];
