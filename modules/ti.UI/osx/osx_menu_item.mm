@@ -206,11 +206,6 @@ namespace ti
 
 	void OSXMenuItem::HandleClickEvent(SharedKObject source)
 	{
-		// NSMenuItem requires a manual state flip-flop
-		//  when a click event happens.
-		if (this->type == CHECK) {
-			this->SetState(!this->GetState());
-		}
 		MenuItem::HandleClickEvent(source);
 	}
 }

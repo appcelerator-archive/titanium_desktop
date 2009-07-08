@@ -13,8 +13,7 @@ namespace ti
 			GtkMenuItem* item = static_cast<GtkMenuItem*>(data);
 			if (item->IsCheck()) {
 				gtk_check_menu_item_set_active(
-					GTK_CHECK_MENU_ITEM(nativeItem),
-					item->GetState());
+					GTK_CHECK_MENU_ITEM(nativeItem), item->GetState());
 			}
 			item->HandleClickEvent(0);
 		}
