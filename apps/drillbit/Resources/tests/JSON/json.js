@@ -4,11 +4,11 @@ describe("JSON tests",{
 		value_of(Titanium.JSON).should_not_be_null();
 		
 		var obj = new Object();
-	    obj.intProp = 0;
-	    obj.strProp = "string";
-	    obj.func = function() {
-	        Titanium.API.info("inside a function");
-	    };
+		obj.intProp = 0;
+		obj.strProp = "string";
+		obj.func = function() {
+			Titanium.API.info("inside a function");
+		};
 		
 		value_of(obj).should_be_object();
 		value_of(obj.intProp).should_be_number();
@@ -20,8 +20,8 @@ describe("JSON tests",{
 		
 		value_of(jsonObj).should_be_string();
 
-        Titanium.API.debug(jsonObj);
-        var theObj = Titanium.JSON.parse(jsonObj);	
+		Titanium.API.debug(jsonObj);
+		var theObj = Titanium.JSON.parse(jsonObj);	
 
 		value_of(theObj).should_be_object();
 		value_of(theObj.intProp).should_be_number();
