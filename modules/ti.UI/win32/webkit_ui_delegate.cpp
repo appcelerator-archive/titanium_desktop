@@ -253,17 +253,29 @@ Win32WebKitUIDelegate::trackCustomPopupMenu(
 
 	if (this->nativeContextMenu) {
 		DestroyMenu(this->nativeContextMenu);
+		this->nativeContextMenu = 0;
 	}
 
+	Host* host = Host::GetInstance();
 	if (!menu.isNull()) {
 		this->nativeContextMenu = menu->CreateNative(false);
 
-		// Add Web Inspector items here
+	} else if (host->IsDebugMode()) {
+		this->nativeContextMenu = CreatePopupMenu();
+		Win32Menu::ApplyNotifyByPositionStyleToNativeMenu(this->nativeContextMenu);
+	}
+
+	if (this->nativeContextMenu) {
+
+		if (host->IsDebugMode()) {
+			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, "Separator");
+			AppendMenu(this->nativeContextMenu,
+				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, "Show Inspector");
+		}
 
 		TrackPopupMenu(this->nativeContextMenu,
 			TPM_BOTTOMALIGN, point->x, point->y, 0,
 			this->window->GetWindowHandle(), NULL);
-
 	}
 
 	return S_OK;

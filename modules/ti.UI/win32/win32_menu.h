@@ -29,7 +29,7 @@ namespace ti
 			bool registerNative, int position=-1);
 		static void RemoveItemAtFromNativeMenu(
 			Win32MenuItem* item, HMENU nativeMenu, int position);
-		void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
+		static void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
 
 		private:
 		std::vector<SharedMenuItem> oldChildren;

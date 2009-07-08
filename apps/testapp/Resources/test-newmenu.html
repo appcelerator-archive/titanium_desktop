@@ -13,7 +13,7 @@
 			var item2 = null;
 			var check_item = null;
 			function addTrayThing() {
-				var trayIcon = Titanium.UI.addTray("app://fonts.png");
+				var trayIcon = Titanium.UI.addTray("app://fonts.ico");
 				if (menu != null)
 				{
 					trayIcon.setMenu(menu);
@@ -22,15 +22,15 @@
 			function setMainMenu() {
 				try {
 				menu = Titanium.UI.createMenu();
-				var itemz = menu.addSubmenu("WithImage", function() {alert('what');}, "app://fonts.png");
+				var itemz = menu.addSubmenu("WithImage", function() {alert('what');}, "app://fonts.ico");
 				var iz = itemz.addItem("blah1");
 				iz.disable();
 				itemz.addItem("blah20");
 				itemz.addItem("blah30");
 				item1 = menu.addSubmenu("Blahblah");
 				item1.addItem("haha1");
-				item1.addItem("haha2");
-				item1.addItem("haha3", function() {alert('what');}, "app://fonts.png");
+				item1.addItem("haha2", function() {alert('what');}, "app://open.png");
+				item1.addItem("haha3", function() {alert('what');}, "app://tray.bmp");
 				check_item = item1.addCheckItem("haha4");
 				check_item.setState(true);
 

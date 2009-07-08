@@ -40,6 +40,15 @@ namespace ti
 		std::string& GetIcon();
 		static UINT nextItemId;
 
+		static HICON LoadImageAsIcon(std::string& path, int sizeX, int sizeY);
+		static HBITMAP LoadImageAsBitmap(std::string& path, int sizeX, int sizeY);
+		static HICON BitmapToIcon(HBITMAP bitmap, int sizeX, int sizeY);
+		static HBITMAP IconToBitmap(HICON icon, int sizeX, int sizeY);
+		static HBITMAP LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY);
+		static cairo_surface_t* ScaleCairoSurface(
+			cairo_surface_t *oldSurface, int newWidth, int newHeight);
+		static void ReleaseImage(HANDLE);
+
 		private:
 		ScriptEvaluator evaluator;
 		SharedPtr<Win32Menu> menu;
@@ -49,6 +58,8 @@ namespace ti
 		// Cookie and handle for WebKit Activation Context
 		ULONG_PTR lpCookie; 
 		HANDLE pActCtx;
+		static std::vector<HICON> loadedICOs;
+		static std::vector<HBITMAP> loadedBMPs;
 
 		void InitCurl(Module *module);
 	};

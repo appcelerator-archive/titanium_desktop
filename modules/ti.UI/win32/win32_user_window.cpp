@@ -195,20 +195,19 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_MENUCOMMAND: {
 			HMENU nativeMenu = (HMENU) lParam;
 			UINT position = (UINT) wParam;
-			Win32MenuItem::HandleClickEvent(nativeMenu, position);
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
+			UINT itemId = GetMenuItemID(nativeMenu, position);
 
-		case WM_COMMAND: {
-			int nativeItemId = LOWORD(wParam);
-			if (nativeItemId == WEB_INSPECTOR_MENU_ITEM_ID) {
+			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID) {
 				Win32UserWindow* wuw = Win32UserWindow::FromWindow(hWnd);
-				if (wuw) {
+				if (wuw)
 					wuw->ShowWebInspector();
-					break;
-				}
+				break;
+
+			} else if (Win32MenuItem::HandleClickEvent(nativeMenu, position)) {
+				break;
+			} else {
+				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
-			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 
 		default:
@@ -860,34 +859,30 @@ SharedMenu Win32UserWindow::GetContextMenu()
 
 void Win32UserWindow::SetIcon(std::string& iconPath)
 {
+	printf("setting icon to: '%s'\n", iconPath.c_str());
 	this->iconPath = iconPath;
 	this->SetupIcon();
 }
 
 void Win32UserWindow::SetupIcon()
 {
-
-	std::string& iconPath = this->iconPath;
+	std::string iconPath = this->iconPath;
+	printf("window icon path: '%s'\n", iconPath.c_str());
 
 	if (iconPath.empty()) {
 		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
 		iconPath = b->GetIcon();
 	}
+	printf("icon path: '%s'\n", iconPath.c_str());
 
+	HICON icon = defaultIcon;
 	if (!iconPath.empty()) {
-		// need to remove the icon
-		SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
-				(LPARAM) defaultIcon);
-	} else {
-		std::string ext = iconPath.substr(iconPath.size() - 4, 4);
-		if (ext == ".ico")
-		{
-			HANDLE icon = LoadImageA(win32_host->GetInstanceHandle(),
-					iconPath.c_str(), IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-			SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG,
-					(LPARAM) icon);
-		}
+		icon = Win32UIBinding::LoadImageAsIcon(iconPath, 32, 32);
 	}
+	if (!icon) { // Icon failed to load
+		icon = defaultIcon;
+	}
+	SendMessageA(window_handle, (UINT) WM_SETICON, ICON_BIG, (LPARAM) icon);
 }
 
 std::string& Win32UserWindow::GetIcon()
@@ -931,9 +926,7 @@ void Win32UserWindow::AppMenuChanged()
 
 void Win32UserWindow::AppIconChanged()
 {
-	if (this->iconPath.empty()) {
-		this->SetupIcon();
-	}
+	this->SetupIcon();
 }
 
 void Win32UserWindow::RemoveOldMenu()
@@ -1061,12 +1054,6 @@ void Win32UserWindow::ShowWebInspector()
 {
 	if (this->web_inspector)
 	{
-		BOOL debug;
-		this->web_inspector->isDebuggingJavaScript(&debug);
-		if (!debug)
-		{
-			web_inspector->toggleDebuggingJavaScript();
-		}
 		this->web_inspector->show();
 	}
 }

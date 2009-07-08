@@ -122,9 +122,19 @@ namespace ti
 
 			if (this->IsCheck()) {
 				itemInfo->fState |= this->GetState() ? MFS_CHECKED : MFS_UNCHECKED;
-			} else {
-				itemInfo->fMask = itemInfo->fMask | MIIM_BITMAP;
-				itemInfo->hbmpItem = HBMMENU_SYSTEM;
+
+			} else if (!this->iconPath.empty()) {
+				HBITMAP bitmap = Win32UIBinding::LoadImageAsBitmap(iconPath, 0, 0);
+				if (bitmap) {
+					itemInfo->fMask = itemInfo->fMask | MIIM_BITMAP;
+					itemInfo->hbmpItem = bitmap;
+				}
+				else
+				{
+					std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+					printf("%s\n", error.c_str());
+
+				}
 			}
 		}
 

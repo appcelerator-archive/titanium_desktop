@@ -1324,7 +1324,10 @@ void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::SharedValue resul
 		iconPath = UIModule::GetResourcePath(icon_url);
 	}
 
-	this->SetIcon(*iconPath);
+	std::string iconPathOut;
+	if (!iconPath.isNull())
+		iconPathOut = *iconPath;
+	this->SetIcon(iconPathOut);
 }
 
 void UserWindow::_GetIcon(const kroll::ValueList& args, kroll::SharedValue result)

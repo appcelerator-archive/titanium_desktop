@@ -361,7 +361,10 @@ namespace ti
 			const char *iconURL = args.at(0)->ToString();
 			iconPath = UIModule::GetResourcePath(iconURL);
 		}
-		this->iconPath = *iconPath;
+
+		this->iconPath = "";
+		if (!iconPath.isNull())
+			this->iconPath = *iconPath;
 		this->SetIcon(this->iconPath);
 	}
 
