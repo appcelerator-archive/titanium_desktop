@@ -26,6 +26,8 @@ namespace ti
 		void SetNativeItemSubmenu(::GtkMenuItem* nativeItem, SharedMenu newSubmenu);
 		::GtkMenuItem* CreateNative(bool registerNative);
 		void DestroyNative(::GtkMenuItem* nativeItem);
+		void BlockSignal(::GtkMenuItem* item);
+		void UnblockSignal(::GtkMenuItem* item);
 
 	private:
 		std::vector< ::GtkMenuItem* > nativeItems;
