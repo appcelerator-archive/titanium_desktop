@@ -8,6 +8,8 @@
 
 #include <kroll/kroll.h>
 #include <vector>
+#include "process.h"
+#include "pipe.h"
 
 namespace ti
 {
@@ -19,7 +21,8 @@ namespace ti
 			
 	private:
 		std::map<std::string,int> signals;
-		std::vector<SharedKObject> processes;
+		std::vector<SharedPtr<Process> > processes;
+		std::vector<SharedPtr<Pipe> > pipes;
 		
 		void CreateProcess(const ValueList& args, SharedValue result);
 		void CreateInputPipe(const ValueList& args, SharedValue result);

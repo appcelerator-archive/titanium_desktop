@@ -40,12 +40,14 @@ namespace ti
 		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr)
 	{
 #if defined(OS_OSX)
-		return new OSXProcess(args, environment, stdin, stdout, stderr);
+		SharedProcess process = new OSXProcess(args, environment, stdin, stdout, stderr);
 #elif defined(OS_WIN32)
-		return new Win32Process(args, environment, stdin, stdout, stderr);
+		SharedProcess process = new Win32Process(args, environment, stdin, stdout, stderr);
 #elif defined(OS_LINUX)
-		return new LinuxProcess(args, environment, stdin, stdout, stderr);
-#endif		
+		SharedProcess process = new LinuxProcess(args, environment, stdin, stdout, stderr);
+#endif
+		process->sharedThis = process;
+		return process;
 	}
 	
 	

@@ -7,13 +7,12 @@
 #include "pipe.h"
 #include <vector>
 #include <cstring>
+#include "process.h"
 
 namespace ti
 {
-	Pipe::Pipe(const char *type) : StaticBoundObject(type), onClose(NULL)
+	Pipe::Pipe(const char *type, SharedProcess parent) : StaticBoundObject(type), onClose(NULL), parent(parent)
 	{
-		sharedThis = this;
-		
 		//TODO doc me
 		SetMethod("close", &Pipe::_Close);
 		SetMethod("isClosed", &Pipe::_IsClosed);
@@ -32,8 +31,6 @@ namespace ti
 		}
 		
 		onClose = NULL;
-		
-		// sharedThis = NULL;
 	}
 	
 	void Pipe::_Close(const ValueList& args, SharedValue result)

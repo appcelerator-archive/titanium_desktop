@@ -18,20 +18,22 @@
 namespace ti
 {
 	/*static*/
-	InputPipe* InputPipe::CreateInputPipe()
+	SharedInputPipe InputPipe::CreateInputPipe()
 	{
+		
 #if defined(OS_OSX)
-		return new OSXInputPipe();
+		SharedInputPipe pipe = new OSXInputPipe();
 #elif defined(OS_WIN32)
-		return new Win32InputPipe();
+		SharedInputPipe pipe = new Win32InputPipe();
 #elif defined(OS_LINUX)
-		return new LinuxInputPipe();
+		SharedInputPipe pipe = new LinuxInputPipe();
 #endif
+		pipe->sharedThis = pipe;
+		return pipe;
 	}
 	
 	InputPipe::InputPipe() : Pipe("InputPipe"), joined(false), attachedOutput(NULL), splitPipes(NULL), onRead(NULL), onClose(NULL)
 	{
-			sharedThis = this;
 		logger = Logger::Get("InputPipe");
 		
 		//TODO doc me
@@ -52,12 +54,11 @@ namespace ti
 	
 	InputPipe::~InputPipe()
 	{
-		//sharedThis = NULL;
 	}
 	
 	void InputPipe::DataReady(SharedInputPipe pipe)
 	{
-		if (pipe.isNull()) pipe = sharedThis;
+		if (pipe.isNull()) pipe = sharedThis.cast<InputPipe>();
 		
 		if (attachedOutput)
 		{
@@ -105,15 +106,13 @@ namespace ti
 				logger->Error(e.DisplayString()->c_str());
 			}
 		}
-		
-		//sharedThis = NULL;
 	}
 	
 	void InputPipe::Join(SharedInputPipe other)
 	{
 		joinedPipes.push_back(other);
 		other->joined = true;
-		other->joinedTo = sharedThis;
+		other->joinedTo = sharedThis.cast<InputPipe>();
 		
 		if (joinedRead.isNull())
 		{
@@ -218,7 +217,7 @@ namespace ti
 		
 		if (IsJoined())
 		{
-			joinedTo->Unjoin(sharedThis);
+			joinedTo->Unjoin(sharedThis.cast<InputPipe>());
 		}
 		else if (IsSplit())
 		{

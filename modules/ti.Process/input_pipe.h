@@ -23,7 +23,7 @@ namespace ti
 	public:
 		InputPipe();
 		virtual ~InputPipe();
-		static InputPipe* CreateInputPipe();
+		static SharedInputPipe CreateInputPipe();
 		
 		virtual SharedPtr<Blob> Read(int bufsize=-1) = 0;
 		
@@ -74,7 +74,6 @@ namespace ti
 		SharedKMethod joinedRead;
 		SharedKObject* attachedOutput;
 		std::pair<SharedPtr<BlobInputPipe>, SharedPtr<BlobInputPipe> >* splitPipes;
-		SharedInputPipe sharedThis;
 		Logger *logger;
 	};
 }

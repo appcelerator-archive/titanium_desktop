@@ -19,12 +19,14 @@ namespace ti
 	SharedOutputPipe OutputPipe::CreateOutputPipe()
 	{
 #if defined(OS_OSX)
-		return new OSXOutputPipe();
+		SharedOutputPipe pipe = new OSXOutputPipe();
 #elif defined(OS_WIN32)
-		return new Win32OutputPipe();
+		SharedOutputPipe pipe = new Win32OutputPipe();
 #elif defined(OS_LINUX)
-		return new LinuxOutputPipe();
+		SharedOutputPipe pipe = new LinuxOutputPipe();
 #endif
+		pipe->sharedThis = pipe;
+		return pipe;
 	}
 	
 	OutputPipe::OutputPipe()

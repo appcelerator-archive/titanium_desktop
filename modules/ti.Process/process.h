@@ -78,6 +78,7 @@ namespace ti
 		SharedOutputPipe stdin;
 		SharedKObject environment;
 		SharedKList args;
+		SharedProcess sharedThis;
 		
 		int exitCode;
 		SharedKMethod* onExit;
