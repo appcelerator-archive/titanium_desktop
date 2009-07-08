@@ -31,7 +31,7 @@ namespace ti
 		}
 
 		this->SetString("command", command);
-		this->SetNull("pid");
+		this->Set("pid",Value::NewInt(-1));
 		this->SetBool("running", false);
 
 		this->err = new Win32Pipe();
