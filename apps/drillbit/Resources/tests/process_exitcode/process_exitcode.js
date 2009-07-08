@@ -1,8 +1,8 @@
 describe("process exitCode tests",
 {
-    before_all: function()
-    {
-        var exitCodeSuccess = -1;
+	before_all: function()
+	{
+		var exitCodeSuccess = -1;
         var exitCodeFail = -1;
     },
     

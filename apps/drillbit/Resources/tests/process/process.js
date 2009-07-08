@@ -99,12 +99,11 @@ describe("process tests",
 	test_current_process_arguments: function()
 	{
 		var p = Titanium.Process.getCurrentProcess();
-		window.alert(""+p.getArguments());
 		
 		value_of(p.getArguments().length).should_be(Titanium.App.arguments.length+1);
 		for (var i = 1; i < p.getArguments().length; i++)
 		{
-			value_of(p.getArguments()[i]).should_be(Titanium.App.arguments[i]);
+			value_of(p.getArguments()[i] in Titanium.App.arguments).should_be_true();
 		}
 	},
 	

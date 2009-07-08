@@ -159,7 +159,7 @@ namespace ti
 	
 	void Process::_GetArguments(const ValueList& args, SharedValue result)
 	{
-		result->SetObject(this->args);
+		result->SetList(this->args);
 	}
 	
 	void Process::_GetEnvironment(const ValueList& args, SharedValue result)
