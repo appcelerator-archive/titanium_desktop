@@ -12,7 +12,7 @@
 
 namespace ti
 {
-	class UIBinding : public StaticBoundObject
+	class UIBinding : public AccessorBoundObject
 	{
 
 	public:
@@ -58,6 +58,7 @@ namespace ti
 		static void SendEventToListener(SharedKMethod listener, SharedKObject event);
 
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
+		void _GetMainWindow(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
 		void _CreateMenuItem(const ValueList& args, SharedValue result);
 		void _CreateCheckMenuItem(const ValueList& args, SharedValue result);
@@ -102,6 +103,7 @@ namespace ti
 	protected:
 		static UIBinding* instance;
 		Host* host;
+		SharedUserWindow mainWindow;
 		std::vector<SharedUserWindow> openWindows;
 		SharedKList openWindowList;
 		std::vector<SharedTrayItem> trayItems;

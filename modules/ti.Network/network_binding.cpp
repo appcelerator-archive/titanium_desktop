@@ -380,11 +380,6 @@ namespace ti
 		std::string port = args.at(1)->ToString();
 		std::string username = args.at(2)->ToString();
 		std::string password = args.at(3)->ToString();
-		if(proxy)
-		{
-			delete proxy;
-			proxy = NULL;
-		}
 
 #if defined(OS_WIN32)
 		std::string http_proxy = "http://";
@@ -396,17 +391,17 @@ namespace ti
 			result->SetBool(false);
 		}
 #endif
-
+		
+		// this handles the updating of the reference count for the proxy shared ptr.
 		proxy = new ti::Proxy(hostname, port, username,password);
 		result->SetBool(true);
   	}
 
 	void NetworkBinding::GetProxy(const ValueList& args, SharedValue result)
 	{
-		if(proxy)
-		{
-			result->SetObject(this->proxy);
-		}
+		// setObject will return null if the proxy hasn't been configured, so we
+		// don't need a null check here.
+		result->SetObject(this->proxy);
 	}
 
 

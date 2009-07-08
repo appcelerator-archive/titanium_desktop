@@ -737,7 +737,9 @@ void IRC::parse_irc_reply(char* data)
 		}
 		else if (!strcmp(cmd, "NICK"))
 		{
-			if (!strcmp(hostd_tmp.nick, cur_nick))
+//			if (!strcmp(hostd_tmp.nick, cur_nick))
+			// if the nicks don't match get the new one.
+			if (strcmp(hostd_tmp.nick, cur_nick))
 			{
 				delete [] cur_nick;
 				cur_nick=new char[strlen(params)+1];

@@ -47,7 +47,8 @@ describe("ti.Media tests", {
 			value_of(sound.isPlaying()).should_be_false();
 			value_of(sound.isPaused()).should_be_true();
 			value_of(sound.isLooping()).should_be_false();
-
+			sound.play();
+			
 			// FIXME -- these seem to be broken
 			//sound.setLooping(true);
 			//value_of(sound.isLooping()).should_be_true();

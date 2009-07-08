@@ -7,7 +7,7 @@
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
-	kroll::StaticBoundObject("UserWindow"),
+	AccessorBoundObject("UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
 	host(kroll::Host::GetInstance()),
@@ -1738,11 +1738,10 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	{
 		// Create a delegate object for the UI API.
 		SharedKObject ui_api = ui_api_value->ToObject();
-		KObject* delegate_ui_api = new DelegateStaticBoundObject(ui_api);
+		KObject* delegate_ui_api = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
 
 		// Place currentWindow in the delegate.
 		SharedValue user_window_val = Value::NewObject(this->GetSharedPtr());
-		delegate_ui_api->Set("currentWindow", user_window_val);
 		delegate_ui_api->Set("getCurrentWindow", this->Get("getCurrentWindow"));
 
 		// Place currentWindow.createWindow in the delegate.

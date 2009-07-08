@@ -32,7 +32,7 @@ namespace ti
 	std::string UIBinding::ACTIVATE = "activate";
 	std::string UIBinding::CLICKED = "clicked";
 
-	UIBinding::UIBinding(Host *host) : host(host)
+	UIBinding::UIBinding(Host *host) : AccessorBoundObject("UI"), host(host)
 	{
 		instance = this;
 
@@ -186,8 +186,14 @@ namespace ti
 		this->SetMethod("getOpenWindows", &UIBinding::_GetOpenWindows);
 
 		/**
-		 * @tiapi(property=True,name=UI.windows,version=0.2,deprecated=True)
-		 * @tiapi  Returns a list of open user created windows
+		 * @tiapi(method=True,name=UI.getMainWindow,version=1.0)
+		 * @tiapi Return the application's main window
+		 * @tiresult[UI.UserWindow] The main window for this application
+		 */
+		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
+
+		/**
+		 * @tiapi(property=True,name=UI.windows,version=0.2) Returns a list of open user created windows
 		 * @tideprecated(for=UI.windows,version=0.4)
 		 */
 		this->Set("windows", Value::NewList(this->openWindowList));
@@ -199,16 +205,9 @@ namespace ti
 
 	void UIBinding::CreateMainWindow(WindowConfig* config)
 	{
-		SharedPtr<UserWindow> noParent = NULL;
-		SharedUserWindow main_window = this->CreateWindow(config, noParent);
-
-		SharedKObject global = host->GetGlobalObject();
-		/**
-		 * @tiapi(property=True,name=UI.mainWindow) Returns the main window 
-		 */
-		global->SetNS("UI.mainWindow", Value::NewObject(main_window));
-
-		main_window->Open();
+		SharedPtr<UserWindow> no_parent = NULL;
+		this->mainWindow = this->CreateWindow(config, no_parent);
+		this->mainWindow->Open();
 	}
 
 	void UIBinding::ErrorDialog(std::string msg)
@@ -258,6 +257,11 @@ namespace ti
 	void UIBinding::_GetOpenWindows(const ValueList& args, SharedValue result)
 	{
 		result->SetList(this->openWindowList);
+	}
+
+	void UIBinding::_GetMainWindow(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(this->mainWindow);
 	}
 
 	void UIBinding::_CreateMenu(const ValueList& args, SharedValue result)

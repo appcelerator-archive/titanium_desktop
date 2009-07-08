@@ -89,6 +89,8 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		SharedKMethod handler = window->messageHandlers[message];
 		ValueList args;
+		args.push_back(Value::NewVoidPtr((void*)wParam));
+		args.push_back(Value::NewVoidPtr((void*)lParam));
 		handler->Call(args);
 		return 0;
 	}

@@ -36,13 +36,19 @@ namespace ti
 		virtual void OnComplete(SharedKMethod callback);
 
 		void GraphCallback(const ValueList& args, SharedValue result);
+		static UINT graphNotifyMessage;
+		
 	private:
-		IGraphBuilder *graph_builder;
-		IMediaControl *media_control;
-		IMediaEventEx *media_event_ex;
-		IMediaSeeking *media_seeking;
+		bool failedToLoad;
+		IGraphBuilder *graphBuilder;
+		IMediaControl *mediaControl;
+		IMediaEventEx *mediaEventEx;
+		IMediaSeeking *mediaSeeking;
+		IBasicAudio   *basicAudio;
+		
 		SharedKMethod* callback;
-
+			
+		void Completed();
 		void InitGraphBuilder();
 	};
 }

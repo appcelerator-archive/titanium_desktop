@@ -30,8 +30,8 @@ describe("HTML 5 database tests",{
 		function run_test(tx)
 		{
 			// see if project table exists
-		   	tx.executeSql("CREATE TABLE TEST (name TEXT)", [], function(tx,result) 
-		   	{
+			tx.executeSql("CREATE TABLE TEST (name TEXT)", [], function(tx,result) 
+			{
 				tx.executeSql('INSERT INTO TEST (name) VALUES (?)',['foo'],function(tx,result)
 				{
 					tx.executeSql('SELECT * FROM TEST',[],function(tx,result)
@@ -47,11 +47,11 @@ describe("HTML 5 database tests",{
 				{
 					scope.failed('insert failed:'+error.message);
 				})
-		   	}, 
+			}, 
 			function(tx, error) 
-		   	{
+			{
 				scope.failed('create table failed:'+error.message);
- 		    });
+			});
 		}
 		this.db.transaction(function(tx)
 		{   
