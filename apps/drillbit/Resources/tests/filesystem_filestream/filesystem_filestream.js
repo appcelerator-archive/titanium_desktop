@@ -34,10 +34,10 @@ describe("Ti.Filesystem FileStream tests",{
 		var textToWrite = "This is the text to write in the file";
 		var fs = Titanium.Filesystem.getFileStream(this.base, "writeTestFile.txt");
 
-        // these are only defined when you have an instance of filesystem.
-	    value_of(fs.MODE_APPEND).should_be(Titanium.Filesystem.MODE_APPEND);
-	    value_of(fs.MODE_READ).should_be(Titanium.Filesystem.MODE_READ);
-	    value_of(fs.MODE_WRITE).should_be(Titanium.Filesystem.MODE_WRITE);
+		// these are only defined when you have an instance of filesystem.
+		value_of(fs.MODE_APPEND).should_be(Titanium.Filesystem.MODE_APPEND);
+		value_of(fs.MODE_READ).should_be(Titanium.Filesystem.MODE_READ);
+		value_of(fs.MODE_WRITE).should_be(Titanium.Filesystem.MODE_WRITE);
 
 		// this should return false, file isn't open
 		value_of(fs.isOpen()).should_be_false();
@@ -45,8 +45,8 @@ describe("Ti.Filesystem FileStream tests",{
 			
 		fs.open(Titanium.Filesystem.MODE_WRITE);
 	
-	    // bug #36 - isOpen should return true here.
-	    // both isOpen() and ready() should return true here.
+		// bug #36 - isOpen should return true here.
+		// both isOpen() and ready() should return true here.
 		value_of(fs.isOpen()).should_be_true();
 		value_of(fs.ready()).should_be_true();
 

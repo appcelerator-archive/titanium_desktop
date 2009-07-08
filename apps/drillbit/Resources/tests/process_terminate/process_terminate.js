@@ -7,12 +7,12 @@ describe("process terminate tests",
 		
 		if (Titanium.platform == 'win32')
 		{
-		    // open a shell and leave it open
+			// open a shell and leave it open
 			p = Titanium.Process.launch('C:\\Windows\\system32\\cmd.exe',['/K', 'dir']);
 		}
 		else
 		{
-		    // on non-windows platforms, we launch using CAT to just let it sit and wait for input.
+			// on non-windows platforms, we launch using CAT to just let it sit and wait for input.
 			p = Titanium.Process.launch('/bin/cat',['-v']);
 		}
 
@@ -40,19 +40,19 @@ describe("process terminate tests",
 		};
 		shortTimer = setTimeout(function()
 		{
-		    // is the process running?
-		    if ( p.running )
-		    {
-		        // kill the process if it's running
-		        p.terminate();
-		        
-		        value_of(p.exitCode).should_not_be_null();
-		    }
-		    else 
-		    {
-		        // this should never happen.
-		        value_of(p.running).should_be_true();
-		    }
+			// is the process running?
+			if ( p.running )
+			{
+				// kill the process if it's running
+				p.terminate();
+				
+				value_of(p.exitCode).should_not_be_null();
+			}
+			else 
+			{
+				// this should never happen.
+				value_of(p.running).should_be_true();
+			}
 		}, 1000);
 		
 		// if we hit this timeout, then we fail.		

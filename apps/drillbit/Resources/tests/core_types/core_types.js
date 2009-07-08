@@ -54,9 +54,9 @@ describe("Core Types Tests",{
 		value_of(ko['property_one']).should_be("blahblah");
 		value_of(o['property_one']).should_be("blahblah");
 
-		o['         weird property name       '] = "oh noes";
-		value_of(o['         weird property name       ']).should_be("oh noes");
-		value_of(ko['         weird property name       ']).should_be("oh noes");
+		o['		 weird property name	   '] = "oh noes";
+		value_of(o['		 weird property name	   ']).should_be("oh noes");
+		value_of(ko['		 weird property name	   ']).should_be("oh noes");
 	},
 	test_empty_klist: function()
 	{
