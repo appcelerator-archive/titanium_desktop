@@ -28,7 +28,7 @@ namespace ti
 		void _AddCheckItem(const ValueList& args, SharedValue result);
 
 		void AppendItem(SharedMenuItem item);
-		SharedMenuItem GetItemAt(size_t index);
+		SharedMenuItem GetItemAt(int index);
 		void InsertItemAt(SharedMenuItem item, size_t index);
 		void RemoveItemAt(size_t index);
 

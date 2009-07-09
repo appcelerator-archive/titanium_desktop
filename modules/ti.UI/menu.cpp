@@ -79,8 +79,7 @@ namespace ti
 	void Menu::_GetItemAt(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("getItemAt", "i");
-		size_t index = static_cast<size_t>(args.GetInt(0));
-		SharedMenuItem item = this->GetItemAt(index);
+		SharedMenuItem item = this->GetItemAt(args.GetInt(0));
 		result->SetObject(item);
 	}
 
@@ -122,15 +121,12 @@ namespace ti
 		}
 	}
 
-	SharedMenuItem Menu::GetItemAt(size_t index)
+	SharedMenuItem Menu::GetItemAt(int index)
 	{
-		if (index >= 0 && index < this->children.size())
-		{
+		if (index >= 0 && (size_t) index < this->children.size()) {
 			return this->children[index];
-		}
-		else
-		{
-			return 0;
+		} else {
+			throw ValueException::FromFormat("Index %i is out of range", index);
 		}
 	}
 
