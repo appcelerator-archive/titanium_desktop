@@ -4,7 +4,6 @@ describe("UI Module Tests",{
 		value_of(Titanium.UI.addTray).should_be_function();
 		value_of(Titanium.UI.clearTray).should_be_function();
 		value_of(Titanium.UI.createMenu).should_be_function();
-		value_of(Titanium.UI.createTrayMenu).should_be_function();
 		value_of(Titanium.UI.getContextMenu).should_be_function();
 		value_of(Titanium.UI.getIdleTime).should_be_function();
 		value_of(Titanium.UI.getMenu).should_be_function();
