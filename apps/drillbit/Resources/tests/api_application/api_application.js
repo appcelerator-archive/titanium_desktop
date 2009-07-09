@@ -840,5 +840,45 @@ describe("ti.API.Application tests",
 			value_of(manifest[i][0]).should_be_string();
 			value_of(manifest[i][1]).should_be_string();
 		}
+	},
+	
+	test_api_app_version: function()
+	{
+		// get the application object
+		var app = Titanium.API.getApplication();
+		value_of(app).should_not_be_null();
+		
+		var ver = app.getVersion();
+		value_of(ver).should_be_string();
+		
+		// this is the version for the test harness app, not drillbit.
+		value_of(ver).should_be("0.4.4");
+	},
+	
+	test_api_app_GUID: function()
+	{
+		// get the application object
+		var app = Titanium.API.getApplication();
+		value_of(app).should_not_be_null();
+		
+		var guid = app.getGUID();
+		value_of(guid).should_be_string();
+		
+		// this is the GUID for the test harness app, not drillbit.
+		value_of(guid).should_be(Titanium.App.getGUID());
+	},
+	
+	test_api_app_ID: function()
+	{
+		// get the application object
+		var app = Titanium.API.getApplication();
+		value_of(app).should_not_be_null();
+		
+		var appid = app.getID();
+		value_of(appid).should_be_string();
+		
+		// this is the ID for the test harness app, not drillbit.
+		value_of(appid).should_be(Titanium.App.getID());
 	}
+	
 });
