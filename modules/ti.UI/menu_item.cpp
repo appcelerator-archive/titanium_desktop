@@ -17,7 +17,8 @@ namespace ti
 		enabled(true),
 		label(""),
 		submenu(0),
-		state(false)
+		state(false),
+		autoCheck(true)
 	{
 		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
 		this->SetMethod("isCheck", &MenuItem::_IsCheck);
@@ -40,6 +41,8 @@ namespace ti
 			this->SetMethod("addEventListener", &MenuItem::_AddEventListener);
 			this->SetMethod("removeEventListener", &MenuItem::_RemoveEventListener);
 			this->SetMethod("getEventListeners", &MenuItem::_GetEventListeners);
+
+			this->SetMethod("click", &MenuItem::_Click);
 		}
 
 		if (this->type == NORMAL)
@@ -52,6 +55,8 @@ namespace ti
 		{
 			this->SetMethod("setState", &MenuItem::_SetState);
 			this->SetMethod("getState", &MenuItem::_GetState);
+			this->SetMethod("setAutoCheck", &MenuItem::_SetAutoCheck);
+			this->SetMethod("isAutoCheck", &MenuItem::_IsAutoCheck);
 		}
 	}
 
@@ -162,9 +167,25 @@ namespace ti
 		this->SetEnabledImpl(true);
 	}
 
+	void MenuItem::_SetAutoCheck(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setAutoCheck", "b");
+		this->autoCheck = args.GetBool(0);
+	}
+
+	void MenuItem::_IsAutoCheck(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->autoCheck);
+	}
+
 	void MenuItem::_IsEnabled(const ValueList& args, SharedValue result)
 	{
 		result->SetBool(this->enabled);
+	}
+
+	void MenuItem::_Click(const ValueList& args, SharedValue result)
+	{
+		this->HandleClickEvent(0);
 	}
 
 	void MenuItem::_AddSubmenu(const ValueList& args, SharedValue result)
@@ -231,7 +252,7 @@ namespace ti
 
 	void MenuItem::HandleClickEvent(SharedKObject source)
 	{
-		if (this->IsCheck())
+		if (this->IsCheck() && this->autoCheck)
 		{
 			// Execute this later on the main thread
 			Host* host = Host::GetInstance();

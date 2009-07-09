@@ -29,6 +29,8 @@ namespace ti
 		void _GetIcon(const ValueList& args, SharedValue result);
 		void _SetState(const ValueList& args, SharedValue result);
 		void _GetState(const ValueList& args, SharedValue result);
+		void _SetAutoCheck(const ValueList& args, SharedValue result);
+		void _IsAutoCheck(const ValueList& args, SharedValue result);
 		void _AddEventListener(const ValueList& args, SharedValue result);
 		void _RemoveEventListener(const ValueList& args, SharedValue result);
 		void _GetEventListeners(const ValueList& args, SharedValue result);
@@ -37,6 +39,7 @@ namespace ti
 		void _Enable(const ValueList& args, SharedValue result);
 		void _Disable(const ValueList& args, SharedValue result);
 		void _IsEnabled(const ValueList& args, SharedValue result);
+		void _Click(const ValueList& args, SharedValue result);
 
 		void _AddSubmenu(const ValueList& args, SharedValue result);
 		void _AddItem(const ValueList& args, SharedValue result);
@@ -72,6 +75,7 @@ namespace ti
 		SharedMenu submenu;
 		std::vector<SharedKMethod> eventListeners;
 		bool state;
+		bool autoCheck;
 	};
 }
 #endif

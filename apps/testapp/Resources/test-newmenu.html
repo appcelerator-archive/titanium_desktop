@@ -35,9 +35,27 @@
 				check_item = item1.addCheckItem("haha4");
 				check_item.setState(true);
 
-				var ci2 = item1.addCheckItem("haha4_disabled");
+				item1.addSeparatorItem();
+				item1.addItem("The items below should flip-flop");
+				var ci2 = item1.addCheckItem("Not autocheck1");
+				ci2.setAutoCheck(false);
 				ci2.setState(true);
-				ci2.disable();
+
+				var ci3 = item1.addCheckItem("Not autocheck2");
+				ci3.setAutoCheck(false);
+
+				var flopper = function() {
+					Titanium.API.debug("Flopping");
+					ci2.setState(!ci2.getState());
+					ci3.setState(!ci3.getState());
+				}
+				ci2.addEventListener(flopper);
+				ci3.addEventListener(flopper);
+				item1.addSeparatorItem();
+
+				var ci4 = item1.addCheckItem("haha4_disabled");
+				ci4.setState(true);
+				ci4.disable();
 
 				Titanium.UI.setMenu(menu);
 				Titanium.UI.setContextMenu(menu);
