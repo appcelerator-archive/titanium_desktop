@@ -105,7 +105,6 @@ namespace ti
 		Host* host;
 		SharedUserWindow mainWindow;
 		std::vector<SharedUserWindow> openWindows;
-		SharedKList openWindowList;
 		std::vector<SharedTrayItem> trayItems;
 		std::string iconURL;
 	};

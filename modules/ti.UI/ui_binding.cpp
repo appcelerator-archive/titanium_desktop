@@ -32,7 +32,9 @@ namespace ti
 	std::string UIBinding::ACTIVATE = "activate";
 	std::string UIBinding::CLICKED = "clicked";
 
-	UIBinding::UIBinding(Host *host) : AccessorBoundObject("UI"), host(host)
+	UIBinding::UIBinding(Host *host) :
+		AccessorBoundObject("UI"),
+		host(host)
 	{
 		instance = this;
 
@@ -180,10 +182,14 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=UI.getOpenWindows,version=0.4) Returns the list of currently open windows
-		 * @tiresult(for=UI.getOpenWindows,type=list) the list of open windows
+		 * @tiresult(for=UI.getOpenWindows,type=Array<UI.UserWindow>) the list of open windows
 		 */
-		this->openWindowList = new StaticBoundList();
+		/**
+		 * @tiapi(method=True,name=UI.getWindows,version=0.4) Returns the list of currently open windows
+		 * @tiresult(for=UI.getWindows,type=Array<UI.UserWindow>) the list of open windows
+		 */
 		this->SetMethod("getOpenWindows", &UIBinding::_GetOpenWindows);
+		this->SetMethod("getWindows", &UIBinding::_GetOpenWindows);
 
 		/**
 		 * @tiapi(method=True,name=UI.getMainWindow,version=1.0)
@@ -191,12 +197,6 @@ namespace ti
 		 * @tiresult[UI.UserWindow] The main window for this application
 		 */
 		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
-
-		/**
-		 * @tiapi(property=True,name=UI.windows,version=0.2) Returns a list of open user created windows
-		 * @tideprecated(for=UI.windows,version=0.4)
-		 */
-		this->Set("windows", Value::NewList(this->openWindowList));
 
 		SharedKObject global = host->GetGlobalObject();
 		SharedValue ui_binding_val = Value::NewObject(this);
@@ -231,7 +231,6 @@ namespace ti
 
 	void UIBinding::AddToOpenWindows(SharedUserWindow window)
 	{
-		this->openWindowList->Append(Value::NewObject(window));
 		this->openWindows.push_back(window);
 	}
 
@@ -256,7 +255,12 @@ namespace ti
 
 	void UIBinding::_GetOpenWindows(const ValueList& args, SharedValue result)
 	{
-		result->SetList(this->openWindowList);
+		SharedKList list = new StaticBoundList();
+		std::vector<SharedUserWindow>::iterator w = openWindows.begin();
+		while (w != openWindows.end()) {
+			list->Append(Value::NewObject(*w++));
+		}
+		result->SetList(list);
 	}
 
 	void UIBinding::_GetMainWindow(const ValueList& args, SharedValue result)
