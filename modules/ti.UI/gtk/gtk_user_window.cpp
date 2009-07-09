@@ -378,7 +378,7 @@ namespace ti
 			return;
 	
 		GdkPixbuf* icon = NULL; // NULL is an unset.
-		std::string& iconPath = this->iconPath;
+		std::string iconPath = this->iconPath;
 
 		if (iconPath.empty()) {
 			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());

@@ -56,7 +56,7 @@ namespace ti
 			if (hint.empty()) {
 				gtk_status_icon_set_tooltip(this->item, NULL);
 			} else {
-				gtk_status_icon_set_tooltip(this->item, hint->c_str());
+				gtk_status_icon_set_tooltip(this->item, hint.c_str());
 			}
 		}
 	}
