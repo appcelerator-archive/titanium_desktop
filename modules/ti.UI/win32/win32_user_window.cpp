@@ -199,7 +199,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID) {
 				Win32UserWindow* wuw = Win32UserWindow::FromWindow(hWnd);
 				if (wuw)
-					wuw->ShowWebInspector();
+					wuw->ShowInspector(false);
 				break;
 
 			} else if (Win32MenuItem::HandleClickEvent(nativeMenu, position)) {
