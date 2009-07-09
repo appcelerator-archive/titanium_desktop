@@ -459,6 +459,11 @@ describe("ti.API tests",
 
   test_api_run_on_main: function()
   {
-    value_of(window.x_value).should_be("threads rock!");
+    function test(value) {
+      Titanium.API.foo = value;
+    }
+
+    Titanium.API.runOnMainThread(test, "works!");
+    value_of(Titanium.API.foo).should_be("works!");
   }
 });
