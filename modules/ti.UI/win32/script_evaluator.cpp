@@ -3,13 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-
-#include <kroll/base.h>
-#include <comdef.h>
-
-#include "script_evaluator.h"
-#include <kroll/kroll.h>
-#include "../../../kroll/modules/javascript/javascript_module.h"
+#include "../ui_module.h"
 
 using namespace kroll;
 

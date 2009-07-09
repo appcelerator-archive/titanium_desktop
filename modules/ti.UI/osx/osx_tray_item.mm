@@ -3,73 +3,91 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#include "osx_tray_item.h"
-#include "osx_tray_delegate.h"
-#include "osx_ui_binding.h"
-
+#include "../ui_module.h"
 namespace ti
 {
-	OSXTrayItem::OSXTrayItem(SharedString iconPath, SharedKMethod cb)
+	OSXTrayItem::OSXTrayItem(std::string& iconPath, SharedKMethod cb) :
+		nativeMenu(0),
+		menu(0),
+		callback(cb),
+		nativeItem(0)
 	{
-		this->callback = cb;
-		this->delegate = [[OSXTrayDelegate alloc] initWithTray:this];
+		OSXTrayItemDelegate* delegate = [[OSXTrayItemDelegate alloc] initWithTray:this];
+		NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
+		nativeItem = [statusBar statusItemWithLength:NSVariableStatusItemLength];
+		[nativeItem retain];
+		[nativeItem setTarget:delegate];
+		[nativeItem setAction:@selector(invoke:)];
+		[nativeItem setHighlightMode:YES];
 		this->SetIcon(iconPath);
 	}
 
 	OSXTrayItem::~OSXTrayItem()
 	{
-		if (delegate)
-		{
-			[delegate release];
-			delegate = nil;
+		if (!this->menu.isNull() && this->nativeMenu) {
+			this->menu->DestroyNative(this->nativeMenu);
 		}
 	}
 
-	void OSXTrayItem::SetIcon(SharedString iconPath)
+	void OSXTrayItem::SetIcon(std::string& iconPath)
 	{
-		std::string path = *iconPath;
-		if (path.empty())
-		{
-			[delegate setIcon:nil];
+		NSImage* image = ti::OSXUIBinding::MakeImage(iconPath);
+		[nativeItem setImage:image];
+	}
+
+	void OSXTrayItem::SetMenu(SharedMenu menu)
+	{
+		if (menu.get() == this->menu.get()) {
+			return;
 		}
-		else
-		{
-			NSImage* image = ti::OSXUIBinding::MakeImage(path);
-			[delegate setIcon:image];
+
+		SharedPtr<OSXMenu> newMenu = menu.cast<OSXMenu>();
+		NSMenu* newNativeMenu = nil;
+		if (!newMenu.isNull()) {
+			newNativeMenu = newMenu->CreateNativeNow(true);
+		}
+
+		if (!this->menu.isNull() && this->nativeMenu) {
+			this->menu->DestroyNative(this->nativeMenu);
+		}
+
+		this->menu = newMenu;
+		this->nativeMenu = newNativeMenu;
+	}
+
+	void OSXTrayItem::SetHint(std::string& hint)
+	{
+		if (hint.empty()) {
+			[nativeItem setToolTip:@""];
+		} else {
+			[nativeItem setToolTip:[NSString stringWithUTF8String:hint.c_str()]];
 		}
 	}
-	void OSXTrayItem::SetMenu(SharedPtr<MenuItem> menu)
-	{
-		[delegate addMenu:menu];
-	}
-	void OSXTrayItem::SetHint(SharedString hint)
-	{
-		std::string label = *hint;
-		if (label.empty())
-		{
-			[delegate setHint:@""];
-		}
-		else
-		{
-			[delegate setHint:[NSString stringWithCString:label.c_str() encoding:NSUTF8StringEncoding]];
-		}
-	}
+
 	void OSXTrayItem::Remove()
 	{
-		[delegate release];
-		delegate = nil;
+		[[NSStatusBar systemStatusBar] removeStatusItem:nativeItem];
+		[[nativeItem target] release];
+		[nativeItem release];
 	}
-	void OSXTrayItem::Invoke()
+
+	void OSXTrayItem::InvokeCallback()
 	{
-		//invoke callback
-		try
+		if (nativeMenu != nil)
 		{
-			ValueList args;
-			callback->Call(args);
+			[nativeItem popUpStatusItemMenu:nativeMenu];
 		}
-		catch(...)
-		{
-			std::cerr << "Menu callback failed" << std::endl;
+
+		if (callback.isNull())
+			return;
+
+		printf("testing callback\n");
+		try {
+			callback->Call(ValueList());
+		} catch (ValueException& e) {
+			Logger* logger = Logger::Get("UI.OSXTrayItem");
+			SharedString ss = e.DisplayString();
+			logger->Error("Tray icon callback failed: %s", ss->c_str());
 		}
 	}
 }

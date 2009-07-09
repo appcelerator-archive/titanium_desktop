@@ -4,8 +4,6 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #import "../ui_module.h"
-#import "osx_menu_item.h"
-
 #define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
 
 namespace ti
@@ -28,7 +26,9 @@ namespace ti
 		nativeWindow(nil),
 		opened(false),
 		closed(false),
-		osx_binding(binding.cast<OSXUIBinding>())
+		menu(0),
+		contextMenu(0),
+		osxBinding(binding.cast<OSXUIBinding>())
 	{
 		// Initialization of the native window and its properties now happen in Open(),
 		// so that developers can tweak window properties before comitting to them
@@ -628,64 +628,53 @@ namespace ti
 		this->config->SetUsingChrome(chrome);
 	}
 
-	void OSXUserWindow::SetMenu(SharedPtr<MenuItem> menu)
+	void OSXUserWindow::SetMenu(SharedMenu menu)
 	{	
-		if (menu == this->menu)
+		if (this->menu.get() == menu.get())
 		{
 			return;
 		}
-		this->menu = menu;
-		if (focused)
-		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
-			this->osx_binding->WindowFocused(this,m.get());
-		}
+		this->menu = menu.cast<OSXMenu>();
+		osxBinding->SetupMainMenu();
 	}
 
-	SharedPtr<MenuItem> OSXUserWindow::GetMenu()
+	SharedMenu OSXUserWindow::GetMenu()
 	{
 		return this->menu;
 	}
 
 	void OSXUserWindow::Focused()
 	{
-		this->focused = true;
-		if (!menu.isNull())
-		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
-			this->osx_binding->WindowFocused(this,m.get());
-		}
+		SharedPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
+		this->osxBinding->WindowFocused(osxWin);
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		this->focused = false;
-		if (!menu.isNull())
-		{
-			SharedPtr<OSXMenuItem> m = menu.cast<OSXMenuItem>();
-			this->osx_binding->WindowUnfocused(this,m.get());
-		}
+		SharedPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
+		this->osxBinding->WindowUnfocused(osxWin);
 	}
 	
-	void OSXUserWindow::SetContextMenu(SharedPtr<MenuItem> value)
+	void OSXUserWindow::SetContextMenu(SharedMenu menu)
 	{
-		this->context_menu = value;
+		this->contextMenu = menu.cast<OSXMenu>();
 	}
 
-	SharedPtr<MenuItem> OSXUserWindow::GetContextMenu()
+	SharedMenu OSXUserWindow::GetContextMenu()
 	{
-		return this->context_menu;
+		return this->contextMenu;
 	}
 
-	void OSXUserWindow::SetIcon(SharedString icon_path)
+	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
 		STUB();
 	}
 
-	SharedString OSXUserWindow::GetIcon()
+	std::string& OSXUserWindow::GetIcon()
 	{
 		STUB();
-		return NULL;
+		static std::string stubby = "";
+		return stubby;
 	}
 
 	bool OSXUserWindow::IsTopMost()

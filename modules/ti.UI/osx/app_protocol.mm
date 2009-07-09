@@ -4,8 +4,7 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #import <WebKit/WebKit.h>
-#import "app_protocol.h"
-#import "ti_app.h"
+#include "../ui_module.h"
 
 @implementation AppProtocol
 
@@ -47,7 +46,7 @@
 	}
 	else
 	{
-		if (![[url host] isEqual:[TiApplication appID]])
+		if (![[url host] isEqual:[TiApplicationDelegate appID]])
 		{
 			// this means we have multiple paths and the first part of the path
 			// is sitting in the host field

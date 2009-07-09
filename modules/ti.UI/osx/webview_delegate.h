@@ -3,7 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#import "preinclude.h"
+#import "../ui_module.h"
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 #import <WebKit/WebViewPrivate.h>
@@ -13,7 +13,6 @@
 #import <WebKit/WebPreferencesPrivate.h>
 
 @class NativeWindow;
-
 @interface WebViewDelegate : NSObject {
 	NativeWindow *window;
 	WebView *webView;

@@ -5,11 +5,6 @@
  */
 #ifndef TI_POPUP_DIALOG_H_
 #define TI_POPUP_DIALOG_H_
-
-#include <api/base.h>
-#include <windows.h>
-#include <string>
-
 #define MAX_INPUT_LENGTH 1024
 
 namespace ti {

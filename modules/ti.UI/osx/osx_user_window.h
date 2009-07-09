@@ -5,13 +5,6 @@
  */
 #ifndef OSX_USER_WINDOW_H
 #define OSX_USER_WINDOW_H
-
-#import "preinclude.h"
-#import <WebKit/WebKit.h>
-#import "../menu_item.h"
-#import "../user_window.h"
-#import "native_window.h"
-
 namespace ti
 {
 	class OSXUIBinding;
@@ -113,12 +106,12 @@ namespace ti
 			bool IsTopMost();
 			void SetTopMost(bool topmost);
 
-			void SetMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetMenu();
-			void SetContextMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetContextMenu();
-			void SetIcon(SharedString icon_path);
-			SharedString GetIcon();
+			void SetMenu(SharedMenu menu);
+			SharedMenu GetMenu();
+			void SetContextMenu(SharedMenu menu);
+			SharedMenu GetContextMenu();
+			void SetIcon(std::string& icon_path);
+			std::string& GetIcon();
 
 			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
@@ -130,9 +123,9 @@ namespace ti
 			bool closed;
 			bool topmost;
 			bool focused;
-			SharedPtr<MenuItem> menu;
-			SharedPtr<MenuItem> context_menu;
-			SharedPtr<OSXUIBinding> osx_binding;
+			SharedPtr<OSXMenu> menu;
+			SharedPtr<OSXMenu> contextMenu;
+			SharedPtr<OSXUIBinding> osxBinding;
 			static bool initial;
 
 			NSScreen* GetWindowScreen();
@@ -141,9 +134,6 @@ namespace ti
 			double real_y;
 			double real_w;
 			double real_h;
-
-			void InstallMenu(OSXMenuItem *menu);
-
 			DISALLOW_EVIL_CONSTRUCTORS(OSXUserWindow);
 	};
 }

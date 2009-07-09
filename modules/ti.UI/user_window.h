@@ -83,78 +83,56 @@ class UserWindow : public AccessorBoundObject {
 		void _IsFullscreen(const kroll::ValueList&, kroll::SharedValue);
 		void _SetFullscreen(const kroll::ValueList&, kroll::SharedValue);
 		void _GetId(const kroll::ValueList&, kroll::SharedValue);
-
 		void _Open(const kroll::ValueList&, kroll::SharedValue);
 		void _Close(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetX(const kroll::ValueList&, kroll::SharedValue);
 		void _SetX(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetY(const kroll::ValueList&, kroll::SharedValue);
 		void _SetY(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetWidth(const kroll::ValueList&, kroll::SharedValue);
 		void _SetWidth(const kroll::ValueList&, kroll::SharedValue);
 		void _GetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
 		void _GetMinWidth(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMinWidth(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetHeight(const kroll::ValueList&, kroll::SharedValue);
 		void _SetHeight(const kroll::ValueList&, kroll::SharedValue);
 		void _GetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
 		void _GetMinHeight(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMinHeight(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetBounds(const kroll::ValueList&, kroll::SharedValue);
 		void _SetBounds(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetTitle(const kroll::ValueList&, kroll::SharedValue);
 		void _SetTitle(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetURL(const kroll::ValueList&, kroll::SharedValue);
 		void _SetURL(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsResizable(const kroll::ValueList&, kroll::SharedValue);
 		void _SetResizable(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsMaximizable(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMaximizable(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsMinimizable(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMinimizable(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsCloseable(const kroll::ValueList&, kroll::SharedValue);
 		void _SetCloseable(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsVisible(const kroll::ValueList&, kroll::SharedValue);
 		void _SetVisible(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetTransparency(const kroll::ValueList&, kroll::SharedValue);
 		void _SetTransparency(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetTransparencyColor(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetMenu(const kroll::ValueList&, kroll::SharedValue);
 		void _SetMenu(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetContextMenu(const kroll::ValueList&, kroll::SharedValue);
 		void _SetContextMenu(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetIcon(const kroll::ValueList&, kroll::SharedValue);
 		void _SetIcon(const kroll::ValueList&, kroll::SharedValue);
-
 		void _GetParent(const kroll::ValueList&, kroll::SharedValue);
 		void _CreateWindow(const kroll::ValueList&, kroll::SharedValue);
-
 		void _OpenFileChooserDialog(const ValueList& args, SharedValue result);
 		void _OpenFolderChooserDialog(const ValueList& args, SharedValue result);
 		void _OpenSaveAsDialog(const ValueList& args, SharedValue result);
-
 		void _AddEventListener(const kroll::ValueList&, kroll::SharedValue);
 		void _RemoveEventListener(const kroll::ValueList&, kroll::SharedValue);
-
 		void _IsTopMost(const kroll::ValueList&, kroll::SharedValue);
 		void _SetTopMost(const kroll::ValueList&, kroll::SharedValue);
 
@@ -245,12 +223,12 @@ class UserWindow : public AccessorBoundObject {
 		virtual std::string GetTransparencyColor() { return ""; }
 		virtual void SetFullscreen(bool fullscreen) = 0;
 		virtual void SetUsingChrome(bool chrome) = 0;
-		virtual void SetMenu(SharedPtr<MenuItem> menu) = 0;
-		virtual SharedPtr<MenuItem> GetMenu() = 0;
-		virtual void SetContextMenu(SharedPtr<MenuItem> menu) = 0;
-		virtual SharedPtr<MenuItem> GetContextMenu() = 0;
-		virtual void SetIcon(SharedString icon_path) = 0;
-		virtual SharedString GetIcon() = 0;
+		virtual void SetMenu(SharedMenu menu) = 0;
+		virtual SharedMenu GetMenu() = 0;
+		virtual void SetContextMenu(SharedMenu menu) = 0;
+		virtual SharedMenu GetContextMenu() = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
+		virtual std::string& GetIcon() = 0;
 		virtual bool IsTopMost() = 0;
 		virtual void SetTopMost(bool topmost) = 0;
 
@@ -259,6 +237,9 @@ class UserWindow : public AccessorBoundObject {
 		virtual void RegisterJSContext(JSGlobalContextRef);
 		virtual void PageLoaded(
 			SharedKObject scope, std::string &url, JSGlobalContextRef context);
+
+		virtual void AppIconChanged() {};
+		virtual void AppMenuChanged() {};
 
 		SharedUserWindow GetSharedPtr();
 
