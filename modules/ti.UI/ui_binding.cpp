@@ -322,7 +322,14 @@ namespace ti
 		{
 			menu = argObj.cast<Menu>();
 		}
-		this->SetMenu(menu);
+
+		this->SetMenu(menu); // platform-specific impl
+
+		// Notify all windows that the app menu has changed.
+		std::vector<SharedUserWindow>::iterator i = openWindows.begin();
+		while (i != openWindows.end()) {
+			(*i++)->AppMenuChanged();
+		}
 	}
 
 	void UIBinding::_GetMenu(const ValueList& args, SharedValue result)
@@ -369,7 +376,14 @@ namespace ti
 		this->iconPath = "";
 		if (!iconPath.isNull())
 			this->iconPath = *iconPath;
-		this->SetIcon(this->iconPath);
+
+		this->SetIcon(this->iconPath); // platform-specific impl
+
+		// Notify all windows that the app menu has changed.
+		std::vector<SharedUserWindow>::iterator i = openWindows.begin();
+		while (i != openWindows.end()) {
+			(*i++)->AppIconChanged();
+		}
 	}
 
 	void UIBinding::_AddTray(const ValueList& args, SharedValue result)

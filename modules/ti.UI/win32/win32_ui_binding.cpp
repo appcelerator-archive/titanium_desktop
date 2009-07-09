@@ -114,16 +114,6 @@ namespace ti
 	void Win32UIBinding::SetMenu(SharedMenu newMenu)
 	{
 		this->menu = newMenu.cast<Win32Menu>();
-
-		// Notify all windows that the app menu has changed.
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end())
-		{
-			SharedPtr<Win32UserWindow> wuw = (*i++).cast<Win32UserWindow>();
-			if (!wuw.isNull())
-				wuw->AppMenuChanged();
-		}
 	}
 
 	void Win32UIBinding::SetContextMenu(SharedMenu newMenu)
@@ -134,18 +124,6 @@ namespace ti
 	void Win32UIBinding::SetIcon(std::string& iconPath)
 	{
 		this->iconPath = iconPath;
-		printf("new icon path: %s\n", iconPath.c_str());
-
-		// Notify all windows that the app icon has changed
-		// TODO this kind of notification should really be placed in UIBinding..
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end())
-		{
-			SharedPtr<Win32UserWindow> wuw = (*i++).cast<Win32UserWindow>();
-			if (!wuw.isNull())
-				wuw->AppIconChanged();
-		}
 	}
 
 	SharedPtr<TrayItem> Win32UIBinding::AddTray(
@@ -197,19 +175,16 @@ namespace ti
 
 		HBITMAP h = 0;
 		if (ext ==  ".ico") {
-			printf("loading bmp: %s as ico\n", path.c_str());
 			HICON hicon = (HICON) LoadImageA(
 				NULL, path.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
 			h = Win32UIBinding::IconToBitmap(hicon, sizeX, sizeY);
 			DestroyIcon(hicon);
 
 		} else if (ext == ".bmp") {
-			printf("loading bmp: %s as bmp\n", path.c_str());
 			h = (HBITMAP) LoadImageA(
 				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 
 		} else if (ext == ".png") {
-			printf("loading bmp: %s as png\n", path.c_str());
 			h = LoadPNGAsBitmap(path, sizeX, sizeY);
 		}
 
@@ -228,19 +203,16 @@ namespace ti
 
 		HICON h = 0;
 		if (ext ==  ".ico") {
-			printf("loading ico: %s as ico\n", path.c_str());
 			h = (HICON) LoadImageA(
 				NULL, path.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
 
 		} else if (ext == ".bmp") {
-			printf("loading ico: %s as bmp\n", path.c_str());
 			HBITMAP bitmap = (HBITMAP) LoadImageA(
 				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
 
 		} else if (ext == ".png") {
-			printf("loading ico: %s as png\n", path.c_str());
 			HBITMAP bitmap = LoadPNGAsBitmap(path, sizeX, sizeY);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);

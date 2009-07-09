@@ -38,8 +38,6 @@ namespace ti
 			std::string& typesDescription);
 		void AddMessageHandler(const ValueList& args, SharedValue result);
 		void ResizeSubViews();
-		void AppMenuChanged();
-		void AppIconChanged();
 		HWND GetWindowHandle();
 		void Hide();
 		void Show();
@@ -98,6 +96,9 @@ namespace ti
 		static Win32UserWindow* FromWindow(HWND hWnd);
 		void RedrawMenu();
 		static void RedrawAllMenus();
+
+		virtual void AppIconChanged();
+		virtual void AppMenuChanged();
 	
 		protected:
 		kroll::Win32Host *win32_host;

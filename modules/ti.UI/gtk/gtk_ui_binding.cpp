@@ -90,16 +90,6 @@ namespace ti
 	void GtkUIBinding::SetMenu(SharedMenu newMenu)
 	{
 		this->menu = newMenu.cast<GtkMenu>();
-
-		// Notify all windows that the app menu has changed.
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end()) {
-			SharedPtr<GtkUserWindow> guw = (*i).cast<GtkUserWindow>();
-			if (!guw.isNull())
-				guw->AppMenuChanged();
-			i++;
-		}
 	}
 
 	void GtkUIBinding::SetContextMenu(SharedMenu newMenu)
@@ -110,17 +100,6 @@ namespace ti
 	void GtkUIBinding::SetIcon(std::string& iconPath)
 	{
 		this->iconPath = iconPath;
-
-		// Notify all windows that the app icon has changed.
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end())
-		{
-			SharedPtr<GtkUserWindow> guw = (*i).cast<GtkUserWindow>();
-			if (!guw.isNull())
-				guw->AppIconChanged();
-			i++;
-		}
 	}
 
 	SharedTrayItem GtkUIBinding::AddTray(SharedString iconPath, SharedKMethod cb)

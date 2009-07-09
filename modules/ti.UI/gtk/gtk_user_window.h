@@ -46,8 +46,8 @@ namespace ti
 		void SetupPosition();
 		void SetupMenu();
 		void SetupIcon();
-		void AppMenuChanged();
-		void AppIconChanged();
+		virtual void AppMenuChanged();
+		virtual void AppIconChanged();
 		void RemoveOldMenu();
 
 		void ShowFileChooser(
