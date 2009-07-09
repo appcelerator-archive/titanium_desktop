@@ -178,7 +178,7 @@ public:
 	// called by frame load delegate to let the window know it's loaded
 	void FrameLoaded();
 
-	void ShowWebInspector();
+	void ShowInspector(bool console);
 
 private:
 	

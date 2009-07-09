@@ -4,21 +4,21 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _BLOB_INPUT_PIPE_H_
-#define _BLOB_INPUT_PIPE_H_
+#ifndef _BUFFERED_INPUT_PIPE_H_
+#define _BUFFERED_INPUT_PIPE_H_
 
 #include <kroll/kroll.h>
 #include "input_pipe.h"
 
 namespace ti
 {
-	class BlobInputPipe;
-	typedef SharedPtr<BlobInputPipe> SharedBlobInputPipe;
+	class BufferedInputPipe;
+	typedef SharedPtr<BufferedInputPipe> SharedBufferedInputPipe;
 	
-	class BlobInputPipe : public InputPipe
+	class BufferedInputPipe : public InputPipe
 	{
 		public:
-			BlobInputPipe();
+			BufferedInputPipe();
 			
 			virtual SharedPtr<Blob> Read(int bufsize=-1);
 			virtual SharedPtr<Blob> ReadLine();
@@ -28,6 +28,7 @@ namespace ti
 			int GetSize();
 			const char* GetBuffer();
 			void Append(SharedPtr<Blob> blob);
+			void Append(char *data, int length);
 			
 		protected:
 			Poco::Mutex mutex;

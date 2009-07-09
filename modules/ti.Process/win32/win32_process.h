@@ -7,54 +7,55 @@
 #ifndef _WIN32_PROCESS_H_
 #define _WIN32_PROCESS_H_
 
-#include "win32_pipe.h"
 #include <sstream>
+#include "win32_output_pipe.h"
+#include "win32_input_pipe.h"
+#include "../process.h"
+
+#undef stdin
+#undef stdout
+#undef stderr
 
 namespace ti
 {
-	class ProcessBinding;
-	
-	class Win32Process : public StaticBoundObject
+	class Win32Process : public Process
 	{
 	public:
-		Win32Process(ProcessBinding* parent, std::string& command, std::vector<std::string>& args);
-
-	protected:
+		Win32Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
 		virtual ~Win32Process();
-		virtual void Set(const char *name, SharedValue value);
 
-	private:
-		ProcessBinding *parent;
+		static SharedPtr<Win32Process> GetCurrentProcess();
+		
+		SharedPtr<Win32OutputPipe> GetStdin() { return stdin.cast<Win32OutputPipe>(); }
+		SharedPtr<Win32InputPipe> GetStdout() { return stdout.cast<Win32InputPipe>(); }
+		SharedPtr<Win32InputPipe> GetStderr() { return stderr.cast<Win32InputPipe>(); }
+		
+		virtual int GetPID();
+		virtual void Launch(bool async=true);
+		virtual void Terminate();
+		virtual void Kill();
+		virtual void SendSignal(int signal);
+		virtual void Restart();
+		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		
+	protected:
+		// for current process
+		Win32Process();
+		std::string ArgListToString(SharedKList argList);
+		
+		void StartProcess();
+		void ExitMonitor();
+		
 		Poco::Thread exitMonitorThread;
-		Poco::Thread stdOutThread;
-		Poco::Thread stdErrorThread;
-		Poco::RunnableAdapter<Win32Process>* monitorAdapter;
-		Poco::RunnableAdapter<Win32Process>* stdOutAdapter;
-		Poco::RunnableAdapter<Win32Process>* stdErrorAdapter;
-		bool running;
-		bool complete;
+		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
+		bool running, complete, currentProcess;
 		int pid;
 		HANDLE process;
 		int exitCode;
-		std::vector<std::string> arguments;
-		std::string command;
-		Win32Pipe *in, *out, *err;
+		
 		std::ostringstream outBuffer, errBuffer;
 		SharedKObject *shared_input, *shared_output, *shared_error;
 		Logger* logger;
-
-		void Terminate(const ValueList& args, SharedValue result);
-		void Terminate();
-		void StartProcess();
-		void StartThreads();
-		
-		void InvokeOnExit();
-		void InvokeOnRead(char *buffer, bool isStdError);
-		void InvokeOnRead(std::ostringstream& buffer, bool isErr);
-		
-		void Monitor();
-		void ReadStdOut();
-		void ReadStdErr();
 	};
 }
 

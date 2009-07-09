@@ -19,8 +19,8 @@ namespace ti
 		ProcessBinding();
 		virtual ~ProcessBinding();
 			
+		static std::map<std::string,int> signals;
 	private:
-		std::map<std::string,int> signals;
 		std::vector<SharedPtr<Process> > processes;
 		std::vector<SharedPtr<Pipe> > pipes;
 		

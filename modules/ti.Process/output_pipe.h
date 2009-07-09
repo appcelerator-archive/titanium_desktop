@@ -21,7 +21,7 @@ namespace ti
 	{
 	public:
 		OutputPipe();
-		virtual int Write(SharedPtr<Blob> data, int size=-1) = 0;
+		virtual int Write(SharedPtr<Blob> data) = 0;
 		static SharedOutputPipe CreateOutputPipe();
 		
 	protected:

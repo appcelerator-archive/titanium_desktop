@@ -5,7 +5,7 @@
  */
 
 #include "input_pipe.h"
-#include "blob_input_pipe.h"
+#include "buffered_input_pipe.h"
 
 #if defined(OS_OSX)
 # include "osx/osx_input_pipe.h"
@@ -145,13 +145,13 @@ namespace ti
 		return this->joined;
 	}
 	
-	std::pair<SharedBlobInputPipe,SharedBlobInputPipe>& InputPipe::Split()
+	std::pair<SharedBufferedInputPipe,SharedBufferedInputPipe>& InputPipe::Split()
 	{
-		SharedPtr<BlobInputPipe> pipe1 = new BlobInputPipe();
-		SharedPtr<BlobInputPipe> pipe2 = new BlobInputPipe();
+		SharedPtr<BufferedInputPipe> pipe1 = new BufferedInputPipe();
+		SharedPtr<BufferedInputPipe> pipe2 = new BufferedInputPipe();
 		
 		this->splitPipes =
-			new std::pair<SharedPtr<BlobInputPipe>, SharedPtr<BlobInputPipe> >(pipe1, pipe2);
+			new std::pair<SharedPtr<BufferedInputPipe>, SharedPtr<BufferedInputPipe> >(pipe1, pipe2);
 		
 		MethodCallback* splitCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::Splitter);
 		MethodCallback* closeCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::SplitterClose);
@@ -163,8 +163,8 @@ namespace ti
 	
 	void InputPipe::Splitter(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<BlobInputPipe> pipe1 = this->splitPipes->first;
-		SharedPtr<BlobInputPipe> pipe2 = this->splitPipes->second;
+		SharedPtr<BufferedInputPipe> pipe1 = this->splitPipes->first;
+		SharedPtr<BufferedInputPipe> pipe2 = this->splitPipes->second;
 		
 		SharedPtr<Blob> blob = this->Read();
 		pipe1->Append(blob);

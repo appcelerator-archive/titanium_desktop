@@ -8,12 +8,13 @@
 #include <Poco/Process.h>
 #include "process_binding.h"
 #include "process.h"
-#if defined(OS_OSX) || (OS_LINUX)
-# include <signal.h>
-#endif
+#include <signal.h>
 
 namespace ti
 {
+
+	std::map<std::string,int> ProcessBinding::signals;
+		
 	ProcessBinding::ProcessBinding()
 	{
 		Logger::Get("Process")->Debug("Initializing Titanium.Process");
@@ -56,6 +57,13 @@ namespace ti
 		signals["SIGINFO"] = SIGINFO;
 		signals["SIGUSR1"] = SIGUSR1;
 		signals["SIGUSR2"] = SIGUSR2;
+#elif defined(OS_WIN32)
+		signals["SIGABRT"] = SIGABRT;
+		signals["SIGFPE"] = SIGFPE;
+		signals["SIGILL"] = SIGILL;
+		signals["SIGINT"] = SIGINT;
+		signals["SIGSEGV"] = SIGSEGV;
+		signals["SIGTERM"] = SIGTERM;
 #endif
 		Logger::Get("Process")->Debug("Binding signals..");
 		std::map<std::string,int>::iterator iter;

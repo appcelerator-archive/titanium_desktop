@@ -41,20 +41,23 @@ namespace ti
 		{
 			throw ValueException::FromString("No data passed to write");
 		}
-		else if (!args.at(0)->IsObject())
+		SharedPtr<Blob> blob = new Blob();
+		if (args.at(0)->IsObject())
 		{
-			throw ValueException::FromString("First argument should be Blob");
+			blob = args.at(0)->ToObject().cast<Blob>();
+		}
+		else if (args.at(0)->IsString())
+		{
+			blob = new Blob(args.at(0)->ToString());
 		}
 		
-		SharedPtr<Blob> blob = args.at(0)->ToObject().cast<Blob>();
-		int size = -1;
-		
-		if (args.size() > 1 && args.at(1)->IsNumber())
+		if (blob.isNull())
 		{
-			size = args.at(1)->ToInt();
+			throw ValueException::FromString("OutputPipe.write argument should be a Blob or string");
 		}
 		
-		int written = this->Write(blob, size);
+		int written = this->Write(blob);
 		result->SetInt(written);
+		
 	}
 }

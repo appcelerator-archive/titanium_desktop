@@ -4,14 +4,14 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "blob_input_pipe.h"
+#include "buffered_input_pipe.h"
 #include "input_pipe.h"
 
 namespace ti
 {
-	BlobInputPipe::BlobInputPipe() : closed(false) { }
+	BufferedInputPipe::BufferedInputPipe() : closed(false) { }
 	
-	SharedPtr<Blob> BlobInputPipe::Read(int bufsize)
+	SharedPtr<Blob> BufferedInputPipe::Read(int bufsize)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -30,7 +30,7 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	SharedPtr<Blob> BlobInputPipe::ReadLine()
+	SharedPtr<Blob> BufferedInputPipe::ReadLine()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -48,7 +48,7 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	int BlobInputPipe::GetSize()
+	int BufferedInputPipe::GetSize()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -59,21 +59,26 @@ namespace ti
 		else throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	const char* BlobInputPipe::GetBuffer()
+	const char* BufferedInputPipe::GetBuffer()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		return &buffer[0];
 	}
 	
-	void BlobInputPipe::Append(SharedPtr<Blob> blob)
+	void BufferedInputPipe::Append(char *data, int length)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
-		buffer.insert(buffer.end(), blob->Get(), blob->Get()+blob->Length());
+		buffer.insert(buffer.end(), data, data+length);
 		
 		InputPipe::DataReady();
 	}
 	
-	void BlobInputPipe::Close()
+	void BufferedInputPipe::Append(SharedPtr<Blob> blob)
+	{
+		this->Append((char *)blob->Get(), blob->Length());
+	}
+	
+	void BufferedInputPipe::Close()
 	{
 		if (!closed)
 		{
@@ -84,7 +89,7 @@ namespace ti
 		}
 	}
 	
-	bool BlobInputPipe::IsClosed()
+	bool BufferedInputPipe::IsClosed()
 	{
 		return closed;
 	}

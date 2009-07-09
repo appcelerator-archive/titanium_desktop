@@ -1081,17 +1081,18 @@ void Win32UserWindow::SetupSize()
 	this->SetBounds(b);
 }
 
-void Win32UserWindow::ShowWebInspector()
+void Win32UserWindow::ShowInspector(bool console)
 {
 	if (this->web_inspector)
 	{
-		BOOL debug;
-		this->web_inspector->isDebuggingJavaScript(&debug);
-		if (!debug)
+		if (console)
 		{
-			web_inspector->toggleDebuggingJavaScript();
+			this->web_inspector->showConsole();
 		}
-		this->web_inspector->show();
+		else
+		{
+			this->web_inspector->show();
+		}
 	}
 }
 

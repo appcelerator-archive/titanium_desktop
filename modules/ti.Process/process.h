@@ -19,6 +19,10 @@
 #include "input_pipe.h"
 #include "output_pipe.h"
 
+#undef stdin
+#undef stdout
+#undef stderr
+
 namespace ti
 {
 	class Process;

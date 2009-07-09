@@ -383,7 +383,7 @@ namespace ti
 
 				if(wuw)
 				{
-					wuw->ShowWebInspector();
+					wuw->ShowInspector(false);
 					return true;
 				}
 				else

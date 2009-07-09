@@ -5,184 +5,53 @@
  */
  
 #include "win32_process.h"
-#include <kroll/base.h>
-#include <windows.h>
-#include "../process_binding.h"
+#include "win32_output_pipe.h"
+#include "win32_input_pipe.h"
+#include <signal.h>
 
 namespace ti
 {
-	Win32Process::Win32Process(ProcessBinding* parent, std::string& command, std::vector<std::string>& args) :
-		StaticBoundObject("Process"),
+	/*static*/
+	SharedPtr<Win32Process> Win32Process::GetCurrentProcess()
+	{
+		return new Win32Process();
+	}
+	
+	Win32Process::Win32Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) :
+		Process(args, environment, stdin, stdout, stderr),
 		running(false),
 		complete(false),
+		currentProcess(false),
 		pid(-1),
 		exitCode(-1),
-		logger(Logger::Get("Process.Win32Process")),
-		parent(parent)
+		logger(Logger::Get("Process.Win32Process"))
 	{
-		try
-		{
-			this->arguments = args;
-			this->command = command;
-		}
-		catch (std::exception &e)	
-		{
-			throw ValueException::FromString(e.what());
-		}
-
-		this->SetString("command", command);
-		this->SetNull("pid");
-		this->SetBool("running", false);
-
-		this->err = new Win32Pipe();
-		this->shared_error = new SharedKObject(this->err);
-		this->SetObject("err", *shared_error);
-
-		this->out = new Win32Pipe();
-		this->shared_output = new SharedKObject(this->out);
-		this->SetObject("out", *shared_output);
-
-		this->in = new Win32Pipe();
-		this->shared_input = new SharedKObject(this->in);
-		this->SetObject("in", *shared_input);
-
-		this->SetMethod("terminate", &Win32Process::Terminate);
-		this->SetNull("exitCode");
-		this->SetNull("onread");
-		this->SetNull("onexit");
-
-		// setup threads which can read output and also monitor the exit
-		this->monitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::Monitor);
-		this->exitMonitorThread.start(*monitorAdapter);
 	}
 	
-	void Win32Process::StartThreads()
+	Win32Process::Win32Process() :
+		Process(),
+		running(true), complete(false), currentProcess(true),
+		logger(Logger::Get("Process.Win32Process"))
 	{
-		logger->Debug("Starting output handler threads...");
-
-		if (!stdOutThread.isRunning())
+		pid = GetCurrentProcessId();
+		
+		LPTCH env = GetEnvironmentStrings();
+		while (env[0] != '\0')
 		{
-			this->stdOutAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ReadStdOut);
-			stdOutThread.start(*stdOutAdapter);
+			std::string entry = env;
+			std::string key = entry.substr(0, entry.find("="));
+			std::string val = entry.substr(entry.find("=")+1);
+			
+			SetEnvironment(key.c_str(), val.c_str());
+			env += entry.size()+1;
 		}
-
-		if (!stdErrorThread.isRunning())
+		
+		for (int i = 0; i < __argc; i++)
 		{
-			this->stdErrorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ReadStdErr);
-			stdErrorThread.start(*stdErrorAdapter);
+			args->Append(Value::NewString(__argv[i]));
 		}
 	}
 	
-	void Win32Process::Monitor()
-	{
-		STARTUPINFO startupInfo;
-		startupInfo.cb          = sizeof(STARTUPINFO);
-		startupInfo.lpReserved  = NULL;
-		startupInfo.lpDesktop   = NULL;
-		startupInfo.lpTitle     = NULL;
-		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
-		startupInfo.cbReserved2 = 0;
-		startupInfo.lpReserved2 = NULL;
-		
-		HANDLE hProc = GetCurrentProcess();
-		DuplicateHandle(hProc, in->GetReadHandle(), hProc, &startupInfo.hStdInput, 0, TRUE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(in->GetReadHandle());
-		DuplicateHandle(hProc, out->GetWriteHandle(), hProc, &startupInfo.hStdOutput, 0, TRUE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(out->GetWriteHandle());
-		DuplicateHandle(hProc, err->GetWriteHandle(), hProc, &startupInfo.hStdError, 0, TRUE, DUPLICATE_SAME_ACCESS);
-		CloseHandle(err->GetWriteHandle());
-		
-		std::string commandLine = command;
-		for (std::vector<std::string>::const_iterator it = arguments.begin(); it != arguments.end(); ++it)
-		{
-			commandLine.append(" ");
-			commandLine.append(*it);
-		}
-		
-		logger->Debug("Launching: %s", commandLine.c_str());
-	
-		PROCESS_INFORMATION processInfo;
-		BOOL rc = CreateProcessA(NULL,
-			(char*)commandLine.c_str(),
-			NULL,
-			NULL,
-			TRUE,
-			0,
-			NULL,
-			NULL,
-			&startupInfo,
-			&processInfo);
-		
-		CloseHandle(startupInfo.hStdInput);
-		CloseHandle(startupInfo.hStdOutput);
-		CloseHandle(startupInfo.hStdError);
-		
-		if (!rc) {
-			std::string message = "Error launching: " + commandLine;
-			logger->Error(message);
-			throw ValueException::FromString(message);
-		}
-		else {
-			StartThreads();
-			CloseHandle(processInfo.hThread);
-			this->pid = processInfo.dwProcessId;
-			this->process = processInfo.hProcess;
-			this->Set("pid", Value::NewInt(this->pid));
-			this->running = true;
-			this->Set("running", Value::NewBool(true));
-		}
-		
-		while (true) {
-			DWORD rc = WaitForSingleObject(this->process, 250);
-			if (rc == WAIT_OBJECT_0) {
-				break;
-			}
-			if (rc == WAIT_ABANDONED) {
-				break;
-			}
-			else continue;
-		}
-		
-		logger->Debug("finally exited it looks like");
-
-		DWORD exitCode;
-		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
-			throw ValueException::FromString("Cannot get exit code for process");
-		}
-		this->exitCode = exitCode;
-		this->Set("exitCode", Value::NewInt(this->exitCode));
-		
-		this->parent->Terminated(this);
-		this->Set("running", Value::NewBool(false));
-		
-		logger->Debug("Invoking onexit");
-		InvokeOnExit();
-	}
-	
-	void Win32Process::ReadStdOut()
-	{
-		char buffer[1024];
-		int length = 1023;
-		int bytesRead = out->Read(buffer, length);
-		while (bytesRead > 0) {
-			buffer[bytesRead] = '\0';
-			InvokeOnRead(buffer, false);
-			bytesRead = out->Read(buffer, length);
-		}
-	}
-	
-	void Win32Process::ReadStdErr()
-	{
-		char buffer[1024];
-		int length = 1023;
-		int bytesRead = err->Read(buffer, length);
-		while (bytesRead > 0) {
-			buffer[bytesRead] = '\0';
-			InvokeOnRead(buffer, false);
-			bytesRead = err->Read(buffer, length);
-		}
-	}
-
 	Win32Process::~Win32Process()
 	{
 		try {
@@ -205,76 +74,146 @@ namespace ti
 			}
 		}
 
-		if (this->stdOutThread.isRunning())
-		{
-			try
-			{
-				this->stdOutThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stdout thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		if (this->stdErrorThread.isRunning())
-		{
-			try
-			{
-				this->stdErrorThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stderr thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		delete monitorAdapter;
-		delete stdOutAdapter;
-		delete stdErrorAdapter;
-		delete shared_output;
-		delete shared_input;
-		delete shared_error;
+		delete exitMonitorAdapter;
 	}
 	
-	void Win32Process::Set(const char *name, SharedValue value)
+	/*
+		Inspired by python's os.list2cmdline, ported to C++ by Marshall Culpepper
+		
+		Translate a sequence of arguments into a command line
+		string, using the same rules as the MS C runtime:
+
+		1) Arguments are delimited by white space, which is either a
+		   space or a tab.
+
+		2) A string surrounded by double quotation marks is
+		   interpreted as a single argument, regardless of white space
+		   contained within.  A quoted string can be embedded in an
+		   argument.
+
+		3) A double quotation mark preceded by a backslash is
+		   interpreted as a literal double quotation mark.
+
+		4) Backslashes are interpreted literally, unless they
+		   immediately precede a double quotation mark.
+
+		5) If backslashes immediately precede a double quotation mark,
+		   every pair of backslashes is interpreted as a literal
+		   backslash.  If the number of backslashes is odd, the last
+		   backslash escapes the next double quotation mark as
+		   described in rule 3.
+		See
+		http://msdn.microsoft.com/library/en-us/vccelng/htm/progs_12.asp
+	*/
+	std::string Win32Process::ArgListToString(SharedKList argList)
 	{
-		// We need to check the previous value of certain incomming values
-		// *before* we actually do the Set(...) on this object.
-		//Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-		bool flushOnRead = 
-			(!strcmp("onread", name)) && (!this->Get("onread")->IsMethod());
-		bool flushOnExit = 
-			(!strcmp("onexit", name)) && (!this->Get("onexit")->IsMethod());
-
-
-		StaticBoundObject::Set(name, value);
-
-		if (flushOnRead)
+		
+		std::string result = "";
+		bool needQuote = false;
+		for (int i = 0; i < argList->Size(); i++)
 		{
-			// If we had no previous onread callback flush our output
-			// buffers, so that onread will be called even when it is
-			// attached after a process finishes executing.
-			this->InvokeOnRead(outBuffer, false);
-			this->InvokeOnRead(errBuffer, true);
-		}
+			std::string arg = argList->At(i)->ToString();
+			std::string backspaceBuf = "";
+			
+			// Add a space to separate this argument from the others
+			if (result.size() > 0) {
+				result += ' ';
+			}
 
-		// this->complete is the signal that monitor thread has already
-		// attempted to call the onexit callback. If it's false, the monitor
-		// thread will take care of calling it.
-		if (flushOnExit && this->complete)
-		{
-			this->InvokeOnExit();
+			needQuote = (arg.find_first_of(" \t") != std::string::npos) || arg == "";
+			if (needQuote) {
+				result += '"';
+			}
+
+			for (int j = 0; j < result.size(); j++)
+			{
+				char c = result[j];
+				if (c == '\\') {
+					// Don't know if we need to double yet.
+					backspaceBuf += c;
+				}
+				else if (c == '"') {
+					// Double backspaces.
+					result.append(backspaceBuf.size()*2, '\\');
+					backspaceBuf = "";
+					result.append("\\\"");
+				}
+				else {
+					// Normal char
+					if (backspaceBuf.size() > 0) {
+						result.append(backspaceBuf);
+						backspaceBuf = "";
+					}
+					result += c;
+				}
+			}
+			// Add remaining backspaces, if any.
+			if (backspaceBuf.size() > 0) {
+				result.append(backspaceBuf);
+			}
+
+			if (needQuote) {
+				result.append(backspaceBuf);
+				result += '"';
+			}
 		}
+		return result;
 	}
-
-	void Win32Process::Terminate(const ValueList& args, SharedValue result)
+	
+	void Win32Process::Launch(bool async)
 	{
-		Terminate();
+		STARTUPINFO startupInfo;
+		startupInfo.cb          = sizeof(STARTUPINFO);
+		startupInfo.lpReserved  = NULL;
+		startupInfo.lpDesktop   = NULL;
+		startupInfo.lpTitle     = NULL;
+		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
+		startupInfo.cbReserved2 = 0;
+		startupInfo.lpReserved2 = NULL;
+		
+		HANDLE hProc = GetCurrentProcess();
+		GetStdin()->DuplicateRead(hProc, &startupInfo.hStdInput);
+		GetStdout()->DuplicateWrite(hProc, &startupInfo.hStdOutput);
+		GetStderr()->DuplicateWrite(hProc, &startupInfo.hStdError);
+		
+		std::string commandLine = ArgListToString(args);
+		logger->Debug("Launching: %s", commandLine.c_str());
+		PROCESS_INFORMATION processInfo;
+		BOOL rc = CreateProcessA(NULL,
+			(char*)commandLine.c_str(),
+			NULL,
+			NULL,
+			TRUE,
+			0,
+			NULL,
+			NULL,
+			&startupInfo,
+			&processInfo);
+		
+		CloseHandle(startupInfo.hStdInput);
+		CloseHandle(startupInfo.hStdOutput);
+		CloseHandle(startupInfo.hStdError);
+		
+		if (!rc) {
+			std::string message = "Error launching: " + commandLine;
+			logger->Error(message);
+			throw ValueException::FromString(message);
+		}
+		else {
+			CloseHandle(processInfo.hThread);
+			this->pid = processInfo.dwProcessId;
+			this->process = processInfo.hProcess;
+			this->running = true;
+		}
+		
+		// setup threads which can read output and also monitor the exit
+		this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
+		this->exitMonitorThread.start(*exitMonitorAdapter);
+	}
+	
+	int Win32Process::GetPID()
+	{
+		return pid;
 	}
 	
 	void Win32Process::Terminate()
@@ -282,77 +221,76 @@ namespace ti
 		if (running) {
 			running = false;
 			HANDLE hProc = OpenProcess(PROCESS_TERMINATE, FALSE, this->pid);
-		if (hProc)
-		{
-			if (TerminateProcess(hProc, 0) == 0)
+			if (hProc)
 			{
+				if (TerminateProcess(hProc, 0) == 0)
+				{
+					CloseHandle(hProc);
+					// not sure if this is the right thing to do
+					throw ValueException::FromString("cannot kill process");
+				}
 				CloseHandle(hProc);
-				// not sure if this is the right thing to do
-				throw ValueException::FromString("cannot kill process");
 			}
-			CloseHandle(hProc);
-		}
-		else
-		{
-			switch (GetLastError())
+			else
 			{
-			case ERROR_ACCESS_DENIED:
-				throw ValueException::FromString("cannot kill process");
-			case ERROR_NOT_FOUND:
-				throw ValueException::FromString("cannot kill process");
-			default:
-				throw ValueException::FromString("cannot kill process");
+				switch (GetLastError())
+				{
+				case ERROR_ACCESS_DENIED:
+					throw ValueException::FromString("cannot kill process");
+				case ERROR_NOT_FOUND:
+					throw ValueException::FromString("cannot kill process");
+				default:
+					throw ValueException::FromString("cannot kill process");
+				}
 			}
 		}
-		
-			this->Set("running", Value::NewBool(false));
-			this->parent->Terminated(this);
+	}
+	
+	void Win32Process::Kill()
+	{
+		Terminate();
+	}
+	
+	void Win32Process::SendSignal(int signal)
+	{
+		// This only works for the current process in Win32.. I guess there's nothing to do?
+		if (this->currentProcess)
+		{
+			raise(signal);
 		}
 	}
 	
-	void Win32Process::InvokeOnExit()
+	void Win32Process::Restart()
 	{
-		SharedValue sv = this->Get("onexit");
-		if (!sv->IsMethod())
-		{
-			return;
-		}
-		
-		ValueList args(Value::NewInt(this->exitCode));
-		SharedKMethod callback = sv->ToMethod();
-		this->parent->GetHost()->InvokeMethodOnMainThread(
-			callback, args, false);
+		//TODO
 	}
 	
-	void Win32Process::InvokeOnRead(char *buffer, bool isErr)
+	void Win32Process::Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr)
 	{
-		if (isErr) {
-			errBuffer << buffer;
-		}
-		else {
-			outBuffer << buffer;
-		}
-		InvokeOnRead(isErr ? errBuffer : outBuffer, isErr);
+		//TODO
 	}
-	
-	void Win32Process::InvokeOnRead(std::ostringstream& buffer, bool isErr)
+		
+	void Win32Process::ExitMonitor()
 	{
-		SharedValue sv = this->Get("onread");
-		if (!sv->IsMethod())
-		{
-			return;
+		
+		while (true) {
+			DWORD rc = WaitForSingleObject(this->process, 250);
+			if (rc == WAIT_OBJECT_0) {
+				break;
+			}
+			if (rc == WAIT_ABANDONED) {
+				break;
+			}
+			else continue;
 		}
 		
-		if (!buffer.str().empty())
-		{
-			ValueList args(
-				Value::NewString(buffer.str()),
-				Value::NewBool(isErr));
-			SharedKMethod callback = sv->ToMethod();
-			this->parent->GetHost()->InvokeMethodOnMainThread(
-				callback, args, false);
-				
-			buffer.str("");
+		DWORD exitCode;
+		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
+			throw ValueException::FromString("Cannot get exit code for process");
 		}
+		this->exitCode = exitCode;
+		Process::Exited();
+		this->running = false;
+		this->complete = true;
 	}
 }

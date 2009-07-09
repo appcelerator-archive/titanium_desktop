@@ -206,6 +206,43 @@ namespace ti
 	{
 		if (args.size() >= 1 && args.at(0)->IsNumber())
 		{
+			int code = -1;
+			if (args.at(0)->IsString()) {
+				std::string signalName = args.at(0)->ToString();
+				if (ProcessBinding::signals.find(signalName) != ProcessBinding::signals.end())
+				{
+					code = ProcessBinding::signals[signalName];
+				}
+				else
+				{
+					std::ostringstream str;
+					str << "Error, signal name: \"" << signalName << "\" is unrecognized";
+					throw ValueException::FromString(str.str());
+				}
+			}
+			else if (args.at(0)->IsNumber())
+			{
+				code = args.at(0)->ToInt();
+				
+				bool found = false;
+				for (std::map<std::string,int>::const_iterator iter = ProcessBinding::signals.begin();
+					iter != ProcessBinding::signals.end();
+					iter++)
+				{
+					if (iter->second == code)
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					std::ostringstream str;
+					str << "Error, signal number: " << code << " is unrecognized";
+					throw ValueException::FromString(str.str());
+				}
+			}
+			
+			
 			SendSignal(args.at(0)->ToInt());
 		}
 	}
