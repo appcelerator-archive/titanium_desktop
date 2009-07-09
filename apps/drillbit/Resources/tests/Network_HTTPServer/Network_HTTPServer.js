@@ -1,4 +1,4 @@
-describe("http server tests",
+describe("Network.HTTPServer",
 {
 	get_request_as_async: function(callback)
 	{

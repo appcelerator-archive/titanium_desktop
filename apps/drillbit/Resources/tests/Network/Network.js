@@ -1,4 +1,4 @@
-describe("Network module tests",{
+describe("Network Module",{
 	// ti.network.HTTP objects are covered in the http_server unit test.
 
 	// test the network object and properties.

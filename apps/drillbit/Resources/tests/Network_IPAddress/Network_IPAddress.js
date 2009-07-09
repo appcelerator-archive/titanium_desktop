@@ -1,4 +1,4 @@
-describe("Network IpAddress object tests",{
+describe("Network.IPAddress",{
 	// ti.network.HTTP objects are covered in the http_server unit test.
 
 	before: function()
