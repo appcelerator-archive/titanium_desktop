@@ -254,7 +254,8 @@ namespace ti
 
 #ifdef OS_WIN32
 		char path[MAX_PATH];
-		if(SHGetSpecialFolderPath(NULL,path,CSIDL_DESKTOP,FALSE))
+
+		if(SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE))
 		{
 			dir.append(path);
 		}

@@ -23,9 +23,6 @@ describe("ti.App tests",
 		value_of(Titanium.App.home).should_not_be_null();
 		value_of(Titanium.App.Properties.getString("ti.app.home")).should_be(Titanium.App.home);
 		
-		// this is specific to the test harness args
-		value_of(Titanium.App.arguments.length).should_be(6); 
-		
 		value_of(Titanium.App.stdout).should_be_function();
 		value_of(Titanium.App.stderr).should_be_function();
 		
@@ -36,6 +33,7 @@ describe("ti.App tests",
 		// test passing multiple args
 		value_of(Titanium.App.getStreamURL('foo','bar')).should_be('https://api.appcelerator.net/p/v1/foo/bar');
 	},
+	
 	//comment out for now, this test function causes the app test to timeout in win32,
 	test_system_properties: function()
 	{
@@ -51,15 +49,16 @@ describe("ti.App tests",
 		value_of(sysProps.getDouble("baddouble")).should_be(0);
 	},
 	
-	test_create_properties: function()
+	test_create_properties_object: function()
 	{
 		var props = Titanium.App.createProperties();
+		value_of(props).should_be_object();
+
 		value_of(props.getBool).should_be_function();
 		value_of(props.getInt).should_be_function();
 		value_of(props.getList).should_be_function();
 		value_of(props.getDouble).should_be_function();
 		value_of(props.setString).should_be_function();
-		
 		value_of(props.setBool).should_be_function();
 		value_of(props.setInt).should_be_function();
 		value_of(props.setList).should_be_function();
@@ -68,7 +67,10 @@ describe("ti.App tests",
 		value_of(props.hasProperty).should_be_function();
 		value_of(props.listProperties).should_be_function();
 		value_of(props.saveTo).should_be_function();
-		
+	},
+	
+	test_create_properties: function()
+	{
 		var props2 = Titanium.App.createProperties({
 			"val1": true,
 			"val2": 1.1,
@@ -98,7 +100,27 @@ describe("ti.App tests",
 		value_of(TFS.getFile(path).exists()).should_be_true();
 	},
 	
-	test_app_properties: function ()
+	test_app_URLToPath: function ()
+	{
+	    // get the fully qualified absolute path to the properties.
+		var path = Titanium.App.appURLToPath("app://app.properties");
+		value_of(path).should_be_string();
+		
+        // get the application object
+        var app = Titanium.API.getApplication();
+        value_of(app).should_not_be_null();
+
+        // the application object will give us the exe path
+	    var exePath = app.getExecutablePath();
+        value_of(exePath).should_be_string();
+
+        // for this test, the exe path should be a substring of the path
+        // returned by appURLToPath()
+        var index = path.indexOf(exePath);
+        value_of(index).should_not_be(-1);
+	},
+
+	test_app_loadproperties: function ()
 	{
 		var props = Titanium.App.loadProperties(Titanium.App.appURLToPath("app://app.properties"));
 		value_of(props).should_be_object();
@@ -108,5 +130,62 @@ describe("ti.App tests",
 		value_of(props.getString("stringval")).should_be("hey this is just a string");
 		value_of(props.getDouble("doubleval")).should_be(1.1);
 		value_of(props.getList("listval")).should_match_array(["entry1","entry2","entry3"]);
-	}
+	},
+	
+    test_app_arguments: function()
+	{
+		value_of(Titanium.App.arguments).should_be_array();
+		// this is specific to the test harness args
+		value_of(Titanium.App.arguments.length).should_be(6); 
+
+        Titanium.API.debug("arguments[0] "+Titanium.App.arguments[0]);
+
+        // get the application object
+        var app = Titanium.API.getApplication();
+        value_of(app).should_not_be_null();
+
+	    var argv = app.getArguments();
+        value_of(argv).should_be_array();
+
+        // find "a" shared part of the path string so we can search for it inside 
+        // the Ti.App.arguments.  These arguments ARE NOT the same as ti.api.application.argv[][]
+        // we can't hard code any paths due to the differences in platforms.
+        var subPath = argv[0].substr(0,argv[0].search(app.getName()));
+        
+        // argv[0] is the fully qualified name and path to the exe
+        var index = Titanium.App.arguments[0].indexOf(subPath);
+        value_of(index).should_not_be(-1);
+	},
+	
+	test_app_home_property: function()
+	{
+		value_of(Titanium.App.home).should_not_be_null();
+	    Titanium.API.debug("home is "+Titanium.App.home);
+	    Titanium.API.debug("Titanium.App.arguments[0] is "+Titanium.App.arguments[0]);
+
+        // get the application object
+        var app = Titanium.API.getApplication();
+        value_of(app).should_not_be_null();
+
+	    var argv = app.getArguments();
+        value_of(argv).should_be_array();
+
+        // find "a" shared part of the path string so we can search for it inside 
+        // the Ti.App.arguments.  These arguments ARE NOT the same as ti.api.application.argv[][]
+        // we can't hard code any paths due to the differences in platforms.
+        var subPath = argv[0].substr(0,argv[0].search(app.getName()));
+        
+        // argv[0] is the fully qualified name and path to the exe
+        var index = Titanium.App.home.indexOf(subPath);
+        value_of(index).should_not_be(-1);
+	},
+	
+	test_app_path_property: function()
+	{
+		value_of(Titanium.App.path).should_not_be_null();
+	    Titanium.API.debug("path is "+Titanium.App.path);
+	    
+        var index = Titanium.App.path.indexOf(Titanium.App.home);
+        value_of(index).should_not_be(-1);
+	},
 });

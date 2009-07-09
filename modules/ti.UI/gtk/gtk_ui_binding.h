@@ -21,17 +21,25 @@ namespace ti
 		SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent);
 		void ErrorDialog(std::string);
 
-		SharedPtr<MenuItem> CreateMenu(bool trayMenu);
-		void SetMenu(SharedPtr<MenuItem>);
-		void SetContextMenu(SharedPtr<MenuItem>);
-		void SetIcon(SharedString icon_path);
-		SharedPtr<TrayItem> AddTray(SharedString icon_path, SharedKMethod cb);
-
+		SharedMenu CreateMenu();
+		SharedMenuItem CreateMenuItem();
+		SharedMenuItem CreateSeparatorMenuItem();
+		SharedMenuItem CreateCheckMenuItem();
+		void SetMenu(SharedMenu newMenu);
+		void SetContextMenu(SharedMenu);
+		void SetIcon(std::string&);
+		SharedTrayItem AddTray(std::string&, SharedKMethod cb);
 		long GetIdleTime();
 
-		private:
-			SharedPtr<ScriptEvaluator> evaluator;
+		SharedMenu GetMenu();
+		SharedMenu GetContextMenu();
+		std::string& GetIcon();
 
+		protected:
+		SharedPtr<ScriptEvaluator> evaluator;
+		SharedPtr<GtkMenu> menu;
+		SharedPtr<GtkMenu> contextMenu;
+		std::string iconPath;
 	};
 }
 

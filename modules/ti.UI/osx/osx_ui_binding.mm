@@ -5,17 +5,12 @@
  */
 
 #include "../ui_module.h"
-#include "osx_ui_binding.h"
-#include "osx_menu_item.h"
-#include "osx_tray_item.h"
-#include "osx_user_window.h"
 
 @interface NSApplication (LegacyWarningSurpression)
 - (id) dockTile;
 @end
 
-@interface DockTileStandin: NSObject{
-	
+@interface DockTileStandin: NSObject {
 }
 - (NSSize)size;
 - (void)setContentView:(NSView *)view;
@@ -32,15 +27,27 @@ namespace ti
 {
 	OSXUIBinding::OSXUIBinding(Host *host) :
 		UIBinding(host),
+		defaultMenu(nil),
+		menu(0),
+		nativeMenu(nil),
+		contextMenu(0),
+		dockMenu(0),
+		nativeDockMenu(nil),
+		activeWindow(0),
 		scriptEvaluator(nil)
 	{
 		[TiProtocol registerSpecialProtocol];
 		[AppProtocol registerSpecialProtocol];
-		application = [[TiApplication alloc] initWithBinding:this host:host];
+		application = [[TiApplicationDelegate alloc] initWithBinding:this];
+		[application retain];
+
 		NSApplication *nsapp = [NSApplication sharedApplication];
 		[nsapp setDelegate:application];
 		[NSBundle loadNibNamed:@"MainMenu" owner:nsapp];
-		InstallMenu(NULL); // force default app menu
+
+		// Create a default menu -- so that keybindings and such work out of the box.
+		this->defaultMenu = [NSApp mainMenu];
+		this->SetupMainMenu(true);
 
 		// Add the custom script evaluator which will dynamically
 		// dispatch unknown script types to loaded Kroll modules.
@@ -51,7 +58,6 @@ namespace ti
 	{
 		[scriptEvaluator release];
 		[application release];
-		[appDockMenu release];
 		[savedDockView release];
 	}
 
@@ -63,6 +69,26 @@ namespace ti
 		return w->GetSharedPtr();
 	}
 
+	SharedMenu OSXUIBinding::CreateMenu()
+	{
+		return new OSXMenu();
+	}
+
+	SharedMenuItem OSXUIBinding::CreateMenuItem()
+	{
+		return new OSXMenuItem(MenuItem::NORMAL);
+	}
+
+	SharedMenuItem OSXUIBinding::CreateSeparatorMenuItem()
+	{
+		return new OSXMenuItem(MenuItem::SEPARATOR);
+	}
+
+	SharedMenuItem OSXUIBinding::CreateCheckMenuItem()
+	{
+		return new OSXMenuItem(MenuItem::CHECK);
+	}
+
 	void OSXUIBinding::ErrorDialog(std::string msg)
 	{
 		NSApplicationLoad();
@@ -71,352 +97,198 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	SharedPtr<MenuItem> OSXUIBinding::CreateMenu(bool trayMenu)
+	void OSXUIBinding::SetMenu(SharedMenu menu)
 	{
-		return new OSXMenuItem();
-	}
-
-	void OSXUIBinding::SetMenu(SharedPtr<MenuItem> menu)
-	{
-		if (!this->activeMenu)
+		if (this->menu.get() == menu.get())
 		{
-			SharedPtr<OSXMenuItem> osx_menu = menu.cast<OSXMenuItem>();
-			InstallMenu(osx_menu.get());
-		}
-		
-		if (menu.isNull() && (!this->activeMenu || this->activeMenu == this->menu.get()))
-		{
-			InstallMenu(NULL);
-		}
-		
-		this->menu = menu;
-		std::cout << "SetMenu => " << menu.get() << ", active=" << activeMenu << std::endl;
-	}
-
-	void OSXUIBinding::SetContextMenu(SharedPtr<MenuItem> menu)
-	{
-		this->contextMenu = menu;
-	}
-
-	void OSXUIBinding::SetDockIcon(SharedString badge_path)
-	{
-		//TODO: Put Dock Icon support back in for 10.4.
-		if (![NSApp respondsToSelector:@selector(dockTile)]){
 			return;
 		}
-		
+		SharedPtr<OSXMenu> osxmenu = menu.cast<OSXMenu>();
+		this->menu = osxmenu;
+		SetupMainMenu();
+	}
+
+	void OSXUIBinding::SetContextMenu(SharedMenu menu)
+	{
+		this->contextMenu = menu.cast<OSXMenu>();
+	}
+
+	void OSXUIBinding::SetDockIcon(std::string& badgePath)
+	{
+		//TODO: Put Dock Icon support back in for 10.4.
+		if (![NSApp respondsToSelector:@selector(dockTile)]) {
+			return;
+		}
+
 		DockTileStandin *dockTile = (DockTileStandin *)[NSApp dockTile];
-		std::string value = *badge_path;
-		if (!value.empty())
+		if (!badgePath.empty())
 		{
-			// remember the old one
-			if (!savedDockView)
+			if (!savedDockView) // remember the old one
 			{
 				savedDockView = [dockTile contentView];
 				[savedDockView retain];
 			}
-		   	// setup our image view for the dock tile
-		   	NSRect frame = NSMakeRect(0, 0, dockTile.size.width, dockTile.size.height);
-		   	NSImageView *dockImageView = [[NSImageView alloc] initWithFrame: frame];
 
-			NSImage *image = MakeImage(value);
-		   	[dockImageView setImage:image];
+			// setup our image view for the dock tile
+			NSRect frame = NSMakeRect(0, 0, dockTile.size.width, dockTile.size.height);
+			NSImageView *dockImageView = [[NSImageView alloc] initWithFrame: frame];
+			NSImage *image = MakeImage(badgePath);
+			[dockImageView setImage:image];
 			[image release];
-			
-		   	// by default, add it to the NSDockTile
-		   	[dockTile setContentView: dockImageView];
+
+			// by default, add it to the NSDockTile
+			[dockTile setContentView: dockImageView];
 		}
 		else if (savedDockView)
 		{
-		   	[dockTile setContentView:savedDockView];
+			[dockTile setContentView:savedDockView];
 			[savedDockView release];
 			savedDockView = nil;
 		}
 		else
 		{
-		   	[dockTile setContentView:nil];
+			[dockTile setContentView:nil];
 		}
-	   	[dockTile display];
+		[dockTile display];
 	}
-	
-	NSImage* OSXUIBinding::MakeImage(std::string value)
+
+	NSImage* OSXUIBinding::MakeImage(std::string& iconURL)
 	{
-		if (ti::UIModule::IsResourceLocalFile(value) || FileUtils::IsFile(value))
-		{
-			SharedString file = ti::UIModule::GetResourcePath(value.c_str());
-			NSString *path = [NSString stringWithCString:((*file).c_str()) encoding:NSUTF8StringEncoding];
-			return [[NSImage alloc] initWithContentsOfFile:path];
-		}
-		else
-		{
-			NSURL *url = [NSURL URLWithString:[NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding]];
-			return [[NSImage alloc] initWithContentsOfURL:url];
+		NSString* iconString = [NSString stringWithUTF8String:iconURL.c_str()];
+		if (FileUtils::IsFile(iconURL)) {
+			return [[NSImage alloc] initWithContentsOfFile:iconString];
+		} else {
+			return [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString: iconString]];
 		}
 	}
-	
-	void OSXUIBinding::WindowFocused(UserWindow *window, OSXMenuItem *menu)
+
+	void OSXUIBinding::WindowFocused(SharedPtr<OSXUserWindow> window)
 	{
-		if (menu == this->activeMenu)
-		{
-			// if we focused but our active menu is already showing
-			// for this window, don't worry about it..
-			return;
-		}
-		// if we're setting the active window's menu to null and we 
-		// have a app menu, re-install the app menu, otherwise set 
-		// the incoming menu
-		if (menu==NULL && this->menu)
-		{
-			SharedPtr<OSXMenuItem> osx_item = this->menu.cast<OSXMenuItem>();
-			InstallMenu(osx_item.get());
-		}
-		else
-		{
-			InstallMenu(menu);
-		}
+		this->activeWindow = window;
+		this->SetupMainMenu();
 	}
 
-	void OSXUIBinding::WindowUnfocused(UserWindow *window, OSXMenuItem *menu)
+	void OSXUIBinding::WindowUnfocused(SharedPtr<OSXUserWindow> window)
 	{
-		if (this->activeMenu!=this->menu)
-		{
-			InstallMenu(this->activeMenu);
-		}
-		else
-		{
-			SharedPtr<OSXMenuItem> osx_item = this->menu.cast<OSXMenuItem>();
-			InstallMenu(osx_item.get());
-		}
+		this->activeWindow = NULL;
+		this->SetupMainMenu();
 	}
-	
-	void OSXUIBinding::InstallMenu(OSXMenuItem *menu)
+
+	NSMenu* OSXUIBinding::GetDefaultMenu()
 	{
-		this->activeMenu = menu;
-		
-		NSMenu * mainMenu = [[NSMenu alloc] initWithTitle:@"MainMenu"];
-		NSMenuItem * menuItem;
-		NSMenu * submenu;
-
-		// The titles of the menu items are for identification purposes only and shouldn't be localized.
-		// The strings in the menu bar come from the submenu titles,
-		// except for the application menu, whose title is ignored at runtime.
-		menuItem = [mainMenu addItemWithTitle:@"Apple" action:NULL keyEquivalent:@""];
-		submenu = [[NSMenu alloc] initWithTitle:@"Apple"];
-		[NSApp performSelector:@selector(setAppleMenu:) withObject:submenu];
-		[mainMenu setSubmenu:submenu forItem:menuItem];
-
-
-		std::string appName = AppConfig::Instance()->GetAppName();
-		NSString * applicationName = [NSString stringWithCString:appName.c_str() encoding:NSUTF8StringEncoding];
-		NSMenu *aMenu = submenu;
-
-		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"About", nil), applicationName]
-									action:@selector(orderFrontStandardAboutPanel:)
-							 keyEquivalent:@""];
-		[menuItem setTarget:NSApp];
-
-		// [aMenu addItem:[NSMenuItem separatorItem]];
-		// 
-		// menuItem = [aMenu addItemWithTitle:NSLocalizedString(@"Preferences...", nil)
-		// 							action:NULL
-		// 					 keyEquivalent:@","];
-		// 
-		[aMenu addItem:[NSMenuItem separatorItem]];
-
-		menuItem = [aMenu addItemWithTitle:NSLocalizedString(@"Services", nil)
-									action:NULL
-							 keyEquivalent:@""];
-		NSMenu * servicesMenu = [[NSMenu alloc] initWithTitle:@"Services"];
-		[aMenu setSubmenu:servicesMenu forItem:menuItem];
-		[NSApp setServicesMenu:servicesMenu];
-		
-		[aMenu addItem:[NSMenuItem separatorItem]];
-
-		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Hide", nil), applicationName]
-									action:@selector(hide:)
-							 keyEquivalent:@"h"];
-		[menuItem setTarget:NSApp];
-		
-		menuItem = [aMenu addItemWithTitle:NSLocalizedString(@"Hide Others", nil)
-									action:@selector(hideOtherApplications:)
-							 keyEquivalent:@"h"];
-		[menuItem setKeyEquivalentModifierMask:NSCommandKeyMask | NSAlternateKeyMask];
-		[menuItem setTarget:NSApp];
-		
-		menuItem = [aMenu addItemWithTitle:NSLocalizedString(@"Show All", nil)
-									action:@selector(unhideAllApplications:)
-							 keyEquivalent:@""];
-		[menuItem setTarget:NSApp];
-		
-		[aMenu addItem:[NSMenuItem separatorItem]];
-		
-		menuItem = [aMenu addItemWithTitle:[NSString stringWithFormat:@"%@ %@", NSLocalizedString(@"Quit", nil), applicationName]
-									action:@selector(terminate:)
-							 keyEquivalent:@"q"];
-		[menuItem setTarget:NSApp];
-		
-		// edit
-		menuItem = [mainMenu addItemWithTitle:@"Edit" action:NULL keyEquivalent:@""];
-		submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Edit", @"The Edit menu")];
-		[mainMenu setSubmenu:submenu forItem:menuItem];
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Undo", nil)
-									action:@selector(undo:)
-							 keyEquivalent:@"z"];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Redo", nil)
-									action:@selector(redo:)
-							 keyEquivalent:@"Z"];
-		
-		[submenu addItem:[NSMenuItem separatorItem]];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Cut", nil)
-									action:@selector(cut:)
-							 keyEquivalent:@"x"];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Copy", nil)
-									action:@selector(copy:)
-							 keyEquivalent:@"c"];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Paste", nil)
-									action:@selector(paste:)
-							 keyEquivalent:@"v"];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Delete", nil)
-									action:@selector(delete:)
-							 keyEquivalent:@""];
-
-		menuItem = [submenu addItemWithTitle: NSLocalizedString(@"Select All", nil)
-							  action: @selector(selectAll:)
-							  keyEquivalent: @"a"];
-		// window
-		menuItem = [mainMenu addItemWithTitle:@"Window" action:NULL keyEquivalent:@""];
-		submenu = [[NSMenu alloc] initWithTitle:NSLocalizedString(@"Window", @"The Window menu")];
-		[mainMenu setSubmenu:submenu forItem:menuItem];
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Minimize", nil)
-									action:@selector(performMinimize:)
-							 keyEquivalent:@"m"];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Zoom", nil)
-									action:@selector(performZoom:)
-							 keyEquivalent:@""];
-		
-		[submenu addItem:[NSMenuItem separatorItem]];
-		
-		menuItem = [submenu addItemWithTitle:NSLocalizedString(@"Bring All to Front", nil)
-									action:@selector(arrangeInFront:)
-							 keyEquivalent:@""];
-		
-		[NSApp setWindowsMenu:submenu];
-
-		if (menu)
-		{
-			OSXUIBinding::AttachMainMenu(mainMenu,menu);
-		}
-		
-		[NSApp setMainMenu:mainMenu];
-		[mainMenu release];
+		return this->defaultMenu;
 	}
 
-	void OSXUIBinding::AttachMainMenu (NSMenu *mainMenu, ti::OSXMenuItem *item)
+	SharedPtr<OSXMenu> OSXUIBinding::GetActiveMenu()
 	{
-		int count = item->GetChildCount();
-		for (int c=0;c<count;c++)
-		{
-			OSXMenuItem *i = item->GetChild(c);
-			const char *label = i->GetLabel();
-			NSString *title = label==NULL ? @"" : [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
-			NSMenuItem *menuItem = [mainMenu addItemWithTitle:title action:NULL keyEquivalent:@""];
-			NSMenu *submenu = [[NSMenu alloc] initWithTitle:title];
-			[mainMenu setSubmenu:submenu forItem:menuItem];
+		return this->activeMenu;
+	}
 
-			NSMenu *submenu2 = [[NSMenu alloc] initWithTitle:title];
-			i->AttachMenu(submenu2);
-			[menuItem setSubmenu:submenu2];
+	void OSXUIBinding::SetupMainMenu(bool force)
+	{
+		SharedPtr<OSXMenu> newActiveMenu = NULL;
 
-			// [menuItem release];
-			// [submenu release];
-			// [mi release];
+		// If there is an active window, search there first for the menu
+		if (!this->activeWindow.isNull()) {
+			newActiveMenu = this->activeWindow->GetMenu().cast<OSXMenu>();
+		}
+
+		// No active window or that window has no menu, try to use the app menu
+		if (newActiveMenu.isNull()) {
+			newActiveMenu = this->menu;
+		}
+
+		if (force || newActiveMenu.get() != this->activeMenu.get()) {
+			SharedPtr<OSXMenu> oldMenu = this->activeMenu; // Save a reference
+			NSMenu* oldNativeMenu = [NSApp mainMenu];
+
+			// Actually create and install the new menu
+			NSMenu* newNativeMenu = nil;
+			if (newActiveMenu.isNull()) {
+				newNativeMenu = this->GetDefaultMenu();
+			} else {
+				newNativeMenu = [[NSMenu alloc] init];
+				newActiveMenu->FillNativeMainMenu(defaultMenu, newNativeMenu);
+			}
+			SetupAppMenuParts(newNativeMenu);
+			[NSApp setMainMenu:newNativeMenu];
+			this->activeMenu = newActiveMenu;
+
+			// Cleanup the old native menu
+			if (!oldMenu.isNull() && oldNativeMenu
+				&& oldNativeMenu != this->GetDefaultMenu()) {
+				oldMenu->DestroyNative(oldNativeMenu);
+			}
 		}
 	}
-	NSMenu* OSXUIBinding::MakeMenu(ti::OSXMenuItem* item)
+
+	void OSXUIBinding::SetupAppMenuParts(NSMenu* nativeMainMenu)
 	{
-		const char *label = item->GetLabel();
-		NSString *title = label == NULL ? @"" : [NSString stringWithCString:label encoding:NSUTF8StringEncoding];
-		NSMenu *menu = [[NSMenu alloc] initWithTitle:title];
-		int count = item->GetChildCount();
-		for (int c=0;c<count;c++)
-		{
-			OSXMenuItem *i = item->GetChild(c);
-			NSMenuItem *mi = i->CreateNative();
-			[mi setEnabled:i->IsEnabled()];
-			[menu addItem:mi];
-			[mi release];
-		}
-		return menu;
+		OSXMenu::FixWindowMenu(nativeMainMenu);
+		[NSApp setWindowsMenu:OSXMenu::GetWindowMenu(nativeMainMenu)];
+		[NSApp performSelector:@selector(setAppleMenu:)
+			withObject:OSXMenu::GetAppleMenu(nativeMainMenu)];
+		[NSApp setServicesMenu:OSXMenu::GetServicesMenu(nativeMainMenu)];
 	}
 
-	void OSXUIBinding::SetDockMenu(SharedPtr<MenuItem> menu)
+	void OSXUIBinding::SetDockMenu(SharedMenu menu)
 	{
-		this->dockMenu = menu;
+		this->dockMenu = menu.cast<OSXMenu>();
 	}
 
-	void OSXUIBinding::SetBadge(SharedString badge_label)
+	void OSXUIBinding::SetBadge(std::string& badgeLabel)
 	{
 		//TODO: Put Dock Icon support back in for 10.4.
 		if (![NSApp respondsToSelector:@selector(dockTile)]){
 			return;
 		}
 
-		std::string value = *badge_label;
-		NSString *label = @"";
-		if (!value.empty())
-		{
-			label = [NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding];
-		}
 		DockTileStandin *tile = (DockTileStandin *)[[NSApplication sharedApplication] dockTile];
-		[tile setBadgeLabel:label];
+		if (!badgeLabel.empty()) {
+			[tile setBadgeLabel:[NSString stringWithUTF8String:badgeLabel.c_str()]];
+
+		} else {
+			[tile setBadgeLabel:@""];
+		}
 	}
-	
-	void OSXUIBinding::SetBadgeImage(SharedString badge_path)
+
+	void OSXUIBinding::SetBadgeImage(std::string& badgePath)
 	{
 		//TODO: need to support allowing custom badge images
 	}
 
-	void OSXUIBinding::SetIcon(SharedString path)
+	void OSXUIBinding::SetIcon(std::string& iconPath)
 	{
-		std::string icon_path = *path;
-		if (icon_path.empty())
+		if (iconPath.empty())
 		{
 			[[NSApplication sharedApplication] setApplicationIconImage:nil];
 		}
 		else
 		{
-			NSImage *image = MakeImage(icon_path);
+			NSImage *image = MakeImage(iconPath);
 			[[NSApplication sharedApplication] setApplicationIconImage:image];
 			[image release];
 		}
 	}
-	
-	SharedPtr<MenuItem> OSXUIBinding::GetDockMenu()
+
+	SharedMenu OSXUIBinding::GetDockMenu()
 	{
 		return this->dockMenu;
 	}
-	
-	SharedPtr<MenuItem> OSXUIBinding::GetMenu()
+
+	SharedMenu OSXUIBinding::GetMenu()
 	{
 		return this->menu;
 	}
 
-	SharedPtr<MenuItem> OSXUIBinding::GetContextMenu()
+	SharedMenu OSXUIBinding::GetContextMenu()
 	{
 		return this->contextMenu;
 	}
-	
-	SharedPtr<TrayItem> OSXUIBinding::AddTray(
-		SharedString icon_path,
-		SharedKMethod cb)
+
+	SharedTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
 	{
-		return new OSXTrayItem(icon_path,cb);
+		return new OSXTrayItem(iconPath, eventListener);
 	}
 
 	long OSXUIBinding::GetIdleTime()

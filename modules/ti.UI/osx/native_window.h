@@ -8,7 +8,6 @@
 
 #import "../ui_module.h"
 #import <Cocoa/Cocoa.h>
-#import "ti_app.h"
 #import <WebKit/WebInspector.h>
 
 @class WebViewDelegate;
@@ -21,14 +20,14 @@ using namespace ti;
 	WebView* webView;
 	WebViewDelegate* delegate;
 	BOOL requiresDisplay;
-	UserWindow* userWindow;
+	OSXUserWindow* userWindow;
 	WebInspector *inspector;
 	BOOL closed;
 	BOOL fullscreen;
 	BOOL focused;
 	NSRect savedFrame;
 }
-- (void)setupDecorations:(WindowConfig*)config host:(Host*)h userwindow:(UserWindow*)uw;
+- (void)setupDecorations:(WindowConfig*)config host:(Host*)h userwindow:(OSXUserWindow*)uw;
 - (void)setTransparency:(double)transparency;
 - (void)setFullscreen:(BOOL)yn;
 - (void)close;

@@ -3,11 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-
-#include "webkit_frame_load_delegate.h"
-#include "win32_user_window.h"
 #include "../ui_module.h"
-#include "../../../kroll/modules/javascript/javascript_module.h"
 #include <comutil.h>
 
 using namespace ti;

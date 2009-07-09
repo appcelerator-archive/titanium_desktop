@@ -3,14 +3,9 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-
 #ifndef _TI_WEB_KIT_POLICY_DELEGATE_H_
 #define _TI_WEB_KIT_POLICY_DELEGATE_H_
-
-#include <kroll/kroll.h>
-#include "WebKit.h"
-
+#include <windows.h>
 namespace ti {
 
 class Win32UserWindow;

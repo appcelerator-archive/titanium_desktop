@@ -5,261 +5,323 @@
  */
 
 #include <kroll/kroll.h>
-#include "menu_item.h"
-
+#include "ui_module.h"
 namespace ti
 {
+	using std::string;
+	using std::vector;
 
-	MenuItem::MenuItem() : AccessorBoundList("MenuItem")
+	MenuItem::MenuItem(MenuItemType type) :
+		StaticBoundObject("UI.MenuItem"),
+		type(type),
+		enabled(true),
+		label(""),
+		submenu(0),
+		state(false),
+		autoCheck(true)
 	{
-		// query methods
-		/**
-		 * @tiapi(method=True,name=UI.Menu.isSeparator,since=0.2) Checks whether a menu item is a separator
-		 * @tiresult(for=UI.Menu.isSeparator,type=boolean) true if the menu item is a separator, false if otherwise
-		 */
 		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.isItem,since=0.2) Checks whether a menu item is a selectable item
-		 * @tiresult(for=UI.Menu.isItem,type=boolean) true if the menu item is a selectable item, false if otherwise
-		 */
-		this->SetMethod("isItem", &MenuItem::_IsItem);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.isSubMenu,since=0.2) Checks whether a menu item is a submenu
-		 * @tiresult(for=UI.Menu.isSubMenu,type=boolean) true if the menu item is a submenu, false if otherwise
-		 */
-		this->SetMethod("isSubMenu", &MenuItem::_IsSubMenu);
+		this->SetMethod("isCheck", &MenuItem::_IsCheck);
 
-		// submenu methods
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addSeparator,since=0.2) Adds a separator to a menu
-		 * @tiresult(for=UI.Menu.addSeparator,type=object) a separator MenuItem
-		 */
-		this->SetMethod("addSeparator", &MenuItem::_AddSeparator);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addItem,since=0.2) Adds a selectable item to a menu
-		 * @tiarg(for=UI.Menu.addItem,name=label,type=string,optional=True) label for the item
-		 * @tiarg(for=UI.Menu.addItem,name=callback,type=method,optional=True) callback function for the item
-		 * @tiarg(for=UI.Menu.addItem,name=icon,type=string,optional=True) icon for the item
-		 * @tiresult(for=UI.Menu.addItem,type=object) a MenuItem
-		 */
-		this->SetMethod("addItem", &MenuItem::_AddItem);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addSubMenu,since=0.2) Adds a submenu item to a menu
-		 * @tiarg(for=UI.Menu.addItem,name=label,type=string,optional=True) label for the item
-		 * @tiarg(for=UI.Menu.addItem,name=icon,type=string,optional=True) icon for the item
-		 * @tiresult(for=UI.Menu.addSubMenu,type=object) a MenuItem
-		 */
-		this->SetMethod("addSubMenu", &MenuItem::_AddSubMenu);
+		if (this->type == NORMAL || this->type == CHECK)
+		{
+			this->SetMethod("setLabel", &MenuItem::_SetLabel);
+			this->SetMethod("getLabel", &MenuItem::_GetLabel);
+			this->SetMethod("setSubmenu", &MenuItem::_SetSubmenu);
+			this->SetMethod("getSubmenu", &MenuItem::_GetSubmenu);
+			this->SetMethod("enable", &MenuItem::_Enable);
+			this->SetMethod("disable", &MenuItem::_Disable);
+			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
 
-		/**
-		 * @tiapi(method=True,name=UI.Menu.enable,since=0.2) Enables a MenuItem
-		 */
-		this->SetMethod("enable", &MenuItem::_Enable);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.disable,since=0.2) Disable a MenuItem
-		 */
-		this->SetMethod("disable", &MenuItem::_Disable);
+			this->SetMethod("addSubmenu", &MenuItem::_AddSubmenu);
+			this->SetMethod("addItem", &MenuItem::_AddItem);
+			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
+			this->SetMethod("addCheckItem", &MenuItem::_AddCheckItem);
 
-		/**
-		* @tiapi(method=True,name=UI.Menu.mark,since=0.4) Marks a MenuItem
-		 */
-		this->SetMethod("mark", &MenuItem::_Mark);
-	
-		/**
-		 * @tiapi(method=True,name=UI.Menu.unmark,since=0.4) Unmarks a MenuItem
-		 */
-		this->SetMethod("unmark", &MenuItem::_Unmark);
+			this->SetMethod("addEventListener", &MenuItem::_AddEventListener);
+			this->SetMethod("removeEventListener", &MenuItem::_RemoveEventListener);
+			this->SetMethod("getEventListeners", &MenuItem::_GetEventListeners);
 
-	    /**
-		 * @tiapi(method=True,name=UI.Menu.setLabel,since=0.2) Sets the MenuItem's label
-		 * @tiarg(for=UI.Menu.setLabel,name=label,type=string) label for the menu item
-		 */
-		this->SetMethod("setLabel", &MenuItem::_SetLabel);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.setIcon,since=0.2) Sets the icon for the MenuItem
-		 * @tiarg(for=UI.Menu.setIcon,name=icon,type=string) path to the icon file
-		 */
-		this->SetMethod("setIcon", &MenuItem::_SetIcon);
+			this->SetMethod("click", &MenuItem::_Click);
+		}
+
+		if (this->type == NORMAL)
+		{
+			this->SetMethod("setIcon", &MenuItem::_SetIcon);
+			this->SetMethod("getIcon", &MenuItem::_GetIcon);
+		}
+
+		if (this->type == CHECK)
+		{
+			this->SetMethod("setState", &MenuItem::_SetState);
+			this->SetMethod("getState", &MenuItem::_GetState);
+			this->SetMethod("setAutoCheck", &MenuItem::_SetAutoCheck);
+			this->SetMethod("isAutoCheck", &MenuItem::_IsAutoCheck);
+		}
 	}
 
 	MenuItem::~MenuItem()
 	{
 	}
 
-	void MenuItem::SetMethod(const char *name, void (MenuItem::*method)(const ValueList&, SharedValue))
-	{
-		MethodCallback* callback = NewCallback<MenuItem, const ValueList&, SharedValue>(static_cast<MenuItem*>(this), method);
-		SharedKMethod bound_method = new StaticBoundMethod(callback);
-		SharedValue method_value = Value::NewMethod(bound_method);
-		this->RawSet(name, method_value);
-	}
-
-	bool MenuItem::IsSeparator()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == SEP);
-	}
-
-	bool MenuItem::IsItem()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == ITEM);
-	}
-
-	bool MenuItem::IsSubMenu()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == SUBMENU);
-	}
-
 	void MenuItem::_IsSeparator(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(this->IsSeparator());
+		result->SetBool(this->type == SEPARATOR);
 	}
 
-	void MenuItem::_IsItem(const ValueList& args, SharedValue result)
+	void MenuItem::_IsCheck(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(this->IsItem());
-	}
-
-	void MenuItem::_IsSubMenu(const ValueList& args, SharedValue result)
-	{
-		result->SetBool(this->IsSubMenu());
-	}
-
-	void MenuItem::_AddSeparator(const ValueList& args, SharedValue result)
-	{
-		SharedValue new_item = this->AddSeparator();
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
-	{
-		SharedValue label = Value::Undefined;
-		SharedValue icon_url = Value::Undefined;
-		SharedValue callback = Value::Undefined;
-
-		if (args.size() > 0 && args.at(0)->IsString())
-			label = args.at(0);
-
-		if (args.size() > 1 && args.at(1)->IsMethod())
-			callback = args.at(1);
-
-		if (args.size() > 2 && args.at(2)->IsString())
-			icon_url = args.at(2);
-
-		SharedValue new_item = this->AddItem(label, callback, icon_url);
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_AddSubMenu(const ValueList& args, SharedValue result)
-	{
-		SharedValue label = Value::Undefined;
-		SharedValue icon_url = Value::Undefined;
-
-		if (args.size() > 0 && args.at(0)->IsString())
-			label = args.at(0);
-
-		if (args.size() > 1 && args.at(1)->IsString())
-			icon_url = args.at(1);
-
-		SharedValue new_item = this->AddSubMenu(label, icon_url);
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_Enable(const ValueList& args, SharedValue result)
-	{
-		this->Enable();
-		this->RawSet("enabled", Value::NewBool(true));
-	}
-
-	void MenuItem::_Disable(const ValueList& args, SharedValue result)
-	{
-		this->Disable();
-		this->RawSet("enabled", Value::NewBool(false));
-	}
-
-	void MenuItem::_Mark(const ValueList& args, SharedValue result)
-	{
-		this->Mark();
-		this->RawSet("marked", Value::NewBool(true));
-	}
-
-	void MenuItem::_Unmark(const ValueList& args, SharedValue result)
-	{
-		this->Unmark();
-		this->RawSet("unmarked", Value::NewBool(false));
+		result->SetBool(this->type == CHECK);
 	}
 
 	void MenuItem::_SetLabel(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("label", args.at(0));
-
-		std::string label = std::string(args.at(0)->ToString());
-		this->SetLabel(label);
+		args.VerifyException("setLabel", "s|0");
+		string newLabel = args.GetString(0, "");
+		this->SetLabel(newLabel);
 	}
+
+	void MenuItem::_GetLabel(const ValueList& args, SharedValue result)
+	{
+		result->SetString(this->label);
+	}
+
 	void MenuItem::_SetIcon(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("icon", args.at(0));
-		std::string icon_path = std::string(args.at(0)->ToString());
-		this->SetIcon(icon_path);
+		args.VerifyException("setIcon", "s|0");
+		std::string newIcon = "";
+		if (args.size() > 0) {
+			newIcon = args.GetString(0);
+		}
+		this->SetIcon(newIcon);
 	}
 
-	/* The function below, modify the bound object values
-	 * of this object and are used by subclasses to ensure
-	 * a consistent state */
-	void MenuItem::MakeSeparator()
+	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(SEP));
-		this->RawSet("iconURL", Value::Undefined);
-		this->RawSet("label", Value::Undefined);
+		result->SetString(this->iconURL);
 	}
 
-	void MenuItem::MakeItem(SharedValue label,
-	                       SharedValue callback,
-	                       SharedValue icon_url)
+	void MenuItem::_SetState(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(ITEM));
-		this->RawSet("label", label);
-		this->RawSet("callback", callback);
-		this->RawSet("iconURL", icon_url);
+		args.VerifyException("setState", "b");
+		this->SetState(args.GetBool(0));
 	}
 
-	void MenuItem::MakeSubMenu(SharedValue label,
-	                          SharedValue icon_url)
+	void MenuItem::_GetState(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(SUBMENU));
-		this->RawSet("label", label);
-		this->RawSet("iconURL", icon_url);
-		this->RawSet("callback", Value::Undefined);
+		result->SetBool(this->state);
 	}
 
-	SharedValue MenuItem::AddToListModel(MenuItem* item)
+	void MenuItem::_AddEventListener(const ValueList& args, SharedValue result)
 	{
-		SharedKList so = SharedKList(item);
-		SharedValue v = Value::NewList(so);
-		this->Append(v);
-		return v;
+		args.VerifyException("addEventListener", "m|0");
+		SharedKMethod newCallback = args.GetMethod(0, NULL);
+		this->AddEventListener(newCallback);
 	}
 
-
-	/* Handy accessor functions */
-	const char* MenuItem::GetLabel()
+	void MenuItem::_RemoveEventListener(const ValueList& args, SharedValue result)
 	{
-		SharedValue label_value = this->RawGet("label");
-		if (label_value->IsString())
-			return label_value->ToString();
+	}
+
+	void MenuItem::_GetEventListeners(const ValueList& args, SharedValue result)
+	{
+	}
+
+	void MenuItem::_SetSubmenu(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setCallback", "o|0");
+		SharedMenu newSubmenu = NULL;
+
+		if (args.at(0)->IsObject())
+		{
+			SharedKObject o = args.at(0)->ToObject();
+			o = KObject::Unwrap(o);
+			newSubmenu = o.cast<Menu>();
+		}
+
+		this->submenu = newSubmenu;
+		this->SetSubmenuImpl(newSubmenu);
+	}
+
+	void MenuItem::_GetSubmenu(const ValueList& args, SharedValue result)
+	{
+		if (this->submenu.isNull())
+		{
+			result->SetNull();
+		}
 		else
-			return NULL;
+		{
+			result->SetObject(this->submenu);
+		}
 	}
 
-	const char* MenuItem::GetIconURL()
+	void MenuItem::_Enable(const ValueList& args, SharedValue result)
 	{
-		SharedValue label_value = this->RawGet("iconURL");
-		if (label_value->IsString())
-			return label_value->ToString();
-		else
-			return NULL;
+		this->enabled = true;
+		this->SetEnabledImpl(true);
 	}
 
+	void MenuItem::_Disable(const ValueList& args, SharedValue result)
+	{
+		this->enabled = false;
+		this->SetEnabledImpl(true);
+	}
+
+	void MenuItem::_SetAutoCheck(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setAutoCheck", "b");
+		this->autoCheck = args.GetBool(0);
+	}
+
+	void MenuItem::_IsAutoCheck(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->autoCheck);
+	}
+
+	void MenuItem::_IsEnabled(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->enabled);
+	}
+
+	void MenuItem::_Click(const ValueList& args, SharedValue result)
+	{
+		this->HandleClickEvent(0);
+	}
+
+	void MenuItem::_AddSubmenu(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		newItem->EnsureHasSubmenu();
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("addItem", "?s m|0 s|0");
+		UIBinding* binding = UIBinding::GetInstance();
+
+		// Create a menu item object and add it to this item's submenu
+		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::_AddSeparatorItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+		SharedMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::_AddCheckItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+
+		// Create a menu item object
+		SharedMenuItem newItem = binding->__CreateCheckMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::AddEventListener(SharedKMethod eventListener)
+	{
+		std::vector<SharedKMethod>::iterator i = this->eventListeners.begin();
+		while (i != this->eventListeners.end())
+		{
+			SharedKMethod m = (*i++);
+			if (eventListener->Equals(m))
+			{
+				return;
+			}
+		}
+
+		this->eventListeners.push_back(eventListener);
+	}
+
+	void MenuItem::HandleClickEvent(SharedKObject source)
+	{
+		if (this->IsCheck() && this->autoCheck)
+		{
+			// Execute this later on the main thread
+			Host* host = Host::GetInstance();
+			host->InvokeMethodOnMainThread(
+				this->Get("setState")->ToMethod(),
+				ValueList(Value::NewBool(!this->GetState())),
+				false);
+		}
+
+		UIBinding::SendEventToListeners(
+			this->eventListeners,
+			UIBinding::CLICKED,
+			source);
+	}
+
+	void MenuItem::SetState(bool newState)
+	{
+		this->state = newState;
+		this->SetStateImpl(newState);
+	}
+
+	void MenuItem::SetLabel(string& newLabel)
+	{
+		this->label = newLabel;
+		this->SetLabelImpl(newLabel);
+	}
+
+	void MenuItem::SetIcon(string& iconURL)
+	{
+		this->iconPath = this->iconURL = iconURL;
+		if (!iconURL.empty()) {
+			this->iconPath = URLToPathOrURL(this->iconURL);
+		}
+		this->SetIconImpl(this->iconPath); // platform-specific impl
+	}
+
+	bool MenuItem::GetState()
+	{
+		return this->state;
+	}
+
+	std::string& MenuItem::GetLabel()
+	{
+		return this->label;
+	}
+
+	bool MenuItem::IsSeparator()
+	{
+		return this->type == SEPARATOR;
+	}
+
+	bool MenuItem::IsCheck()
+	{
+		return this->type == CHECK;
+	}
+
+	bool MenuItem::IsEnabled()
+	{
+		return this->enabled;
+	}
+
+	void MenuItem::EnsureHasSubmenu()
+	{
+		if (this->submenu.isNull())
+		{
+			UIBinding* binding = UIBinding::GetInstance();
+			SharedMenu newSubmenu = binding->CreateMenu();
+			this->SetSubmenuImpl(newSubmenu);
+			this->submenu = newSubmenu;
+		}
+	}
 }

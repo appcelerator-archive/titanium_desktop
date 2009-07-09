@@ -3,16 +3,17 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "webkit_ui_delegate.h"
-
-#include "win32_user_window.h"
-#include "win32_ui_binding.h"
+#include "../ui_module.h"
 #include <comutil.h>
 
 using namespace ti;
 
-Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) : window(window_), ref_count(1) {
-	logger = Logger::Get("UI.Win32WebKitUIDelegate");
+Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) :
+	window(window_),
+	nativeContextMenu(0),
+	logger(Logger::Get("UI.Win32WebKitUIDelegate")),
+	ref_count(1)
+{
 }
 
 HRESULT STDMETHODCALLTYPE
@@ -238,24 +239,42 @@ Win32WebKitUIDelegate::hasCustomMenuImplementation(
 HRESULT STDMETHODCALLTYPE
 Win32WebKitUIDelegate::trackCustomPopupMenu(
 	/* [in] */ IWebView *sender,
-	/* [in] */ OLE_HANDLE menu,
+	/* [in] */ OLE_HANDLE inMenu,
 	/* [in] */ LPPOINT point)
 {
-	HMENU contextMenu = this->window->GetContextMenuHandle();
-	if(! contextMenu)
+	SharedPtr<Win32Menu> menu = this->window->GetContextMenu().cast<Win32Menu>();
+
+	// No window menu, try to use the application menu.
+	if (menu.isNull())
 	{
-		contextMenu = Win32UIBinding::getContextMenuInUseHandle();
-	}
-	if(! contextMenu)
-	{
-		contextMenu = Win32MenuItemImpl::GetDefaultContextMenu();
+		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
+		menu = b->GetContextMenu().cast<Win32Menu>();
 	}
 
-	if(contextMenu)
-	{
-		TrackPopupMenu(contextMenu,
-			TPM_BOTTOMALIGN,
-			point->x, point->y, 0,
+	if (this->nativeContextMenu) {
+		DestroyMenu(this->nativeContextMenu);
+		this->nativeContextMenu = 0;
+	}
+
+	Host* host = Host::GetInstance();
+	if (!menu.isNull()) {
+		this->nativeContextMenu = menu->CreateNative(false);
+
+	} else if (host->IsDebugMode()) {
+		this->nativeContextMenu = CreatePopupMenu();
+		Win32Menu::ApplyNotifyByPositionStyleToNativeMenu(this->nativeContextMenu);
+	}
+
+	if (this->nativeContextMenu) {
+
+		if (host->IsDebugMode()) {
+			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, "Separator");
+			AppendMenu(this->nativeContextMenu,
+				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, "Show Inspector");
+		}
+
+		TrackPopupMenu(this->nativeContextMenu,
+			TPM_BOTTOMALIGN, point->x, point->y, 0,
 			this->window->GetWindowHandle(), NULL);
 	}
 

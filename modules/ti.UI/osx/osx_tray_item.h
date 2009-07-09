@@ -5,30 +5,25 @@
  */
 #ifndef TI_OSX_TRAY_ITEM_H_
 #define TI_OSX_TRAY_ITEM_H_
-
-#include <Cocoa/Cocoa.h>
-#include <kroll/kroll.h>
-#include "../tray_item.h"
-#include "../menu_item.h"
-
 namespace ti
 {
 	class OSXTrayItem: public TrayItem
 	{
 	public:
-		OSXTrayItem(SharedString iconPath, SharedKMethod cb);
+		OSXTrayItem(std::string& iconPath, SharedKMethod cb);
 		virtual ~OSXTrayItem();
 
-		void SetIcon(SharedString iconPath);
-		void SetMenu(SharedPtr<MenuItem> menu);
-		void SetHint(SharedString hint);
+		void SetIcon(std::string& iconPath);
+		void SetMenu(SharedMenu menu);
+		void SetHint(std::string& hint);
 		void Remove();
-		
-		void Invoke();
+		void InvokeCallback();
 
 	private:
+		NSMenu* nativeMenu;
+		SharedPtr<OSXMenu> menu;
 		SharedKMethod callback;
-		id delegate;
+		NSStatusItem* nativeItem;
 	};
 }
 

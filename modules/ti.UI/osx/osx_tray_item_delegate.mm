@@ -3,30 +3,23 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#import "menu_action.h"
+#import "../ui_module.h"
 
-@implementation MenuAction
-
-- (id)initWithMethod:(SharedKMethod)m
+@implementation OSXTrayItemDelegate
+-(id)initWithTray:(OSXTrayItem*)inTrayItem
 {
+	trayItem = inTrayItem;
 	self = [super init];
-	if (self!=nil)
-	{
-		method = new SharedKMethod(m);
-	}
 	return self;
 }
-
-- (void)dealloc
+-(void)dealloc
 {
-	delete method;
 	[super dealloc];
 }
-
-- (void)fire
+-(void)invoke:(id)sender
 {
-	ValueList args;
-	(*method)->Call(args);
+	trayItem->InvokeCallback();
 }
-
 @end
+
+

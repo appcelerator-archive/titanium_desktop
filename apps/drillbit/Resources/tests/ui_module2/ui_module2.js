@@ -1,16 +1,16 @@
 describe("UI Module Tests",{
 	test_user_window_title: function()
 	{
-	    // get the current UserWindow object
+		// get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 
 		var title = "blahahahahahahahahahahahahaha";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
-		title = "    ___       ";
+		title = "	___	   ";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
-		title = "    _¬˚∆¬˚¬∂ƒ¬∆ø´ˆ∆¬ßƒ∂ˆ__       ";
+		title = "	_¬˚∆¬˚¬∂ƒ¬∆ø´ˆ∆¬ßƒ∂ˆ__	   ";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
 		title = "";
@@ -22,10 +22,10 @@ describe("UI Module Tests",{
 		title = "blahahahahahahahahahahahahaha";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
-		title = "    ___       ";
+		title = "	___	   ";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
-		title = "    _¬˚∆¬˚¬∂ƒ¬∆ø´ˆ∆¬ßƒ∂ˆ__       ";
+		title = "	_¬˚∆¬˚¬∂ƒ¬∆ø´ˆ∆¬ßƒ∂ˆ__	   ";
 		w.setTitle(title);
 		value_of(w.getTitle()).should_be(title);
 		title = "";
@@ -37,7 +37,7 @@ describe("UI Module Tests",{
 
 	test_user_window_url: function()
 	{
-	    // get the current UserWindow object
+		// get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 
 		var url = "http://www.google.com";
@@ -93,7 +93,7 @@ describe("UI Module Tests",{
 	},
 	test_window_listener_as_async: function(callback)
 	{
-	    // get the current UserWindow object
+		// get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 
 		var messageLog = { };
@@ -128,7 +128,7 @@ describe("UI Module Tests",{
 	},
 	test_window_maximize_fires_resize_as_async: function(callback)
 	{
-	    // get the current UserWindow object
+		// get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		w.open();
 

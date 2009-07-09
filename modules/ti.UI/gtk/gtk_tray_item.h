@@ -14,23 +14,21 @@ namespace ti
 	{
 
 	public:
-		GtkTrayItem(SharedString icon_path,
-		            SharedKMethod cb);
+		GtkTrayItem(std::string& icon_path, SharedKMethod cb);
 		~GtkTrayItem();
 
-		void SetIcon(SharedString icon_path);
-		void SetMenu(SharedPtr<MenuItem> menu);
-		void SetHint(SharedString hint);
+		void SetIcon(std::string& icon_path);
+		void SetMenu(SharedMenu menu);
+		void SetHint(std::string& hint);
 		void Remove();
 
 		GtkStatusIcon* GetWidget();
-		GtkWidget* GetMenuWidget();
-		SharedPtr<GtkMenuItemImpl> GetMenu();
+		SharedPtr<GtkMenu> GetMenu();
+		SharedKMethod GetCallback();
 
 	protected:
 		GtkStatusIcon* item;
-		SharedPtr<GtkMenuItemImpl> menu;
-		GtkWidget* menu_widget;
+		SharedPtr<GtkMenu> menu;
 		SharedKMethod callback;
 		bool active;
 	};

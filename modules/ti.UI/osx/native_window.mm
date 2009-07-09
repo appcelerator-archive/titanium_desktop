@@ -3,9 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#import "native_window.h"
-#import <Carbon/Carbon.h>
-#import "../user_window.h"
+#include "../ui_module.h"
 
 @implementation NativeWindow
 - (BOOL)canBecomeKeyWindow
@@ -16,7 +14,7 @@
 {
 	return YES;
 }
-- (void)setupDecorations:(WindowConfig*)cfg host:(Host*)host userwindow:(UserWindow*)uw
+- (void)setupDecorations:(WindowConfig*)cfg host:(Host*)host userwindow:(OSXUserWindow*)uw
 {
 	config = cfg;
 	userWindow = uw;
@@ -123,8 +121,7 @@
 - (void)windowDidBecomeKey:(NSNotification*)notification
 {
 	[self fireWindowEvent:FOCUSED];
-	OSXUserWindow* uw = static_cast<OSXUserWindow*>(userWindow);
-	uw->Focused();
+	userWindow->Focused();
 	if (!focused && fullscreen)
 	{
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
@@ -134,8 +131,7 @@
 - (void)windowDidResignKey:(NSNotification*)notification
 {
 	[self fireWindowEvent:UNFOCUSED];
-	OSXUserWindow* uw = static_cast<OSXUserWindow*>(userWindow);
-	uw->Unfocused();
+	userWindow->Unfocused();
 	if (fullscreen && focused)
 	{
 		SetSystemUIMode(kUIModeNormal,0);
@@ -253,8 +249,7 @@
 		[self fireWindowEvent:CLOSED];
 		[webView close];
 		[super close];
-		OSXUserWindow *uw = static_cast<OSXUserWindow*>(userWindow);
-		uw->Close();
+		userWindow->Close();
 	}
 }
 - (void)setInitialWindow:(BOOL)yn
@@ -283,8 +278,7 @@
 }
 - (void)fireWindowEvent:(UserWindowEvent)event
 {
-	OSXUserWindow *uw = static_cast<OSXUserWindow*>(userWindow);
-	uw->FireEvent(event);
+	userWindow->FireEvent(event);
 }
 
 @end

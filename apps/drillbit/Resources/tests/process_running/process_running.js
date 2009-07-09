@@ -25,6 +25,9 @@ describe("process running tests",
 		value_of(p['in']).should_not_be_null();
 		value_of(p['out']).should_not_be_null();
 		value_of(p.terminate).should_be_function();
+		
+		// in the process object we init the pid to NULL, then assign an int later.
+		value_of(p.pid).should_not_be_null();
 		value_of(p.pid).should_be_number();
 		
 		p.onread = function(buf)

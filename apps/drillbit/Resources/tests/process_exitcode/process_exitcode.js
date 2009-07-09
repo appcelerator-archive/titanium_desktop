@@ -53,13 +53,12 @@ describe("process exitCode tests",
 		
 		p.launch();
 		
-		// if we hit this timeout, then we fail.
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');
 		},5000);
 	},
-	
+		
 	test_process_exitCode_fail_as_async: function(test)
 	{
 		value_of(Titanium.Process).should_not_be_null();
