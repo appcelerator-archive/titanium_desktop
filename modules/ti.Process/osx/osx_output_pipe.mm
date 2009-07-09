@@ -35,7 +35,7 @@ namespace ti
 		return closed;
 	}
 	
-	int OSXOutputPipe::Write(SharedPtr<Blob> data, int size)
+	int OSXOutputPipe::Write(SharedPtr<Blob> data)
 	{
 		if (closed)
 		{
@@ -44,9 +44,8 @@ namespace ti
 		
 		@try
 		{
-			if (size == -1) size = data->Length();
-			[handle writeData:[NSData dataWithBytes:(void*)data->Get() length:size]];
-			return size;
+			[handle writeData:[NSData dataWithBytes:(void*)data->Get() length:data->Length()]];
+			return data->Length();
 		}
 		@catch(NSException *e)
 		{
