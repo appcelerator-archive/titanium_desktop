@@ -455,5 +455,10 @@ describe("ti.API tests",
 		
 		value_of(str).should_be_string();
 		value_of(str).should_be("bar");
-	}
+	},
+
+  test_api_run_on_main: function()
+  {
+    value_of(window.x_value).should_be("threads rock!");
+  }
 });
