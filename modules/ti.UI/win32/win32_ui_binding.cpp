@@ -94,21 +94,19 @@ namespace ti
 		return new Win32Menu();
 	}
 
-	SharedMenuItem Win32UIBinding::CreateMenuItem(
-		std::string label, SharedKMethod callback, std::string iconURL)
+	SharedMenuItem Win32UIBinding::CreateMenuItem()
 	{
-		return new Win32MenuItem(MenuItem::NORMAL, label, callback, iconURL);
+		return new Win32MenuItem(MenuItem::NORMAL);
 	}
 
 	SharedMenuItem Win32UIBinding::CreateSeparatorMenuItem()
 	{
-		return new Win32MenuItem(MenuItem::SEPARATOR, std::string(), NULL, std::string());
+		return new Win32MenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem Win32UIBinding::CreateCheckMenuItem(
-		std::string label, SharedKMethod callback)
+	SharedMenuItem Win32UIBinding::CreateCheckMenuItem()
 	{
-		return new Win32MenuItem(MenuItem::CHECK, label, callback, std::string());
+		return new Win32MenuItem(MenuItem::CHECK);
 	}
 
 	void Win32UIBinding::SetMenu(SharedMenu newMenu)
@@ -127,10 +125,9 @@ namespace ti
 	}
 
 	SharedPtr<TrayItem> Win32UIBinding::AddTray(
-		SharedString icon_path,
-		SharedKMethod cb)
+		std::string& iconPath, SharedKMethod cb)
 	{
-		SharedPtr<TrayItem> trayItem = new Win32TrayItem(icon_path, cb);
+		SharedPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cb);
 		return trayItem;
 	}
 

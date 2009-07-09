@@ -227,7 +227,7 @@ class UserWindow : public AccessorBoundObject {
 		virtual SharedMenu GetMenu() = 0;
 		virtual void SetContextMenu(SharedMenu menu) = 0;
 		virtual SharedMenu GetContextMenu() = 0;
-		virtual void SetIcon(std::string& icon_path) = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
 		virtual std::string& GetIcon() = 0;
 		virtual bool IsTopMost() = 0;
 		virtual void SetTopMost(bool topmost) = 0;

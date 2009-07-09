@@ -10,12 +10,12 @@ namespace ti
 	class OSXTrayItem: public TrayItem
 	{
 	public:
-		OSXTrayItem(SharedString iconPath, SharedKMethod cb);
+		OSXTrayItem(std::string& iconPath, SharedKMethod cb);
 		virtual ~OSXTrayItem();
 
-		void SetIcon(SharedString iconPath);
+		void SetIcon(std::string& iconPath);
 		void SetMenu(SharedMenu menu);
-		void SetHint(SharedString hint);
+		void SetHint(std::string& hint);
 		void Remove();
 		void InvokeCallback();
 

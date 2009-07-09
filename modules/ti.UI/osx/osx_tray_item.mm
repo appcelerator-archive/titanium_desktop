@@ -6,7 +6,7 @@
 #include "../ui_module.h"
 namespace ti
 {
-	OSXTrayItem::OSXTrayItem(SharedString iconPath, SharedKMethod cb) :
+	OSXTrayItem::OSXTrayItem(std::string& iconPath, SharedKMethod cb) :
 		nativeMenu(0),
 		menu(0),
 		callback(cb),
@@ -29,14 +29,9 @@ namespace ti
 		}
 	}
 
-	void OSXTrayItem::SetIcon(SharedString iconPath)
+	void OSXTrayItem::SetIcon(std::string& iconPath)
 	{
-		std::string path = *iconPath;
-		NSImage* image = nil;
-		if (!path.empty())
-		{
-			image = ti::OSXUIBinding::MakeImage(path);
-		}
+		image = ti::OSXUIBinding::MakeImage(path);
 		[nativeItem setImage:image];
 	}
 
@@ -60,15 +55,11 @@ namespace ti
 		this->nativeMenu = newNativeMenu;
 	}
 
-	void OSXTrayItem::SetHint(SharedString hint)
+	void OSXTrayItem::SetHint(std::string& hint)
 	{
-		std::string label = *hint;
-		if (label.empty())
-		{
+		if (hint.empty()) {
 			[nativeItem setToolTip:@""];
-		}
-		else
-		{
+		} else {
 			[nativeItem setToolTip:[NSString stringWithCString:label.c_str()]];
 		}
 	}

@@ -19,8 +19,7 @@ namespace ti
 			HMENU submenu;
 		};
 
-		Win32MenuItem(MenuItemType type, std::string label,
-			SharedKMethod callback, std::string iconURL);
+		Win32MenuItem(MenuItemType type);
 		virtual ~Win32MenuItem();
 
 		void SetLabelImpl(std::string newLabel);
@@ -40,9 +39,10 @@ namespace ti
 		static bool HandleClickEvent(HMENU nativeMenu, UINT position);
 
 	private:
-		std::vector<NativeItemBits*> nativeItems;
+		std::string iconPath;
 		SharedPtr<Win32Menu> oldSubmenu;
 		std::string oldLabel;
+		std::vector<NativeItemBits*> nativeItems;
 
 	};
 }

@@ -285,7 +285,16 @@ namespace ti
 		std::string label = args.GetString(0, "");
 		SharedKMethod eventListener = args.GetMethod(1, NULL);
 		std::string iconURL = args.GetString(2, "");
-		return this->CreateMenuItem(label, eventListener, iconURL);
+
+		SharedMenuItem item = this->CreateMenuItem();
+		if (!label.empty())
+			item->SetLabel(label);
+		if (!iconURL.empty())
+			item->SetIcon(iconURL);
+		if (!eventListener.isNull())
+			item->AddEventListener(eventListener);
+
+		return item;
 	}
 
 
@@ -299,7 +308,13 @@ namespace ti
 		args.VerifyException("createCheckMenuItem", "?s m|0");
 		std::string label = args.GetString(0, "");
 		SharedKMethod eventListener = args.GetMethod(1, NULL);
-		return this->CreateCheckMenuItem(label, eventListener);
+
+		SharedMenuItem item = this->CreateCheckMenuItem();
+		if (!label.empty())
+			item->SetLabel(label);
+		if (!eventListener.isNull())
+			item->AddEventListener(eventListener);
+		return item;
 	}
 
 	void UIBinding::_CreateSeparatorMenuItem(const ValueList& args, SharedValue result)
@@ -366,18 +381,14 @@ namespace ti
 
 	void UIBinding::_SetIcon(const ValueList& args, SharedValue result)
 	{
-		SharedString iconPath = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *iconURL = args.at(0)->ToString();
-			iconPath = UIModule::GetResourcePath(iconURL);
+		args.VerifyException("setIcon", "s|0");
+		std::string iconPath = this->iconURL = "";
+		if (args.size() > 0) {
+			this->iconURL = args.GetString(0);
+			iconPath = URLToPathOrURL(this->iconURL);
 		}
 
-		this->iconPath = "";
-		if (!iconPath.isNull())
-			this->iconPath = *iconPath;
-
-		this->SetIcon(this->iconPath); // platform-specific impl
+		this->SetIcon(iconPath); // platform-specific impl
 
 		// Notify all windows that the app menu has changed.
 		std::vector<SharedUserWindow>::iterator i = openWindows.begin();
@@ -389,12 +400,10 @@ namespace ti
 	void UIBinding::_AddTray(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("createTrayIcon", "s,?m");
-		std::string iconURL = args.GetString(0);
-		SharedString iconPath = UIModule::GetResourcePath(iconURL.c_str());
-		if (iconPath.isNull())
-		{
-			throw ValueException::FromString("Could not add tray icon with icon URL: " + iconURL);
-		}
+
+		std::string iconPath = args.GetString(0);
+		iconPath = URLToPathOrURL(iconPath);
+
 		SharedKMethod cb = args.GetMethod(1, NULL);
 		SharedTrayItem item = this->AddTray(iconPath, cb);
 		this->trayItems.push_back(item);
@@ -435,11 +444,10 @@ namespace ti
 
 	void UIBinding::_SetDockIcon(const ValueList& args, SharedValue result)
 	{
-		SharedString iconPath = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *iconURL = args.at(0)->ToString();
-			iconPath = UIModule::GetResourcePath(iconURL);
+		std::string iconPath;
+		if (args.size() > 0) {
+			std::string in = args.GetString(0);
+			iconPath = URLToPathOrURL(in);
 		}
 		this->SetDockIcon(iconPath);
 	}
@@ -456,30 +464,23 @@ namespace ti
 
 	void UIBinding::_SetBadge(const ValueList& args, SharedValue result)
 	{
-		// badges are just labels right now
-		// we might want to support custom images too
-		SharedString badgePath = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString()) {
-
-			const char *badgeURL = args.at(0)->ToString();
-			if (badgeURL) {
-				badgePath = SharedString(new std::string(badgeURL));
-			}
+		std::string badgeText;
+		if (args.size() > 0) {
+			badgeText = args.GetString(0);
 		}
-		this->SetBadge(badgePath);
+
+		this->SetBadge(badgeText);
 	}
 
 	void UIBinding::_SetBadgeImage(const ValueList& args, SharedValue result)
 	{
-		SharedString imagePath = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString()) {
-			const char *imageURL = args.at(0)->ToString();
-			if (imageURL) {
-				imagePath = UIModule::GetResourcePath(imageURL);
-			}
+		std::string iconPath;
+		if (args.size() > 0) {
+			std::string in = args.GetString(0);
+			iconPath = URLToPathOrURL(in);
 		}
 
-		this->SetBadgeImage(imagePath);
+		this->SetBadgeImage(iconPath);
 	}
 
 	void UIBinding::_GetIdleTime(

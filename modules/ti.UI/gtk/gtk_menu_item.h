@@ -10,8 +10,7 @@ namespace ti
 	class GtkMenuItem : public MenuItem
 	{
 	public:
-		GtkMenuItem(MenuItemType type, std::string label,
-			SharedKMethod callback, std::string iconURL);
+		GtkMenuItem(MenuItemType type);
 		virtual ~GtkMenuItem();
 
 		void SetLabelImpl(std::string newLabel);

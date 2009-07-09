@@ -10,7 +10,7 @@
 namespace ti
 {
 	std::vector<SharedPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(SharedString iconPath, SharedKMethod cb) :
+	Win32TrayItem::Win32TrayItem(std::string& iconPath, SharedKMethod cb) :
 		callback(cb),
 		oldNativeMenu(0),
 		trayIconData(0)
@@ -32,8 +32,7 @@ namespace ti
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
 
-		std::string iconString = *iconPath;
-		HICON icon = Win32UIBinding::LoadImageAsIcon(iconString);
+		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
 	
 		lstrcpy(notifyIconData->szTip, "Titanium Application");
@@ -48,17 +47,14 @@ namespace ti
 		this->Remove();
 	}
 	
-	void Win32TrayItem::SetIcon(SharedString iconPath)
+	void Win32TrayItem::SetIcon(std::string& iconPath)
 	{
 		if (this->trayIconData == NULL)
 		{
-			return; // nothing to do
+			HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
+			this->trayIconData->hIcon = icon;
+			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 		}
-	
-		std::string iconString = *iconPath;
-		HICON icon = Win32UIBinding::LoadImageAsIcon(iconString);
-		this->trayIconData->hIcon = icon;
-		Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 	}
 	
 	void Win32TrayItem::SetMenu(SharedMenu menu)
@@ -66,29 +62,23 @@ namespace ti
 		this->menu = menu;
 	}
 	
-	void Win32TrayItem::SetHint(SharedString hint)
+	void Win32TrayItem::SetHint(std::string& hint)
 	{
 		if (this->trayIconData == NULL)
 		{
-			// nothing to do
-			return;
+			// TODO: free the previous hint
+			lstrcpy(this->trayIconData->szTip, hint.c_str());
+			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 		}
-	
-		lstrcpy(this->trayIconData->szTip, (*hint).c_str());
-		Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 	}
 	
 	void Win32TrayItem::Remove()
 	{
 		if (this->trayIconData == NULL)
 		{
-			// nothing to do
-			return;
+			Shell_NotifyIcon(NIM_DELETE, this->trayIconData);
+			this->trayIconData = NULL;
 		}
-	
-		Shell_NotifyIcon(NIM_DELETE, this->trayIconData);
-	
-		this->trayIconData = NULL;
 	}
 
 	void Win32TrayItem::HandleRightClick()

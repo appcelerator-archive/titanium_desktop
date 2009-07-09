@@ -12,7 +12,7 @@ namespace ti
 	void TrayClickedCallback(GtkStatusIcon*, gpointer);
 	void TrayMenuCallback(GtkStatusIcon*, guint, guint, gpointer);
 
-	GtkTrayItem::GtkTrayItem(SharedString icon_path, SharedKMethod cb) :
+	GtkTrayItem::GtkTrayItem(std::string& icon_path, SharedKMethod cb) :
 		TrayItem(),
 		item(gtk_status_icon_new()),
 		menu(0),
@@ -34,18 +34,14 @@ namespace ti
 	{
 	}
 
-	void GtkTrayItem::SetIcon(SharedString icon_path)
+	void GtkTrayItem::SetIcon(std::string& iconPath)
 	{
-		if (!active) return;
-
-		if (icon_path.isNull())
-		{
-			gtk_status_icon_set_from_file(this->item, NULL);
-		}
-		else
-		{
-			gtk_status_icon_set_from_file(
-				this->item, icon_path->c_str());
+		if (active) {
+			if (iconPath.empty()) {
+				gtk_status_icon_set_from_file(this->item, NULL);
+			} else {
+				gtk_status_icon_set_from_file(this->item, iconPath.c_str());
+			}
 		}
 	}
 
@@ -54,11 +50,15 @@ namespace ti
 		this->menu = menu.cast<GtkMenu>();
 	}
 
-	void GtkTrayItem::SetHint(SharedString hint)
+	void GtkTrayItem::SetHint(std::string& hint)
 	{
-		if (!active) return;
-
-		gtk_status_icon_set_tooltip(this->item, hint->c_str());
+		if (active) {
+			if (hint.empty()) {
+				gtk_status_icon_set_tooltip(this->item, NULL);
+			} else {
+				gtk_status_icon_set_tooltip(this->item, hint->c_str());
+			}
+		}
 	}
 
 	void GtkTrayItem::Remove()

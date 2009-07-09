@@ -6,10 +6,7 @@
 #include "../ui_module.h"
 namespace ti
 {
-	OSXMenuItem::OSXMenuItem(
-		MenuItemType type, std::string label,
-		SharedKMethod callback, std::string iconURL) :
-			MenuItem(type, label, callback, iconURL)
+	OSXMenuItem::OSXMenuItem(MenuItemType type) : MenuItem(type)
 	{
 	}
 

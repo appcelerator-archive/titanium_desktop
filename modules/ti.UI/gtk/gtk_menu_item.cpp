@@ -19,11 +19,9 @@ namespace ti
 		}
 	}
 
-	GtkMenuItem::GtkMenuItem(
-		MenuItemType type, std::string label,
-		SharedKMethod callback, std::string iconURL) :
-			MenuItem(type, label, callback, iconURL),
-			oldSubmenu(0)
+	GtkMenuItem::GtkMenuItem(MenuItemType type) :
+		MenuItem(type),
+		oldSubmenu(0)
 	{
 	}
 

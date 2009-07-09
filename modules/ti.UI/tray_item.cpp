@@ -63,16 +63,15 @@ namespace ti
 
 	void TrayItem::_SetIcon(const ValueList& args, SharedValue result)
 	{
-		bool valid = args.Verify("s"); if (!valid)
-			return;
+		args.VerifyException("setIcon", "s");
 
-		const char *iconURL = args.at(0)->ToString();
-		SharedString icon_path = UIModule::GetResourcePath(iconURL);
-		if (!icon_path.isNull())
-		{
-			this->SetIcon(icon_path);
+		std::string iconPath = this->iconURL = "";
+		if (args.size() > 0) {
+			this->iconURL = args.GetString(0);
+			iconPath = URLToPathOrURL(iconURL);
 		}
-		this->iconURL = iconURL;
+
+		this->SetIcon(iconPath);
 	}
 
 	void TrayItem::_GetIcon(const ValueList& args, SharedValue result)
@@ -99,13 +98,12 @@ namespace ti
 
 	void TrayItem::_SetHint(const ValueList& args, SharedValue result)
 	{
-		SharedString hint = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			hint = new std::string(args.at(0)->ToString());
+		args.VerifyException("setHint", "s|0");
+		this->hint = "";
+		if (args.size() > 0) {
+			hint = args.GetString(0);
 		}
 		this->SetHint(hint);
-		this->hint = hint->c_str();
 	}
 
 	void TrayItem::_GetHint(const ValueList& args, SharedValue result)

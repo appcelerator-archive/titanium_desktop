@@ -18,8 +18,7 @@ namespace ti
 			CHECK
 		};
 
-		MenuItem(MenuItemType type, std::string label,
-			SharedKMethod eventListener, std::string iconURL);
+		MenuItem(MenuItemType type);
 		~MenuItem();
 
 		void _IsSeparator(const ValueList& args, SharedValue result);
@@ -45,8 +44,9 @@ namespace ti
 		void _AddCheckItem(const ValueList& args, SharedValue result);
 
 		void AddEventListener(SharedKMethod eventListener);
+		void SetLabel(string& label);
 		std::string& GetLabel();
-		std::string& GetIconPath();
+		void SetIcon(string& iconURL);
 		bool GetState();
 		void SetState(bool);
 		bool IsSeparator();
@@ -66,6 +66,7 @@ namespace ti
 		MenuItemType type;
 		bool enabled;
 		std::string label;
+		std::string iconURL;
 		std::string iconPath;
 		SharedKMethod callback;
 		SharedMenu submenu;

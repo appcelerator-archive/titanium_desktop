@@ -75,26 +75,4 @@ namespace ti
 		std::string scheme = uri.getScheme();
 		return (scheme == "app" || scheme == "ti" || scheme == "file");
 	}
-
-	SharedString UIModule::GetResourcePath(const char *URL)
-	{
-		if (URL == NULL || !strcmp(URL, ""))
-			return new std::string("");
-
-		Poco::URI uri(URL);
-		std::string scheme = uri.getScheme();
-
-		if (scheme == "app" || scheme == "ti")
-		{
-			SharedKObject global = Host::GetInstance()->GetGlobalObject();
-			SharedValue new_url = global->CallNS(
-				"App.appURLToPath",
-				Value::NewString(URL));
-
-			if (new_url->IsString())
-				return new std::string(new_url->ToString());
-		}
-
-		return new std::string(URL);
-	}
 }

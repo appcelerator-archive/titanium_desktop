@@ -83,22 +83,22 @@ namespace ti
 		void _SetBadgeImage(const ValueList& args, SharedValue result);
 
 		virtual SharedMenu CreateMenu() = 0;
-		virtual SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL) = 0;
-		virtual SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod callback) = 0;
+		virtual SharedMenuItem CreateMenuItem() = 0;;
+		virtual SharedMenuItem CreateCheckMenuItem() = 0;
 		virtual SharedMenuItem CreateSeparatorMenuItem() = 0;
 		virtual void SetMenu(SharedMenu) = 0;
 		virtual void SetContextMenu(SharedMenu) = 0;
 		virtual void SetIcon(std::string& iconPath) = 0;
-		virtual SharedTrayItem AddTray(SharedString iconPath, SharedKMethod cb) = 0;
+		virtual SharedTrayItem AddTray(std::string& iconPath, SharedKMethod cb) = 0;
 		virtual SharedMenu GetMenu() = 0;
 		virtual SharedMenu GetContextMenu() = 0;
 		virtual long GetIdleTime() = 0;
 
 		/* These have empty impls, because are OS X-only for now */
-		virtual void SetDockIcon(SharedString icon_path) {}
+		virtual void SetDockIcon(std::string& icon_path) {}
 		virtual void SetDockMenu(SharedMenu) {}
-		virtual void SetBadge(SharedString badgeLabel) {}
-		virtual void SetBadgeImage(SharedString badgeImagePath) {}
+		virtual void SetBadge(std::string& badgeLabel) {}
+		virtual void SetBadgeImage(std::string& badgeImagePath) {}
 
 	protected:
 		static UIBinding* instance;
@@ -107,7 +107,7 @@ namespace ti
 		std::vector<SharedUserWindow> openWindows;
 		SharedKList openWindowList;
 		std::vector<SharedTrayItem> trayItems;
-		std::string iconPath;
+		std::string iconURL;
 	};
 }
 

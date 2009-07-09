@@ -13,5 +13,6 @@ namespace ti
 	std::string NormalizeAppURL(string url);
 	void NormalizeURLCallback(const char* url, char* buffer, int bufferLength);
 	void URLToFileURLCallback(const char* url, char* buffer, int bufferLength);
+	std::string URLToPathOrURL(string& url);
 }
 #endif

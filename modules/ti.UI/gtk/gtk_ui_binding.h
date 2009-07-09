@@ -22,13 +22,13 @@ namespace ti
 		void ErrorDialog(std::string);
 
 		SharedMenu CreateMenu();
-		SharedMenuItem CreateMenuItem(std::string, SharedKMethod, std::string);
+		SharedMenuItem CreateMenuItem();
 		SharedMenuItem CreateSeparatorMenuItem();
-		SharedMenuItem CreateCheckMenuItem(std::string, SharedKMethod);
+		SharedMenuItem CreateCheckMenuItem();
 		void SetMenu(SharedMenu newMenu);
 		void SetContextMenu(SharedMenu);
 		void SetIcon(std::string&);
-		SharedTrayItem AddTray(SharedString, SharedKMethod cb);
+		SharedTrayItem AddTray(std::string&, SharedKMethod cb);
 		long GetIdleTime();
 
 		SharedMenu GetMenu();

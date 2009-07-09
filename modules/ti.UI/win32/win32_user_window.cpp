@@ -858,7 +858,6 @@ SharedMenu Win32UserWindow::GetContextMenu()
 
 void Win32UserWindow::SetIcon(std::string& iconPath)
 {
-	printf("setting icon to: '%s'\n", iconPath.c_str());
 	this->iconPath = iconPath;
 	this->SetupIcon();
 }
@@ -866,13 +865,11 @@ void Win32UserWindow::SetIcon(std::string& iconPath)
 void Win32UserWindow::SetupIcon()
 {
 	std::string iconPath = this->iconPath;
-	printf("window icon path: '%s'\n", iconPath.c_str());
 
 	if (iconPath.empty()) {
 		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
 		iconPath = b->GetIcon();
 	}
-	printf("icon path: '%s'\n", iconPath.c_str());
 
 	HICON icon = defaultIcon;
 	if (!iconPath.empty()) {

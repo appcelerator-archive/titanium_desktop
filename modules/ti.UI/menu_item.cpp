@@ -11,26 +11,14 @@ namespace ti
 	using std::string;
 	using std::vector;
 
-	MenuItem::MenuItem(MenuItemType type, std::string label,
-		SharedKMethod eventListener, std::string iconURL) :
-			StaticBoundObject(),
-			type(type),
-			enabled(true),
-			label(label),
-			submenu(NULL),
-			state(false)
+	MenuItem::MenuItem(MenuItemType type) :
+		StaticBoundObject("UI.MenuItem"),
+		type(type),
+		enabled(true),
+		label(""),
+		submenu(0),
+		state(false)
 	{
-		if (!iconURL.empty())
-		{
-			SharedString iconPathSS = UIModule::GetResourcePath(iconURL.c_str());
-			this->iconPath = iconPathSS->c_str();
-		}
-
-		if (!eventListener.isNull())
-		{
-			this->AddEventListener(eventListener);
-		}
-
 		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
 		this->SetMethod("isCheck", &MenuItem::_IsCheck);
 
@@ -65,7 +53,6 @@ namespace ti
 			this->SetMethod("setState", &MenuItem::_SetState);
 			this->SetMethod("getState", &MenuItem::_GetState);
 		}
-
 	}
 
 	MenuItem::~MenuItem()
@@ -86,8 +73,7 @@ namespace ti
 	{
 		args.VerifyException("setLabel", "s|0");
 		string newLabel = args.GetString(0, "");
-		this->label = newLabel;
-		this->SetLabelImpl(newLabel);
+		this->SetLabel(newLabel);
 	}
 
 	void MenuItem::_GetLabel(const ValueList& args, SharedValue result)
@@ -98,20 +84,16 @@ namespace ti
 	void MenuItem::_SetIcon(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("setIcon", "s|0");
-		string newIconPath;
-		if (args.at(0)->IsString())
-		{
-			string newIconURL = args.at(0)->ToString();
-			SharedString iconPathSS = UIModule::GetResourcePath(newIconURL.c_str());
-			newIconPath = iconPathSS->c_str();
+		std::string newIcon = "";
+		if (args.size() > 0) {
+			newIcon = args.GetString(0);
 		}
-		this->iconPath = newIconPath;
-		this->SetIconImpl(newIconPath);
+		this->SetIcon(newIcon);
 	}
 
 	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
 	{
-		result->SetString(this->iconPath);
+		result->SetString(this->iconURL);
 	}
 
 	void MenuItem::_SetState(const ValueList& args, SharedValue result)
@@ -271,6 +253,21 @@ namespace ti
 		this->SetStateImpl(newState);
 	}
 
+	void MenuItem::SetLabel(string& newLabel)
+	{
+		this->label = newLabel;
+		this->SetLabelImpl(newLabel);
+	}
+
+	void MenuItem::SetIcon(string& iconURL)
+	{
+		this->iconPath = this->iconURL = iconURL;
+		if (!iconURL.empty()) {
+			this->iconPath = URLToPathOrURL(this->iconURL);
+		}
+		this->SetIconImpl(this->iconPath); // platform-specific impl
+	}
+
 	bool MenuItem::GetState()
 	{
 		return this->state;
@@ -279,11 +276,6 @@ namespace ti
 	std::string& MenuItem::GetLabel()
 	{
 		return this->label;
-	}
-
-	std::string& MenuItem::GetIconPath()
-	{
-		return this->iconPath;
 	}
 
 	bool MenuItem::IsSeparator()

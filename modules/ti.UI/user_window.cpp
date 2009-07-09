@@ -1317,17 +1317,14 @@ void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::SharedValu
 
 void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedString iconPath = NULL; // a NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsString())
-	{
-		const char *icon_url = args.at(0)->ToString();
-		iconPath = UIModule::GetResourcePath(icon_url);
+	args.VerifyException("setIcon", "s|0");
+	std::string iconPath;
+	if (args.size() > 0) {
+		std::string in = args.GetString(0);
+		iconPath = URLToPathOrURL(in);
 	}
 
-	std::string iconPathOut;
-	if (!iconPath.isNull())
-		iconPathOut = *iconPath;
-	this->SetIcon(iconPathOut);
+	this->SetIcon(iconPath);
 }
 
 void UserWindow::_GetIcon(const kroll::ValueList& args, kroll::SharedValue result)

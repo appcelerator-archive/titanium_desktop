@@ -10,8 +10,7 @@ namespace ti
 	class OSXMenuItem : public MenuItem
 	{
 	public:
-		OSXMenuItem(MenuItemType type, std::string label,
-			SharedKMethod callback, std::string iconURL);
+		OSXMenuItem(MenuItemType type);
 		virtual ~OSXMenuItem();
 
 		void SetLabelImpl(std::string newLabel);

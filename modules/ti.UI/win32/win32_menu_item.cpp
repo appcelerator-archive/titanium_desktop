@@ -9,12 +9,10 @@ using std::vector;
 using std::map;
 namespace ti
 {
-	Win32MenuItem::Win32MenuItem(
-		MenuItemType type, std::string label,
-		SharedKMethod callback, std::string iconURL) :
-			MenuItem(type, label, callback, iconURL),
-			oldSubmenu(0),
-			oldLabel(label)
+	Win32MenuItem::Win32MenuItem(MenuItemType type) :
+		MenuItem(type),
+		oldSubmenu(0),
+		oldLabel(label)
 	{
 	}
 
@@ -36,6 +34,8 @@ namespace ti
 
 	void Win32MenuItem::SetIconImpl(std::string newIconPath)
 	{
+		this->iconPath = newIconPath;
+
 		if (!this->IsCheck() && !this->IsSeparator()) {
 			this->RecreateAllNativeItems();
 		}
@@ -173,7 +173,7 @@ namespace ti
 
 		vector<NativeItemBits*>::iterator i = nativeItems.begin();
 		while (i != nativeItems.end()) {
-			NativeItemBits* b = *i;
+			NativeItemBits* b = *i++;
 
 			if ((b->submenu && submenu) ||
 				(!b->submenu && b->id == nativeId)) {

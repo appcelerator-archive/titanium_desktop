@@ -21,8 +21,8 @@ namespace ti
 		void ErrorDialog(std::string);
 
 		SharedMenu CreateMenu();
-		SharedMenuItem CreateMenuItem(std::string label, SharedKMethod eventListener, std::string iconURL);
-		SharedMenuItem CreateCheckMenuItem(std::string label, SharedKMethod eventListener);
+		SharedMenuItem CreateMenuItem();
+		SharedMenuItem CreateCheckMenuItem();
 		SharedMenuItem CreateSeparatorMenuItem();
 		SharedMenu GetMenu();
 		SharedMenu GetContextMenu();

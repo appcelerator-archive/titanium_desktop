@@ -74,21 +74,19 @@ namespace ti
 		return new OSXMenu();
 	}
 
-	SharedMenuItem OSXUIBinding::CreateMenuItem(
-		std::string label, SharedKMethod callback, std::string iconURL)
+	SharedMenuItem OSXUIBinding::CreateMenuItem();
 	{
-		return new OSXMenuItem(MenuItem::NORMAL, label, callback, iconURL);
+		return new OSXMenuItem(MenuItem::NORMAL);
 	}
 
 	SharedMenuItem OSXUIBinding::CreateSeparatorMenuItem()
 	{
-		return new OSXMenuItem(MenuItem::SEPARATOR, std::string(), NULL, std::string());
+		return new OSXMenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem OSXUIBinding::CreateCheckMenuItem(
-		std::string label, SharedKMethod callback)
+	SharedMenuItem OSXUIBinding::CreateCheckMenuItem()
 	{
-		return new OSXMenuItem(MenuItem::CHECK, label, callback, std::string());
+		return new OSXMenuItem(MenuItem::CHECK);
 	}
 
 	void OSXUIBinding::ErrorDialog(std::string msg)

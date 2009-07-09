@@ -125,6 +125,26 @@ namespace ti
 
 	}
 
+	string URLToPathOrURL(string& url)
+	{
+		URI inURI = URI(url);
+		try {
+
+			if (inURI.getScheme() == "ti") {
+				return TiURLToPath(url);
+
+			} else if (inURI.getScheme() == "app") {
+				return AppURLToPath(url);
+			}
+
+		} catch (ValueException& e) {
+			SharedString ss = e.DisplayString();
+			Logger* log = Logger::Get("UI.URL");
+			log->Error("Could not convert %s to a path: %s", url, ss->c_str());
+		}
+		return url;
+	}
+
 	void URLToFileURLCallback(const char* url, char* buffer, int bufferLength)
 	{
 		strncpy(buffer, url, bufferLength);

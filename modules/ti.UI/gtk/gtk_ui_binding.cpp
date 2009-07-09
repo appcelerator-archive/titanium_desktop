@@ -70,21 +70,19 @@ namespace ti
 		return new GtkMenu();
 	}
 
-	SharedMenuItem GtkUIBinding::CreateMenuItem(
-		std::string label, SharedKMethod callback, std::string iconURL)
+	SharedMenuItem GtkUIBinding::CreateMenuItem()
 	{
-		return new GtkMenuItem(MenuItem::NORMAL, label, callback, iconURL);
+		return new GtkMenuItem(MenuItem::NORMAL);
 	}
 
 	SharedMenuItem GtkUIBinding::CreateSeparatorMenuItem()
 	{
-		return new GtkMenuItem(MenuItem::SEPARATOR, std::string(), NULL, std::string());
+		return new GtkMenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem GtkUIBinding::CreateCheckMenuItem(
-		std::string label, SharedKMethod callback)
+	SharedMenuItem GtkUIBinding::CreateCheckMenuItem()
 	{
-		return new GtkMenuItem(MenuItem::CHECK, label, callback, std::string());
+		return new GtkMenuItem(MenuItem::CHECK);
 	}
 
 	void GtkUIBinding::SetMenu(SharedMenu newMenu)
@@ -102,7 +100,7 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	SharedTrayItem GtkUIBinding::AddTray(SharedString iconPath, SharedKMethod cb)
+	SharedTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
 	{
 		SharedTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;

@@ -18,9 +18,9 @@ namespace ti
 		TrayItem();
 		~TrayItem();
 
-		virtual void SetIcon(SharedString iconPath) = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
 		virtual void SetMenu(SharedMenu menu) = 0;
-		virtual void SetHint(SharedString hint) = 0;
+		virtual void SetHint(std::string& hint) = 0;
 		virtual void Remove() = 0;
 
 		void _SetIcon(const ValueList& args, SharedValue result);
