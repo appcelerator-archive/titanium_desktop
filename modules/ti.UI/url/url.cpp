@@ -140,7 +140,7 @@ namespace ti
 		} catch (ValueException& e) {
 			SharedString ss = e.DisplayString();
 			Logger* log = Logger::Get("UI.URL");
-			log->Error("Could not convert %s to a path: %s", url, ss->c_str());
+			log->Error("Could not convert %s to a path: %s", url.c_str(), ss->c_str());
 		}
 		return url;
 	}

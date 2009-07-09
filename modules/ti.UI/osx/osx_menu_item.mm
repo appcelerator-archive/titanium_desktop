@@ -78,8 +78,7 @@ namespace ti
 		// allows callers to do one image creation in cases where the same
 		// image is used over and over again.
 		if (image == nil) {
-			NSString *path = [NSString stringWithCString:(iconPath.c_str())];
-			image = [[NSImage alloc] initWithContentsOfFile:path];
+			image = OSXUIBinding::MakeImage(iconPath);
 			needsRelease = true;
 		}
 

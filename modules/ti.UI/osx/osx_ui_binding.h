@@ -32,11 +32,11 @@ namespace ti
 		void SetContextMenu(SharedMenu);
 		void SetDockMenu(SharedMenu);
 
-		SharedTrayItem AddTray(SharedString icon_path, SharedKMethod cb);
-		void SetIcon(std::string& icon_path);
-		virtual void SetDockIcon(SharedString icon_path);
-		virtual void SetBadge(SharedString badge_label);
-		virtual void SetBadgeImage(SharedString badge_path);
+		SharedTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
+		void SetIcon(std::string& iconPath);
+		virtual void SetDockIcon(std::string& iconPath);
+		virtual void SetBadge(std::string& badgeLabel);
+		virtual void SetBadgeImage(std::string& badgeImage);
 
 		SharedPtr<OSXMenu> GetActiveMenu();
 		void WindowFocused(SharedPtr<OSXUserWindow> window);
@@ -45,9 +45,9 @@ namespace ti
 		void SetupAppMenuParts(NSMenu* mainMenu);
 		void ReplaceMainMenu();
 		NSMenu* GetDefaultMenu();
-
 		long GetIdleTime();
-		static NSImage* MakeImage(std::string);
+
+		static NSImage* MakeImage(std::string&);
 
 	protected:
 		NSMenu* defaultMenu;

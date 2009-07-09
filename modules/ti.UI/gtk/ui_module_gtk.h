@@ -25,13 +25,11 @@ using kroll::StaticBoundList;
 // X11 defines this again for some reason
 #undef DisplayString
 
-#include "../url/url_curl.h"
 #include "script_evaluator.h"
 #include "gtk_menu.h"
 #include "gtk_menu_item.h"
 #include "gtk_user_window.h"
 #include "gtk_tray_item.h"
-
 #include "gtk_ui_binding.h"
 
 #endif

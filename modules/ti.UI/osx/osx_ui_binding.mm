@@ -74,7 +74,7 @@ namespace ti
 		return new OSXMenu();
 	}
 
-	SharedMenuItem OSXUIBinding::CreateMenuItem();
+	SharedMenuItem OSXUIBinding::CreateMenuItem()
 	{
 		return new OSXMenuItem(MenuItem::NORMAL);
 	}
@@ -113,31 +113,29 @@ namespace ti
 		this->contextMenu = menu.cast<OSXMenu>();
 	}
 
-	void OSXUIBinding::SetDockIcon(SharedString badge_path)
+	void OSXUIBinding::SetDockIcon(std::string& badgePath)
 	{
 		//TODO: Put Dock Icon support back in for 10.4.
-		if (![NSApp respondsToSelector:@selector(dockTile)]){
+		if (![NSApp respondsToSelector:@selector(dockTile)]) {
 			return;
 		}
-		
+
 		DockTileStandin *dockTile = (DockTileStandin *)[NSApp dockTile];
-		std::string value = *badge_path;
-		if (!value.empty())
+		if (!badgePath.empty())
 		{
-			// remember the old one
-			if (!savedDockView)
+			if (!savedDockView) // remember the old one
 			{
 				savedDockView = [dockTile contentView];
 				[savedDockView retain];
 			}
+
 			// setup our image view for the dock tile
 			NSRect frame = NSMakeRect(0, 0, dockTile.size.width, dockTile.size.height);
 			NSImageView *dockImageView = [[NSImageView alloc] initWithFrame: frame];
-
-			NSImage *image = MakeImage(value);
+			NSImage *image = MakeImage(badgePath);
 			[dockImageView setImage:image];
 			[image release];
-			
+
 			// by default, add it to the NSDockTile
 			[dockTile setContentView: dockImageView];
 		}
@@ -153,22 +151,17 @@ namespace ti
 		}
 		[dockTile display];
 	}
-	
-	NSImage* OSXUIBinding::MakeImage(std::string value)
+
+	NSImage* OSXUIBinding::MakeImage(std::string& iconURL)
 	{
-		if (ti::UIModule::IsResourceLocalFile(value) || FileUtils::IsFile(value))
-		{
-			SharedString file = ti::UIModule::GetResourcePath(value.c_str());
-			NSString *path = [NSString stringWithCString:((*file).c_str()) encoding:NSUTF8StringEncoding];
-			return [[NSImage alloc] initWithContentsOfFile:path];
-		}
-		else
-		{
-			NSURL *url = [NSURL URLWithString:[NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding]];
-			return [[NSImage alloc] initWithContentsOfURL:url];
+		NSString* iconString = [NSString stringWithUTF8String:iconURL.c_str()];
+		if (FileUtils::IsFile(iconURL)) {
+			return [[NSImage alloc] initWithContentsOfFile:iconString];
+		} else {
+			return [[NSImage alloc] initWithContentsOfURL:[NSURL URLWithString: iconString]];
 		}
 	}
-	
+
 	void OSXUIBinding::WindowFocused(SharedPtr<OSXUserWindow> window)
 	{
 		this->activeWindow = window;
@@ -243,24 +236,23 @@ namespace ti
 		this->dockMenu = menu.cast<OSXMenu>();
 	}
 
-	void OSXUIBinding::SetBadge(SharedString badge_label)
+	void OSXUIBinding::SetBadge(std::string& badgeLabel)
 	{
 		//TODO: Put Dock Icon support back in for 10.4.
 		if (![NSApp respondsToSelector:@selector(dockTile)]){
 			return;
 		}
 
-		std::string value = *badge_label;
-		NSString *label = @"";
-		if (!value.empty())
-		{
-			label = [NSString stringWithCString:value.c_str() encoding:NSUTF8StringEncoding];
-		}
 		DockTileStandin *tile = (DockTileStandin *)[[NSApplication sharedApplication] dockTile];
-		[tile setBadgeLabel:label];
+		if (!badgeLabel.empty()) {
+			[tile setBadgeLabel:[NSString stringWithUTF8String:badgeLabel.c_str()]];
+
+		} else {
+			[tile setBadgeLabel:@""];
+		}
 	}
 
-	void OSXUIBinding::SetBadgeImage(SharedString badge_path)
+	void OSXUIBinding::SetBadgeImage(std::string& badgePath)
 	{
 		//TODO: need to support allowing custom badge images
 	}
@@ -294,9 +286,7 @@ namespace ti
 		return this->contextMenu;
 	}
 
-	SharedTrayItem OSXUIBinding::AddTray(
-		SharedString iconPath,
-		SharedKMethod eventListener)
+	SharedTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
 	{
 		return new OSXTrayItem(iconPath, eventListener);
 	}

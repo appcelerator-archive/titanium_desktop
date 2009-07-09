@@ -31,7 +31,7 @@ namespace ti
 
 	void OSXTrayItem::SetIcon(std::string& iconPath)
 	{
-		image = ti::OSXUIBinding::MakeImage(path);
+		NSImage* image = ti::OSXUIBinding::MakeImage(iconPath);
 		[nativeItem setImage:image];
 	}
 
@@ -60,7 +60,7 @@ namespace ti
 		if (hint.empty()) {
 			[nativeItem setToolTip:@""];
 		} else {
-			[nativeItem setToolTip:[NSString stringWithCString:label.c_str()]];
+			[nativeItem setToolTip:[NSString stringWithUTF8String:hint.c_str()]];
 		}
 	}
 
