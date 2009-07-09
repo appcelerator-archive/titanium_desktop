@@ -105,6 +105,98 @@ describe("UI.Menu Tests",{
 		value_of(menu.getItemAt(1).equals(item4)).should_be_true();
 		value_of(menu.getItemAt(2).equals(item5)).should_be_true();
 	},
+	test_invalid_removeitem_at: function()
+	{
+		var tui = Titanium.UI;
+		var menu = tui.createMenu();
+		value_of(menu.getLength()).should_be(0);
+
+		var exc = true;
+		try { menu.removeItemAt(-1); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(-100); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(0); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(1); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(10); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(100); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+
+		var item1 = menu.addItem('blah1');
+		var item2 = menu.addItem('blah2');
+
+		try { menu.removeItemAt(-1); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(-100); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(10); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.removeItemAt(100); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+
+		try { menu.removeItemAt(1); exc = false } catch (e) { }
+		value_of(exc).should_be(false);
+	},
+	test_menu_insertitemat: function()
+	{
+		var tui = Titanium.UI;
+		var menu = tui.createMenu();
+		value_of(menu.getLength()).should_be(0);
+
+		var item1 = tui.createMenuItem('blah1');
+		var item2 = tui.createMenuItem('blah2');
+		var item3 = tui.createMenuItem('blah2');
+		menu.appendItem(item1);
+		menu.appendItem(item2)
+
+		menu.insertItemAt(item3, 0);
+		value_of(menu.getLength()).should_be(3);
+		value_of(menu.getItemAt(0).equals(item3)).should_be_true();
+		value_of(menu.getItemAt(1).equals(item1)).should_be_true();
+		value_of(menu.getItemAt(2).equals(item2)).should_be_true();
+
+		menu.insertItemAt(item3, 2);
+		value_of(menu.getLength()).should_be(4);
+		value_of(menu.getItemAt(0).equals(item3)).should_be_true();
+		value_of(menu.getItemAt(1).equals(item1)).should_be_true();
+		value_of(menu.getItemAt(2).equals(item3)).should_be_true();
+		value_of(menu.getItemAt(3).equals(item2)).should_be_true();
+
+		menu.insertItemAt(item3, 4);
+		value_of(menu.getLength()).should_be(5);
+		value_of(menu.getItemAt(0).equals(item3)).should_be_true();
+		value_of(menu.getItemAt(1).equals(item1)).should_be_true();
+		value_of(menu.getItemAt(2).equals(item3)).should_be_true();
+		value_of(menu.getItemAt(3).equals(item2)).should_be_true();
+		value_of(menu.getItemAt(4).equals(item3)).should_be_true();
+	},
+	test_invalid_insertitemat: function ()
+	{
+		var tui = Titanium.UI;
+		var menu = tui.createMenu();
+		value_of(menu.getLength()).should_be(0);
+
+		var item1 = tui.createMenuItem('blah1');
+		var item2 = tui.createMenuItem('blah2');
+		var item3 = tui.createMenuItem('blah2');
+		menu.appendItem(item1);
+		menu.appendItem(item2)
+
+		var exc = true;
+		try { menu.insertItemAt(-1, item2); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.insertItemAt(-100, item2); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.insertItemAt(100, item2); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.insertItemAt(10, item2); exc = false } catch (e) { }
+		value_of(exc).should_be(true);
+		try { menu.insertItemAt(item2, 1); exc = false } catch (e) { }
+		value_of(exc).should_be(false);
+	},
 	test_basic_menu_add_separator: function()
 	{
 		var tui = Titanium.UI;
