@@ -307,4 +307,9 @@ namespace ti
 		
 		Process::Exited();
 	}
+	
+	bool Win32Process::IsRunning()
+	{
+		return running;
+	}
 }
