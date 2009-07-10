@@ -36,8 +36,6 @@ namespace ti
 		activeWindow(0),
 		scriptEvaluator(nil)
 	{
-		[TiProtocol registerSpecialProtocol];
-		[AppProtocol registerSpecialProtocol];
 		application = [[TiApplicationDelegate alloc] initWithBinding:this];
 		[application retain];
 
@@ -52,6 +50,15 @@ namespace ti
 		// Add the custom script evaluator which will dynamically
 		// dispatch unknown script types to loaded Kroll modules.
 		scriptEvaluator = [[ScriptEvaluator alloc] initWithHost:host];
+
+		// Register our custom URL handler
+		[NSURLProtocol registerClass:[TitaniumProtocols class]];
+
+		// SECURITY FLAG: this will allow apps to have the same security
+		// as local files (like cross-domain XHR requests).  we should 
+		// make sure this is part of the upcoming security work
+		[WebView registerURLSchemeAsLocal:@"app"];
+		[WebView registerURLSchemeAsLocal:@"ti"];
 	}
 
 	OSXUIBinding::~OSXUIBinding()
