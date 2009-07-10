@@ -28,7 +28,6 @@ namespace ti
 #include "native_window.h"
 #include "osx_user_window.h"
 #include "ti_application_delegate.h"
-#include "ti_protocol.h"
-#include "app_protocol.h"
+#include "titanium_protocols.h"
 
 #endif

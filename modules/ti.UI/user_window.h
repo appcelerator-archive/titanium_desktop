@@ -51,7 +51,7 @@ enum UserWindowEvent
 
 class UserWindow : public AccessorBoundObject {
 	public:
-		UserWindow(WindowConfig *config, SharedUserWindow& parent);
+		UserWindow(WindowConfig *config, AutoUserWindow& parent);
 		virtual ~UserWindow();
 		void UpdateWindowForURL(std::string url);
 		Host* GetHost();
@@ -185,6 +185,7 @@ class UserWindow : public AccessorBoundObject {
 		virtual std::string GetId() = 0;
 		virtual void Open();
 		virtual void Close();
+		void Closed();
 
 		virtual double GetX() = 0;
 		virtual void SetX(double x) = 0;
@@ -225,10 +226,10 @@ class UserWindow : public AccessorBoundObject {
 		virtual std::string GetTransparencyColor() { return ""; }
 		virtual void SetFullscreen(bool fullscreen) = 0;
 		virtual void SetUsingChrome(bool chrome) = 0;
-		virtual void SetMenu(SharedMenu menu) = 0;
-		virtual SharedMenu GetMenu() = 0;
-		virtual void SetContextMenu(SharedMenu menu) = 0;
-		virtual SharedMenu GetContextMenu() = 0;
+		virtual void SetMenu(AutoMenu menu) = 0;
+		virtual AutoMenu GetMenu() = 0;
+		virtual void SetContextMenu(AutoMenu menu) = 0;
+		virtual AutoMenu GetContextMenu() = 0;
 		virtual void SetIcon(std::string& iconPath) = 0;
 		virtual std::string& GetIcon() = 0;
 		virtual bool IsTopMost() = 0;
@@ -244,23 +245,23 @@ class UserWindow : public AccessorBoundObject {
 		virtual void AppIconChanged() {};
 		virtual void AppMenuChanged() {};
 
-		SharedUserWindow GetSharedPtr();
+		AutoUserWindow GetAutoPtr();
 
 	protected:
 		Logger* logger;
-		SharedUIBinding binding;
+		AutoUIBinding binding;
 		Host* host;
 		WindowConfig *config;
-		SharedUserWindow parent;
-		SharedUserWindow shared_this;
-		std::vector<SharedUserWindow> children;
+		AutoUserWindow parent;
+		AutoUserWindow shared_this;
+		std::vector<AutoUserWindow> children;
 		long next_listener_id;
 		bool active;
 		bool initialized;
 
-		virtual SharedUserWindow GetParent();
-		virtual void AddChild(SharedUserWindow);
-		virtual void RemoveChild(SharedUserWindow);
+		virtual AutoUserWindow GetParent();
+		virtual void AddChild(AutoUserWindow);
+		virtual void RemoveChild(AutoUserWindow);
 
 	private:
 		DISALLOW_EVIL_CONSTRUCTORS(UserWindow);

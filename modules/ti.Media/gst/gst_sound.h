@@ -15,7 +15,7 @@ using namespace kroll;
 namespace ti
 {
 	class GstSound;
-	typedef SharedPtr<GstSound> SharedGstSound;
+	typedef AutoPtr<GstSound> SharedGstSound;
 
 	class GstSound : public Sound
 	{

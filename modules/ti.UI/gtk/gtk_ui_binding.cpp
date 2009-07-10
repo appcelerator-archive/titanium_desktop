@@ -43,12 +43,12 @@ namespace ti
 		global->Set("userAgent", Value::NewString(user_agent));
 	}
 
-	SharedUserWindow GtkUIBinding::CreateWindow(
+	AutoUserWindow GtkUIBinding::CreateWindow(
 		WindowConfig* config,
-		SharedUserWindow& parent)
+		AutoUserWindow& parent)
 	{
 		UserWindow* w = new GtkUserWindow(config, parent);
-		return w->GetSharedPtr();
+		return w->GetAutoPtr();
 	}
 
 	void GtkUIBinding::ErrorDialog(std::string msg)
@@ -65,32 +65,32 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	SharedMenu GtkUIBinding::CreateMenu()
+	AutoMenu GtkUIBinding::CreateMenu()
 	{
 		return new GtkMenu();
 	}
 
-	SharedMenuItem GtkUIBinding::CreateMenuItem()
+	AutoMenuItem GtkUIBinding::CreateMenuItem()
 	{
 		return new GtkMenuItem(MenuItem::NORMAL);
 	}
 
-	SharedMenuItem GtkUIBinding::CreateSeparatorMenuItem()
+	AutoMenuItem GtkUIBinding::CreateSeparatorMenuItem()
 	{
 		return new GtkMenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem GtkUIBinding::CreateCheckMenuItem()
+	AutoMenuItem GtkUIBinding::CreateCheckMenuItem()
 	{
 		return new GtkMenuItem(MenuItem::CHECK);
 	}
 
-	void GtkUIBinding::SetMenu(SharedMenu newMenu)
+	void GtkUIBinding::SetMenu(AutoMenu newMenu)
 	{
 		this->menu = newMenu.cast<GtkMenu>();
 	}
 
-	void GtkUIBinding::SetContextMenu(SharedMenu newMenu)
+	void GtkUIBinding::SetContextMenu(AutoMenu newMenu)
 	{
 		this->contextMenu = newMenu.cast<GtkMenu>();
 	}
@@ -100,9 +100,9 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	SharedTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
 	{
-		SharedTrayItem item = new GtkTrayItem(iconPath, cb);
+		AutoTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;
 	}
 
@@ -121,12 +121,12 @@ namespace ti
 		return idle_time;
 	}
 
-	SharedMenu GtkUIBinding::GetMenu()
+	AutoMenu GtkUIBinding::GetMenu()
 	{
 		return this->menu;
 	}
 
-	SharedMenu GtkUIBinding::GetContextMenu()
+	AutoMenu GtkUIBinding::GetContextMenu()
 	{
 		return this->contextMenu;
 	}

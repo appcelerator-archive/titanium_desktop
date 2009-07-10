@@ -1,4 +1,4 @@
-describe("HTML 5 database tests",{
+describe("HTML 5 Databases",{
 	
 	before:function()
 	{

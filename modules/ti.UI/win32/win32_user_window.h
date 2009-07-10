@@ -12,7 +12,7 @@ namespace ti
 	class Win32UserWindow : public UserWindow
 	{
 		public:
-		Win32UserWindow(WindowConfig* config, SharedUserWindow& parent);
+		Win32UserWindow(WindowConfig* config, AutoUserWindow& parent);
 		virtual ~Win32UserWindow();
 	
 		void OpenFileChooserDialog(
@@ -80,10 +80,10 @@ namespace ti
 		std::string GetTransparencyColor();
 		void SetFullscreen(bool fullscreen);
 		void SetUsingChrome(bool chrome);
-		void SetMenu(SharedMenu menu);
-		SharedMenu GetMenu();
-		void SetContextMenu(SharedMenu menu);
-		SharedMenu GetContextMenu();
+		void SetMenu(AutoMenu menu);
+		AutoMenu GetMenu();
+		void SetContextMenu(AutoMenu menu);
+		AutoMenu GetContextMenu();
 		void SetIcon(std::string&);
 		std::string& GetIcon();
 		bool IsTopMost();
@@ -116,10 +116,10 @@ namespace ti
 		std::map<long, SharedKMethod> messageHandlers;
 		bool requires_display;
 	
-		SharedPtr<Win32Menu> menu; // The window-specific menu
-		SharedPtr<Win32Menu> activeMenu; // This window's active menu
+		AutoPtr<Win32Menu> menu; // The window-specific menu
+		AutoPtr<Win32Menu> activeMenu; // This window's active menu
 		HMENU nativeMenu; // This window's active native menu
-		SharedPtr<Win32Menu> contextMenu; // This window-specific context menu
+		AutoPtr<Win32Menu> contextMenu; // This window-specific context menu
 		std::string iconPath; // The path to this window's icon
 		HICON defaultIcon;
 	

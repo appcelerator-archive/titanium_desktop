@@ -18,27 +18,27 @@ namespace ti
 		public:
 		GtkUIBinding(Host* host);
 
-		SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent);
+		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
 		void ErrorDialog(std::string);
 
-		SharedMenu CreateMenu();
-		SharedMenuItem CreateMenuItem();
-		SharedMenuItem CreateSeparatorMenuItem();
-		SharedMenuItem CreateCheckMenuItem();
-		void SetMenu(SharedMenu newMenu);
-		void SetContextMenu(SharedMenu);
+		AutoMenu CreateMenu();
+		AutoMenuItem CreateMenuItem();
+		AutoMenuItem CreateSeparatorMenuItem();
+		AutoMenuItem CreateCheckMenuItem();
+		void SetMenu(AutoMenu newMenu);
+		void SetContextMenu(AutoMenu);
 		void SetIcon(std::string&);
-		SharedTrayItem AddTray(std::string&, SharedKMethod cb);
+		AutoTrayItem AddTray(std::string&, SharedKMethod cb);
 		long GetIdleTime();
 
-		SharedMenu GetMenu();
-		SharedMenu GetContextMenu();
+		AutoMenu GetMenu();
+		AutoMenu GetContextMenu();
 		std::string& GetIcon();
 
 		protected:
 		SharedPtr<ScriptEvaluator> evaluator;
-		SharedPtr<GtkMenu> menu;
-		SharedPtr<GtkMenu> contextMenu;
+		AutoPtr<GtkMenu> menu;
+		AutoPtr<GtkMenu> contextMenu;
 		std::string iconPath;
 	};
 }

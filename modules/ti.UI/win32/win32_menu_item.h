@@ -26,7 +26,7 @@ namespace ti
 		void SetIconImpl(std::string newIconPath);
 		void SetStateImpl(bool newState);
 		void SetCallbackImpl(SharedKMethod callback);
-		void SetSubmenuImpl(SharedMenu newSubmenu);
+		void SetSubmenuImpl(AutoMenu newSubmenu);
 		void SetEnabledImpl(bool enabled);
 
 		void RecreateAllNativeItems();
@@ -40,7 +40,7 @@ namespace ti
 
 	private:
 		std::string iconPath;
-		SharedPtr<Win32Menu> oldSubmenu;
+		AutoPtr<Win32Menu> oldSubmenu;
 		std::string oldLabel;
 		std::vector<NativeItemBits*> nativeItems;
 

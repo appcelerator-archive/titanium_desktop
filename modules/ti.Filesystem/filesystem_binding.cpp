@@ -12,10 +12,13 @@
 
 #ifdef OS_OSX
 #include <Cocoa/Cocoa.h>
-#elif defined(OS_WIN32)
+#elif OS_WIN32
 #include <windows.h>
 #include <shlobj.h>
 #include <process.h>
+#elif OS_LINUX
+#include <sys/types.h>
+#include <pwd.h>
 #endif
 
 #include <Poco/TemporaryFile.h>
@@ -40,67 +43,69 @@ namespace ti
 		this->SetMethod("createTempDirectory",&FilesystemBinding::CreateTempDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getFile) Returns a file path, optionally joining multiple arguments together in an OS specific way
-		 * @tiresult(for=Filesystem.getFile,type=object) a File object referencing the file
+		 * @tiarg(for=Filesystem.getFile,name=pathname) a string that is used to form a path
+		 * @tiarg(for=Filesystem.getFile,optional=true,name=...) a variable length argument list of Strings that are concatinated with pathname to form a path
+		 * @tiresult(for=Filesystem.getFile,type=FileSystem.File) a File object referencing the file
 		 */
 		this->SetMethod("getFile",&FilesystemBinding::GetFile);
 		/**
-		 * @tiapi(method=True,returns=filestream,name=Filesystem.getFileStream) Returns a Filestream object
-		 * @tiresult(for=Filesystem.getFileStream,type=object) a Filestream object referencing the file
+		 * @tiapi(method=True,name=Filesystem.getFileStream) Returns a Filestream object
+		 * @tiresult(for=Filesystem.getFileStream,type=FileSystem.Filestream) a Filestream object referencing the file
 		 */
 		this->SetMethod("getFileStream",&FilesystemBinding::GetFileStream);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getProgramsDirectory) Returns the programs directory of the current system
-		 * @tiresult(for=Filesystem.getProgramsDirectory,type=object) a File object referencing the system programs directory
+		 * @tiresult(for=Filesystem.getProgramsDirectory,type=FileSystem.File) a File object referencing the system programs directory
 		 */
 		this->SetMethod("getProgramsDirectory",&FilesystemBinding::GetProgramsDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getApplicationDirectory) Returns the directory where the application resides
-		 * @tiresult(for=Filesystem.getApplicationDirectory,type=object) a File object referencing the directory where the application resides
+		 * @tiresult(for=Filesystem.getApplicationDirectory,type=FileSystem.File) a File object referencing the directory where the application resides
 		 */
 		this->SetMethod("getApplicationDirectory",&FilesystemBinding::GetApplicationDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getApplicationDataDirectory) Returns the data directory of the application
-		 * @tiresult(for=Filesystem.getApplicationDataDirectory,type=object) a File object referencing the data directory of the application
+		 * @tiresult(for=Filesystem.getApplicationDataDirectory,type=FileSystem.File) a File object referencing the data directory of the application
 		 */
 		this->SetMethod("getApplicationDataDirectory",&FilesystemBinding::GetApplicationDataDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getRuntimeHomeDirectory) Returns the directory of where the Titanium runtime files are stored
-		 * @tiresult(for=Filesystem.getRuntimeHomeDirectory,type=object) a File object referencing the directory where the Titanium runtime files are stored.
+		 * @tiresult(for=Filesystem.getRuntimeHomeDirectory,type=FileSystem.File) a File object referencing the directory where the Titanium runtime files are stored.
 		 */
 		this->SetMethod("getRuntimeHomeDirectory",&FilesystemBinding::GetRuntimeHomeDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getResourcesDirectory) Returns the resources directory of the application
-		 * @tiresult(for=Filesystem.getResourcesDirectory,type=object) a File object referencing the resources directory of the application
+		 * @tiresult(for=Filesystem.getResourcesDirectory,type=FileSystem.File) a File object referencing the resources directory of the application
 		 */
 		this->SetMethod("getResourcesDirectory",&FilesystemBinding::GetResourcesDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getDesktopDirectory) Returns the system desktop directory
-		 * @tiresult(for=Filesystem.getDesktopDirectory,type=object) a File object referencing the system desktop directory
+		 * @tiresult(for=Filesystem.getDesktopDirectory,type=FileSystem.File) a File object referencing the system desktop directory
 		 */
 		this->SetMethod("getDesktopDirectory",&FilesystemBinding::GetDesktopDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getDocumentsDirectory) Returns the system documents directory
-		 * @tiresult(for=Filesystem.getDocumentsDirectory,type=object) a File object referencing the system documents directory
+		 * @tiresult(for=Filesystem.getDocumentsDirectory,type=FileSystem.File) a File object referencing the system documents directory
 		 */
 		this->SetMethod("getDocumentsDirectory",&FilesystemBinding::GetDocumentsDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getUserDirectory) Returns the home directory of the current user
-		 * @tiresult(for=Filesystem.getUserDirectory,type=object) a File object referencing the home directory of the current user
+		 * @tiresult(for=Filesystem.getUserDirectory,type=FileSystem.File) a File object referencing the home directory of the current user
 		 */
 		this->SetMethod("getUserDirectory",&FilesystemBinding::GetUserDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getLineEnding) Returns the line ending used by the operating system
-		 * @tiresult(for=Filesystem.getLineEnding,type=string) the line ending used by the operating system
+		 * @tiresult(for=Filesystem.getLineEnding,type=String) the line ending used by the operating system
 		 */
 		this->SetMethod("getLineEnding",&FilesystemBinding::GetLineEnding);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getSeparator) Returns the path separator used by the operating system
-		 * @tiresult(for=Filesystem.getSeparator,type=string) the path separator used by the operating system
+		 * @tiresult(for=Filesystem.getSeparator,type=String) the path separator used by the operating system
 		 */
 		this->SetMethod("getSeparator",&FilesystemBinding::GetSeparator);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getRootDirectories) Returns the system root directory
-		 * @tiresult(for=Filesystem.getRootDirectories,type=list) a File object referencing the system root directory
+		 * @tiresult(for=Filesystem.getRootDirectories,type=Array<FileSystem.File>) a File object referencing the system root directory
 		 */
 		this->SetMethod("getRootDirectories",&FilesystemBinding::GetRootDirectories);
 		/**
@@ -263,7 +268,13 @@ namespace ti
 		NSString *fullPath = [@"~/Desktop" stringByExpandingTildeInPath];
 		dir = [fullPath UTF8String];
 #elif OS_LINUX
-		// TODO
+		passwd *user = getpwuid(getuid());
+		std::string homeDirectory = user->pw_dir;
+		dir = FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL);
+		if (!FileUtils::IsDirectory(dir))
+		{
+			dir = homeDirectory;
+		}
 #endif
 		if (!dir.empty())
 		{
@@ -285,7 +296,13 @@ namespace ti
 		NSString *fullPath = [@"~/Documents" stringByExpandingTildeInPath];
 		dir = [fullPath UTF8String];
 #elif OS_LINUX
-		// TODO
+		passwd *user = getpwuid(getuid());
+		std::string homeDirectory = user->pw_dir;
+		dir = FileUtils::Join(homeDirectory.c_str(), "Documents", NULL);
+		if (!FileUtils::IsDirectory(dir))
+		{
+			dir = homeDirectory;
+		}
 #endif
 		if (dir.empty())
 		{
@@ -337,9 +354,8 @@ namespace ti
 			Poco::Path path;
 			std::vector<std::string> roots;
 			path.listRoots(roots);
-		
-			SharedPtr<StaticBoundList> rootList = new StaticBoundList();
 
+			SharedKList rootList = new StaticBoundList();
 			for(size_t i = 0; i < roots.size(); i++)
 			{
 				ti::File* file = new ti::File(roots.at(i));

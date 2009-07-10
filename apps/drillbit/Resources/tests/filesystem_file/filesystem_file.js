@@ -273,7 +273,76 @@ describe("Ti.Filesystem File tests",
 			if (line==null) break;
 		}
 		value_of(c).should_be(4);
-	}
+	},
 	
+	test_file_create_timestamp: function()
+	{
+		var curDate = new Date();
+		
+		this.createFile(this.base,"timestamp.dat", curDate.toUTCString());
+		
+		var f = Titanium.Filesystem.getFile(this.base, "timestamp.dat");
+		value_of(f).should_not_be_null();
+		value_of(f.exists()).should_be_true();
+		value_of(f.createTimestamp()).should_not_be_null();
+
+		var timestamp = f.createTimestamp();
+		var tsDate = new Date();
+		
+		tsDate.setTime(timestamp);
+		
+		Titanium.API.debug("date "+curDate+ " " +tsDate);
+		value_of(curDate < tsDate ).should_be_true();
+		
+		value_of(f.deleteFile()).should_be_true();
+	},
+	
+	test_file_modify_timestamp: function()
+	{
+		var curDate = new Date();
+		
+		this.createFile(this.base,"modifydate.dat", curDate.toUTCString());
+		
+		var f = Titanium.Filesystem.getFile(this.base, "modifydate.dat");
+		value_of(f).should_not_be_null();
+		value_of(f.exists()).should_be_true();
+		value_of(f.createTimestamp()).should_not_be_null();
+		value_of(f.modificationTimestamp()).should_not_be_null();
+
+		var timestamp = f.createTimestamp();
+		var tsDate = new Date();
+		
+		tsDate.setTime(timestamp);
+		
+		Titanium.API.debug("date "+curDate+ " " +tsDate);
+		value_of(curDate < tsDate ).should_be_true();
+		
+		if ( !f.isWriteable() )
+		{
+			f.setWriteable();
+			value_of(f.isWriteable()).should_be_true();
+		}
+		
+		var modDate = new Date();
+		// write some stuff to the file
+		f.write(modDate.toUTCString());
+		
+		// get the modification date
+		timestamp = f.modificationTimestamp();
+		modDate.setTime(timestamp);
+		value_of(tsDate <= modDate).should_be_true();
+		value_of(f.deleteFile()).should_be_true();
+	},
+	
+	test_available_space: function()
+	{
+		// retrieve a known folder so we can calculate the disk space
+		var dir = Titanium.Filesystem.getProgramsDirectory().nativePath();
+		var f = Titanium.Filesystem.getFile(dir);
+		value_of(f).should_not_be_null();
+		
+		value_of(f.spaceAvailable()).should_be_number();
+		value_of(f.spaceAvailable()).should_not_be(0);
+	},
 });
 

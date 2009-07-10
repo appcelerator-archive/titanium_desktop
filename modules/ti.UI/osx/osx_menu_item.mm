@@ -35,7 +35,7 @@ namespace ti
 		this->UpdateNativeMenuItems();
 	}
 
-	void OSXMenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
+	void OSXMenuItem::SetSubmenuImpl(AutoMenu newSubmenu)
 	{
 		if (this->type == SEPARATOR)
 			return;
@@ -105,10 +105,10 @@ namespace ti
 
 	/*static*/
 	void OSXMenuItem::SetNSMenuItemSubmenu(
-		NSMenuItem* item, SharedMenu submenu, bool registerNative)
+		NSMenuItem* item, AutoMenu submenu, bool registerNative)
 	{
 		if (!submenu.isNull()) {
-			SharedPtr<OSXMenu> osxSubmenu = submenu.cast<OSXMenu>();
+			AutoPtr<OSXMenu> osxSubmenu = submenu.cast<OSXMenu>();
 			NSMenu* nativeMenu = osxSubmenu->CreateNativeLazily(registerNative);
 			[nativeMenu setTitle:[item title]];
 			[item setSubmenu:nativeMenu];
@@ -161,7 +161,7 @@ namespace ti
 				i = this->nativeItems.erase(i);
 				if (!this->submenu.isNull() && [item submenu] != nil)
 				{
-					SharedPtr<OSXMenu> osxSubmenu = this->submenu.cast<OSXMenu>();
+					AutoPtr<OSXMenu> osxSubmenu = this->submenu.cast<OSXMenu>();
 					osxSubmenu->DestroyNative([item submenu]);
 				}
 				[item release];

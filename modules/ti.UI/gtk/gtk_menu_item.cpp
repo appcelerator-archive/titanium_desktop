@@ -73,7 +73,7 @@ namespace ti
 		}
 	}
 
-	void GtkMenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
+	void GtkMenuItem::SetSubmenuImpl(AutoMenu newSubmenu)
 	{
 		if (this->IsSeparator())
 			return;
@@ -130,14 +130,14 @@ namespace ti
 		}
 	}
 
-	void GtkMenuItem::SetNativeItemSubmenu(::GtkMenuItem* nativeItem, SharedMenu newSubmenu)
+	void GtkMenuItem::SetNativeItemSubmenu(::GtkMenuItem* nativeItem, AutoMenu newSubmenu)
 	{
 		::GtkMenuShell* oldNativeMenu = GTK_MENU_SHELL(gtk_menu_item_get_submenu(nativeItem));
 		if (oldNativeMenu && !this->oldSubmenu.isNull()) {
 			this->oldSubmenu->DestroyNative(oldNativeMenu);
 		}
 
-		SharedPtr<GtkMenu> newGtkSubmenu = newSubmenu.cast<GtkMenu>();
+		AutoPtr<GtkMenu> newGtkSubmenu = newSubmenu.cast<GtkMenu>();
 		::GtkMenuShell* newNativeMenu = 0;
 		if (!newGtkSubmenu.isNull()) {
 			newNativeMenu = newGtkSubmenu->CreateNative(true);

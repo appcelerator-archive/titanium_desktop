@@ -17,12 +17,12 @@ namespace ti
 		void SetIconImpl(std::string newIconPath);
 		void SetStateImpl(bool newState);
 		void SetCallbackImpl(SharedKMethod callback);
-		void SetSubmenuImpl(SharedMenu newSubmenu);
+		void SetSubmenuImpl(AutoMenu newSubmenu);
 		void SetEnabledImpl(bool enabled);
 
 		void ReplaceNativeItem(::GtkMenuItem* nativeItem, ::GtkMenuItem* newNativeItem);
 		void SetNativeItemIcon(::GtkMenuItem* nativeItem, std::string& newIconPath);
-		void SetNativeItemSubmenu(::GtkMenuItem* nativeItem, SharedMenu newSubmenu);
+		void SetNativeItemSubmenu(::GtkMenuItem* nativeItem, AutoMenu newSubmenu);
 		::GtkMenuItem* CreateNative(bool registerNative);
 		void DestroyNative(::GtkMenuItem* nativeItem);
 		void BlockSignal(::GtkMenuItem* item);
@@ -30,7 +30,7 @@ namespace ti
 
 	private:
 		std::vector< ::GtkMenuItem* > nativeItems;
-		SharedPtr<GtkMenu> oldSubmenu;
+		AutoPtr<GtkMenu> oldSubmenu;
 	};
 }
 #endif

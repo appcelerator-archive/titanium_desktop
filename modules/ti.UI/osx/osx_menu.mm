@@ -29,12 +29,12 @@ namespace ti
 		nativeMenus.clear();
 	}
 
-	void OSXMenu::AppendItemImpl(SharedMenuItem item)
+	void OSXMenu::AppendItemImpl(AutoMenuItem item)
 	{
 		this->UpdateNativeMenus();
 	}
 
-	void OSXMenu::InsertItemAtImpl(SharedMenuItem item, unsigned int index)
+	void OSXMenu::InsertItemAtImpl(AutoMenuItem item, unsigned int index)
 	{
 		this->UpdateNativeMenus();
 	}
@@ -161,6 +161,8 @@ namespace ti
 		[nativeMainMenu retain];
 
 		OSXMenu::CopyMenu(defaultMenu, nativeMainMenu);
+		OSXMenu::SetupInspectorItem(nativeMainMenu);
+
 		this->AddChildrenToNativeMenu(nativeMainMenu, true, true);
 
 		// The main menu needs all NSMenuItems in it to have submenus for 
@@ -172,10 +174,10 @@ namespace ti
 
 	void OSXMenu::AddChildrenToNativeMenu(NSMenu* nativeMenu, bool registerNative, bool mainMenu)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end()) {
-			SharedMenuItem item = *i++;
-			SharedPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
 			NSMenuItem* nativeItem = osxItem->CreateNative(registerNative);
 
 			int rearOffset = mainMenu ?  MAINMENU_REAR_OFFSET : 0;
@@ -187,11 +189,11 @@ namespace ti
 
 	void OSXMenu::AddChildrenToNSArray(NSMutableArray* array)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end())
 		{
-			SharedMenuItem item = *i++;
-			SharedPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
 			NSMenuItem* nsItem = osxItem->CreateNative(false);
 			[array addObject:nsItem];
 			[nsItem release];
@@ -339,6 +341,24 @@ namespace ti
 		while ([windowMenu numberOfItems] > lastSeparator+1)
 		{
 			[windowMenu removeItemAtIndex:lastSeparator+1];
+		}
+	}
+
+	/*static*/
+	void OSXMenu::SetupInspectorItem(NSMenu* menu)
+	{
+		NSMenu *windowMenu = OSXMenu::GetWindowMenu(menu);
+		NSMenuItem *showInspector = [windowMenu
+			itemWithTitle:NSLocalizedString(@"Show Inspector", @"")];
+		NSMenuItem *showInspectorSeparator = [windowMenu
+			itemWithTitle:NSLocalizedString(@"Show Inspector Separator", @"")];
+
+		if (!Host::GetInstance()->IsDebugMode())
+		{
+			if (showInspector != nil)
+				[windowMenu removeItem:showInspector];
+			if (showInspectorSeparator != nil)
+				[windowMenu removeItem:showInspectorSeparator];
 		}
 	}
 }

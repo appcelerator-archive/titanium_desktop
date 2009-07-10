@@ -1,4 +1,4 @@
-describe("Network TCPSocket object tests",{
+describe("Network.TCPSocket",{
 	// ti.network.HTTP objects are covered in the http_server unit test.
 
 	before_all: function()

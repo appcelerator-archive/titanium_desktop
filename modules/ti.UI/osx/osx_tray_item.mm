@@ -35,13 +35,13 @@ namespace ti
 		[nativeItem setImage:image];
 	}
 
-	void OSXTrayItem::SetMenu(SharedMenu menu)
+	void OSXTrayItem::SetMenu(AutoMenu menu)
 	{
 		if (menu.get() == this->menu.get()) {
 			return;
 		}
 
-		SharedPtr<OSXMenu> newMenu = menu.cast<OSXMenu>();
+		AutoPtr<OSXMenu> newMenu = menu.cast<OSXMenu>();
 		NSMenu* newNativeMenu = nil;
 		if (!newMenu.isNull()) {
 			newNativeMenu = newMenu->CreateNativeNow(true);
@@ -81,7 +81,6 @@ namespace ti
 		if (callback.isNull())
 			return;
 
-		printf("testing callback\n");
 		try {
 			callback->Call(ValueList());
 		} catch (ValueException& e) {

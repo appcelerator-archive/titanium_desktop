@@ -26,7 +26,7 @@ namespace ti
 	
 	void NetworkModule::Stop ()
 	{
-		SharedPtr<NetworkBinding> b = this->variables.cast<NetworkBinding>();
+		AutoPtr<NetworkBinding> b = this->variables.cast<NetworkBinding>();
 		b->Shutdown();
 	}
 	

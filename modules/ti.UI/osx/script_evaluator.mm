@@ -71,24 +71,24 @@
 				catch(ValueException &e)
 				{
 					SharedString s = e.GetValue()->DisplayString();
-					Logger* logger = Logger::Get("UI.WebViewDelegate");
+					Logger* logger = Logger::Get("UI.ScriptEvaluator");
 					logger->Error("Exception evaluating %s. Error: %s", type.c_str(), (*s).c_str());
 				}
 				catch(std::exception &e)
 				{
-					Logger* logger = Logger::Get("UI.WebViewDelegate");
+					Logger* logger = Logger::Get("UI.ScriptEvaluator");
 					logger->Error("Exception evaluating %s. Error: %s", type.c_str(), e.what());
 				}
 				catch(...)
 				{
-					Logger* logger = Logger::Get("UI.WebViewDelegate");
+					Logger* logger = Logger::Get("UI.ScriptEvaluator");
 					logger->Error("Exception evaluating %s. Unknown Error.", type.c_str());
 				}
 			}
 		}
 		else
 		{
-			Logger* logger = Logger::Get("UI.WebViewDelegate");
+			Logger* logger = Logger::Get("UI.ScriptEvaluator");
 			logger->Error("Couldn't find script type bound object for %s", type.c_str());
 		}
 	}

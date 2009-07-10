@@ -208,7 +208,7 @@ namespace ti
 
 	void AppBinding::CreateProperties(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<PropertiesBinding> properties = new PropertiesBinding();
+		AutoPtr<PropertiesBinding> properties = new PropertiesBinding();
 		result->SetObject(properties);
 		
 		if (args.size() > 0 && args.at(0)->IsObject())

@@ -18,17 +18,17 @@ namespace ti
 		~GtkTrayItem();
 
 		void SetIcon(std::string& icon_path);
-		void SetMenu(SharedMenu menu);
+		void SetMenu(AutoMenu menu);
 		void SetHint(std::string& hint);
 		void Remove();
 
 		GtkStatusIcon* GetWidget();
-		SharedPtr<GtkMenu> GetMenu();
+		AutoPtr<GtkMenu> GetMenu();
 		SharedKMethod GetCallback();
 
 	protected:
 		GtkStatusIcon* item;
-		SharedPtr<GtkMenu> menu;
+		AutoPtr<GtkMenu> menu;
 		SharedKMethod callback;
 		bool active;
 	};

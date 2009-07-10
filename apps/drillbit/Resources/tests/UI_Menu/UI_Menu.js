@@ -1,4 +1,4 @@
-describe("UI.Menu Tests",{
+describe("UI.Menu",{
 	test_basic_methods: function()
 	{
 		var tui = Titanium.UI;

@@ -36,7 +36,7 @@ namespace ti
 	{
 
 		public:
-		GtkUserWindow(WindowConfig*, SharedUserWindow&);
+		GtkUserWindow(WindowConfig*, AutoUserWindow&);
 		virtual ~GtkUserWindow();
 		void Destroyed();
 		void SetupDecorations();
@@ -140,10 +140,10 @@ namespace ti
 		void SetFullscreen(bool fullscreen);
 		bool IsTopMost();
 		void SetTopMost(bool topmost);
-		void SetMenu(SharedMenu);
-		SharedMenu GetMenu();
-		void SetContextMenu(SharedMenu);
-		SharedMenu GetContextMenu();
+		void SetMenu(AutoMenu);
+		AutoMenu GetMenu();
+		void SetContextMenu(AutoMenu);
+		AutoMenu GetContextMenu();
 
 		void SetIcon(std::string& iconPath);
 		std::string& GetIcon();
@@ -165,9 +165,9 @@ namespace ti
 		bool topmost;
 		gulong destroyCallbackId;
 
-		SharedPtr<GtkMenu> menu; // The window-specific menu.
-		SharedPtr<GtkMenu> activeMenu; // This window's active menu 
-		SharedPtr<GtkMenu> contextMenu; // The window specific context menu 
+		AutoPtr<GtkMenu> menu; // The window-specific menu.
+		AutoPtr<GtkMenu> activeMenu; // This window's active menu 
+		AutoPtr<GtkMenu> contextMenu; // The window specific context menu 
 		::GtkMenuBar* nativeMenu; // The widget this window uses for a menu.
 		std::string iconPath; // The path to this window's icon
 		GtkWidget *inspectorWindow; // This window's web inspector window

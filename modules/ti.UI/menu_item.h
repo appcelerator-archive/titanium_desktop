@@ -62,7 +62,7 @@ namespace ti
 		virtual void SetLabelImpl(std::string newLabel) = 0;
 		virtual void SetIconImpl(std::string newIconPath) = 0;
 		virtual void SetStateImpl(bool newState) = 0;
-		virtual void SetSubmenuImpl(SharedMenu newSubmenu) = 0;
+		virtual void SetSubmenuImpl(AutoMenu newSubmenu) = 0;
 		virtual void SetEnabledImpl(bool enabled) = 0;
 
 	protected:
@@ -72,7 +72,7 @@ namespace ti
 		std::string iconURL;
 		std::string iconPath;
 		SharedKMethod callback;
-		SharedMenu submenu;
+		AutoMenu submenu;
 		std::vector<SharedKMethod> eventListeners;
 		bool state;
 		bool autoCheck;
