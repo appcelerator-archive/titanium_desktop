@@ -232,8 +232,6 @@
 	UserWindow* userWindow = [window userWindow];
 	userWindow->RegisterJSContext(context);
 
-	NSString* urlString = [[[[frame dataSource] request] URL] absoluteString];
-
 	// Track that we've cleared this frame
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	SharedKObject globalKObject  = new KKJSObject(context, globalObject);

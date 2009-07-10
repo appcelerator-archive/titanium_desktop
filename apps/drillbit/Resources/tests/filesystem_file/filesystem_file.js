@@ -330,7 +330,7 @@ describe("Ti.Filesystem File tests",
 		// get the modification date
 		timestamp = f.modificationTimestamp();
 		modDate.setTime(timestamp);
-		value_of(tsDate < modDate ).should_be_true();
+		value_of(tsDate <= modDate).should_be_true();
 		value_of(f.deleteFile()).should_be_true();
 	},
 	
