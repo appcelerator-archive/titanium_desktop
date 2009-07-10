@@ -52,7 +52,7 @@ namespace ti
 		 * @tiapi(property=True,type=integer,name=Process.Process.pid,version=0.2)
 		 * @tiapi The process id of the Process object
 		 */
-		this->SetNull("pid");
+		this->Set("pid",Value::NewInt(-1));
 
 		/**
 		 * @tiapi(property=True,type=boolean,name=Process.Process.running,version=0.2)

@@ -43,7 +43,13 @@ namespace ti
 	void Win32Desktop::TakeScreenshot(std::string &screenshotFile)
 	{
 		//ensure filename ends in bmp
-		screenshotFile.append(".bmp");
+		// do we have a file extension?
+		if ( screenshotFile.rfind(".") == std::string::npos )
+		{
+			// only append the .bmp extension if we don't detect a file extension.
+			screenshotFile.append(".bmp");
+		}
+
 
 		HWND desktop = GetDesktopWindow();
 		RECT desktopRect;

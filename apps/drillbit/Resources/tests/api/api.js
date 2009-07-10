@@ -375,26 +375,17 @@ describe("ti.API tests",
 	// test the application path functions
 	test_api_application_paths: function()
 	{
-		var componentSearchPaths = Titanium.API.getComponentSearchPaths();
-		
-		value_of(componentSearchPaths).should_be_object();
-		value_of(componentSearchPaths.length).should_not_be(0);
-		
-		
-		Titanium.API.info("dump component search paths")
-		for (i=0; i<componentSearchPaths.length; i++)
-		{
-			Titanium.API.info(componentSearchPaths[i]);
-		}
-
-		// get the application object
-		var app = Titanium.API.getApplication();
-	  
-		value_of(app).should_not_be_null();
-		
-		var dataPath = app.getDataPath();
-		value_of(dataPath).should_not_be_null();
-		Titanium.API.info("data path = "+dataPath);
+	    var componentSearchPaths = Titanium.API.getComponentSearchPaths();
+	    
+	    value_of(componentSearchPaths).should_be_object();
+	    value_of(componentSearchPaths.length).should_not_be(0);
+	    
+	    
+        Titanium.API.info("dump component search paths")
+	    for (i=0; i<componentSearchPaths.length; i++)
+	    {
+	        Titanium.API.info(componentSearchPaths[i]);
+	    }
 	},
 	
 	test_api_application_arguments: function()

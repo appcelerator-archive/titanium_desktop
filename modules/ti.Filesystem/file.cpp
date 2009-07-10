@@ -655,7 +655,7 @@ namespace ti
 			Poco::File file(this->filename);
 			Poco::Timestamp ts = file.created();
 
-			result->SetDouble(ts.epochTime());
+			result->SetDouble(ts.epochMicroseconds());
 		}
 		catch (Poco::Exception& exc)
 		{
@@ -669,7 +669,7 @@ namespace ti
 			Poco::File file(this->filename);
 			Poco::Timestamp ts = file.getLastModified();
 
-			result->SetDouble(ts.epochTime());
+			result->SetDouble(ts.epochMicroseconds());
 		}
 		catch (Poco::Exception& exc)
 		{
@@ -735,14 +735,14 @@ namespace ti
 		}
 	}
 	void File::GetSpaceAvailable(const ValueList& args, SharedValue result)
-	{
-		result->SetNull();
-		Poco::Path path(this->filename);
+	{	
+		double diskSize = -1.0;
+		std::string error;
 
 #ifdef OS_OSX
 		NSString *p = [NSString stringWithCString:this->filename.c_str() encoding:NSUTF8StringEncoding];
 		unsigned long avail = [[[[NSFileManager defaultManager] fileSystemAttributesAtPath:p] objectForKey:NSFileSystemFreeSize] longValue];
-		result->SetDouble(avail);
+		diskSize = (double)avail;
 #elif defined(OS_WIN32)
 		unsigned __int64 i64FreeBytesToCaller;
 		unsigned __int64 i64TotalBytes;
@@ -753,16 +753,28 @@ namespace ti
 			(PULARGE_INTEGER) &i64TotalBytes,
 			(PULARGE_INTEGER) &i64FreeBytes))
 		{
-			result->SetDouble((double) i64FreeBytesToCaller);
+			diskSize = (double)i64FreeBytesToCaller;
+		}
+		else
+		{
+			error = Win32Utils::QuickFormatMessage(GetLastError());
 		}
 #elif defined(OS_LINUX)
 		struct statvfs stats;
 		if (statvfs(this->filename.c_str(), &stats) == 0)
 		{
 			unsigned long avail = stats.f_bsize * static_cast<unsigned long>(stats.f_bavail);
-			result->SetDouble(avail);
+			diskSize = (double)avail;
 		}
 #endif
+		if ( diskSize >=0.0 )
+		{
+			result->SetDouble(diskSize);
+		}
+		else 
+		{
+			throw ValueException::FromString("Cannot determine diskspace on filename '" + this->filename + "' with error message " +error);
+		}
 	}
 	void File::CreateShortcut(const ValueList& args, SharedValue result)
 	{
