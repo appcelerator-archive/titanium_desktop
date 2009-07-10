@@ -26,9 +26,9 @@ namespace ti
 		nativeMenus.clear();
 	}
 
-	void GtkMenu::AppendItemImpl(SharedMenuItem item)
+	void GtkMenu::AppendItemImpl(AutoMenuItem item)
 	{
-		SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
+		AutoPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 		std::vector<GtkMenuShell*>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end())
 		{
@@ -41,9 +41,9 @@ namespace ti
 		this->oldChildren = this->children;
 	}
 
-	void GtkMenu::InsertItemAtImpl(SharedMenuItem item, unsigned int index)
+	void GtkMenu::InsertItemAtImpl(AutoMenuItem item, unsigned int index)
 	{
-		SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
+		AutoPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 		std::vector<GtkMenuShell*>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end())
 		{
@@ -87,8 +87,8 @@ namespace ti
 		{
 			::GtkMenuItem* w = static_cast< ::GtkMenuItem*>(g_list_nth_data(children, i));
 
-			SharedMenuItem item = this->oldChildren.at(i);
-			SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
+			AutoMenuItem item = this->oldChildren.at(i);
+			AutoPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 			gtkItem->DestroyNative(w);
 
 			gtk_container_remove(GTK_CONTAINER(nativeMenu), GTK_WIDGET(w));
@@ -100,8 +100,8 @@ namespace ti
 		GList* children = gtk_container_get_children(GTK_CONTAINER(nativeMenu));
 		::GtkMenuItem* w = (::GtkMenuItem*) g_list_nth_data(children, index);
 
-		SharedMenuItem item = this->oldChildren.at(index);
-		SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
+		AutoMenuItem item = this->oldChildren.at(index);
+		AutoPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 		gtkItem->DestroyNative(w);
 
 		gtk_container_remove(GTK_CONTAINER(nativeMenu), GTK_WIDGET(w));
@@ -142,10 +142,10 @@ namespace ti
 
 	void GtkMenu::AddChildrenToNativeMenu(::GtkMenuShell* nativeMenu, bool registerNative)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end()) {
-			SharedMenuItem item = *i++;
-			SharedPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<GtkMenuItem> gtkItem = item.cast<GtkMenuItem>();
 			::GtkMenuItem* nativeItem = gtkItem->CreateNative(registerNative);
 			gtk_menu_shell_append(GTK_MENU_SHELL(nativeMenu), GTK_WIDGET(nativeItem));
 			gtk_widget_show_all(GTK_WIDGET(nativeItem));

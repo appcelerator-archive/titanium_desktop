@@ -1,4 +1,4 @@
-describe("Ti.Database sync database tests",{
+describe("Database Module",{
 	
 	before_all:function()
 	{

@@ -45,7 +45,7 @@ namespace ti
 		}
 	}
 
-	void GtkTrayItem::SetMenu(SharedMenu menu)
+	void GtkTrayItem::SetMenu(AutoMenu menu)
 	{
 		this->menu = menu.cast<GtkMenu>();
 	}
@@ -77,7 +77,7 @@ namespace ti
 			return NULL;
 	}
 
-	SharedPtr<GtkMenu> GtkTrayItem::GetMenu()
+	AutoPtr<GtkMenu> GtkTrayItem::GetMenu()
 	{
 		return this->menu;
 	}
@@ -112,7 +112,7 @@ namespace ti
 	{
 		GtkTrayItem* item = static_cast<GtkTrayItem*>(data);
 		GtkStatusIcon* trayWidget = item->GetWidget();
-		SharedPtr<GtkMenu> menu = item->GetMenu();
+		AutoPtr<GtkMenu> menu = item->GetMenu();
 
 		if (!menu.isNull()) {
 			::GtkMenu* nativeMenu = (::GtkMenu*) menu->CreateNative(false);

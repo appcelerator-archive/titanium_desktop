@@ -17,7 +17,7 @@ namespace ti
 		void SetIconImpl(std::string newIconPath);
 		void SetStateImpl(bool newState);
 		void SetCallbackImpl(SharedKMethod callback);
-		void SetSubmenuImpl(SharedMenu newSubmenu);
+		void SetSubmenuImpl(AutoMenu newSubmenu);
 		void SetEnabledImpl(bool enabled);
 
 		NSMenuItem* CreateNative(bool registerNative=true);
@@ -31,7 +31,7 @@ namespace ti
 		static void SetNSMenuItemIconPath(
 			NSMenuItem* item, std::string& iconPath, NSImage* image = nil);
 		static void SetNSMenuItemSubmenu(
-			NSMenuItem* item, SharedMenu submenu, bool registerNative=true);
+			NSMenuItem* item, AutoMenu submenu, bool registerNative=true);
 		static void SetNSMenuItemEnabled(NSMenuItem* item, bool enabled);
 
 		std::vector<NSMenuItem*> nativeItems;

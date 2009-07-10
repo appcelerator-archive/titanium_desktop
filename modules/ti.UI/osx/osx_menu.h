@@ -13,8 +13,8 @@ namespace ti
 		OSXMenu();
 		~OSXMenu();
 
-		void AppendItemImpl(SharedMenuItem item);
-		void InsertItemAtImpl(SharedMenuItem item, unsigned int index);
+		void AppendItemImpl(AutoMenuItem item);
+		void InsertItemAtImpl(AutoMenuItem item, unsigned int index);
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 
@@ -36,7 +36,8 @@ namespace ti
 		static NSMenu* GetServicesMenu(NSMenu* nsMenu);
 		static void EnsureAllItemsHaveSubmenus(NSMenu* menu);
 		static void FixWindowMenu(NSMenu* menu);
-		static bool OSXMenu::IsNativeMenuAMainMenu(NSMenu* menu);
+		static bool IsNativeMenuAMainMenu(NSMenu* menu);
+		static void SetupInspectorItem(NSMenu* menu);
 
 	private:
 		void Clear();

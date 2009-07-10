@@ -23,7 +23,7 @@ static TiApplicationDelegate *tiAppInstance = NULL;
 }
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
-	SharedPtr<OSXMenu> menu = binding->GetDockMenu().cast<OSXMenu>();
+	AutoPtr<OSXMenu> menu = binding->GetDockMenu().cast<OSXMenu>();
 	if (!menu.isNull()) {
 		NSMenu* nativeMenu = menu->CreateNativeNow(false);
 		return nativeMenu;

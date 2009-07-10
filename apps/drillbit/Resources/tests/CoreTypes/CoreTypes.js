@@ -1,4 +1,4 @@
-describe("Core Types Tests",{
+describe("Blob, KObject, KList, etc",{
 	test_core_types_harness: function()
 	{
 		value_of(Titanium.CoreTypes).should_be_object();

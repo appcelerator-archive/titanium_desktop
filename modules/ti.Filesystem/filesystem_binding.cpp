@@ -12,10 +12,13 @@
 
 #ifdef OS_OSX
 #include <Cocoa/Cocoa.h>
-#elif defined(OS_WIN32)
+#elif OS_WIN32
 #include <windows.h>
 #include <shlobj.h>
 #include <process.h>
+#elif OS_LINUX
+#include <sys/types.h>
+#include <pwd.h>
 #endif
 
 #include <Poco/TemporaryFile.h>
@@ -265,7 +268,13 @@ namespace ti
 		NSString *fullPath = [@"~/Desktop" stringByExpandingTildeInPath];
 		dir = [fullPath UTF8String];
 #elif OS_LINUX
-		// TODO
+		passwd *user = getpwuid(getuid());
+		std::string homeDirectory = user->pw_dir;
+		dir = FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL);
+		if (!FileUtils::IsDirectory(dir))
+		{
+			dir = homeDirectory;
+		}
 #endif
 		if (!dir.empty())
 		{
@@ -287,7 +296,13 @@ namespace ti
 		NSString *fullPath = [@"~/Documents" stringByExpandingTildeInPath];
 		dir = [fullPath UTF8String];
 #elif OS_LINUX
-		// TODO
+		passwd *user = getpwuid(getuid());
+		std::string homeDirectory = user->pw_dir;
+		dir = FileUtils::Join(homeDirectory.c_str(), "Documents", NULL);
+		if (!FileUtils::IsDirectory(dir))
+		{
+			dir = homeDirectory;
+		}
 #endif
 		if (dir.empty())
 		{
@@ -339,9 +354,8 @@ namespace ti
 			Poco::Path path;
 			std::vector<std::string> roots;
 			path.listRoots(roots);
-		
-			SharedPtr<StaticBoundList> rootList = new StaticBoundList();
 
+			SharedKList rootList = new StaticBoundList();
 			for(size_t i = 0; i < roots.size(); i++)
 			{
 				ti::File* file = new ti::File(roots.at(i));

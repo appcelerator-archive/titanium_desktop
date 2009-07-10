@@ -205,7 +205,7 @@ namespace ti
 
 	void UIBinding::CreateMainWindow(WindowConfig* config)
 	{
-		SharedPtr<UserWindow> no_parent = NULL;
+		AutoPtr<UserWindow> no_parent = NULL;
 		this->mainWindow = this->CreateWindow(config, no_parent);
 		this->mainWindow->Open();
 	}
@@ -224,20 +224,20 @@ namespace ti
 		return host;
 	}
 
-	std::vector<SharedUserWindow>& UIBinding::GetOpenWindows()
+	std::vector<AutoUserWindow>& UIBinding::GetOpenWindows()
 	{
 		return this->openWindows;
 	}
 
-	void UIBinding::AddToOpenWindows(SharedUserWindow window)
+	void UIBinding::AddToOpenWindows(AutoUserWindow window)
 	{
 		this->openWindows.push_back(window);
 	}
 
-	void UIBinding::RemoveFromOpenWindows(SharedUserWindow window)
+	void UIBinding::RemoveFromOpenWindows(AutoUserWindow window)
 	{
 		static Logger* logger = Logger::Get("UI");
-		std::vector<SharedUserWindow>::iterator w = openWindows.begin();
+		std::vector<AutoUserWindow>::iterator w = openWindows.begin();
 		while (w != openWindows.end())
 		{
 			if ((*w).get() == window.get())
@@ -250,13 +250,13 @@ namespace ti
 				w++;
 			}
 		}
-		logger->Warn("Tried to remove a non-existant window: 0x%lx", (long int) window.get());
+		logger->Warn("Tried to remove a non-existant window: %lx", (long int) window.get());
 	}
 
 	void UIBinding::_GetOpenWindows(const ValueList& args, SharedValue result)
 	{
 		SharedKList list = new StaticBoundList();
-		std::vector<SharedUserWindow>::iterator w = openWindows.begin();
+		std::vector<AutoUserWindow>::iterator w = openWindows.begin();
 		while (w != openWindows.end()) {
 			list->Append(Value::NewObject(*w++));
 		}
@@ -273,7 +273,7 @@ namespace ti
 		result->SetObject(__CreateMenu(args));
 	}
 
-	SharedMenu UIBinding::__CreateMenu(const ValueList& args)
+	AutoMenu UIBinding::__CreateMenu(const ValueList& args)
 	{
 		return this->CreateMenu();
 	}
@@ -283,14 +283,14 @@ namespace ti
 		result->SetObject(__CreateMenuItem(args));
 	}
 
-	SharedMenuItem UIBinding::__CreateMenuItem(const ValueList& args)
+	AutoMenuItem UIBinding::__CreateMenuItem(const ValueList& args)
 	{
 		args.VerifyException("createMenuItem", "?s m|0 s|0");
 		std::string label = args.GetString(0, "");
 		SharedKMethod eventListener = args.GetMethod(1, NULL);
 		std::string iconURL = args.GetString(2, "");
 
-		SharedMenuItem item = this->CreateMenuItem();
+		AutoMenuItem item = this->CreateMenuItem();
 		if (!label.empty())
 			item->SetLabel(label);
 		if (!iconURL.empty())
@@ -307,13 +307,13 @@ namespace ti
 		result->SetObject(__CreateCheckMenuItem(args));
 	}
 
-	SharedMenuItem UIBinding::__CreateCheckMenuItem(const ValueList& args)
+	AutoMenuItem UIBinding::__CreateCheckMenuItem(const ValueList& args)
 	{
 		args.VerifyException("createCheckMenuItem", "?s m|0");
 		std::string label = args.GetString(0, "");
 		SharedKMethod eventListener = args.GetMethod(1, NULL);
 
-		SharedMenuItem item = this->CreateCheckMenuItem();
+		AutoMenuItem item = this->CreateCheckMenuItem();
 		if (!label.empty())
 			item->SetLabel(label);
 		if (!eventListener.isNull())
@@ -326,7 +326,7 @@ namespace ti
 		result->SetObject(__CreateSeparatorMenuItem(args));
 	}
 
-	SharedMenuItem UIBinding::__CreateSeparatorMenuItem(const ValueList& args)
+	AutoMenuItem UIBinding::__CreateSeparatorMenuItem(const ValueList& args)
 	{
 		return this->CreateSeparatorMenuItem();
 	}
@@ -335,7 +335,7 @@ namespace ti
 	{
 		args.VerifyException("setMenu", "o|0");
 		SharedKObject argObj = args.GetObject(0, NULL);
-		SharedMenu menu = NULL;
+		AutoMenu menu = NULL;
 
 		if (!argObj.isNull())
 		{
@@ -345,7 +345,7 @@ namespace ti
 		this->SetMenu(menu); // platform-specific impl
 
 		// Notify all windows that the app menu has changed.
-		std::vector<SharedUserWindow>::iterator i = openWindows.begin();
+		std::vector<AutoUserWindow>::iterator i = openWindows.begin();
 		while (i != openWindows.end()) {
 			(*i++)->AppMenuChanged();
 		}
@@ -353,7 +353,7 @@ namespace ti
 
 	void UIBinding::_GetMenu(const ValueList& args, SharedValue result)
 	{
-		SharedMenu menu = this->GetMenu();
+		AutoMenu menu = this->GetMenu();
 		if (menu.isNull())
 		{
 			result->SetNull();
@@ -368,7 +368,7 @@ namespace ti
 	{
 		args.VerifyException("setContextMenu", "o|0");
 		SharedKObject argObj = args.GetObject(0, NULL);
-		SharedMenu menu = NULL;
+		AutoMenu menu = NULL;
 
 		if (!argObj.isNull())
 		{
@@ -379,7 +379,7 @@ namespace ti
 
 	void UIBinding::_GetContextMenu(const ValueList& args, SharedValue result)
 	{
-		SharedMenu menu = this->GetContextMenu();
+		AutoMenu menu = this->GetContextMenu();
 		result->SetObject(menu);
 	}
 
@@ -395,7 +395,7 @@ namespace ti
 		this->SetIcon(iconPath); // platform-specific impl
 
 		// Notify all windows that the app menu has changed.
-		std::vector<SharedUserWindow>::iterator i = openWindows.begin();
+		std::vector<AutoUserWindow>::iterator i = openWindows.begin();
 		while (i != openWindows.end()) {
 			(*i++)->AppIconChanged();
 		}
@@ -409,7 +409,7 @@ namespace ti
 		iconPath = URLToPathOrURL(iconPath);
 
 		SharedKMethod cb = args.GetMethod(1, NULL);
-		SharedTrayItem item = this->AddTray(iconPath, cb);
+		AutoTrayItem item = this->AddTray(iconPath, cb);
 		this->trayItems.push_back(item);
 		result->SetObject(item);
 	}
@@ -421,7 +421,7 @@ namespace ti
 
 	void UIBinding::ClearTray()
 	{
-		std::vector<SharedTrayItem>::iterator i = this->trayItems.begin();
+		std::vector<AutoTrayItem>::iterator i = this->trayItems.begin();
 		while (i != this->trayItems.end())
 		{
 			(*i++)->Remove();
@@ -431,10 +431,10 @@ namespace ti
 
 	void UIBinding::UnregisterTrayItem(TrayItem* item)
 	{
-		std::vector<SharedTrayItem>::iterator i = this->trayItems.begin();
+		std::vector<AutoTrayItem>::iterator i = this->trayItems.begin();
 		while (i != this->trayItems.end())
 		{
-			SharedTrayItem c = *i;
+			AutoTrayItem c = *i;
 			if (c.get() == item)
 			{
 				i = this->trayItems.erase(i);
@@ -458,7 +458,7 @@ namespace ti
 
 	void UIBinding::_SetDockMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<Menu> menu = NULL; // A NULL value is an unset
+		AutoPtr<Menu> menu = NULL; // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
 			menu = args.at(0)->ToObject().cast<Menu>();

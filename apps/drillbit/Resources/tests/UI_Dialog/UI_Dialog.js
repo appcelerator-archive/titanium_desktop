@@ -1,4 +1,4 @@
-describe("ti.UI.Dialog dialog tests",
+describe("UI.Dialog",
 {
 	create_dialog_with_no_content_as_async:function(callback)
 	{

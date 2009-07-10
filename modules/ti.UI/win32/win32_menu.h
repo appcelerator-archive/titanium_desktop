@@ -13,8 +13,8 @@ namespace ti
 		Win32Menu();
 		~Win32Menu();
 
-		void AppendItemImpl(SharedMenuItem item);
-		void InsertItemAtImpl(SharedMenuItem item, unsigned int index);
+		void AppendItemImpl(AutoMenuItem item);
+		void InsertItemAtImpl(AutoMenuItem item, unsigned int index);
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 
@@ -32,7 +32,7 @@ namespace ti
 		static void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
 
 		private:
-		std::vector<SharedMenuItem> oldChildren;
+		std::vector<AutoMenuItem> oldChildren;
 		std::vector<HMENU> nativeMenus;
 	};
 }

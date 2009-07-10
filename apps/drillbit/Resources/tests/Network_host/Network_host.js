@@ -1,4 +1,4 @@
-describe("Network module tests",{
+describe("Network.Host",{
 	// test the network object and properties.
 	test_network_object:function()
 	{

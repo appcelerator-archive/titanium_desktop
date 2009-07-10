@@ -20,25 +20,25 @@ using namespace ti;
 	WebView* webView;
 	WebViewDelegate* delegate;
 	BOOL requiresDisplay;
-	OSXUserWindow* userWindow;
+	AutoPtr<OSXUserWindow>* userWindow;
 	WebInspector *inspector;
-	BOOL closed;
 	BOOL fullscreen;
 	BOOL focused;
 	NSRect savedFrame;
 }
-- (void)setupDecorations:(WindowConfig*)config host:(Host*)h userwindow:(OSXUserWindow*)uw;
+- (void)setUserWindow:(AutoPtr<OSXUserWindow>*)inUserWindow;
+- (void)setupDecorations:(WindowConfig*)config;
 - (void)setTransparency:(double)transparency;
 - (void)setFullscreen:(BOOL)yn;
 - (void)close;
+- (void)finishClose;
 - (void)open;
 - (void)frameLoaded;
 - (WebView*)webView;
 - (WindowConfig*)config;
 - (UserWindow*)userWindow;
 - (void)setInitialWindow:(BOOL)yn;
-- (void)showInspector;
-- (void)fireWindowEvent:(UserWindowEvent)event;
+- (void)showInspector:(id)sender;
 @end
 
 #endif

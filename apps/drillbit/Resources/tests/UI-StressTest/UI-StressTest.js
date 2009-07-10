@@ -40,31 +40,31 @@ describe("UI Module Tests",{
 		// get the current UserWindow object
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 
-		var url = "http://www.google.com";
+		var url = "http://www.google.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://gmail.com";
+		url = "http://gmail.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://www.bbc.co.uk";
+		url = "http://www.bbc.co.uk/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://mail.google.com";
+		url = "http://mail.google.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
 
 		w.open();
 
-		url = "http://www.google.com";
+		url = "http://www.google.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://gmail.com";
+		url = "http://gmail.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://www.bbc.co.uk";
+		url = "http://www.bbc.co.uk/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
-		url = "http://mail.google.com";
+		url = "http://mail.google.com/";
 		w.setURL(url);
 		value_of(w.getURL()).should_be(url);
 		w.close();

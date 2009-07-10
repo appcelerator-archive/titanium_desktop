@@ -1,4 +1,4 @@
-describe("Network IRCClient object tests",{
+describe("Network.IRCClient",{
 	// ti.network.HTTP objects are covered in the http_server unit test.
 
 	before_all: function()

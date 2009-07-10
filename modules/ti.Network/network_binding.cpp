@@ -146,7 +146,7 @@ namespace ti
 	}
 	void NetworkBinding::_GetByHost(std::string hostname, SharedValue result)
 	{
-		SharedPtr<HostBinding> binding = new HostBinding(hostname);
+		AutoPtr<HostBinding> binding = new HostBinding(hostname);
 		if (binding->IsInvalid())
 		{
 			throw ValueException::FromString("Could not resolve address");
@@ -158,14 +158,14 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			SharedKObject obj = args.at(0)->ToObject();
-			SharedPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
+			AutoPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{
 				// in this case, they've passed us an IPAddressBinding
 				// object, which we can just retrieve the ipaddress
 				// instance and resolving using it
 				IPAddress addr(b->GetAddress()->toString());
-				SharedPtr<HostBinding> binding = new HostBinding(addr);
+				AutoPtr<HostBinding> binding = new HostBinding(addr);
 				if (binding->IsInvalid())
 				{
 					throw ValueException::FromString("Could not resolve address");
@@ -200,7 +200,7 @@ namespace ti
 	}
 	void NetworkBinding::CreateIPAddress(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
+		AutoPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
 		if (binding->IsInvalid())
 		{
 			throw ValueException::FromString("Invalid address");
@@ -210,12 +210,12 @@ namespace ti
 	void NetworkBinding::CreateTCPSocket(const ValueList& args, SharedValue result)
 	{
 		//TODO: check for args
-		SharedPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
+		AutoPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
 		result->SetObject(tcp);
 	}
 	void NetworkBinding::CreateIRCClient(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<IRCClientBinding> irc = new IRCClientBinding(host);
+		AutoPtr<IRCClientBinding> irc = new IRCClientBinding(host);
 		result->SetObject(irc);
 	}
 	void NetworkBinding::RemoveBinding(void* binding)

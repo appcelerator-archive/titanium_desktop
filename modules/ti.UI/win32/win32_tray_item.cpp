@@ -9,21 +9,21 @@
 
 namespace ti
 {
-	std::vector<SharedPtr<Win32TrayItem> > Win32TrayItem::trayItems;
+	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
 	Win32TrayItem::Win32TrayItem(std::string& iconPath, SharedKMethod cb) :
 		callback(cb),
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
-		SharedUserWindow uw = NULL;
-		std::vector<SharedUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
+		AutoUserWindow uw = NULL;
+		std::vector<AutoUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
+		std::vector<AutoUserWindow>::iterator i = windows.begin();
 		if (i != windows.end())
 		{
 			uw = *i;
 		}
 	
-		SharedPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
+		AutoPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
 	
 		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
 		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
@@ -57,7 +57,7 @@ namespace ti
 		}
 	}
 	
-	void Win32TrayItem::SetMenu(SharedMenu menu)
+	void Win32TrayItem::SetMenu(AutoMenu menu)
 	{
 		this->menu = menu;
 	}
@@ -91,7 +91,7 @@ namespace ti
 		if (this->menu.isNull())
 			return;
 
-		SharedPtr<Win32Menu> win32menu = this->menu.cast<Win32Menu>();
+		AutoPtr<Win32Menu> win32menu = this->menu.cast<Win32Menu>();
 		if (win32menu.isNull())
 			return;
 
@@ -131,7 +131,7 @@ namespace ti
 		int id = LOWORD(wParam);
 
 		for (size_t i = 0; i < trayItems.size(); i++) {
-			SharedPtr<Win32TrayItem> item = trayItems[i];
+			AutoPtr<Win32TrayItem> item = trayItems[i];
 
 			if (item->GetId() == id && button == WM_LBUTTONDOWN) {
 				item->HandleLeftClick();

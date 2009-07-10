@@ -56,7 +56,7 @@ namespace ti
 		}
 	}
 
-	void Win32MenuItem::SetSubmenuImpl(SharedMenu newSubmenu)
+	void Win32MenuItem::SetSubmenuImpl(AutoMenu newSubmenu)
 	{
 		if (!this->IsSeparator()) {
 			this->RecreateAllNativeItems();
@@ -114,7 +114,7 @@ namespace ti
 			itemInfo->fState = this->IsEnabled() ? MFS_ENABLED : MFS_DISABLED;
 			itemInfo->dwTypeData = (LPSTR) this->oldLabel.c_str();
 
-			SharedPtr<Win32Menu> wsubmenu = this->submenu.cast<Win32Menu>();
+			AutoPtr<Win32Menu> wsubmenu = this->submenu.cast<Win32Menu>();
 			if (!wsubmenu.isNull()) {
 				nativeSubmenu = wsubmenu->CreateNative(registerNative);
 			}

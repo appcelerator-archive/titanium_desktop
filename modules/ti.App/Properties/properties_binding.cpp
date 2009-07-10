@@ -257,7 +257,7 @@ namespace ti
 
 		if (!stringValue->IsNull())
 		{
-			SharedPtr<StaticBoundList> list = new StaticBoundList();
+			SharedKList list = new StaticBoundList();
 			std::string string = stringValue->ToString();
 			Poco::StringTokenizer t(string, ",", Poco::StringTokenizer::TOK_TRIM);
 			for (size_t i = 0; i < t.count(); i++)
@@ -339,7 +339,7 @@ namespace ti
 		std::vector<std::string> keys;
 		config->keys(keys);
 
-		SharedPtr<StaticBoundList> property_list = new StaticBoundList();
+		SharedKList property_list = new StaticBoundList();
 		for (size_t i = 0; i < keys.size(); i++)
 		{
 			std::string property_name = keys.at(i);
