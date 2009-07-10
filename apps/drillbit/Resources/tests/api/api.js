@@ -373,7 +373,7 @@ describe("ti.API tests",
 		}
 	},
 	// test the application path functions
-	test_api_application_paths: function()
+	test_api_component_Search_Paths: function()
 	{
 	    var componentSearchPaths = Titanium.API.getComponentSearchPaths();
 	    
@@ -388,42 +388,6 @@ describe("ti.API tests",
 	    }
 	},
 	
-	test_api_application_arguments: function()
-	{
-		// get the application object
-		var app = Titanium.API.getApplication();
-		value_of(app).should_not_be_null();
-
-		var argv = app.getArguments();
-		value_of(argv).should_be_array();
-
-		if ( argv )
-		{
-			var exePath = app.getExecutablePath();
-			value_of(exePath).should_be_string();
-			
-			// argv[0] is the fully qualified name and path to the exe
-			var index = argv[0].indexOf(exePath);
-			value_of(index).should_not_be(-1);
-		}
-	},
-	
-	// test the application path functions
-	test_api_application_ComponentSearchpath: function()
-	{
-		var componentSearchPaths = Titanium.API.getComponentSearchPaths();
-		
-		value_of(componentSearchPaths).should_be_object();
-		value_of(componentSearchPaths.length).should_not_be(0);
-		
-		
-		Titanium.API.info("dump component search paths")
-		for (i=0; i<componentSearchPaths.length; i++)
-		{
-			Titanium.API.info(componentSearchPaths[i]);
-		}
-	},
-
 	test_api_events_as_async: function(callback)
 	{
 		// create an event
