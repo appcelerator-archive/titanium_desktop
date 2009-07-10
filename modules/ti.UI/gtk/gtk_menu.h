@@ -13,8 +13,8 @@ namespace ti
 		GtkMenu();
 		~GtkMenu();
 
-		void AppendItemImpl(SharedMenuItem item);
-		void InsertItemAtImpl(SharedMenuItem item, unsigned int index);
+		void AppendItemImpl(AutoMenuItem item);
+		void InsertItemAtImpl(AutoMenuItem item, unsigned int index);
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 
@@ -24,11 +24,11 @@ namespace ti
 		GtkMenuShell* CreateNativeBar(bool registerNative);
 		::GtkMenuShell* CreateNative(bool registerNative);
 		void AddChildrenToNativeMenu(::GtkMenuShell* nativeMenu, bool registerNative);
-		void RegisterNativeMenuItem(SharedMenuItem item, ::GtkMenuItem* nativeItem);
+		void RegisterNativeMenuItem(AutoMenuItem item, ::GtkMenuItem* nativeItem);
 		void DestroyNativeMenuItem(::GtkMenuItem* nativeItem);
 
 	private:
-		std::vector<SharedMenuItem> oldChildren;
+		std::vector<AutoMenuItem> oldChildren;
 		std::vector< ::GtkMenuShell* > nativeMenus;
 	};
 }

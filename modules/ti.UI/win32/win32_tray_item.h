@@ -17,7 +17,7 @@ class Win32TrayItem: public TrayItem
 	virtual ~Win32TrayItem();
 
 	void SetIcon(std::string& iconPath);
-	void SetMenu(SharedMenu menu);
+	void SetMenu(AutoMenu menu);
 	void SetHint(std::string& hint);
 	void Remove();
 	void ShowTrayMenu();
@@ -32,7 +32,7 @@ class Win32TrayItem: public TrayItem
 	SharedKMethod callback;
 	HMENU oldNativeMenu;
 	NOTIFYICONDATA* trayIconData;
-	static std::vector<SharedPtr<Win32TrayItem> > trayItems;
+	static std::vector<AutoPtr<Win32TrayItem> > trayItems;
 };
 
 }

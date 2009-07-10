@@ -242,7 +242,7 @@ Win32WebKitUIDelegate::trackCustomPopupMenu(
 	/* [in] */ OLE_HANDLE inMenu,
 	/* [in] */ LPPOINT point)
 {
-	SharedPtr<Win32Menu> menu = this->window->GetContextMenu().cast<Win32Menu>();
+	AutoPtr<Win32Menu> menu = this->window->GetContextMenu().cast<Win32Menu>();
 
 	// No window menu, try to use the application menu.
 	if (menu.isNull())

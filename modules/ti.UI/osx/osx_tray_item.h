@@ -14,14 +14,14 @@ namespace ti
 		virtual ~OSXTrayItem();
 
 		void SetIcon(std::string& iconPath);
-		void SetMenu(SharedMenu menu);
+		void SetMenu(AutoMenu menu);
 		void SetHint(std::string& hint);
 		void Remove();
 		void InvokeCallback();
 
 	private:
 		NSMenu* nativeMenu;
-		SharedPtr<OSXMenu> menu;
+		AutoPtr<OSXMenu> menu;
 		SharedKMethod callback;
 		NSStatusItem* nativeItem;
 	};

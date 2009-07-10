@@ -596,8 +596,7 @@ namespace ti
 				std::vector<std::string> files;
 				dir.list(files);
 
-				SharedPtr<StaticBoundList> fileList = new StaticBoundList();
-
+				SharedKList fileList = new StaticBoundList();
 				for(size_t i = 0; i < files.size(); i++)
 				{
 					std::string entry = files.at(i);

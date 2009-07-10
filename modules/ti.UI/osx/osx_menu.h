@@ -13,8 +13,8 @@ namespace ti
 		OSXMenu();
 		~OSXMenu();
 
-		void AppendItemImpl(SharedMenuItem item);
-		void InsertItemAtImpl(SharedMenuItem item, unsigned int index);
+		void AppendItemImpl(AutoMenuItem item);
+		void InsertItemAtImpl(AutoMenuItem item, unsigned int index);
 		void RemoveItemAtImpl(unsigned int index);
 		void ClearImpl();
 

@@ -27,19 +27,19 @@ namespace ti
 		void _AddSeparatorItem(const ValueList& args, SharedValue result);
 		void _AddCheckItem(const ValueList& args, SharedValue result);
 
-		void AppendItem(SharedMenuItem item);
-		SharedMenuItem GetItemAt(int index);
-		void InsertItemAt(SharedMenuItem item, size_t index);
+		void AppendItem(AutoMenuItem item);
+		AutoMenuItem GetItemAt(int index);
+		void InsertItemAt(AutoMenuItem item, size_t index);
 		void RemoveItemAt(size_t index);
 
 		// Platform-specific implementation
-		virtual void AppendItemImpl(SharedMenuItem item) = 0;
-		virtual void InsertItemAtImpl(SharedMenuItem item, unsigned int index) = 0;
+		virtual void AppendItemImpl(AutoMenuItem item) = 0;
+		virtual void InsertItemAtImpl(AutoMenuItem item, unsigned int index) = 0;
 		virtual void RemoveItemAtImpl(unsigned int index) = 0;
 		virtual void ClearImpl() = 0;
 
 	protected:
-		std::vector<SharedMenuItem> children;
+		std::vector<AutoMenuItem> children;
 	};
 }
 #endif

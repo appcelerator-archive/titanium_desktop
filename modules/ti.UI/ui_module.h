@@ -15,11 +15,11 @@ namespace ti {
 	class TrayItem;
 	class UserWindow;
 
-	typedef SharedPtr<UserWindow> SharedUserWindow;
-	typedef SharedPtr<UIBinding> SharedUIBinding;
-	typedef SharedPtr<Menu> SharedMenu;
-	typedef SharedPtr<MenuItem> SharedMenuItem;
-	typedef SharedPtr<TrayItem> SharedTrayItem;
+	typedef AutoPtr<UserWindow> AutoUserWindow;
+	typedef AutoPtr<UIBinding> AutoUIBinding;
+	typedef AutoPtr<Menu> AutoMenu;
+	typedef AutoPtr<MenuItem> AutoMenuItem;
+	typedef AutoPtr<TrayItem> AutoTrayItem;
 }
 
 #include <JavaScriptCore/JSObjectRef.h>
@@ -52,7 +52,7 @@ namespace ti {
 
 		public:
 		static UIModule* GetInstance() { return instance_; }
-		SharedUIBinding GetUIBinding() { return uiBinding; }
+		AutoUIBinding GetUIBinding() { return uiBinding; }
 		void Exiting(int exitcode);
 		void Start();
 		static bool IsResourceLocalFile(std::string string);
@@ -60,7 +60,7 @@ namespace ti {
 		protected:
 		DISALLOW_EVIL_CONSTRUCTORS(UIModule);
 		static UIModule* instance_;
-		SharedUIBinding uiBinding;
+		AutoUIBinding uiBinding;
 
 	};
 }

@@ -75,12 +75,12 @@ namespace ti
 		return osVersion.dwMajorVersion == 5;
 	}
 
-	SharedUserWindow Win32UIBinding::CreateWindow(
+	AutoUserWindow Win32UIBinding::CreateWindow(
 		WindowConfig* config,
-		SharedUserWindow& parent)
+		AutoUserWindow& parent)
 	{
 		UserWindow* w = new Win32UserWindow(config, parent);
-		return w->GetSharedPtr();
+		return w->GetAutoPtr();
 	}
 
 	void Win32UIBinding::ErrorDialog(std::string msg)
@@ -89,32 +89,32 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	SharedMenu Win32UIBinding::CreateMenu()
+	AutoMenu Win32UIBinding::CreateMenu()
 	{
 		return new Win32Menu();
 	}
 
-	SharedMenuItem Win32UIBinding::CreateMenuItem()
+	AutoMenuItem Win32UIBinding::CreateMenuItem()
 	{
 		return new Win32MenuItem(MenuItem::NORMAL);
 	}
 
-	SharedMenuItem Win32UIBinding::CreateSeparatorMenuItem()
+	AutoMenuItem Win32UIBinding::CreateSeparatorMenuItem()
 	{
 		return new Win32MenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem Win32UIBinding::CreateCheckMenuItem()
+	AutoMenuItem Win32UIBinding::CreateCheckMenuItem()
 	{
 		return new Win32MenuItem(MenuItem::CHECK);
 	}
 
-	void Win32UIBinding::SetMenu(SharedMenu newMenu)
+	void Win32UIBinding::SetMenu(AutoMenu newMenu)
 	{
 		this->menu = newMenu.cast<Win32Menu>();
 	}
 
-	void Win32UIBinding::SetContextMenu(SharedMenu newMenu)
+	void Win32UIBinding::SetContextMenu(AutoMenu newMenu)
 	{
 		this->contextMenu = newMenu.cast<Win32Menu>();
 	}
@@ -124,10 +124,10 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	SharedPtr<TrayItem> Win32UIBinding::AddTray(
+	AutoPtr<TrayItem> Win32UIBinding::AddTray(
 		std::string& iconPath, SharedKMethod cb)
 	{
-		SharedPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cb);
+		AutoPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cb);
 		return trayItem;
 	}
 
@@ -145,12 +145,12 @@ namespace ti
 		return (int)idleTicks;
 	}
 
-	SharedMenu Win32UIBinding::GetMenu()
+	AutoMenu Win32UIBinding::GetMenu()
 	{
 		return this->menu;
 	}
 
-	SharedMenu Win32UIBinding::GetContextMenu()
+	AutoMenu Win32UIBinding::GetContextMenu()
 	{
 		return this->contextMenu;
 	}

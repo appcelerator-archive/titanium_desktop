@@ -6,7 +6,7 @@
 #include "ui_module.h"
 
 using namespace ti;
-UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
+UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	AccessorBoundObject("UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
@@ -457,7 +457,7 @@ UserWindow::~UserWindow()
 	}
 }
 
-SharedUserWindow UserWindow::GetSharedPtr()
+AutoUserWindow UserWindow::GetAutoPtr()
 {
 	return this->shared_this;
 }
@@ -495,13 +495,13 @@ void UserWindow::Closed()
 	this->FireEvent(CLOSED);
 
 	// Close all children and cleanup
-	std::vector<SharedUserWindow>::iterator iter = this->children.begin();
+	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
 	while (iter != this->children.end())
 	{
 		// Save a pointer to the child here, because it may
 		// be freed by the SharedPtr otherwise and that will
 		// make this iterator seriously, seriously unhappy.
-		SharedUserWindow child = (*iter);
+		AutoUserWindow child = (*iter);
 		iter = children.erase(iter);
 		child->Close();
 	}
@@ -517,7 +517,7 @@ void UserWindow::Closed()
 	this->binding->RemoveFromOpenWindows(this->shared_this);
 
 	// When we have no more open windows, we exit...
-	std::vector<SharedUserWindow> windows = this->binding->GetOpenWindows();
+	std::vector<AutoUserWindow> windows = this->binding->GetOpenWindows();
 	if (windows.size() == 0) {
 		this->host->Exit(0);
 	} else {
@@ -1272,7 +1272,7 @@ void UserWindow::_GetTransparencyColor(const kroll::ValueList& args, kroll::Shar
 void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	args.VerifyException("setMenu", "?o");
-	SharedMenu menu = NULL;
+	AutoMenu menu = NULL;
 	if (args.size() > 0) {
 		menu = args.at(0)->ToObject().cast<Menu>();
 	}
@@ -1281,7 +1281,7 @@ void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue resul
 
 void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedMenu menu = this->GetMenu();
+	AutoMenu menu = this->GetMenu();
 	if (!menu.isNull())
 	{
 		result->SetObject(menu);
@@ -1295,7 +1295,7 @@ void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::SharedValue resul
 void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	args.VerifyException("setContextMenu", "?o");
-	SharedMenu menu = NULL;
+	AutoMenu menu = NULL;
 	if (args.size() > 0) {
 		menu = args.at(0)->ToObject().cast<Menu>();
 	}
@@ -1304,7 +1304,7 @@ void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValu
 
 void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedMenu menu = this->GetContextMenu();
+	AutoMenu menu = this->GetContextMenu();
 	if (!menu.isNull())
 	{
 		result->SetObject(menu);
@@ -1370,7 +1370,7 @@ void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 		config = new WindowConfig();
 	}
 
-	SharedUserWindow new_window = this->binding->CreateWindow(config, shared_this);
+	AutoUserWindow new_window = this->binding->CreateWindow(config, shared_this);
 	result->SetObject(new_window);
 }
 
@@ -1644,19 +1644,19 @@ void UserWindow::FireEvent(UserWindowEvent eventType, SharedKObject event)
 	this->api->Call(fullName.c_str(), Value::NewObject(event));
 }
 
-SharedUserWindow UserWindow::GetParent()
+AutoUserWindow UserWindow::GetParent()
 {
 	return this->parent;
 }
 
-void UserWindow::AddChild(SharedUserWindow child)
+void UserWindow::AddChild(AutoUserWindow child)
 {
 	this->children.push_back(child);
 }
 
-void UserWindow::RemoveChild(SharedUserWindow child)
+void UserWindow::RemoveChild(AutoUserWindow child)
 {
-	std::vector<SharedUserWindow>::iterator iter = this->children.begin();
+	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
 	while (iter != this->children.end())
 	{
 		if ((*iter).get() == child.get())
@@ -1738,7 +1738,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 		KObject* delegate_ui_api = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
 
 		// Place currentWindow in the delegate.
-		SharedValue user_window_val = Value::NewObject(this->GetSharedPtr());
+		SharedValue user_window_val = Value::NewObject(this->GetAutoPtr());
 		delegate_ui_api->Set("getCurrentWindow", this->Get("getCurrentWindow"));
 
 		// Place currentWindow.createWindow in the delegate.

@@ -184,7 +184,7 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			SharedKObject b = args.at(0)->ToObject();
-			SharedPtr<Blob> blob = b.cast<Blob>();
+			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
 				text = (char*)blob->Get();
@@ -372,7 +372,7 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			SharedKObject b = args.at(0)->ToObject();
-			SharedPtr<Blob> blob = b.cast<Blob>();
+			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
 				text = (char*)blob->Get();

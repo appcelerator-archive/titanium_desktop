@@ -32,7 +32,7 @@ private:
 	const char* error;
 	std::string appName, appID, description, copyright, url, version, publisher;
 	WindowConfigList windows;
-	SharedPtr<PropertiesBinding> systemProperties;
+	AutoPtr<PropertiesBinding> systemProperties;
 
 	// icon properties
 	std::string icon16, icon32, icon48;
@@ -51,7 +51,7 @@ public:
 	std::string& GetVersion() { return version; }
 	std::string& GetPublisher() { return publisher; }
 
-	SharedPtr<PropertiesBinding> GetSystemProperties() { return systemProperties; }
+	AutoPtr<PropertiesBinding> GetSystemProperties() { return systemProperties; }
 	
 	std::string InsertAppIDIntoURL(std::string url);
 

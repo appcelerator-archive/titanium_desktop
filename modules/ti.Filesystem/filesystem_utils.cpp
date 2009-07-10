@@ -36,9 +36,9 @@ namespace ti
 	}
 	
 	/*static*/
-	SharedPtr<File> FileSystemUtils::ToFile(SharedKObject object)
+	AutoPtr<File> FileSystemUtils::ToFile(SharedKObject object)
 	{
-		SharedPtr<File> file = object.cast<File>();
+		AutoPtr<File> file = object.cast<File>();
 		return file;
 	}
 }
