@@ -33,6 +33,11 @@
 	[webView setDrawsBackground:NO];
 
 	delegate = [[WebViewDelegate alloc] initWithWindow:self];
+	[webView setFrameLoadDelegate:delegate];
+	[webView setUIDelegate:delegate];
+	[webView setResourceLoadDelegate:delegate];
+	[webView setPolicyDelegate:delegate];
+
 	[self setContentView:webView];
 	[self setDelegate:self];
 	[self setTransparency:config->GetTransparency()];
@@ -43,17 +48,18 @@
 - (void)dealloc
 {
 	// make sure we go back to normal mode
-	SetSystemUIMode(kUIModeNormal,0);
-	[inspector release];
-	[delegate release];
-	delegate = nil;
+	SetSystemUIMode(kUIModeNormal, 0);
 
 	[webView setFrameLoadDelegate:nil];
 	[webView setUIDelegate:nil];
 	[webView setResourceLoadDelegate:nil];
 	[webView setPolicyDelegate:nil];
-	[webView release];
 
+	[delegate release];
+	delegate = nil;
+
+	[inspector release];
+	[webView release];
 	webView = nil;
 	[super dealloc];
 }
@@ -65,7 +71,7 @@
 
 - (void)showInspector:(id)sender
 {
-	if (inspector==nil)
+	if (inspector == nil)
 	{
 		inspector = [[WebInspector alloc] initWithWebView:webView];
 		[inspector detach:self];
@@ -89,24 +95,14 @@
 	return newSize;
 }
 
-- (void)updateConfig
-{
-	NSRect frame = [self frame];
-	config->SetWidth(frame.size.width);
-	config->SetHeight(frame.size.height);
-	//FIXME: so x,y but need to translate
-}
-
 - (void)windowDidResize:(NSNotification*)notification
 {
 	(*userWindow)->FireEvent(RESIZED);
-	[self updateConfig];
 }
 
 - (void)windowDidMove:(NSNotification*)notification
 {
 	(*userWindow)->FireEvent(MOVED);
-	[self updateConfig];
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)notification
@@ -115,7 +111,7 @@
 	(*userWindow)->Focused();
 	if (!focused && fullscreen)
 	{
-		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
+		SetSystemUIMode(kUIModeAllHidden, kUIOptionAutoShowMenuBar);
 	}
 	focused = YES;
 }
@@ -126,7 +122,7 @@
 	(*userWindow)->Unfocused();
 	if (fullscreen && focused)
 	{
-		SetSystemUIMode(kUIModeNormal,0);
+		SetSystemUIMode(kUIModeNormal, 0);
 	}
 	focused = NO;
 }
@@ -213,7 +209,7 @@
 		[self setShowsResizeIndicator:config->IsResizable()];
 		(*userWindow)->FireEvent(UNFULLSCREENED);
 	}
-	[self makeKeyAndOrderFront:nil];	
+	[self makeKeyAndOrderFront:nil];
 	[self makeFirstResponder:webView];
 }
 
@@ -265,7 +261,7 @@
 	{
 		requiresDisplay = NO;
 		config->SetVisible(true);
-		
+
 		[NSApp arrangeInFront:self];
 		[self makeKeyAndOrderFront:self];
 		[NSApp activateIgnoringOtherApps:YES];

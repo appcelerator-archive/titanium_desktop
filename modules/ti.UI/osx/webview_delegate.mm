@@ -97,10 +97,6 @@
 
 	// if we use a textured window mask, this is on by default which we don't want
 	[window setMovableByWindowBackground:NO];
-	[webView setFrameLoadDelegate:self];
-	[webView setUIDelegate:self];
-	[webView setResourceLoadDelegate:self];
-	[webView setPolicyDelegate:self];
 
 	// TI-303 we need to add safari UA to our UA to resolve broken
 	// sites that look at Safari and not WebKit for UA
