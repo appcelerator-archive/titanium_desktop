@@ -487,36 +487,44 @@
 }
 
 
-- (void)webView:(WebView *)wv runOpenPanelForFileButtonWithResultListener:(id <WebOpenPanelResultListener>)resultListener 
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id<WebOpenPanelResultListener>)resultListener;
 {
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-	[openPanel beginSheetForDirectory:nil 
+	[openPanel setAllowsMultipleSelection:NO];
+	[openPanel setCanChooseDirectories:NO];
+	[openPanel beginSheetForDirectory:nil
 		file:nil 
 		modalForWindow:window
 		modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 		contextInfo:resultListener];
-
-	// only show if already visible
-	if ([window userWindow]->IsVisible())
-	{
-		[window userWindow]->Show();
-	}
-	[window userWindow]->Show();
+	[openPanel retain];
+	[resultListener retain];
 }
 
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id<WebOpenPanelResultListener>)resultListener allowMultipleFiles:(BOOL)allowMultipleFiles 
+{
+	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+	[openPanel setAllowsMultipleSelection:allowMultipleFiles];
+	[openPanel setCanChooseDirectories:NO];
+	[openPanel beginSheetForDirectory:nil
+		file:nil 
+		modalForWindow:window
+		modalDelegate:self
+		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+		contextInfo:resultListener];
+	[openPanel retain];
+	[resultListener retain];
+}
 
-- (void)openPanelDidEnd:(NSSavePanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo 
+- (void)openPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo 
 {
 	id <WebOpenPanelResultListener>resultListener = (id <WebOpenPanelResultListener>)contextInfo;
-	// only show if already visible
-	if ([window userWindow]->IsVisible())
-	{
-		[window userWindow]->Show();
-	}
-	[window userWindow]->Show();
+
 	if (NSOKButton == returnCode) {
-		[resultListener chooseFilename:[openPanel filename]];
+		[resultListener chooseFilenames:[openPanel filenames]];
+		[resultListener autorelease];
+		[openPanel autorelease];
 	}
 }
 
