@@ -10,51 +10,36 @@
 {
 	return YES;
 }
+
 - (BOOL)canBecomeMainWindow
 {
 	return YES;
 }
-- (void)setupDecorations:(WindowConfig*)cfg host:(Host*)host userwindow:(OSXUserWindow*)uw
-{
-	config = cfg;
-	userWindow = uw;
 
-	[self setTitle:[NSString stringWithCString:config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
+- (void)setUserWindow:(SharedPtr<OSXUserWindow>*)inUserWindow
+{
+	userWindow = inUserWindow;
+}
+
+- (void)setupDecorations:(WindowConfig*)inConfig;
+{
+	config = inConfig;
+
+	[self setTitle:[NSString stringWithUTF8String:config->GetTitle().c_str()]];
 	[self setOpaque:false];
 	[self setHasShadow:true];
 
 	webView = [[WebView alloc] init];
 	[webView setDrawsBackground:NO];
-	delegate = [[WebViewDelegate alloc] initWithWindow:self host:host];
+
+	delegate = [[WebViewDelegate alloc] initWithWindow:self];
 	[self setContentView:webView];
 	[self setDelegate:self];
 	[self setTransparency:config->GetTransparency()];
 	[self setInitialFirstResponder:webView];
 	[self setShowsResizeIndicator:config->IsResizable()];
-
-	NSMenu *windowMenu = [[[NSApp mainMenu] itemWithTitle:NSLocalizedString(@"Window",@"")] submenu];
-	NSMenuItem *showInspector = [windowMenu itemWithTitle:NSLocalizedString(@"Show Inspector", @"")];
-
-	if (host->IsDebugMode())
-	{
-		if (!showInspector)
-		{
-			[windowMenu addItem:[NSMenuItem separatorItem]];
-			showInspector = [windowMenu addItemWithTitle:@"Show Inspector" action:NULL keyEquivalent:@""];
-		}
-	    [showInspector setEnabled:YES];
-	    [showInspector setAction:@selector(showInspector)];
-		[showInspector setKeyEquivalentModifierMask:NSCommandKeyMask|NSAlternateKeyMask];
-		[showInspector setKeyEquivalent:@"c"];
-	}
-	else
-	{	//While 10.5 allows for setHidden, 10.4 doesn't have such. And why hide when removing works?
-		if (showInspector != nil) [windowMenu removeItem:showInspector];
-	    NSMenuItem *showInspectorSep = [windowMenu itemWithTitle:@"Show Inspector Separator"];
-		if (showInspectorSep != nil) [windowMenu removeItem:showInspectorSep];
-	}
-	closed = NO;
 }
+
 - (void)dealloc
 {
 	// make sure we go back to normal mode
@@ -62,15 +47,23 @@
 	[inspector release];
 	[delegate release];
 	delegate = nil;
+
+	[webView setFrameLoadDelegate:nil];
+	[webView setUIDelegate:nil];
+	[webView setResourceLoadDelegate:nil];
+	[webView setPolicyDelegate:nil];
 	[webView release];
+
 	webView = nil;
 	[super dealloc];
 }
+
 - (UserWindow*)userWindow
 {
-	return userWindow;
+	return userWindow->get();
 }
-- (void)showInspector
+
+- (void)showInspector:(id)sender
 {
 	if (inspector==nil)
 	{
@@ -79,6 +72,7 @@
 	}
 	[inspector show:self];
 }
+
 - (void)windowWillClose:(NSNotification *)notification
 {
 	if (inspector)
@@ -89,10 +83,12 @@
 	}
 	config->SetVisible(false);
 }
+
 - (NSSize)windowWillResize:(NSWindow *) window toSize:(NSSize)newSize
 {
 	return newSize;
 }
+
 - (void)updateConfig
 {
 	NSRect frame = [self frame];
@@ -100,45 +96,52 @@
 	config->SetHeight(frame.size.height);
 	//FIXME: so x,y but need to translate
 }
+
 - (void)windowDidResize:(NSNotification*)notification
 {
-	[self fireWindowEvent:RESIZED];
+	(*userWindow)->FireEvent(RESIZED);
 	[self updateConfig];
 }
+
 - (void)windowDidMove:(NSNotification*)notification
 {
-	[self fireWindowEvent:MOVED];
+	(*userWindow)->FireEvent(MOVED);
 	[self updateConfig];
 }
+
 - (void)windowDidBecomeKey:(NSNotification*)notification
 {
-	[self fireWindowEvent:FOCUSED];
-	userWindow->Focused();
+	(*userWindow)->FireEvent(FOCUSED);
+	(*userWindow)->Focused();
 	if (!focused && fullscreen)
 	{
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
 	}
 	focused = YES;
 }
+
 - (void)windowDidResignKey:(NSNotification*)notification
 {
-	[self fireWindowEvent:UNFOCUSED];
-	userWindow->Unfocused();
+	(*userWindow)->FireEvent(UNFOCUSED);
+	(*userWindow)->Unfocused();
 	if (fullscreen && focused)
 	{
 		SetSystemUIMode(kUIModeNormal,0);
 	}
 	focused = NO;
 }
+
 - (void)windowDidMiniaturize:(NSNotification*)notification
 {
-	[self fireWindowEvent:MINIMIZED];
+	(*userWindow)->FireEvent(MINIMIZED);
 }
+
 - (BOOL)windowShouldZoom:(NSWindow*)window toFrame:(NSRect)proposedFrame
 {
-	[self fireWindowEvent:MAXIMIZED];
+	(*userWindow)->FireEvent(MAXIMIZED);
 	return YES;
 }
+
 - (void)setTransparency:(double)transparency
 {
 	[self setAlphaValue:transparency];
@@ -152,12 +155,12 @@
 	}
 	[self invalidateShadow];
 }
+
 - (NSScreen *)activeScreen
 {
-    NSArray *screens = [NSScreen screens];
-
-    /* if we've only got one screen then return it */
-    if ([screens count] <= 1) 
+	NSArray *screens = [NSScreen screens];
+	/* if we've only got one screen then return it */
+	if ([screens count] <= 1) 
 	{
 		return [NSScreen mainScreen];
 	}
@@ -170,13 +173,14 @@
 	
 	return [NSScreen mainScreen];
 }
+
 - (NSRect)constrainFrameRect:(NSRect)frameRect toScreen:(NSScreen *)screen 
 {
 	if (fullscreen)
 	{
 		return frameRect;
 	}
-   	return [super constrainFrameRect:frameRect toScreen:screen];
+	return [super constrainFrameRect:frameRect toScreen:screen];
 }
 
 - (void)setFullscreen:(BOOL)yn
@@ -198,8 +202,8 @@
 
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
 		[self setFrame:frame display:YES animate:YES];
-		[self fireWindowEvent:FULLSCREENED];		
-	    [self setShowsResizeIndicator:NO];
+		(*userWindow)->FireEvent(FULLSCREENED);
+		[self setShowsResizeIndicator:NO];
 	}
 	else
 	{
@@ -207,19 +211,22 @@
 		[self setFrame:savedFrame display:YES animate:YES];
 		SetSystemUIMode(kUIModeNormal,0);
 		[self setShowsResizeIndicator:config->IsResizable()];
-		[self fireWindowEvent:UNFULLSCREENED];
+		(*userWindow)->FireEvent(UNFULLSCREENED);
 	}
 	[self makeKeyAndOrderFront:nil];	
- 	[self makeFirstResponder:webView];
+	[self makeFirstResponder:webView];
 }
+
 - (WebView*)webView
 {
 	return webView;
 }
+
 - (WindowConfig*)config
 {
 	return config;
 }
+
 - (void)open
 {
 	if (config->IsVisible() && !config->IsMinimized())
@@ -233,23 +240,25 @@
 	NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
 }
+
 - (void)close
 {
-	if (!closed)
-	{
-		closed = YES;
-		[self fireWindowEvent:CLOSED];
-		[webView close];
-		[super close];
-		userWindow->Close();
-	}
+	(*userWindow)->Close();
 }
+
+- (void)finishClose
+{
+	[webView close];
+	[super close];
+}
+
 - (void)setInitialWindow:(BOOL)yn
 {
 	// this is a boolean to indicate that when the frame is loaded,
 	// we should go ahead and display the window
 	requiresDisplay = yn;
 }
+
 - (void)frameLoaded
 {
 	if (requiresDisplay)
@@ -268,9 +277,4 @@
 	}
 	[self invalidateShadow];
 }
-- (void)fireWindowEvent:(UserWindowEvent)event
-{
-	userWindow->FireEvent(event);
-}
-
 @end

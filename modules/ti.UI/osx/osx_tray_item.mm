@@ -81,7 +81,6 @@ namespace ti
 		if (callback.isNull())
 			return;
 
-		printf("testing callback\n");
 		try {
 			callback->Call(ValueList());
 		} catch (ValueException& e) {

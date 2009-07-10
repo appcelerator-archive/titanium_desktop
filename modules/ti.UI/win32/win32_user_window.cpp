@@ -102,7 +102,6 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_CLOSE:
 			window->Close();
-			window->FireEvent(CLOSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_GETMINMAXINFO:
@@ -557,7 +556,7 @@ void Win32UserWindow::Close()
 	this->RemoveOldMenu();
 	DestroyWindow(window_handle);
 	UserWindow::Close();
-	FireEvent(CLOSED);
+	this->Closed();
 }
 
 double Win32UserWindow::GetX()

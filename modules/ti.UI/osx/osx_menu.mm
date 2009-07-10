@@ -161,6 +161,8 @@ namespace ti
 		[nativeMainMenu retain];
 
 		OSXMenu::CopyMenu(defaultMenu, nativeMainMenu);
+		OSXMenu::SetupInspectorItem(nativeMainMenu);
+
 		this->AddChildrenToNativeMenu(nativeMainMenu, true, true);
 
 		// The main menu needs all NSMenuItems in it to have submenus for 
@@ -339,6 +341,24 @@ namespace ti
 		while ([windowMenu numberOfItems] > lastSeparator+1)
 		{
 			[windowMenu removeItemAtIndex:lastSeparator+1];
+		}
+	}
+
+	/*static*/
+	void OSXMenu::SetupInspectorItem(NSMenu* menu)
+	{
+		NSMenu *windowMenu = OSXMenu::GetWindowMenu(menu);
+		NSMenuItem *showInspector = [windowMenu
+			itemWithTitle:NSLocalizedString(@"Show Inspector", @"")];
+		NSMenuItem *showInspectorSeparator = [windowMenu
+			itemWithTitle:NSLocalizedString(@"Show Inspector Separator", @"")];
+
+		if (!Host::GetInstance()->IsDebugMode())
+		{
+			if (showInspector != nil)
+				[windowMenu removeItem:showInspector];
+			if (showInspectorSeparator != nil)
+				[windowMenu removeItem:showInspectorSeparator];
 		}
 	}
 }

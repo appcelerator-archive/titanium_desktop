@@ -119,8 +119,6 @@ namespace ti
 
 		private:
 			NativeWindow *nativeWindow;
-			bool opened;
-			bool closed;
 			bool topmost;
 			bool focused;
 			SharedPtr<OSXMenu> menu;

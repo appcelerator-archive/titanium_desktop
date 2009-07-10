@@ -156,10 +156,3 @@ td.status.failed
 	background-repeat:no-repeat;
 	background-position:0px -6px;
 }
-
-#footer
-{
-	position:absolute;
-	bottom:5px;
-	right:15px;
-}

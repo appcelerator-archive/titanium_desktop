@@ -1,4 +1,4 @@
-describe("native XHR tests",
+describe("Network.HTTPClient",
 {
 	before: function()
 	{

@@ -250,7 +250,7 @@ namespace ti
 				w++;
 			}
 		}
-		logger->Warn("Tried to remove a non-existant window: 0x%lx", (long int) window.get());
+		logger->Warn("Tried to remove a non-existant window: %lx", (long int) window.get());
 	}
 
 	void UIBinding::_GetOpenWindows(const ValueList& args, SharedValue result)
