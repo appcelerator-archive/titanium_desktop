@@ -310,6 +310,9 @@ describe("Ti.Filesystem tests",{
 		var toDir = Titanium.Filesystem.getFile(this.base, "asynCopyTo");
 		this.createDirTree(this.base,"ayncCopyFrom");
 		Titanium.Filesystem.asyncCopy(fromDir,toDir,function() {
+			
+			value_of(AsyncCopy.running).should_be_true();
+			
 			var listings = toDir.getDirectoryListing();
 			value_of(listings).should_not_be_null();
 			value_of(listings.length==3).should_be_true();
