@@ -28,7 +28,7 @@ namespace ti
 	class Process;
 	typedef AutoPtr<Process> SharedProcess;
 	
-	class Process : public StaticBoundObject
+	class Process : public AccessorBoundObject
 	{
 	public:
 		Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
@@ -51,6 +51,7 @@ namespace ti
 		virtual void SendSignal(int signal) = 0;
 		virtual void Restart() = 0;
 		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) = 0;
+		virtual bool IsRunning() = 0;
 		
 		void SetOnRead(SharedKMethod method);
 		void Exited();
@@ -74,6 +75,7 @@ namespace ti
 		void _GetStdin(const ValueList& args, SharedValue result);
 		void _GetStdout(const ValueList& args, SharedValue result);
 		void _GetStderr(const ValueList& args, SharedValue result);
+		void _IsRunning(const ValueList& args, SharedValue result);
 		
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);

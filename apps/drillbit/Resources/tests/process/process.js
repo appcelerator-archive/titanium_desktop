@@ -70,9 +70,9 @@ describe("process tests",
 		value_of(p.setEnvironment).should_be_function();
 		value_of(p.cloneEnvironment).should_be_function();
 		value_of(p.getArguments).should_be_function();
-		value_of(p.stdin).should_be_undefined();
-		value_of(p.stdout).should_be_undefined();
-		value_of(p.stderr).should_be_undefined();
+		value_of(p.stdin).should_be_null();
+		value_of(p.stdout).should_be_null();
+		value_of(p.stderr).should_be_null();
 	},
 	
 	test_current_process_env: function()

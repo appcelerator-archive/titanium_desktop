@@ -8,12 +8,12 @@ describe("process terminate tests",
 		if (Titanium.platform == 'win32')
 		{
 			// open a shell and leave it open
-			p = Titanium.Process.launch('C:\\Windows\\system32\\cmd.exe',['/K', 'dir']);
+			p = Titanium.Process.createProcess(['C:\\Windows\\system32\\cmd.exe','/K', 'dir']);
 		}
 		else
 		{
 			// on non-windows platforms, we launch using CAT to just let it sit and wait for input.
-			p = Titanium.Process.launch('/bin/cat',['-v']);
+			p = Titanium.Process.createProcess(['/bin/cat','-v']);
 		}
 
 		var timer = null;
@@ -21,12 +21,12 @@ describe("process terminate tests",
 		value_of(p).should_not_be_null();
 		var output = '';
 
-		p.onread = function(buf)
+		p.setOnRead(function(event)
 		{
-			output += buf;
-		};
+			output += event.pipe.read();
+		});
 
-		p.onexit = function()
+		p.setOnExit(function()
 		{
 			clearTimeout(timer);
 			if (output.length > 0)
@@ -37,7 +37,9 @@ describe("process terminate tests",
 			{
 				test.failed('no output received');
 			}
-		};
+		});
+		p.launch();
+		
 		shortTimer = setTimeout(function()
 		{
 			// is the process running?
