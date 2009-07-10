@@ -35,7 +35,7 @@ namespace ti
 		return closed;
 	}
 	
-	int OSXOutputPipe::Write(SharedPtr<Blob> data)
+	int OSXOutputPipe::Write(AutoPtr<Blob> data)
 	{
 		if (closed)
 		{

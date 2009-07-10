@@ -136,7 +136,7 @@ namespace ti
 		}
 	}
 	
-	SharedPtr<OSXProcess> OSXProcess::currentProcess = new OSXProcess([NSProcessInfo processInfo]);
+	AutoPtr<OSXProcess> OSXProcess::currentProcess = new OSXProcess([NSProcessInfo processInfo]);
 	
 	/*static*/
 	SharedProcess OSXProcess::GetCurrentProcess()

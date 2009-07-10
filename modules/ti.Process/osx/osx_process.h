@@ -43,15 +43,15 @@ namespace ti
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
 		
-		SharedPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
-		SharedPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }
-		SharedPtr<OSXInputPipe> GetStderr() { return stderr.cast<OSXInputPipe>(); }
+		AutoPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
+		AutoPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }
+		AutoPtr<OSXInputPipe> GetStderr() { return stderr.cast<OSXInputPipe>(); }
 	protected:
 		TiOSXProcess *delegate;
 		NSProcessInfo *currentProcessInfo;
 		OSXProcess::OSXProcess(NSProcessInfo *processInfo);
 		
-		static SharedPtr<OSXProcess> currentProcess;
+		static AutoPtr<OSXProcess> currentProcess;
 	};
 }
 

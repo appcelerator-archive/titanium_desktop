@@ -32,8 +32,8 @@ namespace ti
 		
 		virtual void Close();
 		virtual bool IsClosed();
-		virtual SharedPtr<Blob> Read(int bufsize=-1);
-		virtual SharedPtr<Blob> ReadLine();
+		virtual AutoPtr<Blob> Read(int bufsize=-1);
+		virtual AutoPtr<Blob> ReadLine();
 		NSPipe* GetPipe() { return pipe; }
 		
 		void DataReady(NSData *data);

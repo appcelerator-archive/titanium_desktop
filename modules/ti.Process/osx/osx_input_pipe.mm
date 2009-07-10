@@ -112,7 +112,7 @@ namespace ti
 		[buffer replaceBytesInRange:range withBytes:NULL length:0];
 	}
 	
-	SharedPtr<Blob> OSXInputPipe::Read(int bufsize)
+	AutoPtr<Blob> OSXInputPipe::Read(int bufsize)
 	{
 		// let danging onRead events pull the last data from the buffer
 		if (closed && [buffer length] == 0)
@@ -131,12 +131,12 @@ namespace ti
 			bufsize = currentLength;
 		}
 		
-		SharedPtr<Blob> blob = new Blob((const char *)[buffer bytes], bufsize);
+		AutoPtr<Blob> blob = new Blob((const char *)[buffer bytes], bufsize);
 		this->Erase(bufsize);
 		return blob;
 	}
 	
-	SharedPtr<Blob> OSXInputPipe::ReadLine()
+	AutoPtr<Blob> OSXInputPipe::ReadLine()
 	{
 		if (closed && [buffer length] == 0)
 		{
@@ -147,7 +147,7 @@ namespace ti
 		int newline = FindFirstLineFeed((char *)[buffer bytes], [buffer length], &charsToErase);
 		if (newline == -1) return NULL;
 		
-		SharedPtr<Blob> blob = new Blob((const char *)[buffer bytes], newline-charsToErase+1);
+		AutoPtr<Blob> blob = new Blob((const char *)[buffer bytes], newline-charsToErase+1);
 		this->Erase(newline+1);
 		return blob;
 	}
