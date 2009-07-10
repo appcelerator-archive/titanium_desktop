@@ -48,7 +48,7 @@ namespace ti
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
-		bool running, complete, currentProcess;
+		bool running, complete, current;
 		int pid;
 		HANDLE process;
 		int exitCode;
@@ -56,6 +56,7 @@ namespace ti
 		std::ostringstream outBuffer, errBuffer;
 		SharedKObject *shared_input, *shared_output, *shared_error;
 		Logger* logger;
+		static SharedPtr<Win32Process> currentProcess;
 	};
 }
 

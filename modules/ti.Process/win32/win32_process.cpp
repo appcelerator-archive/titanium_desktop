@@ -11,17 +11,19 @@
 
 namespace ti
 {
+	SharedPtr<Win32Process> Win32Process::currentProcess = new Win32Process();
+	
 	/*static*/
 	SharedPtr<Win32Process> Win32Process::GetCurrentProcess()
 	{
-		return new Win32Process();
+		return currentProcess;
 	}
 	
 	Win32Process::Win32Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) :
 		Process(args, environment, stdin, stdout, stderr),
 		running(false),
 		complete(false),
-		currentProcess(false),
+		current(false),
 		pid(-1),
 		exitCode(-1),
 		logger(Logger::Get("Process.Win32Process"))
@@ -30,7 +32,7 @@ namespace ti
 	
 	Win32Process::Win32Process() :
 		Process(),
-		running(true), complete(false), currentProcess(true),
+		running(true), complete(false), current(true),
 		logger(Logger::Get("Process.Win32Process"))
 	{
 		pid = GetCurrentProcessId();
@@ -54,27 +56,30 @@ namespace ti
 	
 	Win32Process::~Win32Process()
 	{
-		try {
-			Terminate();
-		} catch (ValueException &ve) {
-			logger->Error(ve.what());
-		}
-		
-		if (this->exitMonitorThread.isRunning())
+		if (!current)
 		{
-			try
-			{
-				this->exitMonitorThread.join();
+			try {
+				Terminate();
+			} catch (ValueException &ve) {
+				logger->Error(ve.what());
 			}
-			catch (Poco::Exception& e)
+			
+			if (this->exitMonitorThread.isRunning())
 			{
-				logger->Error(
-					"Exception while try to join with exit monitor thread: %s",
-					e.displayText().c_str());
+				try
+				{
+					this->exitMonitorThread.join();
+				}
+				catch (Poco::Exception& e)
+				{
+					logger->Error(
+						"Exception while try to join with exit monitor thread: %s",
+						e.displayText().c_str());
+				}
 			}
-		}
 
-		delete exitMonitorAdapter;
+			delete exitMonitorAdapter;
+		}
 	}
 	
 	/*
@@ -125,9 +130,9 @@ namespace ti
 				result += '"';
 			}
 
-			for (int j = 0; j < result.size(); j++)
+			for (int j = 0; j < arg.size(); j++)
 			{
-				char c = result[j];
+				char c = arg[j];
 				if (c == '\\') {
 					// Don't know if we need to double yet.
 					backspaceBuf += c;
@@ -254,7 +259,7 @@ namespace ti
 	void Win32Process::SendSignal(int signal)
 	{
 		// This only works for the current process in Win32.. I guess there's nothing to do?
-		if (this->currentProcess)
+		if (this->current)
 		{
 			raise(signal);
 		}

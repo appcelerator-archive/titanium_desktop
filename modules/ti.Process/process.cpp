@@ -53,6 +53,9 @@ namespace ti
 	
 	Process::Process() : StaticBoundObject("Process")
 	{
+		args = new StaticBoundList();
+		environment = new StaticBoundObject();
+		
 		InitBindings();
 	}
 	
