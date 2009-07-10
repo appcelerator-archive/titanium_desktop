@@ -13,17 +13,19 @@ namespace ti
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
 		attr.lpSecurityDescriptor = NULL;
-		attr.bInheritHandle       = FALSE;
+		attr.bInheritHandle       = TRUE;
 		
 		CreatePipe(&readHandle, &writeHandle, &attr, 0);
-		
-		monitorAdapter = new Poco::RunnableAdapter<Win32InputPipe>(*this, &Win32InputPipe::MonitorThread);
-		monitorThread.start(*monitorAdapter);
 	}
 	
 	Win32InputPipe::~Win32InputPipe()
 	{
 		Close();
+		
+		if (monitorAdapter)
+		{
+			delete monitorAdapter;
+		}	
 	}
 	
 	void Win32InputPipe::Close()
@@ -46,10 +48,14 @@ namespace ti
 				}
 			}
 			
-			delete monitorAdapter;
-			
 			BufferedInputPipe::Close();
 		}
+	}
+	
+	void Win32InputPipe::StartMonitor()
+	{
+		monitorAdapter = new Poco::RunnableAdapter<Win32InputPipe>(*this, &Win32InputPipe::MonitorThread);
+		monitorThread.start(*monitorAdapter);
 	}
 	
 	int Win32InputPipe::RawRead(char *buffer, int size)
@@ -57,10 +63,17 @@ namespace ti
 		if (readHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesRead;
 			BOOL ok = ReadFile(readHandle, buffer, size, &bytesRead, NULL);
-			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
+			int error = GetLastError();
+			if (ok)
+			{
 				return bytesRead;
 			}
-			else {
+			else if (error == ERROR_BROKEN_PIPE)
+			{
+				return -1;
+			}
+			else
+			{
 				throw ValueException::FromString("Error writing anonymous pipe");
 			}
 		}

@@ -26,6 +26,7 @@ namespace ti
 		void DuplicateWrite(HANDLE process, LPHANDLE handle);
 		HANDLE GetReadHandle() { return readHandle; }
 		HANDLE GetWriteHandle() { return writeHandle; }
+		void StartMonitor();
 		
 	protected:
 		int RawRead(char *buffer, int size);

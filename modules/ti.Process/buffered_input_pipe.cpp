@@ -17,10 +17,15 @@ namespace ti
 		
 		if (!closed)
 		{
+			if (buffer.size() == 0)
+			{
+				return new Blob();
+			}
+			
 			if (bufsize == -1 || bufsize > buffer.size())
 			{
 				bufsize = (int) buffer.size();
-			}
+			}	
 			
 			SharedPtr<Blob> blob = new Blob(&(buffer[0]), bufsize);
 			buffer.erase(buffer.begin(), buffer.begin()+bufsize);
@@ -36,12 +41,14 @@ namespace ti
 		
 		if (!closed)
 		{
+			if (buffer.size() == 0) return NULL;
+			
 			int charsToErase;
 			int newline = FindFirstLineFeed(&(buffer[0]), buffer.size(), &charsToErase);
 			if (newline == -1) return NULL;
 			
 			SharedPtr<Blob> blob = new Blob(&(buffer[0]), newline-charsToErase+1);
-			buffer.erase(buffer.begin(), buffer.begin()+newline);
+			buffer.erase(buffer.begin(), buffer.begin()+newline+1);
 			
 			return blob;
 		}
@@ -80,6 +87,7 @@ namespace ti
 	
 	void BufferedInputPipe::Close()
 	{
+		Poco::Mutex::ScopedLock lock(mutex);
 		if (!closed)
 		{
 			buffer.clear();

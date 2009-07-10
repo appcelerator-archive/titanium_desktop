@@ -77,7 +77,7 @@ namespace ti
 				args.push_back(Value::NewObject(event));
 				try
 				{
-					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args);
+					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args, false);
 				}
 				catch (ValueException& e)
 				{
@@ -99,7 +99,7 @@ namespace ti
 			
 			try
 			{
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args);
+				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
 			}
 			catch (ValueException& e)
 			{

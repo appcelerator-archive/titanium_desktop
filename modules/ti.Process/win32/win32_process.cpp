@@ -59,7 +59,7 @@ namespace ti
 		if (!current)
 		{
 			try {
-				Terminate();
+				//Terminate();
 			} catch (ValueException &ve) {
 				logger->Error(ve.what());
 			}
@@ -175,11 +175,14 @@ namespace ti
 		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
 		startupInfo.cbReserved2 = 0;
 		startupInfo.lpReserved2 = NULL;
+		startupInfo.hStdInput = GetStdin()->GetReadHandle();
+		startupInfo.hStdOutput = GetStdout()->GetWriteHandle();
+		startupInfo.hStdError = GetStderr()->GetWriteHandle();
 		
 		HANDLE hProc = GetCurrentProcess();
-		GetStdin()->DuplicateRead(hProc, &startupInfo.hStdInput);
-		GetStdout()->DuplicateWrite(hProc, &startupInfo.hStdOutput);
-		GetStderr()->DuplicateWrite(hProc, &startupInfo.hStdError);
+		//GetStdin()->DuplicateRead(hProc, &startupInfo.hStdInput);
+		//GetStdout()->DuplicateWrite(hProc, &startupInfo.hStdOutput);
+		//GetStderr()->DuplicateWrite(hProc, &startupInfo.hStdError);
 		
 		std::string commandLine = ArgListToString(args);
 		logger->Debug("Launching: %s", commandLine.c_str());
@@ -194,10 +197,13 @@ namespace ti
 			NULL,
 			&startupInfo,
 			&processInfo);
+		// TODO auto close stdin read handle if / when piped input is finished reading
+		CloseHandle(GetStdout()->GetWriteHandle());
+		CloseHandle(GetStderr()->GetWriteHandle());
 		
-		CloseHandle(startupInfo.hStdInput);
-		CloseHandle(startupInfo.hStdOutput);
-		CloseHandle(startupInfo.hStdError);
+		//CloseHandle(startupInfo.hStdInput);
+		//CloseHandle(startupInfo.hStdOutput);
+		//CloseHandle(startupInfo.hStdError);
 		
 		if (!rc) {
 			std::string message = "Error launching: " + commandLine;
@@ -212,6 +218,8 @@ namespace ti
 		}
 		
 		// setup threads which can read output and also monitor the exit
+		GetStdout()->StartMonitor();
+		GetStderr()->StartMonitor();
 		this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
@@ -294,8 +302,9 @@ namespace ti
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
 		this->exitCode = exitCode;
-		Process::Exited();
 		this->running = false;
 		this->complete = true;
+		
+		Process::Exited();
 	}
 }

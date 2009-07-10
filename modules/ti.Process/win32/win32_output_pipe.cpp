@@ -13,7 +13,7 @@ namespace ti
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
 		attr.lpSecurityDescriptor = NULL;
-		attr.bInheritHandle       = FALSE;
+		attr.bInheritHandle       = TRUE;
 		
 		CreatePipe(&readHandle, &writeHandle, &attr, 0);
 	}
