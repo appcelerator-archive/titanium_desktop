@@ -370,7 +370,7 @@ void Win32UserWindow::InitWebKit()
 	//web_view->setShouldCloseWithWindow(TRUE);
 }
 
-Win32UserWindow::Win32UserWindow(WindowConfig* config, SharedUserWindow& parent) :
+Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	UserWindow(config, parent),
 	menu(0),
 	activeMenu(0),
@@ -834,23 +834,23 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 	}
 }
 
-void Win32UserWindow::SetMenu(SharedMenu menu)
+void Win32UserWindow::SetMenu(AutoMenu menu)
 {
 	this->menu = menu.cast<Win32Menu>();
 	this->SetupMenu();
 }
 
-SharedMenu Win32UserWindow::GetMenu()
+AutoMenu Win32UserWindow::GetMenu()
 {
 	return this->menu;
 }
 
-void Win32UserWindow::SetContextMenu(SharedMenu menu)
+void Win32UserWindow::SetContextMenu(AutoMenu menu)
 {
 	this->contextMenu = menu.cast<Win32Menu>();
 }
 
-SharedMenu Win32UserWindow::GetContextMenu()
+AutoMenu Win32UserWindow::GetContextMenu()
 {
 	return this->contextMenu;
 }
@@ -941,7 +941,7 @@ void Win32UserWindow::RemoveOldMenu()
 
 void Win32UserWindow::SetupMenu()
 {
-	SharedPtr<Win32Menu> menu = this->menu;
+	AutoPtr<Win32Menu> menu = this->menu;
 
 	// No window menu, try to use the application menu.
 	if (menu.isNull())
@@ -1304,11 +1304,11 @@ void Win32UserWindow::RedrawMenu()
 void Win32UserWindow::RedrawAllMenus()
 {
 	// Notify all windows that the app menu has changed.
-	std::vector<SharedUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
-	std::vector<SharedUserWindow>::iterator i = windows.begin();
+	std::vector<AutoUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
+	std::vector<AutoUserWindow>::iterator i = windows.begin();
 	while (i != windows.end())
 	{
-		SharedPtr<Win32UserWindow> wuw = (*i++).cast<Win32UserWindow>();
+		AutoPtr<Win32UserWindow> wuw = (*i++).cast<Win32UserWindow>();
 		if (!wuw.isNull())
 			wuw->RedrawMenu();
 	}

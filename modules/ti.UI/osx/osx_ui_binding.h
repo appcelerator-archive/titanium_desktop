@@ -17,30 +17,30 @@ namespace ti
 		OSXUIBinding(Host *host);
 		~OSXUIBinding();
 
-		SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent);
+		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
 		void ErrorDialog(std::string);
 
-		SharedMenu CreateMenu();
-		SharedMenuItem CreateMenuItem();
-		SharedMenuItem CreateCheckMenuItem();
-		SharedMenuItem CreateSeparatorMenuItem();
-		SharedMenu GetMenu();
-		SharedMenu GetContextMenu();
-		SharedMenu GetDockMenu();
+		AutoMenu CreateMenu();
+		AutoMenuItem CreateMenuItem();
+		AutoMenuItem CreateCheckMenuItem();
+		AutoMenuItem CreateSeparatorMenuItem();
+		AutoMenu GetMenu();
+		AutoMenu GetContextMenu();
+		AutoMenu GetDockMenu();
 		NSMenu* GetNativeDockMenu();
-		void SetMenu(SharedMenu);
-		void SetContextMenu(SharedMenu);
-		void SetDockMenu(SharedMenu);
+		void SetMenu(AutoMenu);
+		void SetContextMenu(AutoMenu);
+		void SetDockMenu(AutoMenu);
 
-		SharedTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
+		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
 		void SetIcon(std::string& iconPath);
 		virtual void SetDockIcon(std::string& iconPath);
 		virtual void SetBadge(std::string& badgeLabel);
 		virtual void SetBadgeImage(std::string& badgeImage);
 
-		SharedPtr<OSXMenu> GetActiveMenu();
-		void WindowFocused(SharedPtr<OSXUserWindow> window);
-		void WindowUnfocused(SharedPtr<OSXUserWindow> window);
+		AutoPtr<OSXMenu> GetActiveMenu();
+		void WindowFocused(AutoPtr<OSXUserWindow> window);
+		void WindowUnfocused(AutoPtr<OSXUserWindow> window);
 		void SetupMainMenu(bool force = false);
 		void SetupAppMenuParts(NSMenu* mainMenu);
 		void ReplaceMainMenu();
@@ -51,15 +51,15 @@ namespace ti
 
 	protected:
 		NSMenu* defaultMenu;
-		SharedPtr<OSXMenu> menu;
+		AutoPtr<OSXMenu> menu;
 		NSMenu* nativeMenu;
-		SharedPtr<OSXMenu> contextMenu;
-		SharedPtr<OSXMenu> dockMenu;
+		AutoPtr<OSXMenu> contextMenu;
+		AutoPtr<OSXMenu> dockMenu;
 		NSMenu* nativeDockMenu;
 		NSView *savedDockView;
 		NSObject* application;
-		SharedPtr<OSXMenu> activeMenu;
-		SharedPtr<OSXUserWindow> activeWindow;
+		AutoPtr<OSXMenu> activeMenu;
+		AutoPtr<OSXUserWindow> activeWindow;
 		ScriptEvaluator* scriptEvaluator;
 
 		void InstallMenu (OSXMenuItem*);

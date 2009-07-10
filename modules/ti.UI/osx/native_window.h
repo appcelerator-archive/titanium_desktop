@@ -20,13 +20,13 @@ using namespace ti;
 	WebView* webView;
 	WebViewDelegate* delegate;
 	BOOL requiresDisplay;
-	SharedPtr<OSXUserWindow>* userWindow;
+	AutoPtr<OSXUserWindow>* userWindow;
 	WebInspector *inspector;
 	BOOL fullscreen;
 	BOOL focused;
 	NSRect savedFrame;
 }
-- (void)setUserWindow:(SharedPtr<OSXUserWindow>*)inUserWindow;
+- (void)setUserWindow:(AutoPtr<OSXUserWindow>*)inUserWindow;
 - (void)setupDecorations:(WindowConfig*)config;
 - (void)setTransparency:(double)transparency;
 - (void)setFullscreen:(BOOL)yn;

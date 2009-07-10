@@ -563,7 +563,7 @@
 	NSMutableArray *menuItems = [[[NSMutableArray alloc] init] autorelease];
 
 	UserWindow *uw = [window userWindow];
-	SharedPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
+	AutoPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
 	if (menu.isNull()) {
 		menu = UIBinding::GetInstance()->GetContextMenu().cast<OSXMenu>();
 	}

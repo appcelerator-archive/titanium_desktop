@@ -13,7 +13,7 @@ namespace ti
 	class OSXUserWindow : public UserWindow
 	{
 		public:
-			OSXUserWindow(WindowConfig* config, SharedUserWindow& parent);
+			OSXUserWindow(WindowConfig* config, AutoUserWindow& parent);
 			~OSXUserWindow();
 		public:
 
@@ -106,10 +106,10 @@ namespace ti
 			bool IsTopMost();
 			void SetTopMost(bool topmost);
 
-			void SetMenu(SharedMenu menu);
-			SharedMenu GetMenu();
-			void SetContextMenu(SharedMenu menu);
-			SharedMenu GetContextMenu();
+			void SetMenu(AutoMenu menu);
+			AutoMenu GetMenu();
+			void SetContextMenu(AutoMenu menu);
+			AutoMenu GetContextMenu();
 			void SetIcon(std::string& icon_path);
 			std::string& GetIcon();
 
@@ -121,9 +121,9 @@ namespace ti
 			NativeWindow *nativeWindow;
 			bool topmost;
 			bool focused;
-			SharedPtr<OSXMenu> menu;
-			SharedPtr<OSXMenu> contextMenu;
-			SharedPtr<OSXUIBinding> osxBinding;
+			AutoPtr<OSXMenu> menu;
+			AutoPtr<OSXMenu> contextMenu;
+			AutoPtr<OSXUIBinding> osxBinding;
 			static bool initial;
 
 			NSScreen* GetWindowScreen();

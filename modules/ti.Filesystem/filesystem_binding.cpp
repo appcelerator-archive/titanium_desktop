@@ -354,9 +354,8 @@ namespace ti
 			Poco::Path path;
 			std::vector<std::string> roots;
 			path.listRoots(roots);
-		
-			SharedPtr<StaticBoundList> rootList = new StaticBoundList();
 
+			SharedKList rootList = new StaticBoundList();
 			for(size_t i = 0; i < roots.size(); i++)
 			{
 				ti::File* file = new ti::File(roots.at(i));

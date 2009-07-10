@@ -19,7 +19,7 @@ namespace ti
 		~TrayItem();
 
 		virtual void SetIcon(std::string& iconPath) = 0;
-		virtual void SetMenu(SharedMenu menu) = 0;
+		virtual void SetMenu(AutoMenu menu) = 0;
 		virtual void SetHint(std::string& hint) = 0;
 		virtual void Remove() = 0;
 
@@ -32,7 +32,7 @@ namespace ti
 		void _Remove(const ValueList& args, SharedValue result);
 
 	protected:
-		SharedMenu menu;
+		AutoMenu menu;
 		std::string iconURL;
 		std::string hint;
 

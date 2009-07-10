@@ -34,7 +34,7 @@ namespace ti
 	void Menu::_AddSubmenu(const ValueList& args, SharedValue result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
-		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateMenuItem(args);
 		newItem->EnsureHasSubmenu();
 		this->AppendItem(newItem);
 		result->SetObject(newItem);
@@ -46,7 +46,7 @@ namespace ti
 		UIBinding* binding = UIBinding::GetInstance();
 
 		// Create a menu item object and add it to this item's submenu
-		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateMenuItem(args);
 		this->AppendItem(newItem);
 		result->SetObject(newItem);
 	}
@@ -54,7 +54,7 @@ namespace ti
 	void Menu::_AddSeparatorItem(const ValueList& args, SharedValue result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
-		SharedMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
 		this->AppendItem(newItem);
 		result->SetObject(newItem);
 	}
@@ -62,7 +62,7 @@ namespace ti
 	void Menu::_AddCheckItem(const ValueList& args, SharedValue result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
-		SharedMenuItem newItem = binding->__CreateCheckMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateCheckMenuItem(args);
 		this->AppendItem(newItem);
 		result->SetObject(newItem);
 	}
@@ -72,14 +72,14 @@ namespace ti
 		args.VerifyException("appendItem", "o");
 		SharedKObject o = args.at(0)->ToObject();
 
-		SharedMenuItem item = o.cast<MenuItem>();
+		AutoMenuItem item = o.cast<MenuItem>();
 		this->AppendItem(item);
 	}
 
 	void Menu::_GetItemAt(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("getItemAt", "i");
-		SharedMenuItem item = this->GetItemAt(args.GetInt(0));
+		AutoMenuItem item = this->GetItemAt(args.GetInt(0));
 		result->SetObject(item);
 	}
 
@@ -87,7 +87,7 @@ namespace ti
 	{
 		args.VerifyException("insertItemAt", "o,i");
 		SharedKObject o = args.at(0)->ToObject();
-		SharedMenuItem item = o.cast<MenuItem>();
+		AutoMenuItem item = o.cast<MenuItem>();
 		size_t index = static_cast<size_t>(args.GetInt(1));
 
 		this->InsertItemAt(item, index);
@@ -112,7 +112,7 @@ namespace ti
 		this->ClearImpl();
 	}
 
-	void Menu::AppendItem(SharedMenuItem item)
+	void Menu::AppendItem(AutoMenuItem item)
 	{
 		if (!item.isNull())
 		{
@@ -121,7 +121,7 @@ namespace ti
 		}
 	}
 
-	SharedMenuItem Menu::GetItemAt(int index)
+	AutoMenuItem Menu::GetItemAt(int index)
 	{
 		if (index >= 0 && (size_t) index < this->children.size()) {
 			return this->children[index];
@@ -130,7 +130,7 @@ namespace ti
 		}
 	}
 
-	void Menu::InsertItemAt(SharedMenuItem item, size_t index)
+	void Menu::InsertItemAt(AutoMenuItem item, size_t index)
 	{
 		if (item.isNull())
 		{
@@ -139,7 +139,7 @@ namespace ti
 
 		if (index >= 0 && index <= this->children.size())
 		{
-			vector<SharedMenuItem>::iterator i = this->children.begin() + index;
+			vector<AutoMenuItem>::iterator i = this->children.begin() + index;
 			this->children.insert(i, item);
 			this->InsertItemAtImpl(item, index);
 		}
@@ -153,7 +153,7 @@ namespace ti
 	{
 		if (index >= 0 && index < this->children.size())
 		{
-			vector<SharedMenuItem>::iterator i = this->children.begin() + index;
+			vector<AutoMenuItem>::iterator i = this->children.begin() + index;
 			this->children.erase(i);
 			this->RemoveItemAtImpl(index);
 		}

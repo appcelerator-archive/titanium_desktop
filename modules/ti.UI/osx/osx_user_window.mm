@@ -21,7 +21,7 @@ namespace ti
 		}
 	}
 
-	OSXUserWindow::OSXUserWindow(WindowConfig* config, SharedUserWindow& parent) :
+	OSXUserWindow::OSXUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
 		nativeWindow(nil),
 		menu(0),
@@ -51,7 +51,7 @@ namespace ti
 			backing: NSBackingStoreBuffered
 			defer: false];
 
-		SharedPtr<OSXUserWindow>* shuw = new SharedPtr<OSXUserWindow>(0);
+		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(0);
 		(*shuw) = shared_this.cast<OSXUserWindow>();
 		[nativeWindow setUserWindow:shuw];
 
@@ -634,7 +634,7 @@ namespace ti
 		this->config->SetUsingChrome(chrome);
 	}
 
-	void OSXUserWindow::SetMenu(SharedMenu menu)
+	void OSXUserWindow::SetMenu(AutoMenu menu)
 	{	
 		if (this->menu.get() == menu.get())
 		{
@@ -644,29 +644,29 @@ namespace ti
 		osxBinding->SetupMainMenu();
 	}
 
-	SharedMenu OSXUserWindow::GetMenu()
+	AutoMenu OSXUserWindow::GetMenu()
 	{
 		return this->menu;
 	}
 
 	void OSXUserWindow::Focused()
 	{
-		SharedPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
+		AutoPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
 		this->osxBinding->WindowFocused(osxWin);
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		SharedPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
+		AutoPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
 		this->osxBinding->WindowUnfocused(osxWin);
 	}
 	
-	void OSXUserWindow::SetContextMenu(SharedMenu menu)
+	void OSXUserWindow::SetContextMenu(AutoMenu menu)
 	{
 		this->contextMenu = menu.cast<OSXMenu>();
 	}
 
-	SharedMenu OSXUserWindow::GetContextMenu()
+	AutoMenu OSXUserWindow::GetContextMenu()
 	{
 		return this->contextMenu;
 	}

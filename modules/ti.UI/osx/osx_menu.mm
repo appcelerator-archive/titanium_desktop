@@ -29,12 +29,12 @@ namespace ti
 		nativeMenus.clear();
 	}
 
-	void OSXMenu::AppendItemImpl(SharedMenuItem item)
+	void OSXMenu::AppendItemImpl(AutoMenuItem item)
 	{
 		this->UpdateNativeMenus();
 	}
 
-	void OSXMenu::InsertItemAtImpl(SharedMenuItem item, unsigned int index)
+	void OSXMenu::InsertItemAtImpl(AutoMenuItem item, unsigned int index)
 	{
 		this->UpdateNativeMenus();
 	}
@@ -174,10 +174,10 @@ namespace ti
 
 	void OSXMenu::AddChildrenToNativeMenu(NSMenu* nativeMenu, bool registerNative, bool mainMenu)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end()) {
-			SharedMenuItem item = *i++;
-			SharedPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
 			NSMenuItem* nativeItem = osxItem->CreateNative(registerNative);
 
 			int rearOffset = mainMenu ?  MAINMENU_REAR_OFFSET : 0;
@@ -189,11 +189,11 @@ namespace ti
 
 	void OSXMenu::AddChildrenToNSArray(NSMutableArray* array)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end())
 		{
-			SharedMenuItem item = *i++;
-			SharedPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<OSXMenuItem> osxItem = item.cast<OSXMenuItem>();
 			NSMenuItem* nsItem = osxItem->CreateNative(false);
 			[array addObject:nsItem];
 			[nsItem release];

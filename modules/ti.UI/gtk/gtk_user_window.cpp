@@ -45,7 +45,7 @@ namespace ti
 		WebKitWebInspector* inspector,
 		gpointer data);
 
-	GtkUserWindow::GtkUserWindow(WindowConfig* config, SharedUserWindow& parent) :
+	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
 		gdkWidth(-1),
 		gdkHeight(-1),
@@ -541,7 +541,7 @@ namespace ti
 		gpointer data)
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-		SharedPtr<GtkMenu> m = userWindow->GetContextMenu().cast<GtkMenu>();
+		AutoPtr<GtkMenu> m = userWindow->GetContextMenu().cast<GtkMenu>();
 	
 		if (m.isNull()) {
 			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
@@ -972,25 +972,25 @@ namespace ti
 		}
 	}
 	
-	void GtkUserWindow::SetMenu(SharedMenu value)
+	void GtkUserWindow::SetMenu(AutoMenu value)
 	{
-		SharedPtr<GtkMenu> menu = value.cast<GtkMenu>();
+		AutoPtr<GtkMenu> menu = value.cast<GtkMenu>();
 		this->menu = menu;
 		this->SetupMenu();
 	}
 
-	SharedMenu GtkUserWindow::GetMenu()
+	AutoMenu GtkUserWindow::GetMenu()
 	{
 		return this->menu;
 	}
 
-	void GtkUserWindow::SetContextMenu(SharedMenu value)
+	void GtkUserWindow::SetContextMenu(AutoMenu value)
 	{
-		SharedPtr<GtkMenu> menu = value.cast<GtkMenu>();
+		AutoPtr<GtkMenu> menu = value.cast<GtkMenu>();
 		this->contextMenu = menu;
 	}
 
-	SharedMenu GtkUserWindow::GetContextMenu()
+	AutoMenu GtkUserWindow::GetContextMenu()
 	{
 		return this->contextMenu;
 	}
@@ -1022,7 +1022,7 @@ namespace ti
 
 	void GtkUserWindow::SetupMenu()
 	{
-		SharedPtr<GtkMenu> menu = this->menu;
+		AutoPtr<GtkMenu> menu = this->menu;
 	
 		// No window menu, try to use the application menu.
 		if (menu.isNull())

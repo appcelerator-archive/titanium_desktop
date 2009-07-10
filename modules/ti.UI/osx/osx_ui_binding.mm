@@ -68,30 +68,30 @@ namespace ti
 		[savedDockView release];
 	}
 
-	SharedUserWindow OSXUIBinding::CreateWindow(
+	AutoUserWindow OSXUIBinding::CreateWindow(
 		WindowConfig* config,
-		SharedUserWindow& parent)
+		AutoUserWindow& parent)
 	{
 		UserWindow* w = new OSXUserWindow(config, parent);
-		return w->GetSharedPtr();
+		return w->GetAutoPtr();
 	}
 
-	SharedMenu OSXUIBinding::CreateMenu()
+	AutoMenu OSXUIBinding::CreateMenu()
 	{
 		return new OSXMenu();
 	}
 
-	SharedMenuItem OSXUIBinding::CreateMenuItem()
+	AutoMenuItem OSXUIBinding::CreateMenuItem()
 	{
 		return new OSXMenuItem(MenuItem::NORMAL);
 	}
 
-	SharedMenuItem OSXUIBinding::CreateSeparatorMenuItem()
+	AutoMenuItem OSXUIBinding::CreateSeparatorMenuItem()
 	{
 		return new OSXMenuItem(MenuItem::SEPARATOR);
 	}
 
-	SharedMenuItem OSXUIBinding::CreateCheckMenuItem()
+	AutoMenuItem OSXUIBinding::CreateCheckMenuItem()
 	{
 		return new OSXMenuItem(MenuItem::CHECK);
 	}
@@ -104,18 +104,18 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	void OSXUIBinding::SetMenu(SharedMenu menu)
+	void OSXUIBinding::SetMenu(AutoMenu menu)
 	{
 		if (this->menu.get() == menu.get())
 		{
 			return;
 		}
-		SharedPtr<OSXMenu> osxmenu = menu.cast<OSXMenu>();
+		AutoPtr<OSXMenu> osxmenu = menu.cast<OSXMenu>();
 		this->menu = osxmenu;
 		SetupMainMenu();
 	}
 
-	void OSXUIBinding::SetContextMenu(SharedMenu menu)
+	void OSXUIBinding::SetContextMenu(AutoMenu menu)
 	{
 		this->contextMenu = menu.cast<OSXMenu>();
 	}
@@ -169,13 +169,13 @@ namespace ti
 		}
 	}
 
-	void OSXUIBinding::WindowFocused(SharedPtr<OSXUserWindow> window)
+	void OSXUIBinding::WindowFocused(AutoPtr<OSXUserWindow> window)
 	{
 		this->activeWindow = window;
 		this->SetupMainMenu();
 	}
 
-	void OSXUIBinding::WindowUnfocused(SharedPtr<OSXUserWindow> window)
+	void OSXUIBinding::WindowUnfocused(AutoPtr<OSXUserWindow> window)
 	{
 		this->activeWindow = NULL;
 		this->SetupMainMenu();
@@ -186,14 +186,14 @@ namespace ti
 		return this->defaultMenu;
 	}
 
-	SharedPtr<OSXMenu> OSXUIBinding::GetActiveMenu()
+	AutoPtr<OSXMenu> OSXUIBinding::GetActiveMenu()
 	{
 		return this->activeMenu;
 	}
 
 	void OSXUIBinding::SetupMainMenu(bool force)
 	{
-		SharedPtr<OSXMenu> newActiveMenu = NULL;
+		AutoPtr<OSXMenu> newActiveMenu = NULL;
 
 		// If there is an active window, search there first for the menu
 		if (!this->activeWindow.isNull()) {
@@ -206,7 +206,7 @@ namespace ti
 		}
 
 		if (force || newActiveMenu.get() != this->activeMenu.get()) {
-			SharedPtr<OSXMenu> oldMenu = this->activeMenu; // Save a reference
+			AutoPtr<OSXMenu> oldMenu = this->activeMenu; // Save a reference
 			NSMenu* oldNativeMenu = [NSApp mainMenu];
 
 			// Actually create and install the new menu
@@ -238,7 +238,7 @@ namespace ti
 		[NSApp setServicesMenu:OSXMenu::GetServicesMenu(nativeMainMenu)];
 	}
 
-	void OSXUIBinding::SetDockMenu(SharedMenu menu)
+	void OSXUIBinding::SetDockMenu(AutoMenu menu)
 	{
 		this->dockMenu = menu.cast<OSXMenu>();
 	}
@@ -278,22 +278,22 @@ namespace ti
 		}
 	}
 
-	SharedMenu OSXUIBinding::GetDockMenu()
+	AutoMenu OSXUIBinding::GetDockMenu()
 	{
 		return this->dockMenu;
 	}
 
-	SharedMenu OSXUIBinding::GetMenu()
+	AutoMenu OSXUIBinding::GetMenu()
 	{
 		return this->menu;
 	}
 
-	SharedMenu OSXUIBinding::GetContextMenu()
+	AutoMenu OSXUIBinding::GetContextMenu()
 	{
 		return this->contextMenu;
 	}
 
-	SharedTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
+	AutoTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
 	{
 		return new OSXTrayItem(iconPath, eventListener);
 	}

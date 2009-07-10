@@ -16,7 +16,7 @@
 	return YES;
 }
 
-- (void)setUserWindow:(SharedPtr<OSXUserWindow>*)inUserWindow
+- (void)setUserWindow:(AutoPtr<OSXUserWindow>*)inUserWindow
 {
 	userWindow = inUserWindow;
 }

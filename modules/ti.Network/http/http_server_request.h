@@ -35,8 +35,6 @@ namespace ti
 		void GetHeader(const ValueList& args, SharedValue result);
 		void HasHeader(const ValueList& args, SharedValue result);
 		void Read(const ValueList& args, SharedValue result);
-
-		SharedPtr<HttpServerRequest>* sharedPtr;
 	};
 }
 

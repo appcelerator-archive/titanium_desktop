@@ -25,9 +25,9 @@ namespace ti
 		nativeMenus.clear();
 	}
 
-	void Win32Menu::AppendItemImpl(SharedMenuItem item)
+	void Win32Menu::AppendItemImpl(AutoMenuItem item)
 	{
-		SharedPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
+		AutoPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
 
 		std::vector<HMENU>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end()) {
@@ -42,9 +42,9 @@ namespace ti
 		}
 	}
 
-	void Win32Menu::InsertItemAtImpl(SharedMenuItem item, unsigned int index)
+	void Win32Menu::InsertItemAtImpl(AutoMenuItem item, unsigned int index)
 	{
-		SharedPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
+		AutoPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
 		
 		std::vector<HMENU>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end())
@@ -62,7 +62,7 @@ namespace ti
 
 	void Win32Menu::RemoveItemAtImpl(unsigned int index)
 	{
-		SharedPtr<Win32MenuItem> win32Item = oldChildren.at(index).cast<Win32MenuItem>();
+		AutoPtr<Win32MenuItem> win32Item = oldChildren.at(index).cast<Win32MenuItem>();
 
 		std::vector<HMENU>::iterator i = this->nativeMenus.begin();
 		while (i != this->nativeMenus.end())
@@ -132,7 +132,7 @@ namespace ti
 	void Win32Menu::ClearNativeMenu(HMENU nativeMenu)
 	{
 		for (int i = GetMenuItemCount(nativeMenu) - 1; i >= 0; i--) {
-			SharedPtr<Win32MenuItem> win32Item =
+			AutoPtr<Win32MenuItem> win32Item =
 				this->oldChildren.at(i).cast<Win32MenuItem>();
 			RemoveItemAtFromNativeMenu(win32Item.get(), nativeMenu, i);
 		}
@@ -183,10 +183,10 @@ namespace ti
 
 	void Win32Menu::AddChildrenToNativeMenu(HMENU nativeMenu, bool registerNative)
 	{
-		vector<SharedMenuItem>::iterator i = this->children.begin();
+		vector<AutoMenuItem>::iterator i = this->children.begin();
 		while (i != this->children.end()) {
-			SharedMenuItem item = *i++;
-			SharedPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
+			AutoMenuItem item = *i++;
+			AutoPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
 			Win32Menu::InsertItemIntoNativeMenu(win32Item.get(), nativeMenu, true);
 		}
 	}

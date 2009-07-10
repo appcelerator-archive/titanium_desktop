@@ -130,7 +130,7 @@ namespace ti
 	void MenuItem::_SetSubmenu(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("setCallback", "o|0");
-		SharedMenu newSubmenu = NULL;
+		AutoMenu newSubmenu = NULL;
 
 		if (args.at(0)->IsObject())
 		{
@@ -192,7 +192,7 @@ namespace ti
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 
-		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateMenuItem(args);
 		newItem->EnsureHasSubmenu();
 		this->EnsureHasSubmenu();
 		this->submenu->AppendItem(newItem);
@@ -206,7 +206,7 @@ namespace ti
 		UIBinding* binding = UIBinding::GetInstance();
 
 		// Create a menu item object and add it to this item's submenu
-		SharedMenuItem newItem = binding->__CreateMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateMenuItem(args);
 		this->EnsureHasSubmenu();
 		this->submenu->AppendItem(newItem);
 
@@ -216,7 +216,7 @@ namespace ti
 	void MenuItem::_AddSeparatorItem(const ValueList& args, SharedValue result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
-		SharedMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
 		this->EnsureHasSubmenu();
 		this->submenu->AppendItem(newItem);
 
@@ -228,7 +228,7 @@ namespace ti
 		UIBinding* binding = UIBinding::GetInstance();
 
 		// Create a menu item object
-		SharedMenuItem newItem = binding->__CreateCheckMenuItem(args);
+		AutoMenuItem newItem = binding->__CreateCheckMenuItem(args);
 		this->EnsureHasSubmenu();
 		this->submenu->AppendItem(newItem);
 
@@ -319,7 +319,7 @@ namespace ti
 		if (this->submenu.isNull())
 		{
 			UIBinding* binding = UIBinding::GetInstance();
-			SharedMenu newSubmenu = binding->CreateMenu();
+			AutoMenu newSubmenu = binding->CreateMenu();
 			this->SetSubmenuImpl(newSubmenu);
 			this->submenu = newSubmenu;
 		}

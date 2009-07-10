@@ -21,21 +21,21 @@ namespace ti
 		~Win32UIBinding();
 		static bool IsWindowsXP();
 
-		SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent);
+		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
 		void ErrorDialog(std::string);
 
-		SharedMenu CreateMenu();
-		SharedMenuItem CreateMenuItem();
-		SharedMenuItem CreateSeparatorMenuItem();
-		SharedMenuItem CreateCheckMenuItem();
-		void SetMenu(SharedMenu);
-		SharedTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
-		void SetContextMenu(SharedMenu);
+		AutoMenu CreateMenu();
+		AutoMenuItem CreateMenuItem();
+		AutoMenuItem CreateSeparatorMenuItem();
+		AutoMenuItem CreateCheckMenuItem();
+		void SetMenu(AutoMenu);
+		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
+		void SetContextMenu(AutoMenu);
 		void SetIcon(std::string& iconPath);
 		long GetIdleTime();
 
-		SharedMenu GetMenu();
-		SharedMenu GetContextMenu();
+		AutoMenu GetMenu();
+		AutoMenu GetContextMenu();
 		std::string& GetIcon();
 		static UINT nextItemId;
 
@@ -50,8 +50,8 @@ namespace ti
 
 		private:
 		ScriptEvaluator evaluator;
-		SharedPtr<Win32Menu> menu;
-		SharedPtr<Win32Menu> contextMenu;
+		AutoPtr<Win32Menu> menu;
+		AutoPtr<Win32Menu> contextMenu;
 		std::string iconPath;
 
 		// Cookie and handle for WebKit Activation Context
