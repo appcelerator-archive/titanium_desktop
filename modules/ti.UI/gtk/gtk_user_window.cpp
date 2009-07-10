@@ -548,15 +548,20 @@ namespace ti
 			m = b->GetContextMenu().cast<GtkMenu>();
 		}
 	
+		// Remove existing unused context menu items
+		GList* children = gtk_container_get_children(GTK_CONTAINER(menu));
+		size_t extent = g_list_length(children);
+
+		// If we are in debug mode, leave the last two --
+		// a separator and the web inspector
+		if (userWindow->GetHost()->IsDebugMode())
+			extent = extent - 2;
+
 		// If we are not in debug mode, remove the default WebKit menu items
-		if (!userWindow->GetHost()->IsDebugMode())
+		for (size_t i = 0; i < extent; i++)
 		{
-			GList* children = gtk_container_get_children(GTK_CONTAINER(menu));
-			for (size_t i = 0; i < g_list_length(children); i++)
-			{
-				GtkWidget* w = (GtkWidget*) g_list_nth_data(children, i);
-				gtk_container_remove(GTK_CONTAINER(menu), w);
-			}
+			GtkWidget* w = (GtkWidget*) g_list_nth_data(children, i);
+			gtk_container_remove(GTK_CONTAINER(menu), w);
 		}
 
 		if (!m.isNull()) {
