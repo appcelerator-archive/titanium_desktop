@@ -15,15 +15,17 @@
 @class NativeWindow;
 @interface WebViewDelegate : NSObject {
 	NativeWindow *window;
-	WebView *webView;
 	Host *host;
-	NSURL *url;
 	WebInspector *inspector;
 	BOOL initialDisplay;
-	std::map<WebFrame*, SharedKObject> *frames; // this is the frame to clear tracking
+	std::map<WebFrame*, SharedKObject> *frameToGlobalObject;
 	Logger *logger;
 }
--(id)initWithWindow:(NativeWindow*)window host:(Host*)h;
--(void)setURL:(NSURL*)url;
--(NSURL*)url;
+-(id)initWithWindow:(NativeWindow*)window;
+-(void)setupPreferences;
+-(void)registerGlobalObject:(SharedKObject) globalObject forFrame:(WebFrame *)frame;
+-(SharedKObject)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame;
+-(BOOL)isGlobalObjectRegisteredForFrame:(WebFrame*) frame;
+-(SharedKObject)globalObjectForFrame:(WebFrame*) frame;
+-(void)deregisterGlobalObjectForFrame:(WebFrame *)frame;
 @end

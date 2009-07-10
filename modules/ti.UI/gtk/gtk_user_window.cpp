@@ -213,9 +213,9 @@ namespace ti
 			this->Destroyed();
 		}
 		this->RemoveOldMenu(); // Cleanup old menu
-	
+
 		UserWindow::Close();
-		this->FireEvent(CLOSED);
+		this->Closed();
 	}
 	
 	void GtkUserWindow::SetupTransparency()

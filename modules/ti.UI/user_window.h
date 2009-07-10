@@ -183,6 +183,7 @@ class UserWindow : public AccessorBoundObject {
 		virtual std::string GetId() = 0;
 		virtual void Open();
 		virtual void Close();
+		void Closed();
 
 		virtual double GetX() = 0;
 		virtual void SetX(double x) = 0;

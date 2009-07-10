@@ -486,7 +486,13 @@ void UserWindow::Open()
 
 void UserWindow::Close()
 {
-	this->active = false;
+	this->FireEvent(CLOSE); // fire our close event
+	this->active = false; // prevent further modification
+}
+
+void UserWindow::Closed()
+{
+	this->FireEvent(CLOSED);
 
 	// Close all children and cleanup
 	std::vector<SharedUserWindow>::iterator iter = this->children.begin();
@@ -510,17 +516,11 @@ void UserWindow::Close()
 	// Tell the UIBinding that we are closed
 	this->binding->RemoveFromOpenWindows(this->shared_this);
 
-	// fire our close event
-	this->FireEvent(CLOSE);
-
 	// When we have no more open windows, we exit...
 	std::vector<SharedUserWindow> windows = this->binding->GetOpenWindows();
-	if (windows.size() == 0)
-	{
+	if (windows.size() == 0) {
 		this->host->Exit(0);
-	}
-	else
-	{
+	} else {
 		windows.at(0)->Focus();
 	}
 
