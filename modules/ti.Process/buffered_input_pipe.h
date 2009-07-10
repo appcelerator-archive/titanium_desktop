@@ -13,21 +13,21 @@
 namespace ti
 {
 	class BufferedInputPipe;
-	typedef SharedPtr<BufferedInputPipe> SharedBufferedInputPipe;
+	typedef AutoPtr<BufferedInputPipe> SharedBufferedInputPipe;
 	
 	class BufferedInputPipe : public InputPipe
 	{
 		public:
 			BufferedInputPipe();
 			
-			virtual SharedPtr<Blob> Read(int bufsize=-1);
-			virtual SharedPtr<Blob> ReadLine();
+			virtual AutoPtr<Blob> Read(int bufsize=-1);
+			virtual AutoPtr<Blob> ReadLine();
 			virtual void Close();
 			virtual bool IsClosed();
 			
 			int GetSize();
 			const char* GetBuffer();
-			void Append(SharedPtr<Blob> blob);
+			void Append(AutoPtr<Blob> blob);
 			void Append(char *data, int length);
 			
 		protected:

@@ -26,7 +26,7 @@
 namespace ti
 {
 	class Process;
-	typedef SharedPtr<Process> SharedProcess;
+	typedef AutoPtr<Process> SharedProcess;
 	
 	class Process : public StaticBoundObject
 	{
@@ -82,7 +82,6 @@ namespace ti
 		SharedOutputPipe stdin;
 		SharedKObject environment;
 		SharedKList args;
-		SharedProcess sharedThis;
 		
 		int exitCode;
 		SharedKMethod* onExit;

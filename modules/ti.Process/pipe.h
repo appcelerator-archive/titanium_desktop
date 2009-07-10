@@ -10,13 +10,14 @@
 #include <kroll/kroll.h>
 
 namespace ti
-{	
-	class Process;
+{
+	class Pipe;
+	typedef AutoPtr<Pipe> SharedPipe;
 	
 	class Pipe : public StaticBoundObject
 	{
 	public:
-		Pipe(const char *type = "Pipe", SharedPtr<Process> parent = NULL);
+		Pipe(const char *type = "Pipe");
 		virtual ~Pipe() {};
 	
 		virtual void Close() = 0;
@@ -25,15 +26,11 @@ namespace ti
 		void Closed();
 		void SetOnClose(SharedKMethod onClose);
 		
-		SharedPtr<Process> GetParent() { return parent; }
-		
 	protected:
 		void _Close(const ValueList& args, SharedValue result);
 		void _IsClosed(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);
 		
-		SharedPtr<Pipe> sharedThis;
-		SharedPtr<Process> parent;
 		SharedKMethod *onClose;
 	};
 }

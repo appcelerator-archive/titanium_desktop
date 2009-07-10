@@ -28,7 +28,6 @@ namespace ti
 #elif defined(OS_LINUX)
 		SharedInputPipe pipe = new LinuxInputPipe();
 #endif
-		pipe->sharedThis = pipe;
 		return pipe;
 	}
 	
@@ -59,11 +58,14 @@ namespace ti
 	
 	void InputPipe::DataReady(SharedInputPipe pipe)
 	{
-		if (pipe.isNull()) pipe = sharedThis.cast<InputPipe>();
+		if (pipe.isNull()) {
+			this->duplicate();
+			pipe = this;
+		}
 		
 		if (attachedOutput)
 		{
-			SharedPtr<Blob> data = pipe->Read();
+			AutoPtr<Blob> data = pipe->Read();
 			SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
 		}
 		else
@@ -93,7 +95,9 @@ namespace ti
 		{
 			ValueList args;
 			SharedKObject event = new StaticBoundObject();
-			event->SetObject("pipe", sharedThis);
+			this->duplicate();
+			AutoPtr<InputPipe> autoThis = this;
+			event->SetObject("pipe", autoThis);
 			
 			args.push_back(Value::NewObject(event));
 			
@@ -112,7 +116,8 @@ namespace ti
 	{
 		joinedPipes.push_back(other);
 		other->joined = true;
-		other->joinedTo = sharedThis.cast<InputPipe>();
+		this->duplicate();
+		other->joinedTo = this;
 		
 		if (joinedRead.isNull())
 		{
@@ -127,12 +132,14 @@ namespace ti
 	
 	void InputPipe::JoinedRead(const ValueList& args, SharedValue result)
 	{
-		DataReady(args.at(0)->ToObject().cast<InputPipe>());
+		SharedInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
+		pipe->duplicate();
+		DataReady(pipe);
 	}
 	
 	void InputPipe::Unjoin(SharedInputPipe other)
 	{
-		if (other->joinedTo.get() == sharedThis.get())
+		if (other->joinedTo.get() == this)
 		{
 			other->joined = false;
 			other->onRead = NULL;
@@ -147,11 +154,11 @@ namespace ti
 	
 	std::pair<SharedBufferedInputPipe,SharedBufferedInputPipe>& InputPipe::Split()
 	{
-		SharedPtr<BufferedInputPipe> pipe1 = new BufferedInputPipe();
-		SharedPtr<BufferedInputPipe> pipe2 = new BufferedInputPipe();
+		AutoPtr<BufferedInputPipe> pipe1 = new BufferedInputPipe();
+		AutoPtr<BufferedInputPipe> pipe2 = new BufferedInputPipe();
 		
 		this->splitPipes =
-			new std::pair<SharedPtr<BufferedInputPipe>, SharedPtr<BufferedInputPipe> >(pipe1, pipe2);
+			new std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >(pipe1, pipe2);
 		
 		MethodCallback* splitCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::Splitter);
 		MethodCallback* closeCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::SplitterClose);
@@ -163,10 +170,10 @@ namespace ti
 	
 	void InputPipe::Splitter(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<BufferedInputPipe> pipe1 = this->splitPipes->first;
-		SharedPtr<BufferedInputPipe> pipe2 = this->splitPipes->second;
+		AutoPtr<BufferedInputPipe> pipe1 = this->splitPipes->first;
+		AutoPtr<BufferedInputPipe> pipe2 = this->splitPipes->second;
 		
-		SharedPtr<Blob> blob = this->Read();
+		AutoPtr<Blob> blob = this->Read();
 		pipe1->Append(blob);
 		pipe2->Append(blob);
 	}
@@ -217,7 +224,8 @@ namespace ti
 		
 		if (IsJoined())
 		{
-			joinedTo->Unjoin(sharedThis.cast<InputPipe>());
+			this->duplicate();
+			joinedTo->Unjoin(this);
 		}
 		else if (IsSplit())
 		{
@@ -271,13 +279,13 @@ namespace ti
 			bufsize = args.at(0)->ToInt();
 		}
 		
-		SharedPtr<Blob> blob = Read(bufsize);
+		AutoPtr<Blob> blob = Read(bufsize);
 		result->SetObject(blob);
 	}
 	
 	void InputPipe::_ReadLine(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<Blob> blob = ReadLine();
+		AutoPtr<Blob> blob = ReadLine();
 		if (blob.isNull())
 		{
 			result->SetNull();

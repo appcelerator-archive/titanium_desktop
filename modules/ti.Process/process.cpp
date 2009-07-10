@@ -46,7 +46,6 @@ namespace ti
 #elif defined(OS_LINUX)
 		SharedProcess process = new LinuxProcess(args, environment, stdin, stdout, stderr);
 #endif
-		process->sharedThis = process;
 		return process;
 	}
 	

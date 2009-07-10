@@ -24,11 +24,11 @@ namespace ti
 		Win32Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
 		virtual ~Win32Process();
 
-		static SharedPtr<Win32Process> GetCurrentProcess();
+		static AutoPtr<Win32Process> GetCurrentProcess();
 		
-		SharedPtr<Win32OutputPipe> GetStdin() { return stdin.cast<Win32OutputPipe>(); }
-		SharedPtr<Win32InputPipe> GetStdout() { return stdout.cast<Win32InputPipe>(); }
-		SharedPtr<Win32InputPipe> GetStderr() { return stderr.cast<Win32InputPipe>(); }
+		AutoPtr<Win32OutputPipe> GetStdin() { return stdin.cast<Win32OutputPipe>(); }
+		AutoPtr<Win32InputPipe> GetStdout() { return stdout.cast<Win32InputPipe>(); }
+		AutoPtr<Win32InputPipe> GetStderr() { return stderr.cast<Win32InputPipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
@@ -53,10 +53,8 @@ namespace ti
 		HANDLE process;
 		int exitCode;
 		
-		std::ostringstream outBuffer, errBuffer;
-		SharedKObject *shared_input, *shared_output, *shared_error;
 		Logger* logger;
-		static SharedPtr<Win32Process> currentProcess;
+		static AutoPtr<Win32Process> currentProcess;
 	};
 }
 

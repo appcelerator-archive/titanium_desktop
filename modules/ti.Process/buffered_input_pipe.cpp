@@ -11,7 +11,7 @@ namespace ti
 {
 	BufferedInputPipe::BufferedInputPipe() : closed(false) { }
 	
-	SharedPtr<Blob> BufferedInputPipe::Read(int bufsize)
+	AutoPtr<Blob> BufferedInputPipe::Read(int bufsize)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -27,7 +27,7 @@ namespace ti
 				bufsize = (int) buffer.size();
 			}	
 			
-			SharedPtr<Blob> blob = new Blob(&(buffer[0]), bufsize);
+			AutoPtr<Blob> blob = new Blob(&(buffer[0]), bufsize);
 			buffer.erase(buffer.begin(), buffer.begin()+bufsize);
 			
 			return blob;
@@ -35,7 +35,7 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	SharedPtr<Blob> BufferedInputPipe::ReadLine()
+	AutoPtr<Blob> BufferedInputPipe::ReadLine()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -47,7 +47,7 @@ namespace ti
 			int newline = FindFirstLineFeed(&(buffer[0]), buffer.size(), &charsToErase);
 			if (newline == -1) return NULL;
 			
-			SharedPtr<Blob> blob = new Blob(&(buffer[0]), newline-charsToErase+1);
+			AutoPtr<Blob> blob = new Blob(&(buffer[0]), newline-charsToErase+1);
 			buffer.erase(buffer.begin(), buffer.begin()+newline+1);
 			
 			return blob;
@@ -80,7 +80,7 @@ namespace ti
 		InputPipe::DataReady();
 	}
 	
-	void BufferedInputPipe::Append(SharedPtr<Blob> blob)
+	void BufferedInputPipe::Append(AutoPtr<Blob> blob)
 	{
 		this->Append((char *)blob->Get(), blob->Length());
 	}

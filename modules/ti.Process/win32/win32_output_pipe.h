@@ -24,7 +24,7 @@ namespace ti
 		
 		virtual void Close();
 		virtual bool IsClosed();
-		virtual int Write(SharedPtr<Blob> data);
+		virtual int Write(AutoPtr<Blob> data);
 		
 		void DuplicateRead(HANDLE process, LPHANDLE handle);
 		HANDLE GetReadHandle() { return readHandle; }

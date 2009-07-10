@@ -15,13 +15,13 @@
 namespace ti
 {
 	class OutputPipe;
-	typedef SharedPtr<OutputPipe> SharedOutputPipe;
+	typedef AutoPtr<OutputPipe> SharedOutputPipe;
 	
 	class OutputPipe : public Pipe
 	{
 	public:
 		OutputPipe();
-		virtual int Write(SharedPtr<Blob> data) = 0;
+		virtual int Write(AutoPtr<Blob> data) = 0;
 		static SharedOutputPipe CreateOutputPipe();
 		
 	protected:

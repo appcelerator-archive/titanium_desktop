@@ -40,7 +40,7 @@ namespace ti
 		return closed;
 	}
 	
-	int Win32OutputPipe::Write(SharedPtr<Blob> blob)
+	int Win32OutputPipe::Write(AutoPtr<Blob> blob)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		

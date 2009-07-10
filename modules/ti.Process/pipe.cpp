@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	Pipe::Pipe(const char *type, SharedProcess parent) : StaticBoundObject(type), onClose(NULL), parent(parent)
+	Pipe::Pipe(const char *type) : StaticBoundObject(type), onClose(NULL)
 	{
 		//TODO doc me
 		SetMethod("close", &Pipe::_Close);
@@ -23,7 +23,10 @@ namespace ti
 		if (onClose != NULL && !onClose->isNull())
 		{
 			SharedKObject event = new StaticBoundObject();
-			event->SetObject("pipe", sharedThis);
+			this->duplicate();
+			AutoPtr<Pipe> autoThis = this;
+			
+			event->SetObject("pipe", autoThis);
 			ValueList args;
 			args.push_back(Value::NewObject(event));
 			

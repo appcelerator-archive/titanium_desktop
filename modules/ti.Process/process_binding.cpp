@@ -153,23 +153,17 @@ namespace ti
 			argsClone->Append(Value::NewString(argList->At(i)->ToString()));
 		}
 		
-		SharedProcess process = Process::CreateProcess(argsClone, environment, stdin, stdout, stderr);
-		processes.push_back(process);
-		result->SetObject(process);
+		result->SetObject(Process::CreateProcess(argsClone, environment, stdin, stdout, stderr));
 	}
 	
 	void ProcessBinding::CreateInputPipe(const ValueList& args, SharedValue result)
 	{
-		SharedInputPipe pipe = InputPipe::CreateInputPipe();
-		pipes.push_back(pipe);
-		result->SetObject(pipe);
+		result->SetObject(InputPipe::CreateInputPipe());
 	}
 	
 	void ProcessBinding::CreateOutputPipe(const ValueList& args, SharedValue result)
 	{
-		SharedOutputPipe pipe = OutputPipe::CreateOutputPipe();
-		pipes.push_back(pipe);
-		result->SetObject(pipe);
+		result->SetObject(OutputPipe::CreateOutputPipe());
 	}
 	
 	void ProcessBinding::GetCurrentProcess(const ValueList& args, SharedValue result)

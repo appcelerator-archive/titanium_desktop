@@ -11,10 +11,10 @@
 
 namespace ti
 {
-	SharedPtr<Win32Process> Win32Process::currentProcess = new Win32Process();
+	AutoPtr<Win32Process> Win32Process::currentProcess = new Win32Process();
 	
 	/*static*/
-	SharedPtr<Win32Process> Win32Process::GetCurrentProcess()
+	AutoPtr<Win32Process> Win32Process::GetCurrentProcess()
 	{
 		return currentProcess;
 	}

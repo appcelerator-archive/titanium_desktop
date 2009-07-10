@@ -21,8 +21,6 @@ namespace ti
 			
 		static std::map<std::string,int> signals;
 	private:
-		std::vector<SharedPtr<Process> > processes;
-		std::vector<SharedPtr<Pipe> > pipes;
 		
 		void CreateProcess(const ValueList& args, SharedValue result);
 		void CreateInputPipe(const ValueList& args, SharedValue result);

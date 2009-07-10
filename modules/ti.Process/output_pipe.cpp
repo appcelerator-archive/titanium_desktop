@@ -25,7 +25,6 @@ namespace ti
 #elif defined(OS_LINUX)
 		SharedOutputPipe pipe = new LinuxOutputPipe();
 #endif
-		pipe->sharedThis = pipe;
 		return pipe;
 	}
 	
@@ -41,7 +40,7 @@ namespace ti
 		{
 			throw ValueException::FromString("No data passed to write");
 		}
-		SharedPtr<Blob> blob = new Blob();
+		AutoPtr<Blob> blob = new Blob();
 		if (args.at(0)->IsObject())
 		{
 			blob = args.at(0)->ToObject().cast<Blob>();
