@@ -56,6 +56,11 @@ namespace ti
 		this->SetMethod("abort",&HTTPClientBinding::Abort);
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.open,since=0.3) Opens an HTTP connection
+     * @tiarg(for=Network.HTTPClient.open,name=method,type=string) HTTP method to use
+     * @tiarg(for=Network.HTTPClient.open,name=url,type=string) target url
+     * @tiarg(for=Network.HTTPClient.open,name=async,type=bool,optional=True) default True
+     * @tiarg(for=Network.HTTPClient.open,name=user,type=string,optional=True)
+     * @tiarg(for=Network.HTTPClient.open,name=password,type=string,optional=True)
 		 */
 		this->SetMethod("open",&HTTPClientBinding::Open);
 		/**
