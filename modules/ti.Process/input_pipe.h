@@ -16,7 +16,7 @@ namespace ti
 {
 	class InputPipe;
 	typedef AutoPtr<InputPipe> AutoInputPipe;
-	
+
 	class BufferedInputPipe;
 	class InputPipe : public Pipe
 	{
