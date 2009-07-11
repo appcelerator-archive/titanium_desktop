@@ -109,7 +109,7 @@
 namespace ti
 {
 	OSXProcess::OSXProcess(SharedKList args, SharedKObject environment,
-		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) :
+		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
 			Process(args, environment, stdin, stdout, stderr), currentProcessInfo(nil)
 	{
 		
@@ -139,7 +139,7 @@ namespace ti
 	AutoPtr<OSXProcess> OSXProcess::currentProcess = new OSXProcess([NSProcessInfo processInfo]);
 	
 	/*static*/
-	SharedProcess OSXProcess::GetCurrentProcess()
+	AutoProcess OSXProcess::GetCurrentProcess()
 	{
 		return currentProcess;
 	}
@@ -218,7 +218,7 @@ namespace ti
 	}
 	
 	void OSXProcess::Restart(
-		SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr)
+		SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr)
 	{
 		
 	}

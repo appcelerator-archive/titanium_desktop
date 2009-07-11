@@ -31,8 +31,8 @@ namespace ti
 	class OSXProcess : public Process
 	{
 	public:
-		static SharedProcess GetCurrentProcess();
-		OSXProcess(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		static AutoProcess GetCurrentProcess();
+		OSXProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
 		virtual ~OSXProcess();
 		
 		virtual int GetPID();
@@ -41,7 +41,7 @@ namespace ti
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
 		
 		AutoPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
 		AutoPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }

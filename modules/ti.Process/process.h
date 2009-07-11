@@ -8,14 +8,7 @@
 #define _PROCESS_H_
 
 #include <kroll/kroll.h>
-#include <Poco/Process.h>
-#include <Poco/Pipe.h>
-#include <Poco/Thread.h>
-#include <Poco/RunnableAdapter.h>
-#include <Poco/Mutex.h>
-#include <Poco/Condition.h>
 #include <sstream>
-#include "process_binding.h"
 #include "input_pipe.h"
 #include "output_pipe.h"
 
@@ -26,15 +19,15 @@
 namespace ti
 {
 	class Process;
-	typedef AutoPtr<Process> SharedProcess;
+	typedef AutoPtr<Process> AutoProcess;
 	
 	class Process : public StaticBoundObject
 	{
 	public:
-		Process(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
 		virtual ~Process();
-		static SharedProcess GetCurrentProcess();
-		static SharedProcess CreateProcess(SharedKList args, SharedKObject environment, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr);
+		static AutoProcess GetCurrentProcess();
+		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
 		
 		virtual SharedValue Call(const ValueList& args);
 		
@@ -50,7 +43,7 @@ namespace ti
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
 		virtual void Restart() = 0;
-		virtual void Restart(SharedKObject env, SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) = 0;
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) = 0;
 		
 		void SetOnRead(SharedKMethod method);
 		void Exited();
@@ -78,8 +71,8 @@ namespace ti
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
 		
-		SharedInputPipe stdout, stderr;
-		SharedOutputPipe stdin;
+		AutoInputPipe stdout, stderr;
+		AutoOutputPipe stdin;
 		SharedKObject environment;
 		SharedKList args;
 		

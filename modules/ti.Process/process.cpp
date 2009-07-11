@@ -6,12 +6,8 @@
 #include <vector>
 #include "process.h"
 #include "pipe.h"
-#include <Poco/Path.h>
-#include <Poco/RunnableAdapter.h>
-#include <Poco/ScopedLock.h>
-#include <Poco/PipeImpl.h>
+#include "process_binding.h"
 
-using Poco::RunnableAdapter;
 #if defined(OS_OSX)
 # include "osx/osx_process.h"
 #elif defined(OS_WIN32)
@@ -23,7 +19,7 @@ using Poco::RunnableAdapter;
 namespace ti
 {
 	/*static*/
-	SharedProcess Process::GetCurrentProcess()
+	AutoProcess Process::GetCurrentProcess()
 	{
 #if defined(OS_OSX)
 		return OSXProcess::GetCurrentProcess();
@@ -35,16 +31,16 @@ namespace ti
 	}
 	
 	/*static*/
-	SharedProcess Process::CreateProcess(
+	AutoProcess Process::CreateProcess(
 		SharedKList args, SharedKObject environment,
-		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr)
+		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr)
 	{
 #if defined(OS_OSX)
-		SharedProcess process = new OSXProcess(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new OSXProcess(args, environment, stdin, stdout, stderr);
 #elif defined(OS_WIN32)
-		SharedProcess process = new Win32Process(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new Win32Process(args, environment, stdin, stdout, stderr);
 #elif defined(OS_LINUX)
-		SharedProcess process = new LinuxProcess(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new LinuxProcess(args, environment, stdin, stdout, stderr);
 #endif
 		return process;
 	}
@@ -59,7 +55,7 @@ namespace ti
 	}
 	
 	Process::Process(SharedKList args, SharedKObject environment,
-		SharedOutputPipe stdin, SharedInputPipe stdout, SharedInputPipe stderr) :
+		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
 			StaticBoundObject("Process"),
 			stdin(stdin), stdout(stdout), stderr(stderr),
 			args(args), environment(environment), exitCode(-1),
@@ -117,6 +113,10 @@ namespace ti
 			ValueList args(Value::NewInt(this->exitCode));
 			Host::GetInstance()->InvokeMethodOnMainThread(*this->onExit, args, false);
 		}
+		
+		this->duplicate();
+		AutoPtr<Process> autoThis = this;
+		ProcessBinding::ProcessTerminated(autoThis);
 	}
 	
 	// convenience for joining stdout + stderr, and attaching to stdout
@@ -261,8 +261,8 @@ namespace ti
 			{
 				SharedKObject object = args.at(0)->ToObject();
 				SharedKObject env;
-				SharedOutputPipe stdin;
-				SharedInputPipe stdout, stderr;
+				AutoOutputPipe stdin;
+				AutoInputPipe stdout, stderr;
 				
 				env = object->GetObject("env");
 				stdin = object->GetObject("stdin").cast<OutputPipe>();

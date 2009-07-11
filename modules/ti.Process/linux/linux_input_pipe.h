@@ -4,30 +4,28 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _WIN32_INPUT_PIPE_H_
-#define _WIN32_INPUT_PIPE_H_
+#ifndef _LINUX_INPUT_PIPE_H_
+#define _LINUX_INPUT_PIPE_H_
 
-#include <kroll/base.h>
-#include <windows.h>
 #include <kroll/kroll.h>
 #include "../monitored_input_pipe.h"
 
 namespace ti
 {
-	class Win32InputPipe : public MonitoredInputPipe
+	class LinuxInputPipe : public MonitoredInputPipe
 	{
 	public:
-		Win32InputPipe();
+		LinuxInputPipe();
+		virtual ~LinuxInputPipe();
 		virtual void Close();
 		
-		void DuplicateWrite(HANDLE process, LPHANDLE handle);
-		HANDLE GetReadHandle() { return readHandle; }
-		HANDLE GetWriteHandle() { return writeHandle; }
+		int GetReadHandle() { return readHandle; }
+		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
 		virtual int RawRead(char *buffer, int size);
 		
-		HANDLE readHandle, writeHandle;
+		int readHandle, writeHandle;
 	};
 }
 

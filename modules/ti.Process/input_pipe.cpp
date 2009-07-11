@@ -18,15 +18,15 @@
 namespace ti
 {
 	/*static*/
-	SharedInputPipe InputPipe::CreateInputPipe()
+	AutoInputPipe InputPipe::CreateInputPipe()
 	{
 		
 #if defined(OS_OSX)
-		SharedInputPipe pipe = new OSXInputPipe();
+		AutoInputPipe pipe = new OSXInputPipe();
 #elif defined(OS_WIN32)
-		SharedInputPipe pipe = new Win32InputPipe();
+		AutoInputPipe pipe = new Win32InputPipe();
 #elif defined(OS_LINUX)
-		SharedInputPipe pipe = new LinuxInputPipe();
+		AutoInputPipe pipe = new LinuxInputPipe();
 #endif
 		return pipe;
 	}
@@ -56,7 +56,7 @@ namespace ti
 	{
 	}
 	
-	void InputPipe::DataReady(SharedInputPipe pipe)
+	void InputPipe::DataReady(AutoInputPipe pipe)
 	{
 		if (pipe.isNull()) {
 			this->duplicate();
@@ -112,7 +112,7 @@ namespace ti
 		}
 	}
 	
-	void InputPipe::Join(SharedInputPipe other)
+	void InputPipe::Join(AutoInputPipe other)
 	{
 		joinedPipes.push_back(other);
 		other->joined = true;
@@ -132,12 +132,12 @@ namespace ti
 	
 	void InputPipe::JoinedRead(const ValueList& args, SharedValue result)
 	{
-		SharedInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
+		AutoInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
 		pipe->duplicate();
 		DataReady(pipe);
 	}
 	
-	void InputPipe::Unjoin(SharedInputPipe other)
+	void InputPipe::Unjoin(AutoInputPipe other)
 	{
 		if (other->joinedTo.get() == this)
 		{
@@ -300,7 +300,7 @@ namespace ti
 	{
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			SharedInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
+			AutoInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
 			if (!pipe.isNull())
 			{
 				this->Join(pipe);
@@ -312,7 +312,7 @@ namespace ti
 	{
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			SharedInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
+			AutoInputPipe pipe = args.at(0)->ToObject().cast<InputPipe>();
 			if (!pipe.isNull())
 			{
 				this->Unjoin(pipe);

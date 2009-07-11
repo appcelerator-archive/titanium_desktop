@@ -15,7 +15,7 @@
 namespace ti
 {
 	class InputPipe;
-	typedef AutoPtr<InputPipe> SharedInputPipe;
+	typedef AutoPtr<InputPipe> AutoInputPipe;
 	
 	class BufferedInputPipe;
 	class InputPipe : public Pipe
@@ -23,15 +23,15 @@ namespace ti
 	public:
 		InputPipe();
 		virtual ~InputPipe();
-		static SharedInputPipe CreateInputPipe();
+		static AutoInputPipe CreateInputPipe();
 		
 		virtual AutoPtr<Blob> Read(int bufsize=-1) = 0;
 		virtual AutoPtr<Blob> ReadLine() = 0;
-		void DataReady(SharedInputPipe pipe = NULL);
+		void DataReady(AutoInputPipe pipe = NULL);
 		void Closed();
 		
-		void Join(SharedInputPipe other);
-		void Unjoin(SharedInputPipe other);
+		void Join(AutoInputPipe other);
+		void Unjoin(AutoInputPipe other);
 		bool IsJoined();
 		
 		std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >& Split();
@@ -71,8 +71,8 @@ namespace ti
 		
 		SharedKMethod *onRead, *onClose;
 		bool joined;
-		SharedInputPipe joinedTo;
-		std::vector<SharedInputPipe> joinedPipes;
+		AutoInputPipe joinedTo;
+		std::vector<AutoInputPipe> joinedPipes;
 		SharedKMethod joinedRead;
 		SharedKObject* attachedOutput;
 		std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >* splitPipes;

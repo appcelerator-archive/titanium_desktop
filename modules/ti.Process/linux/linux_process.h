@@ -4,12 +4,12 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
  
-#ifndef _WIN32_PROCESS_H_
-#define _WIN32_PROCESS_H_
+#ifndef _LINUX_PROCESS_H_
+#define _LINUX_PROCESS_H_
 
 #include <sstream>
-#include "win32_output_pipe.h"
-#include "win32_input_pipe.h"
+#include "linux_output_pipe.h"
+#include "linux_input_pipe.h"
 #include "../process.h"
 
 #undef stdin
@@ -18,17 +18,17 @@
 
 namespace ti
 {
-	class Win32Process : public Process
+	class LinuxProcess : public Process
 	{
 	public:
-		Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
-		virtual ~Win32Process();
+		LinuxProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual ~LinuxProcess();
 
-		static AutoPtr<Win32Process> GetCurrentProcess();
+		static AutoPtr<LinuxProcess> GetCurrentProcess();
 		
-		AutoPtr<Win32OutputPipe> GetStdin() { return stdin.cast<Win32OutputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStdout() { return stdout.cast<Win32InputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStderr() { return stderr.cast<Win32InputPipe>(); }
+		AutoPtr<LinuxOutputPipe> GetStdin() { return stdin.cast<LinuxOutputPipe>(); }
+		AutoPtr<LinuxInputPipe> GetStdout() { return stdout.cast<LinuxInputPipe>(); }
+		AutoPtr<LinuxInputPipe> GetStderr() { return stderr.cast<LinuxInputPipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
@@ -37,24 +37,23 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual bool IsRunning();
 		
 	protected:
 		// for current process
-		Win32Process();
-		std::string ArgListToString(SharedKList argList);
+		LinuxProcess();
 		
 		void StartProcess();
 		void ExitMonitor();
 		
 		Poco::Thread exitMonitorThread;
-		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
+		Poco::RunnableAdapter<LinuxProcess>* exitMonitorAdapter;
 		bool running, complete, current;
 		int pid;
-		HANDLE process;
 		int exitCode;
 		
 		Logger* logger;
-		static AutoPtr<Win32Process> currentProcess;
+		static AutoPtr<LinuxProcess> currentProcess;
 	};
 }
 

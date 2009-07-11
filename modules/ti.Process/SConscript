@@ -14,9 +14,9 @@ if build.is_osx():
 	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 elif build.is_win32():
-	sources = sources + Glob('win32/*.cpp')
+	sources += Glob('win32/*.cpp')
 else:
-	sources += ['process.cpp', 'pipe.cpp']
+	sources += Glob('linux/*.cpp')
 	
 m = build.add_module('ti.Process', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tiprocessmodule', source = sources)

@@ -16,14 +16,14 @@
 namespace ti
 {
 	/*static*/
-	SharedOutputPipe OutputPipe::CreateOutputPipe()
+	AutoOutputPipe OutputPipe::CreateOutputPipe()
 	{
 #if defined(OS_OSX)
-		SharedOutputPipe pipe = new OSXOutputPipe();
+		AutoOutputPipe pipe = new OSXOutputPipe();
 #elif defined(OS_WIN32)
-		SharedOutputPipe pipe = new Win32OutputPipe();
+		AutoOutputPipe pipe = new Win32OutputPipe();
 #elif defined(OS_LINUX)
-		SharedOutputPipe pipe = new LinuxOutputPipe();
+		AutoOutputPipe pipe = new LinuxOutputPipe();
 #endif
 		return pipe;
 	}

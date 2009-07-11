@@ -14,7 +14,8 @@ namespace ti
 {
 
 	std::map<std::string,int> ProcessBinding::signals;
-		
+	std::vector<AutoProcess> ProcessBinding::processes;
+	
 	ProcessBinding::ProcessBinding()
 	{
 		Logger::Get("Process")->Debug("Initializing Titanium.Process");
@@ -26,14 +27,12 @@ namespace ti
 		SetMethod("getCurrentProcess", &ProcessBinding::GetCurrentProcess);
 		
 #if defined(OS_OSX) || (OS_LINUX)
-		Logger::Get("Process")->Debug("Setting up signals..");
 		signals["SIGHUP"] = SIGHUP;
 		signals["SIGINT"] = SIGINT;
 		signals["SIGQUIT"] = SIGQUIT;
 		signals["SIGILL"] = SIGILL;
 		signals["SIGTRAP"] = SIGTRAP;
 		signals["SIGABRT"] = SIGABRT;
-		signals["SIGEMT"] = SIGEMT;
 		signals["SIGFPE"] = SIGFPE;
 		signals["SIGKILL"] = SIGKILL;
 		signals["SIGBUS"] = SIGBUS;
@@ -54,7 +53,6 @@ namespace ti
 		signals["SIGVTALRM"] = SIGVTALRM;
 		signals["SIGPROF"] = SIGPROF;
 		signals["SIGWINCH"] = SIGWINCH;
-		signals["SIGINFO"] = SIGINFO;
 		signals["SIGUSR1"] = SIGUSR1;
 		signals["SIGUSR2"] = SIGUSR2;
 #elif defined(OS_WIN32)
@@ -65,7 +63,10 @@ namespace ti
 		signals["SIGSEGV"] = SIGSEGV;
 		signals["SIGTERM"] = SIGTERM;
 #endif
-		Logger::Get("Process")->Debug("Binding signals..");
+#if defined(OS_OSX)
+		signals["SIGEMT"] = SIGEMT;
+		signals["SIGINFO"] = SIGINFO;
+#endif
 		std::map<std::string,int>::iterator iter;
 		for (iter = signals.begin(); iter != signals.end(); iter++)
 		{
@@ -83,8 +84,8 @@ namespace ti
 	{
 		SharedKList argList = NULL;
 		SharedKObject environment = NULL;
-		SharedOutputPipe stdin = NULL;
-		SharedInputPipe stdout, stderr = NULL;
+		AutoOutputPipe stdin = NULL;
+		AutoInputPipe stdout, stderr = NULL;
 		
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
@@ -148,12 +149,25 @@ namespace ti
 		
 		// Clone args
 		SharedKList argsClone = new StaticBoundList();
-		for (int i = 0; i < argList->Size(); i++)
+		for (size_t i = 0; i < argList->Size(); i++)
 		{
 			argsClone->Append(Value::NewString(argList->At(i)->ToString()));
 		}
 		
-		result->SetObject(Process::CreateProcess(argsClone, environment, stdin, stdout, stderr));
+		AutoProcess process = Process::CreateProcess(argsClone, environment, stdin, stdout, stderr);
+		processes.push_back(process);
+		result->SetObject(process);
+	}
+	
+	void ProcessBinding::ProcessTerminated(AutoProcess process)
+	{
+		std::vector<AutoProcess>::iterator found =
+			std::find(processes.begin(), processes.end(), process);
+		
+		if (found != processes.end())
+		{
+			processes.erase(found);
+		}
 	}
 	
 	void ProcessBinding::CreateInputPipe(const ValueList& args, SharedValue result)
