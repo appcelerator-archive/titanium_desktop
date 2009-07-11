@@ -56,7 +56,7 @@ namespace ti
 	
 	Process::Process(SharedKList args, SharedKObject environment,
 		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
-			StaticBoundObject("Process"),
+			AccessorBoundObject("Process"),
 			stdin(stdin), stdout(stdout), stderr(stderr),
 			args(args), environment(environment), exitCode(-1),
 			onExit(NULL)
