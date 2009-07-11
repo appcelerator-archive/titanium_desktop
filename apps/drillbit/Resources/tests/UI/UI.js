@@ -528,5 +528,31 @@ describe("UI Module Tests",{
 			}
 		}
 		openBlimpWindow();
+	},
+	test_title_override_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://multi_open.html');
+		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://multi_open.html');
+		w.setTitle("Set!");
+		w.open();
+		w2.open();
+
+		setTimeout(function()
+		{
+			if (w.getTitle() != "Set!") {
+				w.close();
+				callback.failed("Set title did not override header title");
+			} else {
+				w.close();
+				callback.passed();
+			}
+			if (w2.getTitle() != Titanium.API.getApplication.getName()) {
+				w.close();
+				callback.failed("Set title did not override header title 2");
+			} else {
+				w.close();
+				callback.passed();
+			}
+		}, 1000);
 	}
 });
