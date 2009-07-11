@@ -29,6 +29,7 @@ namespace ti
 		virtual AutoPtr<Blob> ReadLine() = 0;
 		void DataReady(AutoInputPipe pipe = NULL);
 		void Closed();
+		virtual bool IsClosed() = 0;
 		
 		void Join(AutoInputPipe other);
 		void Unjoin(AutoInputPipe other);
@@ -44,6 +45,7 @@ namespace ti
 		bool IsPiped() { return IsJoined() || IsSplit() || IsAttached(); }
 		
 		void SetOnRead(SharedKMethod onRead);
+
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		

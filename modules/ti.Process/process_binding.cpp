@@ -82,10 +82,10 @@ namespace ti
 	
 	void ProcessBinding::CreateProcess(const ValueList& args, SharedValue result)
 	{
-		SharedKList argList = NULL;
-		SharedKObject environment = NULL;
-		AutoOutputPipe stdin = NULL;
-		AutoInputPipe stdout, stderr = NULL;
+		SharedKList argList = 0;
+		SharedKObject environment = 0;
+		AutoOutputPipe stdinPipe = 0;
+		AutoInputPipe stdoutPipe, stderrPipe = 0;
 		
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
@@ -106,15 +106,15 @@ namespace ti
 			}
 			if (!options->Get("stdin")->IsUndefined() && options->Get("stdin")->IsObject())
 			{
-				stdin = options->Get("stdin")->ToObject().cast<OutputPipe>();
+				stdinPipe = options->Get("stdin")->ToObject().cast<OutputPipe>();
 			}
 			if (!options->Get("stdout")->IsUndefined() && options->Get("stdout")->IsObject())
 			{
-				stdout = options->Get("stdin")->ToObject().cast<InputPipe>();
+				stdoutPipe = options->Get("stdin")->ToObject().cast<InputPipe>();
 			}
 			if (!options->Get("stderr")->IsUndefined() && options->Get("stderr")->IsObject())
 			{
-				stderr = options->Get("stderr")->ToObject().cast<InputPipe>();
+				stderrPipe = options->Get("stderr")->ToObject().cast<InputPipe>();
 			}
 		}
 		else if (args.size() > 0 && args.at(0)->IsList())
@@ -126,15 +126,15 @@ namespace ti
 			}
 			if (args.size() > 2 && args.at(2)->IsObject())
 			{
-				stdin = args.at(2)->ToObject().cast<OutputPipe>();
+				stdinPipe = args.at(2)->ToObject().cast<OutputPipe>();
 			}
 			if (args.size() > 3 && args.at(3)->IsObject())
 			{
-				stdout = args.at(3)->ToObject().cast<InputPipe>();
+				stdoutPipe = args.at(3)->ToObject().cast<InputPipe>();
 			}
 			if (args.size() > 4 && args.at(4)->IsObject())
 			{
-				stderr = args.at(4)->ToObject().cast<InputPipe>();
+				stderrPipe = args.at(4)->ToObject().cast<InputPipe>();
 			}
 		}
 		
@@ -154,7 +154,7 @@ namespace ti
 			argsClone->Append(Value::NewString(argList->At(i)->ToString()));
 		}
 		
-		AutoProcess process = Process::CreateProcess(argsClone, environment, stdin, stdout, stderr);
+		AutoProcess process = Process::CreateProcess(argsClone, environment, stdinPipe, stdoutPipe, stderrPipe);
 		processes.push_back(process);
 		result->SetObject(process);
 	}

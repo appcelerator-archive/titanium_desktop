@@ -19,14 +19,14 @@ namespace ti
 		virtual ~LinuxOutputPipe();
 		virtual void Close();
 		virtual bool IsClosed();
-		
+		virtual int Write(AutoPtr<Blob> data);
+
 		int GetReadHandle() { return readHandle; }
 		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
-		virtual int Write(AutoPtr<Blob> blob);
-		
-		int readHandle, writeHandle;
+		int readHandle;
+		int writeHandle;
 		bool closed;
 	};
 }

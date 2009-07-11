@@ -31,7 +31,14 @@ namespace ti
 		return pipe;
 	}
 	
-	InputPipe::InputPipe() : Pipe("InputPipe"), joined(false), attachedOutput(NULL), splitPipes(NULL), onRead(NULL), onClose(NULL)
+	InputPipe::InputPipe() :
+		Pipe("InputPipe"),
+		onRead(0),
+		onClose(0),
+		joined(false),
+		joinedRead(0),
+		attachedOutput(0),
+		splitPipes(0)
 	{
 		logger = Logger::Get("InputPipe");
 		

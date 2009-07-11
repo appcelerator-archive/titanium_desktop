@@ -23,11 +23,11 @@ namespace ti
 		OutputPipe();
 		virtual int Write(AutoPtr<Blob> data) = 0;
 		static AutoOutputPipe CreateOutputPipe();
-		
+
 	protected:
 		void _Write(const ValueList& args, SharedValue result);
-		
-	};	
+
+	};
 }
 
 #endif

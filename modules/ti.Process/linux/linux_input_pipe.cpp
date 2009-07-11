@@ -23,7 +23,7 @@ namespace ti
 	
 	LinuxInputPipe::~LinuxInputPipe()
 	{
-		Close();
+		this->Close();
 	}
 	
 	void LinuxInputPipe::Close()

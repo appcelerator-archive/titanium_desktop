@@ -21,9 +21,8 @@ namespace ti
 		MonitoredInputPipe() : BufferedInputPipe() {};
 		~MonitoredInputPipe();
 		virtual void Close();
-		
 		void StartMonitor();
-		
+
 	protected:
 		void MonitorThread();
 	

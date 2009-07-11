@@ -11,7 +11,7 @@ namespace ti
 	
 	MonitoredInputPipe::~MonitoredInputPipe ()
 	{
-		Close();
+		this->Close();
 		
 		if (monitorAdapter)
 		{

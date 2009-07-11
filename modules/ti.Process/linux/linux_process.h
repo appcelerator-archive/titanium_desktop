@@ -12,23 +12,19 @@
 #include "linux_input_pipe.h"
 #include "../process.h"
 
-#undef stdin
-#undef stdout
-#undef stderr
-
 namespace ti
 {
 	class LinuxProcess : public Process
 	{
 	public:
-		LinuxProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		LinuxProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual ~LinuxProcess();
 
 		static AutoPtr<LinuxProcess> GetCurrentProcess();
 		
-		AutoPtr<LinuxOutputPipe> GetStdin() { return stdin.cast<LinuxOutputPipe>(); }
-		AutoPtr<LinuxInputPipe> GetStdout() { return stdout.cast<LinuxInputPipe>(); }
-		AutoPtr<LinuxInputPipe> GetStderr() { return stderr.cast<LinuxInputPipe>(); }
+		AutoPtr<LinuxOutputPipe> GetStdin() { return stdinPipe.cast<LinuxOutputPipe>(); }
+		AutoPtr<LinuxInputPipe> GetStdout() { return stdoutPipe.cast<LinuxInputPipe>(); }
+		AutoPtr<LinuxInputPipe> GetStderr() { return stderrPipe.cast<LinuxInputPipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
@@ -36,7 +32,7 @@ namespace ti
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
 	protected:

@@ -12,10 +12,6 @@
 #include "input_pipe.h"
 #include "output_pipe.h"
 
-#undef stdin
-#undef stdout
-#undef stderr
-
 namespace ti
 {
 	class Process;
@@ -24,10 +20,12 @@ namespace ti
 	class Process : public AccessorBoundObject
 	{
 	public:
-		Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		Process(SharedKList args, SharedKObject environment,
+			 AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual ~Process();
 		static AutoProcess GetCurrentProcess();
-		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, 
+			AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		
 		virtual SharedValue Call(const ValueList& args);
 		
@@ -43,7 +41,8 @@ namespace ti
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
 		virtual void Restart() = 0;
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) = 0;
+		virtual void Restart(SharedKObject env,
+			 AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) = 0;
 		virtual bool IsRunning() = 0;
 		
 		void SetOnRead(SharedKMethod method);
@@ -72,12 +71,11 @@ namespace ti
 		
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
-		
-		AutoInputPipe stdout, stderr;
-		AutoOutputPipe stdin;
+
+		AutoInputPipe stdoutPipe, stderrPipe;
+		AutoOutputPipe stdinPipe;
 		SharedKObject environment;
 		SharedKList args;
-		
 		int exitCode;
 		SharedKMethod* onExit;
 	};

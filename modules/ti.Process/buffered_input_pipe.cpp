@@ -22,7 +22,7 @@ namespace ti
 				return new Blob();
 			}
 			
-			if (bufsize == -1 || bufsize > buffer.size())
+			if (bufsize == -1 || bufsize > (int) buffer.size())
 			{
 				bufsize = (int) buffer.size();
 			}	

@@ -18,14 +18,14 @@ namespace ti
 		LinuxInputPipe();
 		virtual ~LinuxInputPipe();
 		virtual void Close();
-		
+
 		int GetReadHandle() { return readHandle; }
 		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
 		virtual int RawRead(char *buffer, int size);
-		
-		int readHandle, writeHandle;
+		int readHandle;
+		int writeHandle;
 	};
 }
 

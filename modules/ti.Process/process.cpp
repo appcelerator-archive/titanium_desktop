@@ -33,14 +33,14 @@ namespace ti
 	/*static*/
 	AutoProcess Process::CreateProcess(
 		SharedKList args, SharedKObject environment,
-		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr)
+		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
 	{
 #if defined(OS_OSX)
-		AutoProcess process = new OSXProcess(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new OSXProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #elif defined(OS_WIN32)
-		AutoProcess process = new Win32Process(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new Win32Process(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #elif defined(OS_LINUX)
-		AutoProcess process = new LinuxProcess(args, environment, stdin, stdout, stderr);
+		AutoProcess process = new LinuxProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #endif
 		return process;
 	}
@@ -54,29 +54,32 @@ namespace ti
 		InitBindings();
 	}
 	
-	Process::Process(SharedKList args, SharedKObject environment,
-		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
-			StaticBoundObject("Process"),
-			stdin(stdin), stdout(stdout), stderr(stderr),
-			args(args), environment(environment), exitCode(-1),
-			onExit(NULL)
+	Process::Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+		AccessorBoundObject("Process"),
+		stdoutPipe(stdoutPipe),
+		stderrPipe(stderrPipe),
+		stdinPipe(stdinPipe),
+		environment(environment),
+		args(args),
+		exitCode(-1),
+		onExit(0)
 	{
 		if (environment.isNull())
 		{
 			this->environment = GetCurrentProcess()->CloneEnvironment();
 		}
 		
-		if (stdin.isNull())
+		if (stdinPipe.isNull())
 		{
-			this->stdin = OutputPipe::CreateOutputPipe();
+			this->stdinPipe = OutputPipe::CreateOutputPipe();
 		}
-		if (stdout.isNull())
+		if (stdoutPipe.isNull())
 		{
-			this->stdout = InputPipe::CreateInputPipe();
+			this->stdoutPipe = InputPipe::CreateInputPipe();
 		}
-		if (stderr.isNull())
+		if (stderrPipe.isNull())
 		{
-			this->stderr = InputPipe::CreateInputPipe();
+			this->stderrPipe = InputPipe::CreateInputPipe();
 		}
 		InitBindings();
 	}
@@ -132,16 +135,16 @@ namespace ti
 	{
 		if (method.isNull())
 		{
-			stdout->SetOnRead(NULL);
+			stdoutPipe->SetOnRead(NULL);
 			return;
 		}
 		
-		if (!stderr->IsJoined())
+		if (!stderrPipe->IsJoined())
 		{
-			stdout->Join(stderr);
+			stdoutPipe->Join(stderrPipe);
 		}
 
-		stdout->SetOnRead(method);
+		stdoutPipe->SetOnRead(method);
 	}
 	
 	SharedKObject Process::CloneEnvironment()
@@ -269,14 +272,14 @@ namespace ti
 			{
 				SharedKObject object = args.at(0)->ToObject();
 				SharedKObject env;
-				AutoOutputPipe stdin;
-				AutoInputPipe stdout, stderr;
+				AutoOutputPipe stdinPipe;
+				AutoInputPipe stdoutPipe, stderrPipe;
 				
 				env = object->GetObject("env");
-				stdin = object->GetObject("stdin").cast<OutputPipe>();
-				stdout = object->GetObject("stdout").cast<InputPipe>();
-				stderr = object->GetObject("stderr").cast<InputPipe>();
-				Restart(env, stdin, stdout, stderr);
+				stdinPipe = object->GetObject("stdin").cast<OutputPipe>();
+				stdoutPipe = object->GetObject("stdout").cast<InputPipe>();
+				stderrPipe = object->GetObject("stderr").cast<InputPipe>();
+				Restart(env, stdinPipe, stdoutPipe, stderrPipe);
 			}
 		}
 	}
@@ -299,17 +302,17 @@ namespace ti
 	
 	void Process::_GetStdin(const ValueList& args, SharedValue result)
 	{
-		result->SetObject(stdin);
+		result->SetObject(stdinPipe);
 	}
 	
 	void Process::_GetStdout(const ValueList& args, SharedValue result)
 	{
-		result->SetObject(stdout);
+		result->SetObject(stdoutPipe);
 	}
 	
 	void Process::_GetStderr(const ValueList& args, SharedValue result)
 	{
-		result->SetObject(stderr);
+		result->SetObject(stderrPipe);
 	}
 	
 	void Process::_IsRunning(const ValueList& args, SharedValue result)
