@@ -37,6 +37,7 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual bool IsRunning();
 		
 	protected:
 		// for current process

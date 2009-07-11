@@ -46,7 +46,7 @@ namespace ti
 	}
 	
 	
-	Process::Process() : StaticBoundObject("Process")
+	Process::Process() : AccessorBoundObject("Process")
 	{
 		args = new StaticBoundList();
 		environment = new StaticBoundObject();
@@ -100,6 +100,7 @@ namespace ti
 		SetMethod("getStdin", &Process::_GetStdin);
 		SetMethod("getStdout", &Process::_GetStdout);
 		SetMethod("getStderr", &Process::_GetStderr);
+		SetMethod("isRunning", &Process::_IsRunning);
 	}
 
 	Process::~Process()
@@ -111,7 +112,14 @@ namespace ti
 		if (onExit != NULL && !onExit->isNull())
 		{
 			ValueList args(Value::NewInt(this->exitCode));
-			Host::GetInstance()->InvokeMethodOnMainThread(*this->onExit, args, false);
+			try
+			{
+				Host::GetInstance()->InvokeMethodOnMainThread(*this->onExit, args, false);
+			}
+			catch (ValueException &e)
+			{
+				Logger::Get("Process")->Error(e.DisplayString()->c_str());
+			}
 		}
 		
 		this->duplicate();
@@ -302,6 +310,11 @@ namespace ti
 	void Process::_GetStderr(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(stderr);
+	}
+	
+	void Process::_IsRunning(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(IsRunning());
 	}
 	
 	SharedValue Process::Call(const ValueList& args)

@@ -205,6 +205,11 @@ namespace ti
 		kill(GetPID(), signal);
 	}
 	
+	bool OSXProcess::IsRunning()
+	{
+		return [[delegate task] isRunning];
+	}
+	
 	void OSXProcess::Restart()
 	{
 		/*

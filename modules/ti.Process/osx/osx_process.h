@@ -42,6 +42,7 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual bool IsRunning();
 		
 		AutoPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
 		AutoPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }
