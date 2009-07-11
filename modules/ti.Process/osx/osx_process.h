@@ -32,7 +32,7 @@ namespace ti
 	{
 	public:
 		static AutoProcess GetCurrentProcess();
-		OSXProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		OSXProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual ~OSXProcess();
 		
 		virtual int GetPID();
@@ -41,12 +41,12 @@ namespace ti
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
-		AutoPtr<OSXOutputPipe> GetStdin() { return stdin.cast<OSXOutputPipe>(); }
-		AutoPtr<OSXInputPipe> GetStdout() { return stdout.cast<OSXInputPipe>(); }
-		AutoPtr<OSXInputPipe> GetStderr() { return stderr.cast<OSXInputPipe>(); }
+		AutoPtr<OSXOutputPipe> GetStdin() { return stdinPipe.cast<OSXOutputPipe>(); }
+		AutoPtr<OSXInputPipe> GetStdout() { return stdoutPipe.cast<OSXInputPipe>(); }
+		AutoPtr<OSXInputPipe> GetStderr() { return stderrPipe.cast<OSXInputPipe>(); }
 	protected:
 		TiOSXProcess *delegate;
 		NSProcessInfo *currentProcessInfo;

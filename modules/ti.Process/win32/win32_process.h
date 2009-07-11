@@ -21,14 +21,14 @@ namespace ti
 	class Win32Process : public Process
 	{
 	public:
-		Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual ~Win32Process();
 
 		static AutoPtr<Win32Process> GetCurrentProcess();
 		
-		AutoPtr<Win32OutputPipe> GetStdin() { return stdin.cast<Win32OutputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStdout() { return stdout.cast<Win32InputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStderr() { return stderr.cast<Win32InputPipe>(); }
+		AutoPtr<Win32OutputPipe> GetStdin() { return stdinPipe.cast<Win32OutputPipe>(); }
+		AutoPtr<Win32InputPipe> GetStdout() { return stdoutPipe.cast<Win32InputPipe>(); }
+		AutoPtr<Win32InputPipe> GetStderr() { return stderrPipe.cast<Win32InputPipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
@@ -36,7 +36,7 @@ namespace ti
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr);
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
 	protected:

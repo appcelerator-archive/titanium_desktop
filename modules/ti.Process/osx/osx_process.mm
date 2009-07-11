@@ -109,8 +109,8 @@
 namespace ti
 {
 	OSXProcess::OSXProcess(SharedKList args, SharedKObject environment,
-		AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
-			Process(args, environment, stdin, stdout, stderr), currentProcessInfo(nil)
+		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+			Process(args, environment, stdinPipe, stdoutPipe, stderrPipe), currentProcessInfo(nil)
 	{
 		
 		delegate = [[TiOSXProcess alloc] initWithProcess:this];
@@ -223,7 +223,7 @@ namespace ti
 	}
 	
 	void OSXProcess::Restart(
-		SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr)
+		SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
 	{
 		
 	}

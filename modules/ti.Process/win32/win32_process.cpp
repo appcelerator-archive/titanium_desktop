@@ -19,8 +19,8 @@ namespace ti
 		return currentProcess;
 	}
 	
-	Win32Process::Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr) :
-		Process(args, environment, stdin, stdout, stderr),
+	Win32Process::Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
 		running(false),
 		complete(false),
 		current(false),
@@ -278,7 +278,7 @@ namespace ti
 		//TODO
 	}
 	
-	void Win32Process::Restart(SharedKObject env, AutoOutputPipe stdin, AutoInputPipe stdout, AutoInputPipe stderr)
+	void Win32Process::Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
 	{
 		//TODO
 	}
