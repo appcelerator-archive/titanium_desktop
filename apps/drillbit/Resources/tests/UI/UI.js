@@ -546,7 +546,7 @@ describe("UI Module Tests",{
 				w.close();
 				callback.passed();
 			}
-			if (w2.getTitle() != Titanium.API.getApplication.getName()) {
+			if (w2.getTitle() != Titanium.API.getApplication().getName()) {
 				w.close();
 				callback.failed("Set title did not override header title 2");
 			} else {
@@ -554,5 +554,24 @@ describe("UI Module Tests",{
 				callback.passed();
 			}
 		}, 1000);
+	},
+	test_close_message_on_originating_window_as_async: function(callback)
+	{
+		Titanium.saw_close = false;
+		Titanium.saw_closed = false;
+
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://test_close_event_listener.html');
+		w.open();
+
+		setTimeout(function() {
+			w.close();
+			setTimeout(function() {
+				if (Titanium.API.saw_close) {
+					callback.passed();
+				} else {
+					callback.failed("Closing window did not receive CLOSE event");
+				}
+			}, 200);
+		}, 200);
 	}
 });

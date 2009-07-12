@@ -10,8 +10,9 @@
 
 namespace ti
 {
-	static void destroy_cb(
+	static gboolean destroy_cb(
 		GtkWidget* widget,
+		GdkEvent* event,
 		gpointer data);
 	static gboolean event_cb(
 		GtkWidget* window,
@@ -129,7 +130,7 @@ namespace ti
 			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
 
 			this->destroyCallbackId = g_signal_connect(
-				G_OBJECT(window), "destroy", G_CALLBACK(destroy_cb), this);
+				G_OBJECT(window), "delete-event", G_CALLBACK(destroy_cb), this);
 			g_signal_connect(
 				G_OBJECT(window), "event", G_CALLBACK(event_cb), this);
 
@@ -183,25 +184,24 @@ namespace ti
 			this->Show();
 		}
 	}
-	
-	// Notify this GtkUserWindow that the GTK bits are invalid
-	void GtkUserWindow::Destroyed()
-	{
-		this->gtkWindow = NULL;
-		this->webView = NULL;
-	}
-	
-	static void destroy_cb(
+
+	static gboolean destroy_cb(
 		GtkWidget* widget,
+		GdkEvent* event,
 		gpointer data)
 	{
+		// Let the close handler actually destroy this window,
+		// as we want things to happen in a very particular order.
 		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		user_window->Destroyed(); // Inform the GtkUserWindow we are done
 		user_window->Close();
+		return FALSE;
 	}
-	
+
 	void GtkUserWindow::Close()
 	{
+		printf("firing closed\n");
+		UserWindow::Close();
+
 		// Destroy the GTK bits, if we have them first, because
 		// we need to assume the GTK window is gone for  everything
 		// below (this method might be called by destroy_cb)
@@ -210,11 +210,12 @@ namespace ti
 			// We don't want the destroy signal handler to fire after now.
 			g_signal_handler_disconnect(this->gtkWindow, this->destroyCallbackId);
 			gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
-			this->Destroyed();
+
+			this->gtkWindow = NULL;
+			this->webView = NULL;
 		}
 		this->RemoveOldMenu(); // Cleanup old menu
 
-		UserWindow::Close();
 		this->Closed();
 	}
 	
