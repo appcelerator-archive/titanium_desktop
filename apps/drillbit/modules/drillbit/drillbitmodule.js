@@ -1,8 +1,8 @@
 (function() {
-	var Drillbit = function() {
+	var Drillbit = function(frontend) {
 		var TFS = Titanium.Filesystem;
 		var TA  = Titanium.App;
-		
+		this.frontend = frontend;
 		this.auto_close = false;
 		this.debug_tests = false;
 		
@@ -32,7 +32,22 @@
 		var manifest_backup = null, manifest = null;
 		var non_visual_ti = null;
 		var tests_started = 0;
-	
+		var self = this;
+		
+		this.include = function(path)
+		{
+			var code = TFS.getFile(path).read();
+			Titanium.App.stdout(code.toString());
+			
+			try {
+				with (this) {
+					eval(code.toString());
+				}
+			} catch (e) {
+				Titanium.App.stdout("Error: "+String(e)+", "+path+", line:"+e.line);
+			}
+		};
+		
 		function describe(description,test)
 		{
 			current_test_load.description = description;
@@ -59,7 +74,7 @@
 			current_test_load = null;
 		};
 	
-		this.make_function = function(f,scope)
+		/*this.make_function = function(f,scope)
 		{
 			if (typeof(f)=='function')
 			{
@@ -76,7 +91,7 @@
 				}
 			}
 			return '';
-		};
+		};*/
 	
 		this.loadTests = function(test_files)
 		{
@@ -115,8 +130,8 @@
 				}
 				catch(EX)
 				{
-					alert("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
-					Titanium.API.debug("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
+					frontend.error("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
+					//Titanium.API.debug("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
 				}
 			}
 
@@ -129,7 +144,7 @@
 			var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
 
 			// create the test harness directory
-			if (!	test_harness_dir.exists())
+			if (!test_harness_dir.exists())
 			{
 				test_harness_dir.createDirectory();
 			}
@@ -268,7 +283,7 @@
 				tiapp.write(non_visual_ti);
 			}
 
-
+			/*
 			var us = '// ==UserScript==\n';
 			us+='// @name	Titanium App Tester\n';
 			us+='// @author	Appcelerator\n';
@@ -355,10 +370,32 @@
 					}
 				}
 				newus+=line+"\n";
+			}*/
+			
+			var modules = Titanium.API.getApplication().getModules();
+			var module = null;
+			for (var i = 0; i < modules.length; i++)
+			{
+				if (modules[i].getName() == "drillbit") {
+					module = modules[i]; 
+					break;
+				}
 			}
-
+			
+			var file = TFS.getFile(module.getPath(), "ejs.js");
+			var template = TFS.getFile(module.getPath(), "template.js").read().toString();
+			
+			this.include(file.nativePath());
 			var runner_js = TFS.getFile(user_scripts_dir,entry.name+'_driver.js');
-			runner_js.write(newus);
+			var data = {entry: entry, Titanium: Titanium, excludes: excludes};
+			var user_script = null;
+			try {
+				user_script = new EJS({text: template, name: "template.js"}).render(data);
+			} catch(e) {
+				Titanium.App.stdout("error: "+e+",line:"+e.line);
+			}
+			TFS.getFile(module.getPath(),"template_out.js").write(user_script);
+			runner_js.write(user_script);
 
 			var profile_path = TFS.getFile(results_dir,entry.name+'.prof');
 			var log_path = TFS.getFile(results_dir,entry.name+'.log');
