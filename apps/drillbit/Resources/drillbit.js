@@ -20,50 +20,56 @@ var total_assertions = 0;
 
 function update_status(msg,hide)
 {
-	$('#status').html(msg).css('visibility','visible');
+	/*$('#status').html(msg).css('visibility','visible');
 	if (typeof(hide)!='undefined')
 	{
 		setTimeout(function()
 		{
 			$('#status').css('visibility','hidden');
 		},4000);
-	}
+	}*/
 }
 function test_status(name,classname)
 {
-	var el = $('#test_'+name+' td.status');
+	var el = $('#suite_'+name+'_status');
 	el.html(classname);
 	el.removeClass('untested').removeClass('failed').removeClass('running')
-	  .removeClass('passed').addClass(classname.toLowerCase());
+		.removeClass('passed').addClass(classname.toLowerCase());
+	$('#suite_'+name).removeClass('suite-untested').removeClass('suite-failed')
+		.removeClass('suite-running').removeClass('suite-passed').addClass('suite-'+classname.toLowerCase());
 }
 
 function progress(passed,failed,total,progress)
 {
-	var passed_percent = Math.floor((passed/total) * 100);
+	/*var passed_percent = Math.floor((passed/total) * 100);
 	var failed_percent = Math.floor((failed/total) * 100);
 	progress.html(
 		'<div class="passed-progress" style="width: '+passed_percent+'%;">&nbsp;</div>'+
 		'<div class="failed-progress" style="width: '+failed_percent+'%;">&nbsp;</div>'
-	);
+	);*/
 }
 
 function suite_progress(passed,failed,total)
 {
-	progress(passed,failed,total,$('#suite-progress'));
+	//progress(passed,failed,total,$('#suite-progress'));
 }
 
 function total_progress(passed,failed,total)
 {
-	progress(passed,failed,total,$('#total-progress'));
+	$('#passed-count').html('<img src="images/check_on.png"/>&nbsp;&nbsp;'+passed+' passed');
+	$('#failed-count').html('<img src="images/check_off.png"/>&nbsp;&nbsp;'+failed+' failed');
+	
+	/*progress(passed,failed,total,$('#total-progress'));
 	
 	var passed_percent = Math.floor((passed/total) * 100);
 	var failed_percent = Math.floor((failed/total) * 100);
 	$('#progress-message').html('<img src="images/check_on.png"/>'+passed+'&nbsp;&nbsp; <img src="images/check_off.png"/>'+failed);
+	*/
 }
 
 function show_current_test(suite_name, test_name)
 {
-	$('#current-test-message').text(suite_name + ': ' + test_name);
+	$('#current-test').html('<b>'+suite_name + '</b>:&nbsp;&nbsp;' + test_name);
 }
 
 function describe(description,test)
@@ -90,7 +96,7 @@ function describe(description,test)
 	
 	total_files++;
 	
-	$('#header').html(total_tests+' tests in '+total_files+' files');
+	$('#test-count').html(total_tests+' tests in '+total_files+' files');
 
 	current_test_load = null;
 }
@@ -98,7 +104,7 @@ function describe(description,test)
 function add_assertion()
 {
 	total_assertions++;
-	$('#header').html(total_tests+' tests in '+total_files+' files<br/>'+total_assertions+' assertions');
+	$('#assertion-count').html(total_assertions+' assertions');
 }
 
 function make_function(f,scope)
@@ -130,16 +136,16 @@ function show_test_details(name)
 }
 
 function toggle_test_includes()
-{
-	$.each($('#table .checkbox'),function()
+{	
+	$.each($("div.suites img"),function()
 	{
-		if ($(this).is('.checked'))
+		if ($(this).attr('src').indexOf('check_on') == -1)
 		{
-			$(this).removeClass('checked');
+			$(this).attr('src', 'images/check_on.png');
 		}
 		else
 		{
-			$(this).addClass('checked');
+			$(this).attr('src', 'images/check_off.png');
 		}
 	});
 }
@@ -147,19 +153,33 @@ function toggle_test_includes()
 function select_tests(tests)
 {
 	// clear the table
-	$.each($('#table .checkbox'),function()
-	{
-		if ($(this).is('.checked')) {
-			$(this).removeClass('checked');
-		}
-	});
+	$("div.suites img").attr('src', 'images/check_off.png');
 	
 	//select tests
-	for (var t=0; t < tests.length; t++) {
+	for (var t = 0; t < tests.length; t++) {
 		var test = tests[t];
-		
-		$('#test_'+test+' .checkbox').addClass('checked');
+		$('#suite_'+test+' img').attr('src', 'images/check_on.png');
 	}
+}
+
+function clear_current_test()
+{
+	$('#current-test').html('<span style="color: #ccc">&lt;no tests currently running&gt;</span>')	
+}
+
+function reset_all()
+{	
+	$('div[class^=suite] img').attr('src', 'images/check_on.png');
+	$('div[id^=suite_]').removeClass().addClass('suite');
+	$('span[id^=suite_]').removeClass().addClass('untested').html('untested');
+	$('#assertion-count').html('0 assertions');
+	$('#passed-count').html('<img src="images/check_on.png"/>&nbsp;&nbsp;0 passed');
+	$('#failed-count').html('<img src="images/check_off.png"/>&nbsp;&nbsp;0 failed');
+	clear_current_test();
+	executing_tests = [];
+	running_tests = 0;
+	running_completed = 0;
+	running_passed = running_failed = total_assertions = 0;
 }
 
 var tests = {};
@@ -218,52 +238,54 @@ window.onload = function()
 
 	test_names.sort();
 	
-	
-	var table = '<table>' +
-		'<tr>'+
-			'<th width="25" onclick="toggle_test_includes();" style="cursor:pointer">Include</th>'+
-			'<th>Test</th>'+
-			'<th>Description</th>'+
-			'<th width="25">Result</th>'+
-		'</tr>'+
-	'';
-		
+	var suites_html = '';	
 	for (var c=0;c<test_names.length;c++)
 	{
 		var name = test_names[c];
 		var entry = tests[name];
 		
-		table+=
-		'<tr id="test_'+name+'" class="test">'+
-			'<td class="check"><div class="checkbox checked"></div></td>'+
-			'<td class="name">'+name+'</td>'+
-			'<td class="description">'+entry.description+'</td>'+
-			'<td class="status untested" onclick="show_test_details(\'' + name + '\')">Untested</td>'+
-		'</tr>';
+		suites_html +=
+		'<div class="suite" id="suite_'+name+'">'+
+			'<img src="images/check_on.png"/> <span class="suite_name">'+name+'</span><br/>'+
+			'<span class="description">'+entry.description+'</span></br>'+
+			'<span id="suite_'+name+'_status" class="untested">untested</span>'+
+		'</div>';
 	}
 	
-	table+='</table>';
-	
-	$('#table').html(table);
-	$('#table .checkbox').click(function()
+	$('div.suites').html(suites_html);	
+	$('div[id^=suite_]').click(function()
 	{
-		if ($(this).is('.checked'))
+		if ($(this).find('img').attr('src').indexOf('check_on') != -1)
 		{
-			$(this).removeClass('checked');
+			$(this).find('img').attr('src', 'images/check_off.png');
 		}
 		else
 		{
-			$(this).addClass('checked');
+			$(this).find('img').attr('src', 'images/check_on.png');
 		}
 	});
-		
+	$('div[id^=suite_]').dblclick(function()
+	{
+		var suite_name = $(this).attr('id').substr(6);
+		show_test_details(suite_name);
+	});
+	
+	Titanium.UI.currentWindow.setWidth($('div.suites').width()+4);
+	Titanium.UI.currentWindow.setHeight($('div.suites').height()+55);
+	
+	var run_link = $('#run-link');
+	$('#toggle-link').click(function() {
+		toggle_test_includes();
+	});
+	$('#reset-link').click(function() {
+		reset_all();
+	});
+	
 	// get the runtime dir
 	var runtime_dir = TFS.getFile(Titanium.Process.getCurrentProcess().getEnvironment('KR_RUNTIME'));
 	var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
-	var app_dir = TFS.getApplicationDirectory();
+	var app_dir = TFS.getApplicationDirectory();	
 	
-	var run_button = $('#run').get(0);
-
 	// create the test harness directory
 	if (!test_harness_dir.exists())
 	{
@@ -518,7 +540,7 @@ window.onload = function()
 					if (data.indexOf('DRILLBIT_TEST:') != -1) {
 						var comma = data.indexOf(',');
 						var suite_name = data.substring(15,comma);
-						var test_name = data.substring(comma+1,data.length-1);
+						var test_name = data.substring(comma+1);
 					
 						show_current_test(suite_name,test_name);
 						continue;
@@ -526,7 +548,7 @@ window.onload = function()
 					else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
 						var comma = data.indexOf(',');
 						var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
-						var line_number = data.substring(comma+1,data.length-1);
+						var line_number = data.substring(comma+1);
 						// do something with metadata eventually?
 						add_assertion();
 						continue;
@@ -571,7 +593,7 @@ window.onload = function()
 					clearInterval(timer);
 					current_test.failed = true;
 					update_status(current_test.name + " timed out");
-					test_status(current_test.name,'Failed');
+					test_status(current_test.name,'failed');
 					process.terminate();
 					return;
 				}
@@ -595,7 +617,7 @@ window.onload = function()
 					var rs = '(' + r + ');';
 					var results = eval(rs);
 					current_test.results = results;
-					test_status(current_test.name,results.failed>0?'Failed':'Passed');
+					test_status(current_test.name,results.failed>0?'failed':'passed');
 					update_status(current_test.name + ' complete ... '+results.passed+' passed, '+results.failed+' failed');
 					if (!test_failures && results.failed>0)
 					{
@@ -623,8 +645,9 @@ window.onload = function()
 			var test_duration = (new Date().getTime() - tests_started)/1000;
 			executing_tests = null;
 			current_test = null;
-			run_button.disabled = false;
-			update_status('Testing complete ... took ' + test_duration + ' seconds',true);
+			run_link.disabled = false;
+			
+			$('#current-test').html('Testing complete ... took ' + test_duration + ' seconds')
 			var f = TFS.getFile(results_dir,'drillbit.json');
 			f.write("{\"success\":" + String(!test_failures) + "}");
 			if (auto_close)
@@ -637,33 +660,41 @@ window.onload = function()
 		current_test = entry;
 		current_test.failed = false;
 		update_status('Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
-		test_status(entry.name,'Running');
+		test_status(entry.name,'running');
 		setTimeout(function(){run_test(entry)},1);
 	}
 	
-	run_button.onclick = function ()
+	run_link.click(function ()
 	{
-		run_button.disabled = true;
-		update_status('Building test harness ... one moment');
-		executing_tests = [];
-		running_tests = 0;
-		running_completed = 0;
-		
-		$.each($('#table tr.test'),function()
+		if (!run_link.disabled)
 		{
-			var name = $(this).find('.name').html();
-			var entry = tests[name];
-			test_status(entry.name,'Untested');
-			if ($(this).find('.checkbox').is('.checked'))
-			{
-				executing_tests.push(entry);
-				running_tests+=entry.assertion_count;
-			}
-		});
+			run_link.disabled = true;
+			update_status('Building test harness ... one moment');
+			executing_tests = [];
+			running_tests = 0;
+			running_completed = 0;
+			running_passed = running_failed = total_assertions = 0;
 		
-		tests_started = new Date().getTime();
-		setTimeout(run_next_test,1);
-	};
+			$.each($('div[id^=suite_]'),function()
+			{
+				var name = $(this).attr('id').substr(6);
+				var entry = tests[name];
+				test_status(entry.name,'untested');
+				if ($(this).find('img').attr('src').indexOf('check_on') != -1)
+				{
+					executing_tests.push(entry);
+					running_tests+=entry.assertion_count;
+				}
+			});
+		
+			tests_started = new Date().getTime();
+			setTimeout(run_next_test,1);
+		}
+		else
+		{
+			alert("Tests are currently running");
+		}
+	});
 	
 	// if you pass in --autorun, just go ahead and start
 	for (var c=0;c<Titanium.App.arguments.length;c++)
@@ -673,7 +704,7 @@ window.onload = function()
 		if (arg == '--autorun')
 		{
 			auto_run = true;
-			run_button.click();
+			run_link.click();
 			//break;
 		}
 		else if (arg == '--autoclose')
