@@ -65,6 +65,6 @@ namespace ti
 	
 	void Win32OutputPipe::Flush()
 	{
-		CloseHandle(readHandle);
+		CloseHandle(writeHandle);
 	}
 }

@@ -198,6 +198,7 @@ namespace ti
 			&startupInfo,
 			&processInfo);
 		// TODO auto close stdin read handle if / when piped input is finished reading
+		CloseHandle(GetStdin()->GetReadHandle());
 		CloseHandle(GetStdout()->GetWriteHandle());
 		CloseHandle(GetStderr()->GetWriteHandle());
 		
@@ -220,8 +221,13 @@ namespace ti
 		// setup threads which can read output and also monitor the exit
 		GetStdout()->StartMonitor();
 		GetStderr()->StartMonitor();
-		this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
-		this->exitMonitorThread.start(*exitMonitorAdapter);
+		
+		if (async) {
+			this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
+			this->exitMonitorThread.start(*exitMonitorAdapter);
+		} else {
+			ExitMonitor();
+		}
 	}
 	
 	int Win32Process::GetPID()

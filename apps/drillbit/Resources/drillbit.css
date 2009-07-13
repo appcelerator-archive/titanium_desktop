@@ -1,6 +1,6 @@
 body, td {
 	background-color:#292929;
-	font-family:Consolas,"Lucida Sans",Arial;
+	font-family:"Lucida Sans",Arial;
 	color:white;
 	font-size:12px;
 	padding:2px;
@@ -45,7 +45,7 @@ a {
 
 .suite, .suite-running, .suite-passed, .suite-failed
 {
-	font-family:Consolas,"Lucida Sans",Arial;
+	font-family:"Lucida Sans",Arial;
 	font-size: 12px;
 	
 	background-image: url(images/gradient.png);

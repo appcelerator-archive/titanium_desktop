@@ -2,13 +2,9 @@ describe("process tests",
 {
 	before_all: function()
 	{
-		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/C","dir"] : ["/bin/ls"];
+		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/c","dir"] : ["/bin/ls"];
 		this.echoCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
 		this.moreCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\more.com"]: ["/usr/bin/more"];
-		
-		this.cmd = function(args, args2) {
-			Array.prototype.push.apply(args, args2);
-		}
 	},
 	
 	test_process_object: function()
@@ -61,15 +57,6 @@ describe("process tests",
 		value_of(p.stdin.isClosed()).should_be_true();
 		value_of(p.stdout.isClosed()).should_be_true();
 		value_of(p.stderr.isClosed()).should_be_true();
-	},
-	
-	test_process_on_PATH: function()
-	{
-		var dir = Titanium.platform == "win32" ? ["cmd", "/C", "dir"] : ["ls"];
-		var listDirs = Titanium.Process.createProcess(dir);
-		//value_of(listDirs.getArguments()[0]).should_be(this.dirCmd);
-		var dirList = listDirs();
-		value_of(dirList.length).should_be_greater_than(0);
 	},
 	
 	test_split_and_attach_pipe_as_async: function(callback)
