@@ -1,17 +1,9 @@
 (function(){
 	var ti = Titanium;
 	var tiFS = ti.Filesystem;
-	
-	function require(app_url) {
-		eval(String(tiFS.getFile(ti.App.appURLToPath(app_url)).read()));
-	}
-	
 	var print = ti.API.print;
 	var println = ti.App.stdout;
 	var errPrint = ti.App.stderr;
-	
-	require("app://js/app.js");
-	require("app://js/project.js");
 	
 	var frontend = {
 		passed: 0, failed: 0,

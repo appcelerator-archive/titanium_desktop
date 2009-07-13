@@ -7,9 +7,12 @@
 		this.auto_close = false;
 		this.debug_tests = false;
 		this.run_tests_async = false;
+		this.window = null;
 		
 		this.tests = {};
 		this.test_names = [];
+		this.total_assertions = 0;
+		
 		var current_test_load = null;
 		var current_test = null;
 		var excludes = ['before','before_all','after','after_all','timeout'];
@@ -21,7 +24,6 @@
 		var running_failed = 0;
 		var test_failures = false;
 		var specific_tests = null;
-		var total_assertions = 0;
 		var executing_tests = [];
 		
 		this.test_harness_dir = TFS.getFile(TA.appURLToPath('app://test_harness'));
@@ -29,13 +31,18 @@
 		var app_dir = TFS.getApplicationDirectory();
 		var drillbit_funcs = TFS.getFile(TA.appURLToPath('app://drillbit_func.js')).read();
 		var user_scripts_dir = null;
-		var app = null;
+		var app = Titanium.API.getApplication();
 		var tiapp_backup = null, tiapp = null;
 		var manifest_backup = null, manifest = null;
 		var non_visual_ti = null;
 		var tests_started = 0;
 		var self = this;
 		
+
+		this.require = function(app_url) {
+			this.include(TA.appURLToPath(app_url));
+		}
+
 		this.include = function(path)
 		{
 			var code = TFS.getFile(path).read();
@@ -101,7 +108,7 @@
 			name = name.replace('.'+ext,'');
 			var dir = test_file.parent();
 			var jsfile = TFS.getFile(dir,name+'.js');
-			if (!jsfile.exists())
+			if (!jsfile.exists() || dir.name() != name)
 			{
 				return;
 			}
@@ -172,6 +179,8 @@
 				this.test_harness_dir.createDirectory();
 			}
 
+			this.require('app://js/app.js');
+			this.require('app://js/project.js');
 			// create app structure
 			app = Titanium.createApp(runtime_dir,this.test_harness_dir,'test_harness','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4',false);
 			tiapp_backup = TFS.getFile(app.base,'_tiapp.xml');
@@ -209,7 +218,7 @@
 			tests_started = new Date().getTime();
 			if (this.run_tests_async)
 			{
-				window.setTimeout(function(){self.run_next_test();}, 1);
+				this.window.setTimeout(function(){self.run_next_test();}, 1);
 			}
 			else
 			{
@@ -374,6 +383,7 @@
 							var comma = data.indexOf(',');
 							var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
 							var line_number = data.substring(comma+1);
+							self.total_assertions++;
 							self.frontend_do('add_assertion', test_name, line_number);
 							continue;
 						}
@@ -413,36 +423,40 @@
 			// start a stuck process monitor in which we check the 
 			// size of the profile file -- if we're not doing anything
 			// we should have a file that hasn't changed in sometime
-			/*timer = setInterval(function()
-			{
-				var t = new Date().getTime();
-				var newsize = profile_path.size();
-				var timed_out = (t-original_time) > 40000;
-				if (newsize == size || timed_out)
+			// TODO we need a way to monitor from cmdline, though it probably
+			// isn't as important there
+			if (this.window) {
+				timer = this.window.setInterval(function()
 				{
-					if (timed_out || t-start_time>=entry.timeout)
+					var t = new Date().getTime();
+					var newsize = profile_path.size();
+					var timed_out = (t-original_time) > 40000;
+					if (newsize == size || timed_out)
 					{
-						clearInterval(timer);
-						current_test.failed = true;
-						update_status(current_test.name + " timed out");
-						test_status(current_test.name,'Failed');
-						process.terminate();
-						return;
+						if (timed_out || t-start_time>=entry.timeout)
+						{
+							clearInterval(timer);
+							current_test.failed = true;
+							update_status(current_test.name + " timed out");
+							test_status(current_test.name,'Failed');
+							process.terminate();
+							return;
+						}
 					}
-				}
-				else
-				{
-					size = newsize;
-				}
-				start_time = t;
-			},1000);*/
+					else
+					{
+						size = newsize;
+					}
+					start_time = t;
+				},1000);
+			}
 
 			process.setOnExit(function(exitcode)
 			{
 				self.frontend_do('suite_finished', current_test.name);
 				try
 				{
-					//clearInterval(timer);
+					if (this.window) this.window.clearInterval(timer);
 					if (!current_test.failed)
 					{
 						var r = TFS.getFile(self.results_dir,current_test.name+'.json').read();
@@ -492,7 +506,7 @@
 			current_test.failed = false;
 			self.frontend_do('update_status', 'Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
 			self.frontend_do('suite_started', entry.name);
-			this.run_tests_async ? setTimeout(function(){self.run_test(entry)},1) : this.run_test(entry);
+			this.run_tests_async ? this.window.setTimeout(function(){self.run_test(entry)},1) : this.run_test(entry);
 		};
 		
 		this.reset = function()
@@ -500,7 +514,7 @@
 			executing_tests = [];
 			running_tests = 0;
 			running_completed = 0;
-			running_passed = running_failed = total_assertions = 0;
+			running_passed = running_failed = this.total_assertions = 0;
 		}
 	};
 	

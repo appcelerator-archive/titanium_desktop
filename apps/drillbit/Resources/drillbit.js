@@ -1,12 +1,9 @@
 
 var TFS = Titanium.Filesystem;
 var TA  = Titanium.App;
+var Drillbit = Titanium.Drillbit;
 
 var frontend = {
-	update_status:function(msg,hide)
-	{
-	},
-	
 	test_status:function(name,classname)
 	{
 		var el = $('#suite_'+name+'_status');
@@ -16,15 +13,12 @@ var frontend = {
 		$('#suite_'+name).removeClass('suite-untested').removeClass('suite-failed')
 			.removeClass('suite-running').removeClass('suite-passed').addClass('suite-'+classname.toLowerCase());
 	},
-
-	progress:function(passed,failed,total,progress)
+	
+	suite_started:function(suite)
 	{
+		this.test_status(suite, 'running');
 	},
-
-	suite_progress:function(passed,failed,total)
-	{
-	},
-
+	
 	total_progress:function(passed,failed,total)
 	{
 		$('#passed-count').html('<img src="images/check_on.png"/>&nbsp;&nbsp;'+passed+' passed');
@@ -36,10 +30,9 @@ var frontend = {
 		$('#current-test').html('<b>'+suite_name + '</b>:&nbsp;&nbsp;' + test_name);
 	},
 	
-	add_assertion:function()
+	add_assertion:function(test_name, line_number)
 	{
-		total_assertions++;
-		$('#assertion-count').html(total_assertions+' assertions');
+		$('#assertion-count').html(Drillbit.total_assertions+' assertions');
 	}
 };
 
@@ -97,16 +90,17 @@ function reset_all()
 }
 
 var tests = {};
-window.onload = function()
+$(window).ready(function()
 {
-	var Drillbit = Titanium.Drillbit;
 	Drillbit.run_tests_async = true;
 	Drillbit.frontend = frontend;
+	Drillbit.window = window;
 	
 	var test_dir = TFS.getFile(TA.appURLToPath('app://tests'));
 	var dir_list = test_dir.getDirectoryListing();
 	
 	Drillbit.loadTests(dir_list);
+	Drillbit.setupTestHarness(TFS.getFile(TFS.getApplicationDirectory(), 'manifest_harness'));
 	
 	var suites_html = '';	
 	for (var c=0;c<Drillbit.test_names.length;c++)
@@ -140,8 +134,10 @@ window.onload = function()
 		show_test_details(suite_name);
 	});
 	
-	Titanium.UI.currentWindow.setWidth($('div.suites').width()+4);
-	Titanium.UI.currentWindow.setHeight($('div.suites').height()+55);
+	var w = $('div.suites').width() + 4;
+	var h = $('div.suites').height() + 55;
+	Titanium.UI.currentWindow.setWidth(w);
+	Titanium.UI.currentWindow.setHeight(h);
 	
 	var run_link = $('#run-link');
 	$('#toggle-link').click(function() {
@@ -156,7 +152,6 @@ window.onload = function()
 		if (!run_link.disabled)
 		{
 			run_link.disabled = true;
-			frontend.update_status('Building test harness ... one moment');
 			var test_names = [];
 			$.each($('div[id^=suite_]'),function()
 			{
@@ -203,5 +198,5 @@ window.onload = function()
 			select_tests(specific_tests);
 		}
 	}
-};
+});
 
