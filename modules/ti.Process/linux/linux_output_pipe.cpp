@@ -44,6 +44,8 @@ namespace ti
 				close(writeHandle);
 				writeHandle = -1;
 			}
+			closed = true;
+			
 			OutputPipe::Closed();
 		}
 	}
