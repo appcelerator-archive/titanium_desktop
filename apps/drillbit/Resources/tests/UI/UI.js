@@ -76,6 +76,9 @@ describe("UI Module Tests",{
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
 
+		value_of(w.getMaxHeight()).should_be(500);
+		value_of(w.getMaxWidth()).should_be(400);
+		
 		w.close();
 	},
 	test_window_min_size: function()
@@ -122,6 +125,9 @@ describe("UI Module Tests",{
 		w.setWidth(100);
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
+
+		value_of(w.getMinHeight()).should_be(500);
+		value_of(w.getMinWidth()).should_be(400);
 
 		w.close();
 	},
@@ -573,5 +579,42 @@ describe("UI Module Tests",{
 				}
 			}, 200);
 		}, 200);
-	}
+	},
+	test_window_TopMost: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		
+		// chrome causes problems with topmost.
+		w.setUsingChrome(false);
+		w.open();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.setTopMost(true);
+		value_of(w.isTopMost()).should_be(true);
+
+		w.setTopMost(false);
+		value_of(w.isTopMost()).should_be(false);
+
+		w.minimize();
+		value_of(w.isMinimized()).should_be(true);
+		value_of(w.isTopMost()).should_be(false);
+		w.unminimize();
+
+		w.setVisible(false);
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.show();
+		value_of(w.isVisible()).should_be_true();
+		value_of(w.isTopMost()).should_be(false);
+		w.hide();
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.close();
+		
+		// the ultimate reality check.
+		value_of(w.isTopMost()).should_be_undefined();
+	},
+	
 });

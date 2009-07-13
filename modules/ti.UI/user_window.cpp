@@ -643,10 +643,14 @@ void UserWindow::_IsTopMost(const kroll::ValueList& args, kroll::SharedValue res
 {
 	if (this->active)
 	{
-		result->SetBool(this->IsUsingChrome());
-	}
-	else
-	{
+		if (this ->IsTopMost() )
+		{
+			PRINTD("using IsTopMost: TRUE");
+		}
+		else
+		{
+			PRINTD("using IsTopMost: FALSE");
+		}
 		result->SetBool(this->config->IsTopMost());
 	}
 }
