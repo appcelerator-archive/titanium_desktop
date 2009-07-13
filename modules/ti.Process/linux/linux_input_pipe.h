@@ -23,6 +23,7 @@ namespace ti
 		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
+		friend class LinuxProcess;
 		virtual int RawRead(char *buffer, int size);
 		int readHandle;
 		int writeHandle;
