@@ -5,6 +5,7 @@
 	var println = ti.App.stdout;
 	var errPrint = ti.App.stderr;
 	
+	// Javascript with ANSI color, this might be a first.
 	var frontend = {
 		passed: 0, failed: 0,
 		error: function(msg) {
@@ -16,16 +17,16 @@
 		},
 		show_current_test: function(suite, test)
 		{
-			print("\tRunning "+ test + "...");
+			print("\tRunning '"+ test + "'...");
 		},
 		test_passed: function(suite, test)
 		{
-			println(" passed");
+			println(" [32m[1mpassed[0m");
 			this.passed++;
 		},
 		test_failed: function(suite, test, error)
 		{
-			println(" failed");
+			println(" [31m[1mfailed[0m");
 			println("\t\tError: " + error);
 			this.failed++;
 		},

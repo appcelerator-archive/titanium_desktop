@@ -689,7 +689,7 @@ TitaniumTest.Subject.prototype.should_be_one_of = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_match_array = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
-		TitaniumTest.assertion(this);
+	TitaniumTest.assertion(this);
 	if (this.target.length && expected.length && this.target.length == expected.length) {
 		for (var i = 0; i < expected.length; i++) {
 			if (expected[i] != this.target[i]) {
@@ -699,5 +699,45 @@ TitaniumTest.Subject.prototype.should_match_array = function(expected,lineNumber
 	}
 	else {
 		throw new TitaniumTest.Error('array lengths differ, expected: '+expected+', was: '+this.target,lineNumber);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_greater_than = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target <= expected)
+	{
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' <= ' + expected);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_less_than = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target >= expected)
+	{
+		throw new TitaniumTest.Error('should be less than, was ' + this.target + ' >= ' + expected);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_greater_than_equal = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target < expected)
+	{
+		throw new TitaniumTest.Error('should be greater than equal, was ' + this.target + ' < ' + expected);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_less_than_equal = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target > expected)
+	{
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' > ' + expected);
 	}
 };

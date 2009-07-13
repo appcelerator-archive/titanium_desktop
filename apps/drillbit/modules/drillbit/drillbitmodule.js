@@ -161,7 +161,7 @@
 				}
 				else
 				{
-					this.loadTest(file);
+					this.loadTestFile(file);
 				}
 			}
 
