@@ -32,6 +32,7 @@ namespace ti
 	{
 		//TODO doc me
 		SetMethod("write", &OutputPipe::_Write);
+		SetMethod("flush", &OutputPipe::_Flush);
 	}
 	
 	void OutputPipe::_Write(const ValueList& args, SharedValue result)
@@ -58,5 +59,10 @@ namespace ti
 		int written = this->Write(blob);
 		result->SetInt(written);
 		
+	}
+	
+	void OutputPipe::_Flush(const ValueList& args, SharedValue result)
+	{
+		this->Flush();
 	}
 }

@@ -35,6 +35,7 @@ namespace ti
 		virtual AutoPtr<Blob> Read(int bufsize=-1);
 		virtual AutoPtr<Blob> ReadLine();
 		NSPipe* GetPipe() { return pipe; }
+		NSMutableData* GetBuffer() { return buffer; }
 		
 		void DataReady(NSData *data);
 

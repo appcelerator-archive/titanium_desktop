@@ -54,4 +54,10 @@ namespace ti
 		
 		return 0;
 	}
+	
+	void OSXOutputPipe::Flush()
+	{
+		//?
+		Close();
+	}
 }

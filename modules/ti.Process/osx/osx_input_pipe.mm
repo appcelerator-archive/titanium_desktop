@@ -26,9 +26,22 @@
 	NSData *data = [[aNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	if ([data length]) {
 		pipe->DataReady(data);
+		
+		// we need to schedule the file handle to wait for more data in the background again.
+		
 	}
-	
-	// we need to schedule the file handle to wait for more data in the background again.
+/*	else {
+		NSData *data;
+		[[NSNotificationCenter defaultCenter] removeObserver:self
+			name:NSFileHandleReadCompletionNotification
+			object:[pipe->GetPipe() fileHandleForReading]];
+			
+		while ((data = [[pipe->GetPipe() fileHandleForReading] availableData]) && [data length])
+		{
+			[pipe->GetBuffer() appendData:data];
+		}
+		pipe->InputPipe::DataReady();
+	}*/
 	[[aNotification object] readInBackgroundAndNotify];
 }
 

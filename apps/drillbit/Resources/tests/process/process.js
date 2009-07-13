@@ -67,14 +67,18 @@ describe("process tests",
 	{
 		var dir = Titanium.platform == "win32" ? ["cmd", "/C", "dir"] : ["ls"];
 		var listDirs = Titanium.Process.createProcess(dir);
-		value_of(listDirs.getArguments()[0]).should_be(this.dirCmd);
+		//value_of(listDirs.getArguments()[0]).should_be(this.dirCmd);
 		var dirList = listDirs();
 		value_of(dirList.length).should_be_greater_than(0);
 	},
 	
 	test_split_and_attach_pipe_as_async: function(callback)
 	{
-		var p = Titanium.Process.createProcess(this.dirCmd);
+		var originalData = 'this_is_a_split_and_attach_test';
+		var echoCmd = this.echoCmd.slice();
+		echoCmd.push(originalData);
+		
+		var p = Titanium.Process.createProcess(echoCmd);
 		p.stdout.join(p.stderr);
 		value_of(p.stdout.isJoined()).should_be_false();
 		value_of(p.stderr.isJoined()).should_be_true();
@@ -95,20 +99,30 @@ describe("process tests",
 		value_of(p.stdout.isAttached()).should_be_false();
 		
 		var data = "";
-		var timer = 0;
 		pipes[1].setOnRead(function(event){
 			data += event.pipe.read();
 		});
+		var timer = 0;
 		p.setOnExit(function(exitCode){
 			clearTimeout(timer);
 			stream.close();
 			var fileData = file.read();
 			
-			value_of(data).should_be(fileData);
-			value_of(pipes[0].isClosed()).should_be_true();
-			value_of(pipes[1].isClosed()).should_be_true();
-			value_of(p.stdout.isClosed()).should_be_true();
-			value_of(p.stderr.isClosed()).should_be_true();
+			try
+			{
+				value_of(data).should_be(fileData);
+				value_of(data).should_be(originalData);
+				value_of(pipes[0].isClosed()).should_be_true();
+				value_of(pipes[1].isClosed()).should_be_true();
+				value_of(p.stdout.isClosed()).should_be_true();
+				value_of(p.stderr.isClosed()).should_be_true();
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}
+			
+			file.deleteFile();
 			callback.passed();
 		});
 		p.launch();
@@ -136,9 +150,13 @@ describe("process tests",
 		var timer = 0;
 		more.setOnExit(function(exitCode){
 			clearTimeout(timer);
-			value_of(moreData).should_be(data);
-			value_of(echo.stdout.isClosed()).should_be_true();
-			value_of(more.stdin.isClosed()).should_be_true();
+			try {
+				value_of(moreData).should_be(data);
+				value_of(echo.stdout.isClosed()).should_be_true();
+				value_of(more.stdin.isClosed()).should_be_true();
+			} catch (e) {
+				callback.failed(e);
+			}
 			callback.passed();
 		});
 		

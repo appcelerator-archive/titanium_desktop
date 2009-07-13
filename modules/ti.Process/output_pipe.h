@@ -22,11 +22,12 @@ namespace ti
 	public:
 		OutputPipe();
 		virtual int Write(AutoPtr<Blob> data) = 0;
+		virtual void Flush() = 0;
 		static AutoOutputPipe CreateOutputPipe();
 
 	protected:
 		void _Write(const ValueList& args, SharedValue result);
-
+		void _Flush(const ValueList& args, SharedValue result);
 	};
 }
 

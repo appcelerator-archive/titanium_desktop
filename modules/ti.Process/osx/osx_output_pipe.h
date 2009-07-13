@@ -22,6 +22,8 @@ namespace ti
 		virtual void Close();
 		virtual bool IsClosed();
 		virtual int Write(AutoPtr<Blob> data);
+		virtual void Flush();
+		
 		NSPipe* GetPipe() { return pipe; }
 		
 	protected:

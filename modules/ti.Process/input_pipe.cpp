@@ -116,6 +116,11 @@ namespace ti
 				logger->Error(e.DisplayString()->c_str());
 			}
 		}
+		
+		if (IsAttached())
+		{
+			(*attachedOutput)->CallNS("flush");
+		}
 	}
 	
 	void InputPipe::Join(AutoInputPipe other)
