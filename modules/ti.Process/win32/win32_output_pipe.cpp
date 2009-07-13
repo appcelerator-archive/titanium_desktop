@@ -62,4 +62,9 @@ namespace ti
 		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
         CloseHandle(readHandle);
 	}
+	
+	void Win32OutputPipe::Flush()
+	{
+		CloseHandle(readHandle);
+	}
 }
