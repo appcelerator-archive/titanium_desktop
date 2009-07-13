@@ -102,6 +102,8 @@ $(window).ready(function()
 	Drillbit.loadTests(dir_list);
 	Drillbit.setupTestHarness(TFS.getFile(TFS.getApplicationDirectory(), 'manifest_harness'));
 	
+	$("#test-count").html(Drillbit.total_tests + ' tests in ' + Drillbit.total_files + ' files');
+	
 	var suites_html = '';	
 	for (var c=0;c<Drillbit.test_names.length;c++)
 	{

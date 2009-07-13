@@ -12,12 +12,12 @@
 		this.tests = {};
 		this.test_names = [];
 		this.total_assertions = 0;
+		this.total_tests = 0;
+		this.total_files = 0;
 		
 		var current_test_load = null;
 		var current_test = null;
 		var excludes = ['before','before_all','after','after_all','timeout'];
-		var total_tests = 0;
-		var total_files = 0;
 		var running_tests = 0;
 		var running_completed = 0;
 		var running_passed = 0;
@@ -112,7 +112,7 @@
 					var fn = test[p];
 					if (typeof fn == 'function')
 					{
-						total_tests++;
+						self.total_tests++;
 						current_test_load.assertion_count++;
 						current_test_load.assertions[p]=false;
 						var r = new RegExp(p+" *: *function *\\(");
@@ -121,7 +121,7 @@
 				}
 			}
 
-			total_files++;
+			self.total_files++;
 			current_test_load = null;
 		};
 		
@@ -430,7 +430,7 @@
 						}
 
 						self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
-						self.frontend_do('total_progress', running_passed, running_failed, total_tests);
+						self.frontend_do('total_progress', running_passed, running_failed, self.total_tests);
 
 						var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
 						self.frontend_do('update_status', msg);
