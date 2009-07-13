@@ -46,7 +46,8 @@ namespace ti
 	}
 	
 	
-	Process::Process() : AccessorBoundObject("Process")
+	Process::Process() :
+		AccessorBoundObject("Process.Process")
 	{
 		args = new StaticBoundList();
 		environment = new StaticBoundObject();
@@ -55,7 +56,7 @@ namespace ti
 	}
 	
 	Process::Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
-		AccessorBoundObject("Process"),
+		AccessorBoundObject("Process.Process"),
 		stdoutPipe(stdoutPipe),
 		stderrPipe(stderrPipe),
 		stdinPipe(stdinPipe),

@@ -16,7 +16,7 @@ namespace ti
 	std::map<std::string,int> ProcessBinding::signals;
 	std::vector<AutoProcess> ProcessBinding::processes;
 	
-	ProcessBinding::ProcessBinding()
+	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
 	{
 		Logger::Get("Process")->Debug("Initializing Titanium.Process");
 		

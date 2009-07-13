@@ -1,10 +1,10 @@
-#appname:UnitTest
-#appid:com.titaniumapp.unittest.driver
+#appname:UnitTest Harness
+#appid:com.titaniumapp.unittest
 #publisher:Appcelerator
 #image:default_app_logo.png
 #url:http://titaniumapp.com
-#guid:D83B08F4-B43B-4909-9FEE-336CDB44750B
-#desc:Unit Test Driver
+#guid:CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4
+#desc:Unit Test Harness
 runtime:0.4
 api:0.4
 javascript:0.4
@@ -23,4 +23,3 @@ tinetwork:0.4
 tinotification:0.4
 tiprocess:0.4
 tidatabase:0.4
-drillbit:0.1

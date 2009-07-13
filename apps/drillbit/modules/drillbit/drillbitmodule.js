@@ -1,8 +1,9 @@
 (function() {
-	var Drillbit = function(frontend) {
+	var Drillbit = function() {
 		var TFS = Titanium.Filesystem;
 		var TA  = Titanium.App;
-		this.frontend = frontend;
+		
+		this.frontend = null;
 		this.auto_close = false;
 		this.debug_tests = false;
 		
@@ -37,8 +38,6 @@
 		this.include = function(path)
 		{
 			var code = TFS.getFile(path).read();
-			Titanium.App.stdout(code.toString());
-			
 			try {
 				with (this) {
 					eval(code.toString());
@@ -47,6 +46,26 @@
 				Titanium.App.stdout("Error: "+String(e)+", "+path+", line:"+e.line);
 			}
 		};
+		
+		this.frontend_do = function()
+		{
+			try {
+				var args = Array.prototype.slice.call(arguments);
+			
+				var fn_name = args[0];
+				args.shift();
+			
+				if (this.frontend &&
+					fn_name in this.frontend && typeof this.frontend[fn_name] == 'function')
+				{
+					this.frontend[fn_name].apply(this.frontend, args);
+				}
+			}
+			catch (e)
+			{
+				Titanium.App.stderr("Error: " +e);
+			}
+		}
 		
 		function describe(description,test)
 		{
@@ -73,29 +92,9 @@
 			total_files++;
 			current_test_load = null;
 		};
-	
-		/*this.make_function = function(f,scope)
-		{
-			if (typeof(f)=='function')
-			{
-				if (typeof(scope)=='undefined')
-				{
-					return '(' + String(f) + ')();\n';
-				}
-				else
-				{
-					var expr = '(function(){var _scope = ' + scope + ';\n';
-					expr+='(' + String(f) + ').call(_scope,_scope);\n';
-					expr+='})();\n';
-					return expr;
-				}
-			}
-			return '';
-		};*/
-	
+		
 		this.loadTests = function(test_files)
 		{
-
 			results_dir.createDirectory();
 
 			var f = Titanium.Filesystem.getFile(results_dir, "results.html");
@@ -130,8 +129,7 @@
 				}
 				catch(EX)
 				{
-					frontend.error("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
-					//Titanium.API.debug("error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
+					this.frontend_do('error', "error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
 				}
 			}
 
@@ -156,15 +154,11 @@
 
 			//var mymanifest = TFS.getFile(TFS.getApplicationDirectory(),'manifest');
 			manifest = TFS.getFile(app.base,'manifest');
-			var manifest_contents = harness_manifest.read().toString();
-
-			manifest_contents = manifest_contents.replace('UnitTest','UnitTest Harness');
-			manifest_contents = manifest_contents.replace('com.titaniumapp.unittest.driver','com.titaniumapp.unittest');
-			manifest_contents = manifest_contents.replace('D83B08F4-B43B-4909-9FEE-336CDB44750B','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
-			manifest_contents = manifest_contents.replace('Unit Test Driver','Unit Test Harness');
-			manifest.write(manifest_contents);
-
-			tiapp = Titanium.Project.writeTiXML('com.titaniumapp.unittest','test_harness','Appcelerator','http://titaniumapp.com',app.base);
+			manifest.write(harness_manifest.read().toString());
+			
+			tiapp_harness = TFS.getFile(TFS.getApplicationDirectory(), 'tiapp_harness.xml');
+			tiapp = TFS.getFile(app.base, 'tiapp.xml');
+			tiapp_harness.copy(tiapp);
 			tiapp.copy(tiapp_backup);
 			manifest.copy(manifest_backup);
 
@@ -282,95 +276,6 @@
 			{
 				tiapp.write(non_visual_ti);
 			}
-
-			/*
-			var us = '// ==UserScript==\n';
-			us+='// @name	Titanium App Tester\n';
-			us+='// @author	Appcelerator\n';
-			us+='// @description	Titanium Tests\n';
-			us+='// @include	app://com.titaniumapp.unittest/index.html\n';
-			us+='// @version 	0.1\n';
-			us+='// ==/UserScript==\n\n';
-
-			us+=drillbit_funcs + '\n';
-			us+="TitaniumTest.NAME = '"+entry.name+"';\n";
-
-			us+="try{";
-			us+=this.make_function(entry.test.before_all,'TitaniumTest.gscope');
-			us+="}catch(e){Titanium.API.error('before_all caught error:'+e+' at line: '+e.line);}\n";
-
-			// we skip these from being re-included
-			for (var f in entry.test)
-			{
-				var i = excludes.indexOf(f);
-				if (i==-1)
-				{
-					us+="TitaniumTest.tests.push(function(){\n";
-					us+="// "+f+"\n";
-					us+="var xscope = new TitaniumTest.Scope('"+f+"');"
-					us+=this.make_function(entry.test.before,'xscope');
-
-					us+="try {\n";
-					us+="TitaniumTest.currentTest='" + f + "';\n";
-					us+="TitaniumTest.runningTest('"+entry.name+"','" + f + "');\n";
-					us+=this.make_function(entry.test[f],'xscope');
-
-					i = f.indexOf('_as_async');
-					if (i==-1)
-					{
-						us+="TitaniumTest.testPassed('"+f+"',TitaniumTest.currentSubject.lineNumber);\n";
-					}
-
-					us+="}\n";
-					us+="catch(___e){\n";
-					us+="TitaniumTest.testFailed('"+f+"',___e);\n";
-					us+="}";
-
-					us+=this.make_function(entry.test.after,'xscope');
-					us+="//--- "+f+" ---\n";
-					us+="});\n\n"
-				}
-			}
-
-			us+="TitaniumTest.on_complete = function(){\n";
-			us+="try{";
-			us+=this.make_function(entry.test.after_all,'TitaniumTest.gscope');
-			us+="}catch(e){Titanium.API.error('after_all caught error:'+e+' at line: '+e.line);}\n";
-			us+="TitaniumTest.complete();\n";
-			us+="};\n";
-			us+="TitaniumTest.run_next_test();\n";
-
-			// poor man's hack to insert line numbers
-			var newus = '';
-			var lines = us.split("\n");
-			var ready = false;
-			for (var linenum=0;linenum<lines.length;linenum++)
-			{
-				var line = lines[linenum];
-				if (!ready)
-				{
-					if (line.indexOf('TitaniumTest.NAME')==0)
-					{
-						ready = true;
-					}
-					newus+=line+"\n";
-					continue;
-				}
-				var idx = line.indexOf('should_');
-				if (idx != -1)
-				{
-					var endIdx = line.lastIndexOf(')');
-					if (line.charAt(endIdx-1)=='(')
-					{
-						line = line.substring(0,endIdx) + 'null,' + (linenum+1) + ');';
-					}
-					else
-					{
-						line = line.substring(0,endIdx) + ',' + (linenum+1) + ');';
-					}
-				}
-				newus+=line+"\n";
-			}*/
 			
 			var modules = Titanium.API.getApplication().getModules();
 			var module = null;
@@ -389,11 +294,13 @@
 			var runner_js = TFS.getFile(user_scripts_dir,entry.name+'_driver.js');
 			var data = {entry: entry, Titanium: Titanium, excludes: excludes};
 			var user_script = null;
+			
 			try {
 				user_script = new EJS({text: template, name: "template.js"}).render(data);
 			} catch(e) {
-				Titanium.App.stdout("error: "+e+",line:"+e.line);
+				this.frontend_do('error',"Error rendering template: "+e+",line:"+e.line);
 			}
+			
 			TFS.getFile(module.getPath(),"template_out.js").write(user_script);
 			runner_js.write(user_script);
 
@@ -426,36 +333,42 @@
 						if (data.indexOf('DRILLBIT_TEST:') != -1) {
 							var comma = data.indexOf(',');
 							var suite_name = data.substring(15,comma);
-							var test_name = data.substring(comma+1,data.length-1);
-
-							//show_current_test(suite_name,test_name);
+							var test_name = data.substring(comma+1);
+							self.frontend_do('show_current_test', suite_name, test_name);
 							continue;
 						}
 						else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
 							var comma = data.indexOf(',');
 							var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
-							var line_number = data.substring(comma+1,data.length-1);
-							// do something with metadata eventually?
-							//add_assertion();
+							var line_number = data.substring(comma+1);
+							self.frontend_do('add_assertion', test_name, line_number);
 							continue;
 						}
 
 						var test_name = data.substring(15);
 						var test_passed = data.indexOf('_PASS:')!=-1;
 						running_completed++;
-						if (test_passed) { passed++; running_passed++; }
-						else { failed ++; running_failed++; }
+						if (test_passed) {
+							passed++; running_passed++;
+							self.frontend_do('test_passed', entry.name, test_name);
+						}
+						else {
+							failed ++; running_failed++;
+							var dashes = test_name.indexOf(" --- ");
+							var error = test_name.substring(dashes+5);
+							test_name = test_name.substring(0,dashes);
+							self.frontend_do('test_failed', entry.name, test_name, error);
+						}
 
-						//suite_progress(passed, failed, current_test.assertion_count);
-						//total_progress(running_passed, running_failed, total_tests);
+						self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
+						self.frontend_do('total_progress', running_passed, running_failed, total_tests);
 
 						var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
-						//update_status(msg);
-						Titanium.API.info("test ["+ test_name + "], passed:"+test_passed);
+						self.frontend_do('update_status', msg);
 					}
 					else
 					{
-						Titanium.API.debug("PROCESS:"+data);
+						self.frontend_do('process_data', data);
 					}
 				}
 			});
@@ -493,7 +406,7 @@
 
 			process.setOnExit(function(exitcode)
 			{
-				Titanium.API.debug("test has exited: "+current_test.name);
+				self.frontend_do('suite_finished', current_test.name);
 				try
 				{
 					//clearInterval(timer);
@@ -503,8 +416,8 @@
 						var rs = '(' + r + ');';
 						var results = eval(rs);
 						current_test.results = results;
-						//test_status(current_test.name,results.failed>0?'Failed':'Passed');
-						//update_status(current_test.name + ' complete ... '+results.passed+' passed, '+results.failed+' failed');
+						self.frontend_do('test_status', current_test.name,results.failed>0?'Failed':'Passed');
+						self.frontend_do('update_status', current_test.name + ' complete ... '+results.passed+' passed, '+results.failed+' failed');
 						if (!test_failures && results.failed>0)
 						{
 							test_failures = true;
@@ -517,9 +430,9 @@
 				}
 				catch(E)
 				{
-					Titanium.API.error("onexit failure = "+E+" at "+E.line);
+					self.frontend_do('error', "onexit failure = "+E+" at "+E.line);
 				}
-				this.run_next_test();
+				self.run_next_test();
 			});
 			process.launch();
 		};
@@ -528,14 +441,14 @@
 		{
 			if (executing_tests==null || executing_tests.length == 0)
 			{
+				this.frontend_do('all_finished');
 				var test_duration = (new Date().getTime() - tests_started)/1000;
 				executing_tests = null;
 				current_test = null;
-				run_button.disabled = false;
-				//update_status('Testing complete ... took ' + test_duration + ' seconds',true);
+				self.frontend_do('update_status', 'Testing complete ... took ' + test_duration + ' seconds',true);
 				var f = TFS.getFile(results_dir,'drillbit.json');
 				f.write("{\"success\":" + String(!test_failures) + "}");
-				if (this.auto_close)
+				if (self.auto_close)
 				{
 					Titanium.App.exit(test_failures ? 1 : 0);
 				}
@@ -544,10 +457,10 @@
 			var entry = executing_tests.shift();
 			current_test = entry;
 			current_test.failed = false;
-//			update_status('Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
-//			test_status(entry.name,'Running');
+			self.frontend_do('update_status', 'Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
+			self.frontend_do('suite_started', entry.name);
 			//setTimeout(function(){this.run_test(entry)},1);
-			this.run_test(entry);
+			self.run_test(entry);
 		};
 	};
 	

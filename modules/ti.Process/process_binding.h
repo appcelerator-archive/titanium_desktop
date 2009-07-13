@@ -13,7 +13,7 @@
 
 namespace ti
 {
-	class ProcessBinding : public StaticBoundObject
+	class ProcessBinding : public AccessorBoundObject
 	{
 	public:
 		ProcessBinding();

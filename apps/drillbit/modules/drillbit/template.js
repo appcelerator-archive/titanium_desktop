@@ -110,6 +110,7 @@ TitaniumTest.on_complete = function(){
 	{
 		Titanium.API.error('after_all caught error:'+e+' at line: '+e.line);
 	}
+	TitaniumTest.complete();
 };
 
 TitaniumTest.run_next_test();

@@ -14,12 +14,15 @@ describe("process tests",
 		var i = Titanium.Process.createInputPipe();
 		value_of(i).should_be_object();
 		value_of(i.read).should_be_function();
+		value_of(i.isSplit).should_be_function();
 		value_of(i.split).should_be_function();
 		value_of(i.unsplit).should_be_function();
 		value_of(i.attach).should_be_function();
 		value_of(i.detach).should_be_function();
+		value_of(i.isAttached).should_be_function();
 		value_of(i.join).should_be_function();
 		value_of(i.unjoin).should_be_function();
+		value_of(i.isJoined).should_be_function();
 		value_of(i.isClosed).should_be_function();
 		value_of(i.close).should_be_function();
 		
