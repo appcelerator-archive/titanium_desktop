@@ -65,4 +65,11 @@ namespace ti
 			throw ValueException::FromString("Error writing blob data to pipe");
 		}
 	}
+	
+	void LinuxOutputPipe::Flush()
+	{
+		if (writeHandle != -1) {
+			close(writeHandle);
+		}
+	}
 }
