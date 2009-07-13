@@ -17,17 +17,18 @@
 		},
 		show_current_test: function(suite, test)
 		{
-			print("\tRunning '"+ test + "'...");
+			print("  Running '"+ test + "'...");
 		},
 		test_passed: function(suite, test)
 		{
 			println(" [32m[1mpassed[0m");
 			this.passed++;
 		},
-		test_failed: function(suite, test, error)
+		test_failed: function(suite, test, line_number, error)
 		{
 			println(" [31m[1mfailed[0m");
-			println("\t\tError: " + error);
+			println("   => " + test + "() line " + line_number);
+			println("   => " + error);
 			this.failed++;
 		},
 		suite_finished: function(suite)

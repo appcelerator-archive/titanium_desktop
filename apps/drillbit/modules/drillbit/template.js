@@ -10,8 +10,9 @@
 	var TFS = Titanium.Filesystem;
 	var TA = Titanium.App;
 	
-	function add_line_numbers(f)
+	function add_line_numbers(entry,fname)
 	{
+		var f = entry.test[fname];
 		var code = String(f);
 		var lines = code.split("\n");
 		var ready = false;
@@ -23,32 +24,36 @@
 			if (idx != -1)
 			{
 				var endIdx = line.lastIndexOf(')');
+				var absoluteLine = linenum+entry.line_offsets[fname]+1;
 				if (line.charAt(endIdx-1)=='(')
 				{
-					line = line.substring(0,endIdx) + 'null,' + (linenum+1) + ');';
+					line = line.substring(0,endIdx) + 'null,' + absoluteLine + ');';
 				}
 				else
 				{
-					line = line.substring(0,endIdx) + ',' + (linenum+1) + ');';
+					line = line.substring(0,endIdx) + ',' + absoluteLine + ');';
 				}
+			
 			}
 			new_code += line+"\n";
 		}
+		
 		return new_code;
 	}
 	
-	function make_function(f,scope)
+	function make_function(entry,fname,scope)
 	{
+		var f = entry.test[fname];
 		if (typeof(f)=='function')
 		{
 			if (typeof(scope)=='undefined')
 			{
-				return '(' + add_line_numbers(f) + ')();\n';
+				return '(' + add_line_numbers(entry,fname) + ')();\n';
 			}
 			else
 			{
 				var expr = '(function(){var _scope = ' + scope + ';\n';
-				expr+='(' + add_line_numbers(f) + ').call(_scope,_scope);\n';
+				expr+='(' + add_line_numbers(entry,fname) + ').call(_scope,_scope);\n';
 				expr+='})();\n';
 				return expr;
 			}
@@ -63,7 +68,7 @@ TitaniumTest.NAME = "<%= entry.name %>";
 
 try
 {
-	<%= make_function(entry.test.before_all, 'TitaniumTest.gscope') %>
+	<%= make_function(entry, 'before_all', 'TitaniumTest.gscope') %>
 }
 catch (e)
 {
@@ -77,12 +82,12 @@ catch (e)
 		TitaniumTest.tests.push(function(){
 			// <%= f %>
 			var xscope = new TitaniumTest.Scope('<%= f %>');
-			<%= make_function(entry.test.before,'xscope') %>;
+			<%= make_function(entry, 'before', 'xscope') %>;
 
 			try {
 				TitaniumTest.currentTest = '<%= f %>';
 				TitaniumTest.runningTest('<%= entry.name %>', '<%= f %>');
-				<%= make_function(entry.test[f], 'xscope') %>;
+				<%= make_function(entry, f, 'xscope') %>;
 				<%
 				i = f.indexOf('_as_async');
 				if (i==-1)
@@ -92,10 +97,16 @@ catch (e)
 			}
 			catch (___e)
 			{
-				TitaniumTest.testFailed('<%= f %>', ___e);
+				// wrap the exception message so we can report the failed test's line number
+				var ___err = {
+					message: ___e.message,
+					line: <%= entry.line_offsets[f] %>,
+					toString: function() { return this.message; }
+				};
+				TitaniumTest.testFailed('<%= f %>', ___err);
 			}
 
-			<%= make_function(entry.test.after, 'xscope') %>
+			<%= make_function(entry, 'after', 'xscope') %>
 			// --- <%= f %> ---
 		});
 <%	}
@@ -104,7 +115,7 @@ catch (e)
 TitaniumTest.on_complete = function(){
 	try
 	{
-		<%= make_function(entry.test.after_all,'TitaniumTest.gscope') %>;
+		<%= make_function(entry, 'after_all','TitaniumTest.gscope') %>;
 	}
 	catch (e)
 	{

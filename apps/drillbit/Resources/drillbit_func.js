@@ -293,8 +293,9 @@ TitaniumTest =
 			lineNumber:e.line,
 			message:e.message || String(e)
 		});
-		Titanium.App.stdout("DRILLBIT_FAIL: "+name+" --- "+e);
-		Titanium.API.debug("DRILLBIT_FAIL: "+name+" --- "+e);
+		
+		Titanium.App.stdout("DRILLBIT_FAIL: "+name+","+e.line+" --- "+e);
+		Titanium.API.debug("DRILLBIT_FAIL: "+name+","+e.line+" --- "+e);
 		TitaniumTest.run_next_test();
 	},
 	
@@ -454,7 +455,7 @@ TitaniumTest.Error = function(message,line)
 
 TitaniumTest.Error.prototype.toString = function()
 {
-	return this.message + ' at ' + this.line;
+	return this.message;
 };
 
 TitaniumTest.Subject = function(target) {

@@ -75,14 +75,35 @@
 			}
 		}
 		
+		function findLine(needle,haystack)
+		{
+			var lines = haystack.split('\n');
+			for (var i = 0; i < lines.length; i++)
+			{
+				if (needle.test(lines[i]))
+				{
+					if (/^[\t ]*{[\t ]*$/.test(lines[i+1]))
+					{
+						//offset by 1 when the bracket is on a seperate line
+						// Function.toString show an inline bracket, so we need to compensate
+						return i+1;
+					}
+					return i;
+				}
+			}
+			return -1;
+		}
+		
 		function describe(description,test)
 		{
 			current_test_load.description = description;
 			current_test_load.test = test;
+			current_test_load.line_offsets = {};
 			current_test_load.timeout = test.timeout || 5000;
 			current_test_load.assertions = {};
 			current_test_load.assertion_count = 0;
-
+			var testSource = TFS.getFile(current_test_load.dir, current_test_load.name+".js").read().toString();
+			
 			for (var p in test)
 			{
 				if (excludes.indexOf(p)==-1)
@@ -93,6 +114,8 @@
 						total_tests++;
 						current_test_load.assertion_count++;
 						current_test_load.assertions[p]=false;
+						var r = new RegExp(p+" *: *function *\\(");
+						current_test_load.line_offsets[p] = findLine(r,testSource);
 					}
 				}
 			}
@@ -399,8 +422,10 @@
 							failed ++; running_failed++;
 							var dashes = test_name.indexOf(" --- ");
 							var error = test_name.substring(dashes+5);
-							test_name = test_name.substring(0,dashes);
-							self.frontend_do('test_failed', entry.name, test_name, error);
+							var test_args = test_name.substring(0,dashes).split(',');
+							test_name = test_args[0];
+							line_number = test_args[1];
+							self.frontend_do('test_failed', entry.name, test_name, line_number, error);
 						}
 
 						self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
