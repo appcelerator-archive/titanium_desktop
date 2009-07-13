@@ -13,6 +13,9 @@ describe("ti.API tests",
 		value_of(Titanium.API.notice).should_be_function();
 		value_of(Titanium.API.trace).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
+		
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
 
 		Titanium.API.critical("this is a critical message");
 		Titanium.API.debug("this is a debug message");
@@ -22,6 +25,8 @@ describe("ti.API tests",
 		Titanium.API.notice("this is a notice message");
 		Titanium.API.trace("this is a trace message");
 		Titanium.API.warn("this is a warn message");
+		
+		Titanium.API.print("this is a print message to stdout");
 	},
 	// test the logging functions
 	test_log_method: function()
@@ -38,6 +43,27 @@ describe("ti.API tests",
 		Titanium.API.log(Titanium.API.WARN,"this is a log message with severity Titanium.API.WARN");
 
 	},
+
+	// test the logging functions
+	test_setLogLevel_method: function()
+	{
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
+		value_of(Titanium.API.log).should_be_function();
+
+		Titanium.API.setLogLevel(Titanium.API.WARN);
+		Titanium.API.log(Titanium.API.FATAL,"this is a log message with severity Titanium.API.FATAL should be logged");
+		Titanium.API.log(Titanium.API.CRITICAL,"this is a log message with severity Titanium.API.CRITICAL should be logged");
+		Titanium.API.log(Titanium.API.ERROR,"this is a log message with severity Titanium.API.ERROR should be logged");
+		Titanium.API.log(Titanium.API.WARN,"Logging severity set to Titanium.API.WARN");
+		Titanium.API.log(Titanium.API.NOTICE,"this is a log message with severity Titanium.API.NOTICE should not be logged");
+		Titanium.API.log(Titanium.API.INFO,"this is a log message with severity Titanium.API.INFO should not be logged");
+		Titanium.API.log(Titanium.API.DEBUG,"this is a log message with severity Titanium.API.DEBUG should not be logged");
+		Titanium.API.log(Titanium.API.TRACE,"this is a log message with severity Titanium.API.TRACE should not be logged");
+
+		Titanium.API.setLogLevel(Titanium.API.FATAL);
+	},
+
 	validate_properties: function()
 	{
 		value_of(Titanium.API.APP_UPDATE).should_not_be_null();
@@ -83,6 +109,10 @@ describe("ti.API tests",
 		value_of(Titanium.API.trace).should_be_function();
 		value_of(Titanium.API.unregister).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
+		
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
+		value_of(Titanium.API.print).should_be_function();
 	},
 	// test the application components API
 	test_components: function()
