@@ -402,5 +402,85 @@ describe("process tests",
 		{
 			test.failed('timed out');
 		},5000);
+	},
+	
+	test_process_exitCode_as_async: function(test)
+	{
+		value_of(Titanium.Process).should_not_be_null();
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		var timer = null;
+		value_of(p).should_not_be_null();
+		p.setOnRead(function(event)
+		{
+			value_of(p.getExitCode()).should_be(-1);
+		});
+		p.setOnExit(function(event)
+		{
+			try 
+			{
+				var exitCode = p.getExitCode();
+				value_of(exitCode).should_be_number();
+				value_of(exitCode).should_be(0);
+				
+				test.passed();
+			}
+			catch(e)
+			{
+    			test.failed(e);
+			}
+			clearTimeout(timer);
+		});
+		
+		p.launch();
+		
+		timer = setTimeout(function()
+		{
+			test.failed('timed out');
+		},5000);
+	},
+	
+	test_long_running_process_as_async: function(test)
+	{
+		value_of(Titanium.Process).should_not_be_null();
+		var p = Titanium.Process.createProcess(Titanium.platform == "win" ?
+			['C:\\Windows\\system32\\cmd.exe','/K', 'dir'] : ['/bin/cat','-v'])
+		
+		var timer = null;
+		var shortTimer = null;
+		p.setOnRead(function(event)
+		{
+			// reality check... are we running?
+			value_of(p.isRunning()).should_be_true();
+		});
+		p.setOnExit(function()
+		{
+			clearTimeout(timer);
+
+			// we should not be running on exit.  
+			if (this.isRunning())
+			{
+				test.failed('test is running onExit, shouldn\'t be');
+			}
+			else
+			{
+				test.passed();
+			}
+		});
+		p.launch();
+		
+		shortTimer = setTimeout(function()
+		{
+			// reality check... are we running?
+			value_of(p.isRunning()).should_be_true();
+		
+			// kill the process if it's running
+			p.terminate();
+		}, 1000);
+
+		// if we hit this timeout, then we fail.
+		timer = setTimeout(function()
+		{
+			test.failed('timed out');
+		},5000);
 	}
 });

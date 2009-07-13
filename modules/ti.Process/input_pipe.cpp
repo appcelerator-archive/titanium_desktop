@@ -119,7 +119,7 @@ namespace ti
 		
 		if (IsAttached())
 		{
-			(*attachedOutput)->CallNS("flush");
+			(*attachedOutput)->CallNS("close");
 		}
 	}
 	
