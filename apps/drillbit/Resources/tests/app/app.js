@@ -13,6 +13,10 @@ describe("ti.App tests",
 		value_of(Titanium.App.getCopyright()).should_be('2010');
 		value_of(Titanium.App.getDescription()).should_be('cool like dat');
 		value_of(Titanium.App.getGUID()).should_be('CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
+		
+		// drillbit doesn't have an icon defined, this should be null
+		value_of(Titanium.App.getIcon()).should_be_null();
+		
 
 		value_of(Titanium.App.exit).should_be_function();
 		value_of(Titanium.App.loadProperties).should_be_function();
