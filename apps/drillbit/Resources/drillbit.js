@@ -136,11 +136,6 @@ $(window).ready(function()
 		show_test_details(suite_name);
 	});
 	
-	var w = $('div.suites').width() + 4;
-	var h = $('div.suites').height() + 55;
-	Titanium.UI.currentWindow.setWidth(w);
-	Titanium.UI.currentWindow.setHeight(h);
-	
 	var run_link = $('#run-link');
 	$('#toggle-link').click(function() {
 		toggle_test_includes();
