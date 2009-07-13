@@ -35,7 +35,7 @@ namespace ti
 		void Unjoin(AutoInputPipe other);
 		bool IsJoined();
 		
-		std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >& Split();
+		void Split();
 		void Unsplit();
 		bool IsSplit();
 		
@@ -77,7 +77,8 @@ namespace ti
 		std::vector<AutoInputPipe> joinedPipes;
 		SharedKMethod joinedRead;
 		SharedKObject* attachedOutput;
-		std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >* splitPipes;
+		Poco::Mutex splitMutex;
+		AutoPtr<BufferedInputPipe> splitPipe1, splitPipe2;
 		Logger *logger;
 	};
 }

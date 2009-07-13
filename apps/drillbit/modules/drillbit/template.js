@@ -65,7 +65,7 @@
 <%= TFS.getFile(TA.appURLToPath('app://drillbit_func.js')).read() %>
 
 TitaniumTest.NAME = "<%= entry.name %>";
-
+TitaniumTest.SOURCE = "<%= entry.source_file.nativePath() %>";
 try
 {
 	<%= make_function(entry, 'before_all', 'TitaniumTest.gscope') %>
@@ -100,7 +100,7 @@ catch (e)
 				// wrap the exception message so we can report the failed test's line number
 				var ___err = {
 					message: ___e.message,
-					line: <%= entry.line_offsets[f] %>,
+					line: ___e.constructor == TitaniumTest.Error ? ___e.line : <%= entry.line_offsets[f] %>,
 					toString: function() { return this.message; }
 				};
 				TitaniumTest.testFailed('<%= f %>', ___err);

@@ -37,8 +37,7 @@ namespace ti
 		onClose(0),
 		joined(false),
 		joinedRead(0),
-		attachedOutput(0),
-		splitPipes(0)
+		attachedOutput(0)
 	{
 		logger = Logger::Get("InputPipe");
 		
@@ -159,52 +158,59 @@ namespace ti
 		return this->joined;
 	}
 	
-	std::pair<SharedBufferedInputPipe,SharedBufferedInputPipe>& InputPipe::Split()
+	void InputPipe::Split()
 	{
-		AutoPtr<BufferedInputPipe> pipe1 = new BufferedInputPipe();
-		AutoPtr<BufferedInputPipe> pipe2 = new BufferedInputPipe();
+		Poco::Mutex::ScopedLock lock(splitMutex);
+		if (IsSplit())
+		{
+			return;
+		}
 		
-		this->splitPipes =
-			new std::pair<AutoPtr<BufferedInputPipe>, AutoPtr<BufferedInputPipe> >(pipe1, pipe2);
+		splitPipe1 = new BufferedInputPipe();
+		splitPipe2 = new BufferedInputPipe();
 		
 		MethodCallback* splitCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::Splitter);
 		MethodCallback* closeCallback = NewCallback<InputPipe, const ValueList&, SharedValue>(this, &InputPipe::SplitterClose);
 		this->onRead = new SharedKMethod(new StaticBoundMethod(splitCallback));
 		this->onClose = new SharedKMethod(new StaticBoundMethod(closeCallback));
-		
-		return *this->splitPipes;
 	}
 	
 	void InputPipe::Splitter(const ValueList& args, SharedValue result)
 	{
-		AutoPtr<BufferedInputPipe> pipe1 = this->splitPipes->first;
-		AutoPtr<BufferedInputPipe> pipe2 = this->splitPipes->second;
+		Poco::Mutex::ScopedLock lock(splitMutex);
 		
 		AutoPtr<Blob> blob = this->Read();
-		pipe1->Append(blob);
-		pipe2->Append(blob);
+		splitPipe1->Append(blob);
+		splitPipe2->Append(blob);
 	}
 	
 	void InputPipe::SplitterClose(const ValueList& args, SharedValue result)
 	{
-		this->splitPipes->first->Close();
-		this->splitPipes->second->Close();
+		Poco::Mutex::ScopedLock lock(splitMutex);
+		
+		splitPipe1->Close();
+		splitPipe2->Close();
 	}
 	
 	void InputPipe::Unsplit()
 	{
 		if (IsSplit())
 		{
+			Poco::Mutex::ScopedLock lock(splitMutex);
+		
 			delete this->onRead;
 			delete this->onClose;
 			
-			delete splitPipes;
+			splitPipe1->Close();
+			splitPipe2->Close();
+			splitPipe1 = NULL;
+			splitPipe2 = NULL;
 		}
 	}
 	
 	bool InputPipe::IsSplit()
 	{
-		return splitPipes != NULL;
+		return !splitPipe1.isNull();
 	}
 	
 	void InputPipe::Attach(SharedKObject other)
@@ -243,13 +249,13 @@ namespace ti
 			Detach();
 		}
 		
-	 	if (onReadCallback.isNull())
+		if (!onReadCallback.isNull())
 		{
-			delete this->onRead;
+			this->onRead = new SharedKMethod(onReadCallback);
 		}
 		else
 		{
-			this->onRead = new SharedKMethod(onReadCallback);
+			this->onRead = NULL;
 		}
 	}
 	
@@ -336,8 +342,8 @@ namespace ti
 	{
 		this->Split();
 		SharedKList list = new StaticBoundList();
-		list->Append(Value::NewObject(this->splitPipes->first));
-		list->Append(Value::NewObject(this->splitPipes->second));
+		list->Append(Value::NewObject(splitPipe1));
+		list->Append(Value::NewObject(splitPipe2));
 		result->SetList(list);
 	}
 	

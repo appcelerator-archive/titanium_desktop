@@ -102,7 +102,8 @@
 			current_test_load.timeout = test.timeout || 5000;
 			current_test_load.assertions = {};
 			current_test_load.assertion_count = 0;
-			var testSource = TFS.getFile(current_test_load.dir, current_test_load.name+".js").read().toString();
+			current_test_load.source_file = TFS.getFile(current_test_load.dir, current_test_load.name+".js");
+			var testSource = current_test_load.source_file.read().toString();
 			
 			for (var p in test)
 			{

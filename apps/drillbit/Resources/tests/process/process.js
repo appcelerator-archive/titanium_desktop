@@ -46,10 +46,15 @@ describe("process tests",
 	{
 		var p = Titanium.Process.createProcess(this.dirCmd);
 		value_of(p).should_be_function();
-		var list = p();
 		
-		value_of(list).should_be_string();
-		value_of(list.length).should_be_greater_than(0);
+		var list = p();
+		value_of(list).should_be_object();
+		value_of(list.toString).should_be_function();
+		
+		var data = list.toString();
+		value_of(data).should_be_string();
+		value_of(data.length).should_be_greater_than(0);
+		
 		value_of(p.stdin).should_be_object();
 		value_of(p.stdout).should_be_object();
 		value_of(p.stderr).should_be_object();
@@ -116,7 +121,11 @@ describe("process tests",
 	test_piped_command_as_async: function(callback)
 	{
 		var data = 'this_is_a_piped_test';
-		var echo = Titanium.Process.createProcess(this.cmd(this.echoCmd, data));
+		var echoCmd = this.echoCmd.slice();
+		echoCmd.push(data);
+		Titanium.API.debug(echoCmd+","+this.moreCmd);
+		
+		var echo = Titanium.Process.createProcess(echoCmd);
 		var more = Titanium.Process.createProcess(this.moreCmd);
 		echo.stdout.attach(more.stdin);
 		value_of(echo.stdout.isAttached()).should_be_true();

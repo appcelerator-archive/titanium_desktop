@@ -396,9 +396,9 @@ TitaniumTest =
 		if (failed)
 		{
 			var app = Titanium.API.getApplication();
-			var script = Titanium.Filesystem.getFile(
-				app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
-			var scriptText = script.read();
+			//var script = Titanium.Filesystem.getFile(
+			//app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
+			var scriptText = Titanium.Filesystem.getFile(TitaniumTest.SOURCE).read();
 			var lines = scriptText.toString().split("\n");
 
 			text.push('<table style="font-family: monospace; font-size: 10pt;">');

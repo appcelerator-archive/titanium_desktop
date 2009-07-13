@@ -170,7 +170,9 @@ namespace ti
 		
 		AutoProcess process = Process::CreateProcess(argsClone, environment, stdinPipe, stdoutPipe, stderrPipe);
 		processes.push_back(process);
-		result->SetObject(process);
+		
+		// this is a callable object
+		result->SetMethod(process);
 	}
 	
 	void ProcessBinding::ProcessTerminated(AutoProcess process)
