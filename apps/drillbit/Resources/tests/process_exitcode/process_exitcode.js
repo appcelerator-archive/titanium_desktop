@@ -36,11 +36,11 @@ describe("process exitCode tests",
 		    value_of(p.getExitCode()).should_be(-1);
 		});
 		
-		p.setOnExit(function(exitCode)
+		p.setOnExit(function(event)
 		{
 			try 
 			{
-			    exitCodeSuccess = exitCode;
+			    exitCodeSuccess = p.exitCode;
 			    Titanium.API.debug("exitCode = "+exitCode);
 			    test.passed();
 			}
@@ -85,11 +85,11 @@ describe("process exitCode tests",
 			}
 		});
 
-		p.setOnExit(function(exitCode)
+		p.setOnExit(function(event)
 		{
 			try 
 			{
-			    exitCodeFail = exitCode;
+			    exitCodeFail = p.exitCode;
 			    Titanium.API.debug("exitCode = "+exitCode);
 			    test.passed();
 			}

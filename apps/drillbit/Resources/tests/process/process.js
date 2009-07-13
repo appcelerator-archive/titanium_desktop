@@ -2,18 +2,47 @@ describe("process tests",
 {
 	before_all: function()
 	{
-		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/c","dir"] : ["/bin/ls"];
+		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/C","dir"] : ["/bin/ls"];
 		this.echoCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
 		this.moreCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\more.com"]: ["/usr/bin/more"];
 	},
 	
-	test_process_object: function()
+	test_process_binding: function()
 	{
 		value_of(Titanium.Process).should_not_be_null();
 		value_of(Titanium.Process.createProcess).should_be_function();
 		value_of(Titanium.Process.createInputPipe).should_be_function();
 		value_of(Titanium.Process.createOutputPipe).should_be_function();
 		value_of(Titanium.Process.getCurrentProcess).should_be_function();
+	},
+	
+	test_create_process: function()
+	{
+		value_of(function(){ Titanium.Process.createProcess() }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(null)}).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess([null])}).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess([])}).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(['ls',true])}).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(['ls',['a','b']])}).should_throw_exception();
+	},
+	
+	test_named_args: function()
+	{
+		var ins = Titanium.Process.createOutputPipe();
+		var outs = Titanium.Process.createInputPipe();
+		var errs = Titanium.Process.createInputPipe();
+		 
+		var myProgram = Titanium.Process.createProcess({  
+		  args: ['myprogram'],  
+		  env: {'env_var_1': 'value_1'},
+		  stdin: ins,
+		  stdout: outs,
+		  stderr: errs
+		});
+		
+		value_of(myProgram.getArguments()).should_be_array(['myprogram']);
+		value_of(myProgram.getEnvironment()['env_var_1']).should_be('value_1');
+		value_of('PATH' in myProgram.getEnvironment()).should_be_false();
 	},
 	
 	test_input_pipe: function()
@@ -36,6 +65,68 @@ describe("process tests",
 		value_of(i.isClosed()).should_be_false();
 		i.close();
 		value_of(i.isClosed()).should_be_true();
+	},
+	
+	test_anonymous_attach_as_async: function(callback)
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		var buf = "";
+		p.stdout.attach({
+			write: function(data) {
+				buf += data.toString();
+			}
+		});
+		var timer = 0;
+		p.setOnExit(function(){
+			clearTimeout(timer);
+			try {
+				value_of(buf.length).should_be_greater_than(0);
+			} catch (e) {
+				callback.failed(e);
+			}
+			callback.passed();
+		});
+		p.launch();
+		
+		timer = setTimeout(function(){
+			callback.failed("timed out");
+		}, 3000);
+	},
+	
+	test_kill: function()
+	{
+		var p = Titanium.Process.createProcess(this.moreCmd);
+		var timer = 0;
+		p.setOnExit(function(){
+			clearTimeout(timer);
+			callback.passed();
+		});
+		p.launch();
+		setTimeout(function(){
+			p.kill();
+		}, 1);
+		
+		timer = setTimeout(function(){
+			callback.failed("timed out");
+		}, 3000);
+	},
+	
+	test_terminate: function()
+	{
+		var p = Titanium.Process.createProcess(this.moreCmd);
+		var timer = 0;
+		p.setOnExit(function(){
+			clearTimeout(timer);
+			callback.passed();
+		});
+		p.launch();
+		setTimeout(function(){
+			p.terminate();
+		}, 1);
+		
+		timer = setTimeout(function(){
+			callback.failed("timed out");
+		}, 3000);
 	},
 	
 	test_sync_process: function()
@@ -173,6 +264,7 @@ describe("process tests",
 		value_of(o.write).should_be_function();
 		value_of(o.isClosed).should_be_function();
 		value_of(o.close).should_be_function();
+		value_of(o.flush).should_be_function();
 		
 		value_of(o.isClosed()).should_be_false();
 		o.close();
@@ -247,8 +339,18 @@ describe("process tests",
 		
 		p.setOnRead(function(event)
 		{
-			var buf = event.pipe.read();
-			output += buf;
+			try {
+				value_of(p.getPID()).should_be_number();
+				
+				var buf = event.pipe.read();
+				value_of(buf).should_be_object();
+				value_of(buf.toString()).should_be_string();
+				value_of(buf.length).should_be_greater_than(0);
+				
+				output += buf;
+			} catch(e) {
+				test.failed(e);
+			}
 		});
 		
 		p.setOnExit(function()

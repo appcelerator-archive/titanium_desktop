@@ -100,9 +100,9 @@ namespace ti
 			}
 			
 			argList = options->Get("args")->ToList();
-			if (!options->Get("env")->IsUndefined() && options->Get("env")->IsList())
+			if (!options->Get("env")->IsUndefined() && options->Get("env")->IsObject())
 			{
-				environment = options->Get("env")->ToList();
+				environment = options->Get("env")->ToObject();
 			}
 			if (!options->Get("stdin")->IsUndefined() && options->Get("stdin")->IsObject())
 			{

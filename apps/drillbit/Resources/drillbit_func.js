@@ -742,3 +742,17 @@ TitaniumTest.Subject.prototype.should_be_less_than_equal = function(expected, li
 		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' > ' + expected);
 	}
 };
+
+TitaniumTest.Subject.prototype.should_throw_exception = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (typeof(this.target) == 'function')
+	{
+		try {
+			this.target();
+		} catch (e) { return; }
+		throw new TitaniumTest.Error("should throw exception, but didn't");
+	}
+	else throw new TitaniumTest.Error("should throw exception, but target isn't a function");
+};
