@@ -276,14 +276,6 @@
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
-	// Only report feedback for the main frame.
-	// set the title on the config in case they
-	// programatically set the title on the window
-	// so that it correctly is reflected in the config 
-	WindowConfig *config = [window config];
-	std::string t = std::string([title UTF8String]);
-	config->SetTitle(t);
-	[window setTitle:title];
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame

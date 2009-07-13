@@ -12,8 +12,10 @@ namespace ti
 		{
 			GtkMenuItem* item = static_cast<GtkMenuItem*>(data);
 			if (item->IsCheck()) {
+				GtkMenuItem::BlockSignal(nativeItem, item);
 				gtk_check_menu_item_set_active(
 					GTK_CHECK_MENU_ITEM(nativeItem), item->GetState());
+				GtkMenuItem::UnblockSignal(nativeItem, item);
 			}
 			item->HandleClickEvent(0);
 		}
@@ -67,9 +69,9 @@ namespace ti
 		std::vector< ::GtkMenuItem*>::iterator i = this->nativeItems.begin();
 		while (i != this->nativeItems.end()) {
 			::GtkMenuItem* nativeItem = *i++;
-			this->BlockSignal(nativeItem);
+			BlockSignal(nativeItem, this);
 			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(nativeItem), newState);
-			this->UnblockSignal(nativeItem);
+			UnblockSignal(nativeItem, this);
 		}
 	}
 
@@ -174,16 +176,16 @@ namespace ti
 		return newNativeItem;
 	}
 
-	void GtkMenuItem::BlockSignal(::GtkMenuItem* item)
+	void GtkMenuItem::BlockSignal(::GtkMenuItem* nativeItem, MenuItem* item)
 	{
 		g_signal_handlers_block_by_func(
-			G_OBJECT(item), (void*) GtkMenus::MenuCallback, this);
+			G_OBJECT(nativeItem), (void*) GtkMenus::MenuCallback, item);
 	}
 
-	void GtkMenuItem::UnblockSignal(::GtkMenuItem* item)
+	void GtkMenuItem::UnblockSignal(::GtkMenuItem* nativeItem, MenuItem* item)
 	{
 		g_signal_handlers_unblock_by_func(
-			G_OBJECT(item), (void*) GtkMenus::MenuCallback, this);
+			G_OBJECT(nativeItem), (void*) GtkMenus::MenuCallback, item);
 	}
 
 	void GtkMenuItem::DestroyNative(::GtkMenuItem* nativeItem)
