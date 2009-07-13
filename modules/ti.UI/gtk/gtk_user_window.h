@@ -38,7 +38,6 @@ namespace ti
 		public:
 		GtkUserWindow(WindowConfig*, AutoUserWindow&);
 		virtual ~GtkUserWindow();
-		void Destroyed();
 		void SetupDecorations();
 		void SetupTransparency();
 		void SetupSizeLimits();

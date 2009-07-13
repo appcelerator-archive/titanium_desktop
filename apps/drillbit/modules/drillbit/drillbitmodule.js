@@ -113,6 +113,7 @@
 					if (typeof fn == 'function')
 					{
 						self.total_tests++;
+						Titanium.App.stdout(">>> ["+self.total_tests+"] "+current_test_load.name+","+p);
 						current_test_load.assertion_count++;
 						current_test_load.assertions[p]=false;
 						var r = new RegExp(p+" *: *function *\\(");

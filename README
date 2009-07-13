@@ -55,6 +55,14 @@ To build the packaged bundles, use package flag:
 The output of the build will be in a folder named build\<osname> such as 
 build/osx for OSX.
 
+-----------
+ Testing
+-----------
+
+Titanium uses the Drillbit application under apps/ to perfrom tests.
+You can build and run Drillbit by typing:
+
+> scons drillbit run=1
 
 ---------------
  Platform Info 
