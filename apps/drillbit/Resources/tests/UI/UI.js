@@ -584,8 +584,6 @@ describe("UI Module Tests",{
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		
-		// chrome causes problems with topmost.
-		w.setUsingChrome(false);
 		w.open();
 		value_of(w.isTopMost()).should_be(false);
 
@@ -617,4 +615,21 @@ describe("UI Module Tests",{
 		value_of(w.isTopMost()).should_be_undefined();
 	},
 	
+	test_window_ResizableFlag: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		
+		value_of(w.isResizable()).should_be(true);
+		w.open();
+
+		value_of(w.isResizable()).should_be(true);
+
+		w.setResizable(false);
+		value_of(w.isResizable()).should_be(false);
+
+		w.setResizable(true);
+		value_of(w.isResizable()).should_be(true);
+
+		w.close();
+	},
 });
