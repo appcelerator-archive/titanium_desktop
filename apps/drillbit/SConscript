@@ -10,7 +10,7 @@ common_dir = p.join(build.titanium_source_dir,'installation','common')
 
 t = build.env.PackageApp('#drillbit-target',
 	[Dir('Resources'), Dir('modules'),
-		Glob('manifest_*'), 'drillbit_cmd.py', 'tiapp.xml'],
+		Glob('manifest*'), 'drillbit_cmd.py', 'tiapp.xml'],
 	FULLNAME='Drillbit',
 	ID='com.titaniumapp.unittest.driver',
 	GUID='D83B08F4-B43B-4909-9FEE-336CDB44750B',

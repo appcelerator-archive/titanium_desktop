@@ -6,7 +6,10 @@
 		this.frontend = null;
 		this.auto_close = false;
 		this.debug_tests = false;
+		this.run_tests_async = false;
 		
+		this.tests = {};
+		this.test_names = [];
 		var current_test_load = null;
 		var current_test = null;
 		var excludes = ['before','before_all','after','after_all','timeout'];
@@ -19,13 +22,11 @@
 		var test_failures = false;
 		var specific_tests = null;
 		var total_assertions = 0;
-		var tests = {};
-		var test_names = [];
 		var executing_tests = [];
-	
+		
+		this.test_harness_dir = TFS.getFile(TA.appURLToPath('app://test_harness'));
+		this.results_dir = TFS.getFile(TA.appURLToPath('app://test_results'));
 		var app_dir = TFS.getApplicationDirectory();
-		var test_harness_dir = TFS.getFile(TA.appURLToPath('app://test_harness'));
-		var results_dir = TFS.getFile(TA.appURLToPath('app://test_results'));
 		var drillbit_funcs = TFS.getFile(TA.appURLToPath('app://drillbit_func.js')).read();
 		var user_scripts_dir = null;
 		var app = null;
@@ -93,47 +94,71 @@
 			current_test_load = null;
 		};
 		
+		this.loadTestFile = function(test_file)
+		{
+			var name = test_file.name();
+			var ext = test_file.extension();
+			name = name.replace('.'+ext,'');
+			var dir = test_file.parent();
+			var jsfile = TFS.getFile(dir,name+'.js');
+			if (!jsfile.exists())
+			{
+				return;
+			}
+			var entry = this.tests[name];
+			if (!entry)
+			{
+				entry = {name:name,dir:dir};
+				this.tests[name] = entry;
+				this.test_names.push(name);
+			}
+			entry[ext] = test_file;
+			current_test_load = entry;
+			try
+			{
+				eval(String(jsfile.read()));
+			}
+			catch(EX)
+			{
+				this.frontend_do('error', "error loading: "+test_file+". Exception: "+EX+" (line: "+EX.line+")");
+			}
+		};
+		
+		this.loadTestDir = function(test_dir)
+		{
+			var files = test_dir.getDirectoryListing();
+			for (var i = 0; i < files.length; i++)
+			{
+				if (files[i].isFile())
+				{
+					this.loadTestFile(files[i]);
+				}
+			}
+		};
+		
 		this.loadTests = function(test_files)
 		{
-			results_dir.createDirectory();
+			this.results_dir.createDirectory();
 
-			var f = Titanium.Filesystem.getFile(results_dir, "results.html");
+			var f = Titanium.Filesystem.getFile(this.results_dir, "results.html");
 			if (f.exists()) {
 				f.deleteFile();
 			}
 		
 			for (var c=0;c<test_files.length;c++)
 			{
-				var f = test_files[c];
-				var name = f.name();
-				var ext = f.extension();
-				name = name.replace('.'+ext,'');
-				var dir = f.parent();
-				var jsfile = TFS.getFile(dir,name+'.js');
-				if (!jsfile.exists())
+				var file = TFS.getFile(test_files[c]);
+				if (file.isDirectory())
 				{
-					continue;
+					this.loadTestDir(file);
 				}
-				var entry = tests[name];
-				if (!entry)
+				else
 				{
-					entry = {name:name,dir:dir};
-					tests[name] = entry;
-					test_names.push(name);
-				}
-				entry[ext] = f;
-				current_test_load = entry;
-				try
-				{
-					eval(String(jsfile.read()));
-				}
-				catch(EX)
-				{
-					this.frontend_do('error', "error loading: "+f+". Exception: "+EX+" (line: "+EX.line+")");
+					this.loadTest(file);
 				}
 			}
 
-			test_names.sort();
+			this.test_names.sort();
 		};
 	
 		this.setupTestHarness = function(harness_manifest)
@@ -142,13 +167,13 @@
 			var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
 
 			// create the test harness directory
-			if (!test_harness_dir.exists())
+			if (!this.test_harness_dir.exists())
 			{
-				test_harness_dir.createDirectory();
+				this.test_harness_dir.createDirectory();
 			}
 
 			// create app structure
-			app = Titanium.createApp(runtime_dir,test_harness_dir,'test_harness','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4',false);
+			app = Titanium.createApp(runtime_dir,this.test_harness_dir,'test_harness','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4',false);
 			tiapp_backup = TFS.getFile(app.base,'_tiapp.xml');
 			manifest_backup = TFS.getFile(app.base,'_manifest');
 
@@ -170,18 +195,26 @@
 			user_scripts_dir.createDirectory();
 		};
 	
-		this.runTests = function()
-		{	
-			for (var i = 0; i < test_names.length; i++)
+		this.runTests = function(tests_to_run)
+		{
+			tests_to_run = tests_to_run ? tests_to_run : this.test_names;
+			for (var i = 0; i < tests_to_run.length; i++)
 			{
-				var name = test_names[i];
-				var entry = tests[name];
+				var name = tests_to_run[i];
+				var entry = this.tests[name];
 				executing_tests.push(entry);
 				running_tests+=entry.assertion_count;
 			}
 		
 			tests_started = new Date().getTime();
-			this.run_next_test();
+			if (this.run_tests_async)
+			{
+				window.setTimeout(function(){self.run_next_test();}, 1);
+			}
+			else
+			{
+				this.run_next_test();
+			}
 		};
 	
 		this.run_test = function(entry)
@@ -304,8 +337,8 @@
 			TFS.getFile(module.getPath(),"template_out.js").write(user_script);
 			runner_js.write(user_script);
 
-			var profile_path = TFS.getFile(results_dir,entry.name+'.prof');
-			var log_path = TFS.getFile(results_dir,entry.name+'.log');
+			var profile_path = TFS.getFile(this.results_dir,entry.name+'.prof');
+			var log_path = TFS.getFile(this.results_dir,entry.name+'.log');
 
 			profile_path.deleteFile();
 			log_path.deleteFile();
@@ -319,7 +352,7 @@
 				args.push('--attach-debugger');
 			}
 
-			args.push('--results-dir="' + results_dir + '"');
+			args.push('--results-dir="' + this.results_dir + '"');
 			var process = Titanium.Process.createProcess(args);
 			var passed = 0;
 			var failed = 0;
@@ -412,7 +445,7 @@
 					//clearInterval(timer);
 					if (!current_test.failed)
 					{
-						var r = TFS.getFile(results_dir,current_test.name+'.json').read();
+						var r = TFS.getFile(self.results_dir,current_test.name+'.json').read();
 						var rs = '(' + r + ');';
 						var results = eval(rs);
 						current_test.results = results;
@@ -446,7 +479,7 @@
 				executing_tests = null;
 				current_test = null;
 				self.frontend_do('update_status', 'Testing complete ... took ' + test_duration + ' seconds',true);
-				var f = TFS.getFile(results_dir,'drillbit.json');
+				var f = TFS.getFile(this.results_dir,'drillbit.json');
 				f.write("{\"success\":" + String(!test_failures) + "}");
 				if (self.auto_close)
 				{
@@ -459,9 +492,16 @@
 			current_test.failed = false;
 			self.frontend_do('update_status', 'Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
 			self.frontend_do('suite_started', entry.name);
-			//setTimeout(function(){this.run_test(entry)},1);
-			self.run_test(entry);
+			this.run_tests_async ? setTimeout(function(){self.run_test(entry)},1) : this.run_test(entry);
 		};
+		
+		this.reset = function()
+		{
+			executing_tests = [];
+			running_tests = 0;
+			running_completed = 0;
+			running_passed = running_failed = total_assertions = 0;
+		}
 	};
 	
 	Titanium.Drillbit = new Drillbit();
