@@ -11,13 +11,14 @@
 #include <sstream>
 #include "input_pipe.h"
 #include "output_pipe.h"
+#include "buffered_input_pipe.h"
 
 namespace ti
 {
 	class Process;
 	typedef AutoPtr<Process> AutoProcess;
 	
-	class Process : public AccessorBoundObject
+	class Process : public AccessorBoundMethod
 	{
 	public:
 		Process(SharedKList args, SharedKObject environment,
@@ -26,8 +27,6 @@ namespace ti
 		static AutoProcess GetCurrentProcess();
 		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, 
 			AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
-		
-		virtual SharedValue Call(const ValueList& args);
 		
 		virtual int GetPID() = 0;
 		void SetExitCode(int exitCode) { this->exitCode = exitCode; }
@@ -71,7 +70,13 @@ namespace ti
 		
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
-
+		
+		// non-exposed binding methods
+		BufferedInputPipe buffer;
+		SharedKMethod bufferedRead;
+		void BufferedRead(const ValueList& args, SharedValue result);
+		void Call(const ValueList& args, SharedValue result);
+		
 		AutoInputPipe stdoutPipe, stderrPipe;
 		AutoOutputPipe stdinPipe;
 		SharedKObject environment;

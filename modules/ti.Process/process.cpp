@@ -47,7 +47,7 @@ namespace ti
 	
 	
 	Process::Process() :
-		AccessorBoundObject("Process.Process")
+		AccessorBoundMethod(NULL, "Process.Process")
 	{
 		args = new StaticBoundList();
 		environment = new StaticBoundObject();
@@ -55,15 +55,16 @@ namespace ti
 		InitBindings();
 	}
 	
-	Process::Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
-		AccessorBoundObject("Process.Process"),
-		stdoutPipe(stdoutPipe),
-		stderrPipe(stderrPipe),
-		stdinPipe(stdinPipe),
-		environment(environment),
-		args(args),
-		exitCode(-1),
-		onExit(0)
+	Process::Process(SharedKList args, SharedKObject environment,
+		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+			AccessorBoundMethod(NULL, "Process.Process"),
+			stdoutPipe(stdoutPipe),
+			stderrPipe(stderrPipe),
+			stdinPipe(stdinPipe),
+			environment(environment),
+			args(args),
+			exitCode(-1),
+			onExit(0)
 	{
 		if (environment.isNull())
 		{
@@ -105,6 +106,7 @@ namespace ti
 		SetMethod("getStdout", &Process::_GetStdout);
 		SetMethod("getStderr", &Process::_GetStderr);
 		SetMethod("isRunning", &Process::_IsRunning);
+		this->callback = NewCallback<Process, const ValueList&, SharedValue>(this, &Process::Call);
 	}
 
 	Process::~Process()
@@ -321,11 +323,32 @@ namespace ti
 		result->SetBool(IsRunning());
 	}
 	
-	SharedValue Process::Call(const ValueList& args)
+	void Process::BufferedRead(const ValueList& args, SharedValue result)
 	{
+		AutoInputPipe pipe = args.at(0)->ToObject()->GetObject("pipe").cast<InputPipe>();
+		buffer.Append(pipe->Read());
+	}
+	
+	void Process::Call(const ValueList& args, SharedValue result)
+	{
+		if (!stderrPipe->IsJoined())
+		{
+			stdoutPipe->Join(stderrPipe);
+		}
+		
+		if (bufferedRead.isNull())
+		{
+	 		MethodCallback* bufferedCallback =
+				NewCallback<Process, const ValueList&, SharedValue>(this, &Process::BufferedRead);
+			
+			bufferedRead = new StaticBoundMethod(bufferedCallback);
+		}
+		
+		stdoutPipe->SetOnRead(bufferedRead);
+		
 		Launch(false);
-		// TODO join stdout/stderr, buffer contents, return
-		return Value::Undefined;
+		
+		result->SetObject(buffer.Read(buffer.GetSize()));
 	}
 }
 

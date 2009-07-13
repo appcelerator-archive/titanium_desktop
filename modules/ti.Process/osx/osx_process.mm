@@ -167,7 +167,6 @@ namespace ti
 		}
 		
 		// start the process
-		// TODO -- implement sync
 		@try
 		{
 			std::ostringstream str;
@@ -178,6 +177,10 @@ namespace ti
 			Logger::Get("OSXProcess")->Debug("Launching: %s", str.str().c_str());
 			
 			[[delegate task] launch];
+			if (!async)
+			{
+				[[delegate task] waitUntilExit];
+			}
 		}
 		@catch(NSException *e)
 		{
@@ -192,7 +195,13 @@ namespace ti
 			return;
 		}
 		
-		[[delegate task] terminate];
+		@try
+		{
+			[[delegate task] terminate];
+		}
+		@catch (NSException *e)
+		{
+		}
 	}
 	
 	void OSXProcess::Kill()

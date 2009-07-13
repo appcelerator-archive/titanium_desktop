@@ -144,14 +144,28 @@ namespace ti
 		}
 		if (argList->Size() == 0)
 		{
-			throw ValueException::FromString("TItanium.Process option argument 'args' must have at least 1 element");
+			throw ValueException::FromString("Titanium.Process option argument 'args' must have at least 1 element");
 		}
-		
 		// Clone args
 		SharedKList argsClone = new StaticBoundList();
 		for (size_t i = 0; i < argList->Size(); i++)
 		{
-			argsClone->Append(Value::NewString(argList->At(i)->ToString()));
+			SharedValue arg = Value::Undefined;
+			if (!argList->At(i)->IsString())
+			{
+				if (argList->At(i)->IsObject() && argList->At(i)->ToObject()->Get("toString") != Value::Undefined)
+				{
+					arg = argList->At(i)->ToObject()->CallNS("toString");
+				}
+			}
+			else {
+				arg = argList->At(i);
+			}
+			if (arg->IsUndefined()) {
+				throw ValueException::FromString("Titanium.Process argument was not a String or Object with toString");
+			}
+			
+			argsClone->Append(arg);
 		}
 		
 		AutoProcess process = Process::CreateProcess(argsClone, environment, stdinPipe, stdoutPipe, stderrPipe);

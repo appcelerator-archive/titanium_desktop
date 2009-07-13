@@ -1,5 +1,16 @@
 describe("process tests",
 {
+	before_all: function()
+	{
+		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/C","dir"] : ["/bin/ls"];
+		this.echoCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
+		this.moreCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\more.com"]: ["/usr/bin/more"];
+		
+		this.cmd = function(args, args2) {
+			Array.prototype.push.apply(args, args2);
+		}
+	},
+	
 	test_process_object: function()
 	{
 		value_of(Titanium.Process).should_not_be_null();
@@ -31,6 +42,105 @@ describe("process tests",
 		value_of(i.isClosed()).should_be_true();
 	},
 	
+	test_sync_process: function()
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		value_of(p).should_be_function();
+		var list = p();
+		
+		value_of(list).should_be_string();
+		value_of(list.length).should_be_greater_than(0);
+		value_of(p.stdin).should_be_object();
+		value_of(p.stdout).should_be_object();
+		value_of(p.stderr).should_be_object();
+		value_of(p.stdin.isClosed()).should_be_true();
+		value_of(p.stdout.isClosed()).should_be_true();
+		value_of(p.stderr.isClosed()).should_be_true();
+	},
+	
+	test_process_on_PATH: function()
+	{
+		var dir = Titanium.platform == "win32" ? ["cmd", "/C", "dir"] : ["ls"];
+		var listDirs = Titanium.Process.createProcess(dir);
+		value_of(listDirs.getArguments()[0]).should_be(this.dirCmd);
+		var dirList = listDirs();
+		value_of(dirList.length).should_be_greater_than(0);
+	},
+	
+	test_split_and_attach_pipe_as_async: function(callback)
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		p.stdout.join(p.stderr);
+		value_of(p.stdout.isJoined()).should_be_false();
+		value_of(p.stderr.isJoined()).should_be_true();
+		
+		var pipes = p.stdout.split();
+		value_of(pipes.length).should_be(2);
+		value_of(pipes[0]).should_be_object();
+		value_of(pipes[1]).should_be_object();
+		value_of(p.stdout.isSplit()).should_be_true();
+		
+		var file = Titanium.Filesystem.createTempFile();
+		var stream = Titanium.Filesystem.getFileStream(file.nativePath());
+		stream.open(stream.MODE_WRITE);
+		
+		pipes[0].attach(stream);
+		value_of(pipes[0].isAttached()).should_be_true();
+		value_of(pipes[1].isAttached()).should_be_false();
+		value_of(p.stdout.isAttached()).should_be_false();
+		
+		var data = "";
+		var timer = 0;
+		pipes[1].setOnRead(function(event){
+			data += event.pipe.read();
+		});
+		p.setOnExit(function(exitCode){
+			clearTimeout(timer);
+			stream.close();
+			var fileData = file.read();
+			
+			value_of(data).should_be(fileData);
+			value_of(pipes[0].isClosed()).should_be_true();
+			value_of(pipes[1].isClosed()).should_be_true();
+			value_of(p.stdout.isClosed()).should_be_true();
+			value_of(p.stderr.isClosed()).should_be_true();
+			callback.passed();
+		});
+		p.launch();
+		
+		timer = setTimeout(function(){
+			callback.failed("Timed out waiting for command to exit");
+		}, 5000);
+	},
+	
+	test_piped_command_as_async: function(callback)
+	{
+		var data = 'this_is_a_piped_test';
+		var echo = Titanium.Process.createProcess(this.cmd(this.echoCmd, data));
+		var more = Titanium.Process.createProcess(this.moreCmd);
+		echo.stdout.attach(more.stdin);
+		value_of(echo.stdout.isAttached()).should_be_true();
+		var moreData = "";
+		more.setOnRead(function(event){
+			moreData += event.pipe.read();
+		});
+		var timer = 0;
+		more.setOnExit(function(exitCode){
+			clearTimeout(timer);
+			value_of(moreData).should_be(data);
+			value_of(echo.stdout.isClosed()).should_be_true();
+			value_of(more.stdin.isClosed()).should_be_true();
+			callback.passed();
+		});
+		
+		echo.launch();
+		more.launch();
+		
+		timer = setTimeout(function(){
+			callback.failed("Timed out waiting for command to exit");
+		}, 5000);
+	},
+	
 	test_input_pipe_empty_read: function() {
 		var i = Titanium.Process.createInputPipe();
 		var exception = false;
@@ -39,8 +149,7 @@ describe("process tests",
 		
 		value_of(exception).should_be_false();
 		value_of(data).should_be_object();
-		value_of(data.length).should_be(0);
-		
+		value_of(data.length).should_be(0);	
 	},
 	
 	test_output_pipe: function()
@@ -112,20 +221,14 @@ describe("process tests",
 	
 	test_process_as_async: function(test)
 	{
-		var p = null;
-		
-		if (Titanium.platform == 'win32')
-		{
-			p = Titanium.Process.createProcess(['C:\\Windows\\system32\\cmd.exe', '/C', 'dir']);
-		}
-		else
-		{
-			p = Titanium.Process.createProcess(['/bin/ls', '-la']);
-		}
-		
+		var p = Titanium.Process.createProcess(this.dirCmd);
 		var timer = null;
 		var shortTimer = null;
 		value_of(p).should_not_be_null();
+		value_of(p.stdin).should_be_object();
+		value_of(p.stdout).should_be_object();
+		value_of(p.stderr).should_be_object();
+		
 		var output = '';
 		
 		p.setOnRead(function(event)
@@ -158,16 +261,7 @@ describe("process tests",
 	
 	test_process_exception_as_async: function(test)
 	{
-		var p = null;
-		if (Titanium.platform == 'win32')
-		{
-			p = Titanium.Process.createProcess(['C:\\Windows\\system32\\cmd.exe', '/c', 'dir']);
-		}
-		else
-		{
-			p = Titanium.Process.createProcess(['/bin/ls', '-la']);
-		}
-
+		var p = Titanium.Process.createProcess(this.dirCmd);
 		var timer = null;
 		value_of(p).should_not_be_null();
 		var output = '';
