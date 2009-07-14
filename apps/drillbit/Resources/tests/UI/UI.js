@@ -580,7 +580,7 @@ describe("UI Module Tests",{
 			}, 200);
 		}, 200);
 	},
-	test_window_TopMost: function()
+	test_window_top_most: function()
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		
@@ -610,15 +610,11 @@ describe("UI Module Tests",{
 		value_of(w.isTopMost()).should_be(false);
 
 		w.close();
-		
-		// the ultimate reality check.
-		value_of(w.isTopMost()).should_be_undefined();
 	},
 	
-	test_window_ResizableFlag: function()
+	test_window_resizable: function()
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
-		
 		value_of(w.isResizable()).should_be(true);
 		w.open();
 

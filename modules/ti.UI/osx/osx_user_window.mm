@@ -685,7 +685,7 @@ namespace ti
 
 	bool OSXUserWindow::IsTopMost()
 	{
-		return this->topmost;
+		return this->config->IsTopMost();
 	}
 
 	void OSXUserWindow::SetTopMost(bool topmost)
@@ -695,12 +695,10 @@ namespace ti
 			if (topmost)
 			{
 				[nativeWindow setLevel:NSPopUpMenuWindowLevel];
-				this->topmost = true;
 			}
 			else
 			{
 				[nativeWindow setLevel:NSNormalWindowLevel];
-				this->topmost = false;
 			}
 		}
 	}

@@ -459,13 +459,16 @@ void UserWindow::Open()
 
 void UserWindow::Close()
 {
-	this->FireEvent(Event::CLOSE); // fire our close event
+	// We want to fire the CLOSE event synchronously, because we
+	// want to ensure that listeners on the originating window get
+	// this event.
+	this->FireEvent(Event::CLOSE, true); 
 	this->active = false; // prevent further modification
 }
 
 void UserWindow::Closed()
 {
-	this->FireEvent(Event::CLOSED);
+	this->FireEvent(Event::CLOSED, true);
 
 	// Close all children and cleanup
 	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
@@ -628,14 +631,10 @@ void UserWindow::_IsTopMost(const kroll::ValueList& args, kroll::SharedValue res
 {
 	if (this->active)
 	{
-		if (this ->IsTopMost() )
-		{
-			PRINTD("using IsTopMost: TRUE");
-		}
-		else
-		{
-			PRINTD("using IsTopMost: FALSE");
-		}
+		result->SetBool(this->IsTopMost());
+	}
+	else
+	{
 		result->SetBool(this->config->IsTopMost());
 	}
 }

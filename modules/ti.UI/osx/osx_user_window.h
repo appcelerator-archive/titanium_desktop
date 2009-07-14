@@ -119,7 +119,6 @@ namespace ti
 
 		private:
 			NativeWindow *nativeWindow;
-			bool topmost;
 			bool focused;
 			AutoPtr<OSXMenu> menu;
 			AutoPtr<OSXMenu> contextMenu;

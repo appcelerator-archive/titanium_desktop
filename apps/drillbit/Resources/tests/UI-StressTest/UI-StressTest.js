@@ -219,8 +219,8 @@ describe("UI Module Tests",{
 		addEventTest(function() { w.open(); }, [Titanium.OPEN, Titanium.OPENED]);
 		addEventTest(function() { w.setVisible(false); }, [Titanium.HIDDEN]);
 		addEventTest(function() { w.setVisible(true); }, [Titanium.SHOWN]);
-		addEventTest(function() { w.setFullScreen(true); }, [Titanium.FULLSCREENED]);
-		addEventTest(function() { w.setFullScreen(false); }, [Titanium.UNFULLSCREENED]);
+		addEventTest(function() { w.setFullscreen(true); }, [Titanium.FULLSCREENED]);
+		addEventTest(function() { w.setFullscreen(false); }, [Titanium.UNFULLSCREENED]);
 		addEventTest(function() { w.maximize(); }, [Titanium.MAXIMIZED]);
 		addEventTest(function() { w.minimize(); w.unminimize() }, [Titanium.MINIMIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.MOVED]);
