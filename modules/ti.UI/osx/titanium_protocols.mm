@@ -80,7 +80,7 @@
 
 	id<NSURLProtocolClient> client = [self client];
 	NSURL* url = [[self request] URL];
-	std:string urlString = [[url absoluteString] UTF8String];
+	std::string urlString = [[url absoluteString] UTF8String];
 	std::string path = ti::URLToPathOrURL(urlString);
 	NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
 
