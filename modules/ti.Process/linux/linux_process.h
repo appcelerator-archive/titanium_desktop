@@ -46,7 +46,6 @@ namespace ti
 		Poco::RunnableAdapter<LinuxProcess>* exitMonitorAdapter;
 		bool running, complete, current;
 		int pid;
-		int exitCode;
 		
 		Logger* logger;
 		static AutoPtr<LinuxProcess> currentProcess;

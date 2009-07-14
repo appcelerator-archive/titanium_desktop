@@ -25,7 +25,6 @@ namespace ti
 		complete(false),
 		current(false),
 		pid(-1),
-		exitCode(-1),
 		logger(Logger::Get("Process.LinuxProcess"))
 	{
 	}
@@ -130,33 +129,17 @@ namespace ti
 			
 		this->running = true;
 		
+		// setup threads which can read output and also monitor the exit
+		GetStdout()->StartMonitor();
+		GetStderr()->StartMonitor();
 		if (async)
 		{
-			// setup threads which can read output and also monitor the exit
-			GetStdout()->StartMonitor();
-			GetStderr()->StartMonitor();
 			this->exitMonitorAdapter = 
 				new Poco::RunnableAdapter<LinuxProcess>(*this, &LinuxProcess::ExitMonitor);
 			this->exitMonitorThread.start(*exitMonitorAdapter);
 		}
 		else
-		{
-			char buffer[1024];
-			while(true)
-			{
-				try
-				{
-					int size = GetStdout()->RawRead(buffer, 1024);
-					if (size == 0 || size == -1) break;
-					
-					GetStdout()->Append(buffer, size);
-				}
-				catch (ValueException &e)
-				{
-					break;
-				}
-			}
-			
+		{	
 			ExitMonitor();
 		}
 	}
@@ -227,7 +210,7 @@ namespace ti
 		
 		this->running = false;
 		this->complete = true;
-		this->exitCode = WEXITSTATUS(status);
+		SetExitCode(WEXITSTATUS(status));
 		Process::Exited();
 	}
 }
