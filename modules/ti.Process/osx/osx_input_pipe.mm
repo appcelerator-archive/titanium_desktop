@@ -23,25 +23,12 @@
 
 -(void)dataReady:(NSNotification *)aNotification
 {
+	kroll::Logger *logger = kroll::Logger::Get("Process.TiDataReady");
 	NSData *data = [[aNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+	
 	if ([data length]) {
 		pipe->DataReady(data);
-		
-		// we need to schedule the file handle to wait for more data in the background again.
-		
 	}
-/*	else {
-		NSData *data;
-		[[NSNotificationCenter defaultCenter] removeObserver:self
-			name:NSFileHandleReadCompletionNotification
-			object:[pipe->GetPipe() fileHandleForReading]];
-			
-		while ((data = [[pipe->GetPipe() fileHandleForReading] availableData]) && [data length])
-		{
-			[pipe->GetBuffer() appendData:data];
-		}
-		pipe->InputPipe::DataReady();
-	}*/
 	[[aNotification object] readInBackgroundAndNotify];
 }
 
@@ -60,11 +47,14 @@ namespace ti
 		
 		dataReady = [[TiDataReady alloc] initWithPipe:this];
 		[dataReady retain];
+		
+		Logger::Get("Process.OSXInputPipe")->Debug("adding notification for dataReady");
 		[[NSNotificationCenter defaultCenter] addObserver:dataReady 
 			selector:@selector(dataReady:)
 			name:NSFileHandleReadCompletionNotification 
 			object: handle];
 		
+		Logger::Get("Process.OSXInputPipe")->Debug("read in background and notify");
 		[handle readInBackgroundAndNotify];
 	}
 	
@@ -81,10 +71,6 @@ namespace ti
 	void OSXInputPipe::Close()
 	{
 		if (!IsClosed()) {
-			[[NSNotificationCenter defaultCenter] removeObserver:dataReady
-				name:NSFileHandleReadCompletionNotification
-				object:handle];
-			
 			closed = true;
 			
 			bool handleClosed = false;
@@ -113,8 +99,17 @@ namespace ti
 	
 	void OSXInputPipe::DataReady(NSData *data)
 	{
+		Logger *logger = Logger::Get("Process.OSXInputPipe");
 		[buffer appendData:data];
-		InputPipe::DataReady();
+		
+		logger->Debug("dataReady: data %d bytes, buffer %d bytes", [data length], [buffer length]);
+		if ([buffer length] > 0)
+		{
+			NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+			logger->Debug("data: %s", [str UTF8String]);
+			[str release];
+			InputPipe::DataReady();
+		}
 	}
 	
 	void OSXInputPipe::Erase(int nBytes)

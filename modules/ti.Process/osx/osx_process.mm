@@ -90,19 +90,21 @@
 
 -(void)terminated: (NSNotification *)aNotification
 {
-	Logger *logger = Logger::Get("OSXProcess");
-	logger->Info("Process has terminated");
+	Logger *logger = Logger::Get("Process.OSXProcess");
+	logger->Debug("Process has terminated: %s", process->ArgumentsToString().c_str());
 
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:NSTaskDidTerminateNotification object: task];
 	
 	process->SetExitCode([task terminationStatus]);
-	process->Exited();
-
 	// close the streams after our onexit in case they want to read
 	// one last time from the stream in the callback
+	// In OSX, Process termination can come before pipe close, so we deal
+	// with pipe cleanup in OSXInputPipe
 	process->GetStdin()->Close();
 	process->GetStdout()->Close();
 	process->GetStderr()->Close();
+	
+	process->Exited();
 }
 @end
 
@@ -114,6 +116,7 @@ namespace ti
 	{
 		
 		delegate = [[TiOSXProcess alloc] initWithProcess:this];
+		logger = Logger::Get("Process.OSXProcess");
 	}
 	
 	// Current process constructor
@@ -121,6 +124,7 @@ namespace ti
 	{
 		environment = new StaticBoundObject();
 		args = new StaticBoundList();
+		logger = Logger::Get("Process.OSXProcess");
 
 		for (id k in [processInfo environment])
 		{
@@ -169,12 +173,7 @@ namespace ti
 		// start the process
 		@try
 		{
-			std::ostringstream str;
-			for (int i = 0; i < args->Size(); i++)
-			{
-				str << " \"" << args->At(i)->ToString() << "\" ";
-			}
-			Logger::Get("OSXProcess")->Debug("Launching: %s", str.str().c_str());
+			logger->Debug("Launching: %s", ArgumentsToString().c_str());
 			
 			[[delegate task] launch];
 			if (!async)

@@ -106,6 +106,8 @@ namespace ti
 		SetMethod("getStdout", &Process::_GetStdout);
 		SetMethod("getStderr", &Process::_GetStderr);
 		SetMethod("isRunning", &Process::_IsRunning);
+		SetMethod("toString", &Process::_ToString);
+		
 		this->callback = NewCallback<Process, const ValueList&, SharedValue>(this, &Process::Call);
 	}
 
@@ -163,6 +165,16 @@ namespace ti
 		return clonedEnvironment;
 	}
 
+	std::string Process::ArgumentsToString()
+	{
+		std::ostringstream str;
+		for (int i = 0; i < this->args->Size(); i++)
+		{
+			str << " \"" << this->args->At(i)->ToString() << "\" ";
+		}
+		return str.str();	
+	}
+	
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
 		result->SetInt(GetPID());
@@ -349,6 +361,11 @@ namespace ti
 		Launch(false);
 		
 		result->SetObject(buffer.Read(buffer.GetSize()));
+	}
+	
+	void Process::_ToString(const ValueList& args, SharedValue result)
+	{
+		result->SetString(ArgumentsToString().c_str());
 	}
 }
 

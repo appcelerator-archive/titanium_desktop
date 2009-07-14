@@ -38,7 +38,7 @@ namespace ti
 		NSMutableData* GetBuffer() { return buffer; }
 		
 		void DataReady(NSData *data);
-
+		
 	protected:
 		void Erase(int nBytes);
 		

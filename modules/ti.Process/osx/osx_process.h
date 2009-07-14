@@ -51,6 +51,7 @@ namespace ti
 		TiOSXProcess *delegate;
 		NSProcessInfo *currentProcessInfo;
 		OSXProcess::OSXProcess(NSProcessInfo *processInfo);
+		Logger *logger;
 		
 		static AutoPtr<OSXProcess> currentProcess;
 	};

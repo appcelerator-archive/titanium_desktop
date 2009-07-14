@@ -44,6 +44,7 @@ namespace ti
 			 AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) = 0;
 		virtual bool IsRunning() = 0;
 		
+		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void Exited();
 		
@@ -70,6 +71,7 @@ namespace ti
 		
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
+		void _ToString(const ValueList& args, SharedValue result);
 		
 		// non-exposed binding methods
 		BufferedInputPipe buffer;
