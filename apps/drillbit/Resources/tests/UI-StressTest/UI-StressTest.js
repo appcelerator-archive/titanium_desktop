@@ -74,22 +74,22 @@ describe("UI Module Tests",{
 		// If these tests fail, perhaps the constant has changed. If that's
 		// the case, just update the tests below and be sure that nothing
 		// else in the system breaks! Hopefully apps do not rely on magic strings.
-		value_of(Titanium.UI.FOCUSED).should_be("focused");
-		value_of(Titanium.UI.UNFOCUSED).should_be("unfocused");
-		value_of(Titanium.UI.OPEN).should_be("open");
-		value_of(Titanium.UI.OPENED).should_be("opened");
-		value_of(Titanium.UI.CLOSE).should_be("close");
-		value_of(Titanium.UI.CLOSED).should_be("closed");
-		value_of(Titanium.UI.HIDDEN).should_be("hidden");
-		value_of(Titanium.UI.SHOWN).should_be("shown");
-		value_of(Titanium.UI.FULLSCREENED).should_be("fullscreened");
-		value_of(Titanium.UI.UNFULLSCREENED).should_be("unfullscreened");
-		value_of(Titanium.UI.MAXIMIZED).should_be("maximized");
-		value_of(Titanium.UI.MINIMIZED).should_be("minimized");
-		value_of(Titanium.UI.RESIZED).should_be("resized");
-		value_of(Titanium.UI.MOVED).should_be("moved");
-		value_of(Titanium.UI.PAGE_INITIALIZED).should_be("page.init");
-		value_of(Titanium.UI.PAGE_LOADED).should_be("page.load");
+		value_of(Titanium.FOCUSED).should_be("focused");
+		value_of(Titanium.UNFOCUSED).should_be("unfocused");
+		value_of(Titanium.OPEN).should_be("open");
+		value_of(Titanium.OPENED).should_be("opened");
+		value_of(Titanium.CLOSE).should_be("close");
+		value_of(Titanium.CLOSED).should_be("closed");
+		value_of(Titanium.HIDDEN).should_be("hidden");
+		value_of(Titanium.SHOWN).should_be("shown");
+		value_of(Titanium.FULLSCREENED).should_be("fullscreened");
+		value_of(Titanium.UNFULLSCREENED).should_be("unfullscreened");
+		value_of(Titanium.MAXIMIZED).should_be("maximized");
+		value_of(Titanium.MINIMIZED).should_be("minimized");
+		value_of(Titanium.RESIZED).should_be("resized");
+		value_of(Titanium.MOVED).should_be("moved");
+		value_of(Titanium.PAGE_INITIALIZED).should_be("page.init");
+		value_of(Titanium.PAGE_LOADED).should_be("page.load");
 	},
 	test_window_listener_as_async: function(callback)
 	{
@@ -97,26 +97,26 @@ describe("UI Module Tests",{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 
 		var messageLog = { };
-		messageLog[Titanium.UI.CLOSE]  = false;
-		messageLog[Titanium.UI.CLOSED]  = false;
-		messageLog[Titanium.UI.OPEN]  = false;
-		messageLog[Titanium.UI.OPENED]  = false;
-		messageLog[Titanium.UI.HIDDEN]  = false;
+		messageLog[Titanium.CLOSE]  = false;
+		messageLog[Titanium.CLOSED]  = false;
+		messageLog[Titanium.OPEN]  = false;
+		messageLog[Titanium.OPENED]  = false;
+		messageLog[Titanium.HIDDEN]  = false;
 
-		w.addEventListener(function(eventName, eventData)
+		w.addEventListener(function(event)
 		{
-			messageLog[eventName] = true;
+			messageLog[event.type] = true;
 		});
 
 		w.open();
 		setTimeout(function()
 		{
 			w.close();
-			if (messageLog[Titanium.UI.OPEN] !== true)
+			if (messageLog[Titanium.OPEN] !== true)
 			{
 				callback.failed("Did not detect open message");
 			}
-			else if (messageLog[Titanium.UI.OPENED] !== true)
+			else if (messageLog[Titanium.OPENED] !== true)
 			{
 				callback.failed("Did not detect opened message");
 			}
@@ -135,13 +135,13 @@ describe("UI Module Tests",{
 		var resizedFired = false;
 		var maximizedFired = false;
 
-		w.addEventListener(function(eventName, eventData)
+		w.addEventListener(function(event)
 		{
-			if (eventName == "resized")
+			if (event.type == "resized")
 			{
 				resizedFired = true;
 			}
-			else if (eventName == "maximized")
+			else if (event.type == "maximized")
 			{
 				maximizedFired = true;
 			}
@@ -174,23 +174,23 @@ describe("UI Module Tests",{
 	test_constants: function()
 	{
 		value_of(Titanium.UI.CENTERED).should_be_number();
-		value_of(Titanium.UI.FOCUSED).should_be_string();
-		value_of(Titanium.UI.UNFOCUSED).should_be_string();
-		value_of(Titanium.UI.OPEN).should_be_string();
-		value_of(Titanium.UI.OPENED).should_be_string();
-		value_of(Titanium.UI.CLOSE).should_be_string();
-		value_of(Titanium.UI.CLOSED).should_be_string();
-		value_of(Titanium.UI.HIDDEN).should_be_string();
-		value_of(Titanium.UI.SHOWN).should_be_string();
-		value_of(Titanium.UI.FULLSCREENED).should_be_string();
-		value_of(Titanium.UI.UNFULLSCREENED).should_be_string();
-		value_of(Titanium.UI.MAXIMIZED).should_be_string();
-		value_of(Titanium.UI.MINIMIZED).should_be_string();
-		value_of(Titanium.UI.RESIZED).should_be_string();
-		value_of(Titanium.UI.MOVED).should_be_string();
-		value_of(Titanium.UI.PAGE_INITIALIZED).should_be_string();
-		value_of(Titanium.UI.PAGE_LOADED).should_be_string();
-		value_of(Titanium.UI.CREATE).should_be_string();
+		value_of(Titanium.FOCUSED).should_be_string();
+		value_of(Titanium.UNFOCUSED).should_be_string();
+		value_of(Titanium.OPEN).should_be_string();
+		value_of(Titanium.OPENED).should_be_string();
+		value_of(Titanium.CLOSE).should_be_string();
+		value_of(Titanium.CLOSED).should_be_string();
+		value_of(Titanium.HIDDEN).should_be_string();
+		value_of(Titanium.SHOWN).should_be_string();
+		value_of(Titanium.FULLSCREENED).should_be_string();
+		value_of(Titanium.UNFULLSCREENED).should_be_string();
+		value_of(Titanium.MAXIMIZED).should_be_string();
+		value_of(Titanium.MINIMIZED).should_be_string();
+		value_of(Titanium.RESIZED).should_be_string();
+		value_of(Titanium.MOVED).should_be_string();
+		value_of(Titanium.PAGE_INITIALIZED).should_be_string();
+		value_of(Titanium.PAGE_LOADED).should_be_string();
+		value_of(Titanium.CREATED).should_be_string();
 	},
 	
 	test_window_events_as_async: function(callback)
@@ -207,27 +207,27 @@ describe("UI Module Tests",{
 		}
 
 		var observedEvents = {};
-		var eventListener = function(eventName, eventData)
+		var eventListener = function(event)
 		{
-			observedEvents[eventName] = "Yakko";
+			observedEvents[event.getType()] = "Yakko";
 		}
 
 		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
 		var listenerID = w.addEventListener(eventListener);
 		value_of(listenerID).should_be_number();
 
-		addEventTest(function() { w.open(); }, [Titanium.UI.OPEN, Titanium.UI.OPENED]);
-		addEventTest(function() { w.setVisible(false); }, [Titanium.UI.HIDDEN]);
-		addEventTest(function() { w.setVisible(true); }, [Titanium.UI.SHOWN]);
-		addEventTest(function() { w.setFullScreen(true); }, [Titanium.UI.FULLSCREENED]);
-		addEventTest(function() { w.setFullScreen(false); }, [Titanium.UI.UNFULLSCREENED]);
-		addEventTest(function() { w.maximize(); }, [Titanium.UI.MAXIMIZED]);
-		addEventTest(function() { w.minimize(); w.unminimize() }, [Titanium.UI.MINIMIZED]);
-		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.UI.MOVED]);
-		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.UI.MOVED]);
-		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.UI.RESIZED]);
-		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.UI.RESIZED]);
-		addEventTest(function() {w.close();}, [Titanium.UI.CLOSE, Titanium.UI.CLOSED]);
+		addEventTest(function() { w.open(); }, [Titanium.OPEN, Titanium.OPENED]);
+		addEventTest(function() { w.setVisible(false); }, [Titanium.HIDDEN]);
+		addEventTest(function() { w.setVisible(true); }, [Titanium.SHOWN]);
+		addEventTest(function() { w.setFullScreen(true); }, [Titanium.FULLSCREENED]);
+		addEventTest(function() { w.setFullScreen(false); }, [Titanium.UNFULLSCREENED]);
+		addEventTest(function() { w.maximize(); }, [Titanium.MAXIMIZED]);
+		addEventTest(function() { w.minimize(); w.unminimize() }, [Titanium.MINIMIZED]);
+		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.MOVED]);
+		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.MOVED]);
+		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.RESIZED]);
+		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.RESIZED]);
+		addEventTest(function() {w.close();}, [Titanium.CLOSE, Titanium.CLOSED]);
 
 		var runNextTest = function() {
 			if (eventTests.length <= 0)

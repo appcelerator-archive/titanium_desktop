@@ -157,30 +157,30 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (window->web_view)
 			{
 				window->ResizeSubViews();
-				window->FireEvent(RESIZED);
+				window->FireEvent(Event::RESIZED);
 				if (wParam == SIZE_MAXIMIZED) {
-					window->FireEvent(MAXIMIZED);
+					window->FireEvent(Event::MAXIMIZED);
 
 				} else if (wParam == SIZE_MINIMIZED) {
-					window->FireEvent(MINIMIZED);
+					window->FireEvent(Event::MINIMIZED);
 				}
 			}
 			break;
 
 		case WM_SETFOCUS:
-			window->FireEvent(FOCUSED);
+			window->FireEvent(Event::FOCUSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_KILLFOCUS:
-			window->FireEvent(UNFOCUSED);
+			window->FireEvent(Event::UNFOCUSED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_MOVE:
-			window->FireEvent(MOVED);
+			window->FireEvent(Event::MOVED);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_SHOWWINDOW:
-			window->FireEvent(((BOOL)wParam) ? SHOWN : HIDDEN);
+			window->FireEvent(((BOOL)wParam) ? Event::SHOWN : Event::HIDDEN);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case TI_TRAY_CLICKED: {
@@ -548,7 +548,7 @@ void Win32UserWindow::Open()
 		this->Minimize();
 	}
 	
-	FireEvent(OPENED);
+	FireEvent(Event::OPENED);
 }
 
 void Win32UserWindow::Close()
@@ -824,13 +824,13 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 					mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_SHOWWINDOW);
 		}
 
-		FireEvent(FULLSCREENED);
+		FireEvent(Event::FULLSCREENED);
 	}
 	else
 	{
 		SetWindowLong(window_handle, GWL_STYLE, restore_styles);
 		SetBounds(restore_bounds);
-		FireEvent(UNFULLSCREENED);
+		FireEvent(Event::UNFULLSCREENED);
 	}
 }
 

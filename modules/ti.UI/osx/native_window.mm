@@ -79,6 +79,12 @@
 	[inspector show:self];
 }
 
+- (void)titaniumQuit:(id)sender
+{
+	Host* host = Host::GetInstance();
+	host->Exit(0);
+}
+
 - (void)windowWillClose:(NSNotification *)notification
 {
 	if (inspector)
@@ -97,17 +103,17 @@
 
 - (void)windowDidResize:(NSNotification*)notification
 {
-	(*userWindow)->FireEvent(RESIZED);
+	(*userWindow)->FireEvent(Event::RESIZED);
 }
 
 - (void)windowDidMove:(NSNotification*)notification
 {
-	(*userWindow)->FireEvent(MOVED);
+	(*userWindow)->FireEvent(Event::MOVED);
 }
 
 - (void)windowDidBecomeKey:(NSNotification*)notification
 {
-	(*userWindow)->FireEvent(FOCUSED);
+	(*userWindow)->FireEvent(Event::FOCUSED);
 	(*userWindow)->Focused();
 	if (!focused && fullscreen)
 	{
@@ -118,7 +124,7 @@
 
 - (void)windowDidResignKey:(NSNotification*)notification
 {
-	(*userWindow)->FireEvent(UNFOCUSED);
+	(*userWindow)->FireEvent(Event::UNFOCUSED);
 	(*userWindow)->Unfocused();
 	if (fullscreen && focused)
 	{
@@ -129,12 +135,12 @@
 
 - (void)windowDidMiniaturize:(NSNotification*)notification
 {
-	(*userWindow)->FireEvent(MINIMIZED);
+	(*userWindow)->FireEvent(Event::MINIMIZED);
 }
 
 - (BOOL)windowShouldZoom:(NSWindow*)window toFrame:(NSRect)proposedFrame
 {
-	(*userWindow)->FireEvent(MAXIMIZED);
+	(*userWindow)->FireEvent(Event::MAXIMIZED);
 	return YES;
 }
 
@@ -198,7 +204,7 @@
 
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
 		[self setFrame:frame display:YES animate:YES];
-		(*userWindow)->FireEvent(FULLSCREENED);
+		(*userWindow)->FireEvent(Event::FULLSCREENED);
 		[self setShowsResizeIndicator:NO];
 	}
 	else
@@ -207,7 +213,7 @@
 		[self setFrame:savedFrame display:YES animate:YES];
 		SetSystemUIMode(kUIModeNormal,0);
 		[self setShowsResizeIndicator:config->IsResizable()];
-		(*userWindow)->FireEvent(UNFULLSCREENED);
+		(*userWindow)->FireEvent(Event::UNFULLSCREENED);
 	}
 	[self makeKeyAndOrderFront:nil];
 	[self makeFirstResponder:webView];

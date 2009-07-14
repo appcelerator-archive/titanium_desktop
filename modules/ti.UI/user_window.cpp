@@ -7,7 +7,7 @@
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
-	AccessorBoundObject("UserWindow"),
+	KEventObject("UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
 	host(kroll::Host::GetInstance()),
@@ -431,22 +431,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 */
 	this->SetMethod("getParent", &UserWindow::_GetParent);
 
-	/**
-	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.addEventListener,since=0.3) Adds an event listener to the window
-	 * @tiarg(for=UI.UserWindow.addEventListener,type=method,name=listener) the event listener function to be fired for the event
-	 * @tiresult(for=UI.UserWindow.addEventListener,type=integer) the id of the event listener used for removal
-	 */
-	this->SetMethod("addEventListener", &UserWindow::_AddEventListener);
-
-	/**
-	 * @tiapi(method=True,name=UI.UserWindow.removeEventListener,since=0.3) Removes an event listener from the window
-	 * @tiarg(for=UI.UserWindow.removeEventListener,type=integer,name=id) the id returned from addEventListener
-	 * @tiresult(for=UI.UserWindow.removeEventListener,type=boolean) true if the listener was removed, false if otherwise
-	 */
-	this->SetMethod("removeEventListener", &UserWindow::_RemoveEventListener);
-
-	this->api = host->GetGlobalObject()->GetNS("API.fire")->ToMethod();
-	this->FireEvent(CREATE);
+	this->FireEvent(Event::CREATED);
 }
 
 UserWindow::~UserWindow()
@@ -469,7 +454,7 @@ Host* UserWindow::GetHost()
 
 void UserWindow::Open()
 {
-	this->FireEvent(OPEN);
+	this->FireEvent(Event::OPEN);
 
 	// We are now in the UI binding's open window list
 	this->binding->AddToOpenWindows(this->shared_this);
@@ -486,13 +471,13 @@ void UserWindow::Open()
 
 void UserWindow::Close()
 {
-	this->FireEvent(CLOSE); // fire our close event
+	this->FireEvent(Event::CLOSE); // fire our close event
 	this->active = false; // prevent further modification
 }
 
 void UserWindow::Closed()
 {
-	this->FireEvent(CLOSED);
+	this->FireEvent(Event::CLOSED);
 
 	// Close all children and cleanup
 	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
@@ -1519,131 +1504,6 @@ void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
 		callback, title, path, defaultName, types, typesDescription);
 }
 
-void UserWindow::_AddEventListener(const ValueList& args, SharedValue result)
-{
-	args.VerifyException("addEventListener", "m");
-
-	SharedKMethod target = args.at(0)->ToMethod();
-	Listener listener = Listener();
-	listener.id = this->next_listener_id++;
-	listener.callback = target;
-	this->listeners.push_back(listener);
-
-	result->SetInt(listener.id);
-}
-
-void UserWindow::_RemoveEventListener(const ValueList& args, SharedValue result)
-{
-	if (args.size() != 1 || !args.at(0)->IsNumber())
-	{
-		throw ValueException::FromString("invalid argument");
-	}
-	int id = args.at(0)->ToInt();
-
-	std::vector<Listener>::iterator it = this->listeners.begin();
-	while (it != this->listeners.end())
-	{
-		if ((*it).id == id)
-		{
-			this->listeners.erase(it);
-			result->SetBool(true);
-			return;
-		}
-		it++;
-	}
-	result->SetBool(false);
-}
-
-void UserWindow::FireEvent(UserWindowEvent eventType, SharedKObject event)
-{
-	std::string name;
-	switch (eventType)
-	{
-		case FOCUSED:
-			name = UIBinding::FOCUSED;
-			break;
-		case UNFOCUSED:
-			name = UIBinding::UNFOCUSED;
-			break;
-		case OPEN:
-			name = UIBinding::OPEN;
-			break;
-		case OPENED:
-			name = UIBinding::OPENED;
-			break;
-		case CLOSE:
-			name = UIBinding::CLOSE;
-			break;
-		case CLOSED:
-			name = UIBinding::CLOSED;
-			break;
-		case HIDDEN:
-			name = UIBinding::HIDDEN;
-			break;
-		case SHOWN:
-			name = UIBinding::SHOWN;
-			break;
-		case FULLSCREENED:
-			name = UIBinding::FULLSCREENED;
-			break;
-		case UNFULLSCREENED:
-			name = UIBinding::UNFULLSCREENED;
-			break;
-		case MAXIMIZED:
-			name = UIBinding::MAXIMIZED;
-			break;
-		case MINIMIZED:
-			name = UIBinding::MINIMIZED;
-			break;
-		case RESIZED:
-			name = UIBinding::RESIZED;
-			break;
-		case MOVED:
-			name = UIBinding::MOVED;
-			break;
-		case PAGE_INITIALIZED:
-			name = UIBinding::PAGE_INITIALIZED;
-			break;
-		case PAGE_LOADED:
-			name = UIBinding::PAGE_LOADED;
-			break;
-		case CREATE:
-			name = UIBinding::CREATE;
-			break;
-		default:
-			logger->Warn("Tried to fire an unknown event: %i\n", eventType);
-			return;
-	}
-	if (event.isNull())
-	{
-		event = new StaticBoundObject();
-	}
-	event->Set("window", Value::NewObject(this->shared_this));
-
-	// Send the event to any event listeners registered for this window
-	ValueList args;
-	args.push_back(Value::NewString(name));
-	args.push_back(Value::NewObject(event));
-	std::vector<Listener>::iterator it = this->listeners.begin();
-	while (it != this->listeners.end())
-	{
-		SharedKMethod callback = (*it++).callback;
-		try
-		{
-			this->host->InvokeMethodOnMainThread(callback, args, false);
-		}
-		catch (ValueException &e)
-		{
-			SharedString ss = e.DisplayString();
-			logger->Error("Exception caught during window event callback: %s", ss->c_str());
-		}
-	}
-
-	// Also send this event to the API module's event system
-	std::string fullName = std::string("ti.UI.window.") + name;
-	this->api->Call(fullName.c_str(), Value::NewObject(event));
-}
-
 AutoUserWindow UserWindow::GetParent()
 {
 	return this->parent;
@@ -1727,30 +1587,27 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// Titanium object. When a property isn't found in this object
 	// it will look for it in global_tibo.
 	SharedKObject global_tibo = this->host->GetGlobalObject();
-	KObject* ti_object = new DelegateStaticBoundObject(global_tibo);
-	SharedKObject shared_ti_obj = SharedKObject(ti_object);
+	SharedKObject tiObject = new DelegateStaticBoundObject(global_tibo);
 
-	SharedValue ui_api_value = ti_object->Get("UI");
+	SharedValue ui_api_value = tiObject->Get("UI");
 	if (ui_api_value->IsObject())
 	{
 		// Create a delegate object for the UI API.
 		SharedKObject ui_api = ui_api_value->ToObject();
-		KObject* delegate_ui_api = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
+		KObject* delegateUIAPI = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
 
 		// Place currentWindow in the delegate.
-		SharedValue user_window_val = Value::NewObject(this->GetAutoPtr());
-		delegate_ui_api->Set("getCurrentWindow", this->Get("getCurrentWindow"));
+		delegateUIAPI->Set("getCurrentWindow", this->Get("getCurrentWindow"));
 
 		// Place currentWindow.createWindow in the delegate.
-		SharedValue create_window_value = this->Get("createWindow");
-		delegate_ui_api->Set("createWindow", create_window_value);
+		delegateUIAPI->Set("createWindow", this->Get("createWindow"));
 
 		// Place currentWindow.openFiles in the delegate.
-		delegate_ui_api->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
-		delegate_ui_api->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
-		delegate_ui_api->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
+		delegateUIAPI->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
+		delegateUIAPI->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
+		delegateUIAPI->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
 
-		ti_object->Set("UI", Value::NewObject(delegate_ui_api));
+		tiObject->Set("UI", Value::NewObject(delegateUIAPI));
 	}
 	else
 	{
@@ -1758,29 +1615,28 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	}
 
 	// Get the global object into a KKJSObject
-	SharedKObject frame_global = new KKJSObject(context, globalObject);
+	SharedKObject frameGlobal = new KKJSObject(context, globalObject);
 
 	// Copy the document and window properties to the Titanium object
-	SharedValue doc_value = frame_global->Get("document");
-	ti_object->Set("document", doc_value);
-	SharedValue window_value = frame_global->Get("window");
-	ti_object->Set("window", window_value);
+	SharedValue doc_value = frameGlobal->Get("document");
+	tiObject->Set("document", doc_value);
+	SharedValue windowValue = frameGlobal->Get("window");
+	tiObject->Set("window", windowValue);
 
 	// Place the Titanium object into the window's global object
-	SharedValue ti_object_value = Value::NewObject(shared_ti_obj);
-	frame_global->Set(GLOBAL_NS_VARNAME, ti_object_value);
+	frameGlobal->SetObject(GLOBAL_NS_VARNAME, tiObject);
 
 	// bind the window into currentWindow so you can call things like
-	// Titanium.UI.currentWindow.getParent().window to get the parents
+	// Titanium.UI.currentWindow.getParent().window to get the parent's
 	// window and global variable scope
-	this->Set("window", window_value);
+	this->Set("window", windowValue);
 
 	UserWindow::LoadUIJavaScript(context);
 
-	SharedKObject event = new StaticBoundObject();
-	event->Set("scope", Value::NewObject(frame_global));
-	event->Set("url", Value::NewString(config->GetURL().c_str()));
-	this->FireEvent(PAGE_INITIALIZED, event);
+	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
+	event->SetObject("scope", frameGlobal);
+	event->SetString("url", config->GetURL());
+	this->FireEvent(event);
 }
 
 void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)
@@ -1807,10 +1663,10 @@ void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)
 void UserWindow::PageLoaded(
 	SharedKObject globalObject, std::string &url, JSGlobalContextRef context)
 {
-	SharedKObject event = new StaticBoundObject();
-	event->Set("scope", Value::NewObject(globalObject));
-	event->Set("url", Value::NewString(url.c_str()));
-	this->FireEvent(PAGE_LOADED, event);
+	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_LOADED);
+	event->SetObject("scope", globalObject);
+	event->SetString("url", url);
+	this->FireEvent(event);
 }
 
 double UserWindow::Constrain(double value, double min, double max)
@@ -1824,4 +1680,21 @@ double UserWindow::Constrain(double value, double min, double max)
 		value = max;
 	}
 	return value;
+}
+
+void UserWindow::FireEvent(std::string& eventName, bool synchronous)
+{
+	KEventObject::FireEvent(eventName, synchronous);
+	std::string fullName = std::string("ti.UI.window.") + eventName;
+	ValueList args(Value::NewString(fullName),
+		 Value::NewObject(new StaticBoundObject()));
+	host->GetGlobalObject()->CallNS("API.fire", args);
+}
+
+void UserWindow::FireEvent(AutoPtr<Event> event, bool synchronous)
+{
+	KEventObject::FireEvent(event, synchronous);
+	std::string fullName = std::string("ti.UI.window.") + event->eventName;
+	ValueList args(Value::NewString(fullName), Value::NewObject(event));
+	host->GetGlobalObject()->CallNS("API.fire", args);
 }
