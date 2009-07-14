@@ -32,14 +32,14 @@ namespace ti
 	}
 	
 	InputPipe::InputPipe() :
-		Pipe("InputPipe"),
+		Pipe("Process.InputPipe"),
 		onRead(0),
 		onClose(0),
 		joined(false),
 		joinedRead(0),
 		attachedOutput(0)
 	{
-		logger = Logger::Get("InputPipe");
+		logger = Logger::Get("Process.InputPipe");
 		
 		//TODO doc me
 		SetMethod("read", &InputPipe::_Read);
@@ -69,7 +69,7 @@ namespace ti
 			pipe = this;
 		}
 		
-		if (attachedOutput)
+		if (attachedOutput && !attachedOutput->isNull())
 		{
 			AutoPtr<Blob> data = pipe->Read();
 			SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));

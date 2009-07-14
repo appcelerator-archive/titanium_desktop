@@ -28,7 +28,7 @@ namespace ti
 		return pipe;
 	}
 	
-	OutputPipe::OutputPipe()
+	OutputPipe::OutputPipe() : Pipe("Process.OutputPipe")
 	{
 		//TODO doc me
 		SetMethod("write", &OutputPipe::_Write);

@@ -17,7 +17,7 @@ namespace ti
 	class Pipe : public StaticBoundObject
 	{
 	public:
-		Pipe(const char *type = "Pipe");
+		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe() {};
 
 		virtual void Close() = 0;
