@@ -628,4 +628,34 @@ describe("UI Module Tests",{
 
 		w.close();
 	},
+
+	test_window_focus: function()
+	{
+		var hasFocus = false;
+		// get the current UserWindow object
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		w2.open();
+
+		w.addEventListener(Titanium.FOCUSED, function(event)
+		{
+			if (event.type == Titanium.FOCUSED)
+			{
+				hasFocus = true;
+			}
+		});
+		w.focus();
+
+		setTimeout(function()
+		{
+			w.close();
+			w2.close();
+			if (!hasFocus)
+			{
+				callback.failed("Did not detect maximized message");
+			}
+			callback.passed();
+		}, 300);
+	},
 });

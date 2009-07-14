@@ -520,7 +520,14 @@ void Win32UserWindow::Focus()
 
 void Win32UserWindow::Unfocus()
 {
-	//TODO: not sure exactly how to cause kill focus
+	// SetFocus sends a WM_KILLFOCUS message to the 
+	// window that has focus.  By sending NULL, we basically turn off keystrokes to window
+	// that had focus.
+	if ( GetFocus() == window_handle)
+	{
+		// only kill focus if we have it.
+		SetFocus(NULL);
+	}
 }
 
 void Win32UserWindow::Open()
