@@ -1,4 +1,5 @@
 .sconsign.dblite
-
+*.swp
+*.swo
 /vc80.pdb
 /vc80.idb
