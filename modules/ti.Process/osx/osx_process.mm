@@ -100,10 +100,10 @@
 	// one last time from the stream in the callback
 	// In OSX, Process termination can come before pipe close, so we deal
 	// with pipe cleanup in OSXInputPipe
+	
 	process->GetStdin()->Close();
 	process->GetStdout()->Close();
 	process->GetStderr()->Close();
-	
 	process->Exited();
 }
 @end
@@ -216,23 +216,5 @@ namespace ti
 	bool OSXProcess::IsRunning()
 	{
 		return [[delegate task] isRunning];
-	}
-	
-	void OSXProcess::Restart()
-	{
-		/*
-		NSProcessInfo *p = [NSProcessInfo processInfo];
-		NSString *path = [[NSBundle mainBundle] bundlePath];
-		NSString *killArg1AndOpenArg2Script = [NSString stringWithFormat:@"kill -9 %d\n open \"%@\"",[p processIdentifier],path];
-		NSArray *shArgs = [NSArray arrayWithObjects:@"-c", // -c tells sh to execute the next argument, passing it the remaining arguments.
-			killArg1AndOpenArg2Script,nil];
-		NSTask *restartTask = [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:shArgs];
-		[restartTask waitUntilExit]; //wait for killArg1AndOpenArg2Script to finish*/
-	}
-	
-	void OSXProcess::Restart(
-		SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
-	{
-		
 	}
 }

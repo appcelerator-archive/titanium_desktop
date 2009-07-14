@@ -40,8 +40,6 @@ namespace ti
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
-		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
 		AutoPtr<OSXOutputPipe> GetStdin() { return stdinPipe.cast<OSXOutputPipe>(); }

@@ -71,8 +71,11 @@ namespace ti
 		
 		if (attachedOutput && !attachedOutput->isNull())
 		{
-			AutoPtr<Blob> data = pipe->Read();
-			SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
+			if ((*attachedOutput)->Get("write")->IsMethod())
+			{
+				AutoPtr<Blob> data = pipe->Read();
+				SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
+			}
 		}
 		else
 		{
@@ -99,7 +102,10 @@ namespace ti
 	{
 		if (IsAttached())
 		{
-			(*attachedOutput)->CallNS("close");
+			if (attachedOutput && !attachedOutput->isNull() && (*attachedOutput)->Get("close")->IsMethod())
+			{
+				(*attachedOutput)->CallNS("close");
+			}
 		}
 		else if (IsSplit())
 		{

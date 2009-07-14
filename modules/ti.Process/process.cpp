@@ -175,6 +175,30 @@ namespace ti
 		return str.str();	
 	}
 	
+	void Process::Restart()
+	{
+		Restart(NULL, NULL, NULL, NULL);
+	}
+	
+	void Process::Restart(SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
+	{
+		this->environment = environment.isNull() ? CloneEnvironment() : environment;
+		this->stdinPipe = stdinPipe.isNull() ? OutputPipe::CreateOutputPipe() : stdinPipe;
+		this->stdoutPipe = stdoutPipe.isNull() ? InputPipe::CreateInputPipe() : stdoutPipe;
+		this->stderrPipe = stderrPipe.isNull() ? InputPipe::CreateInputPipe() : stderrPipe;
+	
+		if (IsRunning())
+		{
+			Terminate();
+		}
+
+		this->duplicate();
+		AutoPtr<Process> autoThis = this;
+		ProcessBinding::AddProcess(autoThis);
+	
+		Launch();
+	}
+	
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
 		result->SetInt(GetPID());

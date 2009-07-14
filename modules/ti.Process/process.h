@@ -39,9 +39,8 @@ namespace ti
 		virtual void Terminate() = 0;
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
-		virtual void Restart() = 0;
-		virtual void Restart(SharedKObject env,
-			 AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) = 0;
+		virtual void Restart();
+		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning() = 0;
 		
 		std::string ArgumentsToString();

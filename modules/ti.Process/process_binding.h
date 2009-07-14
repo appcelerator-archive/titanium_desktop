@@ -20,6 +20,8 @@ namespace ti
 		virtual ~ProcessBinding();
 		
 		static void ProcessTerminated(AutoProcess process);
+		static void AddProcess(AutoProcess process);
+		
 		static std::map<std::string,int> signals;
 	private:
 		static std::vector<AutoProcess> processes;

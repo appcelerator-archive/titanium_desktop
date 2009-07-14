@@ -186,6 +186,11 @@ namespace ti
 		}
 	}
 	
+	void ProcessBinding::AddProcess(AutoProcess process)
+	{
+		processes.push_back(process);
+	}
+	
 	void ProcessBinding::CreateInputPipe(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(InputPipe::CreateInputPipe());
