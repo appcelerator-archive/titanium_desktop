@@ -658,4 +658,39 @@ describe("UI Module Tests",{
 			callback.passed();
 		}, 300);
 	},
+
+	test_window_unfocus: function()
+	{
+		var hadFocus = false;
+		// get the current UserWindow object
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		w2.open();
+		
+		// just make sure we have the focus...
+		w2.focus();
+
+		// basically the same test as before, but we add the event listener to
+		// the second window and wait for the unfocus event.
+		w2.addEventListener(Titanium.UNFOCUSED, function(event)
+		{
+			if (event.type == Titanium.UNFOCUSED)
+			{
+				hadFocus = true;
+			}
+		});
+		w2.unfocus();
+
+		setTimeout(function()
+		{
+			w.close();
+			w2.close();
+			if (!hadFocus)
+			{
+				callback.failed("Did not detect maximized message");
+			}
+			callback.passed();
+		}, 300);
+	},
 });
