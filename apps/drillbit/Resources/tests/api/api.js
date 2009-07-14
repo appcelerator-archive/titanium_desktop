@@ -90,7 +90,7 @@ describe("ti.API tests",
 		value_of(Titanium.API.debug).should_be_function();
 		value_of(Titanium.API.error).should_be_function();
 		value_of(Titanium.API.fatal).should_be_function();
-		value_of(Titanium.API.fire).should_be_function();
+		value_of(Titanium.API.fireEvent).should_be_function();
 		value_of(Titanium.API.get).should_be_function();
 		value_of(Titanium.API.getApplication).should_be_function();			 //done
 		value_of(Titanium.API.getComponentSearchPaths).should_be_function();
@@ -104,10 +104,10 @@ describe("ti.API tests",
 		value_of(Titanium.API.log).should_be_function();
 		value_of(Titanium.API.notice).should_be_function();
 		value_of(Titanium.API.readApplicationManifest).should_be_function();
-		value_of(Titanium.API.register).should_be_function();
+		value_of(Titanium.API.addEventListener).should_be_function();
 		value_of(Titanium.API.set).should_be_function();
 		value_of(Titanium.API.trace).should_be_function();
-		value_of(Titanium.API.unregister).should_be_function();
+		value_of(Titanium.API.removeEventListener).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
 		
 		//new 1.0
@@ -421,20 +421,19 @@ describe("ti.API tests",
 	test_api_events_as_async: function(callback)
 	{
 		// create an event
-		var w = Titanium.API.register("foo", function()
-			{
-				callback.passed();
-			});
-		
+		var w = Titanium.API.addEventListener("foo", function()
+		{
+			callback.passed();
+		});
 		// make sure we have an id for it
 		value_of(w).should_be_number();
 
 		// fire it off
-		Titanium.API.fire("foo", w);
-		
+		Titanium.API.fireEvent("foo");
+
 		// unregister the event when we are done.
-		Titanium.API.unregister(w);
-		
+		Titanium.API.removeEventListener("foo", w);
+
 	},
 	
 	test_api_global_object: function()

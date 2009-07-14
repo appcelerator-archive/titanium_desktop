@@ -21,9 +21,6 @@ namespace ti
 
 	void UIModule::Start()
 	{
-		SharedKMethod api = this->host->GetGlobalObject()->GetNS("API.fire")->ToMethod();
-		api->Call("ti.UI.start", Value::Undefined);
-
 #ifdef OS_WIN32
 		this->uiBinding = new Win32UIBinding(this, host);
 #elif OS_OSX
@@ -44,23 +41,14 @@ namespace ti
 		WindowConfig *main_window_config = config->GetMainWindow();
 		if (main_window_config == NULL)
 		{
-			std::string msg ="Error loading tiapp.xml. Your application "
-			                 "window is not properly configured or packaged.";
+			std::string msg = "Error loading tiapp.xml. Your application "
+				"window is not properly configured or packaged.";
 			this->uiBinding->ErrorDialog(msg);
 			throw ValueException::FromString(msg.c_str());
 			return;
 		}
 
 		this->uiBinding->CreateMainWindow(main_window_config);
-	}
-
-	void UIModule::Exiting(int exitcode)
-	{
-		// send a stop notification - we need to do this before 
-		// stop is called given that the API module is registered (and unregistered)
-		// before our module and it will then be too late
-		SharedKMethod api = this->host->GetGlobalObject()->GetNS("API.fire")->ToMethod();
-		api->Call("ti.UI.stop", Value::Undefined);
 	}
 
 	void UIModule::Stop()

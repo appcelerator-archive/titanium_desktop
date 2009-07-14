@@ -53,7 +53,6 @@ namespace ti {
 		public:
 		static UIModule* GetInstance() { return instance_; }
 		AutoUIBinding GetUIBinding() { return uiBinding; }
-		void Exiting(int exitcode);
 		void Start();
 		static bool IsResourceLocalFile(std::string string);
 

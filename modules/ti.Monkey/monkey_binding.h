@@ -52,7 +52,6 @@ namespace ti
 		virtual ~MonkeyBinding();
 	private:
 		SharedKObject global;
-		int registration;
 		Logger* logger;
 		std::vector< std::pair< std::pair< VectorOfPatterns,VectorOfPatterns > ,std::string> > scripts;
 		

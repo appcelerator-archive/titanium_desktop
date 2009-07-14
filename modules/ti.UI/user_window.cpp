@@ -462,13 +462,13 @@ void UserWindow::Close()
 	// We want to fire the CLOSE event synchronously, because we
 	// want to ensure that listeners on the originating window get
 	// this event.
-	this->FireEvent(Event::CLOSE, true); 
+	this->FireEvent(Event::CLOSE);
 	this->active = false; // prevent further modification
 }
 
 void UserWindow::Closed()
 {
-	this->FireEvent(Event::CLOSED, true);
+	this->FireEvent(Event::CLOSED);
 
 	// Close all children and cleanup
 	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
@@ -1671,21 +1671,4 @@ double UserWindow::Constrain(double value, double min, double max)
 		value = max;
 	}
 	return value;
-}
-
-void UserWindow::FireEvent(std::string& eventName, bool synchronous)
-{
-	KEventObject::FireEvent(eventName, synchronous);
-	std::string fullName = std::string("ti.UI.window.") + eventName;
-	ValueList args(Value::NewString(fullName),
-		 Value::NewObject(new StaticBoundObject()));
-	host->GetGlobalObject()->CallNS("API.fire", args);
-}
-
-void UserWindow::FireEvent(AutoPtr<Event> event, bool synchronous)
-{
-	KEventObject::FireEvent(event, synchronous);
-	std::string fullName = std::string("ti.UI.window.") + event->eventName;
-	ValueList args(Value::NewString(fullName), Value::NewObject(event));
-	host->GetGlobalObject()->CallNS("API.fire", args);
 }

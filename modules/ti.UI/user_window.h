@@ -209,19 +209,13 @@ namespace ti
 			virtual std::string& GetIcon() = 0;
 			virtual bool IsTopMost() = 0;
 			virtual void SetTopMost(bool topmost) = 0;
-	
 			virtual bool ShouldHaveTitaniumObject(JSGlobalContextRef, JSObjectRef);
 			virtual void RegisterJSContext(JSGlobalContextRef);
 			virtual void PageLoaded(
 				SharedKObject scope, std::string &url, JSGlobalContextRef context);
-
 			virtual void AppIconChanged() {};
 			virtual void AppMenuChanged() {};
-
 			AutoUserWindow GetAutoPtr();
-
-			virtual void FireEvent(std::string& eventName, bool synchronous = false);
-			virtual void FireEvent(AutoPtr<Event> event, bool synchronous = false);
 
 		protected:
 			Logger* logger;

@@ -15,7 +15,6 @@ namespace ti
 {
 	MonkeyBinding::MonkeyBinding(Host *host, SharedKObject global) :
 		global(global),
-		registration(0),
 		logger(Logger::Get("Monkey"))
 	{
 		std::string resourcesPath = host->GetApplication()->GetResourcesPath();
@@ -96,18 +95,16 @@ namespace ti
 				if (scripts.size()>0)
 				{
 					this->SetMethod("callback",&MonkeyBinding::Callback);
-					SharedValue v = global->CallNS("API.register",Value::NewString("ti.UI.window.page.load"),this->Get("callback"));
-					this->registration = v->ToInt();
+					KEventObject::root->AddEventListener(
+						Event::PAGE_LOADED, this->GetMethod("callback"));
 				}
 			}
 		}
 	}
 	MonkeyBinding::~MonkeyBinding()
 	{
-		if (registration)
-		{
-			global->CallNS("API.unregister",Value::NewInt(this->registration));
-		}
+		KEventObject::root->RemoveEventListener(
+			Event::PAGE_LOADED, this->GetMethod("callback"));
 	}
 	bool MonkeyBinding::Matches(VectorOfPatterns patterns, std::string &subject)
 	{
@@ -125,7 +122,7 @@ namespace ti
 	}
 	void MonkeyBinding::Callback(const ValueList &args, SharedValue result)
 	{
-		SharedKObject event = args.at(1)->ToObject();
+		SharedKObject event = args.at(0)->ToObject();
 		std::string url_value = event->Get("url")->ToString();
 		
 		std::vector< std::pair< std::pair< VectorOfPatterns,VectorOfPatterns >,std::string> >::iterator iter = scripts.begin();

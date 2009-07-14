@@ -57,11 +57,11 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.open,since=0.3) Opens an HTTP connection
-		 * @tiarg(for=Network.HTTPClient.open,name=method,type=string) HTTP method to use
-		 * @tiarg(for=Network.HTTPClient.open,name=url,type=string) target url
-		 * @tiarg(for=Network.HTTPClient.open,name=async,type=bool,optional=True) default True
-		 * @tiarg(for=Network.HTTPClient.open,name=user,type=string,optional=True)
-		 * @tiarg(for=Network.HTTPClient.open,name=password,type=string,optional=True)
+		 * @tiarg[String, method] The HTTP method to use e.g. POST
+		 * @tiarg[String, url] The url to connect to
+		 * @tiarg[Boolean, asynchronous, optional=True] Whether or not the request should be asynchronous (default: True)
+		 * @tiarg[String, username, optional=True] The HTTP username to use
+		 * @tiarg[String, password, optional=True] The HTTP password to use
 		 */
 		this->SetMethod("open",&HTTPClientBinding::Open);
 
