@@ -719,5 +719,5 @@ describe("UI Module Tests",{
 		value_of(w.getTransparencyColor()).should_be_string();
 		
 		w.close();
-	},	
+	}
 });
