@@ -53,6 +53,8 @@ namespace ti
 		bool IsEnabled();
 		virtual void HandleClickEvent(SharedKObject source);
 		void EnsureHasSubmenu();
+		bool ContainsItem(MenuItem* item);
+		bool ContainsSubmenu(Menu* submenu);
 
 		// Platform-specific implementation
 		virtual void SetLabelImpl(std::string newLabel) = 0;

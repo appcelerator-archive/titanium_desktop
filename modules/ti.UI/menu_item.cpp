@@ -118,6 +118,11 @@ namespace ti
 			newSubmenu = o.cast<Menu>();
 		}
 
+		if (!newSubmenu.isNull() && newSubmenu->ContainsItem(this))
+		{
+			throw ValueException::FromString("Tried to construct a recursive menu");
+		}
+
 		this->submenu = newSubmenu;
 		this->SetSubmenuImpl(newSubmenu);
 	}
@@ -284,5 +289,18 @@ namespace ti
 			this->SetSubmenuImpl(newSubmenu);
 			this->submenu = newSubmenu;
 		}
+	}
+
+	bool MenuItem::ContainsItem(MenuItem* item)
+	{
+		return !this->submenu.isNull() &&
+			this->submenu->ContainsItem(item);
+	}
+
+	bool MenuItem::ContainsSubmenu(Menu* submenu)
+	{
+		return !this->submenu.isNull() &&
+			(this->submenu.get() == submenu ||
+			this->submenu->ContainsSubmenu(submenu));
 	}
 }

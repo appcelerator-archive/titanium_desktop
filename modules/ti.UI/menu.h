@@ -31,6 +31,8 @@ namespace ti
 		AutoMenuItem GetItemAt(int index);
 		void InsertItemAt(AutoMenuItem item, size_t index);
 		void RemoveItemAt(size_t index);
+		bool ContainsItem(MenuItem* item);
+		bool ContainsSubmenu(Menu* submenu);
 
 		// Platform-specific implementation
 		virtual void AppendItemImpl(AutoMenuItem item) = 0;
