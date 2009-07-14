@@ -18,12 +18,12 @@ describe("process tests",
 	
 	test_create_process: function()
 	{
-		value_of(function(){ Titanium.Process.createProcess() }).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess(null)}).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess([null])}).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess([])}).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess(['ls',true])}).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess(['ls',['a','b']])}).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(); }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(null); }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess([null]); }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess([]); }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(['ls',true]); }).should_throw_exception();
+		value_of(function(){ Titanium.Process.createProcess(['ls',['a','b']]); }).should_throw_exception();
 	},
 	
 	test_named_args: function()
@@ -181,7 +181,7 @@ describe("process tests",
 			data += event.pipe.read();
 		});
 		var timer = 0;
-		p.setOnExit(function(exitCode){
+		p.setOnExit(function(event){
 			clearTimeout(timer);
 			stream.close();
 			var fileData = file.read();
@@ -215,7 +215,6 @@ describe("process tests",
 		var data = 'this_is_a_piped_test';
 		var echoCmd = this.echoCmd.slice();
 		echoCmd.push(data);
-		Titanium.API.debug(echoCmd+","+this.moreCmd);
 		
 		var echo = Titanium.Process.createProcess(echoCmd);
 		var more = Titanium.Process.createProcess(this.moreCmd);
@@ -226,7 +225,7 @@ describe("process tests",
 			moreData += event.pipe.read();
 		});
 		var timer = 0;
-		more.setOnExit(function(exitCode){
+		more.setOnExit(function(event){
 			clearTimeout(timer);
 			try {
 				value_of(moreData).should_be(data);
@@ -242,6 +241,9 @@ describe("process tests",
 		more.launch();
 		
 		timer = setTimeout(function(){
+			if (echo.isRunning()) echo.kill();
+			if (more.isRunning()) more.kill();
+			
 			callback.failed("Timed out waiting for command to exit");
 		}, 5000);
 	},
@@ -442,8 +444,8 @@ describe("process tests",
 	test_long_running_process_as_async: function(test)
 	{
 		value_of(Titanium.Process).should_not_be_null();
-		var p = Titanium.Process.createProcess(Titanium.platform == "win" ?
-			['C:\\Windows\\system32\\cmd.exe','/K', 'dir'] : ['/bin/cat','-v'])
+		var p = Titanium.Process.createProcess(Titanium.platform == "win32" ?
+			['C:\\Windows\\System32\\cmd.exe','/K', 'dir'] : ['/bin/cat','-v'])
 		
 		var timer = null;
 		var shortTimer = null;
