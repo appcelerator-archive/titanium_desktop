@@ -693,4 +693,31 @@ describe("UI Module Tests",{
 			callback.passed();
 		}, 300);
 	},
+	
+	test_window_transparency: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		
+		var alphaBlend = w.getTransparency();
+		
+		value_of(alphaBlend).should_be_number();
+		
+		// transparency is constrained to a value between 0.0 <-> 1.0
+        // upper limits
+		w.setTransparency(10.0);
+		value_of(w.getTransparency()).should_be(1.0);
+        
+        // lower limits
+		w.setTransparency(-10.0);
+		value_of(w.getTransparency()).should_be(0.0);
+
+        // somewhere in between
+		w.setTransparency(0.5);
+		value_of(w.getTransparency()).should_be(0.5);
+
+		value_of(w.getTransparencyColor()).should_be_string();
+		
+		w.close();
+	},	
 });
