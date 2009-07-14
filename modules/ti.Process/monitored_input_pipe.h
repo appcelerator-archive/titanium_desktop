@@ -18,10 +18,11 @@ namespace ti
 	class MonitoredInputPipe : public BufferedInputPipe
 	{
 	public:
-		MonitoredInputPipe() : BufferedInputPipe() {};
+		MonitoredInputPipe() : BufferedInputPipe(), monitorJoined(false) {};
 		~MonitoredInputPipe();
 		virtual void Close();
 		void StartMonitor();
+		void JoinMonitor();
 
 	protected:
 		void MonitorThread();
@@ -29,7 +30,7 @@ namespace ti
 		virtual int RawRead(char *buffer, int size) = 0;
 		Poco::Thread monitorThread;
 		Poco::RunnableAdapter<MonitoredInputPipe>* monitorAdapter;
-		
+		bool monitorJoined;
 	};
 }
 

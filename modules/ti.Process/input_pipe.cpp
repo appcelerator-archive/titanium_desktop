@@ -97,6 +97,20 @@ namespace ti
 	
 	void InputPipe::Closed()
 	{
+		if (IsAttached())
+		{
+			(*attachedOutput)->CallNS("close");
+		}
+		else if (IsSplit())
+		{
+			splitPipe1->Close();
+			splitPipe2->Close();
+		}
+		else if (IsJoined())
+		{
+			Unjoin(joinedTo);
+		}
+		
 		if (onClose && !onClose->isNull())
 		{
 			ValueList args;
@@ -109,17 +123,12 @@ namespace ti
 			
 			try
 			{
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
+				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, true);
 			}
 			catch (ValueException& e)
 			{
 				logger->Error(e.DisplayString()->c_str());
 			}
-		}
-		
-		if (IsAttached())
-		{
-			(*attachedOutput)->CallNS("close");
 		}
 	}
 	

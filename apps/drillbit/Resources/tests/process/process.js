@@ -189,7 +189,7 @@ describe("process tests",
 			try
 			{
 				value_of(data).should_be(fileData);
-				value_of(data).should_be(originalData);
+				value_of(data.replace(/[\r\n]+/,'')).should_be(originalData);
 				value_of(pipes[0].isClosed()).should_be_true();
 				value_of(pipes[1].isClosed()).should_be_true();
 				value_of(p.stdout.isClosed()).should_be_true();
@@ -343,13 +343,11 @@ describe("process tests",
 		{
 			try {
 				value_of(p.getPID()).should_be_number();
-				
 				var buf = event.pipe.read();
 				value_of(buf).should_be_object();
 				value_of(buf.toString()).should_be_string();
-				value_of(buf.length).should_be_greater_than(0);
 				
-				output += buf;
+				output += buf.toString();
 			} catch(e) {
 				test.failed(e);
 			}

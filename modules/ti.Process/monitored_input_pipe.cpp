@@ -12,11 +12,6 @@ namespace ti
 	MonitoredInputPipe::~MonitoredInputPipe ()
 	{
 		this->Close();
-		
-		if (monitorAdapter)
-		{
-			delete monitorAdapter;
-		}
 	}
 
 	void MonitoredInputPipe::Close()
@@ -25,19 +20,28 @@ namespace ti
 		{
 			if (monitorThread.isRunning())
 			{
-				try
-				{
-					this->monitorThread.join();
-				}
-				catch (Poco::Exception& e)
-				{
-					Logger::Get("Process.MonitoredInputPipe")->Error(
-						"Exception while try to join with InputPipe thread: %s",
-						e.displayText().c_str());
-				}
+				JoinMonitor();
+				delete monitorAdapter;
 			}
 			
 			BufferedInputPipe::Close();
+		}
+	}
+	
+	void MonitoredInputPipe::JoinMonitor()
+	{
+		if (monitorJoined) return;
+		monitorJoined = true;
+		
+		try
+		{
+			this->monitorThread.join();
+		}
+		catch (Poco::Exception& e)
+		{
+			Logger::Get("Process.MonitoredInputPipe")->Error(
+				"Exception while try to join with InputPipe thread: %s",
+				e.displayText().c_str());
 		}
 	}
 	
@@ -53,11 +57,8 @@ namespace ti
 		int length = MAX_BUFFER_SIZE;
 		int bytesRead = this->RawRead(buffer, length);
 		while (bytesRead > 0) {
+			this->Append(buffer, bytesRead);
 			bytesRead = this->RawRead(buffer, length);
-			if (bytesRead > 0)
-			{
-				this->Append(buffer, bytesRead);
-			}
 		}
 	}
 }
