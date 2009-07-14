@@ -116,7 +116,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=App.loadProperties,since=0.2) Loads a properties list from a file path
 		 * @tiarg(for=App.loadProperties,type=string,name=path) path to properties file
-		 * @tiresult(for=App.loadProperties,type=list) returns the properties as a list
+		 * @tiresult(for=App.loadProperties,type=Array<App.Properties>) returns the properties as a list
 		 */
 		this->SetMethod("loadProperties", &AppBinding::LoadProperties);
 
@@ -133,13 +133,13 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=App.getSystemProperties,since=0.4) get the system properties defined in tiapp.xml
-		 * @tiresult(for=App.getSystemProperties,type=Properties) returns the system properties object (see Titanium.App.Properties)
+		 * @tiresult(for=App.getSystemProperties,type=App.Properties) returns the system properties object (see Titanium.App.Properties)
 		 */
 		this->SetMethod("getSystemProperties", &AppBinding::GetSystemProperties);
 
 		/**
 		 * @tiapi(method=True,name=App.getIcon,since=0.4) Returns the application icon
-		 * @tiresult(for=App.getIcon,type=string) returns the icon path
+		 * @tiresult(for=App.getIcon,type=String) returns the icon path
 		 */
 		this->SetMethod("getIcon", &AppBinding::GetIcon);
 	}
@@ -308,11 +308,9 @@ namespace ti
 	void AppBinding::GetIcon(const ValueList& args, SharedValue result)
 	{
 		const SharedApplication app = this->host->GetApplication();
-		if (app->image.empty())
-		{
-			result->SetNull();
-		}
-		else
+		result->SetNull();	
+
+		if (app && !app->image.empty())
 		{
 			std::string iconPath = app->image;
 			result->SetString(iconPath);

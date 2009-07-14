@@ -14,8 +14,8 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Media.createSound,since=0.2) Creates a sound object
-		 * @tiarg(for=Media.createSound,name=path,type=string) path or url to the sound file
-		 * @tiresult(for=Media.createSound,type=object) a Sound object
+		 * @tiarg(for=Media.createSound,name=path,type=String) path or url to the sound file
+		 * @tiresult(for=Media.createSound,type=Media.Sound) a Sound object
 		 */
 		this->SetMethod("createSound", &MediaBinding::_CreateSound);
 		/**

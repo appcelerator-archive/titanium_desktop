@@ -81,22 +81,10 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullScreen,since=0.2,deprecated=True) Checks whether a window is in fullscreen
-	 * @tiarg(for=UI.UserWindow.isFullScreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
-	 */
-	this->SetMethod("isFullScreen", &UserWindow::_IsFullscreen);
-
-	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=1.0) Checks whether a window is in fullscreen
 	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
 	 */
 	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
-
-	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullScreen,since=0.2,deprecated=True) Makes a window fullscreen
-	 * @tiarg(for=UI.UserWindow.setFullScreen,name=fullscreen,type=boolean) set to true for fullscreen, false if otherwise
-	 */
-	this->SetMethod("setFullScreen", &UserWindow::_SetFullscreen);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=1.0) Makes a window fullscreen
@@ -640,10 +628,14 @@ void UserWindow::_IsTopMost(const kroll::ValueList& args, kroll::SharedValue res
 {
 	if (this->active)
 	{
-		result->SetBool(this->IsUsingChrome());
-	}
-	else
-	{
+		if (this ->IsTopMost() )
+		{
+			PRINTD("using IsTopMost: TRUE");
+		}
+		else
+		{
+			PRINTD("using IsTopMost: FALSE");
+		}
 		result->SetBool(this->config->IsTopMost());
 	}
 }

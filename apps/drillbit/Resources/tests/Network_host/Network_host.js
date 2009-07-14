@@ -20,7 +20,7 @@ describe("Network.Host",{
 
 	test_network_Host_by_address: function()
 	{
-		var theHost = Titanium.Network.getHostByName("127.0.0.1");
+		var theHost = Titanium.Network.getHostByAddress("127.0.0.1");
 		value_of(theHost).should_be_object();
 		value_of(theHost.isInvalid()).should_be_false();
 

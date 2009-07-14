@@ -76,6 +76,9 @@ describe("UI Module Tests",{
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
 
+		value_of(w.getMaxHeight()).should_be(500);
+		value_of(w.getMaxWidth()).should_be(400);
+		
 		w.close();
 	},
 	test_window_min_size: function()
@@ -122,6 +125,9 @@ describe("UI Module Tests",{
 		w.setWidth(100);
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
+
+		value_of(w.getMinHeight()).should_be(500);
+		value_of(w.getMinWidth()).should_be(400);
 
 		w.close();
 	},
@@ -546,7 +552,7 @@ describe("UI Module Tests",{
 				w.close();
 				callback.passed();
 			}
-			if (w2.getTitle() != Titanium.API.getApplication.getName()) {
+			if (w2.getTitle() != Titanium.API.getApplication().getName()) {
 				w.close();
 				callback.failed("Set title did not override header title 2");
 			} else {
@@ -554,5 +560,76 @@ describe("UI Module Tests",{
 				callback.passed();
 			}
 		}, 1000);
-	}
+	},
+	test_close_message_on_originating_window_as_async: function(callback)
+	{
+		Titanium.saw_close = false;
+		Titanium.saw_closed = false;
+
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://test_close_event_listener.html');
+		w.open();
+
+		setTimeout(function() {
+			w.close();
+			setTimeout(function() {
+				if (Titanium.API.saw_close) {
+					callback.passed();
+				} else {
+					callback.failed("Closing window did not receive CLOSE event");
+				}
+			}, 200);
+		}, 200);
+	},
+	test_window_TopMost: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		
+		w.open();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.setTopMost(true);
+		value_of(w.isTopMost()).should_be(true);
+
+		w.setTopMost(false);
+		value_of(w.isTopMost()).should_be(false);
+
+		w.minimize();
+		value_of(w.isMinimized()).should_be(true);
+		value_of(w.isTopMost()).should_be(false);
+		w.unminimize();
+
+		w.setVisible(false);
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.show();
+		value_of(w.isVisible()).should_be_true();
+		value_of(w.isTopMost()).should_be(false);
+		w.hide();
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.close();
+		
+		// the ultimate reality check.
+		value_of(w.isTopMost()).should_be_undefined();
+	},
+	
+	test_window_ResizableFlag: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		
+		value_of(w.isResizable()).should_be(true);
+		w.open();
+
+		value_of(w.isResizable()).should_be(true);
+
+		w.setResizable(false);
+		value_of(w.isResizable()).should_be(false);
+
+		w.setResizable(true);
+		value_of(w.isResizable()).should_be(true);
+
+		w.close();
+	},
 });
