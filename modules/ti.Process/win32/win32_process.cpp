@@ -25,7 +25,6 @@ namespace ti
 		complete(false),
 		current(false),
 		pid(-1),
-		exitCode(-1),
 		logger(Logger::Get("Process.Win32Process"))
 	{
 	}
@@ -307,10 +306,13 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
-		this->exitCode = exitCode;
+		Logger::Get("Process.Win32Process")->Debug("Process terminated with exitcode: %d", exitCode);
+		SetExitCode(exitCode);
 		this->running = false;
 		this->complete = true;
 		
+		GetStdout()->JoinMonitor();
+		GetStderr()->JoinMonitor();
 		Process::Exited();
 	}
 	

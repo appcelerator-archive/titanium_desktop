@@ -52,7 +52,6 @@ namespace ti
 		bool running, complete, current;
 		int pid;
 		HANDLE process;
-		int exitCode;
 		
 		Logger* logger;
 		static AutoPtr<Win32Process> currentProcess;
