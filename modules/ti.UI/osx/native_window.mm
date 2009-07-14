@@ -271,7 +271,7 @@
 		[NSApp arrangeInFront:self];
 		[self makeKeyAndOrderFront:self];
 		[NSApp activateIgnoringOtherApps:YES];
-		
+
 		if (config->IsFullscreen())
 		{
 			[self setFullscreen:YES];

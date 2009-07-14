@@ -300,9 +300,9 @@
 
 	if (!initialDisplay)
 	{
-		initialDisplay = YES;
 		// cause the initial window to show since it was initially opened hidden
 		// so you don't get the nasty white screen while content is loading
+		initialDisplay = YES;
 		[window performSelector:@selector(frameLoaded) withObject:nil afterDelay:.005];
 	}
 }
@@ -448,19 +448,24 @@
 
 - (void)webView:(WebView *)wv runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
-	NSRunInformationalAlertPanel([window title], // title
-		message, // message
-		NSLocalizedString(@"OK", @""), // default button
-		nil, // alt button
-		nil); // other button
+	if (!initialDisplay)
+	{
+		initialDisplay = YES;
+		[window frameLoaded];
+	}
 
 	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
 	}
-}
 
+	NSRunInformationalAlertPanel([window title], // title
+		message, // message
+		NSLocalizedString(@"OK", @""), // default button
+		nil, // alt button
+		nil); // other button
+}
 
 - (BOOL)webView:(WebView *)wv runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
