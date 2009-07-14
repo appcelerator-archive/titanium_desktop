@@ -77,7 +77,8 @@ catch (e)
 
 <% for (var f in entry.test) {
 	var i = excludes.indexOf(f);
-	if (i == -1) { %>
+	var run = (entry.tests_to_run == "all" || entry.tests_to_run.indexOf(f) != -1);
+	if (i == -1 && run) { %>
 
 		TitaniumTest.tests.push(function(){
 			// <%= f %>

@@ -37,10 +37,12 @@
 		},
 		all_finished: function()
 		{
-			println("Total: " + this.passed + " passed, " + this.failed + " failed");
+			println("Total: " + this.passed + " passed, " + this.failed + " failed, "
+				+ ti.Drillbit.assertion_count + " assertions");
 		}
 	};
 	
+	var tests = [];
 	var test_files = [];
 	for (var c=0;c<ti.App.arguments.length;c++)
 	{
@@ -52,22 +54,43 @@
 		}
 		else
 		{
-			var file = tiFS.getFile(arg);
+			var tokens = arg.split(':');
+			var fname = tokens[0];
+			var testname = tokens[1] || null;
+			var file = tiFS.getFile(fname);
+			
 			if (!file.exists())
 			{
-				errPrint("Warning: " + arg + " doesn't exist, skipping.");
+				var src_file = null;
+				if (Titanium.platform=="osx") {
+					src_file = tiFS.getFile(ti.API.getApplication().getPath(), '..', '..', "..", "..",
+						'apps', 'drillbit', 'Resources', 'tests', fname, fname+'.js');
+				} else {
+					src_file = tiFS.getFile(ti.API.getApplication().getPath(), '..', "..", "..",
+						'apps', 'drillbit', 'Resources', 'tests', fname, fname+'.js');
+				}
+				if (src_file.exists())
+				{
+					var t = 'all'
+					if (testname != null) t = testname.split(',');
+					
+					test_files.push(src_file);
+					tests.push({'suite':fname, tests:t});
+				}
+				else errPrint("Warning: " + arg + " doesn't exist, skipping.");
 			}
 			else
 			{
 				println("Loading file: " + file.nativePath());
 				test_files.push(file);
+				tests.push({'suite':fname.name().substring(0,fname.name().length-2), tests:'all'});
 			}
 		}
 	}
 	
-	if (test_files.length == 0)
+	if (tests.length == 0)
 	{
-		errPrint("Usage:\n\t drillbit_cmd.py [--debug-tests] test [test2..testN]");
+		errPrint("Usage:\n\t drillbit_cmd.py [--debug-tests] suite[:test_name] [suite2..suiteN]");
 		ti.App.exit();
 	}
 	else {
@@ -75,6 +98,7 @@
 		ti.Drillbit.auto_close = true;
 		ti.Drillbit.loadTests(test_files);
 		ti.Drillbit.setupTestHarness(tiFS.getFile(tiFS.getApplicationDirectory(), 'manifest_harness'));
-		ti.Drillbit.runTests();
+		println("running tests: "+tests[0].tests);
+		ti.Drillbit.runTests(tests);
 	}
 })();

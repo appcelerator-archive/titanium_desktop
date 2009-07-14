@@ -227,11 +227,21 @@
 	
 		this.runTests = function(tests_to_run)
 		{
-			tests_to_run = tests_to_run ? tests_to_run : this.test_names;
+			if (!tests_to_run)
+			{
+				tests_to_run = [];
+				for (var i = 0; i < this.test_names.length; i++)
+				{
+					tests_to_run.push({suite: this.test_names[i], tests:'all'});
+				}
+			}
+			
 			for (var i = 0; i < tests_to_run.length; i++)
 			{
-				var name = tests_to_run[i];
+				var name = tests_to_run[i].suite;
 				var entry = this.tests[name];
+				entry.tests_to_run = tests_to_run[i].tests;
+				
 				executing_tests.push(entry);
 				running_tests+=entry.assertion_count;
 			}

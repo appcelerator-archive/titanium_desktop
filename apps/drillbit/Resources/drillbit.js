@@ -149,18 +149,18 @@ $(window).ready(function()
 		if (!run_link.disabled)
 		{
 			run_link.disabled = true;
-			var test_names = [];
+			var tests = [];
 			$.each($('div[id^=suite_]'),function()
 			{
 				var name = $(this).attr('id').substr(6);
 				frontend.test_status(name,'untested');
 				if ($(this).find('img').attr('src').indexOf('check_on') != -1)
 				{
-					test_names.push(name);
+					tests.push({suite: name, tests:'all'});
 				}
 			});
 			
-			Drillbit.runTests(test_names, true);
+			Drillbit.runTests(tests, true);
 		}
 		else
 		{
