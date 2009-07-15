@@ -1662,11 +1662,11 @@ void UserWindow::PageLoaded(
 
 double UserWindow::Constrain(double value, double min, double max)
 {
-	if (min > 0 && value < min)
+	if (min >= 0.0 && value < min)
 	{
 		value = min;
 	}
-	if (max > 0 && value > max)
+	if (max >= 0.0 && value > max)
 	{
 		value = max;
 	}
