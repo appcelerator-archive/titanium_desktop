@@ -1,4 +1,4 @@
-/**
+/**s
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
@@ -67,8 +67,10 @@ namespace ti
 	{
 		if (this->trayIconData == NULL)
 		{
-			// TODO: free the previous hint
-			lstrcpy(this->trayIconData->szTip, hint.c_str());
+			// NotifyIconData.szTip has 128 character limit.
+			ZeroMemory(this->trayIconData->szTip, 128);
+			// make sure we don't overflow the static buffer.
+			lstrcpyn(this->trayIconData->szTip, hint.c_str(), 128);
 			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 		}
 	}
