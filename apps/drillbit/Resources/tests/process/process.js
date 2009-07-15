@@ -93,7 +93,7 @@ describe("process tests",
 		}, 3000);
 	},
 	
-	test_kill: function()
+	test_kill_as_async: function(callback)
 	{
 		var p = Titanium.Process.createProcess(this.moreCmd);
 		var timer = 0;
@@ -111,7 +111,7 @@ describe("process tests",
 		}, 3000);
 	},
 	
-	test_terminate: function()
+	test_terminate_as_async: function(callback)
 	{
 		var p = Titanium.Process.createProcess(this.moreCmd);
 		var timer = 0;
