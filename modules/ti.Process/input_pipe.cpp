@@ -102,10 +102,10 @@ namespace ti
 	
 	void InputPipe::Closed()
 	{
-		Logger::Get("Process.InputPipe")->Debug("in InputPipe::Closed");
+		//Logger::Get("Process.InputPipe")->Debug("in InputPipe::Closed");
 		if (IsAttached())
 		{
-			Logger::Get("Process.InputPipe")->Debug("I'm attached");
+			//Logger::Get("Process.InputPipe")->Debug("I'm attached");
 			if (!(*attachedOutput)->GetMethod("close").isNull())
 			{
 				SharedKMethod method = (*attachedOutput)->GetMethod("close");

@@ -68,6 +68,7 @@ namespace ti
 				try
 				{
 					this->exitMonitorThread.join();
+					if (exitMonitorAdapter) delete exitMonitorAdapter;
 				}
 				catch (Poco::Exception& e)
 				{
@@ -76,8 +77,6 @@ namespace ti
 						e.displayText().c_str());
 				}
 			}
-
-			delete exitMonitorAdapter;
 		}
 	}
 	
@@ -302,8 +301,6 @@ namespace ti
 		this->running = false;
 		this->complete = true;
 		
-		GetStdout()->JoinMonitor();
-		GetStderr()->JoinMonitor();
 		GetStdout()->Close();
 		GetStderr()->Close();
 		
