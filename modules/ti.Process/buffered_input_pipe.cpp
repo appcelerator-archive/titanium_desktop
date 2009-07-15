@@ -13,8 +13,6 @@ namespace ti
 	
 	AutoPtr<Blob> BufferedInputPipe::Read(int bufsize)
 	{
-		Poco::Mutex::ScopedLock lock(mutex);
-		
 		if (!closed)
 		{
 			if (buffer.size() == 0)
@@ -27,8 +25,10 @@ namespace ti
 				bufsize = (int) buffer.size();
 			}	
 			
+			mutex.lock();
 			AutoPtr<Blob> blob = new Blob(&(buffer[0]), bufsize);
 			buffer.erase(buffer.begin(), buffer.begin()+bufsize);
+			mutex.unlock();
 			
 			return blob;
 		}
