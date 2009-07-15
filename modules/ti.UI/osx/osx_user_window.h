@@ -127,10 +127,6 @@ namespace ti
 
 			NSScreen* GetWindowScreen();
 			NSRect CalculateWindowFrame(double, double, double, double);
-			double real_x;
-			double real_y;
-			double real_w;
-			double real_h;
 			DISALLOW_EVIL_CONSTRUCTORS(OSXUserWindow);
 	};
 }

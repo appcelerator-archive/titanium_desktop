@@ -6,6 +6,32 @@
 				margin:10px;
 			}
 		</style>
+		<script type="text/python">
+from threading import Thread
+import time
+# Create thread to eat cpu
+def mythread():
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  while True:
+    print "in thread loop"
+    pass
+print "before thread"
+print "before thread"
+print "before thread"
+print "before thread"
+print "before thread"
+Thread(target=mythread).start()
+print "launched thread"
+print "launched thread"
+print "launched thread"
+print "launched thread"
+print "launched thread"
+</script>
 		<script>
 			var menu = null;
 			var item1 = null;
