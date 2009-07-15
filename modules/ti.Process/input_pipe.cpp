@@ -325,7 +325,7 @@ namespace ti
 		}
 		if (onClose && !onClose->isNull())
 		{
-			pipe->SetOnClose(*onClose);
+			pipe->onClose = new SharedKMethod(*onClose);
 		}
 		
 		return pipe;
