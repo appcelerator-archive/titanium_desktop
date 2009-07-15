@@ -10,7 +10,8 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(std::string& iconPath, SharedKMethod cb) :
+	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cb) :
+		TrayItem(iconURL),
 		callback(cb),
 		oldNativeMenu(0),
 		trayIconData(0)
@@ -22,9 +23,8 @@ namespace ti
 		{
 			uw = *i;
 		}
-	
+
 		AutoPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
-	
 		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
 		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
 		notifyIconData->hWnd = wuw->GetWindowHandle();
@@ -32,9 +32,10 @@ namespace ti
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
 
+		std::string iconPath = URLToPathOrURL(iconURL);
 		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
-	
+
 		lstrcpy(notifyIconData->szTip, "Titanium Application");
 		Shell_NotifyIcon(NIM_ADD, notifyIconData);
 		this->trayIconData = notifyIconData;

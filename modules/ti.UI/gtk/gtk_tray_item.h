@@ -14,10 +14,10 @@ namespace ti
 	{
 
 	public:
-		GtkTrayItem(std::string& icon_path, SharedKMethod cb);
+		GtkTrayItem(std::string& iconURL, SharedKMethod cb);
 		~GtkTrayItem();
 
-		void SetIcon(std::string& icon_path);
+		void SetIcon(std::string& iconPath);
 		void SetMenu(AutoMenu menu);
 		void SetHint(std::string& hint);
 		void Remove();

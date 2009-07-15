@@ -13,7 +13,7 @@ namespace ti
 class Win32TrayItem: public TrayItem
 {
 	public:
-	Win32TrayItem(std::string& iconPath, SharedKMethod cb);
+	Win32TrayItem(std::string& iconURL, SharedKMethod cb);
 	virtual ~Win32TrayItem();
 
 	void SetIcon(std::string& iconPath);

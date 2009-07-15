@@ -6,7 +6,8 @@
 #include "../ui_module.h"
 namespace ti
 {
-	OSXTrayItem::OSXTrayItem(std::string& iconPath, SharedKMethod cb) :
+	OSXTrayItem::OSXTrayItem(std::string& iconURL, SharedKMethod cb) :
+		TrayItem(iconURL),
 		nativeMenu(0),
 		menu(0),
 		callback(cb),
@@ -19,6 +20,8 @@ namespace ti
 		[nativeItem setTarget:delegate];
 		[nativeItem setAction:@selector(invoke:)];
 		[nativeItem setHighlightMode:YES];
+
+		std::string iconPath = URLToPathOrURL(iconURL);
 		this->SetIcon(iconPath);
 	}
 
