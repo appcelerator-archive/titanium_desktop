@@ -101,9 +101,11 @@
 	// In OSX, Process termination can come before pipe close, so we deal
 	// with pipe cleanup in OSXInputPipe
 	
-	process->GetStdin()->Close();
-	process->GetStdout()->Close();
-	process->GetStderr()->Close();
+	[self performSelectorOnMainThread:@selector(processExited:) withObject:nil waitUntilDone:NO];
+}
+
+-(void) processExited: (id)object
+{
 	process->Exited();
 }
 @end
@@ -152,6 +154,15 @@ namespace ti
 	{	
 		Terminate();
 		//[delegate release];
+	}
+	
+	void OSXProcess::Exited()
+	{
+		GetStdin()->Close();
+		GetStderr()->Close();
+		GetStdout()->Close();
+		
+		Process::Exited();
 	}
 	
 	int OSXProcess::GetPID()

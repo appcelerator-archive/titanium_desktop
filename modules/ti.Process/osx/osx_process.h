@@ -24,6 +24,7 @@ namespace ti { class OSXProcess; }
 -(id)initWithProcess:(ti::OSXProcess*)p;
 -(NSTask*)task;
 -(void)terminated:(NSNotification *)aNotification;
+-(void)processExited;
 @end
 
 namespace ti
@@ -41,6 +42,7 @@ namespace ti
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual bool IsRunning();
+		virtual void Exited();
 		
 		AutoPtr<OSXOutputPipe> GetStdin() { return stdinPipe.cast<OSXOutputPipe>(); }
 		AutoPtr<OSXInputPipe> GetStdout() { return stdoutPipe.cast<OSXInputPipe>(); }

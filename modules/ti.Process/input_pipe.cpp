@@ -69,9 +69,9 @@ namespace ti
 			pipe = this;
 		}
 		
-		if (attachedOutput && !attachedOutput->isNull())
+		if (IsAttached())
 		{
-			if ((*attachedOutput)->Get("write")->IsMethod())
+			if (!(*attachedOutput)->GetMethod("write").isNull())
 			{
 				AutoPtr<Blob> data = pipe->Read();
 				SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
@@ -100,11 +100,15 @@ namespace ti
 	
 	void InputPipe::Closed()
 	{
+		Logger::Get("Process.InputPipe")->Debug("in InputPipe::Closed");
 		if (IsAttached())
 		{
-			if (attachedOutput && !attachedOutput->isNull() && (*attachedOutput)->Get("close")->IsMethod())
+			Logger::Get("Process.InputPipe")->Debug("I'm attached");
+			if (!(*attachedOutput)->GetMethod("close").isNull())
 			{
-				(*attachedOutput)->CallNS("close");
+				SharedKMethod method = (*attachedOutput)->GetMethod("close");
+				ValueList args;
+				Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
 			}
 		}
 		else if (IsSplit())
@@ -129,7 +133,7 @@ namespace ti
 			
 			try
 			{
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, true);
+				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
 			}
 			catch (ValueException& e)
 			{
@@ -236,6 +240,9 @@ namespace ti
 	void InputPipe::Attach(SharedKObject other)
 	{
 		attachedOutput = new SharedKObject(other);
+		Logger::Get("Process.InputPipe")->Debug("attaching object.. hasWrite? %s, hasClose? %s",
+			!(*attachedOutput)->Get("write")->IsUndefined()?"TRUE":"FALSE",
+			!(*attachedOutput)->Get("close")->IsUndefined()?"TRUE":"FALSE");
 	}
 	
 	void InputPipe::Detach()
@@ -248,7 +255,7 @@ namespace ti
 	
 	bool InputPipe::IsAttached()
 	{
-		return attachedOutput != NULL;
+		return attachedOutput != NULL && !attachedOutput->isNull();
 	}
 	
 	void InputPipe::SetOnRead(SharedKMethod onReadCallback)

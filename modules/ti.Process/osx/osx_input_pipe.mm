@@ -88,7 +88,8 @@ namespace ti
 			
 			SetOnRead(NULL);
 			
-			Pipe::Closed();
+			Logger::Get("Process.OSXInputPipe")->Debug("super::close");
+			InputPipe::Closed();
 		}
 	}
 	
@@ -102,12 +103,8 @@ namespace ti
 		Logger *logger = Logger::Get("Process.OSXInputPipe");
 		[buffer appendData:data];
 		
-		logger->Debug("dataReady: data %d bytes, buffer %d bytes", [data length], [buffer length]);
 		if ([buffer length] > 0)
 		{
-			NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-			logger->Debug("data: %s", [str UTF8String]);
-			[str release];
 			InputPipe::DataReady();
 		}
 	}
