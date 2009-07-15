@@ -1620,16 +1620,6 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 		// window and global variable scope
 		this->Set("window", frameGlobal->Get("window"));
 
-		// TODO: I'm not sure the below is actually useful. The only place these
-		// will be available is from code already running on the page  and that 
-		// code might as well just get 'window' or 'document' -- Martin
-
-		// Copy the document and window properties to the Titanium object
-		// SharedValue doc_value = frameGlobal->Get("document");
-		// tiObject->Set("document", doc_value);
-		// SharedValue windowValue = frameGlobal->Get("window");
-		// tiObject->Set("window", windowValue);
-
 		UserWindow::LoadUIJavaScript(context);
 	}
 
