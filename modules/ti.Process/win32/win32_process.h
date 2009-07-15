@@ -35,8 +35,6 @@ namespace ti
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
-		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
 	protected:

@@ -277,16 +277,6 @@ namespace ti
 			raise(signal);
 		}
 	}
-	
-	void Win32Process::Restart()
-	{
-		//TODO
-	}
-	
-	void Win32Process::Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
-	{
-		//TODO
-	}
 		
 	void Win32Process::ExitMonitor()
 	{
