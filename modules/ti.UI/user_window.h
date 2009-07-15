@@ -44,8 +44,9 @@ namespace ti
 				std::string& defaultName,
 				std::vector<std::string>& types,
 				std::string& typesDescription);
-	
+
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::SharedValue);
+			void _InsertAPI(const kroll::ValueList&, kroll::SharedValue);
 			void _Hide(const kroll::ValueList&, kroll::SharedValue);
 			void _Show(const kroll::ValueList&, kroll::SharedValue);
 			void _Minimize(const kroll::ValueList&, kroll::SharedValue);
@@ -211,6 +212,7 @@ namespace ti
 			virtual void SetTopMost(bool topmost) = 0;
 			virtual bool ShouldHaveTitaniumObject(JSGlobalContextRef, JSObjectRef);
 			virtual void RegisterJSContext(JSGlobalContextRef);
+			virtual void InsertAPI(SharedKObject frameGlobal);
 			virtual void PageLoaded(
 				SharedKObject scope, std::string &url, JSGlobalContextRef context);
 			virtual void AppIconChanged() {};

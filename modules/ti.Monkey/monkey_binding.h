@@ -6,57 +6,38 @@
 
 #ifndef _MONKEY_BINDING_H_
 #define _MONKEY_BINDING_H_
-
 #include <kroll/kroll.h>
 #include <vector>
-#include <Poco/RegularExpression.h>
 
 namespace ti
 {
-	class PatternMatcher : public std::unary_function<char const *, bool> 
+	struct Script
 	{
-	public:
-		PatternMatcher(std::string& pattern) : pattern(pattern) {}
-
-		bool operator()(std::string const &str) const 
-		{
-			return(match(pattern.c_str(), str.c_str()));
-		}
-	private:
-		std::string pattern;
-		bool match(char const *pat, char const *str) const 
-		{
-			// exact match returns immediately
-			if (strcmp(pat,str)==0) return true;
-			
-			switch (*pat) 
-			{
-				case '\0': 
-					return *str=='\0';
-				case '*':
-					return match(pat+1, str) || (*str && match(pat, str+1));
-				default: 
-					return *pat==*str && match(pat+1, str+1);
-			}
-		}
+		public:
+		std::vector<std::string> includes;
+		std::vector<std::string> excludes;
+		std::string source;
+		bool Matches(std::string& url);
+		static bool Matches(std::vector<std::string>&, std::string& url);
+		static bool Matches(const char* pattern, const char* target);
 	};
 
-	typedef std::vector<std::string> VectorOfStr;
-	typedef std::vector<PatternMatcher> VectorOfPatterns;
-	
 	class MonkeyBinding : public kroll::StaticBoundObject
 	{
-	public:
-		MonkeyBinding(Host*,SharedKObject);
-	protected:
+		public:
+		MonkeyBinding(Host*, SharedKObject);
+
+		protected:
 		virtual ~MonkeyBinding();
-	private:
+		void ParseFile(string filePath);
+		void Callback(const ValueList &args, SharedValue result);
+		void EvaluateUserScript(
+			SharedKObject, std::string&,SharedKObject, std::string&);
+
 		SharedKObject global;
 		Logger* logger;
-		std::vector< std::pair< std::pair< VectorOfPatterns,VectorOfPatterns > ,std::string> > scripts;
-		
-		bool Matches(VectorOfPatterns, std::string &subject);
-		void Callback(const ValueList &args, SharedValue result);
+		SharedKMethod callback;
+		std::vector<Script*> scripts;
 	};
 }
 
