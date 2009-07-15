@@ -719,5 +719,43 @@ describe("UI Module Tests",{
 		value_of(w.getTransparencyColor()).should_be_string();
 		
 		w.close();
-	}
+	},
+	
+	test_window_mainWnd_by_ID: function()
+	{
+		var currentWnd = Titanium.UI.getCurrentWindow();
+		var mainWnd = Titanium.UI.getMainWindow();
+		
+        value_of(mainWnd.getID() == currentWnd.getID()).should_be_true();
+        
+        var w = currentWnd.createWindow('app://blahblah.html');
+		w.open();
+
+        value_of(mainWnd == w).should_be_false();
+        value_of(currentWnd.getID() == w.getID()).should_be_false();
+		
+		var whosUrDaddy = w.getParent();
+        value_of(mainWnd.getID() == whosUrDaddy.getID()).should_be_true();
+		
+		w.close();
+	},
+
+	test_window_icon: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+
+        // I expect that there is no icon defined for the test.
+        if ( w.getIcon() != null )		
+        {
+            // if there is, then it should be returned as a string.
+    		value_of(w.getIcon()).should_be_string();
+    	}
+        
+        // setup a dummy icon
+        w.setIcon("doesnotexist.png");
+		value_of(w.getIcon()).should_be("doesnotexist.png");
+		
+		w.close();
+	}	
 });
