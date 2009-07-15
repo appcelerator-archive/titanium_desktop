@@ -24,6 +24,7 @@ namespace ti
 		running(false),
 		complete(false),
 		current(false),
+		runningSync(false),
 		pid(-1),
 		logger(Logger::Get("Process.LinuxProcess"))
 	{
@@ -82,13 +83,19 @@ namespace ti
 	
 	void LinuxProcess::Launch(bool async)
 	{
+		if (!async) {
+			GetStdout()->SetAsyncOnRead(false);
+			GetStderr()->SetAsyncOnRead(false);			
+		}
 		pid = fork();
 		if (pid < 0)
 		{
+			logger->Debug("Can't fork process :(");
 			throw ValueException::FromFormat("Cannot fork process for %s", args->At(0)->ToString());		
 		}
 		else if (pid == 0)
 		{
+			logger->Debug("forked!");
 			// setup redirection
 			dup2(GetStdin()->GetReadHandle(), STDIN_FILENO);
 			GetStdin()->Close();
@@ -98,10 +105,12 @@ namespace ti
 			GetStdout()->Close();
 			GetStderr()->Close();
 			
+			logger->Debug("closing fds");
 			// close all open file descriptors other than stdin, stdout, stderr
-			for (int i = 3; i < getdtablesize(); ++i)
-				close(i);
+			//for (int i = 3; i < getdtablesize(); ++i)
+			//	close(i);
 			
+			logger->Debug("copying args");
 			size_t i = 0;
 			char** argv = new char*[args->Size() + 1];
 			//argv[i++] = const_cast<char*>(command.c_str());
@@ -111,6 +120,7 @@ namespace ti
 			}
 			argv[i] = NULL;
 			
+			logger->Debug("copying env");			
 			SharedStringList envNames = environment->GetPropertyNames();
 			for (i = 0; i < envNames->size(); i++)
 			{
@@ -119,6 +129,7 @@ namespace ti
 			}
 
 			const char *command = args->At(0)->ToString();
+			logger->Debug("execvp: %s", command);
 			execvp(command, argv);
 			_exit(72);
 		}
@@ -128,8 +139,8 @@ namespace ti
 		close(GetStderr()->GetWriteHandle());
 			
 		this->running = true;
-		
 		// setup threads which can read output and also monitor the exit
+		logger->Debug("starting monitors");
 		GetStdout()->StartMonitor();
 		GetStderr()->StartMonitor();
 		if (async)
@@ -139,7 +150,8 @@ namespace ti
 			this->exitMonitorThread.start(*exitMonitorAdapter);
 		}
 		else
-		{	
+		{
+			this->runningSync = true;
 			ExitMonitor();
 		}
 	}
@@ -177,16 +189,6 @@ namespace ti
 	{
 		SendSignal(SIGINT);
 	}
-	
-	void LinuxProcess::Restart()
-	{
-		//TODO
-	}
-
-	void LinuxProcess::Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
-	{
-		//TODO
-	}
 
 	bool LinuxProcess::IsRunning()
 	{
@@ -208,7 +210,14 @@ namespace ti
 			throw ValueException::FromFormat("Cannot wait for process: %d", this->pid);
 		}
 		
+		if (this->runningSync)
+		{
+			//GetStdout()->JoinMonitor();
+			//GetStderr()->JoinMonitor();
+		}
+
 		this->running = false;
+		this->runningSync = false;
 		this->complete = true;
 		SetExitCode(WEXITSTATUS(status));
 		Process::Exited();

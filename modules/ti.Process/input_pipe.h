@@ -44,8 +44,10 @@ namespace ti
 		bool IsAttached();
 		bool IsPiped() { return IsJoined() || IsSplit() || IsAttached(); }
 		
+		void SetAsyncOnRead(bool asyncOnRead) { this->asyncOnRead = asyncOnRead; }
 		void SetOnRead(SharedKMethod onRead);
-
+		AutoInputPipe Clone();
+		
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		
@@ -80,6 +82,7 @@ namespace ti
 		Poco::Mutex splitMutex;
 		AutoPtr<BufferedInputPipe> splitPipe1, splitPipe2;
 		Logger *logger;
+		bool asyncOnRead;
 	};
 }
 

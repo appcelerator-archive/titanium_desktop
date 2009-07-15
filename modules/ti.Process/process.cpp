@@ -168,7 +168,7 @@ namespace ti
 	std::string Process::ArgumentsToString()
 	{
 		std::ostringstream str;
-		for (int i = 0; i < this->args->Size(); i++)
+		for (size_t i = 0; i < this->args->Size(); i++)
 		{
 			str << " \"" << this->args->At(i)->ToString() << "\" ";
 		}
@@ -184,8 +184,8 @@ namespace ti
 	{
 		this->environment = environment.isNull() ? CloneEnvironment() : environment;
 		this->stdinPipe = stdinPipe.isNull() ? OutputPipe::CreateOutputPipe() : stdinPipe;
-		this->stdoutPipe = stdoutPipe.isNull() ? InputPipe::CreateInputPipe() : stdoutPipe;
-		this->stderrPipe = stderrPipe.isNull() ? InputPipe::CreateInputPipe() : stderrPipe;
+		this->stdoutPipe = stdoutPipe.isNull() ? this->stdoutPipe->Clone() : stdoutPipe;
+		this->stderrPipe = stderrPipe.isNull() ? this->stderrPipe->Clone() : stderrPipe;
 	
 		if (IsRunning())
 		{
@@ -196,6 +196,7 @@ namespace ti
 		AutoPtr<Process> autoThis = this;
 		ProcessBinding::AddProcess(autoThis);
 	
+		Logger::Get("Process.Process")->Debug("restarting...");
 		Launch();
 	}
 	
@@ -361,8 +362,10 @@ namespace ti
 	
 	void Process::BufferedRead(const ValueList& args, SharedValue result)
 	{
+		Logger::Get("Process.Process")->Debug("Buffered Reading sync process data..");
 		AutoInputPipe pipe = args.at(0)->ToObject()->GetObject("pipe").cast<InputPipe>();
 		buffer.Append(pipe->Read());
+		Logger::Get("Process.Process")->Debug("Done, data should be available");
 	}
 	
 	void Process::Call(const ValueList& args, SharedValue result)

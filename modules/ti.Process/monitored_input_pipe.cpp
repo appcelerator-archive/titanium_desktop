@@ -57,6 +57,7 @@ namespace ti
 		int length = MAX_BUFFER_SIZE;
 		int bytesRead = this->RawRead(buffer, length);
 		while (bytesRead > 0) {
+			Logger::Get("Process.MonitoredInputPipe")->Debug("monitored data ready: %d bytes, %s", bytesRead, buffer);
 			this->Append(buffer, bytesRead);
 			bytesRead = this->RawRead(buffer, length);
 		}
