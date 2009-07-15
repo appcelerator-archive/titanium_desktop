@@ -675,13 +675,13 @@ namespace ti
 	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
 		STUB();
+		this->iconPath = iconPath;
 	}
 
 	std::string& OSXUserWindow::GetIcon()
 	{
 		STUB();
-		static std::string stubby = "";
-		return stubby;
+		return this->iconPath;
 	}
 
 	bool OSXUserWindow::IsTopMost()

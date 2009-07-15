@@ -110,7 +110,7 @@ namespace ti
 			AutoMenu GetMenu();
 			void SetContextMenu(AutoMenu menu);
 			AutoMenu GetContextMenu();
-			void SetIcon(std::string& icon_path);
+			void SetIcon(std::string& iconPath);
 			std::string& GetIcon();
 
 			NativeWindow* GetNative() { return nativeWindow; }
@@ -124,6 +124,7 @@ namespace ti
 			AutoPtr<OSXMenu> contextMenu;
 			AutoPtr<OSXUIBinding> osxBinding;
 			static bool initial;
+			std::string iconPath;
 
 			NSScreen* GetWindowScreen();
 			NSRect CalculateWindowFrame(double, double, double, double);

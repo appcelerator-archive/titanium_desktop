@@ -704,15 +704,15 @@ describe("UI Module Tests",{
 		value_of(alphaBlend).should_be_number();
 		
 		// transparency is constrained to a value between 0.0 <-> 1.0
-        // upper limits
+		// upper limits
 		w.setTransparency(10.0);
 		value_of(w.getTransparency()).should_be(1.0);
-        
-        // lower limits
+		
+		// lower limits
 		w.setTransparency(-10.0);
 		value_of(w.getTransparency()).should_be(0.0);
 
-        // somewhere in between
+		// somewhere in between
 		w.setTransparency(0.5);
 		value_of(w.getTransparency()).should_be(0.5);
 
@@ -720,42 +720,39 @@ describe("UI Module Tests",{
 		
 		w.close();
 	},
-	
 	test_window_mainWnd_by_ID: function()
 	{
 		var currentWnd = Titanium.UI.getCurrentWindow();
 		var mainWnd = Titanium.UI.getMainWindow();
-		
-        value_of(mainWnd.getID() == currentWnd.getID()).should_be_true();
-        
-        var w = currentWnd.createWindow('app://blahblah.html');
+		value_of(mainWnd.getID() == currentWnd.getID()).should_be_true();
+
+		var w = currentWnd.createWindow('app://blahblah.html');
 		w.open();
 
-        value_of(mainWnd == w).should_be_false();
-        value_of(currentWnd.getID() == w.getID()).should_be_false();
+		value_of(mainWnd == w).should_be_false();
+		value_of(currentWnd.getID() == w.getID()).should_be_false();
 		
 		var whosUrDaddy = w.getParent();
-        value_of(mainWnd.getID() == whosUrDaddy.getID()).should_be_true();
+		value_of(mainWnd.getID() == whosUrDaddy.getID()).should_be_true();
 		
 		w.close();
 	},
-
 	test_window_icon: function()
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		w.open();
 
-        // I expect that there is no icon defined for the test.
-        if ( w.getIcon() != null )		
-        {
-            // if there is, then it should be returned as a string.
-    		value_of(w.getIcon()).should_be_string();
-    	}
-        
-        // setup a dummy icon
-        w.setIcon("doesnotexist.png");
+		// I expect that there is no icon defined for the test.
+		if (w.getIcon() != null)
+		{
+			// if there is, then it should be returned as a string.
+			value_of(w.getIcon()).should_be_string();
+		}
+
+		// setup a dummy icon
+		w.setIcon("doesnotexist.png");
 		value_of(w.getIcon()).should_be("doesnotexist.png");
-		
+
 		w.close();
-	}	
+	}
 });
