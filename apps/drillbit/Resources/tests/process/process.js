@@ -93,7 +93,7 @@ describe("process tests",
 		}, 3000);
 	},
 	
-	test_kill: function()
+	test_kill_as_async: function(callback)
 	{
 		var p = Titanium.Process.createProcess(this.moreCmd);
 		var timer = 0;
@@ -111,7 +111,7 @@ describe("process tests",
 		}, 3000);
 	},
 	
-	test_terminate: function()
+	test_terminate_as_async: function(callback)
 	{
 		var p = Titanium.Process.createProcess(this.moreCmd);
 		var timer = 0;
@@ -481,6 +481,68 @@ describe("process tests",
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');
+		},5000);
+	},
+	
+	test_restart_as_async: function(callback)
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		var timer = null;
+		var shortTimer = null;
+		var output1 = '';
+		var output2 = '';
+		var exited = false;
+		function onRead(n)
+		{
+			return function(event)
+			{
+				try {
+					value_of(p.getPID()).should_be_number();
+					var buf = event.pipe.read();
+					value_of(buf).should_be_object();
+					value_of(buf.toString()).should_be_string();
+				
+					n == 1 ? output1 += buf.toString() : output2 += buf.toString();
+				} catch(e) {
+					callback.failed(e);
+				}
+			};
+		}
+		
+		p.setOnRead(onRead(1));
+		p.setOnExit(function() { exited = true; });
+		p.launch();
+		
+		shortTimer = setTimeout(function(){
+			try
+			{
+				value_of(output1.length).should_be_greater_than(0);
+				value_of(exited).should_be_true();
+				
+				p.setOnRead(onRead(2));
+				p.setOnExit(function(event) {
+					try {
+						value_of(output2).should_be(output1);
+						value_of(p.getExitCode()).should_be(0);
+						callback.passed();
+					}
+					catch (e)
+					{
+						callback.failed(e);
+					}
+				});
+				p.restart();
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}
+		}, 2000);
+		
+		// if we hit this timeout, then we fail.		
+		timer = setTimeout(function()
+		{
+			test.failed('timed out waiting for process to restart');
 		},5000);
 	}
 });

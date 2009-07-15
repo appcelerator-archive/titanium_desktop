@@ -33,7 +33,7 @@ namespace ti
 		protected:
 			Poco::Mutex mutex;
 			std::vector<char> buffer;
-			bool closed;
+			bool closed, asyncRead;
 	};
 }
 

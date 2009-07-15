@@ -31,8 +31,6 @@ namespace ti
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
-		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
 		virtual bool IsRunning();
 		
 	protected:
@@ -44,7 +42,7 @@ namespace ti
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<LinuxProcess>* exitMonitorAdapter;
-		bool running, complete, current;
+		bool running, complete, current, runningSync;
 		int pid;
 		
 		Logger* logger;

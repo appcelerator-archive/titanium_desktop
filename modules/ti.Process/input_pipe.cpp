@@ -37,7 +37,8 @@ namespace ti
 		onClose(0),
 		joined(false),
 		joinedRead(0),
-		attachedOutput(0)
+		attachedOutput(0),
+		asyncOnRead(true)
 	{
 		logger = Logger::Get("Process.InputPipe");
 		
@@ -88,7 +89,8 @@ namespace ti
 				args.push_back(Value::NewObject(event));
 				try
 				{
-					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args, false);
+					logger->Debug("invoke method on main thread, asyncOnRead?%s",asyncOnRead?"true":"false");
+					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args, !asyncOnRead);
 				}
 				catch (ValueException& e)
 				{
@@ -118,7 +120,9 @@ namespace ti
 		}
 		else if (IsJoined())
 		{
-			Unjoin(joinedTo);
+			this->duplicate();
+			AutoInputPipe autoThis = this;
+			joinedTo->Unjoin(autoThis);
 		}
 		
 		if (onClose && !onClose->isNull())
@@ -265,7 +269,8 @@ namespace ti
 		if (IsJoined())
 		{
 			this->duplicate();
-			joinedTo->Unjoin(this);
+			AutoInputPipe autoThis = this;
+			joinedTo->Unjoin(autoThis);
 		}
 		else if (IsSplit())
 		{
@@ -309,6 +314,21 @@ namespace ti
 		}
 		
 		return newline;
+	}
+	
+	AutoInputPipe InputPipe::Clone()
+	{
+		AutoInputPipe pipe = CreateInputPipe();
+		if (onRead && !onRead->isNull())
+		{
+			pipe->SetOnRead(*onRead);
+		}
+		if (onClose && !onClose->isNull())
+		{
+			pipe->SetOnClose(*onClose);
+		}
+		
+		return pipe;
 	}
 	
 	void InputPipe::_Read(const ValueList& args, SharedValue result)
