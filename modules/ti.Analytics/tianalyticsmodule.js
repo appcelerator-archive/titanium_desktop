@@ -64,7 +64,7 @@
 					}
 				}
 			}
-			xhr.open('POST',url,async);
+			xhr.open('POST', url, async);
 			xhr.send(qs);
 		}
 		catch(E)
@@ -353,17 +353,21 @@
 		db.close();
 	}
 	
-	Titanium.API.register("ti.UI.stop",function(name)
+	Titanium.API.addEventListener(Titanium.EXIT, function(event)
 	{
-		window = null;
-		send({'event':'ti.end'},false,5000);
+		if (initialized)
+		{
+			window = null;
+			initialized = false;
+			send({'event':'ti.end'},false,5000);
+		}
 	});
 
-	Titanium.API.register("ti.UI.window.page.init",function(name,event)
+	Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 	{
 		try
 		{
-			if (initialized===true)
+			if (initialized === true)
 			{
 				return;
 			}

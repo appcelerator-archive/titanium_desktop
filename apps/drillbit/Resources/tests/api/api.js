@@ -13,6 +13,9 @@ describe("ti.API tests",
 		value_of(Titanium.API.notice).should_be_function();
 		value_of(Titanium.API.trace).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
+		
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
 
 		Titanium.API.critical("this is a critical message");
 		Titanium.API.debug("this is a debug message");
@@ -22,6 +25,8 @@ describe("ti.API tests",
 		Titanium.API.notice("this is a notice message");
 		Titanium.API.trace("this is a trace message");
 		Titanium.API.warn("this is a warn message");
+		
+		Titanium.API.print("this is a print message to stdout");
 	},
 	// test the logging functions
 	test_log_method: function()
@@ -38,6 +43,27 @@ describe("ti.API tests",
 		Titanium.API.log(Titanium.API.WARN,"this is a log message with severity Titanium.API.WARN");
 
 	},
+
+	// test the logging functions
+	test_setLogLevel_method: function()
+	{
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
+		value_of(Titanium.API.log).should_be_function();
+
+		Titanium.API.setLogLevel(Titanium.API.WARN);
+		Titanium.API.log(Titanium.API.FATAL,"this is a log message with severity Titanium.API.FATAL should be logged");
+		Titanium.API.log(Titanium.API.CRITICAL,"this is a log message with severity Titanium.API.CRITICAL should be logged");
+		Titanium.API.log(Titanium.API.ERROR,"this is a log message with severity Titanium.API.ERROR should be logged");
+		Titanium.API.log(Titanium.API.WARN,"Logging severity set to Titanium.API.WARN");
+		Titanium.API.log(Titanium.API.NOTICE,"this is a log message with severity Titanium.API.NOTICE should not be logged");
+		Titanium.API.log(Titanium.API.INFO,"this is a log message with severity Titanium.API.INFO should not be logged");
+		Titanium.API.log(Titanium.API.DEBUG,"this is a log message with severity Titanium.API.DEBUG should not be logged");
+		Titanium.API.log(Titanium.API.TRACE,"this is a log message with severity Titanium.API.TRACE should not be logged");
+
+		Titanium.API.setLogLevel(Titanium.API.FATAL);
+	},
+
 	validate_properties: function()
 	{
 		value_of(Titanium.API.APP_UPDATE).should_not_be_null();
@@ -64,7 +90,7 @@ describe("ti.API tests",
 		value_of(Titanium.API.debug).should_be_function();
 		value_of(Titanium.API.error).should_be_function();
 		value_of(Titanium.API.fatal).should_be_function();
-		value_of(Titanium.API.fire).should_be_function();
+		value_of(Titanium.API.fireEvent).should_be_function();
 		value_of(Titanium.API.get).should_be_function();
 		value_of(Titanium.API.getApplication).should_be_function();			 //done
 		value_of(Titanium.API.getComponentSearchPaths).should_be_function();
@@ -78,11 +104,15 @@ describe("ti.API tests",
 		value_of(Titanium.API.log).should_be_function();
 		value_of(Titanium.API.notice).should_be_function();
 		value_of(Titanium.API.readApplicationManifest).should_be_function();
-		value_of(Titanium.API.register).should_be_function();
+		value_of(Titanium.API.addEventListener).should_be_function();
 		value_of(Titanium.API.set).should_be_function();
 		value_of(Titanium.API.trace).should_be_function();
-		value_of(Titanium.API.unregister).should_be_function();
+		value_of(Titanium.API.removeEventListener).should_be_function();
 		value_of(Titanium.API.warn).should_be_function();
+		
+		//new 1.0
+		value_of(Titanium.API.setLogLevel).should_be_function();
+		value_of(Titanium.API.print).should_be_function();
 	},
 	// test the application components API
 	test_components: function()
@@ -373,7 +403,7 @@ describe("ti.API tests",
 		}
 	},
 	// test the application path functions
-	test_api_application_paths: function()
+	test_api_component_Search_Paths: function()
 	{
 	    var componentSearchPaths = Titanium.API.getComponentSearchPaths();
 	    
@@ -388,59 +418,22 @@ describe("ti.API tests",
 	    }
 	},
 	
-	test_api_application_arguments: function()
-	{
-		// get the application object
-		var app = Titanium.API.getApplication();
-		value_of(app).should_not_be_null();
-
-		var argv = app.getArguments();
-		value_of(argv).should_be_array();
-
-		if ( argv )
-		{
-			var exePath = app.getExecutablePath();
-			value_of(exePath).should_be_string();
-			
-			// argv[0] is the fully qualified name and path to the exe
-			var index = argv[0].indexOf(exePath);
-			value_of(index).should_not_be(-1);
-		}
-	},
-	
-	// test the application path functions
-	test_api_application_ComponentSearchpath: function()
-	{
-		var componentSearchPaths = Titanium.API.getComponentSearchPaths();
-		
-		value_of(componentSearchPaths).should_be_object();
-		value_of(componentSearchPaths.length).should_not_be(0);
-		
-		
-		Titanium.API.info("dump component search paths")
-		for (i=0; i<componentSearchPaths.length; i++)
-		{
-			Titanium.API.info(componentSearchPaths[i]);
-		}
-	},
-
 	test_api_events_as_async: function(callback)
 	{
 		// create an event
-		var w = Titanium.API.register("foo", function()
-			{
-				callback.passed();
-			});
-		
+		var w = Titanium.API.addEventListener("foo", function()
+		{
+			callback.passed();
+		});
 		// make sure we have an id for it
 		value_of(w).should_be_number();
 
 		// fire it off
-		Titanium.API.fire("foo", w);
-		
+		Titanium.API.fireEvent("foo");
+
 		// unregister the event when we are done.
-		Titanium.API.unregister(w);
-		
+		Titanium.API.removeEventListener("foo", w);
+
 	},
 	
 	test_api_global_object: function()

@@ -23,7 +23,6 @@
 
 -(void)dataReady:(NSNotification *)aNotification
 {
-	kroll::Logger *logger = kroll::Logger::Get("Process.TiDataReady");
 	NSData *data = [[aNotification userInfo] objectForKey:NSFileHandleNotificationDataItem];
 	
 	if ([data length]) {
@@ -100,7 +99,6 @@ namespace ti
 	
 	void OSXInputPipe::DataReady(NSData *data)
 	{
-		Logger *logger = Logger::Get("Process.OSXInputPipe");
 		[buffer appendData:data];
 		
 		if ([buffer length] > 0)

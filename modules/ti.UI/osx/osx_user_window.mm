@@ -97,7 +97,7 @@ namespace ti
 
 		[nativeWindow open];
 		UserWindow::Open();
-		this->FireEvent(OPENED);
+		this->FireEvent(Event::OPENED);
 	}
 
 	OSXUserWindow::~OSXUserWindow()
@@ -111,7 +111,7 @@ namespace ti
 		if (active && nativeWindow)
 		{
 			this->Unfocus();
-			this->FireEvent(HIDDEN);
+			this->FireEvent(Event::HIDDEN);
 		}
 	}
 
@@ -140,7 +140,7 @@ namespace ti
 		if (active && nativeWindow)
 		{
 			this->Focus();
-			this->FireEvent(SHOWN);
+			this->FireEvent(Event::SHOWN);
 		}
 	}
 
@@ -685,7 +685,7 @@ namespace ti
 
 	bool OSXUserWindow::IsTopMost()
 	{
-		return this->topmost;
+		return this->config->IsTopMost();
 	}
 
 	void OSXUserWindow::SetTopMost(bool topmost)
@@ -695,12 +695,10 @@ namespace ti
 			if (topmost)
 			{
 				[nativeWindow setLevel:NSPopUpMenuWindowLevel];
-				this->topmost = true;
 			}
 			else
 			{
 				[nativeWindow setLevel:NSNormalWindowLevel];
-				this->topmost = false;
 			}
 		}
 	}

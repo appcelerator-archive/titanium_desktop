@@ -76,6 +76,9 @@ describe("UI Module Tests",{
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
 
+		value_of(w.getMaxHeight()).should_be(500);
+		value_of(w.getMaxWidth()).should_be(400);
+		
 		w.close();
 	},
 	test_window_min_size: function()
@@ -122,6 +125,9 @@ describe("UI Module Tests",{
 		w.setWidth(100);
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
+
+		value_of(w.getMinHeight()).should_be(500);
+		value_of(w.getMinWidth()).should_be(400);
 
 		w.close();
 	},
@@ -573,5 +579,183 @@ describe("UI Module Tests",{
 				}
 			}, 200);
 		}, 200);
-	}
+	},
+	test_window_top_most: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		
+		w.open();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.setTopMost(true);
+		value_of(w.isTopMost()).should_be(true);
+
+		w.setTopMost(false);
+		value_of(w.isTopMost()).should_be(false);
+
+		w.minimize();
+		value_of(w.isMinimized()).should_be(true);
+		value_of(w.isTopMost()).should_be(false);
+		w.unminimize();
+
+		w.setVisible(false);
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.show();
+		value_of(w.isVisible()).should_be_true();
+		value_of(w.isTopMost()).should_be(false);
+		w.hide();
+		value_of(w.isVisible()).should_be_false();
+		value_of(w.isTopMost()).should_be(false);
+
+		w.close();
+	},
+	
+	test_window_resizable: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		value_of(w.isResizable()).should_be(true);
+		w.open();
+
+		value_of(w.isResizable()).should_be(true);
+
+		w.setResizable(false);
+		value_of(w.isResizable()).should_be(false);
+
+		w.setResizable(true);
+		value_of(w.isResizable()).should_be(true);
+
+		w.close();
+	},
+
+	test_window_focus: function()
+	{
+		var hasFocus = false;
+		// get the current UserWindow object
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		w2.open();
+
+		w.addEventListener(Titanium.FOCUSED, function(event)
+		{
+			if (event.type == Titanium.FOCUSED)
+			{
+				hasFocus = true;
+			}
+		});
+		w.focus();
+
+		setTimeout(function()
+		{
+			w.close();
+			w2.close();
+			if (!hasFocus)
+			{
+				callback.failed("Did not detect maximized message");
+			}
+			callback.passed();
+		}, 300);
+	},
+
+	test_window_unfocus: function()
+	{
+		var hadFocus = false;
+		// get the current UserWindow object
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		w2.open();
+		
+		// just make sure we have the focus...
+		w2.focus();
+
+		// basically the same test as before, but we add the event listener to
+		// the second window and wait for the unfocus event.
+		w2.addEventListener(Titanium.UNFOCUSED, function(event)
+		{
+			if (event.type == Titanium.UNFOCUSED)
+			{
+				hadFocus = true;
+			}
+		});
+		w2.unfocus();
+
+		setTimeout(function()
+		{
+			w.close();
+			w2.close();
+			if (!hadFocus)
+			{
+				callback.failed("Did not detect maximized message");
+			}
+			callback.passed();
+		}, 300);
+	},
+	
+	test_window_transparency: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+		
+		var alphaBlend = w.getTransparency();
+		
+		value_of(alphaBlend).should_be_number();
+		
+		// transparency is constrained to a value between 0.0 <-> 1.0
+        // upper limits
+		w.setTransparency(10.0);
+		value_of(w.getTransparency()).should_be(1.0);
+        
+        // lower limits
+		w.setTransparency(-10.0);
+		value_of(w.getTransparency()).should_be(0.0);
+
+        // somewhere in between
+		w.setTransparency(0.5);
+		value_of(w.getTransparency()).should_be(0.5);
+
+		value_of(w.getTransparencyColor()).should_be_string();
+		
+		w.close();
+	},
+	
+	test_window_mainWnd_by_ID: function()
+	{
+		var currentWnd = Titanium.UI.getCurrentWindow();
+		var mainWnd = Titanium.UI.getMainWindow();
+		
+        value_of(mainWnd.getID() == currentWnd.getID()).should_be_true();
+        
+        var w = currentWnd.createWindow('app://blahblah.html');
+		w.open();
+
+        value_of(mainWnd == w).should_be_false();
+        value_of(currentWnd.getID() == w.getID()).should_be_false();
+		
+		var whosUrDaddy = w.getParent();
+        value_of(mainWnd.getID() == whosUrDaddy.getID()).should_be_true();
+		
+		w.close();
+	},
+
+	test_window_icon: function()
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
+		w.open();
+
+        // I expect that there is no icon defined for the test.
+        if ( w.getIcon() != null )		
+        {
+            // if there is, then it should be returned as a string.
+    		value_of(w.getIcon()).should_be_string();
+    	}
+        
+        // setup a dummy icon
+        w.setIcon("doesnotexist.png");
+		value_of(w.getIcon()).should_be("doesnotexist.png");
+		
+		w.close();
+	}	
 });

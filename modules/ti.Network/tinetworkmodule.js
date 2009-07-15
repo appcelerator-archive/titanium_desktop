@@ -3,19 +3,18 @@
 	var initialized = false;
 	var created = false;
 	var db = null;
-	
-	Titanium.API.register("ti.UI.stop",function(name,event)
+
+	Titanium.API.addEventListener(Titanium.EXIT, function(event)
 	{
-		Titanium.API.debug("stopping tinetwork module");
-		
 		if (initialized && db)
 		{
+			Titanium.API.debug("Shuttig down tinetworkmodule.js");
 			db.close();
 			db = null;
 		}
 	});
-	
-	Titanium.API.register("ti.UI.window.page.init",function(name,event)
+
+	Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 	{
 		try
 		{
@@ -23,7 +22,7 @@
 			{
 				return;
 			}
-			
+
 			created = true;
 			
 			// pull out host from URL

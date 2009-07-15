@@ -54,36 +54,42 @@ namespace ti
 		 * @tiapi(method=True,name=Network.HTTPClient.abort,since=0.3) Aborts an in progress connection
 		 */
 		this->SetMethod("abort",&HTTPClientBinding::Abort);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.open,since=0.3) Opens an HTTP connection
-     * @tiarg(for=Network.HTTPClient.open,name=method,type=string) HTTP method to use
-     * @tiarg(for=Network.HTTPClient.open,name=url,type=string) target url
-     * @tiarg(for=Network.HTTPClient.open,name=async,type=bool,optional=True) default True
-     * @tiarg(for=Network.HTTPClient.open,name=user,type=string,optional=True)
-     * @tiarg(for=Network.HTTPClient.open,name=password,type=string,optional=True)
+		 * @tiarg[String, method] The HTTP method to use e.g. POST
+		 * @tiarg[String, url] The url to connect to
+		 * @tiarg[Boolean, asynchronous, optional=True] Whether or not the request should be asynchronous (default: True)
+		 * @tiarg[String, username, optional=True] The HTTP username to use
+		 * @tiarg[String, password, optional=True] The HTTP password to use
 		 */
 		this->SetMethod("open",&HTTPClientBinding::Open);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.setRequestHeader,since=0.3) Sets a request header for the connection
 		 * @tiarg(for=Network.HTTPClient.setRequestHeader,name=header,type=string) request header name
 		 * @tiarg(for=Network.HTTPClient.setRequestHeader,name=value,type=string) request header value
 		 */
 		this->SetMethod("setRequestHeader",&HTTPClientBinding::SetRequestHeader);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.send,since=0.3) Sends data through the HTTP connection
 		 * @tiarg(for=Network.HTTPClient.send,type=string,name=data) data to send
 		 */
 		this->SetMethod("send",&HTTPClientBinding::Send);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.sendFile,since=0.3) Sends the contents of a file as body content
 		 * @tiarg(for=Network.HTTPClient.sendFile,type=string,name=data) path of file to send
 		 */
 		this->SetMethod("sendFile",&HTTPClientBinding::SendFile);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.sendDir,since=0.3) Sends a directory as a zipped body content
 		 * @tiarg(for=Network.HTTPClient.sendDir,type=string,name=data) path of directory with contents to send
 		 */
 		this->SetMethod("sendDir",&HTTPClientBinding::SendDir);
+
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.getResponseHeader,since=0.3) Returns the value of a response header
 		 * @tiarg(for=Network.HTTPClient.getResponseHeader,type=string,name=name) the response header name
@@ -106,54 +112,76 @@ namespace ti
 		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.UNSENT,since=0.3) The UNSENT readyState property
 		 */
 		this->SetInt("UNSENT",0);
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.OPENED,since=0.3) The OPENED readyState property
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.OPENED,since=0.3)
+		 * @tiapi The OPENED readyState property
 		 */
 		this->SetInt("OPENED",1);
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.HEADERS_RECEIVED,since=0.3) The HEADERS_RECEIVED readyState property
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.HEADERS_RECEIVED,since=0.3)
+		 * @tiapi The HEADERS_RECEIVED readyState property
 		 */
 		this->SetInt("HEADERS_RECEIVED",2);
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.LOADING,since=0.3) The LOADING readyState property
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.LOADING,since=0.3)
+		 * @tiapi The LOADING readyState property
 		 */
 		this->SetInt("LOADING",3);
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.DONE,since=0.3) The DONE readyState property
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.DONE,since=0.3)
+		 * @tiapi The DONE readyState property
 		 */
 		this->SetInt("DONE",4);
 
 		/**
-		 * @tiapi(property=True,type=string,name=Network.HTTPClient.responseText,since=0.3) The response of an HTTP request as text
+		 * @tiapi(property=True,type=string,name=Network.HTTPClient.responseText,since=0.3)
+		 * @tiapi The response of an HTTP request as text
 		 */
 		this->SetNull("responseText");
+
 		/**
-		 * @tiapi(property=True,type=object,name=Network.HTTPClient.responseXML,since=0.3) The response of an HTTP request as parsable XML
+		 * @tiapi(property=True,type=object,name=Network.HTTPClient.responseXML,since=0.3)
+		 * @tiapi The response of an HTTP request as parsable XML
 		 */
 		this->SetNull("responseXML");
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.status,since=0.3) The response status code of an HTTP request
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.status,since=0.3)
+		 * @tiapi The response status code of an HTTP request
 		 */
 		this->SetNull("status");
+
 		/**
-		 * @tiapi(property=True,type=string,name=Network.HTTPClient.statusText,since=0.3) The response status text of an HTTP Request
+		 * @tiapi(property=True,type=string,name=Network.HTTPClient.statusText,since=0.3)
+		 * @tiapi The response status text of an HTTP Request
 		 */
 		this->SetNull("statusText");
+
 		/**
-		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.connected,since=0.3) Whether an HTTPClient object is connected or not
+		 * @tiapi(property=True,type=integer,name=Network.HTTPClient.connected,since=0.3)
+		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
 		this->SetBool("connected", false);
 
 		/**
-		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onreadystatechange,since=0.3) The handler function that will be fired when the ready-state code of an HTTPClient object changes
+		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onreadystatechange,since=0.3)
+		 * @tiapi The handler function that will be fired when the ready-state code of an HTTPClient object changes
 		 */
 		this->SetNull("onreadystatechange");
+
 		/**
-		 * @tiapi(property=True,type=method,name=Network.HTTPClient.ondatastream,since=0.3) The handler function that will be fired as stream data is received from an HTTP request
+		 * @tiapi(property=True,type=method,name=Network.HTTPClient.ondatastream,since=0.3)
+		 * @tiapi The handler function that will be fired as stream data is received from an HTTP request
 		 */
 		this->SetNull("ondatastream");
+
 		/**
-		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onsendstream,since=0.3) The handler function that will be fired as the stream data is sent
+		 * @tiapi(property=True,type=method,name=Network.HTTPClient.onsendstream,since=0.3)
+		 * @tiapi The handler function that will be fired as the stream data is sent
 		 */
 		this->SetNull("onsendstream");
 
@@ -612,31 +640,35 @@ namespace ti
 			this->thread->join();
 		}
 	}
+
 	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
 	{
 		this->shutdown=true;
 		this->SetBool("connected", false);
 	}
+
 	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
 	{
-		if (args.size()<2)
-		{
-			throw ValueException::FromString("invalid arguments");
-		}
+		args.VerifyException("open", "s s ?b s s");
+
 		this->method = args.at(0)->ToString();
 		this->url = args.at(1)->ToString();
-		if (args.size()>=3)
+
+		if (args.size() >= 3)
 		{
-			args.GetBool(2, this->async);
+			this->async = args.GetBool(2, this->async);
 		}
-		if (args.size()>=4)
+
+		if (args.size() >= 4)
 		{
-			this->user = args.at(3)->ToString();
+			this->user = args.GetString(3);
 		}
-		if (args.size()>4)
+
+		if (args.size() > 4)
 		{
-			this->password = args.at(4)->ToString();
+			this->password = args.GetString(4);
 		}
+
 		// assign it here (helps prevent deadlock)
 		SharedValue v = this->Get("onreadystatechange");
 		if (v->IsMethod())

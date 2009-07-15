@@ -24,12 +24,12 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.isValidRow,since=0.4) Checks whether you can call data extraction methods
-		 * @tiresult(for=Database.ResultSet.isValidRow,type=boolean) true if the row is valid
+		 * @tiresult(for=Database.ResultSet.isValidRow,type=Boolean) true if the row is valid
 		 */
 		this->SetMethod("isValidRow",&ResultSetBinding::IsValidRow);
 
 		/**
-		 * @tiapi(method=True,name=Database.ResultSet.Next,since=0.4) Moves the pointer to the next row of the result set
+		 * @tiapi(method=True,name=Database.ResultSet.next,since=0.4) Moves the pointer to the next row of the result set
 		 */
 		this->SetMethod("next",&ResultSetBinding::Next);
 
@@ -40,34 +40,34 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.fieldCount,since=0.4) Returns the number of fields of the result set
-		 * @tiresult(for=Database.ResultSet.fieldCount,type=integer) the number of fields of the result set
+		 * @tiresult(for=Database.ResultSet.fieldCount,type=Integer) the number of fields of the result set
 		 */
 		this->SetMethod("fieldCount",&ResultSetBinding::FieldCount);
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.rowCount,since=0.4) Returns the number of rows of the result set
-		 * @tiresult(for=Database.ResultSet.rowCount,type=integer) the number of the rows of the result set
+		 * @tiresult(for=Database.ResultSet.rowCount,type=Integer) the number of the rows of the result set
 		 */
 		this->SetMethod("rowCount",&ResultSetBinding::RowCount);
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.fieldName,since=0.4) Returns the name of the specified field in the current result set taken from the SQL statement which was executed
 		 * @tiarg(for=Database.ResultSet.fieldName,type=integer,name=fieldIndex) the zero-based index of the desired field
-		 * @tiresult(for=Database.ResultSet.fieldName,type=string) The name of the specified field
+		 * @tiresult(for=Database.ResultSet.fieldName,type=String) The name of the specified field
 		 */
 		this->SetMethod("fieldName",&ResultSetBinding::FieldName);
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.field,since=0.4) Returns the contents of the specified field in the current row
 		 * @tiarg(for=Database.ResultSet.field,type=integer,name=fieldIndex) the zero-based index of the desired field
-		 * @tiresult(for=Database.ResultSet.field,type=object) The content of the specified field in the current row
+		 * @tiresult(for=Database.ResultSet.field,type=Object) The content of the specified field in the current row
 		 */
 		this->SetMethod("field",&ResultSetBinding::Field);
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.fieldByName,since=0.4) Returns the contents of the specified field in the current row using the name of the field as an identifier
 		 * @tiarg(for=Database.ResultSet.fieldByName,type=string,name=name) the name of the desired field
-		 * @tiresult(for=Database.ResultSet.fieldByName,type=object) The content of the specified field in the current row
+		 * @tiresult(for=Database.ResultSet.fieldByName,type=Object) The content of the specified field in the current row
 		 */
 		this->SetMethod("fieldByName",&ResultSetBinding::FieldByName);
 	}

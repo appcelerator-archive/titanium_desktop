@@ -104,7 +104,7 @@
 	[self performSelectorOnMainThread:@selector(processExited:) withObject:nil waitUntilDone:NO];
 }
 
--(void) processExited: (id)object
+-(void) processExited:(id)object
 {
 	process->Exited();
 }

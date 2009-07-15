@@ -73,7 +73,12 @@ namespace ti
 		SharedKObject o = args.at(0)->ToObject();
 
 		AutoMenuItem item = o.cast<MenuItem>();
-		this->AppendItem(item);
+		if (!item.isNull())
+		{
+			if (item->ContainsSubmenu(this))
+				throw ValueException::FromString("Tried to construct a recursive menu");
+			this->AppendItem(item);
+		}
 	}
 
 	void Menu::_GetItemAt(const ValueList& args, SharedValue result)
@@ -88,9 +93,14 @@ namespace ti
 		args.VerifyException("insertItemAt", "o,i");
 		SharedKObject o = args.at(0)->ToObject();
 		AutoMenuItem item = o.cast<MenuItem>();
-		size_t index = static_cast<size_t>(args.GetInt(1));
 
-		this->InsertItemAt(item, index);
+		if (!item.isNull())
+		{
+			if (item->ContainsSubmenu(this))
+				throw ValueException::FromString("Tried to construct a recursive menu");
+			size_t index = static_cast<size_t>(args.GetInt(1));
+			this->InsertItemAt(item, index);
+		}
 	}
 
 	void Menu::_RemoveItemAt(const ValueList& args, SharedValue result)
@@ -161,5 +171,26 @@ namespace ti
 		{
 			throw ValueException::FromString("Tried to remove a MenuItem at an invalid index");
 		}
+	}
+
+	bool Menu::ContainsItem(MenuItem* item)
+	{
+		for (size_t i = 0; i < this->children.size(); i++)
+		{
+			if (this->children.at(i).get() == item ||
+				this->children.at(i)->ContainsItem(item))
+				return true;
+		}
+		return false;
+	}
+
+	bool Menu::ContainsSubmenu(Menu* submenu)
+	{
+		for (size_t i = 0; i < this->children.size(); i++)
+		{
+			if (this->children.at(i)->ContainsSubmenu(submenu))
+				return true;
+		}
+		return false;
 	}
 }

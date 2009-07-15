@@ -12,7 +12,7 @@ namespace ti
 	using std::vector;
 
 	MenuItem::MenuItem(MenuItemType type) :
-		StaticBoundObject("UI.MenuItem"),
+		KEventObject("UI.MenuItem"),
 		type(type),
 		enabled(true),
 		label(""),
@@ -32,16 +32,10 @@ namespace ti
 			this->SetMethod("enable", &MenuItem::_Enable);
 			this->SetMethod("disable", &MenuItem::_Disable);
 			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
-
 			this->SetMethod("addSubmenu", &MenuItem::_AddSubmenu);
 			this->SetMethod("addItem", &MenuItem::_AddItem);
 			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
 			this->SetMethod("addCheckItem", &MenuItem::_AddCheckItem);
-
-			this->SetMethod("addEventListener", &MenuItem::_AddEventListener);
-			this->SetMethod("removeEventListener", &MenuItem::_RemoveEventListener);
-			this->SetMethod("getEventListeners", &MenuItem::_GetEventListeners);
-
 			this->SetMethod("click", &MenuItem::_Click);
 		}
 
@@ -112,21 +106,6 @@ namespace ti
 		result->SetBool(this->state);
 	}
 
-	void MenuItem::_AddEventListener(const ValueList& args, SharedValue result)
-	{
-		args.VerifyException("addEventListener", "m|0");
-		SharedKMethod newCallback = args.GetMethod(0, NULL);
-		this->AddEventListener(newCallback);
-	}
-
-	void MenuItem::_RemoveEventListener(const ValueList& args, SharedValue result)
-	{
-	}
-
-	void MenuItem::_GetEventListeners(const ValueList& args, SharedValue result)
-	{
-	}
-
 	void MenuItem::_SetSubmenu(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("setCallback", "o|0");
@@ -137,6 +116,11 @@ namespace ti
 			SharedKObject o = args.at(0)->ToObject();
 			o = KObject::Unwrap(o);
 			newSubmenu = o.cast<Menu>();
+		}
+
+		if (!newSubmenu.isNull() && newSubmenu->ContainsItem(this))
+		{
+			throw ValueException::FromString("Tried to construct a recursive menu");
 		}
 
 		this->submenu = newSubmenu;
@@ -235,21 +219,6 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void MenuItem::AddEventListener(SharedKMethod eventListener)
-	{
-		std::vector<SharedKMethod>::iterator i = this->eventListeners.begin();
-		while (i != this->eventListeners.end())
-		{
-			SharedKMethod m = (*i++);
-			if (eventListener->Equals(m))
-			{
-				return;
-			}
-		}
-
-		this->eventListeners.push_back(eventListener);
-	}
-
 	void MenuItem::HandleClickEvent(SharedKObject source)
 	{
 		if (this->IsCheck() && this->autoCheck)
@@ -262,10 +231,7 @@ namespace ti
 				false);
 		}
 
-		UIBinding::SendEventToListeners(
-			this->eventListeners,
-			UIBinding::CLICKED,
-			source);
+		this->FireEvent(Event::CLICKED);
 	}
 
 	void MenuItem::SetState(bool newState)
@@ -323,5 +289,18 @@ namespace ti
 			this->SetSubmenuImpl(newSubmenu);
 			this->submenu = newSubmenu;
 		}
+	}
+
+	bool MenuItem::ContainsItem(MenuItem* item)
+	{
+		return !this->submenu.isNull() &&
+			this->submenu->ContainsItem(item);
+	}
+
+	bool MenuItem::ContainsSubmenu(Menu* submenu)
+	{
+		return !this->submenu.isNull() &&
+			(this->submenu.get() == submenu ||
+			this->submenu->ContainsSubmenu(submenu));
 	}
 }

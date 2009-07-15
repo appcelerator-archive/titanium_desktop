@@ -177,7 +177,7 @@ namespace ti
 			}
 
 			UserWindow::Open();
-			this->FireEvent(OPENED);
+			this->FireEvent(Event::OPENED);
 		}
 		else
 		{
@@ -410,11 +410,11 @@ namespace ti
 			GdkEventFocus* f = (GdkEventFocus*) event;
 			if (f->in)
 			{
-				window->FireEvent(FOCUSED);
+				window->FireEvent(Event::FOCUSED);
 			}
 			else
 			{
-				window->FireEvent(UNFOCUSED);
+				window->FireEvent(Event::UNFOCUSED);
 			}
 		}
 		else if (event->type == GDK_WINDOW_STATE)
@@ -423,30 +423,30 @@ namespace ti
 			if ((f->changed_mask & GDK_WINDOW_STATE_WITHDRAWN)
 				&& (f->new_window_state & GDK_WINDOW_STATE_WITHDRAWN))
 			{
-				window->FireEvent(HIDDEN);
+				window->FireEvent(Event::HIDDEN);
 			}
 
 			if ((f->changed_mask & GDK_WINDOW_STATE_ICONIFIED)
 				&& (f->new_window_state & GDK_WINDOW_STATE_ICONIFIED))
 			{
-				window->FireEvent(MINIMIZED);
+				window->FireEvent(Event::MINIMIZED);
 			}
 
 			if (((f->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)
 				&& (f->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)))
 			{
-				window->FireEvent(FULLSCREENED);
+				window->FireEvent(Event::FULLSCREENED);
 			}
 
 			if (f->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)
 			{
-				window->FireEvent(UNFULLSCREENED);
+				window->FireEvent(Event::UNFULLSCREENED);
 			}
 
 			if (((f->changed_mask & GDK_WINDOW_STATE_MAXIMIZED)
 				&& (f->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)))
 			{
-				window->FireEvent(MAXIMIZED);
+				window->FireEvent(Event::MAXIMIZED);
 			}
 
 			window->gdkMinimized =
@@ -462,14 +462,14 @@ namespace ti
 			{
 				window->gdkX = c->x;
 				window->gdkY = c->y;
-				window->FireEvent(MOVED);
+				window->FireEvent(Event::MOVED);
 			}
 	
 			if (c->width != window->gdkWidth || c->height != window->gdkHeight)
 			{
 				window->gdkHeight = c->height;
 				window->gdkWidth = c->width;
-				window->FireEvent(RESIZED);
+				window->FireEvent(Event::RESIZED);
 			}
 		}
 	
@@ -643,7 +643,7 @@ namespace ti
 
 			// There is no GDK event to detect when the window is shown,
 			// so we force the firing of this event here.
-			this->FireEvent(SHOWN);
+			this->FireEvent(Event::SHOWN);
 		}
 	}
 	

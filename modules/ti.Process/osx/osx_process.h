@@ -24,7 +24,7 @@ namespace ti { class OSXProcess; }
 -(id)initWithProcess:(ti::OSXProcess*)p;
 -(NSTask*)task;
 -(void)terminated:(NSNotification *)aNotification;
--(void)processExited;
+-(void)processExited:(id)object;
 @end
 
 namespace ti

@@ -329,7 +329,7 @@ namespace ti
 		else if (args.at(0)->IsString())
 		{
 			std::string src = args.at(0)->ToString();
-		   	std::string sResult = DataUtils::EncodeURIComponent(src);
+			std::string sResult = DataUtils::EncodeURIComponent(src);
 			result->SetString(sResult);
 		}
 		else if (args.at(0)->IsDouble())
@@ -403,7 +403,6 @@ namespace ti
 		// don't need a null check here.
 		result->SetObject(this->proxy);
 	}
-
 
 	Host* NetworkBinding::GetHost()
 	{

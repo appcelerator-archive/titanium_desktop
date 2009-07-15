@@ -109,7 +109,7 @@ namespace ti
 		long restore_styles;
 		int chromeWidth, chromeHeight;
 	
-		HWND window_handle, view_window_handle;
+		HWND windowHandle, viewWindowHandle;
 		IWebView* web_view;
 		IWebFrame *web_frame;
 		IWebInspector *web_inspector;

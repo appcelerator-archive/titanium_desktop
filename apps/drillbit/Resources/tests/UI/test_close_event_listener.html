@@ -2,11 +2,11 @@
 <body>
 <script>
 	Titanium.UI.currentWindow.addEventListener(
-		function(eventName) {
-			if (eventName == Titanium.UI.CLOSED) {
+		function(event) {
+			if (event.type == Titanium.CLOSED) {
 				Titanium.API.saw_closed = true;
 			}
-			if (eventName == Titanium.UI.CLOSE) {
+			if (event.type == Titanium.CLOSE) {
 				Titanium.API.saw_close = true;
 			}
 		});

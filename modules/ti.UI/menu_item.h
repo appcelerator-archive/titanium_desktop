@@ -8,7 +8,7 @@
 #include <kroll/kroll.h>
 namespace ti
 {
-	class MenuItem : public StaticBoundObject
+	class MenuItem : public KEventObject
 	{
 		public:
 		enum MenuItemType
@@ -31,9 +31,6 @@ namespace ti
 		void _GetState(const ValueList& args, SharedValue result);
 		void _SetAutoCheck(const ValueList& args, SharedValue result);
 		void _IsAutoCheck(const ValueList& args, SharedValue result);
-		void _AddEventListener(const ValueList& args, SharedValue result);
-		void _RemoveEventListener(const ValueList& args, SharedValue result);
-		void _GetEventListeners(const ValueList& args, SharedValue result);
 		void _SetSubmenu(const ValueList& args, SharedValue result);
 		void _GetSubmenu(const ValueList& args, SharedValue result);
 		void _Enable(const ValueList& args, SharedValue result);
@@ -46,7 +43,6 @@ namespace ti
 		void _AddSeparatorItem(const ValueList& args, SharedValue result);
 		void _AddCheckItem(const ValueList& args, SharedValue result);
 
-		void AddEventListener(SharedKMethod eventListener);
 		void SetLabel(string& label);
 		std::string& GetLabel();
 		void SetIcon(string& iconURL);
@@ -57,6 +53,8 @@ namespace ti
 		bool IsEnabled();
 		virtual void HandleClickEvent(SharedKObject source);
 		void EnsureHasSubmenu();
+		bool ContainsItem(MenuItem* item);
+		bool ContainsSubmenu(Menu* submenu);
 
 		// Platform-specific implementation
 		virtual void SetLabelImpl(std::string newLabel) = 0;

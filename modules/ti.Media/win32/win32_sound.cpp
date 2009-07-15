@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include<sstream>
+
 namespace ti
 {
 	UINT Win32Sound::graphNotifyMessage = ::RegisterWindowMessage(PRODUCT_NAME "GraphNotify");
@@ -113,11 +115,26 @@ namespace ti
 	double Win32Sound::GetVolume()
 	{
 		long volume;
-		basicAudio->get_Volume(&volume);
-		if (volume < -4000.0) {
-			volume = -4000.0;
+		HRESULT hr = basicAudio->get_Volume(&volume);
+
+		if ( SUCCEEDED(hr) )
+		{
+			std::stringstream s;
+			s << volume;
+
+			std::string buf;
+
+			buf = "current volume from IBasicAudio (" + s.str() + ")";
+			PRINTD(buf.c_str());
+
+			if (volume < -4000.0) {
+				volume = -4000.0;
+			}
 		}
-		
+		else 
+		{
+			throw ValueException::FromString("IBasicAudio for current volume");		
+		}
 		return 1.0 - (abs(volume) / 4000.0);
 	}
 	
