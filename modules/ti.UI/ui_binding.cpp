@@ -87,6 +87,7 @@ namespace ti
 		 * @tiapi Create and add a tray icon
 		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
 		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
+		 * @tiresult(for=UI.addTray,type=UI.Tray|null) the application's Tray icon object
 		 */
 		this->SetMethod("addTray", &UIBinding::_AddTray);
 
