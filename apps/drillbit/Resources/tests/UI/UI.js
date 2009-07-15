@@ -629,7 +629,7 @@ describe("UI Module Tests",{
 		w.close();
 	},
 
-	test_window_focus: function()
+	test_window_focus_as_async: function(callback)
 	{
 		var hasFocus = false;
 		// get the current UserWindow object
@@ -659,7 +659,7 @@ describe("UI Module Tests",{
 		}, 300);
 	},
 
-	test_window_unfocus: function()
+	test_window_unfocus_as_async: function(callback)
 	{
 		var hadFocus = false;
 		// get the current UserWindow object
@@ -757,5 +757,5 @@ describe("UI Module Tests",{
 		value_of(w.getIcon()).should_be("doesnotexist.png");
 		
 		w.close();
-	}	
+	},
 });
