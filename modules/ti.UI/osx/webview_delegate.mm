@@ -438,8 +438,9 @@
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
 {
-	logger->Error("didFailLoadingWithError: %s",
-		[[error localizedDescription] UTF8String]);
+	NSString* urlString = [[[dataSource request] URL] absoluteString];
+	logger->Error("didFailLoadingWithError (%s): %s",
+		[urlString UTF8String], [[error localizedDescription] UTF8String]);
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFinishLoadingFromDataSource:(WebDataSource *)dataSource

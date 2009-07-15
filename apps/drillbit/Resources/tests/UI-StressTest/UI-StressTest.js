@@ -192,11 +192,8 @@ describe("UI Module Tests",{
 		value_of(Titanium.PAGE_LOADED).should_be_string();
 		value_of(Titanium.CREATED).should_be_string();
 	},
-	
 	test_window_events_as_async: function(callback)
 	{
-		value_of(true).should_be_true();
-
 		var eventTests = [];
 		var addEventTest = function(eventTrigger, eventsToVerify)
 		{
@@ -221,8 +218,8 @@ describe("UI Module Tests",{
 		addEventTest(function() { w.setVisible(true); }, [Titanium.SHOWN]);
 		addEventTest(function() { w.setFullscreen(true); }, [Titanium.FULLSCREENED]);
 		addEventTest(function() { w.setFullscreen(false); }, [Titanium.UNFULLSCREENED]);
-		addEventTest(function() { w.maximize(); }, [Titanium.MAXIMIZED]);
-		addEventTest(function() { w.minimize(); w.unminimize() }, [Titanium.MINIMIZED]);
+		addEventTest(function() { w.maximize(); w.unmaximize(); }, [Titanium.MAXIMIZED]);
+		addEventTest(function() { w.minimize(); w.unminimize(); }, [Titanium.MINIMIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.MOVED]);
 		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.MOVED]);
 		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.RESIZED]);
@@ -252,5 +249,63 @@ describe("UI Module Tests",{
 			nextTest.trigger();
 		}
 		runNextTest();
+	},
+	test_set_x_sanity_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var orig_y = w.getY();
+		w.setX(100);
+
+		setTimeout(function() {
+			if (w.x != 100) { callback.failed("X property was not correct"); }
+			if (w.y != orig_y) { callback.failed("Y property was not correct"); }
+			if (w.width != 500) { callback.failed("width property was not correct"); }
+			if (w.height != 300) { callback.failed("height property was not correct"); }
+			callback.passed();
+		}, 250);
+	},
+	test_set_y_sanity_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var orig_x = w.getX();
+		w.setY(100);
+
+		setTimeout(function() {
+			if (w.y != 100) { callback.failed("Y property was not correct"); }
+			if (w.x != orig_x) { callback.failed("X property was not correct"); }
+			if (w.width != 500) { callback.failed("width property was not correct"); }
+			if (w.height != 300) { callback.failed("height property was not correct"); }
+			callback.passed();
+		}, 250);
+	},
+	test_set_width_sanity_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var orig_x = w.getX();
+		var orig_y = w.getY();
+		w.setWidth(400);
+
+		setTimeout(function() {
+			if (w.y != orig_y) { callback.failed("Y property was not correct"); }
+			if (w.x != orig_x) { callback.failed("X property was not correct"); }
+			if (w.width != 400) { callback.failed("width property was not correct"); }
+			if (w.height != 300) { callback.failed("height property was not correct"); }
+			callback.passed();
+		}, 250);
+	},
+	test_set_height_sanity_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var orig_x = w.getX();
+		var orig_y = w.getY();
+		w.setHeight(400);
+
+		setTimeout(function() {
+			if (w.y != orig_y) { callback.failed("Y property was not correct"); }
+			if (w.x != orig_x) { callback.failed("X property was not correct"); }
+			if (w.width != 500) { callback.failed("width property was not correct"); }
+			if (w.height != 400) { callback.failed("height property was not correct"); }
+			callback.passed();
+		}, 250);
 	}
 });
