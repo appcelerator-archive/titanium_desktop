@@ -8,8 +8,12 @@ Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
 
 Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32', 'user32', 'shell32', 'advapi32', 'gdi32', 'iphlpapi'])
 
-Env.Append(CPPPATH=['C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc\\include'])
-Env.Append(LIBPATH=['C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc\\lib'])
+atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
+if not path.exists(atlmfc_path):
+	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
+
+Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
 
 ccf = Env['CCFLAGS']
 if '/MD' in ccf: ccf.remove('/MD')
