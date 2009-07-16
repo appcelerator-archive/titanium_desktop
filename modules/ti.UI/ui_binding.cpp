@@ -24,13 +24,13 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=UI.createMenu,version=1.0) Create an empty Menu object
-		 * @tiresult(for=UI.createMenu,type=object) a Menu object
+		 * @tiresult(for=UI.createMenu,type=UI.Menu) a Menu object
 		 */
 		this->SetMethod("createMenu", &UIBinding::_CreateMenu);
 
 		/**
 		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0) Create a new MenuItem object
-		 * @tiarg[String, label] The label for this menu itemi
+		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
 		 * @tiresult[UI.MenuItem] The new MenuItem object
@@ -40,7 +40,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=UI.createCheckMenuItem,version=1.0)
 		 * @tiapi Create a new CheckMenuItem object
-		 * @tiarg[String, label] The label for this menu itemi
+		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiresult[UI.CheckMenuItem] The new CheckMenuItem object
 		 */
@@ -224,6 +224,7 @@ namespace ti
 
 	AutoMenu UIBinding::__CreateMenu(const ValueList& args)
 	{
+		// call into the native code to retrieve the menu
 		return this->CreateMenu();
 	}
 
