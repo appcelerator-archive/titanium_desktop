@@ -32,7 +32,6 @@ namespace ti
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
 
-		std::string iconPath = URLToPathOrURL(iconURL);
 		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
 

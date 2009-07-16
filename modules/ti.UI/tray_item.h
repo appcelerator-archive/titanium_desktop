@@ -34,6 +34,7 @@ namespace ti
 	protected:
 		AutoMenu menu;
 		std::string iconURL;
+		std::string iconPath;
 		std::string hint;
 
 	};

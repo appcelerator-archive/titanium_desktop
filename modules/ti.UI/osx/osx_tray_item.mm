@@ -21,8 +21,7 @@ namespace ti
 		[nativeItem setAction:@selector(invoke:)];
 		[nativeItem setHighlightMode:YES];
 
-		std::string iconPath = URLToPathOrURL(iconURL);
-		this->SetIcon(iconPath);
+		this->SetIcon(this->iconPath);
 	}
 
 	OSXTrayItem::~OSXTrayItem()

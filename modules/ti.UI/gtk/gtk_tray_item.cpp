@@ -26,8 +26,7 @@ namespace ti
 			G_OBJECT(this->item), "popup-menu",
 			G_CALLBACK(TrayMenuCallback), this);
 
-		std::string iconPath = URLToPathOrURL(iconURL);
-		this->SetIcon(iconPath);
+		this->SetIcon(this->iconPath);
 		gtk_status_icon_set_visible(this->item, TRUE);
 	}
 

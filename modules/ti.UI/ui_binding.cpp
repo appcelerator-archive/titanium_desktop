@@ -165,6 +165,7 @@ namespace ti
 
 	UIBinding::~UIBinding()
 	{
+		this->ClearTray();
 	}
 
 	Host* UIBinding::GetHost()

@@ -46,7 +46,7 @@ describe("UI.Tray Tests",{
 	    value_of(trayObj.getIcon()).should_be("app://logo_small.png");
 	    
 	    trayObj.setIcon("app://tray.png");
-	    value_of(trayObj.getIcon).should_be("app://tray.png");
+	    value_of(trayObj.getIcon()).should_be("app://tray.png");
 	    
 	    Titanium.UI.clearTray();
 	},
