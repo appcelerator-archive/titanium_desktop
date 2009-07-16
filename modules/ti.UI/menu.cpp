@@ -15,69 +15,73 @@ namespace ti
 	{
 
 		/**
-		 * @tiapi(method=True,name=UI.Menu.appendItem,version=1.0) Append a MenuItem object to a menu.
-		 * @tiarg[UI.MenuItem, menuItem] The menuitem to append to the menu
+		 * @tiapi(method=True,name=UI.Menu.appendItem,version=1.0)
+		 * @tiapi Append a MenuItem object to a menu.
+		 * @tiarg[UI.MenuItem, item] Append an item to this menu
 		 */
 		this->SetMethod("appendItem", &Menu::_AppendItem);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.getItemAt,version=1.0) retrieve a MenuItem from the specified index.  If the index is out of range a value exception is thrown.
-		* @tiarg[Integer, index] The index for this menu item
-		* @tiresult[UI.MenuItem|null] The MenuItem object at the specified index.  
+		* @tiapi(method=True,name=UI.Menu.getItemAt,version=1.0)
+		* @tiapi Get an item from this menu at the given index. This method 
+		* @tiapi will throw an exception if the index is out of range.
+		* @tiarg[Number, index] The index of the item to get
+		* @tiresult[UI.MenuItem] the item at the given index
 		*/
 		this->SetMethod("getItemAt", &Menu::_GetItemAt);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.insertItemAt,version=1.0) retrieve a MenuItem from the specified index.  If the index is out of range a value exception is thrown.
-		* @tiarg[Integer, index] The index for this menu item
-		* @tiresult[UI.MenuItem|null] The MenuItem object at the specified index.  
+		* @tiapi(method=True,name=UI.Menu.insertItemAt,version=1.0) 
+		* @tiapi Insert a menu item before the given index. This method
+		* @tiapi will throw an exception if the index of out of range.
+		* @tiarg[Number, index] The index for this menu item
 		*/
 		this->SetMethod("insertItemAt", &Menu::_InsertItemAt);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.removeItemAt,version=1.0) remove a MenuItem at the specified index.  If the index is out of range a value exception is thrown.
-		* @tiarg[Integer, index] The index for the menu item to remove
+		* @tiapi(method=True,name=UI.Menu.removeItemAt,version=1.0) 
+		* @tiapi Remove the item in this menu at the given index. This method
+		* @tiapi will throw an exception if the index is out of range.
+		* @tiarg[Number, index] The index of the item to remove
 		*/
 		this->SetMethod("removeItemAt", &Menu::_RemoveItemAt);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.getLength,version=1.0) returns the number of MenuItems in the menu.
-		* @tiresult[Integer] the number of MenuItem elements in the Menu.  
+		* @tiapi(method=True,name=UI.Menu.getLength,version=1.0) 
+		* @tiapi Get the length of this menu.
+		* @tiresult[Number] The number of items in this menu
 		*/
 		this->SetMethod("getLength", &Menu::_GetLength);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.clear,version=1.0) Clear all MenuItems from the menu
+		* @tiapi(method=True,name=UI.Menu.clear,version=1.0)
+		* @tiapi Remove all items from this menu.
 		*/
 		this->SetMethod("clear", &Menu::_Clear);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.addSubmenu,version=1.0) Add a subMenu to the current menu
-		* @tiarg[String, label] The label for this menu item
-		* @tiarg[Function, eventListener, optional=True] An event listener for this menu item
-		* @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
-		* @tiresult[UI.MenuItem|null] The new subMenu as a MenuItem object
-		*/
-		this->SetMethod("addSubmenu", &Menu::_AddSubmenu);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.addItem,version=1.0) retrieve a MenuItem from the specified index.  If the index is out of range a value exception is thrown.
-		* @tiarg[UI.MenuItem, item] The new MenuItem to add.
-		* @tiresult[UI.MenuItem|null] The new MenuItem object
+		* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+		* @tiapi Add an item to this menu with the given attributes.
+		* @tiarg[String, label] The label for the new item
+		* @tiarg[Function, listener, optional=True] An event listener callback for the item
+		* @tiarg[String, iconURL] The URL for this item's icon
+		* @tiresult[UI.MenuItem] The newly added item
 		*/
 		this->SetMethod("addItem", &Menu::_AddItem);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.addSeparatorItem,version=1.0) Add a menu separator to the menu
-		* @tiarg[UI.MenuItem, item] The new separator MenuItem to add.
-		* @tiresult[UI.MenuItem|null] The separator as a MenuItem object
+		* @tiapi(method=True,name=UI.Menu.addSeparatorItem,version=1.0)
+		* @tiapi Add a separator item to this menu.
+		* @tiresult[UI.MenuItem] The newly added separator item
 		*/
 		this->SetMethod("addSeparatorItem", &Menu::_AddSeparatorItem);
 
 		/**
-		* @tiapi(method=True,name=UI.addCheckItem,version=1.0) Create a new MenuItem object
-		* @tiarg[UI.MenuItem, item] The new check MenuItem to add.
-		* @tiresult[UI.MenuItem] The new MenuItem object
+		* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+		* @tiapi Add a check item to this menu with the given attributes.
+		* @tiarg[String, label] The label for the new item
+		* @tiarg[Function, listener, optional=True] An event listener callback for the item
+		* @tiresult[UI.MenuItem] The newly added check item
 		*/
 		this->SetMethod("addCheckItem", &Menu::_AddCheckItem);
 	}
@@ -85,15 +89,6 @@ namespace ti
 	Menu::~Menu()
 	{
 		this->children.clear();
-	}
-
-	void Menu::_AddSubmenu(const ValueList& args, SharedValue result)
-	{
-		UIBinding* binding = UIBinding::GetInstance();
-		AutoMenuItem newItem = binding->__CreateMenuItem(args);
-		newItem->EnsureHasSubmenu();
-		this->AppendItem(newItem);
-		result->SetObject(newItem);
 	}
 
 	void Menu::_AddItem(const ValueList& args, SharedValue result)

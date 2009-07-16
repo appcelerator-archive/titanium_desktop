@@ -23,23 +23,25 @@ namespace ti
 		this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
 		/**
-		 * @tiapi(method=True,name=UI.createMenu,version=1.0) Create an empty Menu object
-		 * @tiresult(for=UI.createMenu,type=UI.Menu) a Menu object
+		 * @tiapi(method=True,name=UI.createMenu,version=1.0)
+		 * @tiapi Create a new menu
+		 * @tiresult[UI.Menu] A new menu
 		 */
 		this->SetMethod("createMenu", &UIBinding::_CreateMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0) Create a new MenuItem object
+		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0)
+		 * @tiapi Create a new menu item.
 		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
-		 * @tiresult[UI.MenuItem] The new MenuItem object
+		 * @tiresult[UI.MenuItem] A new menu item
 		 */
 		this->SetMethod("createMenuItem", &UIBinding::_CreateMenuItem);
 
 		/**
 		 * @tiapi(method=True,name=UI.createCheckMenuItem,version=1.0)
-		 * @tiapi Create a new CheckMenuItem object
+		 * @tiapi Create a new CheckMenuItem object.
 		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiresult[UI.CheckMenuItem] The new CheckMenuItem object
@@ -47,8 +49,9 @@ namespace ti
 		this->SetMethod("createCheckMenuItem", &UIBinding::_CreateCheckMenuItem);
 
 		/**
-		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0) Create a new SeparatorMenuItem object
-		 * @tiresult[UI.SeparatorMenuItem] The new SeparatorMenuItem object
+		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0)
+		 * @tiapi Create a new separator menu item.
+		 * @tiresult[UI.SeparatorMenuItem] A new separator menu item
 		 */
 		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
 

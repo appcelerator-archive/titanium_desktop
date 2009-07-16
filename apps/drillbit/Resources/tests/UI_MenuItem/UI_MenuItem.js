@@ -22,7 +22,6 @@ describe("UI.MenuItem",{
 				value_of(item.enable).should_be_function();
 				value_of(item.disable).should_be_function();
 				value_of(item.isEnabled).should_be_function();
-				value_of(item.addSubmenu).should_be_function();
 				value_of(item.addItem).should_be_function();
 				value_of(item.addSeparatorItem).should_be_function();
 			} else {
@@ -33,7 +32,6 @@ describe("UI.MenuItem",{
 				value_of(item.enable).should_be_undefined();
 				value_of(item.disable).should_be_undefined();
 				value_of(item.isEnabled).should_be_undefined();
-				value_of(item.addSubmenu).should_be_undefined();
 				value_of(item.addItem).should_be_undefined();
 				value_of(item.addSeparatorItem).should_be_undefined();
 			}
