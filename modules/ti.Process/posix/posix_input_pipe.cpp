@@ -5,11 +5,11 @@
  */
 
 
-#include "linux_input_pipe.h"
+#include "posix_input_pipe.h"
 
 namespace ti
 {
-	LinuxInputPipe::LinuxInputPipe()
+	PosixInputPipe::PosixInputPipe()
 	{
 		int fds[2];
 		int rc = pipe(fds);
@@ -21,12 +21,12 @@ namespace ti
 		else throw ValueException::FromString("Error creating input pipe");
 	}
 	
-	LinuxInputPipe::~LinuxInputPipe()
+	PosixInputPipe::~PosixInputPipe()
 	{
 		this->Close();
 	}
 	
-	void LinuxInputPipe::Close()
+	void PosixInputPipe::Close()
 	{
 		if (!closed)
 		{
@@ -44,7 +44,7 @@ namespace ti
 		}
 	}
 	
-	int LinuxInputPipe::RawRead(char *buffer, int size)
+	int PosixInputPipe::RawRead(char *buffer, int size)
 	{
 		int n;
 		do

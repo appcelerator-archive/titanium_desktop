@@ -1,5 +1,5 @@
 
-#include "linux_process.h"
+#include "posix_process.h"
 #include <errno.h>
 #include <signal.h>
 #include <sys/time.h>
@@ -9,34 +9,53 @@
 #include <unistd.h>
 #if defined(OS_OSX)
 # include <crt_externs.h>
+# include <Poco/Path.h>
 #endif
 
 namespace ti
 {	
 	// Parts derived from Poco::Process_UNIX
-	AutoPtr<LinuxProcess> LinuxProcess::currentProcess = new LinuxProcess();
+	AutoPtr<PosixProcess> PosixProcess::currentProcess = new PosixProcess();
 	
 	/*static*/
-	AutoPtr<LinuxProcess> LinuxProcess::GetCurrentProcess()
+	AutoPtr<PosixProcess> PosixProcess::GetCurrentProcess()
 	{
 		return currentProcess;
 	}
 	
-	LinuxProcess::LinuxProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+	PosixProcess::PosixProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
 		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
 		running(false),
 		complete(false),
 		current(false),
 		runningSync(false),
 		pid(-1),
-		logger(Logger::Get("Process.LinuxProcess"))
+		logger(Logger::Get("Process.PosixProcess"))
 	{
+#if defined(OS_OSX)
+		std::string cmd = args->At(0)->ToString();
+		size_t found = cmd.rfind(".app");
+		if (found != std::string::npos)
+		{
+			Poco::Path p(cmd);
+			std::string fn = p.getFileName();
+			found = fn.find(".app");
+			fn = fn.substr(0,found);
+			fn = kroll::FileUtils::Join(cmd.c_str(),"Contents","MacOS",fn.c_str(),NULL);
+			if (FileUtils::IsFile(fn))
+			{
+				cmd = fn;
+			}
+		}
+		
+		args->At(0)->SetString(cmd.c_str());
+#endif
 	}
 	
-	LinuxProcess::LinuxProcess() :
+	PosixProcess::PosixProcess() :
 		Process(),
 		running(true), complete(false), current(true),
-		logger(Logger::Get("Process.LinuxProcess"))
+		logger(Logger::Get("Process.PosixProcess"))
 	{
 		pid = getpid();
 #if defined(OS_OSX)
@@ -58,7 +77,7 @@ namespace ti
 		}
 	}
 	
-	LinuxProcess::~LinuxProcess()
+	PosixProcess::~PosixProcess()
 	{
 		if (!current)
 		{
@@ -86,7 +105,7 @@ namespace ti
 		}
 	}
 	
-	void LinuxProcess::Launch(bool async)
+	void PosixProcess::Launch(bool async)
 	{
 		if (!async) {
 			GetStdout()->SetAsyncOnRead(false);
@@ -151,7 +170,7 @@ namespace ti
 		if (async)
 		{
 			this->exitMonitorAdapter = 
-				new Poco::RunnableAdapter<LinuxProcess>(*this, &LinuxProcess::ExitMonitor);
+				new Poco::RunnableAdapter<PosixProcess>(*this, &PosixProcess::ExitMonitor);
 			this->exitMonitorThread.start(*exitMonitorAdapter);
 		}
 		else
@@ -161,12 +180,12 @@ namespace ti
 		}
 	}
 	
-	int LinuxProcess::GetPID()
+	int PosixProcess::GetPID()
 	{
 		return pid;
 	}
 	
-	void LinuxProcess::SendSignal(int signal)
+	void PosixProcess::SendSignal(int signal)
 	{
 		if (running)
 		{
@@ -185,22 +204,22 @@ namespace ti
 		}
 	}
 	
-	void LinuxProcess::Kill()
+	void PosixProcess::Kill()
 	{
 		SendSignal(SIGKILL);
 	}
 	
-	void LinuxProcess::Terminate()
+	void PosixProcess::Terminate()
 	{
 		SendSignal(SIGINT);
 	}
 
-	bool LinuxProcess::IsRunning()
+	bool PosixProcess::IsRunning()
 	{
 		return running;
 	}
 	
-	void LinuxProcess::ExitMonitor()
+	void PosixProcess::ExitMonitor()
 	{
 		
 		int status;

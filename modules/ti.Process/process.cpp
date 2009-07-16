@@ -11,7 +11,7 @@
 #if defined(OS_WIN32)
 # include "win32/win32_process.h"
 #else
-# include "linux/linux_process.h"
+# include "posix/posix_process.h"
 #endif
 
 namespace ti
@@ -22,7 +22,7 @@ namespace ti
 #if defined(OS_WIN32)
 		return Win32Process::GetCurrentProcess();
 #else
-		return LinuxProcess::GetCurrentProcess();
+		return PosixProcess::GetCurrentProcess();
 #endif
 	}
 	
@@ -34,7 +34,7 @@ namespace ti
 #if defined(OS_WIN32)
 		AutoProcess process = new Win32Process(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #else
-		AutoProcess process = new LinuxProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
+		AutoProcess process = new PosixProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #endif
 		return process;
 	}

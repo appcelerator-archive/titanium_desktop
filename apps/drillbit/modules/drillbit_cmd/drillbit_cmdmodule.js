@@ -81,9 +81,10 @@
 			}
 			else
 			{
-				println("Loading file: " + file.nativePath());
+				var suite = file.name().substring(0,file.name().length-3);
+				println("Loading suite: " + suite + ", file: " + file.nativePath());
 				test_files.push(file);
-				tests.push({'suite':fname.name().substring(0,fname.name().length-2), tests:'all'});
+				tests.push({'suite':suite, tests:'all'});
 			}
 		}
 	}

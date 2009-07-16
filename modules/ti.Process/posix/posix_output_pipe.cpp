@@ -4,11 +4,11 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "linux_output_pipe.h"
+#include "posix_output_pipe.h"
 
 namespace ti
 {
-	LinuxOutputPipe::LinuxOutputPipe() : closed(false)
+	PosixOutputPipe::PosixOutputPipe() : closed(false)
 	{
 		int fds[2];
 		int rc = pipe(fds);
@@ -20,17 +20,17 @@ namespace ti
 		else throw ValueException::FromString("Error creating output pipe");
 	}
 	
-	LinuxOutputPipe::~LinuxOutputPipe()
+	PosixOutputPipe::~PosixOutputPipe()
 	{
 		Close();
 	}
 	
-	bool LinuxOutputPipe::IsClosed()
+	bool PosixOutputPipe::IsClosed()
 	{
 		return closed;	
 	}
 
-	void LinuxOutputPipe::Close()
+	void PosixOutputPipe::Close()
 	{
 		if (!closed)
 		{
@@ -50,7 +50,7 @@ namespace ti
 		}
 	}
 	
-	int LinuxOutputPipe::Write(AutoPtr<Blob> blob)
+	int PosixOutputPipe::Write(AutoPtr<Blob> blob)
 	{
 		int n;
 		do
@@ -68,7 +68,7 @@ namespace ti
 		}
 	}
 	
-	void LinuxOutputPipe::Flush()
+	void PosixOutputPipe::Flush()
 	{
 		if (writeHandle != -1) {
 			close(writeHandle);

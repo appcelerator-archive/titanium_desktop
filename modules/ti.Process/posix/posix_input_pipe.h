@@ -4,33 +4,30 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _LINUX_OUTPUT_PIPE_H_
-#define _LINUX_OUTPUT_PIPE_H_
+#ifndef _POSIX_INPUT_PIPE_H_
+#define _POSIX_INPUT_PIPE_H_
 
 #include <kroll/kroll.h>
-#include "../output_pipe.h"
+#include "../monitored_input_pipe.h"
 
 namespace ti
 {
-	class LinuxOutputPipe : public OutputPipe
+	class PosixInputPipe : public MonitoredInputPipe
 	{
 	public:
-		LinuxOutputPipe();
-		virtual ~LinuxOutputPipe();
+		PosixInputPipe();
+		virtual ~PosixInputPipe();
 		virtual void Close();
-		virtual bool IsClosed();
-		virtual int Write(AutoPtr<Blob> data);
-		virtual void Flush();
-		
+
 		int GetReadHandle() { return readHandle; }
 		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
+		friend class PosixProcess;
+		virtual int RawRead(char *buffer, int size);
 		int readHandle;
 		int writeHandle;
-		bool closed;
 	};
 }
-
 
 #endif

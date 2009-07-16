@@ -4,33 +4,33 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _OSX_OUTPUT_PIPE_H_
-#define _OSX_OUTPUT_PIPE_H_
+#ifndef _POSIX_OUTPUT_PIPE_H_
+#define _POSIX_OUTPUT_PIPE_H_
 
 #include <kroll/kroll.h>
 #include "../output_pipe.h"
-#include <Cocoa/Cocoa.h>
 
 namespace ti
 {
-	class OSXOutputPipe : public OutputPipe
+	class PosixOutputPipe : public OutputPipe
 	{
 	public:
-		OSXOutputPipe();
-		virtual ~OSXOutputPipe();
-		
+		PosixOutputPipe();
+		virtual ~PosixOutputPipe();
 		virtual void Close();
 		virtual bool IsClosed();
 		virtual int Write(AutoPtr<Blob> data);
 		virtual void Flush();
 		
-		NSPipe* GetPipe() { return pipe; }
+		int GetReadHandle() { return readHandle; }
+		int GetWriteHandle() { return writeHandle; }
 		
 	protected:
-		NSPipe* pipe;
-		NSFileHandle* handle;
+		int readHandle;
+		int writeHandle;
 		bool closed;
 	};
 }
+
 
 #endif

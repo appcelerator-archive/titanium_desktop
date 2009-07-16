@@ -10,7 +10,7 @@
 #if defined(OS_WIN32)
 # include "win32/win32_input_pipe.h"
 #else
-# include "linux/linux_input_pipe.h"
+# include "posix/posix_input_pipe.h"
 #endif
 
 namespace ti
@@ -21,7 +21,7 @@ namespace ti
 #if defined(OS_WIN32)
 		AutoInputPipe pipe = new Win32InputPipe();
 #else
-		AutoInputPipe pipe = new LinuxInputPipe();
+		AutoInputPipe pipe = new PosixInputPipe();
 #endif
 		return pipe;
 	}

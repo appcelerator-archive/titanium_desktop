@@ -8,7 +8,7 @@
 #if defined(OS_WIN32)
 # include "win32/win32_output_pipe.h"
 #else
-# include "linux/linux_output_pipe.h"
+# include "posix/posix_output_pipe.h"
 #endif
 
 namespace ti
@@ -19,7 +19,7 @@ namespace ti
 #if defined(OS_WIN32)
 		AutoOutputPipe pipe = new Win32OutputPipe();
 #else
-		AutoOutputPipe pipe = new LinuxOutputPipe();
+		AutoOutputPipe pipe = new PosixOutputPipe();
 #endif
 		return pipe;
 	}
