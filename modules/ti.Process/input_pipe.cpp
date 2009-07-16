@@ -97,17 +97,17 @@ namespace ti
 	
 	void InputPipe::Closed()
 	{
-		//TODO auto close IO attached (this is fragile in OSX)
-		/*if (IsAttached())
+		//Logger::Get("Process.InputPipe")->Debug("in InputPipe::Closed");
+		if (IsAttached())
 		{
-			Logger::Get("Process.InputPipe")->Debug("I'm attached");
+			//Logger::Get("Process.InputPipe")->Debug("I'm attached");
 			if (!(*attachedOutput)->GetMethod("close").isNull())
 			{
 				SharedKMethod method = (*attachedOutput)->GetMethod("close");
 				ValueList args;
 				Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
 			}
-		}*/
+		}
 		if (IsSplit())
 		{
 			splitPipe1->Close();
