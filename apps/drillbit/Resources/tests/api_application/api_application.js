@@ -85,14 +85,10 @@ describe("ti.API.Application tests",
 		value_of(app).should_be_object();
 		
 		// get the components loaded by the application
-		var loadedComponents = app.getComponents();
 		var installedComponents = app.getAvailableComponents();
-		
-		
-		value_of(loadedComponents).should_not_be_null();
-		value_of(installedComponents).should_not_be_null();
+		value_of(installedComponents).should_be_array();
 
-		if ( loadedComponents && installedComponents ) 
+		if ( installedComponents ) 
 		{
 			// check the components that we think are installed
 			// first we verify that we have a list of components.
@@ -117,57 +113,65 @@ describe("ti.API.Application tests",
 				// installed components cannot be bundled.
 				Titanium.API.info("item "+item.getName()+".isBundled() returned "+item.isBundled().toString());
 			}
+		}
+	},
+
+	test_loaded_components: function()
+	{
+		// test the objects in API		
+		var app = Titanium.API.getApplication();
+		value_of(app).should_be_object();
+		
+		// get the components loaded by the application
+		var loadedComponents = app.getComponents();
+		var installedComponents = app.getAvailableComponents();
+		
+		value_of(loadedComponents).should_be_array();
+		value_of(installedComponents).should_be_array();
+
+		// now validate the loaded components and verify 
+		// that these components are supposed to be here.
+		// these components should be part of the bundle or installed or both.
+		for ( i =0; i < loadedComponents.length; i++ )
+		{
+			var  item = loadedComponents[i];
+			// do we have a component?
+			value_of(item).should_not_be_null();
+			value_of(item).should_be_object();
+			value_of(item.getManifest).should_be_function();
+			value_of(item.getName).should_be_function();
+			value_of(item.getPath).should_be_function();
+			value_of(item.getType).should_be_function();
+			value_of(item.getVersion).should_be_function();
+			value_of(item.isBundled).should_be_function();
+			value_of(item.isLoaded).should_be_function();
 			
-			// now validate the loaded components and verify 
-			// that these components are supposed to be here.
-			// these components should be part of the bundle or installed or both.
-			for ( i =0; i < loadedComponents.length; i++ )
+			// loaded components should always indicate so...
+			value_of(item.isLoaded()).should_be_true();
+
+			Titanium.API.info("processing loaded component '" + item.getName() + 
+							  "' type: '"+item.getType()+
+							  "' version: '"+item.getVersion()+
+							  "' path '" + item.getPath() + "'");
+
+			var manifest = item.getManifest();
+			var name = item.getName();
+			var path = item.getPath();
+			var type = item.getType();
+			var version = item.getVersion();
+			
+			// is this a valid component?  check against 
+			// the installed components.
+			for ( j=0; j< installedComponents.length; j++)
 			{
-				var  item = loadedComponents[i];
-				// do we have a component?
-				value_of(item).should_not_be_null();
-				value_of(item).should_be_object();
-				value_of(item.getManifest).should_be_function();
-				value_of(item.getName).should_be_function();
-				value_of(item.getPath).should_be_function();
-				value_of(item.getType).should_be_function();
-				value_of(item.getVersion).should_be_function();
-				value_of(item.isBundled).should_be_function();
-				value_of(item.isLoaded).should_be_function();
-				
-				// loaded components should always indicate so...
-				value_of(item.isLoaded()).should_be_true();
+				var obj = installedComponents[i];
+				value_of(obj).should_be_object();
 
-				Titanium.API.info("processing loaded component '" + item.getName() + 
-								  "' type: '"+item.getType()+
-								  "' version: '"+item.getVersion()+
-								  "' path '" + item.getPath() + "'");
-
-				var manifest = item.getManifest();
-				var name = item.getName();
-				var path = item.getPath();
-				var type = item.getType();
-				var version = item.getVersion();
-				
-				// is this a valid component?  check against 
-				// the installed components.
-				for ( j=0; j< installedComponents.length; j++)
+				if ( name == obj.getName() && 
+					 path == obj.getPath() && 
+					 version == obj.getVersion() ) 
 				{
-					var obj = installedComponents[i];
-					value_of(obj).should_be_object();
-					if ( obj ) 
-					{
-						if ( name == obj.getName() && 
-							 path == obj.getPath() && 
-							 version == obj.getVersion() ) 
-						{
-							value_of(obj.isLoaded()).should_be_true();
-							if ( !obj.isLoaded() )
-							{
-								Titanium.API.error("obj " + obj.getName() + " is marked as not loaded");
-							}
-						}
-					}
+					value_of(obj.isLoaded()).should_be_true();
 				}
 			}
 		}
@@ -182,7 +186,6 @@ describe("ti.API.Application tests",
 		// get the components loaded by the application
 		var loadedComponents = app.getComponents();
 		var bundledComponents = app.getBundledComponents();
-		
 		
 		value_of(loadedComponents).should_be_array();
 		value_of(bundledComponents).should_be_array();
@@ -249,19 +252,17 @@ describe("ti.API.Application tests",
 				{
 					var obj = bundledComponents[i];
 					value_of(obj).should_be_object();
-					if ( obj ) 
+
+					if ( name == obj.getName() && 
+						 path == obj.getPath() && 
+						 version == obj.getVersion() ) 
 					{
-						if ( name == obj.getName() && 
-							 path == obj.getPath() && 
-							 version == obj.getVersion() ) 
-						{
-							value_of(obj.isBundled()).should_be_true();
-						}
+						value_of(obj.isBundled()).should_be_true();
 					}
 				}
-			
 			}
-			else {
+			else 
+			{
 				// we have not detected any bundled components
 				// all components should have this flag as FALSE
 				value_of(item.isBundled()).should_be_false();
