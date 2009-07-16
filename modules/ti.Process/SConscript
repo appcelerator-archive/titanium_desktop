@@ -10,10 +10,10 @@ build.add_thirdparty(env, 'poco')
 
 sources = Glob('*.cpp')
 
-if build.is_osx():
-	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
-	env.Append(CCFLAGS=['-x', 'objective-c++'])
-elif build.is_win32():
+#if build.is_osx():
+#	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
+#	env.Append(CCFLAGS=['-x', 'objective-c++'])
+if build.is_win32():
 	sources += Glob('win32/*.cpp')
 else:
 	sources += Glob('linux/*.cpp')

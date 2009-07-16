@@ -7,6 +7,9 @@
 #include <sys/resource.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#if defined(OS_OSX)
+# include <crt_externs.h>
+#endif
 
 namespace ti
 {	
@@ -36,7 +39,9 @@ namespace ti
 		logger(Logger::Get("Process.LinuxProcess"))
 	{
 		pid = getpid();
-		
+#if defined(OS_OSX)
+		char **environ = *_NSGetEnviron();
+#endif
 		for (int i = 0; environ[i] != NULL; i++)
 		{
 			std::string entry = environ[i];

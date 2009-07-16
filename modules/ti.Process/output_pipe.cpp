@@ -5,11 +5,9 @@
  */
 
 #include "output_pipe.h"
-#if defined(OS_OSX)
-# include "osx/osx_output_pipe.h"
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 # include "win32/win32_output_pipe.h"
-#elif defined(OS_LINUX)
+#else
 # include "linux/linux_output_pipe.h"
 #endif
 
@@ -18,11 +16,9 @@ namespace ti
 	/*static*/
 	AutoOutputPipe OutputPipe::CreateOutputPipe()
 	{
-#if defined(OS_OSX)
-		AutoOutputPipe pipe = new OSXOutputPipe();
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 		AutoOutputPipe pipe = new Win32OutputPipe();
-#elif defined(OS_LINUX)
+#else
 		AutoOutputPipe pipe = new LinuxOutputPipe();
 #endif
 		return pipe;

@@ -101,11 +101,6 @@
 	// In OSX, Process termination can come before pipe close, so we deal
 	// with pipe cleanup in OSXInputPipe
 	
-	[self performSelectorOnMainThread:@selector(processExited:) withObject:nil waitUntilDone:NO];
-}
-
--(void) processExited:(id)object
-{
 	process->Exited();
 }
 @end

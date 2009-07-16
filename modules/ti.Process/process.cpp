@@ -8,11 +8,9 @@
 #include "pipe.h"
 #include "process_binding.h"
 
-#if defined(OS_OSX)
-# include "osx/osx_process.h"
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 # include "win32/win32_process.h"
-#elif defined(OS_LINUX)
+#else
 # include "linux/linux_process.h"
 #endif
 
@@ -21,11 +19,9 @@ namespace ti
 	/*static*/
 	AutoProcess Process::GetCurrentProcess()
 	{
-#if defined(OS_OSX)
-		return OSXProcess::GetCurrentProcess();
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 		return Win32Process::GetCurrentProcess();
-#elif defined(OS_LINUX)
+#else
 		return LinuxProcess::GetCurrentProcess();
 #endif
 	}
@@ -35,11 +31,9 @@ namespace ti
 		SharedKList args, SharedKObject environment,
 		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
 	{
-#if defined(OS_OSX)
-		AutoProcess process = new OSXProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 		AutoProcess process = new Win32Process(args, environment, stdinPipe, stdoutPipe, stderrPipe);
-#elif defined(OS_LINUX)
+#else
 		AutoProcess process = new LinuxProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
 #endif
 		return process;

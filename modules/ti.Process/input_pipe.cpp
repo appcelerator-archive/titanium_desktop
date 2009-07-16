@@ -7,11 +7,9 @@
 #include "input_pipe.h"
 #include "buffered_input_pipe.h"
 
-#if defined(OS_OSX)
-# include "osx/osx_input_pipe.h"
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 # include "win32/win32_input_pipe.h"
-#elif defined(OS_LINUX)
+#else
 # include "linux/linux_input_pipe.h"
 #endif
 
@@ -20,12 +18,9 @@ namespace ti
 	/*static*/
 	AutoInputPipe InputPipe::CreateInputPipe()
 	{
-		
-#if defined(OS_OSX)
-		AutoInputPipe pipe = new OSXInputPipe();
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 		AutoInputPipe pipe = new Win32InputPipe();
-#elif defined(OS_LINUX)
+#else
 		AutoInputPipe pipe = new LinuxInputPipe();
 #endif
 		return pipe;
@@ -70,15 +65,15 @@ namespace ti
 			pipe = this;
 		}
 		
-		if (IsAttached())
+		/*if (IsAttached())
 		{
 			if (!(*attachedOutput)->GetMethod("write").isNull())
 			{
 				AutoPtr<Blob> data = pipe->Read();
 				SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
 			}
-		}
-		else
+		}*/
+		//else
 		{
 			if (onRead != NULL && !onRead->isNull())
 			{
@@ -102,8 +97,8 @@ namespace ti
 	
 	void InputPipe::Closed()
 	{
-		Logger::Get("Process.InputPipe")->Debug("in InputPipe::Closed");
-		if (IsAttached())
+		//TODO auto close IO attached (this is fragile in OSX)
+		/*if (IsAttached())
 		{
 			Logger::Get("Process.InputPipe")->Debug("I'm attached");
 			if (!(*attachedOutput)->GetMethod("close").isNull())
@@ -112,8 +107,8 @@ namespace ti
 				ValueList args;
 				Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
 			}
-		}
-		else if (IsSplit())
+		}*/
+		if (IsSplit())
 		{
 			splitPipe1->Close();
 			splitPipe2->Close();
