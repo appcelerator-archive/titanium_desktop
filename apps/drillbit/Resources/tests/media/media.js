@@ -60,93 +60,82 @@ describe("ti.Media tests", {
 			callback.failed("sound onComplete timed out");
 		}, 10000);
 	},
-	
-	test_play_sound_looping_as_async: function(callback)
-	{
-		var sound = Titanium.Media.createSound("app://sound.wav");
-		sound.play();
-		
-		var timer = 0;
-		setTimeout(function(){
-			value_of(sound.isPlaying()).should_be_true();
-			// FIXME -- these is not implemented 
-			// looping isn't implemented, this should be false until
-			// we complete the code.
-			sound.setLooping(true);
-			if (!sound.isLooping())
-			{
-				sound.stop();
-				clearTimeout(timer);
-				callback.passed();
-			}
-			else
-			{
-				sound.stop();
-				clearTimeout(timer);
-				callback.failed("unit test has to be updated, sound looping implemented");
-			}
-		}, 2000);
-		
-		timer = setTimeout(function(){
-			callback.failed("sound error on looping test");
-		}, 10000);
-	},
 
+	// We can re-enable this test when looping is implemented on  Win32.
+	//test_play_sound_looping_as_async: function(callback)
+	//{
+	//	var sound = Titanium.Media.createSound("app://sound.wav");
+	//	sound.play();
+	//	
+	//	var timer = 0;
+	//	setTimeout(function(){
+	//		value_of(sound.isPlaying()).should_be_true();
+	//		// FIXME -- these is not implemented 
+	//		// looping isn't implemented, this should be false until
+	//		// we complete the code.
+	//		sound.setLooping(true);
+	//		if (!sound.isLooping())
+	//		{
+	//			sound.stop();
+	//			clearTimeout(timer);
+	//			callback.passed();
+	//		}
+	//		else
+	//		{
+	//			sound.stop();
+	//			clearTimeout(timer);
+	//			callback.failed("unit test has to be updated, sound looping implemented");
+	//		}
+	//	}, 2000);
+	//	
+	//	timer = setTimeout(function(){
+	//		callback.failed("sound error on looping test");
+	//	}, 10000);
+	//},
 	test_play_sound_volume_as_async: function(callback)
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
-		// figure out what the default sound level is, so we can 
-		// restore it when we are done.
-		var defaultSound = sound.getVolume();
-		value_of(defaultSound).should_be_number();
-		Titanium.API.debug("current volume "+defaultSound);
-		
-		if ( Titanium.platform == 'win32' )
-		{
-			// FIXME - sound volume doesn't work on vista.
-			// this is a hack to get around the issue for now.
-			callback.passed();
-			Titanium.API.warn("Windows sound volume doesn't work");
-			// the side effect of the buggy windows code is that the sound
-			// returned will always be 1.  chuck an error when this changes.
-			// then we can remove this workaround.
-			value_of(defaultSound).should_be(1);
-		}
-		else 
-		{
-			var timer = 0;
-			
-			setTimeout(function()
-			{
-				value_of(sound.isPlaying()).should_be_true();
-				sound.setVolume(55);
-				if (sound.getVolume() == 55.0)
-				{
-					sound.setVolume(25);
-					if (sound.getVolume() == 25.0)
-					{
-						clearTimeout(timer);
-						callback.passed();
-					}
-					else 
-					{
-						sound.stop();
-						clearTimeout(timer);
-						callback.failed("failed to set volume to 25.0");
-					}
+		var timer = 0;
+		sound.play();
+
+		steps = [
+			function() {
+				if (!sound.isPlaying()) {
+					callback.failed("Sound did not start");
 				}
-				else 
-				{
-					sound.stop();
-					clearTimeout(timer);
-					callback.failed("failed to set volume to 55.0 actual volume: "+sound.getVolume());
+				sound.setVolume(0.5);
+			},
+			function() {
+				if (sound.getVolume() != 0.5) {
+					callback.failed("Could not set volume to 0.5");
 				}
-				sound.setVolume(defaultsound);
-			}, 2000);
-			
-			timer = setTimeout(function(){			
-				callback.failed("unknown sound error setting the volume");
-			}, 10000);
-		}
+				sound.setVolume(0.25);
+			},
+			function() {
+				if (sound.getVolume() != 0.25) {
+					callback.failed("Could not set volume to 0.5");
+				}
+				sound.setVolume(-0.25);
+			},
+			function() {
+				if (sound.getVolume() != 0) {
+					callback.failed("Volume should be 0 was " + sound.getVolume());
+				}
+				sound.setVolume(100);
+			},
+			function() {
+				if (sound.getVolume() != 1) {
+					callback.failed("Volume should be 1 was " + sound.getVolume());
+				}
+				sound.stop();
+				callback.passed();
+			}];
+
+		var run_next_test = function() {
+			var test = steps.shift();
+			test();
+			setTimeout(run_next_test, 250);
+		};
+		setTimeout(run_next_test, 250);
 	}
 });
