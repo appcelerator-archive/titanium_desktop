@@ -38,7 +38,6 @@ namespace ti
 		void _IsEnabled(const ValueList& args, SharedValue result);
 		void _Click(const ValueList& args, SharedValue result);
 
-		void _AddSubmenu(const ValueList& args, SharedValue result);
 		void _AddItem(const ValueList& args, SharedValue result);
 		void _AddSeparatorItem(const ValueList& args, SharedValue result);
 		void _AddCheckItem(const ValueList& args, SharedValue result);

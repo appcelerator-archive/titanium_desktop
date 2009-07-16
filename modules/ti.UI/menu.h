@@ -22,7 +22,6 @@ namespace ti
 		void _GetLength(const ValueList& args, SharedValue result);
 		void _Clear(const ValueList& args, SharedValue result);
 
-		void _AddSubmenu(const ValueList& args, SharedValue result);
 		void _AddItem(const ValueList& args, SharedValue result);
 		void _AddSeparatorItem(const ValueList& args, SharedValue result);
 		void _AddCheckItem(const ValueList& args, SharedValue result);
