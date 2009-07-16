@@ -282,7 +282,7 @@ describe("Ti.Filesystem tests",{
 			userHome = Titanium.Process.getEnv("HOME");
 			Titanium.API.debug(Titanium.platform +" environment HOME="+userHome);
 		}
-		value_of(userHome == f.nativePath()).should_be_true();
+		value_of(f.nativePath()).should_be(userHome);
 	},
 	
 	root_directories:function()

@@ -312,16 +312,32 @@ namespace ti
 	}
 	void FilesystemBinding::GetUserDirectory(const ValueList& args, SharedValue result)
 	{
+		std::string dir;
 		try
 		{
-			std::string dir = Poco::Path::home().c_str();
-			ti::File* file = new ti::File(dir);
-			result->SetObject(file);
+			dir = Poco::Path::home().c_str();
 		}
 		catch (Poco::Exception& exc)
 		{
-			throw ValueException::FromString(exc.displayText());
+			std::string error = "Couldn't determine home directory: ";
+			error.append(exc.displayText());
+			throw ValueException::FromString(error);
 		}
+
+
+#ifdef OS_WIN32
+		if (dir.size() == 3) // C:\ -- %%HOMEPATH%% might be borked
+		{
+			std::string odir = EnvironmentUtils::Get("USERPROFILE");	
+			if (!odir.empty())
+			{
+				dir = odir;
+			}
+		}
+#endif
+
+		ti::File* file = new ti::File(dir);
+		result->SetObject(file);
 	}
 	void FilesystemBinding::GetLineEnding(const ValueList& args, SharedValue result)
 	{
