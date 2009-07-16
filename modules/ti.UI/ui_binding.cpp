@@ -248,8 +248,8 @@ namespace ti
 			item->SetLabel(label);
 		if (!iconURL.empty())
 			item->SetIcon(iconURL);
-		//if (!eventListener.isNull())
-		//	item->AddEventListener(Event::CLICKED, eventListener);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
 
 		return item;
 	}
@@ -269,8 +269,8 @@ namespace ti
 		AutoMenuItem item = this->CreateCheckMenuItem();
 		if (!label.empty())
 			item->SetLabel(label);
-		//if (!eventListener.isNull())
-		//	item->AddEventListener(Event::CLICKED, eventListener);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
 
 		return item;
 	}
