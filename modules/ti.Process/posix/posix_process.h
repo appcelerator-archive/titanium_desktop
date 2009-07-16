@@ -8,8 +8,7 @@
 #define _POSIX_PROCESS_H_
 
 #include <sstream>
-#include "posix_output_pipe.h"
-#include "posix_input_pipe.h"
+#include "posix_pipe.h"
 #include "../process.h"
 
 namespace ti
@@ -17,14 +16,14 @@ namespace ti
 	class PosixProcess : public Process
 	{
 	public:
-		PosixProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
+		PosixProcess(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~PosixProcess();
 
 		static AutoPtr<PosixProcess> GetCurrentProcess();
 		
-		AutoPtr<PosixOutputPipe> GetStdin() { return stdinPipe.cast<PosixOutputPipe>(); }
-		AutoPtr<PosixInputPipe> GetStdout() { return stdoutPipe.cast<PosixInputPipe>(); }
-		AutoPtr<PosixInputPipe> GetStderr() { return stderrPipe.cast<PosixInputPipe>(); }
+		AutoPtr<PosixPipe> GetStdin() { return stdinPipe.cast<PosixPipe>(); }
+		AutoPtr<PosixPipe> GetStdout() { return stdoutPipe.cast<PosixPipe>(); }
+		AutoPtr<PosixPipe> GetStderr() { return stderrPipe.cast<PosixPipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);

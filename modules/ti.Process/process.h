@@ -9,9 +9,8 @@
 
 #include <kroll/kroll.h>
 #include <sstream>
-#include "input_pipe.h"
-#include "output_pipe.h"
-#include "buffered_input_pipe.h"
+#include "pipe.h"
+#include "buffered_pipe.h"
 
 namespace ti
 {
@@ -22,11 +21,11 @@ namespace ti
 	{
 	public:
 		Process(SharedKList args, SharedKObject environment,
-			 AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
+			 AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~Process();
 		static AutoProcess GetCurrentProcess();
 		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, 
-			AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
+			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		
 		virtual int GetPID() = 0;
 		void SetExitCode(int exitCode) { this->exitCode = exitCode; }
@@ -40,7 +39,7 @@ namespace ti
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
+		virtual void Restart(SharedKObject env, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual bool IsRunning() = 0;
 		
 		std::string ArgumentsToString();
@@ -73,13 +72,13 @@ namespace ti
 		void _ToString(const ValueList& args, SharedValue result);
 		
 		// non-exposed binding methods
-		BufferedInputPipe buffer;
+		BufferedPipe buffer;
 		SharedKMethod bufferedRead;
 		void BufferedRead(const ValueList& args, SharedValue result);
 		void Call(const ValueList& args, SharedValue result);
 		
-		AutoInputPipe stdoutPipe, stderrPipe;
-		AutoOutputPipe stdinPipe;
+		AutoPipe stdoutPipe, stderrPipe;
+		AutoPipe stdinPipe;
 		SharedKObject environment;
 		SharedKList args;
 		int exitCode;

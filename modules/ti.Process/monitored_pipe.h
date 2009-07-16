@@ -4,22 +4,22 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
  
-#ifndef _MONITORED_INPUT_PIPE_H_
-#define _MONITORED_INPUT_PIPE_H_
+#ifndef _MONITORED_PIPE_H_
+#define _MONITORED_PIPE_H_
 
 #define MAX_BUFFER_SIZE 4096
 
-#include "buffered_input_pipe.h"
+#include "buffered_pipe.h"
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
 
 namespace ti
 {
-	class MonitoredInputPipe : public BufferedInputPipe
+	class MonitoredPipe : public BufferedPipe
 	{
 	public:
-		MonitoredInputPipe() : BufferedInputPipe(), monitorJoined(false) {};
-		~MonitoredInputPipe();
+		MonitoredPipe() : BufferedPipe(), monitorJoined(false) {};
+		~MonitoredPipe();
 		virtual void Close();
 		void StartMonitor();
 		void JoinMonitor();
@@ -29,7 +29,7 @@ namespace ti
 	
 		virtual int RawRead(char *buffer, int size) = 0;
 		Poco::Thread monitorThread;
-		Poco::RunnableAdapter<MonitoredInputPipe>* monitorAdapter;
+		Poco::RunnableAdapter<MonitoredPipe>* monitorAdapter;
 		bool monitorJoined;
 	};
 }

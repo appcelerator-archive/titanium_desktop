@@ -4,11 +4,12 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "posix_output_pipe.h"
+
+#include "posix_pipe.h"
 
 namespace ti
 {
-	PosixOutputPipe::PosixOutputPipe() : closed(false)
+	PosixPipe::PosixPipe()
 	{
 		int fds[2];
 		int rc = pipe(fds);
@@ -17,20 +18,15 @@ namespace ti
 			readHandle  = fds[0];
 			writeHandle = fds[1];
 		}
-		else throw ValueException::FromString("Error creating output pipe");
+		else throw ValueException::FromString("Error creating input pipe");
 	}
 	
-	PosixOutputPipe::~PosixOutputPipe()
+	PosixPipe::~PosixPipe()
 	{
-		Close();
+		this->Close();
 	}
 	
-	bool PosixOutputPipe::IsClosed()
-	{
-		return closed;	
-	}
-
-	void PosixOutputPipe::Close()
+	void PosixPipe::Close()
 	{
 		if (!closed)
 		{
@@ -44,13 +40,30 @@ namespace ti
 				close(writeHandle);
 				writeHandle = -1;
 			}
-			closed = true;
-			
-			OutputPipe::Closed();
+			MonitoredPipe::Close();
 		}
 	}
 	
-	int PosixOutputPipe::Write(AutoPtr<Blob> blob)
+	int PosixPipe::RawRead(char *buffer, int size)
+	{
+		int n;
+		do
+		{
+			n = read(readHandle, buffer, size);
+		}
+		while (n < 0 && errno == EINTR);
+		
+		if (n >= 0)
+		{
+			return n;
+		}
+		else
+		{
+			throw ValueException::FromString("Error reading from anonymous pipe");
+		}
+	}
+	
+	int PosixPipe::Write(AutoPtr<Blob> blob)
 	{
 		int n;
 		do
@@ -68,7 +81,7 @@ namespace ti
 		}
 	}
 	
-	void PosixOutputPipe::Flush()
+	void PosixPipe::Flush()
 	{
 		if (writeHandle != -1) {
 			close(writeHandle);

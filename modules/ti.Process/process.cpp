@@ -29,7 +29,7 @@ namespace ti
 	/*static*/
 	AutoProcess Process::CreateProcess(
 		SharedKList args, SharedKObject environment,
-		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
+		AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
 	{
 #if defined(OS_WIN32)
 		AutoProcess process = new Win32Process(args, environment, stdinPipe, stdoutPipe, stderrPipe);
@@ -50,7 +50,7 @@ namespace ti
 	}
 	
 	Process::Process(SharedKList args, SharedKObject environment,
-		AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+		AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
 			AccessorBoundMethod(NULL, "Process.Process"),
 			stdoutPipe(stdoutPipe),
 			stderrPipe(stderrPipe),
@@ -67,15 +67,15 @@ namespace ti
 		
 		if (stdinPipe.isNull())
 		{
-			this->stdinPipe = OutputPipe::CreateOutputPipe();
+			this->stdinPipe = Pipe::CreatePipe();
 		}
 		if (stdoutPipe.isNull())
 		{
-			this->stdoutPipe = InputPipe::CreateInputPipe();
+			this->stdoutPipe = Pipe::CreatePipe();
 		}
 		if (stderrPipe.isNull())
 		{
-			this->stderrPipe = InputPipe::CreateInputPipe();
+			this->stderrPipe = Pipe::CreatePipe();
 		}
 		InitBindings();
 	}
@@ -135,15 +135,12 @@ namespace ti
 		if (method.isNull())
 		{
 			stdoutPipe->SetOnRead(NULL);
+			stderrPipe->SetOnRead(NULL);
 			return;
 		}
 		
-		if (!stderrPipe->IsJoined())
-		{
-			stdoutPipe->Join(stderrPipe);
-		}
-
 		stdoutPipe->SetOnRead(method);
+		stderrPipe->SetOnRead(method);
 	}
 	
 	SharedKObject Process::CloneEnvironment()
@@ -174,10 +171,10 @@ namespace ti
 		Restart(NULL, NULL, NULL, NULL);
 	}
 	
-	void Process::Restart(SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe)
+	void Process::Restart(SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
 	{
 		this->environment = environment.isNull() ? CloneEnvironment() : environment;
-		this->stdinPipe = stdinPipe.isNull() ? OutputPipe::CreateOutputPipe() : stdinPipe;
+		this->stdinPipe = stdinPipe.isNull() ? Pipe::CreatePipe() : stdinPipe;
 		this->stdoutPipe = stdoutPipe.isNull() ? this->stdoutPipe->Clone() : stdoutPipe;
 		this->stderrPipe = stderrPipe.isNull() ? this->stderrPipe->Clone() : stderrPipe;
 	
@@ -306,13 +303,13 @@ namespace ti
 			{
 				SharedKObject object = args.at(0)->ToObject();
 				SharedKObject env;
-				AutoOutputPipe stdinPipe;
-				AutoInputPipe stdoutPipe, stderrPipe;
+				AutoPipe stdinPipe;
+				AutoPipe stdoutPipe, stderrPipe;
 				
 				env = object->GetObject("env");
-				stdinPipe = object->GetObject("stdin").cast<OutputPipe>();
-				stdoutPipe = object->GetObject("stdout").cast<InputPipe>();
-				stderrPipe = object->GetObject("stderr").cast<InputPipe>();
+				stdinPipe = object->GetObject("stdin").cast<Pipe>();
+				stdoutPipe = object->GetObject("stdout").cast<Pipe>();
+				stderrPipe = object->GetObject("stderr").cast<Pipe>();
 				Restart(env, stdinPipe, stdoutPipe, stderrPipe);
 			}
 		}
@@ -357,18 +354,13 @@ namespace ti
 	void Process::BufferedRead(const ValueList& args, SharedValue result)
 	{
 		Logger::Get("Process.Process")->Debug("Buffered Reading sync process data..");
-		AutoInputPipe pipe = args.at(0)->ToObject()->GetObject("pipe").cast<InputPipe>();
-		buffer.Append(pipe->Read());
+		AutoPipe pipe = args.at(0)->ToObject()->GetObject("pipe").cast<Pipe>();
+		buffer.Write(pipe->Read());
 		Logger::Get("Process.Process")->Debug("Done, data should be available");
 	}
 	
 	void Process::Call(const ValueList& args, SharedValue result)
 	{
-		if (!stderrPipe->IsJoined())
-		{
-			stdoutPipe->Join(stderrPipe);
-		}
-		
 		if (bufferedRead.isNull())
 		{
 	 		MethodCallback* bufferedCallback =

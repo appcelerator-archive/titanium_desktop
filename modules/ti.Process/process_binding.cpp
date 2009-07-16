@@ -22,8 +22,8 @@ namespace ti
 		
 		//TODO doc me
 		SetMethod("createProcess", &ProcessBinding::CreateProcess);
-		SetMethod("createInputPipe", &ProcessBinding::CreateInputPipe);
-		SetMethod("createOutputPipe", &ProcessBinding::CreateOutputPipe);
+		SetMethod("createPipe", &ProcessBinding::CreatePipe);
+		SetMethod("createPipe", &ProcessBinding::CreatePipe);
 		SetMethod("getCurrentProcess", &ProcessBinding::GetCurrentProcess);
 		
 #if defined(OS_OSX) || (OS_LINUX)
@@ -84,8 +84,8 @@ namespace ti
 	{
 		SharedKList argList = 0;
 		SharedKObject environment = 0;
-		AutoOutputPipe stdinPipe = 0;
-		AutoInputPipe stdoutPipe, stderrPipe = 0;
+		AutoPipe stdinPipe = 0;
+		AutoPipe stdoutPipe, stderrPipe = 0;
 		
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
@@ -106,15 +106,15 @@ namespace ti
 			}
 			if (!options->Get("stdin")->IsUndefined() && options->Get("stdin")->IsObject())
 			{
-				stdinPipe = options->Get("stdin")->ToObject().cast<OutputPipe>();
+				stdinPipe = options->Get("stdin")->ToObject().cast<Pipe>();
 			}
 			if (!options->Get("stdout")->IsUndefined() && options->Get("stdout")->IsObject())
 			{
-				stdoutPipe = options->Get("stdin")->ToObject().cast<InputPipe>();
+				stdoutPipe = options->Get("stdin")->ToObject().cast<Pipe>();
 			}
 			if (!options->Get("stderr")->IsUndefined() && options->Get("stderr")->IsObject())
 			{
-				stderrPipe = options->Get("stderr")->ToObject().cast<InputPipe>();
+				stderrPipe = options->Get("stderr")->ToObject().cast<Pipe>();
 			}
 		}
 		else if (args.size() > 0 && args.at(0)->IsList())
@@ -126,15 +126,15 @@ namespace ti
 			}
 			if (args.size() > 2 && args.at(2)->IsObject())
 			{
-				stdinPipe = args.at(2)->ToObject().cast<OutputPipe>();
+				stdinPipe = args.at(2)->ToObject().cast<Pipe>();
 			}
 			if (args.size() > 3 && args.at(3)->IsObject())
 			{
-				stdoutPipe = args.at(3)->ToObject().cast<InputPipe>();
+				stdoutPipe = args.at(3)->ToObject().cast<Pipe>();
 			}
 			if (args.size() > 4 && args.at(4)->IsObject())
 			{
-				stderrPipe = args.at(4)->ToObject().cast<InputPipe>();
+				stderrPipe = args.at(4)->ToObject().cast<Pipe>();
 			}
 		}
 		
@@ -191,14 +191,9 @@ namespace ti
 		processes.push_back(process);
 	}
 	
-	void ProcessBinding::CreateInputPipe(const ValueList& args, SharedValue result)
+	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)
 	{
-		result->SetObject(InputPipe::CreateInputPipe());
-	}
-	
-	void ProcessBinding::CreateOutputPipe(const ValueList& args, SharedValue result)
-	{
-		result->SetObject(OutputPipe::CreateOutputPipe());
+		result->SetObject(Pipe::CreatePipe());
 	}
 	
 	void ProcessBinding::GetCurrentProcess(const ValueList& args, SharedValue result)

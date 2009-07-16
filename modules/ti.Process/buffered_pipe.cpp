@@ -4,14 +4,14 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "buffered_input_pipe.h"
-#include "input_pipe.h"
+#include "buffered_pipe.h"
+#include "pipe.h"
 
 namespace ti
 {
-	BufferedInputPipe::BufferedInputPipe() : closed(false) { }
+	BufferedPipe::BufferedPipe() : closed(false) { }
 	
-	AutoPtr<Blob> BufferedInputPipe::Read(int bufsize)
+	AutoPtr<Blob> BufferedPipe::Read(int bufsize)
 	{
 		if (!closed)
 		{
@@ -35,7 +35,7 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	AutoPtr<Blob> BufferedInputPipe::ReadLine()
+	AutoPtr<Blob> BufferedPipe::ReadLine()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -55,7 +55,7 @@ namespace ti
 		throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	int BufferedInputPipe::GetSize()
+	int BufferedPipe::GetSize()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -66,26 +66,27 @@ namespace ti
 		else throw ValueException::FromString("This pipe is closed.");
 	}
 	
-	const char* BufferedInputPipe::GetBuffer()
+	const char* BufferedPipe::GetBuffer()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		return &buffer[0];
 	}
 	
-	void BufferedInputPipe::Append(char *data, int length)
+	void BufferedPipe::Write(char *data, int length)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		buffer.insert(buffer.end(), data, data+length);
 		
-		InputPipe::DataReady();
+		Pipe::DataReady();
 	}
 	
-	void BufferedInputPipe::Append(AutoPtr<Blob> blob)
+	int BufferedPipe::Write(AutoPtr<Blob> blob)
 	{
-		this->Append((char *)blob->Get(), blob->Length());
+		this->Write((char *)blob->Get(), blob->Length());
+		return blob->Length();
 	}
 	
-	void BufferedInputPipe::Close()
+	void BufferedPipe::Close()
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		if (!closed)
@@ -93,13 +94,16 @@ namespace ti
 			buffer.clear();
 			closed = true;
 			
-			InputPipe::Closed();
+			Pipe::Closed();
 		}
 	}
 	
-	bool BufferedInputPipe::IsClosed()
+	bool BufferedPipe::IsClosed()
 	{
 		return closed;
 	}
 	
+	void BufferedPipe::Flush()
+	{
+	}
 }

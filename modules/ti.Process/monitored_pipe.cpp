@@ -4,17 +4,17 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
  
-#include "monitored_input_pipe.h"
+#include "monitored_pipe.h"
 
 namespace ti
 {
 	
-	MonitoredInputPipe::~MonitoredInputPipe ()
+	MonitoredPipe::~MonitoredPipe ()
 	{
 		this->Close();
 	}
 
-	void MonitoredInputPipe::Close()
+	void MonitoredPipe::Close()
 	{
 		if (!closed)
 		{
@@ -24,11 +24,11 @@ namespace ti
 				delete monitorAdapter;
 			}
 			
-			BufferedInputPipe::Close();
+			BufferedPipe::Close();
 		}
 	}
 	
-	void MonitoredInputPipe::JoinMonitor()
+	void MonitoredPipe::JoinMonitor()
 	{
 		if (monitorJoined) return;
 		monitorJoined = true;
@@ -39,26 +39,26 @@ namespace ti
 		}
 		catch (Poco::Exception& e)
 		{
-			Logger::Get("Process.MonitoredInputPipe")->Error(
-				"Exception while try to join with InputPipe thread: %s",
+			Logger::Get("Process.MonitoredPipe")->Error(
+				"Exception while try to join with Pipe thread: %s",
 				e.displayText().c_str());
 		}
 	}
 	
-	void MonitoredInputPipe::StartMonitor()
+	void MonitoredPipe::StartMonitor()
 	{
-		monitorAdapter = new Poco::RunnableAdapter<MonitoredInputPipe>(*this, &MonitoredInputPipe::MonitorThread);
+		monitorAdapter = new Poco::RunnableAdapter<MonitoredPipe>(*this, &MonitoredPipe::MonitorThread);
 		monitorThread.start(*monitorAdapter);
 	}
 	
-	void MonitoredInputPipe::MonitorThread()
+	void MonitoredPipe::MonitorThread()
 	{
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
 		int bytesRead = this->RawRead(buffer, length);
 		while (bytesRead > 0) {
-			Logger::Get("Process.MonitoredInputPipe")->Debug("monitored data ready: %d bytes, %s", bytesRead, buffer);
-			this->Append(buffer, bytesRead);
+			Logger::Get("Process.MonitoredPipe")->Debug("monitored data ready: %d bytes, %s", bytesRead, buffer);
+			this->Write(buffer, bytesRead);
 			bytesRead = this->RawRead(buffer, length);
 		}
 	}

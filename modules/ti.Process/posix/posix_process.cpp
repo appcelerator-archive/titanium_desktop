@@ -23,7 +23,7 @@ namespace ti
 		return currentProcess;
 	}
 	
-	PosixProcess::PosixProcess(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+	PosixProcess::PosixProcess(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
 		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
 		running(false),
 		complete(false),

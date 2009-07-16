@@ -27,8 +27,7 @@ namespace ti
 		static std::vector<AutoProcess> processes;
 		
 		void CreateProcess(const ValueList& args, SharedValue result);
-		void CreateInputPipe(const ValueList& args, SharedValue result);
-		void CreateOutputPipe(const ValueList& args, SharedValue result);
+		void CreatePipe(const ValueList& args, SharedValue result);
 		void GetCurrentProcess(const ValueList& args, SharedValue result);
 		
 	};

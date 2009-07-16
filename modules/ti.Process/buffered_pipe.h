@@ -4,31 +4,33 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _BUFFERED_INPUT_PIPE_H_
-#define _BUFFERED_INPUT_PIPE_H_
+#ifndef _BUFFERED_PIPE_H_
+#define _BUFFERED_PIPE_H_
 
 #include <kroll/kroll.h>
-#include "input_pipe.h"
+#include "pipe.h"
 
 namespace ti
 {
-	class BufferedInputPipe;
-	typedef AutoPtr<BufferedInputPipe> SharedBufferedInputPipe;
+	class BufferedPipe;
+	typedef AutoPtr<BufferedPipe> SharedBufferedPipe;
 	
-	class BufferedInputPipe : public InputPipe
+	class BufferedPipe : public Pipe
 	{
 		public:
-			BufferedInputPipe();
+			BufferedPipe();
 			
 			virtual AutoPtr<Blob> Read(int bufsize=-1);
 			virtual AutoPtr<Blob> ReadLine();
 			virtual void Close();
 			virtual bool IsClosed();
+			virtual int Write(AutoPtr<Blob> data);
+			void Write(char *data, int length);
+			virtual void Flush();
 			
 			int GetSize();
 			const char* GetBuffer();
-			void Append(AutoPtr<Blob> blob);
-			void Append(char *data, int length);
+			AutoPtr<Blob> ToBlob() { return new Blob(&(buffer[0]), buffer.size()); }
 			
 		protected:
 			Poco::Mutex mutex;
