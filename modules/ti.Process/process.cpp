@@ -351,29 +351,23 @@ namespace ti
 		result->SetBool(IsRunning());
 	}
 	
-	void Process::BufferedRead(const ValueList& args, SharedValue result)
-	{
-		Logger::Get("Process.Process")->Debug("Buffered Reading sync process data..");
-		AutoPipe pipe = args.at(0)->ToObject()->GetObject("pipe").cast<Pipe>();
-		buffer.Write(pipe->Read());
-		Logger::Get("Process.Process")->Debug("Done, data should be available");
-	}
 	
 	void Process::Call(const ValueList& args, SharedValue result)
 	{
-		if (bufferedRead.isNull())
+		/*if (bufferedRead.isNull())
 		{
 	 		MethodCallback* bufferedCallback =
 				NewCallback<Process, const ValueList&, SharedValue>(this, &Process::BufferedRead);
 			
 			bufferedRead = new StaticBoundMethod(bufferedCallback);
-		}
+		}*/
 		
 		//stdoutPipe->SetOnRead(bufferedRead);
 		
 		Launch(false);
 		
-		result->SetObject(buffer.Read(buffer.GetSize()));
+		// TODO: fill the buffer!
+		//result->SetObject(buffer.Read(buffer.GetSize()));
 	}
 	
 	void Process::_ToString(const ValueList& args, SharedValue result)

@@ -108,14 +108,14 @@ namespace ti
 	void PosixProcess::Launch(bool async)
 	{
 		if (!async) {
-			GetStdout()->SetAsyncOnRead(false);
-			GetStderr()->SetAsyncOnRead(false);			
+			//GetStdout()->SetAsyncOnRead(false);
+			//GetStderr()->SetAsyncOnRead(false);
 		}
 		pid = fork();
 		if (pid < 0)
 		{
 			logger->Debug("Can't fork process :(");
-			throw ValueException::FromFormat("Cannot fork process for %s", args->At(0)->ToString());		
+			throw ValueException::FromFormat("Cannot fork process for %s", args->At(0)->ToString());
 		}
 		else if (pid == 0)
 		{

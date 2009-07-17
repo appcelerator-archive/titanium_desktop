@@ -71,9 +71,6 @@ namespace ti
 		void _ToString(const ValueList& args, SharedValue result);
 		
 		// non-exposed binding methods
-		Pipe buffer;
-		SharedKMethod bufferedRead;
-		void BufferedRead(const ValueList& args, SharedValue result);
 		void Call(const ValueList& args, SharedValue result);
 		
 		AutoPipe stdoutPipe, stderrPipe;
