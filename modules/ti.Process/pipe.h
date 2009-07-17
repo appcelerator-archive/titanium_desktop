@@ -15,37 +15,32 @@
 namespace ti
 {
 	class Pipe;
+	class NativePipe;
 	typedef AutoPtr<Pipe> AutoPipe;
 
 	class Pipe : public KEventObject
 	{
 	public:
-		static AutoPipe CreatePipe();
-		
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
 
-		virtual AutoPtr<Blob> Read(int bufsize=-1);
-		virtual AutoPtr<Blob> ReadLine();
 		virtual void Close();
 		virtual bool IsClosed();
-		virtual int Write(AutoPtr<Blob> data);
+		virtual int Write(AutoBlob data);
 		void Write(char *data, int length);
 		virtual void Flush();
 
 		int GetSize();
 		const char* GetBuffer();
 
-		void DataReady(AutoPipe pipe = NULL);
-		void Attach(SharedKObject other);
-		void Detach();
+		void Attach(SharedKObject object);
+		void Detach(SharedKObject object);
 		bool IsAttached();
-		
-		void SetAsyncOnRead(bool asyncOnRead) { this->asyncOnRead = asyncOnRead; }
 		AutoPipe Clone();
 
 		virtual void Closed();
 		void SetOnClose(SharedKMethod onClose);
+		void SetNativePipe(AutoPtr<NativePipe> nativePipe);
 		
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
@@ -54,9 +49,6 @@ namespace ti
 		void _Close(const ValueList& args, SharedValue result);
 		void _IsClosed(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);
-		void _Read(const ValueList& args, SharedValue result);
-		void _ReadLine(const ValueList& args, SharedValue result);
-		void _IsJoined(const ValueList& args, SharedValue result);
 		void _Attach(const ValueList& args, SharedValue result);
 		void _Detach(const ValueList& args, SharedValue result);
 		void _IsAttached(const ValueList& args, SharedValue result);
@@ -64,17 +56,18 @@ namespace ti
 		void _Flush(const ValueList& args, SharedValue result);
 
 		SharedKMethod *onClose;
-		SharedKObject* attachedOutput;
+		
+		Poco::Mutex attachedMutex;
+		std::vector<SharedKObject> attachedObjects;
+		
 		Logger *logger;
-		bool asyncOnRead;
-		Poco::Mutex mutex;
-		bool closed, asyncRead;
+		bool closed;
 
 		Poco::Mutex buffersMutex;
 		std::queue<AutoBlob> buffers;
 		Poco::Thread* eventsThread;
 		Poco::RunnableAdapter<Pipe>* eventsThreadAdapter;
-
+		AutoPtr<NativePipe> nativePipe;
 	};
 }
 

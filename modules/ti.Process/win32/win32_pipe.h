@@ -10,17 +10,17 @@
 #include <kroll/base.h>
 #include <windows.h>
 #include <kroll/kroll.h>
-#include "../monitored_pipe.h"
+#include "../native_pipe.h"
 
 namespace ti
 {
-	class Win32Pipe : public MonitoredPipe
+	class Win32Pipe : public NativePipe
 	{
 	public:
-		Win32Pipe();	
+		Win32Pipe(AutoPipe delegate);	
 		virtual void Close();
-		virtual int Write(AutoPtr<Blob> data);
-		virtual void Flush();
+		virtual void Write(AutoPtr<Blob> data);
+		virtual void EndOfFile();
 		
 		void DuplicateWrite(HANDLE process, LPHANDLE handle);
 		void DuplicateRead(HANDLE process, LPHANDLE handle);
@@ -30,6 +30,7 @@ namespace ti
 	protected:
 		virtual int RawRead(char *buffer, int size);
 		
+		Poco::Mutex mutex;
 		HANDLE readHandle, writeHandle;
 	};
 }

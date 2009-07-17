@@ -8,7 +8,7 @@
 
 namespace ti
 {
-	Win32Pipe::Win32Pipe() : MonitoredPipe()
+	Win32Pipe::Win32Pipe(AutoPipe delegate) : NativePipe(delegate)
 	{
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
@@ -20,16 +20,28 @@ namespace ti
 	
 	void Win32Pipe::Close()
 	{
-		if (!closed) {
+		if (!closed)
+		{
 			if (writeHandle != INVALID_HANDLE_VALUE)
+			{
 				CloseHandle(writeHandle);
+				writeHandle = INVALID_HANDLE_VALUE;
+			}
+				
+			if (readHandle != INVALID_HANDLE_VALUE)
+			{
+				CloseHandle(readHandle);
+				readHandle = INVALID_HANDLE_VALUE;
+			}
 			
-			MonitoredPipe::Close();
+			NativePipe::Close();
 		}
 	}
 	
 	int Win32Pipe::RawRead(char *buffer, int size)
 	{
+		Poco::Mutex::ScopedLock lock(mutex);
+		
 		if (readHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesRead;
 			BOOL ok = ReadFile(readHandle, buffer, size, &bytesRead, NULL);
@@ -62,7 +74,7 @@ namespace ti
         CloseHandle(writeHandle);
 	}
 	
-	int Win32Pipe::Write(AutoPtr<Blob> blob)
+	void Win32Pipe::Write(AutoPtr<Blob> blob)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
@@ -70,17 +82,20 @@ namespace ti
 			DWORD bytesWritten;
 			BOOL ok = WriteFile(writeHandle, (LPCVOID)blob->Get(), blob->Length(), &bytesWritten, NULL);
 			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
-				return bytesWritten;
+				return;
 			}
 			else {
 				throw ValueException::FromString("Error writing anonymous pipe");
 			}
 		}
-		return 0;
 	}
 	
-	void Win32Pipe::Flush()
+	void Win32Pipe::EndOfFile()
 	{
-		
+		if (writeHandle != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(writeHandle);
+			readHandle = INVALID_HANDLE_VALUE;
+		}
 	}
 }
