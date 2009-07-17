@@ -357,24 +357,12 @@ namespace ti
 	{
 		result->SetBool(IsRunning());
 	}
-	
-	
+
 	void Process::Call(const ValueList& args, SharedValue result)
 	{
-		/*if (bufferedRead.isNull())
-		{
-	 		MethodCallback* bufferedCallback =
-				NewCallback<Process, const ValueList&, SharedValue>(this, &Process::BufferedRead);
-			
-			bufferedRead = new StaticBoundMethod(bufferedCallback);
-		}*/
-		
-		//stdoutPipe->SetOnRead(bufferedRead);
-		
-		Launch(false);
-		
-		// TODO: fill the buffer!
-		//result->SetObject(buffer.Read(buffer.GetSize()));
+		// Should this return an AutoBlob instead?
+		std::string output = LaunchSynchronously();
+		result->SetString(output);
 	}
 	
 	void Process::_ToString(const ValueList& args, SharedValue result)

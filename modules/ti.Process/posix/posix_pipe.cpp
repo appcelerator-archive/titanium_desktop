@@ -9,7 +9,8 @@
 
 namespace ti
 {
-	PosixPipe::PosixPipe()
+	PosixPipe::PosixPipe(bool isReader) :
+		NativePipe(isReader)
 	{
 		int fds[2];
 		int rc = pipe(fds);
@@ -71,7 +72,7 @@ namespace ti
 		int n;
 		do
 		{
-			n = write(writeHandle, buffer), size);
+			n = write(writeHandle, buffer, size);
 		}
 		while (n < 0 && errno == EINTR);
 		if (n >= 0)

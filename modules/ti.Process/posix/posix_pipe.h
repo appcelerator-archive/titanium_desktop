@@ -15,11 +15,12 @@ namespace ti
 	class PosixPipe : public NativePipe
 	{
 	public:
-		PosixPipe();
+		PosixPipe(bool isReader);
 		virtual ~PosixPipe();
 		virtual void Close();
 		inline int GetReadHandle() { return readHandle; }
 		inline int GetWriteHandle() { return writeHandle; }
+		virtual void EndOfFile() {};
 
 	protected:
 		int readHandle;

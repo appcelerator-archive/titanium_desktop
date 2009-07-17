@@ -26,8 +26,8 @@ namespace ti
 	PosixProcess::PosixProcess(SharedKList args, SharedKObject environment, 
 			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
 		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
-		pid(-1),
-		logger(Logger::Get("Process.PosixProcess"))
+		logger(Logger::Get("Process.PosixProcess")),
+		pid(-1)
 	{
 #if defined(OS_OSX)
 		std::string cmd = args->At(0)->ToString();
@@ -50,8 +50,8 @@ namespace ti
 	
 	PosixProcess::PosixProcess() :
 		Process(),
-		running(true), complete(false), current(true),
-		logger(Logger::Get("Process.PosixProcess"))
+		logger(Logger::Get("Process.PosixProcess")),
+		pid(getpid())
 	{
 		pid = getpid();
 #if defined(OS_OSX)
@@ -84,13 +84,13 @@ namespace ti
 		}
 	}
 
-	NativePosixProcess::NativePosixProcess(PosixProces* process) :
-		process(process)
-		exitStatus(-1),
+	NativePosixProcess::NativePosixProcess(PosixProcess* process) :
+		process(process),
+		exitCode(-1),
 		pid(-1),
-		stdinPipe(new PosixPipe()),
-		stdoutPipe(new PosixPipe()),
-		stderrPipe(new StderrPipe()),
+		stdinPipe(new PosixPipe(false)),
+		stdoutPipe(new PosixPipe(true)),
+		stderrPipe(new PosixPipe(true)),
 		exitMonitorAdapter(new Poco::RunnableAdapter<NativePosixProcess>(
 			*this, &NativePosixProcess::ExitMonitor)),
 		exitCallback(0)
@@ -119,17 +119,16 @@ namespace ti
 		{
 			Logger* logger = Logger::Get("Process.NativePosixProcess");
 			logger->Debug("Can't fork process :(");
-			throw ValueException::FromFormat("Cannot fork process for %s", args->At(0)->ToString());
+			throw ValueException::FromFormat("Cannot fork process for %s", 
+				process->args->At(0)->ToString());
 		}
 		else if (pid == 0)
 		{
-			// setup redirection
-			dup2(stdinPipe->GetReadHandle(), STDIN_FILENO);
-			p->stdinPipe->Close();
-
 			// outPipe and errPipe may be the same, so we dup first and close later
+			dup2(stdinPipe->GetReadHandle(), STDIN_FILENO);
 			dup2(stdoutPipe->GetWriteHandle(), STDOUT_FILENO);
 			dup2(stderrPipe->GetWriteHandle(), STDERR_FILENO);
+			stdinPipe->Close();
 			stdoutPipe->Close();
 			stderrPipe->Close();
 
@@ -149,12 +148,12 @@ namespace ti
 			SharedStringList envNames = process->environment->GetPropertyNames();
 			for (i = 0; i < envNames->size(); i++)
 			{
-				setenv(envNames->at(i)->c_str(),
-					environment->Get(envNames->at(i)->c_str())->ToString(), 1);
+				const char* key = envNames->at(i)->c_str();
+				std::string value = process->environment->Get(key)->ToString();
+				setenv(key, value.c_str(), 1);
 			}
 
 			const char *command = process->args->At(0)->ToString();
-			logger->Debug("execvp: %s", command);
 			execvp(command, argv);
 			_exit(72);
 		}
@@ -164,22 +163,23 @@ namespace ti
 		close(stderrPipe->GetWriteHandle());
 	}
 
-	NativePosixProcess::MonitorAsynchronously()
+	void NativePosixProcess::MonitorAsynchronously()
 	{
 		stdoutPipe->StartMonitor();
 		stderrPipe->StartMonitor();
 
-		this->exitCallback =
-			StaticBoundMethod::FromMethod(this, NativePosixProcess::ExitCallback);
+		this->exitCallback = StaticBoundMethod::FromMethod<NativePosixProcess>(
+			this, &NativePosixProcess::ExitCallback);
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
 	std::string NativePosixProcess::MonitorSynchronously()
 	{
 		SharedKMethod readCallback =
-			StaticBoundMethod::FromMethod(this, NativePosixProcess::ReadCallback);
-		stdoutPipe->AddEventListener(Event::READ, readCallbcak);
-		stderrPipe->AddEventListener(Event::READ, readCallbcak);
+			StaticBoundMethod::FromMethod<NativePosixProcess>(
+				this, &NativePosixProcess::ReadCallback);
+		stdoutPipe->AddEventListener(Event::READ, readCallback);
+		stderrPipe->AddEventListener(Event::READ, readCallback);
 
 		stdoutPipe->StartMonitor();
 		stderrPipe->StartMonitor();
@@ -214,10 +214,10 @@ namespace ti
 		stderrPipe->Close();
 
 		if (!exitCallback.isNull())
-			InvokeMethodOnMainThread(exitCallback, ValueList());
+			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
 	}
 
-	void ExitCallback(const ValueList& args, SharedValue result)
+	void NativePosixProcess::ExitCallback(const ValueList& args, SharedValue result)
 	{
 		if (this->process)
 			process->Exited(this);
@@ -225,11 +225,11 @@ namespace ti
 		delete this;
 	}
 
-	void ReadCallback(const ValueList& args, SharedValue result)
+	void NativePosixProcess::ReadCallback(const ValueList& args, SharedValue result)
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject data = args.GetObject(0)->GetObject("data")
+			SharedKObject data = args.GetObject(0)->GetObject("data");
 			AutoBlob blob = data.cast<Blob>();
 			if (!blob.isNull())
 			{
@@ -238,21 +238,19 @@ namespace ti
 		}
 	}
 
-	void PosixProcess::Launch(bool async)
+	void PosixProcess::Launch()
 	{
-		NativePosixProcess* nativeProcess = CreateNativePosixProcess();
-		if (async)
-		{
-			nativeProcess->MonitorAsynchronously();
+		NativePosixProcess* nativeProcess = NativePosixProcess::Create(this);
+		nativeProcess->MonitorAsynchronously();
+		Poco::Mutex::ScopedLock lock(nativeProcessesMutex);
+		nativeProcesses.push_back(nativeProcess);
+	}
 
-			Poco::Mutex::ScopedLock lock(nativeProcessesMutex);
-			nativeProcesses.push_back(nativeProcess);
-		}
-		else
-		{
-			std::string output = nativeProcess->MonitorSynchronously();
-			return output;
-		}
+	std::string PosixProcess::LaunchSynchronously()
+	{
+		NativePosixProcess* nativeProcess = NativePosixProcess::Create(this);
+		std::string output = nativeProcess->MonitorSynchronously();
+		return output;
 	}
 
 	int PosixProcess::GetPID()
@@ -263,7 +261,7 @@ namespace ti
 	void PosixProcess::SendSignal(int signal)
 	{
 		Poco::Mutex::ScopedLock lock(nativeProcessesMutex);
-		for (size_t = i; i < nativeProcesses.size(); i++)
+		for (size_t i = 0; i < nativeProcesses.size(); i++)
 		{
 			NativePosixProcess* native = nativeProcesses.at(i);
 			if (kill(native->pid, signal) != 0)
@@ -311,7 +309,8 @@ namespace ti
 					i++;
 			}
 		}
-		this->Exited();
+
+		Process::Exited();
 	}
 
 }

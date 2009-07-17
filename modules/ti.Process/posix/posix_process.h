@@ -18,9 +18,12 @@ namespace ti
 
 	class NativePosixProcess
 	{
+		public:
 		NativePosixProcess(PosixProcess* process);
+		~NativePosixProcess();
+
 		PosixProcess* process;
-		int exitStatus;
+		int exitCode;
 		int pid;
 		AutoPtr<PosixPipe> stdinPipe;
 		AutoPtr<PosixPipe> stdoutPipe;
@@ -29,11 +32,13 @@ namespace ti
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.
 		std::vector<AutoBlob> processOutput;
+		Poco::RunnableAdapter<NativePosixProcess>* exitMonitorAdapter;
 		Poco::Thread exitMonitorThread;
 		SharedKMethod exitCallback;
 
+		void ForkAndExec();
 		void MonitorAsynchronously();
-		void MonitorSynchronously();
+		std::string MonitorSynchronously();
 		void ExitMonitor();
 		void ExitCallback(const ValueList& args, SharedValue result);
 		void ReadCallback(const ValueList& args, SharedValue result);
@@ -42,19 +47,22 @@ namespace ti
 
 	class PosixProcess : public Process
 	{
-	public:
+		public:
+		friend class NativePosixProcess;
 		PosixProcess(SharedKList args, SharedKObject environment, 
 			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~PosixProcess();
 		virtual int GetPID();
-		virtual void Launch(bool async=true);
+		virtual void Launch();
+		virtual std::string LaunchSynchronously();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual bool IsRunning();
+		void Exited(NativePosixProcess* native);
 		static AutoPtr<PosixProcess> GetCurrentProcess();
 
-	protected:
+		protected:
 		Poco::Mutex nativeProcessesMutex;
 		std::vector<NativePosixProcess*> nativeProcesses;
 		Poco::RunnableAdapter<PosixProcess>* exitMonitorAdapter;

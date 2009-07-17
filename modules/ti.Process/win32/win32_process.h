@@ -30,7 +30,8 @@ namespace ti
 		AutoPtr<Win32Pipe> GetStderr() { return nativeErr; }
 		
 		virtual int GetPID();
-		virtual void Launch(bool async=true);
+		virtual void Launch();
+		virtual std::string LaunchSynchronously();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);

@@ -33,7 +33,8 @@ namespace ti
 		virtual SharedKObject GetEnvironment() { return environment; }
 		virtual void SetEnvironment(const char *name, const char *value) { environment->SetString(name, value); }
 		virtual SharedKObject CloneEnvironment();
-		virtual void Launch(bool async=true) = 0;
+		virtual void Launch() = 0;
+		virtual std::string LaunchSynchronously() = 0;
 		virtual void Terminate() = 0;
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;

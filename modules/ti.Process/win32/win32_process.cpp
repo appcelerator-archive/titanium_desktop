@@ -232,7 +232,13 @@ namespace ti
 			ExitMonitor();
 		}
 	}
-	
+
+	virtual std::string LaunchSynchronously()
+	{
+		static std::string stubby = "mcstubersons"
+		return stubby;
+	}
+
 	int Win32Process::GetPID()
 	{
 		return pid;
