@@ -13,39 +13,55 @@
 
 namespace ti
 {
+	class NativePosixProcess
+	{
+		static NativePosixProcess* CreateNativePosixProcess(PosixProces* process);
+		NativePosixProcess(PosixProces* process);
+		PosixProcess* process;
+		int exitStatus;
+		int pid;
+		AutoPtr<PosixPipe> stdinPipe;
+		AutoPtr<PosixPipe> stdoutPipe;
+		AutoPtr<PosixPipe> stderrPipe;
+
+		// For synchronous process execution store
+		// process output as a vector of blobs for speed.
+		std::vector<AutoBlob> processOutput;
+		Poco::Thread exitMonitorThread;
+		SharedKMethod exitCallback;
+
+		void MonitorAsynchronously();
+		void MonitorSynchronously();
+		void ExitMonitor();
+		void ExitCallback(const ValueList& args, SharedValue result);
+		void ReadCallback(const ValueList& args, SharedValue result);
+	}
+
 	class PosixProcess : public Process
 	{
 	public:
-		PosixProcess(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
+		PosixProcess(SharedKList args, SharedKObject environment, 
+			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~PosixProcess();
-
-		static AutoPtr<PosixProcess> GetCurrentProcess();
-		
-		AutoPtr<PosixPipe> GetStdin() { return stdinPipe.cast<PosixPipe>(); }
-		AutoPtr<PosixPipe> GetStdout() { return stdoutPipe.cast<PosixPipe>(); }
-		AutoPtr<PosixPipe> GetStderr() { return stderrPipe.cast<PosixPipe>(); }
-		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual bool IsRunning();
-		
+		static AutoPtr<PosixProcess> GetCurrentProcess();
+
 	protected:
-		// for current process
-		PosixProcess();
-		
-		void StartProcess();
-		void ExitMonitor();
-		
-		Poco::Thread exitMonitorThread;
+		Poco::Mutex nativeProcessesMutex;
+		std::vector<NativePosixProcess*> nativeProcesses;
 		Poco::RunnableAdapter<PosixProcess>* exitMonitorAdapter;
-		bool running, complete, current, runningSync;
-		int pid;
-		
 		Logger* logger;
 		static AutoPtr<PosixProcess> currentProcess;
+		int pid;
+
+		PosixProcess();
+		void StartProcess();
+		void ExitMonitor();
 	};
 }
 
