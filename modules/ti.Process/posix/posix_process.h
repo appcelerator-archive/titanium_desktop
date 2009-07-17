@@ -37,8 +37,8 @@ namespace ti
 		SharedKMethod exitCallback;
 
 		void ForkAndExec();
-		void MonitorAsynchronously();
-		std::string MonitorSynchronously();
+		void MonitorAsync();
+		std::string MonitorSync();
 		void ExitMonitor();
 		void ExitCallback(const ValueList& args, SharedValue result);
 		void ReadCallback(const ValueList& args, SharedValue result);
@@ -53,8 +53,8 @@ namespace ti
 			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~PosixProcess();
 		virtual int GetPID();
-		virtual void Launch();
-		virtual std::string LaunchSynchronously();
+		virtual void LaunchAsync();
+		virtual std::string LaunchSync();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);

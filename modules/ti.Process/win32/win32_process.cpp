@@ -165,7 +165,7 @@ namespace ti
 		return result;
 	}
 	
-	void Win32Process::Launch(bool async)
+	void Win32Process::LaunchAsync()
 	{
 		STARTUPINFO startupInfo;
 		startupInfo.cb          = sizeof(STARTUPINFO);
@@ -228,7 +228,7 @@ namespace ti
 		}
 	}
 
-	virtual std::string LaunchSynchronously()
+	virtual std::string LaunchSync()
 	{
 		static std::string stubby = "mcstubersons"
 		return stubby;

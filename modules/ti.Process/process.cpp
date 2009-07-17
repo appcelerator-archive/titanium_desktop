@@ -195,7 +195,7 @@ namespace ti
 		ProcessBinding::AddProcess(autoThis);
 	
 		Logger::Get("Process.Process")->Debug("restarting...");
-		Launch();
+		LaunchAsync();
 	}
 	
 	void Process::_GetPID(const ValueList& args, SharedValue result)
@@ -240,7 +240,7 @@ namespace ti
 	
 	void Process::_Launch(const ValueList& args, SharedValue result)
 	{
-		Launch();
+		LaunchAsync();
 	}
 	
 	void Process::_Terminate(const ValueList& args, SharedValue result)
@@ -361,7 +361,7 @@ namespace ti
 	void Process::Call(const ValueList& args, SharedValue result)
 	{
 		// Should this return an AutoBlob instead?
-		std::string output = LaunchSynchronously();
+		std::string output = LaunchSync();
 		result->SetString(output);
 	}
 	

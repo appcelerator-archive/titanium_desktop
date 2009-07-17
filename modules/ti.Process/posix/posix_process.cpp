@@ -163,7 +163,7 @@ namespace ti
 		close(stderrPipe->GetWriteHandle());
 	}
 
-	void NativePosixProcess::MonitorAsynchronously()
+	void NativePosixProcess::MonitorAsync()
 	{
 		stdoutPipe->StartMonitor();
 		stderrPipe->StartMonitor();
@@ -173,7 +173,7 @@ namespace ti
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
-	std::string NativePosixProcess::MonitorSynchronously()
+	std::string NativePosixProcess::MonitorSync()
 	{
 		SharedKMethod readCallback =
 			StaticBoundMethod::FromMethod<NativePosixProcess>(
@@ -238,18 +238,18 @@ namespace ti
 		}
 	}
 
-	void PosixProcess::Launch()
+	void PosixProcess::LaunchAsync()
 	{
 		NativePosixProcess* nativeProcess = NativePosixProcess::Create(this);
-		nativeProcess->MonitorAsynchronously();
+		nativeProcess->MonitorAsync();
 		Poco::Mutex::ScopedLock lock(nativeProcessesMutex);
 		nativeProcesses.push_back(nativeProcess);
 	}
 
-	std::string PosixProcess::LaunchSynchronously()
+	std::string PosixProcess::LaunchSync()
 	{
 		NativePosixProcess* nativeProcess = NativePosixProcess::Create(this);
-		std::string output = nativeProcess->MonitorSynchronously();
+		std::string output = nativeProcess->MonitorSync();
 		return output;
 	}
 
