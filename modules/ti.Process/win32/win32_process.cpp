@@ -5,8 +5,7 @@
  */
  
 #include "win32_process.h"
-#include "win32_output_pipe.h"
-#include "win32_input_pipe.h"
+#include "win32_pipe.h"
 #include <signal.h>
 
 namespace ti
@@ -19,7 +18,7 @@ namespace ti
 		return currentProcess;
 	}
 	
-	Win32Process::Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe) :
+	Win32Process::Win32Process(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
 		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
 		running(false),
 		complete(false),

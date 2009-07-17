@@ -4,37 +4,33 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#ifndef _WIN32_OUTPUT_PIPE_H_
-#define _WIN32_OUTPUT_PIPE_H_
+#ifndef _WIN32_PIPE_H_
+#define _WIN32_PIPE_H_
 
 #include <kroll/base.h>
 #include <windows.h>
-#include <Poco/RunnableAdapter.h>
 #include <kroll/kroll.h>
-#include "../output_pipe.h"
-#include <vector>
+#include "../monitored_pipe.h"
 
 namespace ti
 {
-	class Win32OutputPipe : public OutputPipe
+	class Win32Pipe : public MonitoredPipe
 	{
 	public:
-		Win32OutputPipe();
-		virtual ~Win32OutputPipe();
-		
+		Win32Pipe();	
 		virtual void Close();
-		virtual bool IsClosed();
 		virtual int Write(AutoPtr<Blob> data);
 		virtual void Flush();
 		
+		void DuplicateWrite(HANDLE process, LPHANDLE handle);
 		void DuplicateRead(HANDLE process, LPHANDLE handle);
 		HANDLE GetReadHandle() { return readHandle; }
 		HANDLE GetWriteHandle() { return writeHandle; }
 		
 	protected:
-		Poco::Mutex mutex;
+		virtual int RawRead(char *buffer, int size);
+		
 		HANDLE readHandle, writeHandle;
-		bool closed;
 	};
 }
 
