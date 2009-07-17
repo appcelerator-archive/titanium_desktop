@@ -5,6 +5,7 @@
  */
 
 #include "pipe.h"
+#include "native_pipe.h"
 #include <vector>
 #include <cstring>
 
@@ -39,20 +40,14 @@ namespace ti
 		this->eventsThread->start(*this->eventsThreadAdapter);
 	}
 
-	/*static*/
-	AutoPipe Pipe::CreatePipe()
-	{
-#if defined(OS_WIN32)
-		AutoPipe pipe = new Win32Pipe();
-#else
-		AutoPipe pipe = new PosixPipe();
-#endif
-		return pipe;
-	}
-
 	Pipe::~Pipe()
 	{
 
+	}
+	
+	void Pipe::SetNativePipe(AutoPtr<NativePipe> nativePipe)
+	{
+		this->nativePipe = nativePipe;
 	}
 	
 	void Pipe::Attach(SharedKObject object)
@@ -108,7 +103,7 @@ namespace ti
 	
 	AutoPipe Pipe::Clone()
 	{
-		AutoPipe pipe = CreatePipe();
+		AutoPipe pipe = new Pipe();
 		if (onClose && !onClose->isNull())
 		{
 			pipe->onClose = new SharedKMethod(*onClose);
@@ -185,6 +180,11 @@ namespace ti
 	
 	int Pipe::Write(AutoBlob blob)
 	{
+		if (!nativePipe.isNull())
+		{
+			nativePipe->Write(blob);	
+		}
+		
 		{ // Start the callbacks
 			Poco::Mutex::ScopedLock lock(buffersMutex);
 			buffers.push(blob);
@@ -193,7 +193,14 @@ namespace ti
 		attachedMutex.lock();
 		for (size_t i = 0; i < attachedObjects.size(); i++)
 		{
-			attachedObjects.at(i)->CallNS("write", Value::NewObject(blob));
+			SharedKMethod write = attachedObjects.at(i)->GetMethod("write");
+			if (!write.isNull())
+			{
+				ValueList args;
+				args.push_back(Value::NewObject(blob));
+				
+				Host::GetInstance()->InvokeMethodOnMainThread(write, args, false);	
+			}
 		}
 		attachedMutex.unlock();
 

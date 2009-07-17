@@ -25,9 +25,9 @@ namespace ti
 
 		static AutoPtr<Win32Process> GetCurrentProcess();
 		
-		AutoPtr<Win32Pipe> GetStdin() { return stdinPipe.cast<Win32Pipe>(); }
-		AutoPtr<Win32Pipe> GetStdout() { return stdoutPipe.cast<Win32Pipe>(); }
-		AutoPtr<Win32Pipe> GetStderr() { return stderrPipe.cast<Win32Pipe>(); }
+		AutoPtr<Win32Pipe> GetStdin() { return nativeIn; }
+		AutoPtr<Win32Pipe> GetStdout() { return nativeOut; }
+		AutoPtr<Win32Pipe> GetStderr() { return nativeErr; }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);
@@ -46,6 +46,8 @@ namespace ti
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
+		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
+		
 		bool running, complete, current;
 		int pid;
 		HANDLE process;

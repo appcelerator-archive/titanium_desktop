@@ -67,15 +67,15 @@ namespace ti
 		
 		if (stdinPipe.isNull())
 		{
-			this->stdinPipe = Pipe::CreatePipe();
+			this->stdinPipe = new Pipe();
 		}
 		if (stdoutPipe.isNull())
 		{
-			this->stdoutPipe = Pipe::CreatePipe();
+			this->stdoutPipe = new Pipe();
 		}
 		if (stderrPipe.isNull())
 		{
-			this->stderrPipe = Pipe::CreatePipe();
+			this->stderrPipe = new Pipe();
 		}
 		InitBindings();
 	}
@@ -174,7 +174,7 @@ namespace ti
 	void Process::Restart(SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
 	{
 		this->environment = environment.isNull() ? CloneEnvironment() : environment;
-		this->stdinPipe = stdinPipe.isNull() ? Pipe::CreatePipe() : stdinPipe;
+		this->stdinPipe = stdinPipe.isNull() ? new Pipe() : stdinPipe;
 		this->stdoutPipe = stdoutPipe.isNull() ? this->stdoutPipe->Clone() : stdoutPipe;
 		this->stderrPipe = stderrPipe.isNull() ? this->stderrPipe->Clone() : stderrPipe;
 	

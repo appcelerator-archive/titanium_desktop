@@ -15,13 +15,12 @@
 namespace ti
 {
 	class Pipe;
+	class NativePipe;
 	typedef AutoPtr<Pipe> AutoPipe;
 
 	class Pipe : public KEventObject
 	{
 	public:
-		static AutoPipe CreatePipe();
-		
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
 
@@ -41,6 +40,7 @@ namespace ti
 
 		virtual void Closed();
 		void SetOnClose(SharedKMethod onClose);
+		void SetNativePipe(AutoPtr<NativePipe> nativePipe);
 		
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
@@ -67,7 +67,7 @@ namespace ti
 		std::queue<AutoBlob> buffers;
 		Poco::Thread* eventsThread;
 		Poco::RunnableAdapter<Pipe>* eventsThreadAdapter;
-
+		AutoPtr<NativePipe> nativePipe;
 	};
 }
 

@@ -26,6 +26,14 @@ namespace ti
 		pid(-1),
 		logger(Logger::Get("Process.Win32Process"))
 	{
+		nativeIn = new Win32Pipe(stdinPipe);
+		stdinPipe->SetNativePipe(nativeIn);
+		
+		nativeOut = new Win32Pipe(stdoutPipe);
+		stdoutPipe->SetNativePipe(nativeOut);
+		
+		nativeErr = new Win32Pipe(stderrPipe);
+		stderrPipe->SetNativePipe(nativeErr);
 	}
 	
 	Win32Process::Win32Process() :
@@ -172,9 +180,9 @@ namespace ti
 		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
 		startupInfo.cbReserved2 = 0;
 		startupInfo.lpReserved2 = NULL;
-		startupInfo.hStdInput = GetStdin()->GetReadHandle();
-		startupInfo.hStdOutput = GetStdout()->GetWriteHandle();
-		startupInfo.hStdError = GetStderr()->GetWriteHandle();
+		startupInfo.hStdInput = nativeIn->GetReadHandle();
+		startupInfo.hStdOutput = nativeOut->GetWriteHandle();
+		startupInfo.hStdError = nativeErr->GetWriteHandle();
 		
 		HANDLE hProc = GetCurrentProcess();
 		//GetStdin()->DuplicateRead(hProc, &startupInfo.hStdInput);
@@ -194,10 +202,8 @@ namespace ti
 			NULL,
 			&startupInfo,
 			&processInfo);
-		// TODO auto close stdin read handle if / when piped input is finished reading
-		CloseHandle(GetStdin()->GetReadHandle());
-		CloseHandle(GetStdout()->GetWriteHandle());
-		CloseHandle(GetStderr()->GetWriteHandle());
+		CloseHandle(nativeOut->GetWriteHandle());
+		CloseHandle(nativeErr->GetWriteHandle());
 		
 		//CloseHandle(startupInfo.hStdInput);
 		//CloseHandle(startupInfo.hStdOutput);
@@ -216,8 +222,8 @@ namespace ti
 		}
 		
 		// setup threads which can read output and also monitor the exit
-		GetStdout()->StartMonitor();
-		GetStderr()->StartMonitor();
+		nativeOut->StartMonitor();
+		nativeErr->StartMonitor();
 		
 		if (async) {
 			this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
@@ -300,8 +306,8 @@ namespace ti
 		this->running = false;
 		this->complete = true;
 		
-		GetStdout()->Close();
-		GetStderr()->Close();
+		nativeOut->Close();
+		nativeErr->Close();
 		
 		Process::Exited();
 	}
