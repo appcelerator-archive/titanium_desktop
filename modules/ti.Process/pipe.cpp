@@ -44,16 +44,10 @@ namespace ti
 	{
 
 	}
-	
-	void Pipe::SetNativePipe(AutoPtr<NativePipe> nativePipe)
-	{
-		this->nativePipe = nativePipe;
-	}
-	
+
 	void Pipe::Attach(SharedKObject object)
 	{
 		Poco::Mutex::ScopedLock lock(attachedMutex);
-		
 		attachedObjects.push_back(object);
 	}
 	
@@ -62,7 +56,7 @@ namespace ti
 		Poco::Mutex::ScopedLock lock(attachedMutex);
 		std::vector<SharedKObject>::iterator iter =
 			std::find(attachedObjects.begin(), attachedObjects.end(), object);
-		
+
 		if (iter != attachedObjects.end())
 		{
 			attachedObjects.erase(iter);
@@ -173,38 +167,49 @@ namespace ti
 		result->SetBool(this->IsClosed());
 	}
 	
-	void Pipe::Write(char *data, int length)
-	{
-		//Poco::Mutex::ScopedLock lock(mutex);
-	}
-	
 	int Pipe::Write(AutoBlob blob)
 	{
-		if (!nativePipe.isNull())
-		{
-			nativePipe->Write(blob);	
-		}
-		
 		{ // Start the callbacks
 			Poco::Mutex::ScopedLock lock(buffersMutex);
 			buffers.push(blob);
 		}
 
-		attachedMutex.lock();
-		for (size_t i = 0; i < attachedObjects.size(); i++)
+		// We want this to execute on the same thread and to make all
+		// our writeable objects thread safe. This will allow data to
+		// flow through pipes more quickly.
 		{
-			SharedKMethod write = attachedObjects.at(i)->GetMethod("write");
-			if (!write.isNull())
+			Poco::Mutex::ScopedLock lock(attachedMutex);
+			for (size_t i = 0; i < attachedObjects.size(); i++)
 			{
-				ValueList args;
-				args.push_back(Value::NewObject(blob));
-				
-				Host::GetInstance()->InvokeMethodOnMainThread(write, args, false);	
+				this->CallWrite(attachedObjects.at(i), blob);
 			}
 		}
-		attachedMutex.unlock();
 
 		return blob->Length();
+	}
+
+	void Pipe::CallWrite(SharedKObject target, AutoBlob blob)
+	{
+		SharedKMethod writeMethod = target->GetMethod("write");
+
+		if (writeMethod.isNull())
+		{
+			logger->Error("Target object did not have a write method");
+			return;
+		}
+		else
+		{
+			try
+			{
+				writeMethod->Call(ValueList(Value::NewObject(blob)));
+			}
+			catch (ValueException &e)
+			{
+				SharedString ss = e.DisplayString();
+				logger->Error("Exception while trying to write to target: %s",
+					ss->c_str());
+			}
+		}
 	}
 
 	void Pipe::Close()

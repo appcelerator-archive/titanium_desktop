@@ -44,7 +44,6 @@ namespace ti
 				cmd = fn;
 			}
 		}
-		
 		args->At(0)->SetString(cmd.c_str());
 #endif
 	}
@@ -73,7 +72,7 @@ namespace ti
 			args->Append(Value::NewString(app->arguments.at(i)));
 		}
 	}
-	
+
 	PosixProcess::~PosixProcess()
 	{
 		Poco::Mutex::ScopedLock lock(nativeProcessesMutex);
@@ -103,12 +102,20 @@ namespace ti
 		delete exitMonitorAdapter;
 	}
 
-	NativePosixProcess* NativePosixProcess::CreateNativePosixProcess(PosixProcess* process)
+	NativePosixProcess* NativePosixProcess::Create(
+		PosixProcess* process)
 	{
 		NativePosixProcess* p = new NativePosixProcess(process);
+		p->process = process;
+		p->ForkAndExec();
+		process->pid = p->pid;
+		return p;
+	}
 
-		pid = fork();
-		if (pid < 0)
+	void NativePosixProcess::ForkAndExec()
+	{
+		this->pid = fork();
+		if (this->pid < 0)
 		{
 			Logger* logger = Logger::Get("Process.NativePosixProcess");
 			logger->Debug("Can't fork process :(");
@@ -117,14 +124,14 @@ namespace ti
 		else if (pid == 0)
 		{
 			// setup redirection
-			dup2(p->stdinPipe->GetReadHandle(), STDIN_FILENO);
+			dup2(stdinPipe->GetReadHandle(), STDIN_FILENO);
 			p->stdinPipe->Close();
 
 			// outPipe and errPipe may be the same, so we dup first and close later
-			dup2(p->stdoutPipe->GetWriteHandle(), STDOUT_FILENO);
-			dup2(p->stderrPipe->GetWriteHandle(), STDERR_FILENO);
-			p->stdoutPipe->Close();
-			p->stderrPipe->Close();
+			dup2(stdoutPipe->GetWriteHandle(), STDOUT_FILENO);
+			dup2(stderrPipe->GetWriteHandle(), STDERR_FILENO);
+			stdoutPipe->Close();
+			stderrPipe->Close();
 
 			// close all open file descriptors other than stdin, stdout, stderr
 			for (int i = 3; i < getdtablesize(); ++i)
@@ -152,10 +159,9 @@ namespace ti
 			_exit(72);
 		}
 
-		close(p->stdinPipe->GetReadHandle());
-		close(p->stdoutPipe->GetWriteHandle());
-		close(p->stderrPipe->GetWriteHandle());
-		process->pid = p->pid = pid;
+		close(stdinPipe->GetReadHandle());
+		close(stdoutPipe->GetWriteHandle());
+		close(stderrPipe->GetWriteHandle());
 	}
 
 	NativePosixProcess::MonitorAsynchronously()

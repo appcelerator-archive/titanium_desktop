@@ -8,27 +8,24 @@
 #define _POSIX_PIPE_H_
 
 #include <kroll/kroll.h>
-#include "../monitored_pipe.h"
+#include "../native_pipe.h"
 
 namespace ti
 {
-	class PosixPipe : public MonitoredPipe
+	class PosixPipe : public NativePipe
 	{
 	public:
 		PosixPipe();
 		virtual ~PosixPipe();
 		virtual void Close();
-		virtual int Write(AutoPtr<Blob> data);
-		virtual void Flush();
+		inline int GetReadHandle() { return readHandle; }
+		inline int GetWriteHandle() { return writeHandle; }
 
-		int GetReadHandle() { return readHandle; }
-		int GetWriteHandle() { return writeHandle; }
-		
 	protected:
-		friend class PosixProcess;
-		virtual int RawRead(char *buffer, int size);
 		int readHandle;
 		int writeHandle;
+		virtual int RawRead(char *buffer, int size);
+		virtual int RawWrite(const char *buffer, int size);
 	};
 }
 

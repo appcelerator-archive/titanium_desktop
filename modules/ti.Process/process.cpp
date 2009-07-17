@@ -174,9 +174,16 @@ namespace ti
 	void Process::Restart(SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
 	{
 		this->environment = environment.isNull() ? CloneEnvironment() : environment;
-		this->stdinPipe = stdinPipe.isNull() ? new Pipe() : stdinPipe;
-		this->stdoutPipe = stdoutPipe.isNull() ? this->stdoutPipe->Clone() : stdoutPipe;
-		this->stderrPipe = stderrPipe.isNull() ? this->stderrPipe->Clone() : stderrPipe;
+
+		this->stdinPipe = stdinPipe;
+		this->stdoutPipe = stdoutPipe;
+		this->stderrPipe = stderrPipe;
+		if (stdinPipe.isNull())
+			this->stdinPipe = new Pipe();
+		if (this->stdoutPipe.isNull())
+			this->stdoutPipe = new Pipe();
+		if (this->stderrPipe.isNull())
+			this->stderrPipe = new Pipe();
 	
 		if (IsRunning())
 		{

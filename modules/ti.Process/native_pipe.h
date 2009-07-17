@@ -16,29 +16,31 @@
 
 namespace ti
 {
-	class NativePipe : public ReferenceCounted
+	class NativePipe : public Pipe
 	{
 	public:
-		NativePipe(AutoPipe delegate) : monitorJoined(false), delegate(delegate) {};
+		NativePipe(bool isReader);
 		~NativePipe();
-		virtual void Close();
 		void StartMonitor();
-		void JoinMonitor();
-
-		AutoPipe GetDelegate() { return delegate; }
-		virtual void Write(AutoBlob blob) = 0;
+		virtual void Close();
+		virtual int Write(AutoBlob blob);
 		virtual void EndOfFile() = 0;
-		
+
 	protected:
-		void MonitorThread();
-	
-		virtual int RawRead(char *buffer, int size) = 0;
-		Poco::Thread monitorThread;
-		Poco::RunnableAdapter<NativePipe>* monitorAdapter;
-		bool monitorJoined;
 		bool closed;
-		
-		AutoPipe delegate;
+		bool isReader;
+		std::vector<SharedKObject> attachedObjects;
+		Poco::RunnableAdapter<NativePipe>* writeThreadAdapter;
+		Poco::RunnableAdapter<NativePipe>* readThreadAdapter;
+		Poco::Thread writeThread;
+		Poco::Thread readThread;
+		Logger* logger;
+
+		void PollForReads();
+		void PollForWrites();
+		virtual void RawWrite(AutoBlob blob);
+		virtual int RawRead(char *buffer, int size) = 0;
+		virtual int RawWrite(const char *buffer, int size) = 0;
 	};
 }
 

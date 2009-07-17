@@ -13,10 +13,12 @@
 
 namespace ti
 {
+	class PosixProcess;
+	class NativePosixProcess;
+
 	class NativePosixProcess
 	{
-		static NativePosixProcess* CreateNativePosixProcess(PosixProces* process);
-		NativePosixProcess(PosixProces* process);
+		NativePosixProcess(PosixProcess* process);
 		PosixProcess* process;
 		int exitStatus;
 		int pid;
@@ -35,7 +37,8 @@ namespace ti
 		void ExitMonitor();
 		void ExitCallback(const ValueList& args, SharedValue result);
 		void ReadCallback(const ValueList& args, SharedValue result);
-	}
+		static NativePosixProcess* Create(PosixProcess* process);
+	};
 
 	class PosixProcess : public Process
 	{
