@@ -217,7 +217,7 @@ namespace ti
 			InvokeMethodOnMainThread(exitCallback, ValueList());
 	}
 
-	void ExitCallback(const ValueList& args, SharedValue result)
+	void NativePosixProcess::ExitCallback(const ValueList& args, SharedValue result)
 	{
 		if (this->process)
 			process->Exited(this);
@@ -225,7 +225,7 @@ namespace ti
 		delete this;
 	}
 
-	void ReadCallback(const ValueList& args, SharedValue result)
+	void NativePosixProcess::ReadCallback(const ValueList& args, SharedValue result)
 	{
 		if (args.at(0)->IsObject())
 		{

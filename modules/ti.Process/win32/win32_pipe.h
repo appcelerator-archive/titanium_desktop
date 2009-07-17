@@ -19,7 +19,6 @@ namespace ti
 	public:
 		Win32Pipe(AutoPipe delegate);	
 		virtual void Close();
-		virtual void Write(AutoPtr<Blob> data);
 		virtual void EndOfFile();
 		
 		void DuplicateWrite(HANDLE process, LPHANDLE handle);
@@ -29,6 +28,7 @@ namespace ti
 		
 	protected:
 		virtual int RawRead(char *buffer, int size);
+		virtual int RawWrite(const char *buffer, int size);
 		
 		Poco::Mutex mutex;
 		HANDLE readHandle, writeHandle;

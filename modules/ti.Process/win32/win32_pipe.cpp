@@ -74,20 +74,21 @@ namespace ti
         CloseHandle(writeHandle);
 	}
 	
-	void Win32Pipe::Write(AutoPtr<Blob> blob)
+	int Win32Pipe::RawWrite(const char *data, int size)
 	{
 		Poco::Mutex::ScopedLock lock(mutex);
 		
 		if (writeHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesWritten;
-			BOOL ok = WriteFile(writeHandle, (LPCVOID)blob->Get(), blob->Length(), &bytesWritten, NULL);
+			BOOL ok = WriteFile(writeHandle, (LPCVOID)data, size, &bytesWritten, NULL);
 			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
-				return;
+				return bytesWritten;
 			}
 			else {
 				throw ValueException::FromString("Error writing anonymous pipe");
 			}
 		}
+		return 0;
 	}
 	
 	void Win32Pipe::EndOfFile()
