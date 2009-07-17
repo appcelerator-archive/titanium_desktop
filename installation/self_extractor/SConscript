@@ -9,8 +9,13 @@ Env.Append(LIBS=['kernel32','shell32','user32','comctl32','comdlg32'])
 Env.Append(CCFLAGS=['/O2','/GL','/FD','/EHsc','/MT','/W3','/Wp64','/Zi','/TP'])
 #'/MANIFEST', '/MANIFESTFILE:build\\win32\\self_extractor.exe.intermediate.manifest',
 Env.Append(LINKFLAGS=['/SUBSYSTEM:WINDOWS','/OPT:REF','/OPT:ICF','/LTCG','/MACHINE:X86'])
-Env.Append(LIBPATH=['C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc\\lib'])
-Env.Append(CPPPATH=['C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc\\include'])
+
+atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
+if not path.exists(atlmfc_path):
+	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
+
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
+Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
 
 resfile = Env.RES('progress.rc')
 p = Env.Program(build.dir + '/self_extractor', Glob('*.cpp') + resfile)

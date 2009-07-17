@@ -8,8 +8,7 @@
 #define _WIN32_PROCESS_H_
 
 #include <sstream>
-#include "win32_output_pipe.h"
-#include "win32_input_pipe.h"
+#include "win32_pipe.h"
 #include "../process.h"
 
 #undef stdin
@@ -21,14 +20,14 @@ namespace ti
 	class Win32Process : public Process
 	{
 	public:
-		Win32Process(SharedKList args, SharedKObject environment, AutoOutputPipe stdinPipe, AutoInputPipe stdoutPipe, AutoInputPipe stderrPipe);
+		Win32Process(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~Win32Process();
 
 		static AutoPtr<Win32Process> GetCurrentProcess();
 		
-		AutoPtr<Win32OutputPipe> GetStdin() { return stdinPipe.cast<Win32OutputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStdout() { return stdoutPipe.cast<Win32InputPipe>(); }
-		AutoPtr<Win32InputPipe> GetStderr() { return stderrPipe.cast<Win32InputPipe>(); }
+		AutoPtr<Win32Pipe> GetStdin() { return stdinPipe.cast<Win32Pipe>(); }
+		AutoPtr<Win32Pipe> GetStdout() { return stdoutPipe.cast<Win32Pipe>(); }
+		AutoPtr<Win32Pipe> GetStderr() { return stderrPipe.cast<Win32Pipe>(); }
 		
 		virtual int GetPID();
 		virtual void Launch(bool async=true);

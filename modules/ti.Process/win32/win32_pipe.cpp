@@ -4,31 +4,31 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "win32_input_pipe.h"
+#include "win32_pipe.h"
 
 namespace ti
 {
-	Win32InputPipe::Win32InputPipe() : MonitoredInputPipe()
+	Win32Pipe::Win32Pipe() : MonitoredPipe()
 	{
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
 		attr.lpSecurityDescriptor = NULL;
 		attr.bInheritHandle       = TRUE;
 		
-		CreatePipe(&readHandle, &writeHandle, &attr, 0);
+		::CreatePipe(&readHandle, &writeHandle, &attr, 0);
 	}
 	
-	void Win32InputPipe::Close()
+	void Win32Pipe::Close()
 	{
 		if (!closed) {
 			if (writeHandle != INVALID_HANDLE_VALUE)
 				CloseHandle(writeHandle);
 			
-			MonitoredInputPipe::Close();
+			MonitoredPipe::Close();
 		}
 	}
 	
-	int Win32InputPipe::RawRead(char *buffer, int size)
+	int Win32Pipe::RawRead(char *buffer, int size)
 	{
 		if (readHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesRead;
@@ -50,9 +50,37 @@ namespace ti
 		return -1;
 	}
 	
-	void Win32InputPipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
+	void Win32Pipe::DuplicateRead(HANDLE process, LPHANDLE handle)
+	{
+		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+        CloseHandle(readHandle);
+	}
+	
+	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
 	{
 		DuplicateHandle(process, writeHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
         CloseHandle(writeHandle);
+	}
+	
+	int Win32Pipe::Write(AutoPtr<Blob> blob)
+	{
+		Poco::Mutex::ScopedLock lock(mutex);
+		
+		if (writeHandle != INVALID_HANDLE_VALUE) {
+			DWORD bytesWritten;
+			BOOL ok = WriteFile(writeHandle, (LPCVOID)blob->Get(), blob->Length(), &bytesWritten, NULL);
+			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
+				return bytesWritten;
+			}
+			else {
+				throw ValueException::FromString("Error writing anonymous pipe");
+			}
+		}
+		return 0;
+	}
+	
+	void Win32Pipe::Flush()
+	{
+		
 	}
 }
