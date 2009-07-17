@@ -30,11 +30,8 @@ namespace ti
 		pid(-1),
 		nativeIn(new PosixPipe(false)),
 		nativeOut(new PosixPipe(true)),
-		nativeErr(new PosixPipe(true)),
-		exitCallback(0)
+		nativeErr(new PosixPipe(true))
 	{
-		
-		exitMonitorAdapter = new Poco::RunnableAdapter<PosixProcess>(*this, &PosixProcess::ExitMonitor);
 #if defined(OS_OSX)
 		std::string cmd = args->At(0)->ToString();
 		size_t found = cmd.rfind(".app");
@@ -81,7 +78,6 @@ namespace ti
 
 	PosixProcess::~PosixProcess()
 	{
-		delete exitMonitorAdapter;
 	}
 
 	void PosixProcess::ForkAndExec()
@@ -137,10 +133,6 @@ namespace ti
 	{
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
-
-		this->exitCallback = StaticBoundMethod::FromMethod<PosixProcess>(
-			this, &PosixProcess::ExitCallback);
-		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
 	std::string PosixProcess::MonitorSync()
@@ -164,7 +156,7 @@ namespace ti
 		return output;
 	}
 
-	void PosixProcess::ExitMonitor()
+	int PosixProcess::Wait()
 	{
 		int status;
 		int rc;
@@ -178,19 +170,10 @@ namespace ti
 			throw ValueException::FromFormat("Cannot wait for process: %d", this->pid);
 		}
 
-		this->exitCode = WEXITSTATUS(status);
-
+		int exitCode = WEXITSTATUS(status);
 		nativeOut->Close();
 		nativeErr->Close();
-
-		if (!exitCallback.isNull())
-			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
-	}
-
-	void PosixProcess::ExitCallback(const ValueList& args, SharedValue result)
-	{
-		this->Exited();
-		delete this;
+		return exitCode;
 	}
 
 	void PosixProcess::ReadCallback(const ValueList& args, SharedValue result)
@@ -205,20 +188,7 @@ namespace ti
 			}
 		}
 	}
-
-	void PosixProcess::LaunchAsync()
-	{
-		ForkAndExec();
-		MonitorAsync();
-	}
-
-	std::string PosixProcess::LaunchSync()
-	{
-		ForkAndExec();
-		std::string output = MonitorSync();
-		return output;
-	}
-
+	
 	int PosixProcess::GetPID()
 	{
 		return pid;

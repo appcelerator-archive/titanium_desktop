@@ -22,32 +22,28 @@ namespace ti
 			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual ~PosixProcess();
 		virtual int GetPID();
-		virtual void LaunchAsync();
-		virtual std::string LaunchSync();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual bool IsRunning();
 		static AutoPtr<PosixProcess> GetCurrentProcess();
 
-		void ForkAndExec();
-		void MonitorAsync();
-		std::string MonitorSync();
-		void ExitMonitor();
+		virtual void ForkAndExec();
+		virtual void MonitorAsync();
+		virtual std::string MonitorSync();
+		virtual int Wait();
+		
 		void ExitCallback(const ValueList& args, SharedValue result);
 		void ReadCallback(const ValueList& args, SharedValue result);
 	protected:
 		Logger* logger;
 		static AutoPtr<PosixProcess> currentProcess;
-		int pid, exitCode;
+		int pid;
 		AutoPtr<PosixPipe> nativeIn, nativeOut, nativeErr;
 
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.
 		std::vector<AutoBlob> processOutput;
-		Poco::RunnableAdapter<PosixProcess>* exitMonitorAdapter;
-		Poco::Thread exitMonitorThread;
-		SharedKMethod exitCallback;
 		
 		PosixProcess();
 		void StartProcess();

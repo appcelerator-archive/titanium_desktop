@@ -33,14 +33,19 @@ namespace ti
 		virtual SharedKObject GetEnvironment() { return environment; }
 		virtual void SetEnvironment(const char *name, const char *value) { environment->SetString(name, value); }
 		virtual SharedKObject CloneEnvironment();
-		virtual void LaunchAsync() = 0;
-		virtual std::string LaunchSync() = 0;
+		virtual void LaunchAsync();
+		virtual std::string LaunchSync();
+		virtual void ExitMonitor();
 		virtual void Terminate() = 0;
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual bool IsRunning() = 0;
+		virtual void ForkAndExec() = 0;
+		virtual void MonitorAsync() = 0;
+		virtual std::string MonitorSync() = 0;
+		virtual int Wait() = 0;
 		
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
@@ -50,6 +55,9 @@ namespace ti
 		// empty constructor for creating the current process in platform implementations
 		Process();
 		void InitBindings();
+		
+		void ExitCallback(const ValueList& args, SharedValue result);
+		void ReadCallback(const ValueList& args, SharedValue result);
 		
 		void _GetPID(const ValueList& args, SharedValue result);
 		void _GetExitCode(const ValueList& args, SharedValue result);
@@ -80,6 +88,9 @@ namespace ti
 		SharedKList args;
 		int exitCode;
 		SharedKMethod* onExit;
+		Poco::RunnableAdapter<Process>* exitMonitorAdapter;
+		Poco::Thread exitMonitorThread;
+		SharedKMethod exitCallback;
 	};
 }
 
