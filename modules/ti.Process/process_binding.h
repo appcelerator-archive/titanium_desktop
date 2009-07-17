@@ -18,14 +18,8 @@ namespace ti
 	public:
 		ProcessBinding();
 		virtual ~ProcessBinding();
-		
-		static void ProcessTerminated(AutoProcess process);
-		static void AddProcess(AutoProcess process);
-		
 		static std::map<std::string,int> signals;
 	private:
-		static std::vector<AutoProcess> processes;
-		
 		void CreateProcess(const ValueList& args, SharedValue result);
 		void CreatePipe(const ValueList& args, SharedValue result);
 		void GetCurrentProcess(const ValueList& args, SharedValue result);

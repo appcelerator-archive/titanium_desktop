@@ -14,8 +14,6 @@ namespace ti
 {
 
 	std::map<std::string,int> ProcessBinding::signals;
-	std::vector<AutoProcess> ProcessBinding::processes;
-	
 	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
 	{
 		Logger::Get("Process")->Debug("Initializing Titanium.Process");
@@ -74,127 +72,121 @@ namespace ti
 		
 		Logger::Get("Process")->Debug("returning");
 	}
-	
+
 	ProcessBinding::~ProcessBinding()
 	{
 	}
-	
+
 	void ProcessBinding::CreateProcess(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("createProcess", "o|l");
+		SharedKObject temp = 0;
 		SharedKList argList = 0;
 		SharedKObject environment = 0;
 		AutoPipe stdinPipe = 0;
-		AutoPipe stdoutPipe, stderrPipe = 0;
-		
-		if (args.size() > 0 && args.at(0)->IsObject())
+		AutoPipe stdoutPipe = 0;
+		AutoPipe stderrPipe = 0;
+
+		if (args.at(0)->IsObject())
 		{
-			SharedKObject options = args.at(0)->ToObject();
-			if (options->Get("args")->IsUndefined())
-			{
-				throw ValueException::FromString("Titanium.Process option argument 'args' was undefined");
-			}
-			if (!options->Get("args")->IsList())
-			{
-				throw ValueException::FromString("Titanium.Process option 'args' must be an array");
-			}
-			
-			argList = options->Get("args")->ToList();
-			if (!options->Get("env")->IsUndefined() && options->Get("env")->IsObject())
-			{
-				environment = options->Get("env")->ToObject();
-			}
-			if (!options->Get("stdin")->IsUndefined() && options->Get("stdin")->IsObject())
-			{
-				stdinPipe = options->Get("stdin")->ToObject().cast<Pipe>();
-			}
-			if (!options->Get("stdout")->IsUndefined() && options->Get("stdout")->IsObject())
-			{
-				stdoutPipe = options->Get("stdin")->ToObject().cast<Pipe>();
-			}
-			if (!options->Get("stderr")->IsUndefined() && options->Get("stderr")->IsObject())
-			{
-				stderrPipe = options->Get("stderr")->ToObject().cast<Pipe>();
-			}
+			SharedKObject options = args.GetObject(0);
+			argList = options->GetList("args", 0);
+			if (argList.isNull())
+				throw ValueException::FromString(
+					"Titanium.Process option 'args' must be an array");
+
+			environment = options->GetObject("env", 0);
+
+			temp = options->GetObject("stdin");
+			if (!temp.isNull())
+				stdinPipe = temp.cast<Pipe>();
+
+			temp = options->GetObject("stdout");
+			if (!temp.isNull())
+				stdoutPipe = temp.cast<Pipe>();
+
+			temp = options->GetObject("stderr");
+			if (!temp.isNull())
+				stderrPipe = temp.cast<Pipe>();
+
 		}
-		else if (args.size() > 0 && args.at(0)->IsList())
+		else if (args.at(0)->IsList())
 		{
 			argList = args.at(0)->ToList();
-			if (args.size() > 1 && args.at(1)->IsObject())
+			if (args.size() > 1)
+				environment = args.GetObject(1);
+
+			if (args.size() > 2)
 			{
-				environment = args.at(1)->ToObject();
+				temp = args.GetObject(2);
+				if (!temp.isNull())
+					stdinPipe = temp.cast<Pipe>();
 			}
-			if (args.size() > 2 && args.at(2)->IsObject())
+
+			if (args.size() > 3)
 			{
-				stdinPipe = args.at(2)->ToObject().cast<Pipe>();
+				temp = args.GetObject(3);
+				if (!temp.isNull())
+					stdoutPipe = temp.cast<Pipe>();
 			}
-			if (args.size() > 3 && args.at(3)->IsObject())
+
+			if (args.size() > 4)
 			{
-				stdoutPipe = args.at(3)->ToObject().cast<Pipe>();
-			}
-			if (args.size() > 4 && args.at(4)->IsObject())
-			{
-				stderrPipe = args.at(4)->ToObject().cast<Pipe>();
+				temp = args.GetObject(4);
+				if (!temp.isNull())
+					stderrPipe = temp.cast<Pipe>();
 			}
 		}
-		
+
 		if (argList.isNull())
 		{
-			throw ValueException::FromString("Titanium.Process option argument 'args' was undefined");
+			throw ValueException::FromString(
+				"Titanium.Process option argument 'args' was undefined");
 		}
+
 		if (argList->Size() == 0)
 		{
-			throw ValueException::FromString("Titanium.Process option argument 'args' must have at least 1 element");
+			throw ValueException::FromString(
+				"Titanium.Process option argument 'args' must have at least 1 element");
 		}
-		// Clone args
+
 		SharedKList argsClone = new StaticBoundList();
 		for (size_t i = 0; i < argList->Size(); i++)
 		{
 			SharedValue arg = Value::Undefined;
 			if (!argList->At(i)->IsString())
 			{
-				if (argList->At(i)->IsObject() && argList->At(i)->ToObject()->Get("toString") != Value::Undefined)
-				{
-					arg = argList->At(i)->ToObject()->CallNS("toString");
-				}
+				SharedString ss = argList->At(i)->DisplayString();
+				arg = Value::NewString(ss);
 			}
-			else {
+			else
+			{
 				arg = argList->At(i);
 			}
-			if (arg->IsUndefined()) {
-				throw ValueException::FromString("Titanium.Process argument was not a String or Object with toString");
-			}
-			
 			argsClone->Append(arg);
 		}
-		
-		AutoProcess process = Process::CreateProcess(argsClone, environment, stdinPipe, stdoutPipe, stderrPipe);
-		processes.push_back(process);
-		
+
+		AutoProcess process = Process::CreateProcess();
+		process->SetArguments(argsClone);
+
+		if (!environment.isNull())
+			process->SetEnvironment(environment);
+		if (!stdinPipe.isNull())
+			process->SetStdin(stdinPipe);
+		if (!stdoutPipe.isNull())
+			process->SetStdout(stdoutPipe);
+		if (!stderrPipe.isNull())
+			process->SetStderr(stderrPipe);
+
 		// this is a callable object
 		result->SetMethod(process);
 	}
-	
-	void ProcessBinding::ProcessTerminated(AutoProcess process)
-	{
-		std::vector<AutoProcess>::iterator found =
-			std::find(processes.begin(), processes.end(), process);
-		
-		if (found != processes.end())
-		{
-			processes.erase(found);
-		}
-	}
-	
-	void ProcessBinding::AddProcess(AutoProcess process)
-	{
-		processes.push_back(process);
-	}
-	
+
 	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(new Pipe());
 	}
-	
+
 	void ProcessBinding::GetCurrentProcess(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(Process::GetCurrentProcess());

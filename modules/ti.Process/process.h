@@ -19,19 +19,12 @@ namespace ti
 	class Process : public AccessorBoundMethod
 	{
 	public:
-		Process(SharedKList args, SharedKObject environment,
-			 AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
+		Process();
 		virtual ~Process();
 		static AutoProcess GetCurrentProcess();
-		static AutoProcess CreateProcess(SharedKList args, SharedKObject environment, 
-			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
-		
+		static AutoProcess CreateProcess();
+
 		virtual int GetPID() = 0;
-		void SetExitCode(int exitCode) { this->exitCode = exitCode; }
-		virtual int GetExitCode() { return exitCode; }
-		virtual SharedKList GetArgs() { return args; }
-		virtual SharedKObject GetEnvironment() { return environment; }
-		virtual void SetEnvironment(const char *name, const char *value) { environment->SetString(name, value); }
 		virtual SharedKObject CloneEnvironment();
 		virtual void LaunchAsync() = 0;
 		virtual std::string LaunchSync() = 0;
@@ -41,16 +34,30 @@ namespace ti
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		virtual bool IsRunning() = 0;
-		
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void Exited();
-		
+
+		inline void SetStdin(AutoPipe stdinPipe) { this->stdinPipe = stdinPipe; }
+		inline void SetStdout(AutoPipe stdoutPipe) { this->stdoutPipe = stdoutPipe; }
+		inline void SetStderr(AutoPipe stderrPipe) { this->stderrPipe = stderrPipe; }
+		inline void SetArguments(SharedKList args) { this->args = args; }
+		inline void SetEnvironment(SharedKObject env) { this->environment = env; }
+		inline void SetExitCode(int exitCode) { this->exitCode = exitCode; }
+		inline AutoPipe GetStdin() { return this->stdinPipe; }
+		inline AutoPipe GetStdout() { return this->stdoutPipe; }
+		inline AutoPipe GetStderr() { return this->stderrPipe; }
+		inline SharedKList GetArgs() { return this->args; };
+		inline SharedKObject GetEnvironment() { return this->environment; }
+		inline int GetExitCode() { return exitCode; }
+
+		void SetEnvironment(const char *name, const char *value)
+		{
+			environment->SetString(name, value);
+		}
+
+
 	protected:
-		// empty constructor for creating the current process in platform implementations
-		Process();
-		void InitBindings();
-		
 		void _GetPID(const ValueList& args, SharedValue result);
 		void _GetExitCode(const ValueList& args, SharedValue result);
 		void _GetArguments(const ValueList& args, SharedValue result);

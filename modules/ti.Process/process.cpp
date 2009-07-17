@@ -27,62 +27,25 @@ namespace ti
 	}
 	
 	/*static*/
-	AutoProcess Process::CreateProcess(
-		SharedKList args, SharedKObject environment,
-		AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
+	AutoProcess Process::CreateProcess()
 	{
 #if defined(OS_WIN32)
-		AutoProcess process = new Win32Process(args, environment, stdinPipe, stdoutPipe, stderrPipe);
+		AutoProcess process = new Win32Process();
 #else
-		AutoProcess process = new PosixProcess(args, environment, stdinPipe, stdoutPipe, stderrPipe);
+		AutoProcess process = new PosixProcess();
 #endif
 		return process;
 	}
-	
-	
+
 	Process::Process() :
-		AccessorBoundMethod(NULL, "Process.Process")
+		AccessorBoundMethod(NULL, "Process.Process"),
+		stdoutPipe(new Pipe()),
+		stderrPipe(new Pipe()),
+		stdinPipe(new Pipe()),
+		environment(GetCurrentProcess()->CloneEnvironment()),
+		exitCode(-1),
+		onExit(0)
 	{
-		args = new StaticBoundList();
-		environment = new StaticBoundObject();
-		
-		InitBindings();
-	}
-	
-	Process::Process(SharedKList args, SharedKObject environment,
-		AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
-			AccessorBoundMethod(NULL, "Process.Process"),
-			stdoutPipe(stdoutPipe),
-			stderrPipe(stderrPipe),
-			stdinPipe(stdinPipe),
-			environment(environment),
-			args(args),
-			exitCode(-1),
-			onExit(0)
-	{
-		if (environment.isNull())
-		{
-			this->environment = GetCurrentProcess()->CloneEnvironment();
-		}
-		
-		if (stdinPipe.isNull())
-		{
-			this->stdinPipe = new Pipe();
-		}
-		if (stdoutPipe.isNull())
-		{
-			this->stdoutPipe = new Pipe();
-		}
-		if (stderrPipe.isNull())
-		{
-			this->stderrPipe = new Pipe();
-		}
-		InitBindings();
-	}
-	
-	void Process::InitBindings()
-	{
-		//TODO doc me
 		SetMethod("getPID", &Process::_GetPID);
 		SetMethod("getExitCode", &Process::_GetExitCode);
 		SetMethod("getArguments", &Process::_GetArguments);
@@ -101,8 +64,6 @@ namespace ti
 		SetMethod("getStderr", &Process::_GetStderr);
 		SetMethod("isRunning", &Process::_IsRunning);
 		SetMethod("toString", &Process::_ToString);
-		
-		this->callback = NewCallback<Process, const ValueList&, SharedValue>(this, &Process::Call);
 	}
 
 	Process::~Process()

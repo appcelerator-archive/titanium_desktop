@@ -12,6 +12,7 @@
 # include <Poco/Path.h>
 #endif
 
+extern char **environ;
 namespace ti
 {	
 	// Parts derived from Poco::Process_UNIX
@@ -54,9 +55,6 @@ namespace ti
 		pid(getpid())
 	{
 		pid = getpid();
-#if defined(OS_OSX)
-		char **environ = *_NSGetEnviron();
-#endif
 		for (int i = 0; environ[i] != NULL; i++)
 		{
 			std::string entry = environ[i];
