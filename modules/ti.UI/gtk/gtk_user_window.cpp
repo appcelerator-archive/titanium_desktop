@@ -199,7 +199,6 @@ namespace ti
 
 	void GtkUserWindow::Close()
 	{
-		printf("firing closed\n");
 		UserWindow::Close();
 
 		// Destroy the GTK bits, if we have them first, because
