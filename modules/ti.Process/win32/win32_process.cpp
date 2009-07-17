@@ -27,13 +27,8 @@ namespace ti
 		logger(Logger::Get("Process.Win32Process"))
 	{
 		nativeIn = new Win32Pipe(stdinPipe);
-		stdinPipe->SetNativePipe(nativeIn);
-		
 		nativeOut = new Win32Pipe(stdoutPipe);
-		stdoutPipe->SetNativePipe(nativeOut);
-		
 		nativeErr = new Win32Pipe(stderrPipe);
-		stderrPipe->SetNativePipe(nativeErr);
 	}
 	
 	Win32Process::Win32Process() :
