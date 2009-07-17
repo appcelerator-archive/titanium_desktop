@@ -15,7 +15,6 @@ namespace ti
 {
 	class Process;
 	typedef AutoPtr<Process> AutoProcess;
-	
 	class Process : public AccessorBoundMethod
 	{
 	public:
@@ -23,25 +22,24 @@ namespace ti
 		virtual ~Process();
 		static AutoProcess GetCurrentProcess();
 		static AutoProcess CreateProcess();
-
-		virtual int GetPID() = 0;
+		void ExitCallback(const ValueList& args, SharedValue result);
+		void ReadCallback(const ValueList& args, SharedValue result);
 		virtual SharedKObject CloneEnvironment();
-		virtual void LaunchAsync() = 0;
-		virtual std::string LaunchSync() = 0;
-		virtual void Terminate() = 0;
-		virtual void Kill() = 0;
-		virtual void SendSignal(int signal) = 0;
+		virtual void LaunchAsync();
+		virtual std::string LaunchSync();
+		virtual void ExitMonitor();
 		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
-		virtual bool IsRunning() = 0;
+		virtual void Restart(SharedKObject env, AutoPipe
+			stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void Exited();
+		void ExitCallback(const ValueList& args, SharedValue result);
 
 		inline void SetStdin(AutoPipe stdinPipe) { this->stdinPipe = stdinPipe; }
 		inline void SetStdout(AutoPipe stdoutPipe) { this->stdoutPipe = stdoutPipe; }
 		inline void SetStderr(AutoPipe stderrPipe) { this->stderrPipe = stderrPipe; }
-		inline void SetArguments(SharedKList args) { this->args = args; }
+		virtual inline void SetArguments(SharedKList args) { this->args = args; }
 		inline void SetEnvironment(SharedKObject env) { this->environment = env; }
 		inline void SetExitCode(int exitCode) { this->exitCode = exitCode; }
 		inline AutoPipe GetStdin() { return this->stdinPipe; }
@@ -50,12 +48,20 @@ namespace ti
 		inline SharedKList GetArgs() { return this->args; };
 		inline SharedKObject GetEnvironment() { return this->environment; }
 		inline int GetExitCode() { return exitCode; }
-
 		void SetEnvironment(const char *name, const char *value)
 		{
 			environment->SetString(name, value);
 		}
 
+		virtual int GetPID() = 0;
+		virtual void Terminate() = 0;
+		virtual void Kill() = 0;
+		virtual void SendSignal(int signal) = 0;
+		virtual bool IsRunning() = 0;
+		virtual void ForkAndExec() = 0;
+		virtual void MonitorAsync() = 0;
+		virtual std::string MonitorSync() = 0;
+		virtual int Wait() = 0;
 
 	protected:
 		void _GetPID(const ValueList& args, SharedValue result);
@@ -87,6 +93,9 @@ namespace ti
 		SharedKList args;
 		int exitCode;
 		SharedKMethod* onExit;
+		Poco::RunnableAdapter<Process>* exitMonitorAdapter;
+		Poco::Thread exitMonitorThread;
+		SharedKMethod exitCallback;
 	};
 }
 

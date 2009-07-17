@@ -68,6 +68,7 @@ namespace ti
 
 	Process::~Process()
 	{
+		delete exitMonitorAdapter;
 	}
 
 	void Process::Exited()
@@ -125,6 +126,36 @@ namespace ti
 			str << " \"" << this->args->At(i)->ToString() << "\" ";
 		}
 		return str.str();	
+	}
+	
+	void Process::LaunchAsync()
+	{
+		ForkAndExec();
+		MonitorAsync();
+		
+		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
+			this, &Process::ExitCallback);
+		this->exitMonitorThread.start(*exitMonitorAdapter);
+	}
+
+	std::string Process::LaunchSync()
+	{
+		ForkAndExec();
+		std::string output = MonitorSync();
+		return output;
+	}
+	
+	void Process::ExitMonitor()
+	{
+		this->exitCode = this->Wait();
+		if (!exitCallback.isNull())
+			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+	}
+	
+	void Process::ExitCallback(const ValueList& args, SharedValue result)
+	{
+		this->Exited();
+		delete this;
 	}
 	
 	void Process::Restart()
