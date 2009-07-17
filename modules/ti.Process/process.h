@@ -10,7 +10,6 @@
 #include <kroll/kroll.h>
 #include <sstream>
 #include "pipe.h"
-#include "buffered_pipe.h"
 
 namespace ti
 {
@@ -72,7 +71,7 @@ namespace ti
 		void _ToString(const ValueList& args, SharedValue result);
 		
 		// non-exposed binding methods
-		BufferedPipe buffer;
+		Pipe buffer;
 		SharedKMethod bufferedRead;
 		void BufferedRead(const ValueList& args, SharedValue result);
 		void Call(const ValueList& args, SharedValue result);

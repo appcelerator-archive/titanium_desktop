@@ -16,8 +16,14 @@
 
 namespace ti
 {
-	Pipe::Pipe(const char *type) : StaticBoundObject(type),
-		onRead(0), onClose(0), attachedOutput(0), asyncOnRead(true)
+	Pipe::Pipe(const char *type) :
+		KEventObject(type),
+		onClose(0),
+		attachedOutput(0),
+		asyncOnRead(true),
+		closed(false),
+		eventsThread(0),
+		eventsThreadAdapter(0)
 	{
 		//TODO doc me
 		SetMethod("close", &Pipe::_Close);
@@ -29,9 +35,14 @@ namespace ti
 		SetMethod("attach", &Pipe::_Attach);
 		SetMethod("detach", &Pipe::_Detach);
 		SetMethod("isAttached", &Pipe::_IsAttached);
-		SetMethod("setOnRead", &Pipe::_SetOnRead);
 		SetMethod("setOnClose", &Pipe::_SetOnClose);
+
+		this->eventsThreadAdapter =
+			new Poco::RunnableAdapter<Pipe>(*this, &Pipe::FireEvents);
+		this->eventsThread = new Poco::Thread();
+		this->eventsThread->start(*this->eventsThreadAdapter);
 	}
+
 	/*static*/
 	AutoPipe Pipe::CreatePipe()
 	{
@@ -42,78 +53,51 @@ namespace ti
 #endif
 		return pipe;
 	}
-	
+
+	Pipe::~Pipe()
+	{
+
+	}
+
 	void Pipe::DataReady(AutoPipe pipe)
 	{
-		if (pipe.isNull()) {
-			this->duplicate();
-			pipe = this;
-		}
-		
-		/*if (IsAttached())
-		{
-			if (!(*attachedOutput)->GetMethod("write").isNull())
-			{
-				AutoPtr<Blob> data = pipe->Read();
-				SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
-			}
-		}*/
-		//else
-		{
-			if (onRead != NULL && !onRead->isNull())
-			{
-				ValueList args;
-				SharedKObject event = new StaticBoundObject();
-				event->SetObject("pipe", pipe);
-				
-				args.push_back(Value::NewObject(event));
-				try
-				{
-					logger->Debug("invoke method on main thread, asyncOnRead?%s",asyncOnRead?"true":"false");
-					Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args, !asyncOnRead);
-				}
-				catch (ValueException& e)
-				{
-					logger->Error(e.DisplayString()->c_str());
-				}
-			}
-		}
+		// if (pipe.isNull()) {
+		// 	this->duplicate();
+		// 	pipe = this;
+		// }
+		// 
+		// /*if (IsAttached())
+		// {
+		// 	if (!(*attachedOutput)->GetMethod("write").isNull())
+		// 	{
+		// 		AutoPtr<Blob> data = pipe->Read();
+		// 		SharedValue result = (*attachedOutput)->CallNS("write", Value::NewObject(data));
+		// 	}
+		// }*/
+		// //else
+		// {
+		// 	if (onRead != NULL && !onRead->isNull())
+		// 	{
+		// 		ValueList args;
+		// 		SharedKObject event = new StaticBoundObject();
+		// 		event->SetObject("pipe", pipe);
+		// 		
+		// 		args.push_back(Value::NewObject(event));
+		// 		try
+		// 		{
+		// 			logger->Debug("invoke method on main thread, asyncOnRead?%s",asyncOnRead?"true":"false");
+		// 			Host::GetInstance()->InvokeMethodOnMainThread(*this->onRead, args, !asyncOnRead);
+		// 		}
+		// 		catch (ValueException& e)
+		// 		{
+		// 			logger->Error(e.DisplayString()->c_str());
+		// 		}
+		// 	}
+		// }
 	}
 	
 	void Pipe::Closed()
 	{
-		//Logger::Get("Process.Pipe")->Debug("in Pipe::Closed");
-		if (IsAttached())
-		{
-			//Logger::Get("Process.Pipe")->Debug("I'm attached");
-			if (!(*attachedOutput)->GetMethod("close").isNull())
-			{
-				SharedKMethod method = (*attachedOutput)->GetMethod("close");
-				ValueList args;
-				Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
-			}
-		}
-		
-		if (onClose && !onClose->isNull())
-		{
-			ValueList args;
-			SharedKObject event = new StaticBoundObject();
-			this->duplicate();
-			AutoPtr<Pipe> autoThis = this;
-			event->SetObject("pipe", autoThis);
-			
-			args.push_back(Value::NewObject(event));
-			
-			try
-			{
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
-			}
-			catch (ValueException& e)
-			{
-				logger->Error(e.DisplayString()->c_str());
-			}
-			delete onClose;
-		}
 	}
 	
 	void Pipe::Attach(SharedKObject other)
@@ -135,25 +119,6 @@ namespace ti
 	bool Pipe::IsAttached()
 	{
 		return attachedOutput != NULL && !attachedOutput->isNull();
-	}
-	
-	void Pipe::SetOnRead(SharedKMethod onReadCallback)
-	{
-		if (this->onRead && onReadCallback.get() == this->onRead->get()) return;
-		
-		if (IsAttached())
-		{
-			Detach();
-		}
-		
-		if (!onReadCallback.isNull())
-		{
-			this->onRead = new SharedKMethod(onReadCallback);
-		}
-		else
-		{
-			this->onRead = NULL;
-		}
 	}
 	
 	int Pipe::FindFirstLineFeed(char *data, int length, int *charsToErase)
@@ -184,10 +149,6 @@ namespace ti
 	AutoPipe Pipe::Clone()
 	{
 		AutoPipe pipe = CreatePipe();
-		if (onRead && !onRead->isNull())
-		{
-			pipe->SetOnRead(*onRead);
-		}
 		if (onClose && !onClose->isNull())
 		{
 			pipe->onClose = new SharedKMethod(*onClose);
@@ -239,14 +200,6 @@ namespace ti
 		result->SetBool(this->IsAttached());
 	}
 		
-	void Pipe::_SetOnRead(const ValueList& args, SharedValue result)
-	{
-		if (args.size() >= 0 && args.at(0)->IsMethod())
-		{
-			SetOnRead(args.at(0)->ToMethod());
-		}
-	}
-	
 	void Pipe::_SetOnClose(const ValueList& args, SharedValue result)
 	{
 		if (args.size() >= 0 && args.at(0)->IsMethod())
@@ -286,7 +239,7 @@ namespace ti
 		this->Flush();
 	}
 	
-	
+
 	void Pipe::_Close(const ValueList& args, SharedValue result)
 	{
 		this->Close();
@@ -295,5 +248,171 @@ namespace ti
 	void Pipe::_IsClosed(const ValueList& args, SharedValue result)
 	{
 		result->SetBool(this->IsClosed());
+	}
+
+	AutoPtr<Blob> Pipe::Read(int bufsize)
+	{
+		// I don't think we need this any longer...
+		// if (!closed)
+		// {
+		// 	if (buffer.size() == 0)
+		// 	{
+		// 		return new Blob();
+		// 	}
+		// 	
+		// 	if (bufsize == -1 || bufsize > (int) buffer.size())
+		// 	{
+		// 		bufsize = (int) buffer.size();
+		// 	}	
+		// 	
+		// 	mutex.lock();
+		// 	AutoPtr<Blob> blob = new Blob(&(buffer[0]), bufsize);
+		// 	buffer.erase(buffer.begin(), buffer.begin()+bufsize);
+		// 	mutex.unlock();
+		// 	
+		// 	return blob;
+		// }
+		// throw ValueException::FromString("This pipe is closed.");
+		return new Blob();
+	}
+	
+	AutoPtr<Blob> Pipe::ReadLine()
+	{
+		// I don't think we need this any longer -- everything is asynchronous
+		// Poco::Mutex::ScopedLock lock(mutex);
+		// if (!closed)
+		// {
+		// 	if (buffer.size() == 0) return NULL;
+		// 	
+		// 	int charsToErase;
+		// 	int newline = FindFirstLineFeed(&(buffer[0]), buffer.size(), &charsToErase);
+		// 	if (newline == -1) return NULL;
+		// 	
+		// 	AutoPtr<Blob> blob = new Blob(&(buffer[0]), newline-charsToErase+1);
+		// 	buffer.erase(buffer.begin(), buffer.begin()+newline+1);
+		// 	
+		// 	return blob;
+		// }
+		// throw ValueException::FromString("This pipe is closed.");
+		return new Blob();
+	}
+	
+	int Pipe::GetSize()
+	{
+		return 0;
+		// Poco::Mutex::ScopedLock lock(mutex);
+		// 
+		// if (!closed)
+		// {
+		// 	return buffer.size();
+		// }
+		// else throw ValueException::FromString("This pipe is closed.");
+	}
+	
+	const char* Pipe::GetBuffer()
+	{
+		Poco::Mutex::ScopedLock lock(mutex);
+		// return &buffer[0];
+		return " ";
+	}
+
+	void Pipe::Write(char *data, int length)
+	{
+		//Poco::Mutex::ScopedLock lock(mutex);
+	}
+	
+	int Pipe::Write(AutoPtr<Blob> blob)
+	{
+		{ // Start the callbacks
+			Poco::Mutex::ScopedLock lock(buffersMutex);
+			buffers.push(blob);
+		}
+
+		// For every attached pipe, write this data to it
+		// for (each attached pipe)
+		// {
+		// 		pipe->Write(blob);
+		// 		or even
+		// 		pipe->Call("write", Value::NewObject(blob));
+		// }
+
+		return blob->Length();
+	}
+
+	void Pipe::Close()
+	{
+		Poco::Mutex::ScopedLock lock(mutex);
+		if (!closed)
+		{
+			closed = true;
+			eventsThread->join();
+			delete eventsThread;
+			delete eventsThreadAdapter;
+
+			//Logger::Get("Process.Pipe")->Debug("in Pipe::Closed");
+			if (IsAttached())
+			{
+				//Logger::Get("Process.Pipe")->Debug("I'm attached");
+				if (!(*attachedOutput)->GetMethod("close").isNull())
+				{
+					SharedKMethod method = (*attachedOutput)->GetMethod("close");
+					ValueList args;
+					Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
+				}
+			}
+			
+			if (onClose && !onClose->isNull())
+			{
+				ValueList args;
+				SharedKObject event = new StaticBoundObject();
+				this->duplicate();
+				AutoPtr<Pipe> autoThis = this;
+				event->SetObject("pipe", autoThis);
+				
+				args.push_back(Value::NewObject(event));
+				
+				try
+				{
+					Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
+				}
+				catch (ValueException& e)
+				{
+					logger->Error(e.DisplayString()->c_str());
+				}
+				delete onClose;
+			}
+		}
+	}
+	
+	bool Pipe::IsClosed()
+	{
+		return closed;
+	}
+
+	void Pipe::Flush()
+	{
+	}
+
+	void Pipe::FireEvents()
+	{
+		AutoBlob blob = 0;
+		while (!closed || buffers.size() > 0)
+		{
+			if (buffers.size() > 0)
+			{
+				Poco::Mutex::ScopedLock lock(buffersMutex);
+				blob = buffers.front();
+				buffers.pop();
+			}
+
+			if (!blob.isNull())
+			{
+				this->duplicate();
+				AutoPtr<KEventObject> autothis = this;
+				AutoPtr<Event> event = new ReadEvent(autothis, blob);
+				this->FireEvent(event);
+				blob = 0;
+			}
+		}
 	}
 }

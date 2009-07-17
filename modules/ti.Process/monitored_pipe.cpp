@@ -24,7 +24,7 @@ namespace ti
 				delete monitorAdapter;
 			}
 			
-			BufferedPipe::Close();
+			Pipe::Close();
 		}
 	}
 	

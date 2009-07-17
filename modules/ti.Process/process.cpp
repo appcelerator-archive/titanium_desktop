@@ -134,13 +134,13 @@ namespace ti
 	{
 		if (method.isNull())
 		{
-			stdoutPipe->SetOnRead(NULL);
-			stderrPipe->SetOnRead(NULL);
+			//stdoutPipe->SetOnRead(NULL);
+			//stderrPipe->SetOnRead(NULL);
 			return;
 		}
 		
-		stdoutPipe->SetOnRead(method);
-		stderrPipe->SetOnRead(method);
+		//stdoutPipe->SetOnRead(method);
+		//stderrPipe->SetOnRead(method);
 	}
 	
 	SharedKObject Process::CloneEnvironment()
@@ -319,7 +319,7 @@ namespace ti
 	{
 		if (args.size() > 0 && args.at(0)->IsMethod())
 		{
-			SetOnRead(args.at(0)->ToMethod());
+			//SetOnRead(args.at(0)->ToMethod());
 		}
 	}
 	
@@ -369,7 +369,7 @@ namespace ti
 			bufferedRead = new StaticBoundMethod(bufferedCallback);
 		}
 		
-		stdoutPipe->SetOnRead(bufferedRead);
+		//stdoutPipe->SetOnRead(bufferedRead);
 		
 		Launch(false);
 		

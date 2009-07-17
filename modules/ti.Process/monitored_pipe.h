@@ -9,16 +9,16 @@
 
 #define MAX_BUFFER_SIZE 4096
 
-#include "buffered_pipe.h"
+#include "pipe.h"
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
 
 namespace ti
 {
-	class MonitoredPipe : public BufferedPipe
+	class MonitoredPipe : public Pipe
 	{
 	public:
-		MonitoredPipe() : BufferedPipe(), monitorJoined(false) {};
+		MonitoredPipe() : Pipe(), monitorJoined(false) {};
 		~MonitoredPipe();
 		virtual void Close();
 		void StartMonitor();
