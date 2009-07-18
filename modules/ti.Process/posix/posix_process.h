@@ -44,6 +44,7 @@ namespace ti
 
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.
+		Poco::Mutex processOutputMutex;
 		std::vector<AutoBlob> processOutput;
 		void StartProcess();
 	};

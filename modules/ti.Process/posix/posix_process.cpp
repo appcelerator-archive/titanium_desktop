@@ -110,17 +110,28 @@ namespace ti
 		SharedKMethod readCallback =
 			StaticBoundMethod::FromMethod<PosixProcess>(
 				this, &PosixProcess::ReadCallback);
-		nativeOut->AddEventListener(Event::READ, readCallback);
-		nativeErr->AddEventListener(Event::READ, readCallback);
+
+		// Set up the synchronous callbacks
+		nativeOut->SetReadCallback(readCallback);
+		nativeErr->SetReadCallback(readCallback);
 
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
+
 		this->ExitMonitor();
 
+		// Unset the callbacks just in case these pipes are used again
+		nativeOut->SetReadCallback(0);
+		nativeErr->SetReadCallback(0);
+
 		std::string output;
-		for (size_t i = 0; i < processOutput.size(); i++)
 		{
-			output.append(processOutput.at(i)->Get());
+			Poco::Mutex::ScopedLock lock(processOutputMutex);
+			for (size_t i = 0; i < processOutput.size(); i++)
+			{
+				AutoBlob b = processOutput.at(i);
+				output.append(processOutput.at(i)->Get());
+			}
 		}
 
 		return output;
@@ -150,10 +161,10 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject data = args.GetObject(0)->GetObject("data");
-			AutoBlob blob = data.cast<Blob>();
-			if (!blob.isNull())
+			AutoBlob blob = args.GetObject(0).cast<Blob>();
+			if (!blob.isNull() && blob->Length() > 0)
 			{
+				Poco::Mutex::ScopedLock lock(processOutputMutex);
 				processOutput.push_back(blob);
 			}
 		}

@@ -22,9 +22,11 @@ namespace ti
 		NativePipe(bool isReader);
 		~NativePipe();
 		void StartMonitor();
+		void StartMonitor(SharedKMethod readCallback);
 		virtual void Close();
 		virtual int Write(AutoBlob blob);
 		virtual void EndOfFile() = 0;
+		inline void SetReadCallback(SharedKMethod cb) { this->readCallback = cb; }
 
 	protected:
 		bool closed;
@@ -34,6 +36,7 @@ namespace ti
 		Poco::RunnableAdapter<NativePipe>* readThreadAdapter;
 		Poco::Thread writeThread;
 		Poco::Thread readThread;
+		SharedKMethod readCallback;
 		Logger* logger;
 
 		void PollForReads();

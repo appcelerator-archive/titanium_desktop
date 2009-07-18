@@ -56,7 +56,7 @@ namespace ti
 			n = read(readHandle, buffer, size);
 		}
 		while (n < 0 && errno == EINTR);
-		
+
 		if (n >= 0)
 		{
 			return n;

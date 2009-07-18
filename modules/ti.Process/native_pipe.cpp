@@ -15,6 +15,7 @@ namespace ti
 			*this, &NativePipe::PollForWrites)),
 		readThreadAdapter(new Poco::RunnableAdapter<NativePipe>(
 			*this, &NativePipe::PollForReads)),
+		readCallback(0),
 		logger(Logger::Get("Process.NativePipe"))
 	{
 	};
@@ -51,6 +52,13 @@ namespace ti
 			// If this is a reader pipe (ie one reading from stdout and stderr
 			// via polling), then we want to pass along the data to all attached
 			// pipes
+
+			// Someone (probably a process) wants to subscribe to this pipe's
+			// reads synchronously. So we need to call the callback on this thread
+			// right now.
+			if (!readCallback.isNull())
+				readCallback->Call(Value::NewObject(blob));
+
 			return Pipe::Write(blob);
 		}
 		else
@@ -85,9 +93,9 @@ namespace ti
 		int bytesRead = this->RawRead(buffer, length);
 		while (bytesRead > 0)
 		{
-			bytesRead = this->RawRead(buffer, length);
 			AutoBlob blob = new Blob(buffer, bytesRead);
 			this->Write(blob);
+			bytesRead = this->RawRead(buffer, length);
 		}
 	}
 
