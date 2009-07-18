@@ -19,29 +19,27 @@ namespace ti
 {
 	Pipe::Pipe(const char *type) :
 		KEventObject(type),
-		onClose(0),
-		closed(false),
-		eventsThread(0),
+		active(true),
 		eventsThreadAdapter(0)
 	{
 		//TODO doc me
 		SetMethod("close", &Pipe::_Close);
-		SetMethod("isClosed", &Pipe::_IsClosed);
 		SetMethod("write", &Pipe::_Write);
 		SetMethod("flush", &Pipe::_Flush);
 		SetMethod("attach", &Pipe::_Attach);
 		SetMethod("detach", &Pipe::_Detach);
 		SetMethod("isAttached", &Pipe::_IsAttached);
-		SetMethod("setOnClose", &Pipe::_SetOnClose);
 
 		this->eventsThreadAdapter =
 			new Poco::RunnableAdapter<Pipe>(*this, &Pipe::FireEvents);
-		this->eventsThread = new Poco::Thread();
-		this->eventsThread->start(*this->eventsThreadAdapter);
+		this->eventsThread.start(*this->eventsThreadAdapter);
 	}
 
 	Pipe::~Pipe()
 	{
+		active = true;
+		eventsThread.join();
+		delete eventsThreadAdapter;
 	}
 
 	void Pipe::Attach(SharedKObject object)
@@ -102,11 +100,6 @@ namespace ti
 	AutoPipe Pipe::Clone()
 	{
 		AutoPipe pipe = new Pipe();
-		if (onClose && !onClose->isNull())
-		{
-			pipe->onClose = new SharedKMethod(*onClose);
-		}
-		
 		return pipe;
 	}
 
@@ -127,12 +120,6 @@ namespace ti
 		result->SetBool(this->IsAttached());
 	}
 
-	void Pipe::_SetOnClose(const ValueList& args, SharedValue result)
-	{
-		args.VerifyException("setOnClose", "m");
-		this->onClose = new SharedKMethod(args.at(0)->ToMethod());
-	}
-
 	void Pipe::_Write(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("write", "o|s");
@@ -151,26 +138,21 @@ namespace ti
 		{
 			throw ValueException::FromString("Pipe.write argument should be a Blob or string");
 		}
-		
+
 		int written = this->Write(blob);
 		result->SetInt(written);
 	}
-	
+
 	void Pipe::_Flush(const ValueList& args, SharedValue result)
 	{
 		this->Flush();
 	}
-	
+
 	void Pipe::_Close(const ValueList& args, SharedValue result)
 	{
 		this->Close();
 	}
-	
-	void Pipe::_IsClosed(const ValueList& args, SharedValue result)
-	{
-		result->SetBool(this->IsClosed());
-	}
-	
+
 	int Pipe::Write(AutoBlob blob)
 	{
 		{ // Start the callbacks
@@ -218,62 +200,43 @@ namespace ti
 
 	void Pipe::Close()
 	{
-		Poco::Mutex::ScopedLock lock(attachedMutex);
-		if (!closed)
-		{
-			closed = true;
-			eventsThread->join();
-			delete eventsThread;
-			delete eventsThreadAdapter;
-			
-			if (onClose && !onClose->isNull())
-			{
-				ValueList args;
-				SharedKObject event = new StaticBoundObject();
-				this->duplicate();
-				AutoPipe autoThis = this;
-				event->SetObject("pipe", autoThis);
-				
-				args.push_back(Value::NewObject(event));
-				
-				try
-				{
-					Host::GetInstance()->InvokeMethodOnMainThread(*this->onClose, args, false);
-				}
-				catch (ValueException& e)
-				{
-					logger->Error(e.DisplayString()->c_str());
-				}
-				delete onClose;
-			}
+		{ // A Null Blob on the qeueue signals a close event
+			Poco::Mutex::ScopedLock lock(buffersMutex);
+			buffers.push(0);
 		}
-	}
-	
-	void Pipe::Closed()
-	{
-		if (IsAttached())
-		{	
-			this->duplicate();
-			AutoPipe autoThis = this;
+
+		// Call the close method on our attached objects
+		{
+			Poco::Mutex::ScopedLock lock(attachedMutex);
 			for (size_t i = 0; i < attachedObjects.size(); i++)
 			{
-				if (attachedObjects.at(i)->GetMethod("closed").isNull())
-				{
-					SharedKMethod method = attachedObjects.at(i)->GetMethod("close");
-					ValueList args;
-					SharedKObject event = new StaticBoundObject();
-					event->SetObject("pipe", autoThis);
-					event->SetObject("attached", attachedObjects.at(i));
-					Host::GetInstance()->InvokeMethodOnMainThread(method, args, false);
-				}	
+				this->CallClose(attachedObjects.at(i));
 			}
-			
 		}
 	}
-	
-	bool Pipe::IsClosed()
+
+	void Pipe::CallClose(SharedKObject target)
 	{
-		return closed;
+		SharedKMethod closeMethod = target->GetMethod("close");
+
+		if (closeMethod.isNull())
+		{
+			logger->Warn("Target object did not have a write method");
+			return;
+		}
+		else
+		{
+			try
+			{
+				closeMethod->Call(ValueList());
+			}
+			catch (ValueException &e)
+			{
+				SharedString ss = e.DisplayString();
+				logger->Error("Exception while trying to write to target: %s",
+					ss->c_str());
+			}
+		}
 	}
 
 	void Pipe::Flush()
@@ -283,7 +246,7 @@ namespace ti
 	void Pipe::FireEvents()
 	{
 		AutoBlob blob = 0;
-		while (!closed || buffers.size() > 0)
+		while (active || buffers.size() > 0)
 		{
 			if (buffers.size() > 0)
 			{
@@ -299,6 +262,12 @@ namespace ti
 				AutoPtr<Event> event = new ReadEvent(autothis, blob);
 				this->FireEvent(event);
 				blob = 0;
+			}
+			else
+			{
+				// A null blob signifies a close event
+				this->FireEvent(Event::CLOSE);
+				this->FireEvent(Event::CLOSED);
 			}
 		}
 	}

@@ -22,30 +22,20 @@ namespace ti
 	public:
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
-
-		virtual void Close();
-		virtual bool IsClosed();
 		virtual int Write(AutoBlob data);
 		virtual void CallWrite(SharedKObject target, AutoBlob data);
+		virtual void Close();
+		virtual void CallClose(SharedKObject target);
 		virtual void Flush();
-
-		int GetSize();
-		const char* GetBuffer();
-
 		void Attach(SharedKObject object);
 		void Detach(SharedKObject object);
 		bool IsAttached();
 		AutoPipe Clone();
 
-		virtual void Closed();
-		void SetOnClose(SharedKMethod onClose);
-
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		void FireEvents();
-		
 		void _Close(const ValueList& args, SharedValue result);
-		void _IsClosed(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);
 		void _Attach(const ValueList& args, SharedValue result);
 		void _Detach(const ValueList& args, SharedValue result);
@@ -53,17 +43,13 @@ namespace ti
 		void _Write(const ValueList& args, SharedValue result);
 		void _Flush(const ValueList& args, SharedValue result);
 
-		SharedKMethod *onClose;
-		
 		Poco::Mutex attachedMutex;
 		std::vector<SharedKObject> attachedObjects;
-		
 		Logger *logger;
-		bool closed;
-
+		bool active;
 		Poco::Mutex buffersMutex;
 		std::queue<AutoBlob> buffers;
-		Poco::Thread* eventsThread;
+		Poco::Thread eventsThread;
 		Poco::RunnableAdapter<Pipe>* eventsThreadAdapter;
 	};
 }
