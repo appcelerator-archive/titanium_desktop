@@ -31,11 +31,16 @@ namespace ti
 		virtual int Wait();
 		virtual void SetArguments(SharedKList args);
 		void ReadCallback(const ValueList& args, SharedValue result);
+		inline virtual AutoPipe GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPipe GetNativeStdout() { return nativeOut; }
+		inline virtual AutoPipe GetNativeStderr() { return nativeErr; }
 
 	protected:
 		Logger* logger;
 		int pid;
-		AutoPtr<PosixPipe> nativeIn, nativeOut, nativeErr;
+		AutoPtr<PosixPipe> nativeIn;
+		AutoPtr<PosixPipe> nativeOut;
+		AutoPtr<PosixPipe> nativeErr;
 
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.

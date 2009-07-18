@@ -42,7 +42,6 @@ namespace ti
 
 	Pipe::~Pipe()
 	{
-
 	}
 
 	void Pipe::Attach(SharedKObject object)
@@ -50,26 +49,31 @@ namespace ti
 		Poco::Mutex::ScopedLock lock(attachedMutex);
 		attachedObjects.push_back(object);
 	}
-	
+
 	void Pipe::Detach(SharedKObject object)
 	{
 		Poco::Mutex::ScopedLock lock(attachedMutex);
-		std::vector<SharedKObject>::iterator iter =
-			std::find(attachedObjects.begin(), attachedObjects.end(), object);
-
-		if (iter != attachedObjects.end())
+		std::vector<SharedKObject>::iterator i = attachedObjects.begin();
+		while (i != attachedObjects.end())
 		{
-			attachedObjects.erase(iter);
+			SharedKObject obj = *i;
+			if (obj->Equals(object))
+			{
+				i = attachedObjects.erase(i);
+			}
+			else
+			{
+				i++;
+			}
 		}
 	}
-	
+
 	bool Pipe::IsAttached()
 	{
 		Poco::Mutex::ScopedLock lock(attachedMutex);
-		
 		return attachedObjects.size() > 0;
 	}
-	
+
 	int Pipe::FindFirstLineFeed(char *data, int length, int *charsToErase)
 	{
 		int newline = -1;
@@ -94,7 +98,7 @@ namespace ti
 		
 		return newline;
 	}
-	
+
 	AutoPipe Pipe::Clone()
 	{
 		AutoPipe pipe = new Pipe();
@@ -105,7 +109,7 @@ namespace ti
 		
 		return pipe;
 	}
-	
+
 	void Pipe::_Attach(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("attach", "o");
@@ -117,18 +121,18 @@ namespace ti
 		args.VerifyException("detach", "o");
 		this->Detach(args.at(0)->ToObject());
 	}
-	
+
 	void Pipe::_IsAttached(const ValueList& args, SharedValue result)
 	{
 		result->SetBool(this->IsAttached());
 	}
-		
+
 	void Pipe::_SetOnClose(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("setOnClose", "m");
 		this->onClose = new SharedKMethod(args.at(0)->ToMethod());
 	}
-	
+
 	void Pipe::_Write(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("write", "o|s");

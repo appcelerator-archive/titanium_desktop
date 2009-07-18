@@ -36,11 +36,11 @@ namespace ti
 		virtual SharedValue Call(const ValueList& args);
 		static SharedKObject GetCurrentEnvironment();
 
+		void SetStdin(AutoPipe stdinPipe);
+		void SetStdout(AutoPipe stdoutPipe);
+		void SetStderr(AutoPipe stderrPipe);
 		inline bool IsRunning() { return running; }
 		inline void SetPID(int pid) { this->pid = pid; }
-		inline void SetStdin(AutoPipe stdinPipe) { this->stdinPipe = stdinPipe; }
-		inline void SetStdout(AutoPipe stdoutPipe) { this->stdoutPipe = stdoutPipe; }
-		inline void SetStderr(AutoPipe stderrPipe) { this->stderrPipe = stderrPipe; }
 		virtual inline void SetArguments(SharedKList args) { this->args = args; }
 		inline void SetEnvironment(SharedKObject env) { this->environment = env; }
 		inline int GetPID() { return this->pid; }
@@ -61,6 +61,9 @@ namespace ti
 		virtual void MonitorAsync() = 0;
 		virtual std::string MonitorSync() = 0;
 		virtual int Wait() = 0;
+		virtual AutoPipe GetNativeStdin() = 0;
+		virtual AutoPipe GetNativeStdout() = 0;
+		virtual AutoPipe GetNativeStderr() = 0;
 
 	protected:
 		void _GetPID(const ValueList& args, SharedValue result);
@@ -81,14 +84,18 @@ namespace ti
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
 		void _ToString(const ValueList& args, SharedValue result);
+		void AttachPipes();
+		void DetachPipes();
 
-		AutoPipe stdoutPipe, stderrPipe;
+		AutoPipe stdoutPipe;
+		AutoPipe stderrPipe;
 		AutoPipe stdinPipe;
 		SharedKObject environment;
 		SharedKList args;
 		int pid;
 		SharedValue exitCode;
-		SharedKMethod* onExit;
+		SharedKMethod onRead;
+		SharedKMethod onExit;
 		Poco::RunnableAdapter<Process>* exitMonitorAdapter;
 		Poco::Thread exitMonitorThread;
 		SharedKMethod exitCallback;

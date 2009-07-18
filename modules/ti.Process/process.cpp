@@ -7,12 +7,12 @@
 #include "process.h"
 #include "pipe.h"
 #include "process_binding.h"
-
 #if defined(OS_WIN32)
-# include "win32/win32_process.h"
+#include "win32/win32_process.h"
 #else
-# include "posix/posix_process.h"
+#include "posix/posix_process.h"
 #endif
+using Poco::RunnableAdapter;
 
 namespace ti
 {
@@ -35,7 +35,10 @@ namespace ti
 		environment(GetCurrentEnvironment()),
 		pid(-1),
 		exitCode(Value::Null),
-		onExit(0)
+		onRead(0),
+		onExit(0),
+		exitMonitorAdapter(new RunnableAdapter<Process>(*this, &Process::ExitMonitor)),
+		running(false)
 	{
 		SetMethod("getPID", &Process::_GetPID);
 		SetMethod("getExitCode", &Process::_GetExitCode);
@@ -65,17 +68,28 @@ namespace ti
 	void Process::Exited()
 	{
 		this->running = false;
+		this->DetachPipes();
 		this->FireEvent(Event::EXIT);
 	}
 
-	void Process::SetOnRead(SharedKMethod onRead)
+	void Process::SetOnRead(SharedKMethod newOnRead)
 	{
-		this->AddEventListener(Event::READ, onRead);
+		if (running)
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, newOnRead);
+			this->GetNativeStderr()->AddEventListener(Event::READ, newOnRead);
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->RemoveEventListener(Event::READ, onRead);
+		}
+		this->onRead = newOnRead;
 	}
 
-	void Process::SetOnExit(SharedKMethod onExit)
+	void Process::SetOnExit(SharedKMethod newOnExit)
 	{
-		this->AddEventListener(Event::EXIT, onExit);
+		this->AddEventListener(Event::EXIT, newOnExit);
+		if (!this->onExit.isNull())
+			this->RemoveEventListener(Event::EXIT, this->onExit);
+		this->onExit = newOnExit;
 	}
 
 	SharedKObject Process::CloneEnvironment()
@@ -100,13 +114,37 @@ namespace ti
 		}
 		return str.str();
 	}
-	
+
+	void Process::AttachPipes()
+	{
+		stdinPipe->Attach(this->GetNativeStdin());
+		this->GetNativeStdout()->Attach(stdoutPipe);
+		this->GetNativeStderr()->Attach(stderrPipe);
+
+		this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+		this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
+	}
+
+	void Process::DetachPipes()
+	{
+		stdinPipe->Detach(this->GetNativeStdin());
+		this->GetNativeStdout()->Detach(stdoutPipe);
+		this->GetNativeStderr()->Detach(stderrPipe);
+
+		if (!onRead.isNull())
+		{
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->RemoveEventListener(Event::READ, onRead);
+		}
+	}
+
 	void Process::LaunchAsync()
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
 
 		ForkAndExec();
+		this->AttachPipes();
 		MonitorAsync();
 
 		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
@@ -165,7 +203,7 @@ namespace ti
 		Logger::Get("Process.Process")->Debug("restarting...");
 		LaunchAsync();
 	}
-	
+
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
 		if (running)
@@ -173,7 +211,7 @@ namespace ti
 		else
 			result->SetNull();
 	}
-	
+
 	void Process::_GetExitCode(const ValueList& args, SharedValue result)
 	{
 		result->SetValue(exitCode);
@@ -331,7 +369,7 @@ namespace ti
 		std::string output = LaunchSync();
 		return Value::NewString(output);
 	}
-	
+
 	void Process::_ToString(const ValueList& args, SharedValue result)
 	{
 		result->SetString(ArgumentsToString().c_str());
@@ -349,6 +387,36 @@ namespace ti
 			i++;
 		}
 		return kenv;
+	}
+
+	void Process::SetStdin(AutoPipe newStdin)
+	{
+		if (running)
+		{
+			newStdin->Attach(this->GetNativeStdin());
+			this->stdinPipe->Detach(this->GetNativeStdin());
+		}
+		this->stdinPipe = stdinPipe;
+	}
+
+	void Process::SetStdout(AutoPipe newStdout)
+	{
+		if (running)
+		{
+			this->GetNativeStdout()->Attach(newStdout);
+			this->GetNativeStdout()->Detach(this->stdoutPipe);
+		}
+		this->stdoutPipe = newStdout;
+	}
+
+	void Process::SetStderr(AutoPipe newStderr)
+	{
+		if (running)
+		{
+			this->GetNativeStderr()->Attach(newStderr);
+			this->GetNativeStderr()->Detach(this->stderrPipe);
+		}
+		this->stderrPipe = newStderr;
 	}
 }
 
