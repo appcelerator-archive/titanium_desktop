@@ -24,9 +24,7 @@ namespace ti
 	public:
 		HTTPClientBinding(Host* host, std::string path);
 		virtual ~HTTPClientBinding();
-		
-		SharedValue GetSelf() { return self;}
-		
+
 	private:
 		Host* host;
 		std::string modulePath;
@@ -39,7 +37,6 @@ namespace ti
 		bool async;
 		std::string user;
 		std::string password;
-		SharedValue self;
 		Poco::FileInputStream *filestream;
 		std::string filename;
 		std::string datastream;

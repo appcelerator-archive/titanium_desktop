@@ -27,8 +27,6 @@ namespace ti
 		host(host),global(host->GetGlobalObject()),
 		callback(NULL),socket(NULL),connection(NULL)
 	{
-		this->self = Value::NewObject(this);
-		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
 		 * @tiarg(for=Network.HTTPServer.bind,name=port,type=integer) port to bind on
