@@ -28,7 +28,7 @@ namespace ti
 	}
 
 	Process::Process() :
-		KEventMethod(NULL, "Process.Process"),
+		KEventMethod("Process.Process"),
 		stdoutPipe(new Pipe()),
 		stderrPipe(new Pipe()),
 		stdinPipe(new Pipe()),
@@ -65,7 +65,7 @@ namespace ti
 	void Process::Exited()
 	{
 		this->running = false;
-		this->FireEvent(Event::Exit);
+		this->FireEvent(Event::EXIT);
 	}
 
 	void Process::SetOnRead(SharedKMethod onRead)
@@ -75,7 +75,7 @@ namespace ti
 
 	void Process::SetOnExit(SharedKMethod onExit)
 	{
-		this->AddEventListener(Event::Exit, onExit);
+		this->AddEventListener(Event::EXIT, onExit);
 	}
 
 	SharedKObject Process::CloneEnvironment()
@@ -111,7 +111,7 @@ namespace ti
 
 		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
 			this, &Process::ExitCallback);
-		this->exitMonitorThread.start(*nxitMonitorAdapter);
+		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
 	std::string Process::LaunchSync()
@@ -157,7 +157,7 @@ namespace ti
 		if (this->stderrPipe.isNull())
 			this->stderrPipe = new Pipe();
 	
-		if (IsRunning())
+		if (running)
 		{
 			Terminate();
 		}
@@ -322,14 +322,14 @@ namespace ti
 	
 	void Process::_IsRunning(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(IsRunning());
+		result->SetBool(running);
 	}
 
-	void Process::Call(const ValueList& args, SharedValue result)
+	SharedValue Process::Call(const ValueList& args)
 	{
 		// Should this return an AutoBlob instead?
 		std::string output = LaunchSync();
-		result->SetString(output);
+		return Value::NewString(output);
 	}
 	
 	void Process::_ToString(const ValueList& args, SharedValue result)
@@ -337,7 +337,7 @@ namespace ti
 		result->SetString(ArgumentsToString().c_str());
 	}
 
-	SharedKObject GetCurrentEnvironment()
+	SharedKObject Process::GetCurrentEnvironment()
 	{
 		SharedKObject kenv = new StaticBoundObject();
 

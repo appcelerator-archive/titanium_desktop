@@ -308,9 +308,4 @@ namespace ti
 			raise(signal);
 		}
 	}
-	
-	bool Win32Process::IsRunning()
-	{
-		return running;
-	}
 }

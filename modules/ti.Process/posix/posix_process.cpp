@@ -15,12 +15,6 @@ extern char **environ;
 
 namespace ti
 {
-	/*static*/
-	AutoPtr<PosixProcess> PosixProcess::GetCurrentProcess()
-	{
-		return currentProcess;
-	}
-
 	PosixProcess::PosixProcess() :
 		logger(Logger::Get("Process.PosixProcess")),
 		nativeIn(new PosixPipe(false)),

@@ -30,11 +30,13 @@ namespace ti
 			stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
+		void SetOnExit(SharedKMethod onExit);
 		void Exited();
 		void ExitCallback(const ValueList& args, SharedValue result);
-		void Call(const ValueList& args, SharedValue result);
+		virtual SharedValue Call(const ValueList& args);
 		static SharedKObject GetCurrentEnvironment();
 
+		inline bool IsRunning() { return running; }
 		inline void SetPID(int pid) { this->pid = pid; }
 		inline void SetStdin(AutoPipe stdinPipe) { this->stdinPipe = stdinPipe; }
 		inline void SetStdout(AutoPipe stdoutPipe) { this->stdoutPipe = stdoutPipe; }

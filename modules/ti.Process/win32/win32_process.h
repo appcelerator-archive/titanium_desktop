@@ -33,7 +33,6 @@ namespace ti
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
-		virtual bool IsRunning();
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
 		virtual std::string MonitorSync();

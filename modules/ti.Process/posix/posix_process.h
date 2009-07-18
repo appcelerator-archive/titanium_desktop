@@ -20,11 +20,9 @@ namespace ti
 	public:
 		PosixProcess();
 		virtual ~PosixProcess();
-		virtual int GetPID();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
-		virtual bool IsRunning();
 		static AutoPtr<PosixProcess> GetCurrentProcess();
 
 		virtual void ForkAndExec();
@@ -36,7 +34,6 @@ namespace ti
 
 	protected:
 		Logger* logger;
-		static AutoPtr<PosixProcess> currentProcess;
 		int pid;
 		AutoPtr<PosixPipe> nativeIn, nativeOut, nativeErr;
 
