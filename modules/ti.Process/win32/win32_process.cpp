@@ -18,8 +18,8 @@ namespace ti
 		return currentProcess;
 	}
 	
-	Win32Process::Win32Process(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe) :
-		Process(args, environment, stdinPipe, stdoutPipe, stderrPipe),
+	Win32Process::Win32Process() :
+		Process(),
 		running(false),
 		complete(false),
 		current(false),
@@ -29,30 +29,6 @@ namespace ti
 		nativeIn = new Win32Pipe(stdinPipe);
 		nativeOut = new Win32Pipe(stdoutPipe);
 		nativeErr = new Win32Pipe(stderrPipe);
-	}
-	
-	Win32Process::Win32Process() :
-		Process(),
-		running(true), complete(false), current(true),
-		logger(Logger::Get("Process.Win32Process"))
-	{
-		pid = GetCurrentProcessId();
-		
-		LPTCH env = GetEnvironmentStrings();
-		while (env[0] != '\0')
-		{
-			std::string entry = env;
-			std::string key = entry.substr(0, entry.find("="));
-			std::string val = entry.substr(entry.find("=")+1);
-			
-			SetEnvironment(key.c_str(), val.c_str());
-			env += entry.size()+1;
-		}
-		
-		for (int i = 0; i < __argc; i++)
-		{
-			args->Append(Value::NewString(__argv[i]));
-		}
 	}
 	
 	Win32Process::~Win32Process()

@@ -20,7 +20,7 @@ namespace ti
 	class Win32Process : public Process
 	{
 	public:
-		Win32Process(SharedKList args, SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
+		Win32Process();
 		virtual ~Win32Process();
 
 		static AutoPtr<Win32Process> GetCurrentProcess();
@@ -41,8 +41,6 @@ namespace ti
 		void ReadCallback(const ValueList& args, SharedValue result);
 		
 	protected:
-		// for current process
-		Win32Process();
 		std::string ArgListToString(SharedKList argList);
 		
 		Poco::Thread exitMonitorThread;
