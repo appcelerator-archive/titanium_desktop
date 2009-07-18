@@ -57,29 +57,6 @@ namespace ti
 	
 	Win32Process::~Win32Process()
 	{
-		if (!current)
-		{
-			try {
-				Terminate();
-			} catch (ValueException &ve) {
-				logger->Error(ve.what());
-			}
-			
-			if (this->exitMonitorThread.isRunning())
-			{
-				try
-				{
-					this->exitMonitorThread.join();
-					if (exitMonitorAdapter) delete exitMonitorAdapter;
-				}
-				catch (Poco::Exception& e)
-				{
-					logger->Error(
-						"Exception while try to join with exit monitor thread: %s",
-						e.displayText().c_str());
-				}
-			}
-		}
 	}
 	
 	/*
@@ -165,7 +142,12 @@ namespace ti
 		return result;
 	}
 	
-	void Win32Process::LaunchAsync()
+	std::string Win32Process::ArgumentsToString()
+	{
+		return ArgListToString(args);
+	}
+	
+	void Win32Process::ForkAndExec()
 	{
 		STARTUPINFO startupInfo;
 		startupInfo.cb          = sizeof(STARTUPINFO);
@@ -215,28 +197,72 @@ namespace ti
 			this->process = processInfo.hProcess;
 			this->running = true;
 		}
-		
-		// setup threads which can read output and also monitor the exit
+	}
+	
+	void Win32Process::MonitorAsync()
+	{
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
-		
-		if (async) {
-			this->exitMonitorAdapter = new Poco::RunnableAdapter<Win32Process>(*this, &Win32Process::ExitMonitor);
-			this->exitMonitorThread.start(*exitMonitorAdapter);
-		} else {
-			ExitMonitor();
-		}
 	}
-
-	virtual std::string LaunchSync()
+	
+	std::string Win32Process::MonitorSync()
 	{
-		static std::string stubby = "mcstubersons"
-		return stubby;
+		SharedKMethod readCallback =
+			StaticBoundMethod::FromMethod<Win32Process>(
+				this, &Win32Process::ReadCallback);
+		nativeOut->AddEventListener(Event::READ, readCallback);
+		nativeErr->AddEventListener(Event::READ, readCallback);
+
+		nativeOut->StartMonitor();
+		nativeErr->StartMonitor();
+		this->ExitMonitor();
+
+		std::string output;
+		for (size_t i = 0; i < processOutput.size(); i++)
+		{
+			output.append(processOutput.at(i)->Get());
+		}
+
+		return output;
+	}
+	
+	int Win32Process::Wait()
+	{
+		while (true) {
+			DWORD rc = WaitForSingleObject(this->process, 250);
+			if (rc == WAIT_OBJECT_0) {
+				break;
+			}
+			if (rc == WAIT_ABANDONED) {
+				break;
+			}
+			else continue;
+		}
+		
+		DWORD exitCode;
+		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
+			throw ValueException::FromString("Cannot get exit code for process");
+		}
+		
+		return exitCode;
 	}
 
 	int Win32Process::GetPID()
 	{
 		return pid;
+	}
+	
+	void Win32Process::ReadCallback(const ValueList& args, SharedValue result)
+	{
+		if (args.at(0)->IsObject())
+		{
+			SharedKObject data = args.GetObject(0)->GetObject("data");
+			AutoBlob blob = data.cast<Blob>();
+			if (!blob.isNull())
+			{
+				processOutput.push_back(blob);
+			}
+		}
 	}
 	
 	void Win32Process::Terminate()
@@ -281,36 +307,6 @@ namespace ti
 		{
 			raise(signal);
 		}
-	}
-		
-	void Win32Process::ExitMonitor()
-	{
-		
-		while (true) {
-			DWORD rc = WaitForSingleObject(this->process, 250);
-			if (rc == WAIT_OBJECT_0) {
-				break;
-			}
-			if (rc == WAIT_ABANDONED) {
-				break;
-			}
-			else continue;
-		}
-		
-		DWORD exitCode;
-		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
-			throw ValueException::FromString("Cannot get exit code for process");
-		}
-		
-		logger->Debug("Process terminated with exitcode: %d", exitCode);
-		SetExitCode(exitCode);
-		this->running = false;
-		this->complete = true;
-		
-		nativeOut->Close();
-		nativeErr->Close();
-		
-		Process::Exited();
 	}
 	
 	bool Win32Process::IsRunning()

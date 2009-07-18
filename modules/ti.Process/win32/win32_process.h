@@ -30,24 +30,27 @@ namespace ti
 		AutoPtr<Win32Pipe> GetStderr() { return nativeErr; }
 		
 		virtual int GetPID();
-		virtual void LaunchAsync();
-		virtual std::string LaunchSync();
 		virtual void Terminate();
 		virtual void Kill();
 		virtual void SendSignal(int signal);
 		virtual bool IsRunning();
+		virtual void ForkAndExec();
+		virtual void MonitorAsync();
+		virtual std::string MonitorSync();
+		virtual int Wait();
+		virtual std::string ArgumentsToString();
+		void ReadCallback(const ValueList& args, SharedValue result);
 		
 	protected:
 		// for current process
 		Win32Process();
 		std::string ArgListToString(SharedKList argList);
 		
-		void StartProcess();
-		void ExitMonitor();
-		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
 		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
+		Poco::Mutex mutex;
+		std::vector<AutoBlob> processOutput;
 		
 		bool running, complete, current;
 		int pid;

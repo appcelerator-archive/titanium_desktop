@@ -47,7 +47,7 @@ namespace ti
 		virtual std::string MonitorSync() = 0;
 		virtual int Wait() = 0;
 		
-		std::string ArgumentsToString();
+		virtual std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void Exited();
 		
