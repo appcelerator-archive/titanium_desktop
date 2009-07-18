@@ -93,6 +93,7 @@ namespace ti
 			_exit(72);
 		}
 
+		SetPID(pid);
 		close(nativeIn->GetReadHandle());
 		close(nativeOut->GetWriteHandle());
 		close(nativeErr->GetWriteHandle());
