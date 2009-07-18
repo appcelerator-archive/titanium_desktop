@@ -25,6 +25,10 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 */
 	this->SetMethod("getCurrentWindow", &UserWindow::_GetCurrentWindow);
 
+	// This is an undocumented method which allows other modules to manually
+	// insert this window's Titanium object into a KObject.
+	this->SetMethod("insertAPI", &UserWindow::_InsertAPI);
+
 	// @tiproperty[integer, UI.UserWindow.CENTERED,since=0.3,deprecated=true] The CENTERED event constant
 	this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
@@ -514,6 +518,14 @@ void UserWindow::Closed()
 void UserWindow::_GetCurrentWindow(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	result->SetObject(this->shared_this);
+}
+
+void UserWindow::_InsertAPI(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	if (args.size() > 0 && args.at(0)->IsObject())
+	{
+		this->InsertAPI(args.GetObject(0));
+	}
 }
 
 void UserWindow::_Hide(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1569,66 +1581,53 @@ bool UserWindow::ShouldHaveTitaniumObject(
 		url.find("file://") == 0;
 }
 
+void UserWindow::InsertAPI(SharedKObject frameGlobal)
+{
+	// Produce a delegating object to represent the top-level Titanium object.
+	// When a property isn't found in this object it will look for it globally.
+	SharedKObject tiObject = new DelegateStaticBoundObject(host->GetGlobalObject());
+
+	// Create a delegate object for the UI API.
+	KObject* delegateUIAPI = new DelegateStaticBoundObject(binding, new AccessorBoundObject());
+
+	// Place currentWindow in the delegate.
+	delegateUIAPI->Set("getCurrentWindow", this->Get("getCurrentWindow"));
+
+	// Place currentWindow.createWindow in the delegate.
+	delegateUIAPI->Set("createWindow", this->Get("createWindow"));
+
+	// Place currentWindow.openFiles in the delegate.
+	delegateUIAPI->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
+	delegateUIAPI->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
+	delegateUIAPI->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
+
+	tiObject->Set("UI", Value::NewObject(delegateUIAPI));
+
+	// Place the Titanium object into the window's global object
+	frameGlobal->SetObject(GLOBAL_NS_VARNAME, tiObject);
+}
+
 void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
 	KJSUtil::ProtectGlobalContext(context);
 
-	if (!this->ShouldHaveTitaniumObject(context, globalObject))
-	{
-		return;
-	}
-
-	// Produce a delegating object to represent the top-level
-	// Titanium object. When a property isn't found in this object
-	// it will look for it in global_tibo.
-	SharedKObject global_tibo = this->host->GetGlobalObject();
-	SharedKObject tiObject = new DelegateStaticBoundObject(global_tibo);
-
-	SharedValue ui_api_value = tiObject->Get("UI");
-	if (ui_api_value->IsObject())
-	{
-		// Create a delegate object for the UI API.
-		SharedKObject ui_api = ui_api_value->ToObject();
-		KObject* delegateUIAPI = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
-
-		// Place currentWindow in the delegate.
-		delegateUIAPI->Set("getCurrentWindow", this->Get("getCurrentWindow"));
-
-		// Place currentWindow.createWindow in the delegate.
-		delegateUIAPI->Set("createWindow", this->Get("createWindow"));
-
-		// Place currentWindow.openFiles in the delegate.
-		delegateUIAPI->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
-		delegateUIAPI->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
-		delegateUIAPI->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
-
-		tiObject->Set("UI", Value::NewObject(delegateUIAPI));
-	}
-	else
-	{
-		std::cerr << "Could not find UI API point!" << std::endl;
-	}
-
-	// Get the global object into a KKJSObject
+	// Get the global object as a KKJSObject
 	SharedKObject frameGlobal = new KKJSObject(context, globalObject);
 
-	// Copy the document and window properties to the Titanium object
-	SharedValue doc_value = frameGlobal->Get("document");
-	tiObject->Set("document", doc_value);
-	SharedValue windowValue = frameGlobal->Get("window");
-	tiObject->Set("window", windowValue);
+	if (this->ShouldHaveTitaniumObject(context, globalObject))
+	{
+		this->InsertAPI(frameGlobal);
 
-	// Place the Titanium object into the window's global object
-	frameGlobal->SetObject(GLOBAL_NS_VARNAME, tiObject);
+		// FIXME: This is broken for documents with more than one frame
+		// Bind the window into currentWindow so you can call things like
+		// Titanium.UI.currentWindow.getParent().window to get the parent's
+		// window and global variable scope
+		this->Set("window", frameGlobal->Get("window"));
 
-	// bind the window into currentWindow so you can call things like
-	// Titanium.UI.currentWindow.getParent().window to get the parent's
-	// window and global variable scope
-	this->Set("window", windowValue);
-
-	UserWindow::LoadUIJavaScript(context);
+		UserWindow::LoadUIJavaScript(context);
+	}
 
 	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
 	event->SetObject("scope", frameGlobal);

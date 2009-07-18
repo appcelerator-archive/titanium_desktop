@@ -10,7 +10,7 @@ namespace ti
 	class OSXTrayItem: public TrayItem
 	{
 	public:
-		OSXTrayItem(std::string& iconPath, SharedKMethod cb);
+		OSXTrayItem(std::string& iconURL, SharedKMethod cb);
 		virtual ~OSXTrayItem();
 
 		void SetIcon(std::string& iconPath);

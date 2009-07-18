@@ -23,32 +23,35 @@ namespace ti
 		this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
 		/**
-		 * @tiapi(method=True,name=UI.createMenu,version=1.0) Create an empty Menu object
-		 * @tiresult(for=UI.createMenu,type=object) a Menu object
+		 * @tiapi(method=True,name=UI.createMenu,version=1.0)
+		 * @tiapi Create a new menu
+		 * @tiresult[UI.Menu] A new menu
 		 */
 		this->SetMethod("createMenu", &UIBinding::_CreateMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0) Create a new MenuItem object
-		 * @tiarg[String, label] The label for this menu itemi
+		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0)
+		 * @tiapi Create a new menu item.
+		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
-		 * @tiresult[UI.MenuItem] The new MenuItem object
+		 * @tiresult[UI.MenuItem] A new menu item
 		 */
 		this->SetMethod("createMenuItem", &UIBinding::_CreateMenuItem);
 
 		/**
 		 * @tiapi(method=True,name=UI.createCheckMenuItem,version=1.0)
-		 * @tiapi Create a new CheckMenuItem object
-		 * @tiarg[String, label] The label for this menu itemi
+		 * @tiapi Create a new CheckMenuItem object.
+		 * @tiarg[String, label] The label for this menu item
 		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
 		 * @tiresult[UI.CheckMenuItem] The new CheckMenuItem object
 		 */
 		this->SetMethod("createCheckMenuItem", &UIBinding::_CreateCheckMenuItem);
 
 		/**
-		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0) Create a new SeparatorMenuItem object
-		 * @tiresult[UI.SeparatorMenuItem] The new SeparatorMenuItem object
+		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0)
+		 * @tiapi Create a new separator menu item.
+		 * @tiresult[UI.SeparatorMenuItem] A new separator menu item
 		 */
 		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
 
@@ -87,6 +90,7 @@ namespace ti
 		 * @tiapi Create and add a tray icon
 		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
 		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
+		 * @tiresult(for=UI.addTray,type=UI.Tray|null) the application's Tray icon object
 		 */
 		this->SetMethod("addTray", &UIBinding::_AddTray);
 
@@ -164,6 +168,7 @@ namespace ti
 
 	UIBinding::~UIBinding()
 	{
+		this->ClearTray();
 	}
 
 	Host* UIBinding::GetHost()
@@ -222,6 +227,7 @@ namespace ti
 
 	AutoMenu UIBinding::__CreateMenu(const ValueList& args)
 	{
+		// call into the native code to retrieve the menu
 		return this->CreateMenu();
 	}
 
@@ -242,8 +248,8 @@ namespace ti
 			item->SetLabel(label);
 		if (!iconURL.empty())
 			item->SetIcon(iconURL);
-		//if (!eventListener.isNull())
-		//	item->AddEventListener(Event::CLICKED, eventListener);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
 
 		return item;
 	}
@@ -263,8 +269,8 @@ namespace ti
 		AutoMenuItem item = this->CreateCheckMenuItem();
 		if (!label.empty())
 			item->SetLabel(label);
-		//if (!eventListener.isNull())
-		//	item->AddEventListener(Event::CLICKED, eventListener);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
 
 		return item;
 	}
@@ -352,12 +358,10 @@ namespace ti
 	void UIBinding::_AddTray(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("createTrayIcon", "s,?m");
-
-		std::string iconPath = args.GetString(0);
-		iconPath = URLToPathOrURL(iconPath);
+		std::string iconURL = args.GetString(0);
 
 		SharedKMethod cb = args.GetMethod(1, NULL);
-		AutoTrayItem item = this->AddTray(iconPath, cb);
+		AutoTrayItem item = this->AddTray(iconURL, cb);
 		this->trayItems.push_back(item);
 		result->SetObject(item);
 	}

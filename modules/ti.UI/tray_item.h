@@ -15,7 +15,7 @@ namespace ti
 	{
 
 	public:
-		TrayItem();
+		TrayItem(std::string& iconURL);
 		~TrayItem();
 
 		virtual void SetIcon(std::string& iconPath) = 0;
@@ -34,6 +34,7 @@ namespace ti
 	protected:
 		AutoMenu menu;
 		std::string iconURL;
+		std::string iconPath;
 		std::string hint;
 
 	};

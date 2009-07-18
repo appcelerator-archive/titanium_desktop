@@ -20,6 +20,13 @@
 #include <sys/statvfs.h>
 #endif
 
+#ifdef OS_WIN32
+#define MIN_PATH_LENGTH 3
+#else
+#define MIN_PATH_LENGTH 1
+#endif
+
+
 namespace ti
 {
 	File::File(std::string filename) :
@@ -30,9 +37,9 @@ namespace ti
 		this->filename = pocoPath.absolute().toString();
 
 		// If the filename we were given contains a trailing slash, just remove it
-		// so that users can count on reproducible results fromr toShtring.
-		size_t length = this->filename.length();
-		if (length > 1 && this->filename[length - 1] == Poco::Path::separator())
+		// so that users can count on reproducible results from toString.
+		size_t length = this->filename.length();		
+		if (length > MIN_PATH_LENGTH && this->filename[length - 1] == Poco::Path::separator())
 		{
 			this->filename.resize(length - 1);
 		}

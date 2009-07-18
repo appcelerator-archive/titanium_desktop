@@ -3,7 +3,7 @@ Import('build')
 import os, os.path as path
 
 Env = build.env.Clone()
-Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
+Env.Append(CPPDEFINES=['USE_NO_EXPORT=1', '_CRT_SECURE_NO_WARNINGS=1'])
 Env.Append(LIBS=['kernel32','shell32','user32','comctl32','comdlg32'])
 # /MD
 Env.Append(CCFLAGS=['/O2','/GL','/FD','/EHsc','/MT','/W3','/Wp64','/Zi','/TP'])

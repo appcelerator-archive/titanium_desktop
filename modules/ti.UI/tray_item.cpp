@@ -9,11 +9,14 @@
 namespace ti
 {
 
-	TrayItem::TrayItem() : StaticBoundObject("TrayItem")
+	TrayItem::TrayItem(std::string& iconURL) : 
+		StaticBoundObject("TrayItem"),
+		iconURL(iconURL),
+		iconPath(URLToPathOrURL(iconURL))
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Tray.setIcon,since=0.2) Sets a TrayItem's icon
-		 * @tiarg(for=UI.Tray.setIcon,name=icon,type=string,optional=True) path to the icon or null to unset
+		 * @tiarg(for=UI.Tray.setIcon,name=icon,type=String,optional=True) path to the icon or null to unset
 		 */
 		this->SetMethod("setIcon", &TrayItem::_SetIcon);
 
@@ -34,13 +37,13 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=UI.Tray.getMenu,since=1.0)
 		 * @tiapi Get the menu for this TrayItem
-		 * @tiresult[UI.Menu|null] Thh Menu in use for this TrayItem or null if unset
+		 * @tiresult[UI.Menu|null] The Menu in use for this TrayItem or null if unset
 		 */
 		this->SetMethod("getMenu", &TrayItem::_GetMenu);
 
 		/**
 		 * @tiapi(method=True,name=UI.Tray.setHint,since=0.2) Sets a TrayItem's tooltip
-		 * @tiarg(for=UI.Tray.setHint,name=hint,type=string,optional=True) tooltip value or null to unset
+		 * @tiarg(for=UI.Tray.setHint,name=hint,type=String,optional=True) tooltip value or null to unset
 		 */
 		this->SetMethod("setHint", &TrayItem::_SetHint);
 
@@ -65,13 +68,13 @@ namespace ti
 	{
 		args.VerifyException("setIcon", "s");
 
-		std::string iconPath = this->iconURL = "";
+		this->iconPath = this->iconURL = "";
 		if (args.size() > 0) {
 			this->iconURL = args.GetString(0);
-			iconPath = URLToPathOrURL(iconURL);
+			this->iconPath = URLToPathOrURL(iconURL);
 		}
 
-		this->SetIcon(iconPath);
+		this->SetIcon(this->iconPath);
 	}
 
 	void TrayItem::_GetIcon(const ValueList& args, SharedValue result)

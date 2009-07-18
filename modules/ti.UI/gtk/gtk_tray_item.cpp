@@ -12,8 +12,8 @@ namespace ti
 	void TrayClickedCallback(GtkStatusIcon*, gpointer);
 	void TrayMenuCallback(GtkStatusIcon*, guint, guint, gpointer);
 
-	GtkTrayItem::GtkTrayItem(std::string& icon_path, SharedKMethod cb) :
-		TrayItem(),
+	GtkTrayItem::GtkTrayItem(std::string& iconURL, SharedKMethod cb) :
+		TrayItem(iconURL),
 		item(gtk_status_icon_new()),
 		menu(0),
 		callback(cb),
@@ -26,7 +26,7 @@ namespace ti
 			G_OBJECT(this->item), "popup-menu",
 			G_CALLBACK(TrayMenuCallback), this);
 
-		this->SetIcon(icon_path);
+		this->SetIcon(this->iconPath);
 		gtk_status_icon_set_visible(this->item, TRUE);
 	}
 

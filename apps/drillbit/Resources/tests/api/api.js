@@ -450,13 +450,13 @@ describe("ti.API tests",
 		value_of(str).should_be("bar");
 	},
 
-  test_api_run_on_main: function()
-  {
-    function test(value) {
-      Titanium.API.foo = value;
-    }
+	test_api_run_on_main: function()
+	{
+		function test(value) {
+			Titanium.API.foo = value;
+		}
 
-    Titanium.API.runOnMainThread(test, "works!");
-    value_of(Titanium.API.foo).should_be("works!");
-  }
+		Titanium.API.runOnMainThread(test, "works!");
+		value_of(Titanium.API.foo).should_be("works!");
+	}
 });

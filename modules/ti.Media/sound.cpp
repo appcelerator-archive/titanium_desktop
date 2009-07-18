@@ -90,11 +90,15 @@ namespace ti
 	}
 	void Sound::SetVolume(const ValueList& args, SharedValue result)
 	{
-		if (args.size()!=1)
-		{
-			throw ValueException::FromString("setVolume takes 1 parameter");
-		}
-		this->SetVolume(args.at(0)->ToDouble());
+		args.VerifyException("setVolume", "n");
+		double volume = args.GetDouble(0);
+
+		if (volume < 0)
+			volume = 0;
+		if (volume > 1)
+			volume = 1;
+
+		this->SetVolume(volume);
 	}
 	void Sound::GetVolume(const ValueList& args, SharedValue result)
 	{

@@ -559,8 +559,9 @@ void Win32UserWindow::Open()
 void Win32UserWindow::Close()
 {
 	this->RemoveOldMenu();
-	DestroyWindow(windowHandle);
 	UserWindow::Close();
+
+	DestroyWindow(windowHandle);
 	this->Closed();
 }
 

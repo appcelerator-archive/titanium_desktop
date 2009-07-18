@@ -1,4 +1,4 @@
-/**
+/**s
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
@@ -10,7 +10,8 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(std::string& iconPath, SharedKMethod cb) :
+	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cb) :
+		TrayItem(iconURL),
 		callback(cb),
 		oldNativeMenu(0),
 		trayIconData(0)
@@ -22,9 +23,8 @@ namespace ti
 		{
 			uw = *i;
 		}
-	
+
 		AutoPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
-	
 		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
 		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
 		notifyIconData->hWnd = wuw->GetWindowHandle();
@@ -34,7 +34,7 @@ namespace ti
 
 		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
-	
+
 		lstrcpy(notifyIconData->szTip, "Titanium Application");
 		Shell_NotifyIcon(NIM_ADD, notifyIconData);
 		this->trayIconData = notifyIconData;
@@ -66,8 +66,10 @@ namespace ti
 	{
 		if (this->trayIconData == NULL)
 		{
-			// TODO: free the previous hint
-			lstrcpy(this->trayIconData->szTip, hint.c_str());
+			// NotifyIconData.szTip has 128 character limit.
+			ZeroMemory(this->trayIconData->szTip, 128);
+			// make sure we don't overflow the static buffer.
+			lstrcpyn(this->trayIconData->szTip, hint.c_str(), 128);
 			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 		}
 	}

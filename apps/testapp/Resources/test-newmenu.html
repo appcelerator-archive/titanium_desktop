@@ -6,6 +6,32 @@
 				margin:10px;
 			}
 		</style>
+		<script type="text/python">
+from threading import Thread
+import time
+# Create thread to eat cpu
+def mythread():
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  print "in thread"
+  while True:
+    print "in thread loop"
+    pass
+print "before thread"
+print "before thread"
+print "before thread"
+print "before thread"
+print "before thread"
+Thread(target=mythread).start()
+print "launched thread"
+print "launched thread"
+print "launched thread"
+print "launched thread"
+print "launched thread"
+</script>
 		<script>
 			var menu = null;
 			var item1 = null;
@@ -22,19 +48,18 @@
 			function setMainMenu() {
 				try {
 				menu = Titanium.UI.createMenu();
-				var itemz = menu.addSubmenu("WithImage", function() {alert('what');}, "app://fonts.ico");
+				var itemz = menu.addItem("WithImage", function() {alert('what');}, "app://fonts.ico");
 				var iz = itemz.addItem("blah1");
 				iz.disable();
 				itemz.addItem("blah20");
 				itemz.addItem("blah30");
-				item1 = menu.addSubmenu("Blahblah");
+				item1 = menu.addItem("Blahblah");
 				item1.addItem("haha1");
 				item1.addItem("PNG Icon", function() {alert('what');}, "app://icon.png");
 				item1.addItem("BMP Icon", function() {alert('what');}, "app://icon.bmp");
 				item1.addItem("ICO Icon", function() {alert('what');}, "app://setup.ico");
 				check_item = item1.addCheckItem("haha4");
 				check_item.setState(true);
-				check_item.setSubmenu(menu);
 
 				item1.addSeparatorItem();
 				item1.addItem("The items below should flip-flop");
@@ -68,7 +93,7 @@
 			function setMainMenu2() {
 				try {
 				menu2 = Titanium.UI.createMenu();
-				item2 = menu2.addSubmenu("Menu2");
+				item2 = menu2.addItem("Menu2");
 				item2.addItem("haha1");
 				item2.addItem("haha2");
 				item2.addItem("haha3");

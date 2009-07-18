@@ -57,11 +57,9 @@ namespace ti
 
 		if (!config->IsFullscreen())
 		{
-			this->real_x = config->GetX();
-			this->real_y = config->GetY();
-			this->real_w = config->GetWidth();
-			this->real_h = config->GetHeight();
-			NSRect rect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
+			NSRect rect = CalculateWindowFrame(
+				config->GetX(), config->GetY(),
+				config->GetWidth(), config->GetHeight());
 			[nativeWindow setFrame:rect display:NO animate:NO];
 
 			this->ReconfigureWindowConstraints();
@@ -271,7 +269,7 @@ namespace ti
 
 		// Adjust the position for the origin of this screen and use cartesian coordinates
 		x += screenFrame.origin.x;
-		y = screenFrame.origin.y + (screenFrame.size.height - (y + height));
+		y = (screenFrame.size.height - (height + y)) + screenFrame.origin.y;
 
 		return NSMakeRect(x, y, width, height);
 	}
@@ -295,8 +293,8 @@ namespace ti
 	{
 		if (active && nativeWindow)
 		{
-			this->real_x = x; // Preserve input value
-			NSRect newRect = CalculateWindowFrame(x, real_y, real_w, real_h);
+			NSRect newRect = CalculateWindowFrame(
+				x, this->GetY(), this->GetWidth(), this->GetHeight());
 			[nativeWindow setFrameOrigin: newRect.origin];
 		}
 	}
@@ -324,8 +322,8 @@ namespace ti
 	{
 		if (active && nativeWindow)
 		{
-			this->real_y = y; // Preserve input value
-			NSRect newRect = CalculateWindowFrame(real_x, real_y, real_w, real_h);
+			NSRect newRect = CalculateWindowFrame(
+				this->GetX(), y, this->GetWidth(), this->GetHeight());
 			[nativeWindow setFrameOrigin: newRect.origin];
 		}
 	}
@@ -346,8 +344,11 @@ namespace ti
 	{
 		if (active && nativeWindow)
 		{
-			this->real_w = width;
-			NSRect newFrame = CalculateWindowFrame(real_x, real_y, width, real_h);
+			NSRect newFrame = CalculateWindowFrame(
+				this->GetX(), this->GetY(), width, this->GetHeight());
+
+			// We only want to change the width
+			newFrame.size.height = [nativeWindow frame].size.height;
 
 			if (!config->IsResizable())
 			{
@@ -374,8 +375,11 @@ namespace ti
 	{
 		if (active && nativeWindow)
 		{
-			this->real_h = height;
-			NSRect newFrame = CalculateWindowFrame(real_x, real_y, real_w, real_h);
+			NSRect newFrame = CalculateWindowFrame(
+				this->GetX(), this->GetY(), this->GetWidth(), height);
+
+			// We only want to change the height
+			newFrame.size.width = [nativeWindow frame].size.width;
 
 			if (!config->IsResizable())
 			{
@@ -394,10 +398,10 @@ namespace ti
 		}
 
 		NSSize minSize, maxSize;
-		double maxWidth = (int) this->config->GetMaxWidth();
-		double minWidth = (int) this->config->GetMinWidth();
-		double maxHeight = (int) this->config->GetMaxHeight();
-		double minHeight = (int) this->config->GetMinHeight();
+		double maxWidth = this->config->GetMaxWidth();
+		double minWidth = this->config->GetMinWidth();
+		double maxHeight = this->config->GetMaxHeight();
+		double minHeight = this->config->GetMinHeight();
 
 		if (maxWidth == -1)
 		{
@@ -493,11 +497,8 @@ namespace ti
 	{
 		if (active && nativeWindow)
 		{
-			this->real_x = bounds.x;
-			this->real_y = bounds.y;
-			this->real_w = bounds.width;
-			this->real_h = bounds.height;
-			NSRect newFrame = CalculateWindowFrame(real_x, real_y, real_w, real_h);
+			NSRect newFrame = CalculateWindowFrame(
+				bounds.x, bounds.y, bounds.width, bounds.height);
 
 			if (!config->IsResizable())
 			{
@@ -674,13 +675,13 @@ namespace ti
 	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
 		STUB();
+		this->iconPath = iconPath;
 	}
 
 	std::string& OSXUserWindow::GetIcon()
 	{
 		STUB();
-		static std::string stubby = "";
-		return stubby;
+		return this->iconPath;
 	}
 
 	bool OSXUserWindow::IsTopMost()
