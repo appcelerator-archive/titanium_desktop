@@ -21,8 +21,7 @@ namespace ti
 		//TODO doc me
 		SetMethod("createProcess", &ProcessBinding::CreateProcess);
 		SetMethod("createPipe", &ProcessBinding::CreatePipe);
-		SetMethod("getCurrentProcess", &ProcessBinding::GetCurrentProcess);
-		
+
 #if defined(OS_OSX) || (OS_LINUX)
 		signals["SIGHUP"] = SIGHUP;
 		signals["SIGINT"] = SIGINT;
@@ -185,10 +184,5 @@ namespace ti
 	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(new Pipe());
-	}
-
-	void ProcessBinding::GetCurrentProcess(const ValueList& args, SharedValue result)
-	{
-		result->SetObject(Process::GetCurrentProcess());
 	}
 }

@@ -18,8 +18,7 @@ namespace ti
 	class PosixProcess : public Process
 	{
 	public:
-		PosixProcess(SharedKList args, SharedKObject environment, 
-			AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
+		PosixProcess();
 		virtual ~PosixProcess();
 		virtual int GetPID();
 		virtual void Terminate();
@@ -44,8 +43,6 @@ namespace ti
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.
 		std::vector<AutoBlob> processOutput;
-		
-		PosixProcess();
 		void StartProcess();
 	};
 }

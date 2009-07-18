@@ -15,15 +15,12 @@ namespace ti
 {
 	class Process;
 	typedef AutoPtr<Process> AutoProcess;
-	class Process : public AccessorBoundMethod
+	class Process : public KEventMethod
 	{
 	public:
 		Process();
 		virtual ~Process();
-		static AutoProcess GetCurrentProcess();
 		static AutoProcess CreateProcess();
-		void ExitCallback(const ValueList& args, SharedValue result);
-		void ReadCallback(const ValueList& args, SharedValue result);
 		virtual SharedKObject CloneEnvironment();
 		virtual void LaunchAsync();
 		virtual std::string LaunchSync();
@@ -35,29 +32,29 @@ namespace ti
 		void SetOnRead(SharedKMethod method);
 		void Exited();
 		void ExitCallback(const ValueList& args, SharedValue result);
+		void Call(const ValueList& args, SharedValue result);
+		static SharedKObject GetCurrentEnvironment();
 
+		inline void SetPID(int pid) { this->pid = pid; }
 		inline void SetStdin(AutoPipe stdinPipe) { this->stdinPipe = stdinPipe; }
 		inline void SetStdout(AutoPipe stdoutPipe) { this->stdoutPipe = stdoutPipe; }
 		inline void SetStderr(AutoPipe stderrPipe) { this->stderrPipe = stderrPipe; }
 		virtual inline void SetArguments(SharedKList args) { this->args = args; }
 		inline void SetEnvironment(SharedKObject env) { this->environment = env; }
-		inline void SetExitCode(int exitCode) { this->exitCode = exitCode; }
+		inline int GetPID() { return this->pid; }
 		inline AutoPipe GetStdin() { return this->stdinPipe; }
 		inline AutoPipe GetStdout() { return this->stdoutPipe; }
 		inline AutoPipe GetStderr() { return this->stderrPipe; }
 		inline SharedKList GetArgs() { return this->args; };
 		inline SharedKObject GetEnvironment() { return this->environment; }
-		inline int GetExitCode() { return exitCode; }
 		void SetEnvironment(const char *name, const char *value)
 		{
 			environment->SetString(name, value);
 		}
 
-		virtual int GetPID() = 0;
 		virtual void Terminate() = 0;
 		virtual void Kill() = 0;
 		virtual void SendSignal(int signal) = 0;
-		virtual bool IsRunning() = 0;
 		virtual void ForkAndExec() = 0;
 		virtual void MonitorAsync() = 0;
 		virtual std::string MonitorSync() = 0;
@@ -79,23 +76,21 @@ namespace ti
 		void _GetStdout(const ValueList& args, SharedValue result);
 		void _GetStderr(const ValueList& args, SharedValue result);
 		void _IsRunning(const ValueList& args, SharedValue result);
-		
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
 		void _ToString(const ValueList& args, SharedValue result);
-		
-		// non-exposed binding methods
-		void Call(const ValueList& args, SharedValue result);
-		
+
 		AutoPipe stdoutPipe, stderrPipe;
 		AutoPipe stdinPipe;
 		SharedKObject environment;
 		SharedKList args;
-		int exitCode;
+		int pid;
+		SharedValue exitCode;
 		SharedKMethod* onExit;
 		Poco::RunnableAdapter<Process>* exitMonitorAdapter;
 		Poco::Thread exitMonitorThread;
 		SharedKMethod exitCallback;
+		bool running;
 	};
 }
 

@@ -17,16 +17,6 @@
 namespace ti
 {
 	/*static*/
-	AutoProcess Process::GetCurrentProcess()
-	{
-#if defined(OS_WIN32)
-		return Win32Process::GetCurrentProcess();
-#else
-		return PosixProcess::GetCurrentProcess();
-#endif
-	}
-	
-	/*static*/
 	AutoProcess Process::CreateProcess()
 	{
 #if defined(OS_WIN32)
@@ -38,12 +28,13 @@ namespace ti
 	}
 
 	Process::Process() :
-		AccessorBoundMethod(NULL, "Process.Process"),
+		KEventMethod(NULL, "Process.Process"),
 		stdoutPipe(new Pipe()),
 		stderrPipe(new Pipe()),
 		stdinPipe(new Pipe()),
-		environment(GetCurrentProcess()->CloneEnvironment()),
-		exitCode(-1),
+		environment(GetCurrentEnvironment()),
+		pid(-1),
+		exitCode(Value::Null),
 		onExit(0)
 	{
 		SetMethod("getPID", &Process::_GetPID);
@@ -73,38 +64,20 @@ namespace ti
 
 	void Process::Exited()
 	{
-		if (onExit != NULL && !onExit->isNull())
-		{
-			ValueList args(Value::NewInt(this->exitCode));
-			try
-			{
-				Host::GetInstance()->InvokeMethodOnMainThread(*this->onExit, args, false);
-			}
-			catch (ValueException &e)
-			{
-				Logger::Get("Process")->Error(e.DisplayString()->c_str());
-			}
-		}
-		
-		this->duplicate();
-		AutoPtr<Process> autoThis = this;
-		ProcessBinding::ProcessTerminated(autoThis);
+		this->running = false;
+		this->FireEvent(Event::Exit);
 	}
-	
-	// convenience for joining stdout + stderr, and attaching to stdout
-	void Process::SetOnRead(SharedKMethod method)
+
+	void Process::SetOnRead(SharedKMethod onRead)
 	{
-		if (method.isNull())
-		{
-			//stdoutPipe->SetOnRead(NULL);
-			//stderrPipe->SetOnRead(NULL);
-			return;
-		}
-		
-		//stdoutPipe->SetOnRead(method);
-		//stderrPipe->SetOnRead(method);
+		this->AddEventListener(Event::READ, onRead);
 	}
-	
+
+	void Process::SetOnExit(SharedKMethod onExit)
+	{
+		this->AddEventListener(Event::Exit, onExit);
+	}
+
 	SharedKObject Process::CloneEnvironment()
 	{
 		SharedStringList properties = environment->GetPropertyNames();
@@ -125,44 +98,51 @@ namespace ti
 		{
 			str << " \"" << this->args->At(i)->ToString() << "\" ";
 		}
-		return str.str();	
+		return str.str();
 	}
 	
 	void Process::LaunchAsync()
 	{
+		this->running = true;
+		this->exitCode = Value::Null;
+
 		ForkAndExec();
 		MonitorAsync();
-		
+
 		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
 			this, &Process::ExitCallback);
-		this->exitMonitorThread.start(*exitMonitorAdapter);
+		this->exitMonitorThread.start(*nxitMonitorAdapter);
 	}
 
 	std::string Process::LaunchSync()
 	{
+		this->running = true;
+		this->exitCode = Value::Null;
+
 		ForkAndExec();
 		std::string output = MonitorSync();
+
+		this->Exited();
 		return output;
 	}
-	
+
 	void Process::ExitMonitor()
 	{
-		this->exitCode = this->Wait();
+		this->exitCode = Value::NewInt(this->Wait());
 		if (!exitCallback.isNull())
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
 	}
-	
+
 	void Process::ExitCallback(const ValueList& args, SharedValue result)
 	{
 		this->Exited();
-		delete this;
 	}
-	
+
 	void Process::Restart()
 	{
 		Restart(NULL, NULL, NULL, NULL);
 	}
-	
+
 	void Process::Restart(SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
 	{
 		this->environment = environment.isNull() ? CloneEnvironment() : environment;
@@ -182,22 +162,21 @@ namespace ti
 			Terminate();
 		}
 
-		this->duplicate();
-		AutoPtr<Process> autoThis = this;
-		ProcessBinding::AddProcess(autoThis);
-	
 		Logger::Get("Process.Process")->Debug("restarting...");
 		LaunchAsync();
 	}
 	
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
-		result->SetInt(GetPID());
+		if (running)
+			result->SetInt(GetPID());
+		else
+			result->SetNull();
 	}
 	
 	void Process::_GetExitCode(const ValueList& args, SharedValue result)
 	{
-		result->SetInt(exitCode);
+		result->SetValue(exitCode);
 	}
 	
 	void Process::_GetArguments(const ValueList& args, SharedValue result)
@@ -313,23 +292,19 @@ namespace ti
 			}
 		}
 	}
-	
+
 	void Process::_SetOnRead(const ValueList& args, SharedValue result)
 	{
-		if (args.size() > 0 && args.at(0)->IsMethod())
-		{
-			//SetOnRead(args.at(0)->ToMethod());
-		}
+		args.VerifyException("setOnRead", "m");
+		this->SetOnRead(args.GetMethod(0));
 	}
-	
+
 	void Process::_SetOnExit(const ValueList& args, SharedValue result)
 	{
-		if (args.size() > 0 && args.at(0)->IsMethod())
-		{
-			this->onExit = new SharedKMethod(args.at(0)->ToMethod());
-		}
+		args.VerifyException("setOnExit", "m");
+		this->SetOnExit(args.GetMethod(0));
 	}
-	
+
 	void Process::_GetStdin(const ValueList& args, SharedValue result)
 	{
 		result->SetObject(stdinPipe);
@@ -360,6 +335,20 @@ namespace ti
 	void Process::_ToString(const ValueList& args, SharedValue result)
 	{
 		result->SetString(ArgumentsToString().c_str());
+	}
+
+	SharedKObject GetCurrentEnvironment()
+	{
+		SharedKObject kenv = new StaticBoundObject();
+
+		std::map<std::string, std::string> env = EnvironmentUtils::GetEnvironment();
+		std::map<std::string, std::string>::iterator i = env.begin();
+		while (i != env.end())
+		{
+			kenv->SetString(i->first.c_str(), i->second.c_str());
+			i++;
+		}
+		return kenv;
 	}
 }
 

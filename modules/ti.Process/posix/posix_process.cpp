@@ -11,13 +11,10 @@
 # include <crt_externs.h>
 # include <Poco/Path.h>
 #endif
-
 extern char **environ;
-namespace ti
-{	
-	// Parts derived from Poco::Process_UNIX
-	AutoPtr<PosixProcess> PosixProcess::currentProcess = new PosixProcess();
 
+namespace ti
+{
 	/*static*/
 	AutoPtr<PosixProcess> PosixProcess::GetCurrentProcess()
 	{
@@ -26,33 +23,10 @@ namespace ti
 
 	PosixProcess::PosixProcess() :
 		logger(Logger::Get("Process.PosixProcess")),
-		pid(-1),
 		nativeIn(new PosixPipe(false)),
 		nativeOut(new PosixPipe(true)),
 		nativeErr(new PosixPipe(true))
 	{
-	}
-
-	PosixProcess::PosixProcess() :
-		Process(),
-		logger(Logger::Get("Process.PosixProcess")),
-		pid(getpid())
-	{
-		pid = getpid();
-		for (int i = 0; environ[i] != NULL; i++)
-		{
-			std::string entry = environ[i];
-			std::string key = entry.substr(0, entry.find("="));
-			std::string val = entry.substr(entry.find("=")+1);
-			
-			SetEnvironment(key.c_str(), val.c_str());
-		}
-		
-		SharedApplication app = Host::GetInstance()->GetApplication();
-		for (size_t i = 0; i < app->arguments.size(); i++)
-		{
-			args->Append(Value::NewString(app->arguments.at(i)));
-		}
 	}
 
 	PosixProcess::~PosixProcess()
@@ -78,13 +52,13 @@ namespace ti
 		}
 		args->At(0)->SetString(cmd.c_str());
 #endif
-		Process:SetArguments(args);
+		Process::SetArguments(args);
 	}
 
 	void PosixProcess::ForkAndExec()
 	{
-		this->pid = fork();
-		if (this->pid < 0)
+		int pid = fork();
+		if (pid < 0)
 		{
 			throw ValueException::FromFormat("Cannot fork process for %s", 
 				args->At(0)->ToString());
@@ -163,12 +137,12 @@ namespace ti
 		int rc;
 		do
 		{
-			rc = waitpid(this->pid, &status, 0);
+			rc = waitpid(GetPID(), &status, 0);
 		} while (rc < 0 && errno == EINTR);
 
-		if (rc != this->pid)
+		if (rc != GetPID())
 		{
-			throw ValueException::FromFormat("Cannot wait for process: %d", this->pid);
+			throw ValueException::FromFormat("Cannot wait for process: %d", GetPID());
 		}
 
 		int exitCode = WEXITSTATUS(status);
@@ -189,15 +163,13 @@ namespace ti
 			}
 		}
 	}
-	
-	int PosixProcess::GetPID()
-	{
-		return pid;
-	}
 
 	void PosixProcess::SendSignal(int signal)
 	{
-		if (kill(this->pid, signal) != 0)
+		if (!running)
+			return;
+
+		if (kill(GetPID(), signal) != 0)
 		{
 			switch (errno)
 			{
@@ -220,10 +192,4 @@ namespace ti
 	{
 		SendSignal(SIGINT);
 	}
-
-	bool PosixProcess::IsRunning()
-	{
-		return pid != -1;
-	}
-
 }
