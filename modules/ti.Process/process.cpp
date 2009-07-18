@@ -375,11 +375,12 @@ namespace ti
 		result->SetString(ArgumentsToString().c_str());
 	}
 
+	/*static*/
 	SharedKObject Process::GetCurrentEnvironment()
 	{
 		SharedKObject kenv = new StaticBoundObject();
-
 		std::map<std::string, std::string> env = EnvironmentUtils::GetEnvironment();
+
 		std::map<std::string, std::string>::iterator i = env.begin();
 		while (i != env.end())
 		{
