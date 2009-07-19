@@ -246,7 +246,12 @@ namespace ti
 	void Pipe::FireReadBuffers()
 	{
 		AutoBlob blob = 0;
-		for (size_t i = 0; i < buffers.size(); i++)
+		int size = 0;
+		{
+			Poco::Mutex::ScopedLock lock(buffersMutex);
+			size = buffers.size();
+		}
+		while (size > 0)
 		{
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
@@ -268,7 +273,13 @@ namespace ti
 				this->FireEvent(Event::CLOSE);
 				this->FireEvent(Event::CLOSED);
 			}
+
+			{
+				Poco::Mutex::ScopedLock lock(buffersMutex);
+				size = buffers.size();
+			}
 		}
+
 	}
 	
 	void Pipe::FireEvents()
