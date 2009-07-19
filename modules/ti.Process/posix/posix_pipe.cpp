@@ -35,17 +35,7 @@ namespace ti
 		// A widowed pipe will eventually stop reading data.
 		NativePipe::Close();
 
-		if (readHandle != -1)
-		{
-			close(readHandle);
-			readHandle = -1;
-		}
-
-		if (writeHandle != -1)
-		{
-			close(writeHandle);
-			writeHandle = -1;
-		}
+		this->CloseNative();
 	}
 
 	int PosixPipe::RawRead(char *buffer, int size)
@@ -83,5 +73,29 @@ namespace ti
 		{
 			throw ValueException::FromString("Error writing blob data to pipe");
 		}
+	}
+
+	void PosixPipe::CloseNativeRead()
+	{
+		if (readHandle != -1)
+		{
+			close(readHandle);
+			readHandle = -1;
+		}
+	}
+
+	void PosixPipe::CloseNativeWrite()
+	{
+		if (writeHandle != -1)
+		{
+			close(writeHandle);
+			writeHandle = -1;
+		}
+	}
+
+	void PosixPipe::CloseNative()
+	{
+		this->CloseNativeRead();
+		this->CloseNativeWrite();
 	}
 }

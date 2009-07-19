@@ -17,9 +17,9 @@ namespace ti
 {
 	PosixProcess::PosixProcess() :
 		logger(Logger::Get("Process.PosixProcess")),
-		nativeIn(new PosixPipe(false)),
-		nativeOut(new PosixPipe(true)),
-		nativeErr(new PosixPipe(true))
+		nativeIn(0),
+		nativeOut(0),
+		nativeErr(0)
 	{
 	}
 
@@ -51,6 +51,10 @@ namespace ti
 
 	void PosixProcess::ForkAndExec()
 	{
+		nativeIn = new PosixPipe(false);
+		nativeOut = new PosixPipe(true);
+		nativeErr = new PosixPipe(true);
+
 		int pid = fork();
 		if (pid < 0)
 		{
@@ -63,9 +67,9 @@ namespace ti
 			dup2(nativeIn->GetReadHandle(), STDIN_FILENO);
 			dup2(nativeOut->GetWriteHandle(), STDOUT_FILENO);
 			dup2(nativeErr->GetWriteHandle(), STDERR_FILENO);
-			nativeIn->Close();
-			nativeOut->Close();
-			nativeErr->Close();
+			nativeIn->CloseNative();
+			nativeOut->CloseNative();
+			nativeErr->CloseNative();
 
 			// close all open file descriptors other than stdin, stdout, stderr
 			for (int i = 3; i < getdtablesize(); ++i)
@@ -94,9 +98,9 @@ namespace ti
 		}
 
 		SetPID(pid);
-		close(nativeIn->GetReadHandle());
-		close(nativeOut->GetWriteHandle());
-		close(nativeErr->GetWriteHandle());
+		nativeIn->CloseNativeRead();
+		nativeOut->CloseNativeWrite();
+		nativeErr->CloseNativeWrite();
 	}
 
 	void PosixProcess::MonitorAsync()

@@ -250,24 +250,27 @@ namespace ti
 		{
 			if (buffers.size() > 0)
 			{
-				Poco::Mutex::ScopedLock lock(buffersMutex);
-				blob = buffers.front();
-				buffers.pop();
-			}
+				{
+					Poco::Mutex::ScopedLock lock(buffersMutex);
+					blob = buffers.front();
+					buffers.pop();
+				}
 
-			if (!blob.isNull())
-			{
-				this->duplicate();
-				AutoPtr<KEventObject> autothis = this;
-				AutoPtr<Event> event = new ReadEvent(autothis, blob);
-				this->FireEvent(event);
-				blob = 0;
-			}
-			else
-			{
-				// A null blob signifies a close event
-				this->FireEvent(Event::CLOSE);
-				this->FireEvent(Event::CLOSED);
+				if (!blob.isNull())
+				{
+					this->duplicate();
+					AutoPtr<KEventObject> autothis = this;
+					AutoPtr<Event> event = new ReadEvent(autothis, blob);
+					this->FireEvent(event);
+					blob = 0;
+				}
+				else
+				{
+					// A null blob signifies a close event
+					this->FireEvent(Event::CLOSE);
+					this->FireEvent(Event::CLOSED);
+				}
+
 			}
 			Poco::Thread::sleep(50);
 		}

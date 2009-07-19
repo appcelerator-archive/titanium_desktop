@@ -131,11 +131,9 @@ namespace ti
 		this->GetNativeStdout()->Detach(stdoutPipe);
 		this->GetNativeStderr()->Detach(stderrPipe);
 
-		if (!onRead.isNull())
-		{
-			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
-			this->GetNativeStderr()->RemoveEventListener(Event::READ, onRead);
-		}
+		// Don't detach event listeners because we want any pending
+		// READ events to fire. It should be okay though, because
+		// native pipes should not be re-used.
 	}
 
 	void Process::LaunchAsync()

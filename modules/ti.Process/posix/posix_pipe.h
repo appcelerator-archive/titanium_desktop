@@ -18,6 +18,9 @@ namespace ti
 		PosixPipe(bool isReader);
 		virtual ~PosixPipe();
 		virtual void Close();
+		virtual void CloseNative();
+		virtual void CloseNativeRead();
+		virtual void CloseNativeWrite();
 		inline int GetReadHandle() { return readHandle; }
 		inline int GetWriteHandle() { return writeHandle; }
 		virtual void EndOfFile() {};
