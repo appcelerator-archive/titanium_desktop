@@ -11,45 +11,43 @@
 	Titanium.Process.createProcess = function()
 	{
 		var process = ti_createProcess.apply(Titanium.Process, arguments);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setOnReadLine,since=0.5)
+		 * @tiarg[Function, fn] a callback that is called with every line of output received from this process
+		 */
 		process.setOnReadLine = function(fn)
 		{
-			var buffer = '';
+			process.buffer = '';
 			process.setOnRead(function (event)
 			{
 				var str = event.data.toString();
-				if (buffer.length > 0)
+				if (process.buffer.length > 0)
 				{
-					str = buffer + str;
+					str = process.buffer + str;
+					process.buffer = '';
 				}
 				
-				var newline = str.lastIndexOf("\n");
-				if (newline >= 0 && newline < str.length - 1)
+				var lines = str.split(/\r?\n/);
+				var lastLine = lines[lines.length-1];
+				
+				if (str.indexOf(lastLine)+lastLine.length < str.length)
 				{
-					buffer += str.substring(newline+1);
-					str = str.substring(0, newline);
-				}
-				else if (newline < 0)
-				{
-					buffer += str;
-					return;
+					buffer = lines.pop();
 				}
 				
-				if (str.length > 0)
+				for (var i = 0; i < lines.length; i++)
 				{
-					var lines = str.split(/\r?\n/);
-					for (var i = 0; i < lines.length; i++)
-					{
-						fn(line);
-					}
+					fn(lines[i]);
 				}
 			});
 			
 			process.addEventListener("exit", function (event)
 			{
-				if (buffer.length > 0)
+				if (process.buffer.length > 0)
 				{
-					fn(buffer);
-					buffer = null;
+					fn(process.buffer);
+					process.buffer = null;
 				}
 			});
 		};

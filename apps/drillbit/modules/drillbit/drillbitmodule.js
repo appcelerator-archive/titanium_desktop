@@ -398,6 +398,7 @@
 			var failed = 0;
 			process.setOnReadLine(function(data)
 			{
+				Titanium.API.debug("data="+data);
 				var i = data.indexOf('DRILLBIT_');
 				if (i != -1)
 				{
@@ -481,7 +482,7 @@
 				},1000);
 			}
 
-			process.addEventListener("exit", function(event)
+			process.addEventListener(Titanium.EXIT, function(event)
 			{
 				self.frontend_do('suite_finished', current_test.name);
 				try
