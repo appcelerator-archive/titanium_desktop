@@ -4,9 +4,10 @@ import os, sys, shutil, platform, subprocess
 
 
 def run(args,env=None,cwd=None):
-	args = [arg.replace(" ", "\\ ") for arg in args]
-	p = subprocess.Popen(" ".join(args), cwd=cwd, shell=True)
-	return os.waitpid(p.pid, 0)
+	return subprocess.call(args, cwd=cwd)
+	#args = [arg.replace(" ", "\\ ") for arg in args]
+	#p = subprocess.Popen(" ".join(args), cwd=cwd, shell=True)
+	#return os.waitpid(p.pid, 0)
 
 contents_dir = os.path.dirname(os.path.abspath(__file__))
 

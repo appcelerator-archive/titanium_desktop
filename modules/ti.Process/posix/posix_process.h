@@ -27,7 +27,7 @@ namespace ti
 
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual std::string MonitorSync();
+		virtual AutoBlob MonitorSync();
 		virtual int Wait();
 		virtual void SetArguments(SharedKList args);
 		void ReadCallback(const ValueList& args, SharedValue result);

@@ -109,7 +109,7 @@ namespace ti
 		nativeErr->StartMonitor();
 	}
 
-	std::string PosixProcess::MonitorSync()
+	AutoBlob PosixProcess::MonitorSync()
 	{
 		SharedKMethod readCallback =
 			StaticBoundMethod::FromMethod<PosixProcess>(
@@ -128,17 +128,17 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		std::string output;
+		std::vector<char> output;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
 			for (size_t i = 0; i < processOutput.size(); i++)
 			{
 				AutoBlob b = processOutput.at(i);
-				output.append(processOutput.at(i)->Get());
+				output.insert(output.end(), b->Get(), b->Get()+b->Length());
 			}
 		}
 
-		return output;
+		return new Blob(&(output[0]), output.size());
 	}
 
 	int PosixProcess::Wait()

@@ -162,9 +162,6 @@ describe("process tests",
 		value_of(p.stdin).should_be_object();
 		value_of(p.stdout).should_be_object();
 		value_of(p.stderr).should_be_object();
-		value_of(p.stdin.isClosed()).should_be_true();
-		value_of(p.stdout.isClosed()).should_be_true();
-		value_of(p.stderr.isClosed()).should_be_true();
 	},
 	
 	test_attach_file_as_async: function(callback)
@@ -197,8 +194,6 @@ describe("process tests",
 			{
 				value_of(data).should_be(fileData);
 				value_of(data.replace(/[\r\n]+/,'')).should_be(originalData);
-				value_of(p.stdout.isClosed()).should_be_true();
-				value_of(p.stderr.isClosed()).should_be_true();
 			}
 			catch (e)
 			{
@@ -253,17 +248,6 @@ describe("process tests",
 		}, 5000);
 	},
 	
-	test_pipe_empty_read: function() {
-		var i = Titanium.Process.createPipe();
-		var exception = false;
-		var data = null;
-		try { data = i.read(); } catch(e) { exception = true; }
-		
-		value_of(exception).should_be_false();
-		value_of(data).should_be_object();
-		value_of(data.length).should_be(0);	
-	},
-		
 	test_pipe_write: function()
 	{
 		var o = Titanium.Process.createPipe();
@@ -301,7 +285,7 @@ describe("process tests",
 		{
 			try {
 				value_of(p.getPID()).should_be_number();
-				var buf = event.data.toString();
+				var buf = event.data;
 				value_of(buf).should_be_object();
 				value_of(buf.toString()).should_be_string();
 				
@@ -500,7 +484,7 @@ describe("process tests",
 		// if we hit this timeout, then we fail.		
 		timer = setTimeout(function()
 		{
-			test.failed('timed out waiting for process to restart');
+			callback.failed('timed out waiting for process to restart');
 		},5000);
 	}
 });

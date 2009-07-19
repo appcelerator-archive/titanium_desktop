@@ -23,7 +23,7 @@ namespace ti
 		static AutoProcess CreateProcess();
 		virtual SharedKObject CloneEnvironment();
 		virtual void LaunchAsync();
-		virtual std::string LaunchSync();
+		virtual AutoBlob LaunchSync();
 		virtual void ExitMonitor();
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoPipe
@@ -59,7 +59,7 @@ namespace ti
 		virtual void SendSignal(int signal) = 0;
 		virtual void ForkAndExec() = 0;
 		virtual void MonitorAsync() = 0;
-		virtual std::string MonitorSync() = 0;
+		virtual AutoBlob MonitorSync() = 0;
 		virtual int Wait() = 0;
 		virtual AutoPipe GetNativeStdin() = 0;
 		virtual AutoPipe GetNativeStdout() = 0;

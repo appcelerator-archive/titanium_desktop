@@ -33,7 +33,7 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual std::string MonitorSync();
+		virtual AutoBlob MonitorSync();
 		virtual int Wait();
 		virtual std::string ArgumentsToString();
 		void ReadCallback(const ValueList& args, SharedValue result);

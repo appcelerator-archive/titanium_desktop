@@ -150,14 +150,14 @@ namespace ti
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
-	std::string Process::LaunchSync()
+	AutoBlob Process::LaunchSync()
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
 
 		ForkAndExec();
 		this->AttachPipes();
-		std::string output = MonitorSync();
+		AutoBlob output = MonitorSync();
 
 		this->Exited();
 		return output;
@@ -365,8 +365,8 @@ namespace ti
 	SharedValue Process::Call(const ValueList& args)
 	{
 		// Should this return an AutoBlob instead?
-		std::string output = LaunchSync();
-		return Value::NewString(output);
+		AutoBlob output = LaunchSync();
+		return Value::NewObject(output);
 	}
 
 	void Process::_ToString(const ValueList& args, SharedValue result)

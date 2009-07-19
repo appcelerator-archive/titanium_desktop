@@ -1,6 +1,4 @@
 (function() {
-	Titanium.API.debug(Titanium.API.getEnvironment());
-	
 	var Drillbit = function() {
 		var TFS = Titanium.Filesystem;
 		var TA  = Titanium.App;

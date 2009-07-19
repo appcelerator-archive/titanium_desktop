@@ -6,8 +6,9 @@
 	var errPrint = ti.App.stderr;
 	
 	// Javascript with ANSI color, this might be a first.
+	var ansi = (Titanium.platform != "win32" || 'MANPATH' in Titanium.API.getEnvironment())
 	var frontend = {
-		passed: 0, failed: 0, ansi: (Titanium.platform != "win32"),
+		passed: 0, failed: 0, ansi: ansi,
 		error: function(msg) {
 			errPrint(msg);
 		},
@@ -40,7 +41,7 @@
 		all_finished: function()
 		{
 			println("Total: " + this.passed + " passed, " + this.failed + " failed, "
-				+ ti.Drillbit.assertion_count + " assertions");
+				+ ti.Drillbit.total_assertions + " assertions");
 		}
 	};
 	
