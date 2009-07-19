@@ -18,3 +18,6 @@ else:
 m = build.add_module('ti.Process', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tiprocessmodule', source = sources)
 build.mark_build_target(t)
+
+t = build.utils.CopyTree(Glob('*.js'), m.build_dir)
+build.mark_build_target(t)

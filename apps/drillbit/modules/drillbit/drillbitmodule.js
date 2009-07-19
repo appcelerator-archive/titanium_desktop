@@ -191,7 +191,7 @@
 	
 		this.setupTestHarness = function(harness_manifest)
 		{
-			var runtime_dir = TFS.getFile(Titanium.Process.getCurrentProcess().getEnvironment('KR_RUNTIME'));
+			var runtime_dir = TFS.getFile(Titanium.API.getEnvironment()['KR_RUNTIME']);
 			var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
 
 			// create the test harness directory
@@ -396,56 +396,53 @@
 			var process = Titanium.Process.createProcess(args);
 			var passed = 0;
 			var failed = 0;
-			process.setOnRead(function(event)
+			process.setOnReadLine(function(data)
 			{
-				for (var data = event.pipe.readLine(); data != null; data = event.pipe.readLine())
+				var i = data.indexOf('DRILLBIT_');
+				if (i != -1)
 				{
-					var i = data.indexOf('DRILLBIT_');
-					if (i != -1)
-					{
-						if (data.indexOf('DRILLBIT_TEST:') != -1) {
-							var comma = data.indexOf(',');
-							var suite_name = data.substring(15,comma);
-							var test_name = data.substring(comma+1);
-							self.frontend_do('show_current_test', suite_name, test_name);
-							continue;
-						}
-						else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
-							var comma = data.indexOf(',');
-							var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
-							var line_number = data.substring(comma+1);
-							self.total_assertions++;
-							self.frontend_do('add_assertion', test_name, line_number);
-							continue;
-						}
-
-						var test_name = data.substring(15);
-						var test_passed = data.indexOf('_PASS:')!=-1;
-						running_completed++;
-						if (test_passed) {
-							passed++; running_passed++;
-							self.frontend_do('test_passed', entry.name, test_name);
-						}
-						else {
-							failed ++; running_failed++;
-							var dashes = test_name.indexOf(" --- ");
-							var error = test_name.substring(dashes+5);
-							var test_args = test_name.substring(0,dashes).split(',');
-							test_name = test_args[0];
-							line_number = test_args[1];
-							self.frontend_do('test_failed', entry.name, test_name, line_number, error);
-						}
-
-						self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
-						self.frontend_do('total_progress', running_passed, running_failed, self.total_tests);
-
-						var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
-						self.frontend_do('update_status', msg);
+					if (data.indexOf('DRILLBIT_TEST:') != -1) {
+						var comma = data.indexOf(',');
+						var suite_name = data.substring(15,comma);
+						var test_name = data.substring(comma+1);
+						self.frontend_do('show_current_test', suite_name, test_name);
+						continue;
 					}
-					else
-					{
-						self.frontend_do('process_data', data);
+					else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
+						var comma = data.indexOf(',');
+						var test_name = data.substring('DRILLBIT_ASSERTION:'.length+1, comma);
+						var line_number = data.substring(comma+1);
+						self.total_assertions++;
+						self.frontend_do('add_assertion', test_name, line_number);
+						continue;
 					}
+
+					var test_name = data.substring(15);
+					var test_passed = data.indexOf('_PASS:')!=-1;
+					running_completed++;
+					if (test_passed) {
+						passed++; running_passed++;
+						self.frontend_do('test_passed', entry.name, test_name);
+					}
+					else {
+						failed ++; running_failed++;
+						var dashes = test_name.indexOf(" --- ");
+						var error = test_name.substring(dashes+5);
+						var test_args = test_name.substring(0,dashes).split(',');
+						test_name = test_args[0];
+						line_number = test_args[1];
+						self.frontend_do('test_failed', entry.name, test_name, line_number, error);
+					}
+
+					self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
+					self.frontend_do('total_progress', running_passed, running_failed, self.total_tests);
+
+					var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
+					self.frontend_do('update_status', msg);
+				}
+				else
+				{
+					self.frontend_do('process_data', data);
 				}
 			});
 			var size = 0;
@@ -468,7 +465,7 @@
 					{
 						if (timed_out || t-start_time>=entry.timeout)
 						{
-							clearInterval(timer);
+							this.window.clearInterval(timer);
 							current_test.failed = true;
 							update_status(current_test.name + " timed out");
 							test_status(current_test.name,'Failed');
@@ -484,7 +481,7 @@
 				},1000);
 			}
 
-			process.setOnExit(function(exitcode)
+			process.addEventListener("exit", function(event)
 			{
 				self.frontend_do('suite_finished', current_test.name);
 				try
