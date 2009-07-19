@@ -14,14 +14,45 @@ describe("process tests",
 		value_of(Titanium.Process.createPipe).should_be_function();
 	},
 	
+	test_process_object: function()
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		value_of(p).should_be_function();
+		value_of(p.getStdin).should_be_function();
+		value_of(p.getStdout).should_be_function();
+		value_of(p.getStderr).should_be_function();
+		value_of(p.getStdin()).should_be_object();
+		value_of(p.getStdout()).should_be_object();
+		value_of(p.getStderr()).should_be_object();
+		value_of(p.getPID).should_be_function();
+		value_of(p.getExitCode).should_be_function();
+		value_of(p.getArguments).should_be_function();
+		value_of(p.getArguments()).should_be_array(this.dirCmd);
+		value_of(p.getEnvironment).should_be_function();
+		value_of(p.setEnvironment).should_be_function();
+		value_of(p.cloneEnvironment).should_be_function();
+		value_of(p.launch).should_be_function();
+		value_of(p.kill).should_be_function();
+		value_of(p.terminate).should_be_function();
+		value_of(p.sendSignal).should_be_function();
+		value_of(p.setOnRead).should_be_function();
+		value_of(p.setOnExit).should_be_function();
+		value_of(p.isRunning).should_be_function();
+		value_of(p.isRunning()).should_be_false();
+	},
+	
 	test_create_process: function()
 	{
 		value_of(function(){ Titanium.Process.createProcess(); }).should_throw_exception();
 		value_of(function(){ Titanium.Process.createProcess(null); }).should_throw_exception();
 		value_of(function(){ Titanium.Process.createProcess([null]); }).should_throw_exception();
 		value_of(function(){ Titanium.Process.createProcess([]); }).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess(['ls',true]); }).should_throw_exception();
-		value_of(function(){ Titanium.Process.createProcess(['ls',['a','b']]); }).should_throw_exception();
+		
+		var p = Titanium.Process.createProcess(['ls',true]);
+		value_of(p.getArguments()).should_be_array(['ls', 'true']);
+		
+		p = Titanium.Process.createProcess(['ls',['a','b']]);
+		value_of(p.getArguments()).should_be_array(['ls', 'a', 'b']);
 	},
 	
 	test_named_args: function()

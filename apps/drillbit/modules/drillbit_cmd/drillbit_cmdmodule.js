@@ -7,7 +7,7 @@
 	
 	// Javascript with ANSI color, this might be a first.
 	var frontend = {
-		passed: 0, failed: 0,
+		passed: 0, failed: 0, ansi: (Titanium.platform != "win32"),
 		error: function(msg) {
 			errPrint(msg);
 		},
@@ -21,12 +21,14 @@
 		},
 		test_passed: function(suite, test)
 		{
-			println(" [32m[1mpassed[0m");
+			if (!this.ansi) println(" passed");
+			else println(" [32m[1mpassed[0m");
 			this.passed++;
 		},
 		test_failed: function(suite, test, line_number, error)
 		{
-			println(" [31m[1mfailed[0m");
+			if (!this.ansi) println(" failed");
+			else println(" [31m[1mfailed[0m");
 			println("   => " + test + "() line " + line_number);
 			println("   => " + error);
 			this.failed++;

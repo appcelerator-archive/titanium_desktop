@@ -112,6 +112,7 @@ namespace ti
 		else if (args.at(0)->IsList())
 		{
 			argList = args.at(0)->ToList();
+			
 			if (args.size() > 1)
 				environment = args.GetObject(1);
 
@@ -148,22 +149,15 @@ namespace ti
 			throw ValueException::FromString(
 				"Titanium.Process option argument 'args' must have at least 1 element");
 		}
+		else if (argList->At(0)->IsNull() ||
+			argList->At(0)->IsString() && strlen(argList->At(0)->ToString()) == 0)
+		{
+			throw ValueException::FromString(
+				"Titanium.Process 1st argument must not be null/empty");
+		}
 
 		SharedKList argsClone = new StaticBoundList();
-		for (size_t i = 0; i < argList->Size(); i++)
-		{
-			SharedValue arg = Value::Undefined;
-			if (!argList->At(i)->IsString())
-			{
-				SharedString ss = argList->At(i)->DisplayString();
-				arg = Value::NewString(ss);
-			}
-			else
-			{
-				arg = argList->At(i);
-			}
-			argsClone->Append(arg);
-		}
+		ExtendArgs(argsClone, argList);
 
 		AutoProcess process = Process::CreateProcess();
 		process->SetArguments(argsClone);
@@ -179,6 +173,30 @@ namespace ti
 
 		// this is a callable object
 		result->SetMethod(process);
+	}
+	
+	void ProcessBinding::ExtendArgs(SharedKList dest, SharedKList args)
+	{
+		for (size_t i = 0; i < args->Size(); i++)
+		{
+			SharedValue arg = Value::Undefined;
+			if (args->At(i)->IsList())
+			{
+				SharedKList list = args->At(i)->ToList();
+				ExtendArgs(dest, list);
+				continue;
+			}
+			else if (!args->At(i)->IsString())
+			{
+				SharedString ss = args->At(i)->DisplayString();
+				arg = Value::NewString(ss);
+			}
+			else
+			{
+				arg = args->At(i);
+			}
+			dest->Append(arg);
+		}
 	}
 
 	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)

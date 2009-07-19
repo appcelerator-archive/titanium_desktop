@@ -23,7 +23,7 @@ namespace ti
 		void CreateProcess(const ValueList& args, SharedValue result);
 		void CreatePipe(const ValueList& args, SharedValue result);
 		void GetCurrentProcess(const ValueList& args, SharedValue result);
-		
+		void ExtendArgs(SharedKList dest, SharedKList args);
 	};
 }
 

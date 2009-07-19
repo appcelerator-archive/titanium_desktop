@@ -709,7 +709,7 @@ TitaniumTest.Subject.prototype.should_be_greater_than = function(expected, lineN
 	TitaniumTest.assertion(this);
 	if (this.target <= expected)
 	{
-		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' <= ' + expected);
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' <= ' + expected,lineNumber);
 	}
 };
 
@@ -719,7 +719,7 @@ TitaniumTest.Subject.prototype.should_be_less_than = function(expected, lineNumb
 	TitaniumTest.assertion(this);
 	if (this.target >= expected)
 	{
-		throw new TitaniumTest.Error('should be less than, was ' + this.target + ' >= ' + expected);
+		throw new TitaniumTest.Error('should be less than, was ' + this.target + ' >= ' + expected,lineNumber);
 	}
 };
 
@@ -729,7 +729,7 @@ TitaniumTest.Subject.prototype.should_be_greater_than_equal = function(expected,
 	TitaniumTest.assertion(this);
 	if (this.target < expected)
 	{
-		throw new TitaniumTest.Error('should be greater than equal, was ' + this.target + ' < ' + expected);
+		throw new TitaniumTest.Error('should be greater than equal, was ' + this.target + ' < ' + expected,lineNumber);
 	}
 };
 
@@ -739,7 +739,7 @@ TitaniumTest.Subject.prototype.should_be_less_than_equal = function(expected, li
 	TitaniumTest.assertion(this);
 	if (this.target > expected)
 	{
-		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' > ' + expected);
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' > ' + expected,lineNumber);
 	}
 };
 
@@ -752,7 +752,22 @@ TitaniumTest.Subject.prototype.should_throw_exception = function(expected,lineNu
 		try {
 			this.target();
 		} catch (e) { return; }
-		throw new TitaniumTest.Error("should throw exception, but didn't");
+		throw new TitaniumTest.Error("should throw exception, but didn't",lineNumber);
 	}
-	else throw new TitaniumTest.Error("should throw exception, but target isn't a function");
+	else throw new TitaniumTest.Error("should throw exception, but target isn't a function",lineNumber);
+};
+
+TitaniumTest.Subject.prototype.should_not_throw_exception = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (typeof(this.target) == 'function')
+	{
+		try {
+			this.target();
+		} catch (e) { 
+			throw new TitaniumTest.Error("should not throw exception, but did",lineNumber);	
+		}
+	}
+	else throw new TitaniumTest.Error("should not throw exception, but target isn't a function",lineNumber);
 };
