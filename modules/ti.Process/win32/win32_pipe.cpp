@@ -24,19 +24,8 @@ namespace ti
 	{
 		if (!closed)
 		{
-			if (writeHandle != INVALID_HANDLE_VALUE)
-			{
-				CloseHandle(writeHandle);
-				writeHandle = INVALID_HANDLE_VALUE;
-			}
-				
-			if (readHandle != INVALID_HANDLE_VALUE)
-			{
-				CloseHandle(readHandle);
-				readHandle = INVALID_HANDLE_VALUE;
-			}
-			
 			NativePipe::Close();
+			this->CloseNative();
 		}
 	}
 	
@@ -88,15 +77,30 @@ namespace ti
 	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
 	{
 		DuplicateHandle(process, writeHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(writeHandle);
+		CloseHandle(writeHandle);
 	}
-	
-	void Win32Pipe::EndOfFile()
+
+	void Win32Pipe::CloseNativeRead()
+	{
+		if (readHandle != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(readHandle);
+			readHandle = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	void Win32Pipe::CloseNativeWrite()
 	{
 		if (writeHandle != INVALID_HANDLE_VALUE)
 		{
 			CloseHandle(writeHandle);
-			readHandle = INVALID_HANDLE_VALUE;
+			writeHandle = INVALID_HANDLE_VALUE;
 		}
+	}
+
+	void Win32Pipe::CloseNative()
+	{
+		this->CloseNativeRead();
+		this->CloseNativeWrite();
 	}
 }

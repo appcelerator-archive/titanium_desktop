@@ -17,10 +17,11 @@ namespace ti
 	class Win32Pipe : public NativePipe
 	{
 	public:
-		Win32Pipe(bool isReader);	
+		Win32Pipe(bool isReader);
 		virtual void Close();
-		virtual void EndOfFile();
-		
+		virtual void CloseNative();
+		virtual void CloseNativeRead();
+		virtual void CloseNativeWrite();
 		void DuplicateWrite(HANDLE process, LPHANDLE handle);
 		void DuplicateRead(HANDLE process, LPHANDLE handle);
 		HANDLE GetReadHandle() { return readHandle; }

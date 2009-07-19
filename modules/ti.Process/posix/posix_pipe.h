@@ -23,7 +23,6 @@ namespace ti
 		virtual void CloseNativeWrite();
 		inline int GetReadHandle() { return readHandle; }
 		inline int GetWriteHandle() { return writeHandle; }
-		virtual void EndOfFile() {};
 
 	protected:
 		int readHandle;
