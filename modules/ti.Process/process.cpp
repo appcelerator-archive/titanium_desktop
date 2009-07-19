@@ -158,6 +158,7 @@ namespace ti
 		this->exitCode = Value::Null;
 
 		ForkAndExec();
+		this->AttachPipes();
 		std::string output = MonitorSync();
 
 		this->Exited();

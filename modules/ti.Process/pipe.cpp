@@ -37,7 +37,7 @@ namespace ti
 
 	Pipe::~Pipe()
 	{
-		active = true;
+		active = false;
 		eventsThread.join();
 		delete eventsThreadAdapter;
 	}
