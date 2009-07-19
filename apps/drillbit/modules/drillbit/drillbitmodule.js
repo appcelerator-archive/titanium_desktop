@@ -14,9 +14,9 @@
 		this.total_assertions = 0;
 		this.total_tests = 0;
 		this.total_files = 0;
+		this.current_test = null;
 		
 		var current_test_load = null;
-		var current_test = null;
 		var excludes = ['before','before_all','after','after_all','timeout'];
 		var running_tests = 0;
 		var running_completed = 0;
@@ -407,7 +407,7 @@
 						var suite_name = data.substring(15,comma);
 						var test_name = data.substring(comma+1);
 						self.frontend_do('show_current_test', suite_name, test_name);
-						continue;
+						return;
 					}
 					else if (data.indexOf('DRILLBIT_ASSERTION:') != -1) {
 						var comma = data.indexOf(',');
@@ -415,7 +415,7 @@
 						var line_number = data.substring(comma+1);
 						self.total_assertions++;
 						self.frontend_do('add_assertion', test_name, line_number);
-						continue;
+						return;
 					}
 
 					var test_name = data.substring(15);
@@ -435,7 +435,6 @@
 						self.frontend_do('test_failed', entry.name, test_name, line_number, error);
 					}
 
-					self.frontend_do('suite_progress', passed, failed, current_test.assertion_count);
 					self.frontend_do('total_progress', running_passed, running_failed, self.total_tests);
 
 					var msg = "Completed: " +entry.name + " ... " + running_completed + "/" + running_tests;
@@ -467,9 +466,9 @@
 						if (timed_out || t-start_time>=entry.timeout)
 						{
 							this.window.clearInterval(timer);
-							current_test.failed = true;
-							update_status(current_test.name + " timed out");
-							test_status(current_test.name,'Failed');
+							this.current_test.failed = true;
+							update_status(this.current_test.name + " timed out");
+							test_status(this.current_test.name,'Failed');
 							process.terminate();
 							return;
 						}
@@ -484,18 +483,18 @@
 
 			process.addEventListener(Titanium.EXIT, function(event)
 			{
-				self.frontend_do('suite_finished', current_test.name);
+				self.frontend_do('suite_finished', self.current_test.name);
 				try
 				{
 					if (this.window) this.window.clearInterval(timer);
-					if (!current_test.failed)
+					if (!self.current_test.failed)
 					{
-						var r = TFS.getFile(self.results_dir,current_test.name+'.json').read();
+						var r = TFS.getFile(self.results_dir,self.current_test.name+'.json').read();
 						var rs = '(' + r + ');';
 						var results = eval(rs);
-						current_test.results = results;
-						self.frontend_do('test_status', current_test.name,results.failed>0?'Failed':'Passed');
-						self.frontend_do('update_status', current_test.name + ' complete ... '+results.passed+' passed, '+results.failed+' failed');
+						self.current_test.results = results;
+						self.frontend_do('test_status', self.current_test.name,results.failed>0?'Failed':'Passed');
+						self.frontend_do('update_status', self.current_test.name + ' complete ... '+results.passed+' passed, '+results.failed+' failed');
 						if (!test_failures && results.failed>0)
 						{
 							test_failures = true;
@@ -522,7 +521,7 @@
 				this.frontend_do('all_finished');
 				var test_duration = (new Date().getTime() - tests_started)/1000;
 				executing_tests = null;
-				current_test = null;
+				this.current_test = null;
 				self.frontend_do('update_status', 'Testing complete ... took ' + test_duration + ' seconds',true);
 				var f = TFS.getFile(this.results_dir,'drillbit.json');
 				f.write("{\"success\":" + String(!test_failures) + "}");
@@ -533,8 +532,8 @@
 				return;
 			}
 			var entry = executing_tests.shift();
-			current_test = entry;
-			current_test.failed = false;
+			this.current_test = entry;
+			this.current_test.failed = false;
 			self.frontend_do('update_status', 'Executing: '+entry.name+' ... '+running_completed + "/" + running_tests);
 			self.frontend_do('suite_started', entry.name);
 			this.run_tests_async ? this.window.setTimeout(function(){self.run_test(entry)},1) : this.run_test(entry);
