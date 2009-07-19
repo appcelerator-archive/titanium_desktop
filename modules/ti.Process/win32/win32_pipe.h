@@ -17,7 +17,7 @@ namespace ti
 	class Win32Pipe : public NativePipe
 	{
 	public:
-		Win32Pipe(AutoPipe delegate);	
+		Win32Pipe(bool isReader);	
 		virtual void Close();
 		virtual void EndOfFile();
 		
@@ -32,6 +32,7 @@ namespace ti
 		
 		Poco::Mutex mutex;
 		HANDLE readHandle, writeHandle;
+		Logger *logger;
 	};
 }
 

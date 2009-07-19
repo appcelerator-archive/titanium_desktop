@@ -23,11 +23,9 @@ namespace ti
 		Win32Process();
 		virtual ~Win32Process();
 
-		static AutoPtr<Win32Process> GetCurrentProcess();
-		
-		AutoPtr<Win32Pipe> GetStdin() { return nativeIn; }
-		AutoPtr<Win32Pipe> GetStdout() { return nativeOut; }
-		AutoPtr<Win32Pipe> GetStderr() { return nativeErr; }
+		virtual AutoPipe GetNativeStdin() { return nativeIn; }
+		virtual AutoPipe GetNativeStdout() { return nativeOut; }
+		virtual AutoPipe GetNativeStderr() { return nativeErr; }
 		
 		virtual int GetPID();
 		virtual void Terminate();
@@ -47,14 +45,14 @@ namespace ti
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
 		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
 		Poco::Mutex mutex;
+		
+		Poco::Mutex processOutputMutex;
 		std::vector<AutoBlob> processOutput;
 		
-		bool running, complete, current;
 		int pid;
 		HANDLE process;
 		
 		Logger* logger;
-		static AutoPtr<Win32Process> currentProcess;
 	};
 }
 

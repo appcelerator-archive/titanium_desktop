@@ -10,25 +10,13 @@
 
 namespace ti
 {
-	AutoPtr<Win32Process> Win32Process::currentProcess = new Win32Process();
-	
-	/*static*/
-	AutoPtr<Win32Process> Win32Process::GetCurrentProcess()
-	{
-		return currentProcess;
-	}
 	
 	Win32Process::Win32Process() :
-		Process(),
-		running(false),
-		complete(false),
-		current(false),
-		pid(-1),
-		logger(Logger::Get("Process.Win32Process"))
+		logger(Logger::Get("Process.Win32Process")),
+		nativeIn(new Win32Pipe(false)),
+		nativeOut(new Win32Pipe(true)),
+		nativeErr(new Win32Pipe(true))
 	{
-		nativeIn = new Win32Pipe(stdinPipe);
-		nativeOut = new Win32Pipe(stdoutPipe);
-		nativeErr = new Win32Pipe(stderrPipe);
 	}
 	
 	Win32Process::~Win32Process()
@@ -186,17 +174,28 @@ namespace ti
 		SharedKMethod readCallback =
 			StaticBoundMethod::FromMethod<Win32Process>(
 				this, &Win32Process::ReadCallback);
-		nativeOut->AddEventListener(Event::READ, readCallback);
-		nativeErr->AddEventListener(Event::READ, readCallback);
+
+		// Set up the synchronous callbacks
+		nativeOut->SetReadCallback(readCallback);
+		nativeErr->SetReadCallback(readCallback);
 
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
+
 		this->ExitMonitor();
 
+		// Unset the callbacks just in case these pipes are used again
+		nativeOut->SetReadCallback(0);
+		nativeErr->SetReadCallback(0);
+
 		std::string output;
-		for (size_t i = 0; i < processOutput.size(); i++)
 		{
-			output.append(processOutput.at(i)->Get());
+			Poco::Mutex::ScopedLock lock(processOutputMutex);
+			for (size_t i = 0; i < processOutput.size(); i++)
+			{
+				AutoBlob b = processOutput.at(i);
+				output.append(processOutput.at(i)->Get());
+			}
 		}
 
 		return output;
@@ -232,10 +231,10 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject data = args.GetObject(0)->GetObject("data");
-			AutoBlob blob = data.cast<Blob>();
-			if (!blob.isNull())
+			AutoBlob blob = args.GetObject(0).cast<Blob>();
+			if (!blob.isNull() && blob->Length() > 0)
 			{
+				Poco::Mutex::ScopedLock lock(processOutputMutex);
 				processOutput.push_back(blob);
 			}
 		}
@@ -278,10 +277,6 @@ namespace ti
 	
 	void Win32Process::SendSignal(int signal)
 	{
-		// This only works for the current process in Win32.. I guess there's nothing to do?
-		if (this->current)
-		{
-			raise(signal);
-		}
+		logger->Warn("Signals are not supported in Windows");
 	}
 }

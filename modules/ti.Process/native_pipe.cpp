@@ -57,7 +57,10 @@ namespace ti
 			// reads synchronously. So we need to call the callback on this thread
 			// right now.
 			if (!readCallback.isNull())
+			{
+				logger->Debug("calling reader for blob data of %d size", blob->Length());
 				readCallback->Call(Value::NewObject(blob));
+			}
 
 			return Pipe::Write(blob);
 		}

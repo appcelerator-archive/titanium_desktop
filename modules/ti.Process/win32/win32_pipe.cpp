@@ -8,7 +8,9 @@
 
 namespace ti
 {
-	Win32Pipe::Win32Pipe(AutoPipe delegate) : NativePipe(delegate)
+	Win32Pipe::Win32Pipe(bool isReader) :
+		NativePipe(isReader),
+		logger(Logger::Get("Process.Win32Pipe"))
 	{
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
@@ -40,14 +42,14 @@ namespace ti
 	
 	int Win32Pipe::RawRead(char *buffer, int size)
 	{
-		Poco::Mutex::ScopedLock lock(mutex);
-		
+		logger->Debug("RawRead: %d bytes", size);
 		if (readHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesRead;
 			BOOL ok = ReadFile(readHandle, buffer, size, &bytesRead, NULL);
 			int error = GetLastError();
 			if (ok)
 			{
+				logger->Debug("ok: %d, error: %d, just read %d bytes, buffer: %s", ok, error, bytesRead, buffer);
 				return bytesRead;
 			}
 			else if (error == ERROR_BROKEN_PIPE)
@@ -62,22 +64,8 @@ namespace ti
 		return -1;
 	}
 	
-	void Win32Pipe::DuplicateRead(HANDLE process, LPHANDLE handle)
-	{
-		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(readHandle);
-	}
-	
-	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
-	{
-		DuplicateHandle(process, writeHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(writeHandle);
-	}
-	
 	int Win32Pipe::RawWrite(const char *data, int size)
 	{
-		Poco::Mutex::ScopedLock lock(mutex);
-		
 		if (writeHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesWritten;
 			BOOL ok = WriteFile(writeHandle, (LPCVOID)data, size, &bytesWritten, NULL);
@@ -89,6 +77,18 @@ namespace ti
 			}
 		}
 		return 0;
+	}
+	
+	void Win32Pipe::DuplicateRead(HANDLE process, LPHANDLE handle)
+	{
+		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+        CloseHandle(readHandle);
+	}
+	
+	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
+	{
+		DuplicateHandle(process, writeHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+        CloseHandle(writeHandle);
 	}
 	
 	void Win32Pipe::EndOfFile()

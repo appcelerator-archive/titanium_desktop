@@ -269,6 +269,7 @@ namespace ti
 				this->FireEvent(Event::CLOSE);
 				this->FireEvent(Event::CLOSED);
 			}
+			Poco::Thread::sleep(50);
 		}
 	}
 }
