@@ -398,7 +398,6 @@
 			var failed = 0;
 			process.setOnReadLine(function(data)
 			{
-				Titanium.API.debug("data="+data);
 				var i = data.indexOf('DRILLBIT_');
 				if (i != -1)
 				{

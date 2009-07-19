@@ -243,35 +243,39 @@ namespace ti
 	{
 	}
 
-	void Pipe::FireEvents()
+	void Pipe::FireReadBuffers()
 	{
 		AutoBlob blob = 0;
+		for (size_t i = 0; i < buffers.size(); i++)
+		{
+			{
+				Poco::Mutex::ScopedLock lock(buffersMutex);
+				blob = buffers.front();
+				buffers.pop();
+			}
+
+			if (!blob.isNull())
+			{
+				this->duplicate();
+				AutoPtr<KEventObject> autothis = this;
+				AutoPtr<Event> event = new ReadEvent(autothis, blob);
+				this->FireEvent(event);
+				blob = 0;
+			}
+			else
+			{
+				// A null blob signifies a close event
+				this->FireEvent(Event::CLOSE);
+				this->FireEvent(Event::CLOSED);
+			}
+		}
+	}
+	
+	void Pipe::FireEvents()
+	{
 		while (active || buffers.size() > 0)
 		{
-			if (buffers.size() > 0)
-			{
-				{
-					Poco::Mutex::ScopedLock lock(buffersMutex);
-					blob = buffers.front();
-					buffers.pop();
-				}
-
-				if (!blob.isNull())
-				{
-					this->duplicate();
-					AutoPtr<KEventObject> autothis = this;
-					AutoPtr<Event> event = new ReadEvent(autothis, blob);
-					this->FireEvent(event);
-					blob = 0;
-				}
-				else
-				{
-					// A null blob signifies a close event
-					this->FireEvent(Event::CLOSE);
-					this->FireEvent(Event::CLOSED);
-				}
-
-			}
+			FireReadBuffers();
 			Poco::Thread::sleep(50);
 		}
 	}
