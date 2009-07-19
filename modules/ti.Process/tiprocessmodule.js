@@ -38,7 +38,7 @@
 				
 				for (var i = 0; i < lines.length; i++)
 				{
-					fn(lines[i]);
+					fn.apply(fn, [lines[i]]);
 				}
 			});
 			

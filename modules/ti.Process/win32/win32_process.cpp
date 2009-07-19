@@ -113,6 +113,8 @@ namespace ti
 	
 	void Win32Process::ForkAndExec()
 	{
+		AttachPipes();
+		
 		STARTUPINFO startupInfo;
 		startupInfo.cb          = sizeof(STARTUPINFO);
 		startupInfo.lpReserved  = NULL;

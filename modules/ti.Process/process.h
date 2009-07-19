@@ -64,6 +64,7 @@ namespace ti
 		virtual AutoPipe GetNativeStdin() = 0;
 		virtual AutoPipe GetNativeStdout() = 0;
 		virtual AutoPipe GetNativeStderr() = 0;
+		void AttachPipes();
 
 	protected:
 		void _GetPID(const ValueList& args, SharedValue result);
@@ -84,7 +85,6 @@ namespace ti
 		void _SetOnRead(const ValueList& args, SharedValue result);
 		void _SetOnExit(const ValueList& args, SharedValue result);
 		void _ToString(const ValueList& args, SharedValue result);
-		void AttachPipes();
 		void DetachPipes();
 
 		AutoPipe stdoutPipe;

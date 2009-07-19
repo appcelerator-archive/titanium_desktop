@@ -6,7 +6,9 @@
 	var errPrint = ti.App.stderr;
 	
 	// Javascript with ANSI color, this might be a first.
-	var ansi = (Titanium.platform != "win32" || 'MANPATH' in Titanium.API.getEnvironment())
+	var ansi = (Titanium.platform != "win32" || 'MANPATH' in Titanium.API.getEnvironment());
+	var show_log = false;
+	
 	var frontend = {
 		passed: 0, failed: 0, ansi: ansi,
 		error: function(msg) {
@@ -42,6 +44,26 @@
 		{
 			println("Total: " + this.passed + " passed, " + this.failed + " failed, "
 				+ ti.Drillbit.total_assertions + " assertions");
+			
+			if (test_files.length == 1 && show_log)
+			{
+				var editor = null;
+				if (Titanium.platform == "win32") editor = "C:\\Windows\\system32\\notepad.exe";
+				else if (Titanium.platform == "osx") editor = "/usr/bin/open";
+				else editor = "/usr/bin/gedit";
+
+				if ('EDITOR' in ti.API.getEnvironment())
+				{
+					editor = ti.API.getEnvironment()['EDITOR'];
+				}
+
+				var app = Titanium.API.getApplication();
+				var path = ti.App.appURLToPath('app://test_results/'+tests[0].suite+'.log');
+				println("opening log: " + path);
+
+				Titanium.Process.createProcess([editor, path])();
+
+			}
 		}
 	};
 	
@@ -54,6 +76,10 @@
 		if (arg == '--debug-tests')
 		{
 			ti.Drillbit.debug_tests = true;
+		}
+		else if (arg == '--show-log')
+		{
+			show_log = true;
 		}
 		else
 		{

@@ -243,15 +243,21 @@ namespace ti
 	{
 	}
 
-	void Pipe::FireReadBuffers()
+	int Pipe::SafeBuffersSize()
 	{
-		AutoBlob blob = 0;
 		int size = 0;
 		{
 			Poco::Mutex::ScopedLock lock(buffersMutex);
 			size = buffers.size();
 		}
-		while (size > 0)
+		return size;
+	}
+	
+	void Pipe::FireReadBuffers()
+	{
+		AutoBlob blob = 0;
+		
+		while (SafeBuffersSize() > 0)
 		{
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
@@ -264,6 +270,7 @@ namespace ti
 				this->duplicate();
 				AutoPtr<KEventObject> autothis = this;
 				AutoPtr<Event> event = new ReadEvent(autothis, blob);
+				Logger::Get("Process.Pipe2")->Debug("firing read event, blob size: %d bytes, data: %s\n", blob->Length(), blob->Get());
 				this->FireEvent(event);
 				blob = 0;
 			}
@@ -273,21 +280,16 @@ namespace ti
 				this->FireEvent(Event::CLOSE);
 				this->FireEvent(Event::CLOSED);
 			}
-
-			{
-				Poco::Mutex::ScopedLock lock(buffersMutex);
-				size = buffers.size();
-			}
 		}
 
 	}
 	
 	void Pipe::FireEvents()
 	{
-		while (active || buffers.size() > 0)
+		while (active || SafeBuffersSize() > 0)
 		{
 			FireReadBuffers();
-			Poco::Thread::sleep(50);
+			Poco::Thread::sleep(5);
 		}
 	}
 }

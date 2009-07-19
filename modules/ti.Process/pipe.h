@@ -35,6 +35,7 @@ namespace ti
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		void FireReadBuffers();
+		int SafeBuffersSize();
 		void FireEvents();
 		void _Close(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);

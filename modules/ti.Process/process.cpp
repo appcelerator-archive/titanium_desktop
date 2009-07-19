@@ -69,6 +69,7 @@ namespace ti
 	{
 		this->running = false;
 		this->DetachPipes();
+		Logger::Get("Process.Process2")->Debug("firing exit");
 		this->FireEvent(Event::EXIT);
 	}
 
@@ -140,9 +141,8 @@ namespace ti
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
-
+		
 		ForkAndExec();
-		this->AttachPipes();
 		MonitorAsync();
 
 		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
@@ -154,9 +154,8 @@ namespace ti
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
-
+		
 		ForkAndExec();
-		this->AttachPipes();
 		AutoBlob output = MonitorSync();
 
 		this->Exited();
@@ -364,7 +363,6 @@ namespace ti
 
 	SharedValue Process::Call(const ValueList& args)
 	{
-		// Should this return an AutoBlob instead?
 		AutoBlob output = LaunchSync();
 		return Value::NewObject(output);
 	}

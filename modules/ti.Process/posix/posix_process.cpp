@@ -54,7 +54,8 @@ namespace ti
 		nativeIn = new PosixPipe(false);
 		nativeOut = new PosixPipe(true);
 		nativeErr = new PosixPipe(true);
-
+		AttachPipes();
+		
 		int pid = fork();
 		if (pid < 0)
 		{

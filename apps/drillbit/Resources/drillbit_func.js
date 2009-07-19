@@ -294,7 +294,7 @@ TitaniumTest =
 			message:e.message || String(e)
 		});
 		
-		Titanium.App.stdout("DRILLBIT_FAIL: "+name+","+e.line+" --- "+e);
+		Titanium.App.stdout("DRILLBIT_FAIL: "+name+","+e.line+" --- "+String(e).replace("\n","\\n"));
 		Titanium.API.debug("DRILLBIT_FAIL: "+name+","+e.line+" --- "+e);
 		TitaniumTest.run_next_test();
 	},
