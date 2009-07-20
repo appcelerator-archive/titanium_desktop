@@ -16,41 +16,140 @@ namespace ti
 	std::map<std::string,int> ProcessBinding::signals;
 	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
 	{
-		Logger::Get("Process")->Debug("Initializing Titanium.Process");
 		
-		//TODO doc me
+		/**
+		 * @tiapi(method=True,name=Process.createProcess,since=0.5)
+		 * @tiapi Create a Process object. There are two main ways to use this function:
+		 * @tiapi  With an options object (preferred):
+		 * @tiapi  Titanium.Process.createProcess({args: ['mycmd', 'arg1', 'arg2'],
+		 * @tiapi     env: {'PATH': '/something'}, stdin: pipeIn, stdout: pipeOut, stderr: pipeErr});
+		 * @tiapi OR
+		 * @tiapi  Titanium.Process.createProcess(args[, environment, stdin, stdout, stderr]);
+		 * @tiresult[Process.Process, process] The process object
+		 */
 		SetMethod("createProcess", &ProcessBinding::CreateProcess);
+		
+		/**
+		 * @tiapi(method=True,name=Process.createPipe,since=0.5)
+		 * @tiapi Create an pipe for attach to/from any number of processes.
+		 * @tiresult[Process.Pipe, pipe] A new pipe
+		 */
 		SetMethod("createPipe", &ProcessBinding::CreatePipe);
 
 #if defined(OS_OSX) || (OS_LINUX)
+		/**
+		 * @tiapi(property=True,name=Process.SIGHUP,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGHUP"] = SIGHUP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGINT,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGINT"] = SIGINT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGQUIT,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGQUIT"] = SIGQUIT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGILL,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGILL"] = SIGILL;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTRAP,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGTRAP"] = SIGTRAP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGABRT,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGABRT"] = SIGABRT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGFPE,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGFPE"] = SIGFPE;
+		/**
+		 * @tiapi(property=True,name=Process.SIGKILL,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGKILL"] = SIGKILL;
+		/**
+		 * @tiapi(property=True,name=Process.SIGBUS,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGBUS"] = SIGBUS;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSEGV,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGSEGV"] = SIGSEGV;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSYS,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGSYS"] = SIGSYS;
+		/**
+		 * @tiapi(property=True,name=Process.SIGPIPE,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGPIPE"] = SIGPIPE;
+		/**
+		 * @tiapi(property=True,name=Process.SIGALRM,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGALRM"] = SIGALRM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTERM,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGTERM"] = SIGTERM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGURG,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGURG"] = SIGURG;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSTOP,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGSTOP"] = SIGSTOP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTSTP,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGTSTP"] = SIGTSTP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGCHLD,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGCHLD"] = SIGCHLD;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTTIN,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGTTIN"] = SIGTTIN;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTTOU,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGTTOU"] = SIGTTOU;
+		/**
+		 * @tiapi(property=True,name=Process.SIGIO,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGIO"] = SIGIO;
+		/**
+		 * @tiapi(property=True,name=Process.SIGXCPU,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGXCPU"] = SIGXCPU;
+		/**
+		 * @tiapi(property=True,name=Process.SIGXFSZ,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGXFSZ"] = SIGXFSZ;
+		/**
+		 * @tiapi(property=True,name=Process.v,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGVTALRM"] = SIGVTALRM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGPROF,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGPROF"] = SIGPROF;
+		/**
+		 * @tiapi(property=True,name=Process.SIGWINCH,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGWINCH"] = SIGWINCH;
+		/**
+		 * @tiapi(property=True,name=Process.SIGUSR1,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGUSR1"] = SIGUSR1;
+		/**
+		 * @tiapi(property=True,name=Process.SIGUSR2,since=0.5,platforms=osx|linux)
+		 */
 		signals["SIGUSR2"] = SIGUSR2;
+		
 #elif defined(OS_WIN32)
 		signals["SIGABRT"] = SIGABRT;
 		signals["SIGFPE"] = SIGFPE;
@@ -60,7 +159,13 @@ namespace ti
 		signals["SIGTERM"] = SIGTERM;
 #endif
 #if defined(OS_OSX)
+		/**
+		 * @tiapi(property=True,name=Process.SIGEMT,since=0.5,platforms=osx)
+		 */
 		signals["SIGEMT"] = SIGEMT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGINFO,since=0.5,platforms=osx)
+		 */
 		signals["SIGINFO"] = SIGINFO;
 #endif
 		std::map<std::string,int>::iterator iter;
@@ -68,8 +173,6 @@ namespace ti
 		{
 			Set(iter->first.c_str(), Value::NewInt(iter->second));
 		}
-		
-		Logger::Get("Process")->Debug("returning");
 	}
 
 	ProcessBinding::~ProcessBinding()
