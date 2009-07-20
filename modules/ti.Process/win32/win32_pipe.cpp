@@ -65,7 +65,7 @@ namespace ti
 	void Win32Pipe::DuplicateRead(HANDLE process, LPHANDLE handle)
 	{
 		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
-        CloseHandle(readHandle);
+      	CloseHandle(readHandle);
 	}
 	
 	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)

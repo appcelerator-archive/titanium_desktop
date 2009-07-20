@@ -17,6 +17,7 @@ namespace ti
 		nativeOut(new Win32Pipe(true)),
 		nativeErr(new Win32Pipe(true))
 	{
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 	
 	Win32Process::~Win32Process()
@@ -25,9 +26,13 @@ namespace ti
 
 	void Win32Process::RecreateNativePipes()
 	{
+		if (this->process != INVALID_HANDLE_VALUE)
+			CloseHandle(this->process);
+		
 		this->nativeIn = new Win32Pipe(false);
 		this->nativeOut = new Win32Pipe(true);
 		this->nativeErr = new Win32Pipe(true);
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 	
 	/*
@@ -128,14 +133,16 @@ namespace ti
 		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
 		startupInfo.cbReserved2 = 0;
 		startupInfo.lpReserved2 = NULL;
-		startupInfo.hStdInput = GetNativeStdin().cast<Win32Pipe>()->GetReadHandle();
-		startupInfo.hStdOutput = nativeOut->GetWriteHandle();
-		startupInfo.hStdError = nativeErr->GetWriteHandle();
+		//startupInfo.hStdInput = nativeIn->GetReadHandle();
+		//startupInfo.hStdOutput = nativeOut->GetWriteHandle();
+		//startupInfo.hStdError = nativeErr->GetWriteHandle();
 		
 		HANDLE hProc = GetCurrentProcess();
-		//GetStdin()->DuplicateRead(hProc, &startupInfo.hStdInput);
-		//GetStdout()->DuplicateWrite(hProc, &startupInfo.hStdOutput);
-		//GetStderr()->DuplicateWrite(hProc, &startupInfo.hStdError);
+		nativeIn->DuplicateRead(hProc, &startupInfo.hStdInput);
+		nativeOut->DuplicateWrite(hProc, &startupInfo.hStdOutput);
+		nativeErr->DuplicateWrite(hProc, &startupInfo.hStdError);
+		//CloseHandle(nativeOut->GetWriteHandle());
+		//CloseHandle(nativeErr->GetWriteHandle());
 		
 		std::string commandLine = ArgListToString(args);
 		logger->Debug("Launching: %s", commandLine.c_str());
@@ -150,12 +157,12 @@ namespace ti
 			NULL,
 			&startupInfo,
 			&processInfo);
-		CloseHandle(nativeOut->GetWriteHandle());
-		CloseHandle(nativeErr->GetWriteHandle());
 		
-		//CloseHandle(startupInfo.hStdInput);
-		//CloseHandle(startupInfo.hStdOutput);
-		//CloseHandle(startupInfo.hStdError);
+		//CloseHandle(nativeIn->GetReadHandle());
+		
+		CloseHandle(startupInfo.hStdInput);
+		CloseHandle(startupInfo.hStdOutput);
+		CloseHandle(startupInfo.hStdError);
 		
 		if (!rc) {
 			std::string message = "Error launching: " + commandLine;
@@ -222,6 +229,8 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
+		
+		CloseHandle(this->process);
 		
 		//nativeOut->Close();
 		//nativeErr->Close();
