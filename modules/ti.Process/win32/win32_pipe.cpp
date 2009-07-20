@@ -25,8 +25,8 @@ namespace ti
 		if (!closed)
 		{
 			NativePipe::Close();
+			this->CloseNative();
 		}
-		this->CloseNative();
 	}
 	
 	int Win32Pipe::RawRead(char *buffer, int size)
