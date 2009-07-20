@@ -24,7 +24,8 @@ namespace ti
 		virtual SharedKObject CloneEnvironment();
 		virtual void LaunchAsync();
 		virtual AutoBlob LaunchSync();
-		virtual void ExitMonitor();
+		virtual void ExitMonitorAsync();
+		virtual void ExitMonitorSync();
 		virtual void Restart();
 		virtual void Restart(SharedKObject env, AutoPipe
 			stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);

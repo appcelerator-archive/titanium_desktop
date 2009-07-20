@@ -28,8 +28,6 @@ namespace ti
 
 	void NativePipe::Close()
 	{
-		// Do we need to send EOF here for writer threads? 
-
 		closed = true;
 		try
 		{

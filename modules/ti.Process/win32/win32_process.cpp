@@ -184,7 +184,7 @@ namespace ti
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 
-		this->ExitMonitor();
+		this->ExitMonitorSync();
 
 		// Unset the callbacks just in case these pipes are used again
 		nativeOut->SetReadCallback(0);

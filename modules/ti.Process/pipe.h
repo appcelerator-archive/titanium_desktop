@@ -31,6 +31,8 @@ namespace ti
 		void Detach(SharedKObject object);
 		bool IsAttached();
 		AutoPipe Clone();
+		void StartEventsThread();
+		void StopEventsThread();
 
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);

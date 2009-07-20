@@ -37,7 +37,8 @@ namespace ti
 		exitCode(Value::Null),
 		onRead(0),
 		onExit(0),
-		exitMonitorAdapter(new RunnableAdapter<Process>(*this, &Process::ExitMonitor)),
+		exitMonitorAdapter(new RunnableAdapter<Process>(
+			*this, &Process::ExitMonitorAsync)),
 		running(false)
 	{
 		SetMethod("getPID", &Process::_GetPID);
@@ -68,8 +69,11 @@ namespace ti
 	void Process::Exited()
 	{
 		this->running = false;
+
+
 		this->DetachPipes();
 		Logger::Get("Process.Process2")->Debug("firing exit");
+
 		this->FireEvent(Event::EXIT);
 	}
 
@@ -128,13 +132,12 @@ namespace ti
 
 	void Process::DetachPipes()
 	{
+		// We don't detach event listeners because we want any pending
+		// READ events to fire. It should be okay though, because
+		// native pipes should not be re-used.
 		stdinPipe->Detach(this->GetNativeStdin());
 		this->GetNativeStdout()->Detach(stdoutPipe);
 		this->GetNativeStderr()->Detach(stderrPipe);
-
-		// Don't detach event listeners because we want any pending
-		// READ events to fire. It should be okay though, because
-		// native pipes should not be re-used.
 	}
 
 	void Process::LaunchAsync()
@@ -154,7 +157,7 @@ namespace ti
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
-		
+
 		ForkAndExec();
 		AutoBlob output = MonitorSync();
 
@@ -162,9 +165,27 @@ namespace ti
 		return output;
 	}
 
-	void Process::ExitMonitor()
+	void Process::ExitMonitorSync()
 	{
 		this->exitCode = Value::NewInt(this->Wait());
+		if (!exitCallback.isNull())
+			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+	}
+
+	void Process::ExitMonitorAsync()
+	{
+		this->exitCode = Value::NewInt(this->Wait());
+
+		// We want the onRead callbacks to fire before the exit
+		// event, so we do a little hack here and stop the event
+		// threads on the native pipes. It shouldn't matter anyhow
+		// because these pipes are now dead and will be replaced on
+		// next launch. Don't do this for synchronous process
+		// launch becauase we are already on the main thread and that
+		// will cause a deadlock.
+		this->GetNativeStdout()->StopEventsThread();
+		this->GetNativeStderr()->StopEventsThread();
+
 		if (!exitCallback.isNull())
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
 	}

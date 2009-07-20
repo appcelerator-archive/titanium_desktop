@@ -32,14 +32,26 @@ namespace ti
 
 		this->eventsThreadAdapter =
 			new Poco::RunnableAdapter<Pipe>(*this, &Pipe::FireEvents);
-		this->eventsThread.start(*this->eventsThreadAdapter);
+		this->StartEventsThread();
 	}
 
 	Pipe::~Pipe()
 	{
-		active = false;
-		eventsThread.join();
 		delete eventsThreadAdapter;
+	}
+
+	void Pipe::StopEventsThread()
+	{
+		active = false;
+		if (eventsThread.isRunning())
+			eventsThread.join();
+	}
+
+	void Pipe::StartEventsThread()
+	{
+		this->active = true;
+		if (!eventsThread.isRunning())
+			this->eventsThread.start(*this->eventsThreadAdapter);
 	}
 
 	void Pipe::Attach(SharedKObject object)
