@@ -104,12 +104,48 @@ namespace ti
 		 */
 		SetMethod("sendSignal", &Process::_SendSignal);
 		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setOnRead,since=0.5)
+		 * @tiapi Set an onRead event handler for this process stdout and stderr
+		 * @tiarg[Function, onRead] a handler that is passed an event, with a "data" Blob full of data read from the pipe
+		 */
 		SetMethod("setOnRead", &Process::_SetOnRead);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setOnExit,since=0.5)
+		 * @tiapi Set an onExit event handler for this process
+		 * @tiarg[Function, onExit] a function
+		 */
 		SetMethod("setOnExit", &Process::_SetOnExit);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStdin,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard input pipe for this process
+		 */
 		SetMethod("getStdin", &Process::_GetStdin);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStdout,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard output pipe for this process
+		 */
 		SetMethod("getStdout", &Process::_GetStdout);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStderr,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard error pipe for this process
+		 */
 		SetMethod("getStderr", &Process::_GetStderr);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.isRunning,since=0.5)
+		 * @tiresult[bool, running] whether or not this process is actively running
+		 */
 		SetMethod("isRunning", &Process::_IsRunning);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.toString,since=0.5)
+		 * @tiresult[String, str] the arguments of this process as a string
+		 */
 		SetMethod("toString", &Process::_ToString);
 	}
 
