@@ -67,10 +67,10 @@ namespace ti
 		else if (pid == 0)
 		{
 			// outPipe and errPipe may be the same, so we dup first and close later
-			dup2(GetNativeStdin().cast<PosixPipe>()->GetReadHandle(), STDIN_FILENO);
+			dup2(nativeIn->GetReadHandle(), STDIN_FILENO);
 			dup2(nativeOut->GetWriteHandle(), STDOUT_FILENO);
 			dup2(nativeErr->GetWriteHandle(), STDERR_FILENO);
-			GetNativeStdin().cast<PosixPipe>()->CloseNative();
+			nativeIn->CloseNative();
 			nativeOut->CloseNative();
 			nativeErr->CloseNative();
 
@@ -101,7 +101,7 @@ namespace ti
 		}
 
 		SetPID(pid);
-		GetNativeStdin().cast<PosixPipe>()->CloseNativeRead();
+		nativeIn->CloseNativeRead();
 		nativeOut->CloseNativeWrite();
 		nativeErr->CloseNativeWrite();
 	}

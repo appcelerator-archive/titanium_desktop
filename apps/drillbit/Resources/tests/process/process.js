@@ -273,7 +273,7 @@ describe("process tests",
 		var timer = 0;
 		p.setOnExit(function(event){
 			Titanium.API.debug("rcvd exit event");
-			clearTimeout(timer)
+			clearTimeout(timer);
 			stream.close();
 			var fileData = file.read();
 			

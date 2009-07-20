@@ -132,6 +132,7 @@ namespace ti
 
 	void Process::AttachPipes(bool async)
 	{
+		stdinPipe->Attach(this->GetNativeStdin());
 		this->GetNativeStdout()->Attach(stdoutPipe);
 		this->GetNativeStderr()->Attach(stderrPipe);
 

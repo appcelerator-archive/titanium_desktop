@@ -109,9 +109,9 @@ namespace ti
 	{
 		this->duplicate();
 
+		AutoBlob blob = 0;
 		while (!closed || buffers.size() > 0)
 		{
-			AutoBlob blob = 0;
 			if (buffers.size() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
