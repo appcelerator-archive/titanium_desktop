@@ -2,21 +2,20 @@
 <head>
 	<script type="text/javascript" charset="utf-8" src="jquery.js"></script>
 	<script type="text/javascript" charset="utf-8" src="drillbit.js"></script>
-	<script type="text/javascript" charset="utf-8" src="js/app.js"></script>
-	<script type="text/javascript" charset="utf-8" src="js/project.js"></script>
 	<link rel="stylesheet" href="drillbit.css" type="text/css" charset="utf-8">
 </head>
 <body>
-	<div id="progress-bars">
-		<div id="suite-progress"></div>
-		<div id="total-progress"></div>
+	<div id="actions">
+		<a id="run-link" href="#">run tests</a>
+		| <a id="toggle-link" href="#">toggle all</a>
+		| <a id="reset-link" href="#">reset</a>
 	</div>
-	<div id="progress-message"><img src="images/check_on.png"/>0&nbsp;&nbsp; <img src="images/check_off.png"/>0</div>
-	<div id="current-test-message">no tests running</div>
-	
-	<div id="header"></div>
-	<div id="table"></div>
-	<div><button id="run">Run Tests</button></div>
-	<div id="status" style="visibility:hidden"></div>
+	<div id="passed-count"><img src="images/check_on.png">&nbsp;&nbsp;0 passed</div>
+	<div id="failed-count"><img src="images/check_off.png">&nbsp;&nbsp;0 failed</div>
+	<div id="assertion-count">0 assertions</div>
+	<div id="test-count"></div>
+	<div id="current-test"><span style="color: #ccc">&lt;no tests currently running&gt;</span></div>
+	<div class="suites">&nbsp;
+	</div>
 </body>
 </html>

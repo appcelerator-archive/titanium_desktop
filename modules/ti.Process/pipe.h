@@ -8,26 +8,48 @@
 #define _PIPE_H_
 
 #include <kroll/kroll.h>
-#include <Poco/Process.h>
-#include <Poco/PipeStream.h>
-#include <Poco/Exception.h>
+#include <queue>
+#include <Poco/Thread.h>
+#include <Poco/ThreadTarget.h>
 
 namespace ti
 {
-	class Pipe : public StaticBoundObject
+	class Pipe;
+	typedef AutoPtr<Pipe> AutoPipe;
+
+	class Pipe : public KEventObject
 	{
 	public:
-		Pipe(Poco::PipeIOS *pipe);
+		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
-	private:
-		Poco::PipeIOS *pipe;
-		bool closed;
+		virtual int Write(AutoBlob data);
+		virtual void CallWrite(SharedKObject target, AutoBlob data);
+		virtual void Close();
+		virtual void CallClose(SharedKObject target);
+		virtual void Flush();
+		void Attach(SharedKObject object);
+		void Detach(SharedKObject object);
+		bool IsAttached();
+		AutoPipe Clone();
+		static Poco::Mutex eventsMutex;
+		static std::queue<AutoPtr<Event> > events;
 
-	public:
-		void Write(const ValueList& args, SharedValue result);
-		void Read(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void Close();
+	protected:
+		int FindFirstLineFeed(char *data, int length, int *charsToErase);
+		void _Close(const ValueList& args, SharedValue result);
+		void _SetOnClose(const ValueList& args, SharedValue result);
+		void _Attach(const ValueList& args, SharedValue result);
+		void _Detach(const ValueList& args, SharedValue result);
+		void _IsAttached(const ValueList& args, SharedValue result);
+		void _Write(const ValueList& args, SharedValue result);
+		void _Flush(const ValueList& args, SharedValue result);
+		Poco::Mutex attachedMutex;
+		std::vector<SharedKObject> attachedObjects;
+		Logger *logger;
+
+		static void FireEvents();
+		static Poco::ThreadTarget eventsThreadTarget;
+		static Poco::Thread eventsThread;
 	};
 }
 

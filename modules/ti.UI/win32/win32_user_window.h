@@ -90,7 +90,7 @@ namespace ti
 		void SetTopMost(bool topmost);
 
 		void FrameLoaded();
-		void ShowWebInspector();
+		void ShowInspector(bool console);
 		static void RegisterWindowClass(HINSTANCE hInstance);
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 		static Win32UserWindow* FromWindow(HWND hWnd);

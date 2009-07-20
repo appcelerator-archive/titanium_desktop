@@ -11,26 +11,11 @@ from threading import Thread
 import time
 # Create thread to eat cpu
 def mythread():
-  print "in thread"
-  print "in thread"
-  print "in thread"
-  print "in thread"
-  print "in thread"
-  print "in thread"
+  a = 1
   while True:
-    print "in thread loop"
-    pass
-print "before thread"
-print "before thread"
-print "before thread"
-print "before thread"
-print "before thread"
+    a = a + 1
+    print "in thread loop %s" % a
 Thread(target=mythread).start()
-print "launched thread"
-print "launched thread"
-print "launched thread"
-print "launched thread"
-print "launched thread"
 </script>
 		<script>
 			var menu = null;

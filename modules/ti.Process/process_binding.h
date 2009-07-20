@@ -8,40 +8,22 @@
 
 #include <kroll/kroll.h>
 #include <vector>
+#include "process.h"
+#include "pipe.h"
 
 namespace ti
 {
-#ifdef OS_WIN32
-	class Win32Process;
-#else
-	class Process;
-#endif
-
-	class Process;
-	class ProcessBinding : public StaticBoundObject
+	class ProcessBinding : public AccessorBoundObject
 	{
 	public:
-		ProcessBinding(Host *, SharedKObject);
+		ProcessBinding();
 		virtual ~ProcessBinding();
-	
-#ifdef OS_WIN32
-		void Terminated(Win32Process* p);
-#else
-		void Terminated(Process* p);
-#endif
-		Host* GetHost() { return host; }
-		
+		static std::map<std::string,int> signals;
 	private:
-		Host *host;
-		SharedKObject global;
-		std::vector<SharedKObject> processes;
-		
-		void Launch(const ValueList& args, SharedValue result);
-		void GetEnv(const ValueList& args, SharedValue result);
-		void HasEnv(const ValueList& args, SharedValue result);
-		void SetEnv(const ValueList& args, SharedValue result);
-		void Restart(const ValueList& args, SharedValue result);
-		
+		void CreateProcess(const ValueList& args, SharedValue result);
+		void CreatePipe(const ValueList& args, SharedValue result);
+		void GetCurrentProcess(const ValueList& args, SharedValue result);
+		void ExtendArgs(SharedKList dest, SharedKList args);
 	};
 }
 

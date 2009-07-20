@@ -68,15 +68,22 @@
 {
 	return userWindow->get();
 }
-
-- (void)showInspector:(id)sender
+- (void)showInspector:(BOOL)console
 {
 	if (inspector == nil)
 	{
 		inspector = [[WebInspector alloc] initWithWebView:webView];
-		[inspector detach:self];
+		[inspector detach:webView];
 	}
-	[inspector show:self];
+	
+	if (console)
+	{
+		[inspector showConsole:webView];
+	}
+	else
+	{
+		[inspector show:webView];
+	}
 }
 
 - (void)titaniumQuit:(id)sender

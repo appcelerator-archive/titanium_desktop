@@ -116,6 +116,8 @@ namespace ti
 			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
 			void Unfocused();
+			
+			virtual void ShowInspector(bool console=false);
 
 		private:
 			NativeWindow *nativeWindow;

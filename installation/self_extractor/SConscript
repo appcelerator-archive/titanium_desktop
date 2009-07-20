@@ -14,8 +14,8 @@ atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
 if not path.exists(atlmfc_path):
 	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
 
-Env.Append(LIBPATH=[atlmfc_path+'\\lib'])
-Env.Append(CPPPATH=[atlmfc_path+'\\include'])
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
+Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
 
 resfile = Env.RES('progress.rc')
 p = Env.Program(build.dir + '/self_extractor', Glob('*.cpp') + resfile)

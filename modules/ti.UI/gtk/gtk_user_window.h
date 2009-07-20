@@ -149,6 +149,7 @@ namespace ti
 
 		void SetInspectorWindow(GtkWidget* inspectorWindow);
 		GtkWidget *GetInspectorWindow();
+		virtual void ShowInspector(bool console);
 
 		int gdkWidth;
 		int gdkHeight;

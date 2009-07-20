@@ -198,7 +198,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID) {
 				Win32UserWindow* wuw = Win32UserWindow::FromWindow(hWnd);
 				if (wuw)
-					wuw->ShowWebInspector();
+					wuw->ShowInspector(false);
 				break;
 
 			} else if (Win32MenuItem::HandleClickEvent(nativeMenu, position)) {
@@ -1051,11 +1051,18 @@ void Win32UserWindow::SetupSize()
 	this->SetBounds(b);
 }
 
-void Win32UserWindow::ShowWebInspector()
+void Win32UserWindow::ShowInspector(bool console)
 {
 	if (this->web_inspector)
 	{
-		this->web_inspector->show();
+		if (console)
+		{
+			this->web_inspector->showConsole();
+		}
+		else
+		{
+			this->web_inspector->show();
+		}
 	}
 }
 
