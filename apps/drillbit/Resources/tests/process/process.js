@@ -537,7 +537,7 @@ describe("process tests",
 		{
 			try {
 				value_of(output2.length).should_be_greater_than(0);
-				value_of(output2.toString()).should_be(output1.toString());
+				value_of(output2.length).should_be(output1.length);
 				value_of(p.getExitCode()).should_be(0);
 				callback.passed();
 			}
