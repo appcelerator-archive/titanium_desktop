@@ -40,17 +40,70 @@ namespace ti
 		exitMonitorAdapter(new RunnableAdapter<Process>(
 			*this, &Process::ExitMonitorAsync)),
 		running(false)
-	{	
+	{
+		/**
+		 * @tiapi(method=True,name=Process.Process.getPID,since=0.5)
+		 * @tiresult[int, pid] The PID of this process
+		 */
 		SetMethod("getPID", &Process::_GetPID);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getExitCode,since=0.5)
+		 * @tiresult[int, pid] The exit code of this process. If the process is still running, this will return -1
+		 */
 		SetMethod("getExitCode", &Process::_GetExitCode);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getArguments,since=0.5)
+		 * @tiresult[List<String>, arguments] The list of arguments this process was created with
+		 */
 		SetMethod("getArguments", &Process::_GetArguments);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getEnvironment,since=0.5)
+		 * @tiarg[String, key] an environment key
+		 * @tiresult[Any<String,Object> result] either the string value of the passed-in environment key, or the entire environment object
+		 */
 		SetMethod("getEnvironment", &Process::_GetEnvironment);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setEnvironment,since=0.5) Set an environment variable for this process
+		 * @tiarg[String, key] an environment key
+		 * @tiarg[String, value] the value
+		 */
 		SetMethod("setEnvironment", &Process::_SetEnvironment);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.cloneEnvironment,since=0.5)
+		 * @tiresult[Object, environment] A clone of this process' environment
+		 */
 		SetMethod("cloneEnvironment", &Process::_CloneEnvironment);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.launch,since=0.5)
+		 * @tiapi Launch this process asynchronously (not waiting for it's exit)
+		 */
 		SetMethod("launch", &Process::_Launch);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.terminate,since=0.5)
+		 * @tiapi Terminate this process (SIGTERM in Unix, TerminateProcess in Windows)
+		 */
 		SetMethod("terminate", &Process::_Terminate);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.kill,since=0.5)
+		 * @tiapi Kill this process (SIGINT in Unix, TerminateProcess in Windows)
+		 */
 		SetMethod("kill", &Process::_Kill);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.sendSignal,since=0.5)
+		 * @tiapi NOTE: this method does nothing in Windows
+		 * @tiarg[Any<int,String> signal] send a signal, i.e. Process.SIGHUP
+		 */
 		SetMethod("sendSignal", &Process::_SendSignal);
+		
 		SetMethod("setOnRead", &Process::_SetOnRead);
 		SetMethod("setOnExit", &Process::_SetOnExit);
 		SetMethod("getStdin", &Process::_GetStdin);
