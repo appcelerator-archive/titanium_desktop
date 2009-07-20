@@ -394,6 +394,7 @@
 
 			args.push('--results-dir="' + this.results_dir + '"');
 			var process = Titanium.Process.createProcess(args);
+			Titanium.App.stdout("running: " + process);
 			var passed = 0;
 			var failed = 0;
 			process.setOnReadLine(function(data)

@@ -37,6 +37,8 @@ namespace ti
 		Poco::Thread readThread;
 		SharedKMethod readCallback;
 		Logger* logger;
+		std::queue<AutoBlob> writeBuffers;
+		Poco::Mutex writeBufferMutex;
 
 		void PollForReads();
 		void PollForWrites();

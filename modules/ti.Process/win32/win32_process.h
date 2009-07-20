@@ -23,7 +23,7 @@ namespace ti
 		Win32Process();
 		virtual ~Win32Process();
 
-		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPtr<NativePipe> CreateNativeStdin() { return new Win32Pipe(false); }
 		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
 		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
@@ -43,7 +43,7 @@ namespace ti
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
-		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
+		AutoPtr<Win32Pipe> nativeOut, nativeErr;
 		Poco::Mutex mutex;
 		
 		Poco::Mutex processOutputMutex;

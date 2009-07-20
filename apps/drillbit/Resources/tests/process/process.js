@@ -330,7 +330,7 @@ describe("process tests",
 			if (more.isRunning()) more.kill();
 			
 			callback.failed("Timed out waiting for command to exit");
-		}, 5000);
+		}, 7000);
 	},
 	
 	test_pipe_write: function()

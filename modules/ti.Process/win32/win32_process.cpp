@@ -12,8 +12,8 @@ namespace ti
 {
 	
 	Win32Process::Win32Process() :
+		Process(new Win32Pipe(false)),
 		logger(Logger::Get("Process.Win32Process")),
-		nativeIn(0),
 		nativeOut(0),
 		nativeErr(0)
 	{
@@ -113,7 +113,6 @@ namespace ti
 	
 	void Win32Process::ForkAndExec()
 	{
-		nativeIn = new Win32Pipe(false);
 		nativeOut = new Win32Pipe(true);
 		nativeErr = new Win32Pipe(true);
 		AttachPipes();
@@ -126,7 +125,7 @@ namespace ti
 		startupInfo.dwFlags     = STARTF_FORCEOFFFEEDBACK | STARTF_USESTDHANDLES;
 		startupInfo.cbReserved2 = 0;
 		startupInfo.lpReserved2 = NULL;
-		startupInfo.hStdInput = nativeIn->GetReadHandle();
+		startupInfo.hStdInput = GetNativeStdin().cast<Win32Pipe>()->GetReadHandle();
 		startupInfo.hStdOutput = nativeOut->GetWriteHandle();
 		startupInfo.hStdError = nativeErr->GetWriteHandle();
 		
@@ -170,6 +169,7 @@ namespace ti
 	
 	void Win32Process::MonitorAsync()
 	{
+		GetNativeStdin()->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 	}
@@ -184,6 +184,7 @@ namespace ti
 		nativeOut->SetReadCallback(readCallback);
 		nativeErr->SetReadCallback(readCallback);
 
+		GetNativeStdin()->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 
@@ -218,6 +219,9 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
+		
+		//nativeOut->Close();
+		//nativeErr->Close();
 		return exitCode;
 	}
 

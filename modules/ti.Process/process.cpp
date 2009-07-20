@@ -27,11 +27,12 @@ namespace ti
 		return process;
 	}
 
-	Process::Process() :
+	Process::Process(AutoPtr<NativePipe> nativeStdin) :
 		KEventMethod("Process.Process"),
 		stdoutPipe(new Pipe()),
 		stderrPipe(new Pipe()),
 		stdinPipe(new Pipe()),
+		nativeStdin(nativeStdin),
 		environment(GetCurrentEnvironment()),
 		pid(-1),
 		exitCode(Value::Null),
@@ -41,6 +42,8 @@ namespace ti
 			*this, &Process::ExitMonitorAsync)),
 		running(false)
 	{
+		stdinPipe->Attach(nativeStdin);
+		
 		SetMethod("getPID", &Process::_GetPID);
 		SetMethod("getExitCode", &Process::_GetExitCode);
 		SetMethod("getArguments", &Process::_GetArguments);
@@ -122,7 +125,6 @@ namespace ti
 
 	void Process::AttachPipes()
 	{
-		stdinPipe->Attach(this->GetNativeStdin());
 		this->GetNativeStdout()->Attach(stdoutPipe);
 		this->GetNativeStderr()->Attach(stderrPipe);
 
@@ -135,7 +137,7 @@ namespace ti
 		// We don't detach event listeners because we want any pending
 		// READ events to fire. It should be okay though, because
 		// native pipes should not be re-used.
-		stdinPipe->Detach(this->GetNativeStdin());
+		stdinPipe->Detach(nativeStdin);
 		this->GetNativeStdout()->Detach(stdoutPipe);
 		this->GetNativeStderr()->Detach(stderrPipe);
 	}
@@ -169,6 +171,7 @@ namespace ti
 	{
 		this->exitCode = Value::NewInt(this->Wait());
 
+		this->nativeStdin->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
 		if (!exitCallback.isNull())
@@ -186,6 +189,7 @@ namespace ti
 		// next launch. Don't do this for synchronous process
 		// launch becauase we are already on the main thread and that
 		// will cause a deadlock.
+		this->nativeStdin->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
 		this->GetNativeStdout()->StopEventsThread();
@@ -365,8 +369,8 @@ namespace ti
 	{
 		if (running)
 		{
-			newStdin->Attach(this->GetNativeStdin());
-			this->stdinPipe->Detach(this->GetNativeStdin());
+			newStdin->Attach(nativeStdin);
+			this->stdinPipe->Detach(nativeStdin);
 		}
 		this->stdinPipe = stdinPipe;
 	}
