@@ -231,7 +231,7 @@ namespace ti
 
 	void Pipe::Close()
 	{
-		{ // A Null Blob on the qeueue signals a close event
+		{
 			Poco::Mutex::ScopedLock lock(eventsMutex);
 			this->duplicate();
 			this->duplicate();
