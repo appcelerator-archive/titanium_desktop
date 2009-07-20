@@ -14,12 +14,12 @@ describe("ti.API.Application tests",
 			value_of(app.getAvailableComponents).should_be_function();
 			value_of(app.getAvailableModules).should_be_function();
 			value_of(app.getAvailableRuntimes).should_be_function();
-			value_of(app.getBundledComponents).should_be_function();	// done
+			value_of(app.getBundledComponents).should_be_function();
 			value_of(app.getBundledModules).should_be_function();
 			value_of(app.getBundledRuntimes).should_be_function();
-			value_of(app.getComponents).should_be_function();		   // done
+			value_of(app.getComponents).should_be_function();
 			value_of(app.getDataPath).should_be_function();
-			value_of(app.getDependencies).should_be_function();		 // done
+			value_of(app.getDependencies).should_be_function();
 			value_of(app.getExecutablePath).should_be_function();
 			value_of(app.getGUID).should_be_function();
 			value_of(app.getID).should_be_function();
@@ -852,7 +852,7 @@ describe("ti.API.Application tests",
 		value_of(ver).should_be_string();
 		
 		// this is the version for the test harness app, not drillbit.
-		value_of(ver).should_be("0.4.4");
+		value_of(ver).should_be("0.5.0");
 	},
 	
 	test_api_app_GUID: function()
