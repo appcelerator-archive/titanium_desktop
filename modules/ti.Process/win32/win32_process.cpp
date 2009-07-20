@@ -17,6 +17,7 @@ namespace ti
 		nativeOut(new Win32Pipe(true)),
 		nativeErr(new Win32Pipe(true))
 	{
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 	
 	Win32Process::~Win32Process()
@@ -28,6 +29,7 @@ namespace ti
 		this->nativeIn = new Win32Pipe(false);
 		this->nativeOut = new Win32Pipe(true);
 		this->nativeErr = new Win32Pipe(true);
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 	
 	/*
