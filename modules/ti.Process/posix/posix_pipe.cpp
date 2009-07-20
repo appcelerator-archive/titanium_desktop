@@ -33,8 +33,6 @@ namespace ti
 		// the output is cleared from the pipe before closing them.
 		// A widowed pipe will eventually stop reading data.
 		NativePipe::Close();
-
-		this->CloseNative();
 	}
 
 	int PosixPipe::RawRead(char *buffer, int size)

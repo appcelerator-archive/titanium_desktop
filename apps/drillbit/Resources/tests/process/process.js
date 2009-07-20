@@ -4,7 +4,7 @@ describe("process tests",
 	{
 		this.dirCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe","/C","dir"] : ["/bin/ls"];
 		this.echoCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
-		this.moreCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\more.com"]: ["more"];
+		this.moreCmd = Titanium.platform == "win32" ? ["C:\\Windows\\System32\\more.com"]: ["/usr/bin/more"];
 	},
 	
 	test_process_binding: function()
@@ -321,8 +321,43 @@ describe("process tests",
 			}
 			callback.passed();
 		});
-		
+
+		setTimeout(function() { more.launch(); }, 500);
 		echo.launch();
+		
+		timer = setTimeout(function(){
+			if (echo.isRunning()) echo.kill();
+			if (more.isRunning()) more.kill();
+			
+			callback.failed("Timed out waiting for command to exit");
+		}, 7000);
+	},
+	test_piped_command_as_async_reversed: function(callback)
+	{
+		var data = 'this_is_a_piped_test';
+		var echoCmd = this.echoCmd.slice();
+		echoCmd.push(data);
+		
+		var echo = Titanium.Process.createProcess(echoCmd);
+		var more = Titanium.Process.createProcess(this.moreCmd);
+		echo.stdout.attach(more.stdin);
+		value_of(echo.stdout.isAttached()).should_be_true();
+		var moreData = "";
+		more.setOnRead(function(event){
+			moreData += event.data.toString();
+		});
+		var timer = 0;
+		more.setOnExit(function(event){
+			clearTimeout(timer);
+			try {
+				value_of(moreData.replace(/[\r\n]+/,'')).should_be(data);
+			} catch (e) {
+				callback.failed(e);
+			}
+			callback.passed();
+		});
+
+		setTimeout(function() { echo.launch(); }, 500);
 		more.launch();
 		
 		timer = setTimeout(function(){

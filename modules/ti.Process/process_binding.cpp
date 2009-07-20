@@ -253,7 +253,7 @@ namespace ti
 				"Titanium.Process option argument 'args' must have at least 1 element");
 		}
 		else if (argList->At(0)->IsNull() ||
-			argList->At(0)->IsString() && strlen(argList->At(0)->ToString()) == 0)
+			(argList->At(0)->IsString() && strlen(argList->At(0)->ToString()) == 0))
 		{
 			throw ValueException::FromString(
 				"Titanium.Process 1st argument must not be null/empty");
