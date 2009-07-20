@@ -210,7 +210,7 @@ describe("process tests",
 		
 		var allData = p();
 		value_of(buf.length).should_be_greater_than(0);
-		value_of(buf).should_be(allData);
+		value_of(buf.length).should_be(allData.length);
 	},
 	
 	test_pipe_chain: function()
@@ -314,8 +314,6 @@ describe("process tests",
 			clearTimeout(timer);
 			try {
 				value_of(moreData).should_be(data);
-				value_of(echo.stdout.isClosed()).should_be_true();
-				value_of(more.stdin.isClosed()).should_be_true();
 			} catch (e) {
 				callback.failed(e);
 			}
@@ -508,6 +506,53 @@ describe("process tests",
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');
+		},5000);
+	},
+	
+	test_relaunch_as_async: function(callback)
+	{
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		var timer = null;
+		var shortTimer = null;
+		var output2 = '';
+		var output1 = p();
+		
+		value_of(output1.length).should_be_greater_than(0);
+		
+		p.setOnRead(function(event)
+		{
+			try {
+				Titanium.API.debug("test_relaunch_as_async onRead");
+				var buf = event.data;
+				value_of(buf).should_be_object();
+				value_of(buf.toString()).should_be_string();
+			
+				output2 += buf.toString();
+			} catch(e) {
+				callback.failed(e);
+			}
+		});
+		
+		p.setOnExit(function(event)
+		{
+			try {
+				value_of(output2.length).should_be_greater_than(0);
+				value_of(output2.toString()).should_be(output1.toString());
+				value_of(p.getExitCode()).should_be(0);
+				callback.passed();
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}
+		});
+		
+		p.launch();
+		
+		// if we hit this timeout, then we fail.		
+		timer = setTimeout(function()
+		{
+			callback.failed('timed out waiting for process to relaunch');
 		},5000);
 	}
 });

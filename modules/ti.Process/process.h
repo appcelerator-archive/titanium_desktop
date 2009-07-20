@@ -27,9 +27,6 @@ namespace ti
 		virtual AutoBlob LaunchSync();
 		virtual void ExitMonitorAsync();
 		virtual void ExitMonitorSync();
-		virtual void Restart();
-		virtual void Restart(SharedKObject env, AutoPipe
-			stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe);
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void SetOnExit(SharedKMethod onExit);
@@ -79,7 +76,6 @@ namespace ti
 		void _Terminate(const ValueList& args, SharedValue result);
 		void _Kill(const ValueList& args, SharedValue result);
 		void _SendSignal(const ValueList& args, SharedValue result);
-		void _Restart(const ValueList& args, SharedValue result);
 		void _GetStdin(const ValueList& args, SharedValue result);
 		void _GetStdout(const ValueList& args, SharedValue result);
 		void _GetStderr(const ValueList& args, SharedValue result);

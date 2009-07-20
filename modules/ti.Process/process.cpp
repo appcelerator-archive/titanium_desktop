@@ -51,7 +51,6 @@ namespace ti
 		SetMethod("terminate", &Process::_Terminate);
 		SetMethod("kill", &Process::_Kill);
 		SetMethod("sendSignal", &Process::_SendSignal);
-		SetMethod("restart", &Process::_Restart);
 		SetMethod("setOnRead", &Process::_SetOnRead);
 		SetMethod("setOnExit", &Process::_SetOnExit);
 		SetMethod("getStdin", &Process::_GetStdin);
@@ -201,34 +200,6 @@ namespace ti
 		this->Exited();
 	}
 
-	void Process::Restart()
-	{
-		Restart(NULL, NULL, NULL, NULL);
-	}
-
-	void Process::Restart(SharedKObject environment, AutoPipe stdinPipe, AutoPipe stdoutPipe, AutoPipe stderrPipe)
-	{
-		this->environment = environment.isNull() ? CloneEnvironment() : environment;
-
-		this->stdinPipe = stdinPipe;
-		this->stdoutPipe = stdoutPipe;
-		this->stderrPipe = stderrPipe;
-		if (stdinPipe.isNull())
-			this->stdinPipe = new Pipe();
-		if (this->stdoutPipe.isNull())
-			this->stdoutPipe = new Pipe();
-		if (this->stderrPipe.isNull())
-			this->stderrPipe = new Pipe();
-	
-		if (running)
-		{
-			Terminate();
-		}
-
-		Logger::Get("Process.Process")->Debug("restarting...");
-		LaunchAsync();
-	}
-
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
 		if (running)
@@ -329,30 +300,6 @@ namespace ti
 			
 			
 			SendSignal(args.at(0)->ToInt());
-		}
-	}
-	
-	void Process::_Restart(const ValueList& args, SharedValue result)
-	{
-		if (args.size() == 0)
-		{
-			Restart();
-		}
-		else
-		{
-			if (args.at(0)->IsObject())
-			{
-				SharedKObject object = args.at(0)->ToObject();
-				SharedKObject env;
-				AutoPipe stdinPipe;
-				AutoPipe stdoutPipe, stderrPipe;
-				
-				env = object->GetObject("env");
-				stdinPipe = object->GetObject("stdin").cast<Pipe>();
-				stdoutPipe = object->GetObject("stdout").cast<Pipe>();
-				stderrPipe = object->GetObject("stderr").cast<Pipe>();
-				Restart(env, stdinPipe, stdoutPipe, stderrPipe);
-			}
 		}
 	}
 

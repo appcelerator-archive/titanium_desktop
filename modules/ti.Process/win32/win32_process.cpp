@@ -219,6 +219,8 @@ namespace ti
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
 		
+		nativeOut->Close();
+		nativeErr->Close();
 		return exitCode;
 	}
 
