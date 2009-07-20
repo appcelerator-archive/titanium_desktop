@@ -193,7 +193,7 @@ describe("process tests",
 	
 	test_attach_file_as_async: function(callback)
 	{
-		var originalData = 'this_is_a_split_and_attach_test';
+		var originalData = 'this_is_an_attach_test';
 		var echoCmd = this.echoCmd.slice();
 		echoCmd.push(originalData);
 		
@@ -460,55 +460,40 @@ describe("process tests",
 		var p = Titanium.Process.createProcess(this.dirCmd);
 		var timer = null;
 		var shortTimer = null;
-		var output1 = '';
 		var output2 = '';
-		var exited = false;
-		function onRead(n)
+		var output1 = p();
+		
+		value_of(output1.length).should_be_greater_than(0);
+		
+		p.setOnRead(function(event)
 		{
-			return function(event)
-			{
-				try {
-					value_of(p.getPID()).should_be_number();
-					var buf = event.data;
-					value_of(buf).should_be_object();
-					value_of(buf.toString()).should_be_string();
-				
-					n == 1 ? output1 += buf.toString() : output2 += buf.toString();
-				} catch(e) {
-					callback.failed(e);
-				}
-			};
-		}
+			try {
+				Titanium.API.debug("test_restart_as_async onRead");
+				var buf = event.data;
+				value_of(buf).should_be_object();
+				value_of(buf.toString()).should_be_string();
+			
+				output2 += buf.toString();
+			} catch(e) {
+				callback.failed(e);
+			}
+		});
 		
-		p.setOnRead(onRead(1));
-		p.setOnExit(function() { exited = true; });
-		p.launch();
-		
-		shortTimer = setTimeout(function(){
-			try
-			{
-				value_of(output1.length).should_be_greater_than(0);
-				value_of(exited).should_be_true();
-				
-				p.setOnRead(onRead(2));
-				p.setOnExit(function(event) {
-					try {
-						value_of(output2).should_be(output1);
-						value_of(p.getExitCode()).should_be(0);
-						callback.passed();
-					}
-					catch (e)
-					{
-						callback.failed(e);
-					}
-				});
-				p.restart();
+		p.setOnExit(function(event)
+		{
+			try {
+				value_of(output2.length).should_be_greater_than(0);
+				value_of(output2.toString()).should_be(output1.toString());
+				value_of(p.getExitCode()).should_be(0);
+				callback.passed();
 			}
 			catch (e)
 			{
 				callback.failed(e);
 			}
-		}, 2000);
+		});
+		
+		p.restart();
 		
 		// if we hit this timeout, then we fail.		
 		timer = setTimeout(function()

@@ -120,15 +120,18 @@ namespace ti
 		nativeOut->SetReadCallback(readCallback);
 		nativeErr->SetReadCallback(readCallback);
 
+		logger->Debug("Starting monitors..");
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
-
+		
+		logger->Debug("Exit monitor..");
 		this->ExitMonitor();
 
 		// Unset the callbacks just in case these pipes are used again
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
+		logger->Debug("concat outputs..");
 		std::vector<char> output;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
@@ -138,8 +141,13 @@ namespace ti
 				output.insert(output.end(), b->Get(), b->Get()+b->Length());
 			}
 		}
-
-		return new Blob(&(output[0]), output.size());
+		
+		logger->Debug("returning");
+		if (output.size() > 0)
+		{
+			return new Blob(&(output[0]), output.size());
+		}
+		else return new Blob();
 	}
 
 	int PosixProcess::Wait()
