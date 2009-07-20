@@ -170,7 +170,7 @@ namespace ti
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 	}
-	
+
 	AutoBlob Win32Process::MonitorSync()
 	{
 		SharedKMethod readCallback =
@@ -190,22 +190,14 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		std::vector<char> output;
+		AutoBlob output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
-			for (size_t i = 0; i < processOutput.size(); i++)
-			{
-				AutoBlob b = processOutput.at(i);
-				output.insert(output.end(), b->Get(), b->Get()+b->Length());
-			}
+			output = Blob::GlobBlobs(processOutput);
 		}
-		if (output.size() > 0)
-		{
-			return new Blob(&(output[0]), output.size());	
-		}
-		return new Blob();
+		return output;
 	}
-	
+
 	int Win32Process::Wait()
 	{
 		while (true) {

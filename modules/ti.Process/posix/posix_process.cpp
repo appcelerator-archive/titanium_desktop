@@ -131,23 +131,12 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		logger->Debug("concat outputs..");
-		std::vector<char> output;
+		AutoBlob output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
-			for (size_t i = 0; i < processOutput.size(); i++)
-			{
-				AutoBlob b = processOutput.at(i);
-				output.insert(output.end(), b->Get(), b->Get()+b->Length());
-			}
+			output = Blob::GlobBlobs(processOutput);
 		}
-		
-		logger->Debug("returning");
-		if (output.size() > 0)
-		{
-			return new Blob(&(output[0]), output.size());
-		}
-		else return new Blob();
+		return output;
 	}
 
 	int PosixProcess::Wait()
