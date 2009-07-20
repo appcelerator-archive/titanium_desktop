@@ -25,6 +25,9 @@ namespace ti
 		void StartMonitor(SharedKMethod readCallback);
 		virtual void StopMonitors();
 		virtual int Write(AutoBlob blob);
+		void PollForWriteIteration();
+		virtual void Close();
+		virtual void CloseNative() = 0;
 		inline void SetReadCallback(SharedKMethod cb) { this->readCallback = cb; }
 
 	protected:

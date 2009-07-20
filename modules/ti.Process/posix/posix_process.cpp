@@ -21,6 +21,7 @@ namespace ti
 		nativeOut(new PosixPipe(true)),
 		nativeErr(new PosixPipe(true))
 	{
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 
 	PosixProcess::~PosixProcess()
@@ -32,6 +33,7 @@ namespace ti
 		this->nativeIn = new PosixPipe(false);
 		this->nativeOut = new PosixPipe(true);
 		this->nativeErr = new PosixPipe(true);
+		stdinPipe->Attach(this->GetNativeStdin());
 	}
 
 	void PosixProcess::SetArguments(SharedKList args)

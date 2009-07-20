@@ -45,6 +45,15 @@ namespace ti
 		}
 	}
 
+	void NativePipe::Close()
+	{
+		if (!isReader)
+		{
+			closed = true;
+		}
+		Pipe::Close();
+	}
+
 	int NativePipe::Write(AutoBlob blob)
 	{
 		if (isReader)
@@ -68,7 +77,7 @@ namespace ti
 			// If this is not a reader pipe (ie one that simply accepts write
 			// requests via the Write(...) method, like stdin), then queue the
 			// data to be written to the native pipe (blocking operation) by
-			// our writer thread.
+			// our writer thread.:
 			Poco::Mutex::ScopedLock lock(buffersMutex);
 			buffers.push(blob);
 		}
@@ -112,13 +121,23 @@ namespace ti
 		AutoBlob blob = 0;
 		while (!closed || buffers.size() > 0)
 		{
-			if (buffers.size() > 0)
+			PollForWriteIteration();
+		}
+
+		this->CloseNative();
+		this->release();
+	}
+
+	void NativePipe::PollForWriteIteration()
+	{
+		AutoBlob blob = 0;
+		while (buffers.size() > 0)
+		{
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
 				blob = buffers.front();
 				buffers.pop();
 			}
-
 			if (!blob.isNull())
 			{
 				this->RawWrite(blob);
@@ -126,7 +145,6 @@ namespace ti
 			}
 		}
 
-		this->release();
 	}
 
 	void NativePipe::RawWrite(AutoBlob blob)
