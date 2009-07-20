@@ -75,7 +75,6 @@ namespace ti
 
 		this->running = false;
 		this->DetachPipes();
-		Logger::Get("Process.Process2")->Debug("firing exit");
 
 		this->FireEvent(Event::EXIT);
 	}

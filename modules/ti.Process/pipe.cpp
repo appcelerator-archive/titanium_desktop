@@ -284,7 +284,6 @@ namespace ti
 				this->duplicate();
 				AutoPtr<KEventObject> autothis = this;
 				AutoPtr<Event> event = new ReadEvent(autothis, blob);
-				Logger::Get("Process.Pipe2")->Debug("firing read event, blob size: %d bytes, data: %s\n", blob->Length(), blob->Get());
 				this->FireEvent(event);
 				blob = 0;
 			}

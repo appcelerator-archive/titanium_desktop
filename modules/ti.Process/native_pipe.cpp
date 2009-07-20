@@ -57,7 +57,6 @@ namespace ti
 			// right now.
 			if (!readCallback.isNull())
 			{
-				logger->Debug("calling reader for blob data of %d size", blob->Length());
 				readCallback->Call(Value::NewObject(blob));
 			}
 

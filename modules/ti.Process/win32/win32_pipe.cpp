@@ -29,20 +29,18 @@ namespace ti
 		if (!closed)
 		{
 			NativePipe::Close();
-			this->CloseNative();
 		}
+		this->CloseNative();
 	}
 	
 	int Win32Pipe::RawRead(char *buffer, int size)
 	{
-		logger->Debug("RawRead: %d bytes", size);
 		if (readHandle != INVALID_HANDLE_VALUE) {
 			DWORD bytesRead;
 			BOOL ok = ReadFile(readHandle, buffer, size, &bytesRead, NULL);
 			int error = GetLastError();
 			if (ok)
 			{
-				logger->Debug("ok: %d, error: %d, just read %d bytes, buffer: %s", ok, error, bytesRead, buffer);
 				return bytesRead;
 			}
 			else if (error == ERROR_BROKEN_PIPE)
