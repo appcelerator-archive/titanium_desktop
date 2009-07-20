@@ -577,7 +577,7 @@ describe("UI Module Tests",{
 				} else {
 					callback.failed("Closing window did not receive CLOSE event");
 				}
-			}, 200);
+			}, 1000);
 		}, 200);
 	},
 	test_window_top_most: function()
