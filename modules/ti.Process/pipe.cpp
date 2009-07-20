@@ -26,12 +26,38 @@ namespace ti
 		KEventObject(type),
 		logger(Logger::Get("Process.Pipe"))
 	{
-		//TODO doc me
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.close,since=0.5)
+		 * @tiapi Close this pipe to further reading/writing.
+		 */
 		SetMethod("close", &Pipe::_Close);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.write,since=0.5)
+		 * @tiapi Write data to this pipe
+		 * @tiarg[Any<Blob,String> data] a Blob object or String to write to this pipe
+		 * @tiresult[int, bytesWritten] the number of bytes actually written on this pipe
+		 */
 		SetMethod("write", &Pipe::_Write);
-		SetMethod("flush", &Pipe::_Flush);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.attach,since=0.5)
+		 * @tiapi Attach an IO object to this pipe. An IO object is an object that
+		 * @tiapi implements a public "write(Blob)". In Titanium, this include FileStreams, and Pipes.
+		 * @tiapi You may also use your own custom IO implementation here.
+		 */
 		SetMethod("attach", &Pipe::_Attach);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.detach,since=0.5)
+		 * @tiapi Detach an IO object from this pipe. see Process.Pipe.attach.
+		 */
 		SetMethod("detach", &Pipe::_Detach);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.isAttached,since=0.5)
+		 * @tiresult[bool, isAttached] returns whether or not this pipe is attached to 1 or more IO objects
+		 */
 		SetMethod("isAttached", &Pipe::_IsAttached);
 
 		if (!eventsThread.isRunning())
