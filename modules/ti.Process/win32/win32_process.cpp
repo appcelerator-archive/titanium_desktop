@@ -218,9 +218,6 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
-		
-		nativeOut->Close();
-		nativeErr->Close();
 		return exitCode;
 	}
 
