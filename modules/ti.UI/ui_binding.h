@@ -56,7 +56,8 @@ namespace ti
 		void _AddTray(const ValueList& args, SharedValue result);
 		void _ClearTray(const ValueList& args, SharedValue result);
 		void _GetIdleTime(const ValueList& args, SharedValue result);
-
+		
+		
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
 		void _SetDockMenu(const ValueList& args, SharedValue result);

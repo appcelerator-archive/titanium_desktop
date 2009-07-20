@@ -1,158 +1,108 @@
-body
-{
+body, td {
 	background-color:#292929;
 	font-family:"Lucida Sans",Arial;
 	color:white;
 	font-size:12px;
-	padding:20px;
-}
-input[type=text]
-{
-	-webkit-border-bottom-right-radius: 3px;
-	-webkit-border-bottom-left-radius: 3px;
-	-webkit-border-top-right-radius: 3px;
-	-webkit-border-top-left-radius: 3px;
-	background-color:#333;
-	border:1px solid #555;
-	outline:none;
-	font-size:12px;
-	padding:3px;
-	color:#ddd;
-	width:420px;
+	padding:2px;
+	margin:2px;
 }
 
-button
-{
-	margin-top:10px;
-	float:right;
+a {
+	color: #cc9;
+	font-weight: bold;
 }
 
-#suite-progress, #total-progress
-{
-	background-color: #111;
-	margin-bottom: 10px;
-	border: 1px solid #666;
-	width: 250px;
-	height: 8px;
-	
-	margin: 1px;
-}
-
-#progress-bars {
-	float: left;
-	clear: none;
-}
-
-#current-test-message, #progress-message
+#actions,#passed-count, #failed-count, #assertion-count, #test-count
 {
 	float: left;
+	width: 150px;
+	margin-bottom: 3px;
 	font-size: 12px;
-	margin-left: 5px;
 }
 
-.passed-progress, .failed-progress
+#actions {
+	width: 165px;
+}
+
+#current-test
+{	
+	clear: left;
+	margin-bottom: 15px;
+}
+
+.line {
+	background-color: #333;
+	clear: both;
+}
+
+.suites
 {
-	float: left;
-	clear: none;
-	height: 8px;
-}
-
-.passed-progress { 
-	background-color: #3c3;
-}
-
-.failed-progress
-{
-	background-color: #c33;
-}
-
-#header
-{
-	font-size:12px;
-	margin-bottom:10px;
-	float:right;
-}
-
-div.checkbox
-{
-	width:12px;
-	height:10px;
-	cursor:pointer;
-	background-image:url(images/check_off.png);
-	background-repeat:no-repeat;
-	background-position:middle center;
-}
-
-div.checkbox.checked
-{
-	background-image:url(images/check_on.png);
-}
-
-td.status
-{
-	width:20px;
-	cursor:pointer;
-}
-
-td.status.untested
-{
-	color:#777;
-}
-
-td.status.running
-{
-	color:#00f;
-}
-
-td.status.passed
-{
-	color:#080;
-}
-
-td.status.failed
-{
-	color:#800;
-}
-
-#table table
-{
-	border:1px solid #111;
-	width:690px;
-}
-
-#table table th
-{
-	font-weight:bold;
-	text-align:left;
-	background-color:#111;
-	color:#fff;
-	padding-left:5px;
-	font-size:12px;
-}
-
-#table table td
-{
-	padding:5px;
-	text-align:left;
-	font-size:12px;
-}
-
-#table
-{
-	clear:both;
-	margin:0;
-	padding:0;
-	height:560px;
+	margin:0px;
+	padding:0px;
+	margin-top: 5px;
 	overflow:hidden;
-	overflow-y:auto;
 }
 
-#status
+.suite, .suite-running, .suite-passed, .suite-failed
 {
-	margin-top:15px;
-	padding-left:38px;
-	height:32px;
-	background-image:url(images/ajax.gif);
-	background-repeat:no-repeat;
-	background-position:0px -6px;
+	font-family:"Lucida Sans",Arial;
+	font-size: 12px;
+	
+	background-image: url(images/gradient.png);
+	background-repeat: repeat-x;
+	background-position: top left;
+	
+	border: 1px solid #000;
+	color:white;
+	margin: 0px;
+	padding: 1px;
+	float: left;
+	height: 50px;
+	width: 150px;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.suite_name
+{
+	font-weight: bold;
+}
+
+.suite-running
+{
+	background: #336;
+}
+
+.suite-passed
+{
+	background: #363;
+}
+
+.suite-failed
+{
+	background: #633;
+}
+
+.description {
+	font-size: 10px;
+	margin-left: 3px;
+}
+
+.untested, .running, .failed, .passed {
+	font-size: 10px;
+	color: #ccc;
+	font-weight:bold;
+	text-align:right;
+}
+
+.running {
+	color: #66c;
+}
+
+.failed {
+	color: #c66;
+}
+
+.passed {
+	color: #6c6;
 }

@@ -5,118 +5,301 @@
  */
 
 #include "pipe.h"
+#include "native_pipe.h"
 #include <vector>
 #include <cstring>
 
+#if defined(OS_WIN32)
+# include "win32/win32_pipe.h"
+#else
+# include "posix/posix_pipe.h"
+#endif
+
 namespace ti
 {
-	Pipe::Pipe(Poco::PipeIOS* pipe) : StaticBoundObject("Pipe"), pipe(pipe), closed(false)
+	Poco::Mutex Pipe::eventsMutex;
+	std::queue<AutoPtr<Event> > Pipe::events;
+	Poco::ThreadTarget Pipe::eventsThreadTarget(&Pipe::FireEvents);
+	Poco::Thread Pipe::eventsThread;
+
+	Pipe::Pipe(const char *type) :
+		KEventObject(type),
+		logger(Logger::Get("Process.Pipe"))
 	{
 		/**
-		 * @tiapi(property=True,type=boolean,name=Process.Pipe.closed,since=0.2) Whether or not a pipe is closed
+		 * @tiapi(method=True,name=Process.Pipe.close,since=0.5)
+		 * @tiapi Close this pipe to further reading/writing.
 		 */
-		this->Set("closed",Value::NewBool(false));
+		SetMethod("close", &Pipe::_Close);
+		
 		/**
-		 * @tiapi(method=True,name=Process.Pipe.close,since=0.2) Closes the pipe
+		 * @tiapi(method=True,name=Process.Pipe.write,since=0.5)
+		 * @tiapi Write data to this pipe
+		 * @tiarg[Any<Blob,String> data] a Blob object or String to write to this pipe
+		 * @tiresult[int, bytesWritten] the number of bytes actually written on this pipe
 		 */
-		this->SetMethod("close",&Pipe::Close);
+		SetMethod("write", &Pipe::_Write);
+		
 		/**
-		 * @tiapi(method=True,name=Process.Pipe.write,since=0.2) Writes data to the pipe
-		 * @tiarg(for=Process.Pipe.write,type=string,name=data) data to write
+		 * @tiapi(method=True,name=Process.Pipe.attach,since=0.5)
+		 * @tiapi Attach an IO object to this pipe. An IO object is an object that
+		 * @tiapi implements a public "write(Blob)". In Titanium, this include FileStreams, and Pipes.
+		 * @tiapi You may also use your own custom IO implementation here.
 		 */
-		this->SetMethod("write",&Pipe::Write);
+		SetMethod("attach", &Pipe::_Attach);
+		
 		/**
-		 * @tiapi(method=True,name=Process.Pipe.read,since=0.2) Reads data from the pipe
-		 * @tiresult(for=Process.Pipe.read,type=string) result read from pipe
+		 * @tiapi(method=True,name=Process.Pipe.detach,since=0.5)
+		 * @tiapi Detach an IO object from this pipe. see Process.Pipe.attach.
 		 */
-		this->SetMethod("read",&Pipe::Read);
+		SetMethod("detach", &Pipe::_Detach);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Pipe.isAttached,since=0.5)
+		 * @tiresult[bool, isAttached] returns whether or not this pipe is attached to 1 or more IO objects
+		 */
+		SetMethod("isAttached", &Pipe::_IsAttached);
+
+		if (!eventsThread.isRunning())
+		{
+			eventsThread.start(eventsThreadTarget);
+		}
 	}
+
 	Pipe::~Pipe()
 	{
-		Close();
-		delete pipe;
-		pipe = NULL;
 	}
-	void Pipe::Write(const ValueList& args, SharedValue result)
+
+	void Pipe::Attach(SharedKObject object)
 	{
-		if (closed)
-		{
-			throw ValueException::FromString("Pipe is already closed");
-		}
-		if (!args.at(0)->IsString())
-		{
-			throw ValueException::FromString("Can only write string data");
-		}
-		Poco::PipeOutputStream *os = dynamic_cast<Poco::PipeOutputStream*>(pipe);
-		if (os==NULL)
-		{
-			throw ValueException::FromString("Stream is not writeable");
-		}
-		const char *data = args.at(0)->ToString();
-		int len = (int)strlen(data);
-		try
-		{
-			os->write(data,len);
-			result->SetInt(len);
-		}
-		catch (Poco::Exception &e)
-		{
-			throw ValueException::FromString(e.what());
-		}
+		Poco::Mutex::ScopedLock lock(attachedMutex);
+		attachedObjects.push_back(object);
 	}
-	void Pipe::Read(const ValueList& args, SharedValue result)
+
+	void Pipe::Detach(SharedKObject object)
 	{
-		if (closed)
+		Poco::Mutex::ScopedLock lock(attachedMutex);
+		std::vector<SharedKObject>::iterator i = attachedObjects.begin();
+		while (i != attachedObjects.end())
 		{
-			throw ValueException::FromString("Pipe is already closed");
-		}
-		Poco::PipeInputStream *is = dynamic_cast<Poco::PipeInputStream*>(pipe);
-		if (is==NULL)
-		{
-			throw ValueException::FromString("Stream is not readable");
-		}
-		char *buf = NULL;
-		try
-		{
-			int size = 128;
-			// allow the size of the returned buffer to be 
-			// set by the caller - defaults to 1024 if not specified
-			if (args.size() > 0 && args.at(0)->IsInt())
+			SharedKObject obj = *i;
+			if (obj->Equals(object))
 			{
-				size = args.at(0)->ToInt();
-			}
-			buf = new char[size+1];
-			is->read(buf,size);
-			int count = is->gcount();
-			if (count <= 0)
-			{
-				result->SetNull();
+				i = attachedObjects.erase(i);
 			}
 			else
 			{
-				buf[count] = '\0';
-				result->SetString(buf);
+				i++;
 			}
-			delete [] buf;
-		}
-		catch (Poco::Exception &e)
-		{
-			if (buf) delete[] buf;
-			Logger::Get("Process.Pipe")->Error(e.what());
-			throw ValueException::FromString(e.what());
 		}
 	}
-	void Pipe::Close(const ValueList& args, SharedValue result)
+
+	bool Pipe::IsAttached()
 	{
-		Close();
+		Poco::Mutex::ScopedLock lock(attachedMutex);
+		return attachedObjects.size() > 0;
 	}
+
+	int Pipe::FindFirstLineFeed(char *data, int length, int *charsToErase)
+	{
+		int newline = -1;
+		for (int i = 0; i < length; i++)
+		{
+			if (data[i] == '\n')
+			{
+				newline = i;
+				*charsToErase = 1;
+				break;
+			}
+			else if (data[i] == '\r')
+			{
+				if (i < length-1 && data[i+1] == '\n')
+				{
+					newline = i+1;
+					*charsToErase = 2;
+					break;
+				}
+			}
+		}
+		
+		return newline;
+	}
+
+	AutoPipe Pipe::Clone()
+	{
+		AutoPipe pipe = new Pipe();
+		return pipe;
+	}
+
+	void Pipe::_Attach(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("attach", "o");
+		this->Attach(args.at(0)->ToObject());
+	}
+	
+	void Pipe::_Detach(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("detach", "o");
+		this->Detach(args.at(0)->ToObject());
+	}
+
+	void Pipe::_IsAttached(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->IsAttached());
+	}
+
+	void Pipe::_Write(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("write", "o|s");
+		
+		AutoBlob blob = new Blob();
+		if (args.at(0)->IsObject())
+		{
+			blob = args.at(0)->ToObject().cast<Blob>();
+		}
+		else if (args.at(0)->IsString())
+		{
+			blob = new Blob(args.at(0)->ToString());
+		}
+		
+		if (blob.isNull())
+		{
+			throw ValueException::FromString("Pipe.write argument should be a Blob or string");
+		}
+
+		int written = this->Write(blob);
+		result->SetInt(written);
+	}
+
+	void Pipe::_Flush(const ValueList& args, SharedValue result)
+	{
+		this->Flush();
+	}
+
+	void Pipe::_Close(const ValueList& args, SharedValue result)
+	{
+		this->Close();
+	}
+
+	int Pipe::Write(AutoBlob blob)
+	{
+		{ // Start the callbacks
+			this->duplicate();
+			AutoPtr<Event> event = new ReadEvent(this, blob);
+			Poco::Mutex::ScopedLock lock(eventsMutex);
+			events.push(event);
+		}
+
+		// We want this to execute on the same thread and to make all
+		// our writeable objects thread safe. This will allow data to
+		// flow through pipes more quickly.
+		{
+			Poco::Mutex::ScopedLock lock(attachedMutex);
+			for (size_t i = 0; i < attachedObjects.size(); i++)
+			{
+				this->CallWrite(attachedObjects.at(i), blob);
+			}
+		}
+
+		return blob->Length();
+	}
+
+	void Pipe::CallWrite(SharedKObject target, AutoBlob blob)
+	{
+		SharedKMethod writeMethod = target->GetMethod("write");
+
+		if (writeMethod.isNull())
+		{
+			std::string error = "Target object did not have a write method";
+			logger->Error(error);
+			return;
+		}
+		else
+		{
+			try
+			{
+				writeMethod->Call(ValueList(Value::NewObject(blob)));
+			}
+			catch (ValueException &e)
+			{
+				SharedString ss = e.DisplayString();
+				logger->Error("Exception while trying to write to target: %s",
+					ss->c_str());
+			}
+		}
+	}
+
 	void Pipe::Close()
 	{
-		if (!closed)
 		{
-			pipe->close();
-			closed=true;
-			this->Set("closed",Value::NewBool(true));
+			Poco::Mutex::ScopedLock lock(eventsMutex);
+			this->duplicate();
+			this->duplicate();
+			AutoPtr<Event> closeEvent = new Event(this, Event::CLOSE);
+			AutoPtr<Event> closedEvent = new Event(this, Event::CLOSED);
+
+			events.push(closeEvent);
+			events.push(closedEvent);
+		}
+
+		// Call the close method on our attached objects
+		{
+			Poco::Mutex::ScopedLock lock(attachedMutex);
+			for (size_t i = 0; i < attachedObjects.size(); i++)
+			{
+				this->CallClose(attachedObjects.at(i));
+			}
+		}
+	}
+
+	void Pipe::CallClose(SharedKObject target)
+	{
+		SharedValue closeMethod = target->Get("close");
+
+		if (!closeMethod->IsMethod())
+		{
+			logger->Warn("Target object did not have a close method");
+			return;
+		}
+		else
+		{
+			try
+			{
+				closeMethod->ToMethod()->Call(ValueList());
+			}
+			catch (ValueException &e)
+			{
+				SharedString ss = e.DisplayString();
+				logger->Error("Exception while trying to write to target: %s",
+					ss->c_str());
+			}
+		}
+	}
+
+	void Pipe::Flush()
+	{
+	}
+
+	void Pipe::FireEvents()
+	{
+		while (true)
+		{
+			AutoPtr<Event> event = 0;
+			{
+				Poco::Mutex::ScopedLock lock(eventsMutex);
+				if (events.size() > 0)
+				{
+					event = events.front();
+					events.pop();
+				}
+			}
+
+			if (!event.isNull())
+			{
+				event->target->FireEvent(event);
+			}
+
+			Poco::Thread::sleep(5);
 		}
 	}
 }

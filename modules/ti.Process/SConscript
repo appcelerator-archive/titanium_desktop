@@ -8,16 +8,16 @@ env.Append(CPPDEFINES = ('TITANIUM_PROCESS_API_EXPORT', 1))
 env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
-sources = ['process_binding.cpp', 'process_module.cpp']
+sources = Glob('*.cpp')
 
-if build.is_osx():
-	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
-	env.Append(CCFLAGS=['-x', 'objective-c++'])
-elif build.is_win32():
-	sources = sources + Glob('win32/*.cpp')
+if build.is_win32():
+	sources += Glob('win32/*.cpp')
 else:
-	sources += ['process.cpp', 'pipe.cpp']
+	sources += Glob('posix/*.cpp')
 	
 m = build.add_module('ti.Process', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tiprocessmodule', source = sources)
+build.mark_build_target(t)
+
+t = build.utils.CopyTree(Glob('*.js'), m.build_dir)
 build.mark_build_target(t)

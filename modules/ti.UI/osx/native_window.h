@@ -38,7 +38,7 @@ using namespace ti;
 - (WindowConfig*)config;
 - (UserWindow*)userWindow;
 - (void)setInitialWindow:(BOOL)yn;
-- (void)showInspector:(id)sender;
+- (void)showInspector:(BOOL)console;
 @end
 
 #endif

@@ -17,7 +17,7 @@ namespace ti
 	void ProcessModule::Initialize()
 	{
 		// load our variables
-		this->binding = new ProcessBinding(host,host->GetGlobalObject());
+		this->binding = new ProcessBinding();
 
 		// set our ti.Process
 		SharedValue value = Value::NewObject(this->binding);
@@ -28,7 +28,6 @@ namespace ti
 		char *s = NULL;
 		(*s)++;
 #endif
-		
 	}
 
 	void ProcessModule::Stop()

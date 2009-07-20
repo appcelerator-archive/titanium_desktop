@@ -1237,5 +1237,18 @@ namespace ti
 			GtkUserWindowNS::SAVE_FILE,
 			callback, false, title, path, defaultName, types, typesDescription);
 	}
+	
+	void GtkUserWindow::ShowInspector(bool console)
+	{
+		WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
+		
+		// TODO we need to expose showConsole ala win32/osx
+		if (!GetInspectorWindow())
+		{
+			// calling these callbacks directly probably isn't the best way to do this?
+			inspect_web_view_cb(inspector, webView, this);
+		}
+		gtk_widget_show(GetInspectorWindow());
+	}
 }
 
