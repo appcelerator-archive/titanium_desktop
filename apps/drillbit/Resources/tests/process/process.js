@@ -164,6 +164,33 @@ describe("process tests",
 		value_of(p.stderr).should_be_object();
 	},
 	
+	test_simple_attach_file: function()
+	{
+		var data = 'some_data';
+		var echoCmd = this.echoCmd.slice();
+		echoCmd.push(data);
+		
+		var p = Titanium.Process.createProcess(echoCmd);
+		var file = Titanium.Filesystem.createTempFile();
+		var stream = Titanium.Filesystem.getFileStream(file.nativePath());
+		stream.open(stream.MODE_WRITE);
+		p.stdout.attach(stream);
+		p.stderr.attach(stream);
+		var allData = p();
+		stream.close();
+		
+		value_of(file.exists()).should_be_true();
+		var fileData = file.read();
+		fileData = String(fileData).replace(/[\r\n]+/,'');
+		allData = String(allData).replace(/[\r\n]+/, '');
+		
+		value_of(fileData.length).should_be(allData.length);
+		value_of(fileData.length).should_be(data.length);
+		value_of(fileData).should_be(allData);
+		value_of(fileData).should_be(data);
+		value_of(allData).should_be(data);
+	},
+	
 	test_attach_file_as_async: function(callback)
 	{
 		var originalData = 'this_is_a_split_and_attach_test';
