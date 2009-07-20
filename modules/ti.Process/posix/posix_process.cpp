@@ -16,7 +16,6 @@ extern char **environ;
 namespace ti
 {
 	PosixProcess::PosixProcess() :
-		Process(new PosixPipe(false)),
 		logger(Logger::Get("Process.PosixProcess")),
 		nativeIn(new PosixPipe(false)),
 		nativeOut(new PosixPipe(true)),
