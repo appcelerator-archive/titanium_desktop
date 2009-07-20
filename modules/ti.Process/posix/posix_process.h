@@ -31,9 +31,9 @@ namespace ti
 		virtual int Wait();
 		virtual void SetArguments(SharedKList args);
 		void ReadCallback(const ValueList& args, SharedValue result);
-		inline virtual AutoPipe GetNativeStdin() { return nativeIn; }
-		inline virtual AutoPipe GetNativeStdout() { return nativeOut; }
-		inline virtual AutoPipe GetNativeStderr() { return nativeErr; }
+		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
+		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
 	protected:
 		Logger* logger;

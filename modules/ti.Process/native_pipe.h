@@ -23,7 +23,7 @@ namespace ti
 		~NativePipe();
 		void StartMonitor();
 		void StartMonitor(SharedKMethod readCallback);
-		virtual void Close();
+		virtual void StopMonitors();
 		virtual int Write(AutoBlob blob);
 		inline void SetReadCallback(SharedKMethod cb) { this->readCallback = cb; }
 

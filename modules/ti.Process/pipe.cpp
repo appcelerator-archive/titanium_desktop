@@ -37,6 +37,7 @@ namespace ti
 
 	Pipe::~Pipe()
 	{
+		this->StopEventsThread();
 		delete eventsThreadAdapter;
 	}
 
@@ -192,7 +193,8 @@ namespace ti
 
 		if (writeMethod.isNull())
 		{
-			logger->Error("Target object did not have a write method");
+			std::string error = "Target object did not have a write method";
+			logger->Error(error);
 			return;
 		}
 		else
@@ -229,18 +231,18 @@ namespace ti
 
 	void Pipe::CallClose(SharedKObject target)
 	{
-		SharedKMethod closeMethod = target->GetMethod("close");
+		SharedValue closeMethod = target->Get("close");
 
-		if (closeMethod.isNull())
+		if (!closeMethod->IsMethod())
 		{
-			logger->Warn("Target object did not have a write method");
+			//logger->Warn("Target object did not have a close method");
 			return;
 		}
 		else
 		{
 			try
 			{
-				closeMethod->Call(ValueList());
+				closeMethod->ToMethod()->Call(ValueList());
 			}
 			catch (ValueException &e)
 			{

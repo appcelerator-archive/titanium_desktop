@@ -10,6 +10,7 @@
 #include <kroll/kroll.h>
 #include <sstream>
 #include "pipe.h"
+#include "native_pipe.h"
 
 namespace ti
 {
@@ -62,9 +63,9 @@ namespace ti
 		virtual void MonitorAsync() = 0;
 		virtual AutoBlob MonitorSync() = 0;
 		virtual int Wait() = 0;
-		virtual AutoPipe GetNativeStdin() = 0;
-		virtual AutoPipe GetNativeStdout() = 0;
-		virtual AutoPipe GetNativeStderr() = 0;
+		virtual AutoPtr<NativePipe> GetNativeStdin() = 0;
+		virtual AutoPtr<NativePipe> GetNativeStdout() = 0;
+		virtual AutoPtr<NativePipe> GetNativeStderr() = 0;
 		void AttachPipes();
 
 	protected:

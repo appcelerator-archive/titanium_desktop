@@ -68,9 +68,10 @@ namespace ti
 
 	void Process::Exited()
 	{
+		this->GetNativeStdout()->Close();
+		this->GetNativeStderr()->Close();
+
 		this->running = false;
-
-
 		this->DetachPipes();
 		Logger::Get("Process.Process2")->Debug("firing exit");
 
@@ -168,6 +169,9 @@ namespace ti
 	void Process::ExitMonitorSync()
 	{
 		this->exitCode = Value::NewInt(this->Wait());
+
+		this->GetNativeStdout()->StopMonitors();
+		this->GetNativeStderr()->StopMonitors();
 		if (!exitCallback.isNull())
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
 	}
@@ -183,6 +187,8 @@ namespace ti
 		// next launch. Don't do this for synchronous process
 		// launch becauase we are already on the main thread and that
 		// will cause a deadlock.
+		this->GetNativeStdout()->StopMonitors();
+		this->GetNativeStderr()->StopMonitors();
 		this->GetNativeStdout()->StopEventsThread();
 		this->GetNativeStderr()->StopEventsThread();
 

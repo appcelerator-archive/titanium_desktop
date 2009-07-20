@@ -509,52 +509,5 @@ describe("process tests",
 		{
 			test.failed('timed out');
 		},5000);
-	},
-	
-	test_restart_as_async: function(callback)
-	{
-		var p = Titanium.Process.createProcess(this.dirCmd);
-		var timer = null;
-		var shortTimer = null;
-		var output2 = '';
-		var output1 = p();
-		
-		value_of(output1.length).should_be_greater_than(0);
-		
-		p.setOnRead(function(event)
-		{
-			try {
-				Titanium.API.debug("test_restart_as_async onRead");
-				var buf = event.data;
-				value_of(buf).should_be_object();
-				value_of(buf.toString()).should_be_string();
-			
-				output2 += buf.toString();
-			} catch(e) {
-				callback.failed(e);
-			}
-		});
-		
-		p.setOnExit(function(event)
-		{
-			try {
-				value_of(output2.length).should_be_greater_than(0);
-				value_of(output2.toString()).should_be(output1.toString());
-				value_of(p.getExitCode()).should_be(0);
-				callback.passed();
-			}
-			catch (e)
-			{
-				callback.failed(e);
-			}
-		});
-		
-		p.restart();
-		
-		// if we hit this timeout, then we fail.		
-		timer = setTimeout(function()
-		{
-			callback.failed('timed out waiting for process to restart');
-		},5000);
 	}
 });

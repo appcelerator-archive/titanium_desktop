@@ -22,11 +22,12 @@ namespace ti
 
 	NativePipe::~NativePipe ()
 	{
+		this->StopMonitors();
 		delete readThreadAdapter;
 		delete writeThreadAdapter;
 	}
 
-	void NativePipe::Close()
+	void NativePipe::StopMonitors()
 	{
 		closed = true;
 		try

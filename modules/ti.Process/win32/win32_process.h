@@ -23,10 +23,10 @@ namespace ti
 		Win32Process();
 		virtual ~Win32Process();
 
-		virtual AutoPipe GetNativeStdin() { return nativeIn; }
-		virtual AutoPipe GetNativeStdout() { return nativeOut; }
-		virtual AutoPipe GetNativeStderr() { return nativeErr; }
-		
+		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
+		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
+
 		virtual int GetPID();
 		virtual void Terminate();
 		virtual void Kill();

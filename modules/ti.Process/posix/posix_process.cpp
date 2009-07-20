@@ -154,8 +154,6 @@ namespace ti
 		}
 
 		int exitCode = WEXITSTATUS(status);
-		nativeOut->Close();
-		nativeErr->Close();
 		return exitCode;
 	}
 
