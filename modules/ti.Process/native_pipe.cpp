@@ -18,11 +18,12 @@ namespace ti
 		readCallback(0),
 		logger(Logger::Get("Process.NativePipe"))
 	{
-	};
+	}
 
 	NativePipe::~NativePipe ()
 	{
-		this->StopMonitors();
+		// Don't need to StopMonitors here, because the destructor
+		// should never be called until the monitors are shutdown
 		delete readThreadAdapter;
 		delete writeThreadAdapter;
 	}
@@ -68,8 +69,8 @@ namespace ti
 			// requests via the Write(...) method, like stdin), then queue the
 			// data to be written to the native pipe (blocking operation) by
 			// our writer thread.
-			Poco::Mutex::ScopedLock lock(writeBufferMutex);
-			writeBuffers.push(blob);
+			Poco::Mutex::ScopedLock lock(buffersMutex);
+			buffers.push(blob);
 		}
 
 		return blob->Length();
@@ -89,6 +90,8 @@ namespace ti
 
 	void NativePipe::PollForReads()
 	{
+		this->duplicate();
+
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
 		int bytesRead = this->RawRead(buffer, length);
@@ -98,18 +101,22 @@ namespace ti
 			this->Write(blob);
 			bytesRead = this->RawRead(buffer, length);
 		}
+
+		this->release();
 	}
 
 	void NativePipe::PollForWrites()
 	{
-		AutoBlob blob = 0;
-		while (!closed || writeBuffers.size() > 0)
+		this->duplicate();
+
+		while (!closed || buffers.size() > 0)
 		{
-			if (writeBuffers.size() > 0)
+			AutoBlob blob = 0;
+			if (buffers.size() > 0)
 			{
-				Poco::Mutex::ScopedLock lock(writeBufferMutex);
-				blob = writeBuffers.front();
-				writeBuffers.pop();
+				Poco::Mutex::ScopedLock lock(buffersMutex);
+				blob = buffers.front();
+				buffers.pop();
 			}
 
 			if (!blob.isNull())
@@ -118,6 +125,8 @@ namespace ti
 				blob = 0;
 			}
 		}
+
+		this->release();
 	}
 
 	void NativePipe::RawWrite(AutoBlob blob)

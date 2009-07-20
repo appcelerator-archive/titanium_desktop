@@ -27,12 +27,11 @@ namespace ti
 		return process;
 	}
 
-	Process::Process(AutoPtr<NativePipe> nativeStdin) :
+	Process::Process() :
 		KEventMethod("Process.Process"),
 		stdoutPipe(new Pipe()),
 		stderrPipe(new Pipe()),
 		stdinPipe(new Pipe()),
-		nativeStdin(nativeStdin),
 		environment(GetCurrentEnvironment()),
 		pid(-1),
 		exitCode(Value::Null),
@@ -41,9 +40,7 @@ namespace ti
 		exitMonitorAdapter(new RunnableAdapter<Process>(
 			*this, &Process::ExitMonitorAsync)),
 		running(false)
-	{
-		stdinPipe->Attach(nativeStdin);
-		
+	{	
 		SetMethod("getPID", &Process::_GetPID);
 		SetMethod("getExitCode", &Process::_GetExitCode);
 		SetMethod("getArguments", &Process::_GetArguments);
@@ -68,15 +65,26 @@ namespace ti
 		delete exitMonitorAdapter;
 	}
 
-	void Process::Exited()
+	void Process::Exited(bool async)
 	{
 		this->GetNativeStdout()->Close();
 		this->GetNativeStderr()->Close();
 
-		this->running = false;
 		this->DetachPipes();
+		this->RecreateNativePipes();
+		this->running = false;
 
-		this->FireEvent(Event::EXIT);
+		if (async)
+		{
+			this->duplicate();
+			AutoPtr<Event> event = new Event(this, Event::EXIT);
+			Poco::Mutex::ScopedLock lock(Pipe::eventsMutex);
+			Pipe::events.push(event);
+		}
+		else
+		{
+			this->FireEvent(Event::EXIT);
+		}
 	}
 
 	void Process::SetOnRead(SharedKMethod newOnRead)
@@ -122,13 +130,16 @@ namespace ti
 		return str.str();
 	}
 
-	void Process::AttachPipes()
+	void Process::AttachPipes(bool async)
 	{
 		this->GetNativeStdout()->Attach(stdoutPipe);
 		this->GetNativeStderr()->Attach(stderrPipe);
 
-		this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
-		this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
+		if (async && !onRead.isNull())
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
+		}
 	}
 
 	void Process::DetachPipes()
@@ -136,7 +147,7 @@ namespace ti
 		// We don't detach event listeners because we want any pending
 		// READ events to fire. It should be okay though, because
 		// native pipes should not be re-used.
-		stdinPipe->Detach(nativeStdin);
+		stdinPipe->Detach(this->GetNativeStdin());
 		this->GetNativeStdout()->Detach(stdoutPipe);
 		this->GetNativeStderr()->Detach(stderrPipe);
 	}
@@ -145,7 +156,8 @@ namespace ti
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
-		
+
+		this->AttachPipes(true);
 		ForkAndExec();
 		MonitorAsync();
 
@@ -159,10 +171,21 @@ namespace ti
 		this->running = true;
 		this->exitCode = Value::Null;
 
+		this->AttachPipes(false);
 		ForkAndExec();
 		AutoBlob output = MonitorSync();
 
-		this->Exited();
+		// Manually fire read events here so that
+		// we can be precise about the ordering.
+		if (!onRead.isNull())
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			AutoPtr<Event> event = new ReadEvent(this->GetNativeStdin(), output);
+			this->GetNativeStdout()->FireEvent(event);
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
+		}
+
+		this->Exited(false);
 		return output;
 	}
 
@@ -170,7 +193,7 @@ namespace ti
 	{
 		this->exitCode = Value::NewInt(this->Wait());
 
-		this->nativeStdin->StopMonitors();
+		this->GetNativeStdin()->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
 		if (!exitCallback.isNull())
@@ -188,11 +211,9 @@ namespace ti
 		// next launch. Don't do this for synchronous process
 		// launch becauase we are already on the main thread and that
 		// will cause a deadlock.
-		this->nativeStdin->StopMonitors();
+		this->GetNativeStdin()->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
-		this->GetNativeStdout()->StopEventsThread();
-		this->GetNativeStderr()->StopEventsThread();
 
 		if (!exitCallback.isNull())
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
@@ -200,12 +221,13 @@ namespace ti
 
 	void Process::ExitCallback(const ValueList& args, SharedValue result)
 	{
-		this->Exited();
+		this->Exited(true);
 	}
 
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
-		if (running)
+		int pid = GetPID();
+		if (pid != -1)
 			result->SetInt(GetPID());
 		else
 			result->SetNull();
@@ -368,8 +390,8 @@ namespace ti
 	{
 		if (running)
 		{
-			newStdin->Attach(nativeStdin);
-			this->stdinPipe->Detach(nativeStdin);
+			newStdin->Attach(this->GetNativeStdin());
+			this->stdinPipe->Detach(this->GetNativeStdin());
 		}
 		this->stdinPipe = stdinPipe;
 	}

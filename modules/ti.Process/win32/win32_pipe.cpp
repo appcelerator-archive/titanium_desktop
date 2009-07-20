@@ -18,10 +18,6 @@ namespace ti
 		attr.bInheritHandle       = TRUE;
 		
 		::CreatePipe(&readHandle, &writeHandle, &attr, 0);
-		if (!isReader)
-		{
-			StopEventsThread();
-		}
 	}
 	
 	void Win32Pipe::Close()

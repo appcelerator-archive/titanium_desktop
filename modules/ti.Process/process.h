@@ -19,7 +19,7 @@ namespace ti
 	class Process : public KEventMethod
 	{
 	public:
-		Process(AutoPtr<NativePipe> nativeStdin);
+		Process();
 		virtual ~Process();
 		static AutoProcess CreateProcess();
 		virtual SharedKObject CloneEnvironment();
@@ -30,7 +30,7 @@ namespace ti
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void SetOnExit(SharedKMethod onExit);
-		void Exited();
+		void Exited(bool async);
 		void ExitCallback(const ValueList& args, SharedValue result);
 		virtual SharedValue Call(const ValueList& args);
 		static SharedKObject GetCurrentEnvironment();
@@ -46,7 +46,6 @@ namespace ti
 		inline AutoPipe GetStdin() { return this->stdinPipe; }
 		inline AutoPipe GetStdout() { return this->stdoutPipe; }
 		inline AutoPipe GetStderr() { return this->stderrPipe; }
-		inline AutoPtr<NativePipe> GetNativeStdin() { return this->nativeStdin; }
 		inline SharedKList GetArgs() { return this->args; };
 		inline SharedKObject GetEnvironment() { return this->environment; }
 		void SetEnvironment(const char *name, const char *value)
@@ -61,10 +60,11 @@ namespace ti
 		virtual void MonitorAsync() = 0;
 		virtual AutoBlob MonitorSync() = 0;
 		virtual int Wait() = 0;
-		virtual AutoPtr<NativePipe> CreateNativeStdin() = 0;
+		virtual void RecreateNativePipes() = 0;
+		virtual AutoPtr<NativePipe> GetNativeStdin() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStdout() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStderr() = 0;
-		void AttachPipes();
+		void AttachPipes(bool async);
 
 	protected:
 		void _GetPID(const ValueList& args, SharedValue result);
@@ -89,7 +89,6 @@ namespace ti
 		AutoPipe stdoutPipe;
 		AutoPipe stderrPipe;
 		AutoPipe stdinPipe;
-		AutoPtr<NativePipe> nativeStdin;
 		SharedKObject environment;
 		SharedKList args;
 		int pid;

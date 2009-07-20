@@ -24,7 +24,6 @@ namespace ti
 
 	PosixPipe::~PosixPipe()
 	{
-		this->Close();
 	}
 
 	void PosixPipe::Close()

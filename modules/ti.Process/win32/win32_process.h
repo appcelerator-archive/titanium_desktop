@@ -23,7 +23,7 @@ namespace ti
 		Win32Process();
 		virtual ~Win32Process();
 
-		inline virtual AutoPtr<NativePipe> CreateNativeStdin() { return new Win32Pipe(false); }
+		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
 		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
 		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
@@ -37,13 +37,14 @@ namespace ti
 		virtual int Wait();
 		virtual std::string ArgumentsToString();
 		void ReadCallback(const ValueList& args, SharedValue result);
+		virtual void RecreateNativePipes();
 		
 	protected:
 		std::string ArgListToString(SharedKList argList);
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
-		AutoPtr<Win32Pipe> nativeOut, nativeErr;
+		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
 		Poco::Mutex mutex;
 		
 		Poco::Mutex processOutputMutex;
