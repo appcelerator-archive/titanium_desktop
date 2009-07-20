@@ -191,6 +191,62 @@ describe("process tests",
 		value_of(allData).should_be(data);
 	},
 	
+	test_attach_anonymous_io: function()
+	{
+		var buf = '';
+		var io = {
+			write: function(data)
+			{
+				buf += data.toString();
+			}
+		};
+		
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		p.stdout.attach(io);
+		p.stderr.attach(io);
+		
+		value_of(p.stdout.isAttached()).should_be_true();
+		value_of(p.stderr.isAttached()).should_be_true();
+		
+		var allData = p();
+		value_of(buf.length).should_be_greater_than(0);
+		value_of(buf).should_be(allData);
+	},
+	
+	test_pipe_chain: function()
+	{
+		var pipe1 = Titanium.Process.createPipe();
+		var pipe2 = Titanium.Process.createPipe();
+		var pipe3 = Titanium.Process.createPipe();
+		
+		var p = Titanium.Process.createProcess(this.dirCmd);
+		p.stdout.attach(pipe1);
+		p.stderr.attach(pipe1);
+		pipe1.attach(pipe2);
+		pipe2.attach(pipe3);
+		
+		var file1 = Titanium.Filesystem.createTempFile();
+		var file2 = Titanium.Filesystem.createTempFile();
+		var stream1 = Titanium.Filesystem.getFileStream(file1.nativePath());
+		var stream2 = Titanium.Filesystem.getFileStream(file2.nativePath());
+		stream1.open(stream1.MODE_WRITE);
+		stream2.open(stream2.MODE_WRITE);
+		
+		pipe3.attach(stream1);
+		pipe3.attach(stream2)
+		
+		var data = String(p());
+		
+		var contents1 = file1.read();
+		var contents2 = file2.read();
+		
+		value_of(data.length).should_be_greater_than(0);
+		value_of(contents1.length).should_be_greater_than(0);
+		value_of(contents2.length).should_be_greater_than(0);
+		value_of(data).should_be(contents1);
+		value_of(data).should_be(contents2);
+	},
+	
 	test_attach_file_as_async: function(callback)
 	{
 		var originalData = 'this_is_an_attach_test';
