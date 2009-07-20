@@ -13,9 +13,9 @@ namespace ti
 	
 	Win32Process::Win32Process() :
 		logger(Logger::Get("Process.Win32Process")),
-		nativeIn(new Win32Pipe(false)),
-		nativeOut(new Win32Pipe(true)),
-		nativeErr(new Win32Pipe(true))
+		nativeIn(0),
+		nativeOut(0),
+		nativeErr(0)
 	{
 	}
 	
@@ -113,6 +113,9 @@ namespace ti
 	
 	void Win32Process::ForkAndExec()
 	{
+		nativeIn = new Win32Pipe(false);
+		nativeOut = new Win32Pipe(true);
+		nativeErr = new Win32Pipe(true);
 		AttachPipes();
 		
 		STARTUPINFO startupInfo;
