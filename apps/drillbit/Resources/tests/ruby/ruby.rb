@@ -171,3 +171,29 @@ def test_rubykobject_respond_to(o)
 	end
 	return ""
 end
+
+def test_rubykobject_method_missing_exception(o)
+	exception = ""
+	begin
+		o.method_missing(:blahblah)
+		exception = ":blahblah did not throw an Exception"
+	rescue NoMethodError
+		1 + 1
+	rescue 
+		exception = ":blahblah did not throw a NoMethodError"
+	end
+
+	if (exception != "")
+		return exception
+	end
+
+	exception = ""
+	begin
+		o.method_missing(:cow)
+	rescue NoMethodError
+		exception = ":cow threw a NoMethodError"
+	rescue 
+		exception = ":cow threw some unknown error: " + $!
+	end
+	return exception
+end

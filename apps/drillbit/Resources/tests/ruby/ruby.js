@@ -180,5 +180,14 @@ describe("Ruby Tests",
 		a.phillip = 34;
 		a.undef = undefined;
 		value_of(test_rubykobject_respond_to(a)).should_be("");
+	},
+	test_rubykobject_method_missing_exception: function()
+	{
+		a = Object();
+		a.sheep = "baaah";
+		a.cow = function() { return 'moo'; };
+		a.phillip = 34;
+		a.undef = undefined;
+		value_of(test_rubykobject_method_missing_exception(a)).should_be("");
 	}
 });
