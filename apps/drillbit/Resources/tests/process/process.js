@@ -235,7 +235,9 @@ describe("process tests",
 		pipe3.attach(stream1);
 		pipe3.attach(stream2)
 		
-		var data = String(p());
+		var data = p();
+		stream1.close();
+		stream2.close();
 		
 		var contents1 = file1.read();
 		var contents2 = file2.read();
@@ -243,8 +245,8 @@ describe("process tests",
 		value_of(data.length).should_be_greater_than(0);
 		value_of(contents1.length).should_be_greater_than(0);
 		value_of(contents2.length).should_be_greater_than(0);
-		value_of(data).should_be(contents1);
-		value_of(data).should_be(contents2);
+		value_of(data.toString()).should_be(contents1.toString());
+		value_of(data.toString()).should_be(contents2.toString());
 	},
 	
 	test_attach_file_as_async: function(callback)
