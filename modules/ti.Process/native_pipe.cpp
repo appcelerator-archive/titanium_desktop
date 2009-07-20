@@ -18,11 +18,12 @@ namespace ti
 		readCallback(0),
 		logger(Logger::Get("Process.NativePipe"))
 	{
-	};
+	}
 
 	NativePipe::~NativePipe ()
 	{
-		this->StopMonitors();
+		// Don't need to StopMonitors here, because the destructor
+		// should never be called until the monitors are shutdown
 		delete readThreadAdapter;
 		delete writeThreadAdapter;
 	}
@@ -90,6 +91,8 @@ namespace ti
 
 	void NativePipe::PollForReads()
 	{
+		this->duplicate();
+
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
 		int bytesRead = this->RawRead(buffer, length);
@@ -99,13 +102,17 @@ namespace ti
 			this->Write(blob);
 			bytesRead = this->RawRead(buffer, length);
 		}
+
+		this->release();
 	}
 
 	void NativePipe::PollForWrites()
 	{
-		AutoBlob blob = 0;
+		this->duplicate();
+
 		while (!closed || buffers.size() > 0)
 		{
+			AutoBlob blob = 0;
 			if (buffers.size() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
@@ -118,6 +125,8 @@ namespace ti
 				this->RawWrite(blob);
 			}
 		}
+
+		this->release();
 	}
 
 	void NativePipe::RawWrite(AutoBlob blob)

@@ -65,16 +65,26 @@ namespace ti
 		delete exitMonitorAdapter;
 	}
 
-	void Process::Exited()
+	void Process::Exited(bool async)
 	{
 		this->GetNativeStdout()->Close();
 		this->GetNativeStderr()->Close();
 
-		this->running = false;
 		this->DetachPipes();
-		Logger::Get("Process.Process2")->Debug("firing exit");
+		this->RecreateNativePipes();
+		this->running = false;
 
-		this->FireEvent(Event::EXIT);
+		if (async)
+		{
+			this->duplicate();
+			AutoPtr<Event> event = new Event(this, Event::EXIT);
+			Poco::Mutex::ScopedLock lock(Pipe::eventsMutex);
+			Pipe::events.push(event);
+		}
+		else
+		{
+			this->FireEvent(Event::EXIT);
+		}
 	}
 
 	void Process::SetOnRead(SharedKMethod newOnRead)
@@ -120,14 +130,17 @@ namespace ti
 		return str.str();
 	}
 
-	void Process::AttachPipes()
+	void Process::AttachPipes(bool async)
 	{
 		stdinPipe->Attach(this->GetNativeStdin());
 		this->GetNativeStdout()->Attach(stdoutPipe);
 		this->GetNativeStderr()->Attach(stderrPipe);
 
-		this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
-		this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
+		if (async && !onRead.isNull())
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
+		}
 	}
 
 	void Process::DetachPipes()
@@ -144,7 +157,8 @@ namespace ti
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
-		
+
+		this->AttachPipes(true);
 		ForkAndExec();
 		MonitorAsync();
 
@@ -158,10 +172,21 @@ namespace ti
 		this->running = true;
 		this->exitCode = Value::Null;
 
+		this->AttachPipes(false);
 		ForkAndExec();
 		AutoBlob output = MonitorSync();
 
-		this->Exited();
+		// Manually fire read events here so that
+		// we can be precise about the ordering.
+		if (!onRead.isNull())
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			AutoPtr<Event> event = new ReadEvent(this->GetNativeStdin(), output);
+			this->GetNativeStdout()->FireEvent(event);
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
+		}
+
+		this->Exited(false);
 		return output;
 	}
 
@@ -169,6 +194,7 @@ namespace ti
 	{
 		this->exitCode = Value::NewInt(this->Wait());
 
+		this->GetNativeStdin()->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
 		if (!exitCallback.isNull())
@@ -186,10 +212,9 @@ namespace ti
 		// next launch. Don't do this for synchronous process
 		// launch becauase we are already on the main thread and that
 		// will cause a deadlock.
+		this->GetNativeStdin()->StopMonitors();
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
-		this->GetNativeStdout()->StopEventsThread();
-		this->GetNativeStderr()->StopEventsThread();
 
 		if (!exitCallback.isNull())
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
@@ -197,12 +222,13 @@ namespace ti
 
 	void Process::ExitCallback(const ValueList& args, SharedValue result)
 	{
-		this->Exited();
+		this->Exited(true);
 	}
 
 	void Process::_GetPID(const ValueList& args, SharedValue result)
 	{
-		if (running)
+		int pid = GetPID();
+		if (pid != -1)
 			result->SetInt(GetPID());
 		else
 			result->SetNull();

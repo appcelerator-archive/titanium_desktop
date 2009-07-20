@@ -10,7 +10,7 @@
 #include <kroll/kroll.h>
 #include <queue>
 #include <Poco/Thread.h>
-#include <Poco/RunnableAdapter.h>
+#include <Poco/ThreadTarget.h>
 
 namespace ti
 {
@@ -31,14 +31,11 @@ namespace ti
 		void Detach(SharedKObject object);
 		bool IsAttached();
 		AutoPipe Clone();
-		void StartEventsThread();
-		void StopEventsThread();
+		static Poco::Mutex eventsMutex;
+		static std::queue<AutoPtr<Event> > events;
 
 	protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
-		void FireReadBuffers();
-		int SafeBuffersSize();
-		void FireEvents();
 		void _Close(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);
 		void _Attach(const ValueList& args, SharedValue result);
@@ -46,15 +43,13 @@ namespace ti
 		void _IsAttached(const ValueList& args, SharedValue result);
 		void _Write(const ValueList& args, SharedValue result);
 		void _Flush(const ValueList& args, SharedValue result);
-
 		Poco::Mutex attachedMutex;
 		std::vector<SharedKObject> attachedObjects;
 		Logger *logger;
-		bool active;
-		Poco::Mutex buffersMutex;
-		std::queue<AutoBlob> buffers;
-		Poco::Thread eventsThread;
-		Poco::RunnableAdapter<Pipe>* eventsThreadAdapter;
+
+		static void FireEvents();
+		static Poco::ThreadTarget eventsThreadTarget;
+		static Poco::Thread eventsThread;
 	};
 }
 

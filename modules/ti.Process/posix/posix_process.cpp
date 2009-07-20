@@ -17,14 +17,21 @@ namespace ti
 {
 	PosixProcess::PosixProcess() :
 		logger(Logger::Get("Process.PosixProcess")),
-		nativeIn(0),
-		nativeOut(0),
-		nativeErr(0)
+		nativeIn(new PosixPipe(false)),
+		nativeOut(new PosixPipe(true)),
+		nativeErr(new PosixPipe(true))
 	{
 	}
 
 	PosixProcess::~PosixProcess()
 	{
+	}
+
+	void PosixProcess::RecreateNativePipes()
+	{
+		this->nativeIn = new PosixPipe(false);
+		this->nativeOut = new PosixPipe(true);
+		this->nativeErr = new PosixPipe(true);
 	}
 
 	void PosixProcess::SetArguments(SharedKList args)
@@ -51,11 +58,6 @@ namespace ti
 
 	void PosixProcess::ForkAndExec()
 	{
-		nativeIn = new PosixPipe(false);
-		nativeOut = new PosixPipe(true);
-		nativeErr = new PosixPipe(true);
-		AttachPipes();
-		
 		int pid = fork();
 		if (pid < 0)
 		{
@@ -106,6 +108,7 @@ namespace ti
 
 	void PosixProcess::MonitorAsync()
 	{
+		nativeIn->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 	}
@@ -120,11 +123,10 @@ namespace ti
 		nativeOut->SetReadCallback(readCallback);
 		nativeErr->SetReadCallback(readCallback);
 
-		logger->Debug("Starting monitors..");
+		nativeIn->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
-		
-		logger->Debug("Exit monitor..");
+
 		this->ExitMonitorSync();
 
 		// Unset the callbacks just in case these pipes are used again

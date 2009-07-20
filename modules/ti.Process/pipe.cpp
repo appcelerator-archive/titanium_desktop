@@ -17,10 +17,14 @@
 
 namespace ti
 {
+	Poco::Mutex Pipe::eventsMutex;
+	std::queue<AutoPtr<Event> > Pipe::events;
+	Poco::ThreadTarget Pipe::eventsThreadTarget(&Pipe::FireEvents);
+	Poco::Thread Pipe::eventsThread;
+
 	Pipe::Pipe(const char *type) :
 		KEventObject(type),
-		active(true),
-		eventsThreadAdapter(0)
+		logger(Logger::Get("Process.Pipe"))
 	{
 		//TODO doc me
 		SetMethod("close", &Pipe::_Close);
@@ -30,29 +34,14 @@ namespace ti
 		SetMethod("detach", &Pipe::_Detach);
 		SetMethod("isAttached", &Pipe::_IsAttached);
 
-		this->eventsThreadAdapter =
-			new Poco::RunnableAdapter<Pipe>(*this, &Pipe::FireEvents);
-		this->StartEventsThread();
+		if (!eventsThread.isRunning())
+		{
+			eventsThread.start(eventsThreadTarget);
+		}
 	}
 
 	Pipe::~Pipe()
 	{
-		this->StopEventsThread();
-		delete eventsThreadAdapter;
-	}
-
-	void Pipe::StopEventsThread()
-	{
-		active = false;
-		if (eventsThread.isRunning())
-			eventsThread.join();
-	}
-
-	void Pipe::StartEventsThread()
-	{
-		this->active = true;
-		if (!eventsThread.isRunning())
-			this->eventsThread.start(*this->eventsThreadAdapter);
 	}
 
 	void Pipe::Attach(SharedKObject object)
@@ -169,8 +158,10 @@ namespace ti
 	int Pipe::Write(AutoBlob blob)
 	{
 		{ // Start the callbacks
-			Poco::Mutex::ScopedLock lock(buffersMutex);
-			buffers.push(blob);
+			this->duplicate();
+			AutoPtr<Event> event = new ReadEvent(this, blob);
+			Poco::Mutex::ScopedLock lock(eventsMutex);
+			events.push(event);
 		}
 
 		// We want this to execute on the same thread and to make all
@@ -215,8 +206,14 @@ namespace ti
 	void Pipe::Close()
 	{
 		{ // A Null Blob on the qeueue signals a close event
-			Poco::Mutex::ScopedLock lock(buffersMutex);
-			buffers.push(0);
+			Poco::Mutex::ScopedLock lock(eventsMutex);
+			this->duplicate();
+			this->duplicate();
+			AutoPtr<Event> closeEvent = new Event(this, Event::CLOSE);
+			AutoPtr<Event> closedEvent = new Event(this, Event::CLOSED);
+
+			events.push(closeEvent);
+			events.push(closedEvent);
 		}
 
 		// Call the close method on our attached objects
@@ -235,7 +232,7 @@ namespace ti
 
 		if (!closeMethod->IsMethod())
 		{
-			//logger->Warn("Target object did not have a close method");
+			logger->Warn("Target object did not have a close method");
 			return;
 		}
 		else
@@ -257,52 +254,25 @@ namespace ti
 	{
 	}
 
-	int Pipe::SafeBuffersSize()
-	{
-		int size = 0;
-		{
-			Poco::Mutex::ScopedLock lock(buffersMutex);
-			size = buffers.size();
-		}
-		return size;
-	}
-	
-	void Pipe::FireReadBuffers()
-	{
-		AutoBlob blob = 0;
-		
-		while (SafeBuffersSize() > 0)
-		{
-			{
-				Poco::Mutex::ScopedLock lock(buffersMutex);
-				blob = buffers.front();
-				buffers.pop();
-			}
-
-			if (!blob.isNull())
-			{
-				this->duplicate();
-				AutoPtr<KEventObject> autothis = this;
-				AutoPtr<Event> event = new ReadEvent(autothis, blob);
-				Logger::Get("Process.Pipe2")->Debug("firing read event, blob size: %d bytes, data: %s\n", blob->Length(), blob->Get());
-				this->FireEvent(event);
-				blob = 0;
-			}
-			else
-			{
-				// A null blob signifies a close event
-				this->FireEvent(Event::CLOSE);
-				this->FireEvent(Event::CLOSED);
-			}
-		}
-
-	}
-	
 	void Pipe::FireEvents()
 	{
-		while (active || SafeBuffersSize() > 0)
+		while (true)
 		{
-			FireReadBuffers();
+			AutoPtr<Event> event = 0;
+			{
+				Poco::Mutex::ScopedLock lock(eventsMutex);
+				if (events.size() > 0)
+				{
+					event = events.front();
+					events.pop();
+				}
+			}
+
+			if (!event.isNull())
+			{
+				event->target->FireEvent(event);
+			}
+
 			Poco::Thread::sleep(5);
 		}
 	}

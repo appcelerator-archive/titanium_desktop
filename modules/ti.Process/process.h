@@ -30,7 +30,7 @@ namespace ti
 		std::string ArgumentsToString();
 		void SetOnRead(SharedKMethod method);
 		void SetOnExit(SharedKMethod onExit);
-		void Exited();
+		void Exited(bool async);
 		void ExitCallback(const ValueList& args, SharedValue result);
 		virtual SharedValue Call(const ValueList& args);
 		static SharedKObject GetCurrentEnvironment();
@@ -60,10 +60,11 @@ namespace ti
 		virtual void MonitorAsync() = 0;
 		virtual AutoBlob MonitorSync() = 0;
 		virtual int Wait() = 0;
+		virtual void RecreateNativePipes() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStdin() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStdout() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStderr() = 0;
-		void AttachPipes();
+		void AttachPipes(bool async);
 
 	protected:
 		void _GetPID(const ValueList& args, SharedValue result);

@@ -13,14 +13,21 @@ namespace ti
 	
 	Win32Process::Win32Process() :
 		logger(Logger::Get("Process.Win32Process")),
-		nativeIn(0),
-		nativeOut(0),
-		nativeErr(0)
+		nativeIn(new Win32Pipe(false)),
+		nativeOut(new Win32Pipe(true)),
+		nativeErr(new Win32Pipe(true))
 	{
 	}
 	
 	Win32Process::~Win32Process()
 	{
+	}
+
+	void Win32Process::RecreateNativePipes()
+	{
+		this->nativeIn = new Win32Pipe(false);
+		this->nativeOut = new Win32Pipe(true);
+		this->nativeErr = new Win32Pipe(true);
 	}
 	
 	/*
@@ -113,11 +120,6 @@ namespace ti
 	
 	void Win32Process::ForkAndExec()
 	{
-		nativeIn = new Win32Pipe(false);
-		nativeOut = new Win32Pipe(true);
-		nativeErr = new Win32Pipe(true);
-		AttachPipes();
-		
 		STARTUPINFO startupInfo;
 		startupInfo.cb          = sizeof(STARTUPINFO);
 		startupInfo.lpReserved  = NULL;
@@ -170,6 +172,7 @@ namespace ti
 	
 	void Win32Process::MonitorAsync()
 	{
+		nativeIn->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 	}
@@ -184,6 +187,7 @@ namespace ti
 		nativeOut->SetReadCallback(readCallback);
 		nativeErr->SetReadCallback(readCallback);
 
+		nativeIn->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 

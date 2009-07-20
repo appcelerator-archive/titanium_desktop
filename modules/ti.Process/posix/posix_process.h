@@ -29,6 +29,7 @@ namespace ti
 		virtual void MonitorAsync();
 		virtual AutoBlob MonitorSync();
 		virtual int Wait();
+		virtual void RecreateNativePipes();
 		virtual void SetArguments(SharedKList args);
 		void ReadCallback(const ValueList& args, SharedValue result);
 		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
