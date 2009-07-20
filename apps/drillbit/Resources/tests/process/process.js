@@ -315,7 +315,7 @@ describe("process tests",
 		more.setOnExit(function(event){
 			clearTimeout(timer);
 			try {
-				value_of(moreData).should_be(data);
+				value_of(moreData.replace(/[\r\n]+/,'')).should_be(data);
 			} catch (e) {
 				callback.failed(e);
 			}

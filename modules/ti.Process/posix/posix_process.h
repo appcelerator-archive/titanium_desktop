@@ -31,14 +31,13 @@ namespace ti
 		virtual int Wait();
 		virtual void SetArguments(SharedKList args);
 		void ReadCallback(const ValueList& args, SharedValue result);
-		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPtr<NativePipe> CreateNativeStdin() { return new PosixPipe(false); }
 		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
 		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
 	protected:
 		Logger* logger;
 		int pid;
-		AutoPtr<PosixPipe> nativeIn;
 		AutoPtr<PosixPipe> nativeOut;
 		AutoPtr<PosixPipe> nativeErr;
 

@@ -16,8 +16,8 @@ extern char **environ;
 namespace ti
 {
 	PosixProcess::PosixProcess() :
+		Process(new PosixPipe(false)),
 		logger(Logger::Get("Process.PosixProcess")),
-		nativeIn(0),
 		nativeOut(0),
 		nativeErr(0)
 	{
@@ -51,7 +51,6 @@ namespace ti
 
 	void PosixProcess::ForkAndExec()
 	{
-		nativeIn = new PosixPipe(false);
 		nativeOut = new PosixPipe(true);
 		nativeErr = new PosixPipe(true);
 		AttachPipes();
@@ -65,10 +64,10 @@ namespace ti
 		else if (pid == 0)
 		{
 			// outPipe and errPipe may be the same, so we dup first and close later
-			dup2(nativeIn->GetReadHandle(), STDIN_FILENO);
+			dup2(GetNativeStdin().cast<PosixPipe>()->GetReadHandle(), STDIN_FILENO);
 			dup2(nativeOut->GetWriteHandle(), STDOUT_FILENO);
 			dup2(nativeErr->GetWriteHandle(), STDERR_FILENO);
-			nativeIn->CloseNative();
+			GetNativeStdin().cast<PosixPipe>()->CloseNative();
 			nativeOut->CloseNative();
 			nativeErr->CloseNative();
 
@@ -99,13 +98,14 @@ namespace ti
 		}
 
 		SetPID(pid);
-		nativeIn->CloseNativeRead();
+		GetNativeStdin().cast<PosixPipe>()->CloseNativeRead();
 		nativeOut->CloseNativeWrite();
 		nativeErr->CloseNativeWrite();
 	}
 
 	void PosixProcess::MonitorAsync()
 	{
+		GetNativeStdin()->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 	}
@@ -121,6 +121,7 @@ namespace ti
 		nativeErr->SetReadCallback(readCallback);
 
 		logger->Debug("Starting monitors..");
+		GetNativeStdin()->StartMonitor();
 		nativeOut->StartMonitor();
 		nativeErr->StartMonitor();
 		
