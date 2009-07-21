@@ -447,6 +447,8 @@ Win32UserWindow::~Win32UserWindow()
 
 	if (web_frame)
 		web_frame->Release();
+
+	DestroyWindow(windowHandle);
 }
 
 std::string Win32UserWindow::GetTransparencyColor()
@@ -560,9 +562,7 @@ void Win32UserWindow::Close()
 {
 	this->RemoveOldMenu();
 	UserWindow::Close();
-
-	DestroyWindow(windowHandle);
-	this->Closed();
+	UserWindow::Closed();
 }
 
 double Win32UserWindow::GetX()

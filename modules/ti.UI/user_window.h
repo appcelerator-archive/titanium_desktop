@@ -227,7 +227,6 @@ namespace ti
 			Host* host;
 			WindowConfig *config;
 			AutoUserWindow parent;
-			AutoUserWindow shared_this;
 			std::vector<AutoUserWindow> children;
 			long next_listener_id;
 			bool active;

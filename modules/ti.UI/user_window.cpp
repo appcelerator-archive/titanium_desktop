@@ -17,8 +17,6 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	active(false),
 	initialized(false)
 {
-	this->shared_this = this;
-
 	// This method is on Titanium.UI, but will be delegated to this class.
 	/**
 	 * @tiapi(method=True,name=UI.getCurrentWindow,since=0.4) Returns the current window
@@ -443,7 +441,8 @@ UserWindow::~UserWindow()
 
 AutoUserWindow UserWindow::GetAutoPtr()
 {
-	return this->shared_this;
+	this->duplicate();
+	return this;
 }
 
 Host* UserWindow::GetHost()
@@ -456,12 +455,12 @@ void UserWindow::Open()
 	this->FireEvent(Event::OPEN);
 
 	// We are now in the UI binding's open window list
-	this->binding->AddToOpenWindows(this->shared_this);
+	this->binding->AddToOpenWindows(GetAutoPtr());
 
 	// Tell the parent window that we are open for business
 	if (!parent.isNull())
 	{
-		parent->AddChild(this->shared_this);
+		parent->AddChild(GetAutoPtr());
 	}
 
 	this->initialized = true;
@@ -496,12 +495,12 @@ void UserWindow::Closed()
 	// Tell our parent that we are now closed
 	if (!this->parent.isNull())
 	{
-		this->parent->RemoveChild(this->shared_this);
+		this->parent->RemoveChild(GetAutoPtr());
 		this->parent->Focus(); // Focus the parent
 	}
 
 	// Tell the UIBinding that we are closed
-	this->binding->RemoveFromOpenWindows(this->shared_this);
+	this->binding->RemoveFromOpenWindows(GetAutoPtr());
 
 	// When we have no more open windows, we exit...
 	std::vector<AutoUserWindow> windows = this->binding->GetOpenWindows();
@@ -510,19 +509,18 @@ void UserWindow::Closed()
 	} else {
 		windows.at(0)->Focus();
 	}
-
-	// This should be the last reference to this window
-	// after all external references are destroyed.
-	this->shared_this = NULL;
 }
 
 void UserWindow::_GetCurrentWindow(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	result->SetObject(this->shared_this);
+	result->SetObject(GetAutoPtr());
 }
 
 void UserWindow::_InsertAPI(const kroll::ValueList& args, kroll::SharedValue result)
 {
+	if (!this->active)
+		return;
+
 	if (args.size() > 0 && args.at(0)->IsObject())
 	{
 		this->InsertAPI(args.GetObject(0));
@@ -1271,7 +1269,11 @@ void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue resul
 	if (args.size() > 0) {
 		menu = args.at(0)->ToObject().cast<Menu>();
 	}
-	this->SetMenu(menu);
+
+	if (this->active)
+	{
+		this->SetMenu(menu);
+	}
 }
 
 void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1294,7 +1296,11 @@ void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValu
 	if (args.size() > 0) {
 		menu = args.at(0)->ToObject().cast<Menu>();
 	}
-	this->SetContextMenu(menu);
+
+	if (this->active)
+	{
+		this->SetContextMenu(menu);
+	}
 }
 
 void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1319,7 +1325,10 @@ void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::SharedValue resul
 		iconPath = URLToPathOrURL(in);
 	}
 
-	this->SetIcon(iconPath);
+	if (this->active)
+	{
+		this->SetIcon(iconPath);
+	}
 }
 
 void UserWindow::_GetIcon(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1365,7 +1374,7 @@ void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 		config = new WindowConfig();
 	}
 
-	AutoUserWindow new_window = this->binding->CreateWindow(config, shared_this);
+	AutoUserWindow new_window = this->binding->CreateWindow(config, GetAutoPtr());
 	result->SetObject(new_window);
 }
 
@@ -1456,8 +1465,15 @@ void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue resul
 			types,
 			typesDescription);
 	}
-	this->OpenFileChooserDialog(
-		callback, multiple, title, path, defaultName, types, typesDescription);
+	if (this->active)
+	{
+		this->OpenFileChooserDialog(
+			callback, multiple, title, path, defaultName, types, typesDescription);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to open file chooser on an inactive window.");
+	}
 }
 
 void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue result)
@@ -1483,8 +1499,15 @@ void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue res
 			types,
 			typesDescription);
 	}
-	this->OpenFolderChooserDialog(
-		callback, multiple, title, path, defaultName);
+
+	if (this->active)
+	{
+		this->OpenFolderChooserDialog(callback, multiple, title, path, defaultName);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to open folder chooser on an inactive window.");
+	}
 }
 
 void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
@@ -1510,8 +1533,31 @@ void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
 			types,
 			typesDescription);
 	}
-	this->OpenSaveAsDialog(
-		callback, title, path, defaultName, types, typesDescription);
+	if (this->active)
+	{
+		this->OpenSaveAsDialog(
+			callback, title, path, defaultName, types, typesDescription);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to save dialog on an inactive window.");
+	}
+}
+
+void UserWindow::_ShowInspector(const ValueList& args, SharedValue result)
+{
+	if (!this->active)
+		return;
+
+	if (args.size() > 0 && args.at(0)->IsBool())
+	{
+		bool console = args.at(0)->ToBool();
+		this->ShowInspector(console);
+	}
+	else
+	{
+		this->ShowInspector();
+	}
 }
 
 AutoUserWindow UserWindow::GetParent()
@@ -1677,17 +1723,4 @@ double UserWindow::Constrain(double value, double min, double max)
 		value = max;
 	}
 	return value;
-}
-
-void UserWindow::_ShowInspector(const ValueList& args, SharedValue result)
-{
-	if (args.size() > 0 && args.at(0)->IsBool())
-	{
-		bool console = args.at(0)->ToBool();
-		this->ShowInspector(console);
-	}
-	else
-	{
-		this->ShowInspector();
-	}
 }
