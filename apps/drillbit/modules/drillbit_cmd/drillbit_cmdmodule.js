@@ -69,6 +69,7 @@
 	
 	var tests = [];
 	var test_files = [];
+	var load_all = false;
 	for (var c=0;c<ti.App.arguments.length;c++)
 	{
 		var arg = ti.App.arguments[c];
@@ -80,6 +81,10 @@
 		else if (arg == '--show-log')
 		{
 			show_log = true;
+		}
+		else if (arg == '--all')
+		{
+			load_all = true;
 		}
 		else
 		{
@@ -118,17 +123,31 @@
 		}
 	}
 	
-	if (tests.length == 0)
+	if (tests.length == 0 && !load_all)
 	{
-		errPrint("Usage:\n\t drillbit_cmd.py [--debug-tests] suite[:test_name] [suite2..suiteN]");
+		errPrint("Usage:\n\t drillbit_cmd.py [--all] [--debug-tests] suite[:test_name] [suite2..suiteN]");
 		ti.App.exit();
 	}
 	else {
 		ti.Drillbit.frontend = frontend;
 		ti.Drillbit.auto_close = true;
-		ti.Drillbit.loadTests(test_files);
+		if (load_all)
+		{
+			var test_dir = tiFS.getFile(ti.App.appURLToPath('app://tests'));
+			var dir_list = test_dir.getDirectoryListing();
+			ti.Drillbit.loadTests(dir_list);
+			for (var c=0;c<ti.Drillbit.test_names.length;c++)
+			{
+				var suite = ti.Drillbit.test_names[c];
+				tests.push({suite: suite, tests:'all'});
+			}
+		}
+		else
+		{
+			ti.Drillbit.loadTests(test_files);
+		}
+		
 		ti.Drillbit.setupTestHarness(tiFS.getFile(tiFS.getApplicationDirectory(), 'manifest_harness'));
-		println("running tests: "+tests[0].tests);
 		ti.Drillbit.runTests(tests);
 	}
 })();
