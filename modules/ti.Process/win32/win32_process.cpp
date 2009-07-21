@@ -122,6 +122,10 @@ namespace ti
 	
 	void Win32Process::ForkAndExec()
 	{
+		nativeIn->CreateHandles();
+		nativeOut->CreateHandles();
+		nativeErr->CreateHandles();
+
 		STARTUPINFO startupInfo;
 		startupInfo.cb          = sizeof(STARTUPINFO);
 		startupInfo.lpReserved  = NULL;

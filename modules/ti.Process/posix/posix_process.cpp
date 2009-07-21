@@ -60,6 +60,10 @@ namespace ti
 
 	void PosixProcess::ForkAndExec()
 	{
+		nativeIn->CreateHandles();
+		nativeOut->CreateHandles();
+		nativeErr->CreateHandles();
+
 		int pid = fork();
 		if (pid < 0)
 		{
