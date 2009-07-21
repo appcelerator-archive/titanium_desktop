@@ -26,9 +26,6 @@ namespace ti
 
 	void Win32Process::RecreateNativePipes()
 	{
-		if (this->process != INVALID_HANDLE_VALUE)
-			CloseHandle(this->process);
-		
 		this->nativeIn = new Win32Pipe(false);
 		this->nativeOut = new Win32Pipe(true);
 		this->nativeErr = new Win32Pipe(true);
@@ -141,8 +138,6 @@ namespace ti
 		nativeIn->DuplicateRead(hProc, &startupInfo.hStdInput);
 		nativeOut->DuplicateWrite(hProc, &startupInfo.hStdOutput);
 		nativeErr->DuplicateWrite(hProc, &startupInfo.hStdError);
-		//CloseHandle(nativeOut->GetWriteHandle());
-		//CloseHandle(nativeErr->GetWriteHandle());
 		
 		std::string commandLine = ArgListToString(args);
 		logger->Debug("Launching: %s", commandLine.c_str());
@@ -230,10 +225,12 @@ namespace ti
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
 		
-		CloseHandle(this->process);
+		if (this->process != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(this->process);
+			this->process = INVALID_HANDLE_VALUE;
+		}
 		
-		//nativeOut->Close();
-		//nativeErr->Close();
 		return exitCode;
 	}
 
