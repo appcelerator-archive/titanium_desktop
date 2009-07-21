@@ -1373,7 +1373,8 @@ void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 		config = new WindowConfig();
 	}
 
-	AutoUserWindow new_window = this->binding->CreateWindow(config, GetAutoPtr());
+	AutoUserWindow autothis = GetAutoPtr();
+	AutoUserWindow new_window = this->binding->CreateWindow(config, autothis);
 	result->SetObject(new_window);
 }
 
