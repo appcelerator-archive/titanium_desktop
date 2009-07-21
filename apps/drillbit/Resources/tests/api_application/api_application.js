@@ -14,12 +14,12 @@ describe("ti.API.Application tests",
 			value_of(app.getAvailableComponents).should_be_function();
 			value_of(app.getAvailableModules).should_be_function();
 			value_of(app.getAvailableRuntimes).should_be_function();
-			value_of(app.getBundledComponents).should_be_function();	// done
+			value_of(app.getBundledComponents).should_be_function();
 			value_of(app.getBundledModules).should_be_function();
 			value_of(app.getBundledRuntimes).should_be_function();
-			value_of(app.getComponents).should_be_function();		   // done
+			value_of(app.getComponents).should_be_function();
 			value_of(app.getDataPath).should_be_function();
-			value_of(app.getDependencies).should_be_function();		 // done
+			value_of(app.getDependencies).should_be_function();
 			value_of(app.getExecutablePath).should_be_function();
 			value_of(app.getGUID).should_be_function();
 			value_of(app.getID).should_be_function();
@@ -48,33 +48,30 @@ describe("ti.API.Application tests",
 		var loadedComponents = app.getComponents();
 		value_of(loadedComponents).should_not_be_null();
 
-		if ( loadedComponents ) 
+		// validate the loaded components and verify 
+		// that these components are supposed to be here.
+		// these components should be part of the bundle or installed or both.
+		for ( i =0; i < loadedComponents.length; i++ )
 		{
-			// validate the loaded components and verify 
-			// that these components are supposed to be here.
-			// these components should be part of the bundle or installed or both.
-			for ( i =0; i < loadedComponents.length; i++ )
-			{
-				var  item = loadedComponents[i];
-				// do we have a component?
-				value_of(item).should_not_be_null();
-				value_of(item).should_be_object();
-				value_of(item.getManifest).should_be_function();
-				value_of(item.getName).should_be_function();
-				value_of(item.getPath).should_be_function();
-				value_of(item.getType).should_be_function();
-				value_of(item.getVersion).should_be_function();
-				value_of(item.isBundled).should_be_function();
-				value_of(item.isLoaded).should_be_function();
-				
-				// loaded components should always indicate so...
-				value_of(item.isLoaded()).should_be_true();
+			var  item = loadedComponents[i];
+			// do we have a component?
+			value_of(item).should_not_be_null();
+			value_of(item).should_be_object();
+			value_of(item.getManifest).should_be_function();
+			value_of(item.getName).should_be_function();
+			value_of(item.getPath).should_be_function();
+			value_of(item.getType).should_be_function();
+			value_of(item.getVersion).should_be_function();
+			value_of(item.isBundled).should_be_function();
+			value_of(item.isLoaded).should_be_function();
+			
+			// loaded components should always indicate so...
+			value_of(item.isLoaded()).should_be_true();
 
-				Titanium.API.info("processing loaded component '" + item.getName() + 
-								  "' type: '"+item.getType()+
-								  "' version: '"+item.getVersion()+
-								  "' path '" + item.getPath() + "'");
-			}
+			Titanium.API.info("processing loaded component '" + item.getName() + 
+							  "' type: '"+item.getType()+
+							  "' version: '"+item.getVersion()+
+							  "' path '" + item.getPath() + "'");
 		}
 	},
 	
@@ -88,31 +85,28 @@ describe("ti.API.Application tests",
 		var installedComponents = app.getAvailableComponents();
 		value_of(installedComponents).should_be_array();
 
-		if ( installedComponents ) 
+		// check the components that we think are installed
+		// first we verify that we have a list of components.
+		for ( i =0; i < installedComponents.length; i++ )
 		{
-			// check the components that we think are installed
-			// first we verify that we have a list of components.
-			for ( i =0; i < installedComponents.length; i++ )
-			{
-				var  item = installedComponents[i];
-				// do we have a component?
-				value_of(item).should_be_object();
-				value_of(item.getManifest).should_be_function();
-				value_of(item.getName).should_be_function();
-				value_of(item.getPath).should_be_function();
-				value_of(item.getType).should_be_function();
-				value_of(item.getVersion).should_be_function();
-				value_of(item.isBundled).should_be_function();
-				value_of(item.isLoaded).should_be_function();
-				
-				Titanium.API.info("processing installed component '" + item.getName() + 
-								  "' type: '"+item.getType()+
-								  "' version: '"+item.getVersion()+
-								  "' path '" + item.getPath() + "'");
-								  
-				// installed components cannot be bundled.
-				Titanium.API.info("item "+item.getName()+".isBundled() returned "+item.isBundled().toString());
-			}
+			var  item = installedComponents[i];
+			// do we have a component?
+			value_of(item).should_be_object();
+			value_of(item.getManifest).should_be_function();
+			value_of(item.getName).should_be_function();
+			value_of(item.getPath).should_be_function();
+			value_of(item.getType).should_be_function();
+			value_of(item.getVersion).should_be_function();
+			value_of(item.isBundled).should_be_function();
+			value_of(item.isLoaded).should_be_function();
+			
+			Titanium.API.info("processing installed component '" + item.getName() + 
+							  "' type: '"+item.getType()+
+							  "' version: '"+item.getVersion()+
+							  "' path '" + item.getPath() + "'");
+							  
+			// installed components cannot be bundled.
+			Titanium.API.info("item "+item.getName()+".isBundled() returned "+item.isBundled().toString());
 		}
 	},
 
