@@ -472,8 +472,8 @@ void UserWindow::Close()
 	// We want to fire the CLOSE event synchronously, because we
 	// want to ensure that listeners on the originating window get
 	// this event.
-	this->FireEvent(Event::CLOSE);
 	this->active = false; // prevent further modification
+	this->FireEvent(Event::CLOSE);
 }
 
 void UserWindow::Closed()
