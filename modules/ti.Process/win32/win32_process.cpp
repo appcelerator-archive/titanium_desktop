@@ -224,21 +224,12 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
-<<<<<<< HEAD:modules/ti.Process/win32/win32_process.cpp
-
 		// close the process before exit.
-		CloseHandle(this->process);
-		// remember to set the process handle to null!
-		this->process = INVALID_HANDLE_VALUE;
-=======
-		
 		if (this->process != INVALID_HANDLE_VALUE)
 		{
 			CloseHandle(this->process);
 			this->process = INVALID_HANDLE_VALUE;
 		}
->>>>>>> 429f429ed1bdf64a5750fe8e676bc882bd1646d0:modules/ti.Process/win32/win32_process.cpp
-		
 		return exitCode;
 	}
 
