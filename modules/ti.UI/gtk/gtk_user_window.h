@@ -151,12 +151,20 @@ namespace ti
 		GtkWidget *GetInspectorWindow();
 		virtual void ShowInspector(bool console);
 
-		int gdkWidth;
-		int gdkHeight;
-		int gdkX;
-		int gdkY;
-		bool gdkMaximized;
-		bool gdkMinimized;
+		// These values contain the most-recently-set dimension
+		// information for this UserWindow. GDK is asynchronous,
+		// so if a user sets the value the and fetches it without
+		// giving up control to the UI thread, returning one of them
+		// will yield the correct information. When we actually
+		// detect a GDK window resize, these values will also be
+		// updated, so they will be an accurate representation of
+		// the window size.
+		int targetWidth;
+		int targetHeight;
+		int targetX;
+		int targetY;
+		bool targetMaximized;
+		bool targetMinimized;
 
 	protected:
 		GtkWindow* gtkWindow;

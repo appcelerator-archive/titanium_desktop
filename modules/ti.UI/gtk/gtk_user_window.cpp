@@ -48,12 +48,12 @@ namespace ti
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
-		gdkWidth(-1),
-		gdkHeight(-1),
-		gdkX(-1),
-		gdkY(-1),
-		gdkMaximized(false),
-		gdkMinimized(false),
+		targetWidth(-1),
+		targetHeight(-1),
+		targetX(-1),
+		targetY(-1),
+		targetMaximized(false),
+		targetMinimized(false),
 		gtkWindow(0),
 		vbox(0),
 		webView(0),
@@ -352,8 +352,8 @@ namespace ti
 			// Another alternative would be to block until a resize
 			// is detected, but that might leave the application in
 			// a funky state.
-			this->gdkX = x;
-			this->gdkY = y;
+			this->targetX = x;
+			this->targetY = y;
 		}
 	}
 	
@@ -370,8 +370,8 @@ namespace ti
 			// Another alternative would be to block until a resize
 			// is detected, but that might leave the application in
 			// a funky state.
-			this->gdkWidth = this->config->GetWidth();
-			this->gdkHeight = this->config->GetHeight();
+			this->targetWidth = this->config->GetWidth();
+			this->targetHeight = this->config->GetHeight();
 		}
 	}
 	
@@ -406,6 +406,11 @@ namespace ti
 		GdkEvent *event,
 		gpointer data)
 	{
+		static int oldWidth = -1;
+		static int oldHeight = -1;
+		static int oldX = -1;
+		static int oldY = -1;
+
 		GtkUserWindow* window = (GtkUserWindow*) data;
 		if (event->type == GDK_FOCUS_CHANGE)
 		{
@@ -451,28 +456,35 @@ namespace ti
 				window->FireEvent(Event::MAXIMIZED);
 			}
 
-			window->gdkMinimized =
+			window->targetMinimized =
 				f->new_window_state & GDK_WINDOW_STATE_ICONIFIED;
 
-			window->gdkMaximized =
+			window->targetMaximized =
 				f->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
 		}
 		else if (event->type == GDK_CONFIGURE)
 		{
 			GdkEventConfigure* c = (GdkEventConfigure*) event;
-			if (c->x != window->gdkX || c->y != window->gdkY)
+			if ((oldX != -1 && c->x != oldX) || 
+				(oldY != -1 && c->y != oldY))
 			{
-				window->gdkX = c->x;
-				window->gdkY = c->y;
+				window->targetX = c->x;
+				window->targetY = c->y;
 				window->FireEvent(Event::MOVED);
 			}
-	
-			if (c->width != window->gdkWidth || c->height != window->gdkHeight)
+
+			if ((oldWidth != -1 && c->width != oldWidth) ||
+				(oldHeight != -1 && c->height != oldHeight))
 			{
-				window->gdkHeight = c->height;
-				window->gdkWidth = c->width;
+				window->targetHeight = c->height;
+				window->targetWidth = c->width;
 				window->FireEvent(Event::RESIZED);
 			}
+
+			oldHeight = c->height;
+			oldWidth = c->width;
+			oldX = c->x;
+			oldY = c->y;
 		}
 	
 		return FALSE;
@@ -660,7 +672,7 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMinimized = true;
+		this->targetMinimized = true;
 	}
 	
 	void GtkUserWindow::Unminimize()
@@ -674,14 +686,14 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMinimized = false;
+		this->targetMinimized = false;
 	}
 
 	bool GtkUserWindow::IsMinimized()
 	{
 		if (this->gtkWindow != NULL)
 		{
-			return this->gdkMinimized;
+			return this->targetMinimized;
 		}
 		else
 		{
@@ -701,7 +713,7 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMaximized = true;
+		this->targetMaximized = true;
 	}
 
 	void GtkUserWindow::Unmaximize()
@@ -716,14 +728,14 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMaximized = false;
+		this->targetMaximized = false;
 	}
 
 	bool GtkUserWindow::IsMaximized()
 	{
 		if (this->gtkWindow != NULL)
 		{
-			return this->gdkMaximized;
+			return this->targetMaximized;
 		}
 		else
 		{
@@ -777,7 +789,7 @@ namespace ti
 	
 	double GtkUserWindow::GetX()
 	{
-		return this->gdkX;
+		return this->targetX;
 	}
 	
 	void GtkUserWindow::SetX(double x)
@@ -787,7 +799,7 @@ namespace ti
 	
 	double GtkUserWindow::GetY()
 	{
-		return this->gdkY;
+		return this->targetY;
 	}
 	
 	void GtkUserWindow::SetY(double y)
@@ -797,7 +809,7 @@ namespace ti
 
 	double GtkUserWindow::GetWidth()
 	{
-		return this->gdkWidth;
+		return this->targetWidth;
 	}
 
 	void GtkUserWindow::SetWidth(double width)
@@ -827,7 +839,7 @@ namespace ti
 
 	double GtkUserWindow::GetHeight()
 	{
-		return this->gdkHeight;
+		return this->targetHeight;
 	}
 
 	void GtkUserWindow::SetHeight(double height)
@@ -858,10 +870,10 @@ namespace ti
 	Bounds GtkUserWindow::GetBounds()
 	{
 		Bounds b;
-		b.width = gdkWidth;
-		b.height = gdkHeight;
-		b.x = gdkX;
-		b.y = gdkY;
+		b.width = targetWidth;
+		b.height = targetHeight;
+		b.x = targetX;
+		b.y = targetY;
 		return b;
 	}
 	

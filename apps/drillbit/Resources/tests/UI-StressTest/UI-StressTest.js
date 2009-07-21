@@ -218,9 +218,9 @@ describe("UI Module Tests",{
 		addEventTest(function() { w.setVisible(true); }, [Titanium.SHOWN]);
 		addEventTest(function() { w.setFullscreen(true); }, [Titanium.FULLSCREENED]);
 		addEventTest(function() { w.setFullscreen(false); }, [Titanium.UNFULLSCREENED]);
-		addEventTest(function() { w.maximize(); w.unmaximize(); }, [Titanium.MAXIMIZED]);
-		addEventTest(function() { w.minimize(); w.unminimize(); }, [Titanium.MINIMIZED]);
-		addEventTest(function() {var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.MOVED]);
+		addEventTest(function() { w.maximize(); }, [Titanium.MAXIMIZED]);
+		addEventTest(function() { w.unmaximize(); w.minimize(); }, [Titanium.MINIMIZED]);
+		addEventTest(function() { w.unminimize(); var b = w.getBounds(); w.setX(b.x+1);}, [Titanium.MOVED]);
 		addEventTest(function() {var b = w.getBounds(); w.setY(b.y+1); }, [Titanium.MOVED]);
 		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.RESIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.RESIZED]);
