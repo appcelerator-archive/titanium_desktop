@@ -88,7 +88,7 @@ describe("Network.Proxy",{
 				// contains the proxy information.  we can use this information to 
 				// see if the test passed.
 				
-				var env = Titanium.Process.getEnv("HTTP_PROXY");
+				var env = Titanium.API.getEnvironment()["HTTP_PROXY"];
 				value_of(env).should_be_string();
 			}
 		}
