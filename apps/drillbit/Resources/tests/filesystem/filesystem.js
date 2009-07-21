@@ -140,7 +140,7 @@ describe("Ti.Filesystem tests",{
 			// in windows we have an environment variable we can check
 			// for the program files directory.
 			
-			progFileFolder = Titanium.Process.getEnv("PROGRAMFILES");
+			progFileFolder = Titanium.API.getEnvironment()["PROGRAMFILES"];
 			Titanium.API.debug("windows env PROGRAMFILES="+progFileFolder);
 		}
 		else if ( Titanium.platform == 'osx' )
@@ -219,14 +219,14 @@ describe("Ti.Filesystem tests",{
 		// of the desktop folder path
 		if ( Titanium.platform == 'win32' )
 		{
-			userHome = Titanium.Process.getEnv("USERPROFILE");
+			userHome = Titanium.API.getEnvironment()["USERPROFILE"];
 			Titanium.API.debug(Titanium.platform+" env USERPROFILE="+userHome);
 		}
 		else 
 		{	
 			// on the Mac, this should be hard coded to '~/desktop' according to the source code.
 			// on linux, this will be hard coded in a similar fashion
-			userHome = Titanium.Process.getEnv("HOME");
+			userHome = Titanium.API.getEnvironment()["HOME"];
 			Titanium.API.debug(Titanium.platform+" env HOME="+userHome);
 		}
 		var path = desktop.nativePath();
@@ -246,14 +246,14 @@ describe("Ti.Filesystem tests",{
 		// of the desktop folder path
 		if ( Titanium.platform == 'win32' )
 		{
-			userHome = Titanium.Process.getEnv("USERPROFILE");
+			userHome = Titanium.API.getEnvironment()["USERPROFILE"];
 			Titanium.API.debug(Titanium.platform+" env USERPROFILE="+userHome);
 		}
 		else 
 		{	
 			// on the Mac, this should be hard coded to '~/desktop' according to the source code.
 			// on linux, this will be hard coded in a similar fashion
-			userHome = Titanium.Process.getEnv("HOME");
+			userHome = Titanium.API.getEnvironment()["HOME"];
 			Titanium.API.debug(Titanium.platform+" env HOME="+userHome);
 		}
 		var path = documents.nativePath();
@@ -273,13 +273,13 @@ describe("Ti.Filesystem tests",{
 		{
 			// in windows we have an environment variable we can check
 			// for the program files directory.
-			userHome = Titanium.Process.getEnv("USERPROFILE");
+			userHome = Titanium.API.getEnvironment()["USERPROFILE"];
 			Titanium.API.debug(Titanium.platform +" environment USERPROFILE="+userHome);
 		}
 		else
 		{	
 			// on the Mac, this should be hard coded to '~/desktop' according to the source code.
-			userHome = Titanium.Process.getEnv("HOME");
+			userHome = Titanium.API.getEnvironment()["HOME"];
 			Titanium.API.debug(Titanium.platform +" environment HOME="+userHome);
 		}
 		value_of(f.nativePath()).should_be(userHome);
