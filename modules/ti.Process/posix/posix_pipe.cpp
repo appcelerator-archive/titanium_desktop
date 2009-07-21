@@ -19,7 +19,9 @@ namespace ti
 			readHandle  = fds[0];
 			writeHandle = fds[1];
 		}
-		else throw ValueException::FromString("Error creating input pipe");
+		else {
+			throw ValueException::FromFormat("Error creating pipe: %s (%d)", strerror(errno), errno);
+		}
 	}
 
 	PosixPipe::~PosixPipe()
