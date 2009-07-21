@@ -26,9 +26,6 @@ namespace ti
 
 	void Win32Process::RecreateNativePipes()
 	{
-		if (this->process != INVALID_HANDLE_VALUE)
-			CloseHandle(this->process);
-		
 		this->nativeIn = new Win32Pipe(false);
 		this->nativeOut = new Win32Pipe(true);
 		this->nativeErr = new Win32Pipe(true);
@@ -229,8 +226,11 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
-		
+
+		// close the process before exit.
 		CloseHandle(this->process);
+		// remember to set the process handle to null!
+		this->process = INVALID_HANDLE_VALUE;
 		
 		//nativeOut->Close();
 		//nativeErr->Close();
