@@ -144,6 +144,10 @@ describe("Ruby Tests",
 	{
 		value_of(test_js_type_klist([1,2,3])).should_be_true();
 	},
+	test_js_klist_elements: function()
+	{
+		value_of(test_js_klist_elements([1,2,3])).should_be_true();
+	},
 	test_js_type_dict: function()
 	{
 		value_of(test_js_type_kobject({'a1':'sauce'})).should_be_true();
@@ -168,4 +172,22 @@ describe("Ruby Tests",
 	{
 		value_of(test_js_type_false_bool(false)).should_be_true();
 	},
+	test_rubykobject_respond_to: function()
+	{
+		a = Object();
+		a.sheep = "baaah";
+		a.cow = function() { return 'moo'; };
+		a.phillip = 34;
+		a.undef = undefined;
+		value_of(test_rubykobject_respond_to(a)).should_be("");
+	},
+	test_rubykobject_method_missing_exception: function()
+	{
+		a = Object();
+		a.sheep = "baaah";
+		a.cow = function() { return 'moo'; };
+		a.phillip = 34;
+		a.undef = undefined;
+		value_of(test_rubykobject_method_missing_exception(a)).should_be("");
+	}
 });

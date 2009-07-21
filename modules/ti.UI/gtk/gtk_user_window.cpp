@@ -69,9 +69,12 @@ namespace ti
 
 	GtkUserWindow::~GtkUserWindow()
 	{
-		this->Close();
+		if (this->active)
+		{
+			this->Close();
+		}
 	}
-	
+
 	void GtkUserWindow::Open()
 	{
 		if (this->gtkWindow == NULL)

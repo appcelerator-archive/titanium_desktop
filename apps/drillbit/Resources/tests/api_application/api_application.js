@@ -847,7 +847,7 @@ describe("ti.API.Application tests",
 		value_of(ver).should_be_string();
 		
 		// this is the version for the test harness app, not drillbit.
-		value_of(ver).should_be("0.4.4");
+		value_of(ver).should_be("0.5.0");
 	},
 	
 	test_api_app_GUID: function()

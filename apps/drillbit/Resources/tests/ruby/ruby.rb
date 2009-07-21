@@ -125,6 +125,11 @@ end
 def test_js_type_klist(t)
 	return t.class.name == 'RubyKList'
 end
+
+def test_js_klist_elements(t)
+	return t[0] == 1 && t[1] == 2 && t[2] == 3
+end
+
 def test_js_type_kobject(t)
 	return t.class.name == 'RubyKObject'
 end
@@ -147,5 +152,48 @@ end
 def test_js_type_nil(t)
 	return t.class == NilClass
 end
-	
-	
+
+def test_rubykobject_respond_to(o)
+	if not(o.respond_to?(:sheep))
+		return "Oops: Did not respond to sheep"
+	end
+	if not(o.respond_to?(:cow))
+		return "Oops: Did not respond to cow"
+	end
+	if not(o.respond_to?(:phillip))
+		return "Oops: Did not respond to phillip"
+	end
+	if o.respond_to?(:undef)
+		return "Oops: Responded to undef"
+	end
+	if o.respond_to?(:bob)
+		return "Oops: Responded to bob"
+	end
+	return ""
+end
+
+def test_rubykobject_method_missing_exception(o)
+	exception = ""
+	begin
+		o.method_missing(:blahblah)
+		exception = ":blahblah did not throw an Exception"
+	rescue NoMethodError
+		1 + 1
+	rescue 
+		exception = ":blahblah did not throw a NoMethodError"
+	end
+
+	if (exception != "")
+		return exception
+	end
+
+	exception = ""
+	begin
+		o.method_missing(:cow)
+	rescue NoMethodError
+		exception = ":cow threw a NoMethodError"
+	rescue 
+		exception = ":cow threw some unknown error: " + $!
+	end
+	return exception
+end
