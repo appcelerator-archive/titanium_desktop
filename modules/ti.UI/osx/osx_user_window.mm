@@ -50,9 +50,9 @@ namespace ti
 			styleMask: mask
 			backing: NSBackingStoreBuffered
 			defer: false];
-
-		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(0);
-		(*shuw) = shared_this.cast<OSXUserWindow>();
+		
+		this->duplicate();
+		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this);
 		[nativeWindow setUserWindow:shuw];
 
 		if (!config->IsFullscreen())
@@ -652,14 +652,14 @@ namespace ti
 
 	void OSXUserWindow::Focused()
 	{
-		AutoPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
-		this->osxBinding->WindowFocused(osxWin);
+		this->duplicate();
+		this->osxBinding->WindowFocused(this);
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		AutoPtr<OSXUserWindow> osxWin = this->shared_this.cast<OSXUserWindow>();
-		this->osxBinding->WindowUnfocused(osxWin);
+		this->duplicate();
+		this->osxBinding->WindowUnfocused(this);
 	}
 	
 	void OSXUserWindow::SetContextMenu(AutoMenu menu)
