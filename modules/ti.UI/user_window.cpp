@@ -423,7 +423,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("getParent", &UserWindow::_GetParent);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=1.0) show the web inspector
+	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) show the web inspector
 	 * @tiarg(for=UI.UserWindow.showInspector,type=bool,name=console,optional=True) show the interactive console (default false)
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);

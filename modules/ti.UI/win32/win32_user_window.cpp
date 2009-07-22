@@ -437,7 +437,14 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 				(LPARAM) defaultIcon);
 	}
 
-	SetLayeredWindowAttributes(windowHandle, 0, 255, LWA_ALPHA);
+	if (config->GetTransparency() < 1.0)
+	{
+		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
+		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
+				config->GetTransparency() * 255), LWA_ALPHA);
+		SetLayeredWindowAttributes(this->windowHandle, transparencyColor, 0,
+			LWA_COLORKEY);
+	}
 }
 
 Win32UserWindow::~Win32UserWindow()
@@ -984,9 +991,6 @@ void Win32UserWindow::ReloadTiWindowConfig()
 
 	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
 
-	//UINT flags = SWP_NOZORDER | SWP_FRAMECHANGED;
-
-	//SetLayeredWindowAttributes(hWnd, 0, (BYTE)0, LWA_ALPHA);
 	if (config->GetTransparency() < 1.0)
 	{
 		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
