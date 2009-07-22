@@ -250,22 +250,38 @@ namespace ti
 
 	void AppBinding::StdOut(const ValueList& args, SharedValue result)
 	{
-		for (size_t c=0;c<args.size();c++)
+		for (size_t c=0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
-			const char *s = arg->ToString();
-			std::cout << s;
+			if (arg->IsString())
+			{
+				const char *s = arg->ToString();
+				std::cout << s;
+			}
+			else
+			{
+				SharedString ss = arg->DisplayString();
+				std::cout << *ss;
+			}
 		}
 		std::cout << std::endl;
 	}
 
 	void AppBinding::StdErr(const ValueList& args, SharedValue result)
 	{
-		for (size_t c=0;c<args.size();c++)
+		for (size_t c=0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
-			const char *s = arg->ToString();
-			std::cerr << s;
+			if (arg->IsString())
+			{
+				const char *s = arg->ToString();
+				std::cerr << s;
+			}
+			else
+			{
+				SharedString ss = arg->DisplayString();
+				std::cerr << *ss;
+			}
 		}
 		std::cerr << std::endl;
 	}
