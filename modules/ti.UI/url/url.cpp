@@ -54,7 +54,7 @@ namespace ti
 		return tiURL;
 	}
 
-	string NormalizeAppURL(string url)
+	string NormalizeAppURL(string& url)
 	{
 		size_t appLength = 6; // app://
 		string id = Host::GetInstance()->GetApplication()->id;
@@ -118,11 +118,24 @@ namespace ti
 		URI inURI = URI(url);
 		if (inURI.getScheme() == "app")
 		{
-			string normalized = NormalizeAppURL(url);
+			string sturl = url;
+			string normalized = NormalizeAppURL(sturl);
 			strncpy(buffer, normalized.c_str(), bufferLength);
 			buffer[bufferLength - 1] = '\0';
 		}
+	}
 
+	string NormalizeURL(string& url)
+	{
+		URI inURI = URI(url);
+		if (inURI.getScheme() != "app")
+		{
+			return url;
+		}
+		else
+		{
+			return NormalizeAppURL(url);
+		}
 	}
 
 	string URLToPathOrURL(string& url)

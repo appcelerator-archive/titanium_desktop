@@ -1099,7 +1099,8 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 	args.VerifyException("setURL", "s");
 
 	std::string url = args.at(0)->ToString();
-	url = AppConfig::Instance()->InsertAppIDIntoURL(url);
+	url = NormalizeURL(url);
+
 	this->config->SetURL(url);
 	if (this->active)
 	{
@@ -1365,7 +1366,7 @@ void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 		std::string url = args.at(0)->ToString();
 		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
 
-		url = AppConfig::Instance()->InsertAppIDIntoURL(url);
+		url = NormalizeURL(url);
 		config = new WindowConfig(matchedConfig, url);
 	}
 	else

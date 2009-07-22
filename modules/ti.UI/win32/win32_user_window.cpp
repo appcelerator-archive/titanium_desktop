@@ -721,9 +721,8 @@ void Win32UserWindow::SetTitle(std::string& title)
 void Win32UserWindow::SetURL(std::string& url_)
 {
 	std::string url = url_;
-	url = ti::NormalizeAppURL(url);	
-	logger->Debug("SetURL: %s", url.c_str());
-	
+	url = ti::NormalizeURL(url);
+
 	IWebMutableURLRequest* request = 0;
 	std::wstring method = L"GET" ;
 

@@ -536,9 +536,9 @@ namespace ti
 	{
 		if (active && nativeWindow != nil)
 		{
-			std::string url_str = AppConfig::Instance()->InsertAppIDIntoURL(config->GetURL());
-			NSURL* url = [NSURL URLWithString: [NSString stringWithCString:url_str.c_str() encoding:NSUTF8StringEncoding]];
-			[[[nativeWindow webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:url]];
+			std::string nurl = NormalizeURL(url);
+			NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:nurl]];
+			[[[nativeWindow webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
 		}
 	}
 
