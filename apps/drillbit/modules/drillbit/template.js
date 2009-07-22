@@ -65,7 +65,7 @@
 <%= TFS.getFile(TA.appURLToPath('app://drillbit_func.js')).read() %>
 
 TitaniumTest.NAME = "<%= entry.name %>";
-TitaniumTest.SOURCE = "<%= entry.source_file.nativePath() %>";
+TitaniumTest.SOURCE = "<%= entry.source_file.nativePath().replace(/\\/g, "\\\\") %>";
 try
 {
 	<%= make_function(entry, 'before_all', 'TitaniumTest.gscope') %>
