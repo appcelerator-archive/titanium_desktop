@@ -652,14 +652,12 @@ namespace ti
 
 	void OSXUserWindow::Focused()
 	{
-		this->duplicate();
-		this->osxBinding->WindowFocused(this);
+		this->osxBinding->WindowFocused(GetAutoPtr().cast<OSXUserWindow>());
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		this->duplicate();
-		this->osxBinding->WindowUnfocused(this);
+		this->osxBinding->WindowUnfocused(GetAutoPtr().cast<OSXUserWindow>());
 	}
 	
 	void OSXUserWindow::SetContextMenu(AutoMenu menu)

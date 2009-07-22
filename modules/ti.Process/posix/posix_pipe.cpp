@@ -10,20 +10,26 @@
 namespace ti
 {
 	PosixPipe::PosixPipe(bool isReader) :
-		NativePipe(isReader)
+		NativePipe(isReader),
+		readHandle(-1),
+		writeHandle(-1)
+	{
+	}
+
+	void PosixPipe::CreateHandles()
 	{
 		int fds[2];
 		int rc = pipe(fds);
 		if (rc == 0)
 		{
-			readHandle  = fds[0];
+			readHandle = fds[0];
 			writeHandle = fds[1];
 		}
-		else throw ValueException::FromString("Error creating input pipe");
-	}
-
-	PosixPipe::~PosixPipe()
-	{
+		else
+		{
+			throw ValueException::FromFormat(
+				"Error creating pipe: %s (%d)", strerror(errno), errno);
+		}
 	}
 
 	void PosixPipe::Close()
@@ -76,8 +82,8 @@ namespace ti
 	{
 		if (readHandle != -1)
 		{
-			close(readHandle);
-			readHandle = -1;
+			close(this->readHandle);
+			this->readHandle = -1;
 		}
 	}
 
@@ -86,13 +92,7 @@ namespace ti
 		if (writeHandle != -1)
 		{
 			close(writeHandle);
-			writeHandle = -1;
+			this->writeHandle = -1;
 		}
-	}
-
-	void PosixPipe::CloseNative()
-	{
-		this->CloseNativeRead();
-		this->CloseNativeWrite();
 	}
 }

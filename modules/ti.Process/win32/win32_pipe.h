@@ -18,8 +18,8 @@ namespace ti
 	{
 	public:
 		Win32Pipe(bool isReader);
+		virtual void CreateHandles();
 		virtual void Close();
-		virtual void CloseNative();
 		virtual void CloseNativeRead();
 		virtual void CloseNativeWrite();
 		void DuplicateWrite(HANDLE process, LPHANDLE handle);

@@ -27,7 +27,9 @@ namespace ti
 		virtual int Write(AutoBlob blob);
 		void PollForWriteIteration();
 		virtual void Close();
-		virtual void CloseNative() = 0;
+		virtual void CloseNative();
+		virtual void CloseNativeRead() = 0;
+		virtual void CloseNativeWrite() = 0;
 		inline void SetReadCallback(SharedKMethod cb) { this->readCallback = cb; }
 
 	protected:

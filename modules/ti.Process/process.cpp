@@ -221,7 +221,6 @@ namespace ti
 
 	void Process::AttachPipes(bool async)
 	{
-		this->GetNativeStdin()->PollForWriteIteration();
 		this->GetNativeStdout()->Attach(stdoutPipe);
 		this->GetNativeStderr()->Attach(stderrPipe);
 

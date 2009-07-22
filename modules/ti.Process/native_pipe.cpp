@@ -136,6 +136,7 @@ namespace ti
 			this->Write(glob);
 		}
 
+		this->CloseNativeRead();
 		this->release();
 	}
 
@@ -149,7 +150,7 @@ namespace ti
 			PollForWriteIteration();
 		}
 
-		this->CloseNative();
+		this->CloseNativeWrite();
 		this->release();
 	}
 
@@ -169,7 +170,6 @@ namespace ti
 				blob = 0;
 			}
 		}
-
 	}
 
 	void NativePipe::RawWrite(AutoBlob blob)
@@ -184,4 +184,11 @@ namespace ti
 				e.displayText().c_str());
 		}
 	}
+
+	void NativePipe::CloseNative()
+	{
+		this->CloseNativeRead();
+		this->CloseNativeWrite();
+	}
+
 }
