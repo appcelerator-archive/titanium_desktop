@@ -228,13 +228,12 @@ namespace ti
 		if (GetExitCodeProcess(this->process, &exitCode) == 0) {
 			throw ValueException::FromString("Cannot get exit code for process");
 		}
-		
+		// close the process before exit.
 		if (this->process != INVALID_HANDLE_VALUE)
 		{
 			CloseHandle(this->process);
 			this->process = INVALID_HANDLE_VALUE;
 		}
-		
 		return exitCode;
 	}
 

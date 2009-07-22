@@ -9,7 +9,7 @@
 namespace ti
 {
 	Win32Pipe::Win32Pipe(bool isReader) :
-		NativePipe(isReader),,
+		NativePipe(isReader),
 		readHandle(INVALID_HANDLE_VALUE),
 		writeHandle(INVALID_HANDLE_VALUE),
 		logger(Logger::Get("Process.Win32Pipe"))
