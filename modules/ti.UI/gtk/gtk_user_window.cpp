@@ -749,12 +749,18 @@ namespace ti
 			gtk_window_present(this->gtkWindow);
 	}
 	
-	void GtkUserWindow::Unfocus(){
+	void GtkUserWindow::Unfocus()
+	{
 		if (gtk_window_has_toplevel_focus(this->gtkWindow))
 		{
 			gdk_window_focus(
 				gdk_get_default_root_window(),
 				gtk_get_current_event_time());
+
+			// FIXME: GDK unfocus events seem to fire very spottily, so we
+			// force the event to fire here. This means that the UNFOCUSED event
+			// may fire twice.
+			FireEvent(Event::UNFOCUSED);
 		}
 	}
 	

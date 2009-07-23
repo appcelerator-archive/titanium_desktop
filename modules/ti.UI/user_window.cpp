@@ -10,6 +10,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	KEventObject("UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
+	domWindow(0),
 	host(kroll::Host::GetInstance()),
 	config(config),
 	parent(parent),
@@ -84,13 +85,13 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=1.0) Checks whether a window is in fullscreen
+	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.5) Checks whether a window is in fullscreen
 	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=Boolean) true if the window is in fullscreen, false if otherwise
 	 */
 	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=1.0) Makes a window fullscreen
+	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=0.5) Makes a window fullscreen
 	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=Boolean) set to true for fullscreen, false if otherwise
 	 */
 	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
@@ -336,29 +337,28 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.5)
 	 * @tiapi Set this window's menu
 	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the menu or null to unset
 	 */
 	this->SetMethod("setMenu", &UserWindow::_SetMenu);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=1.0) 
+	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=0.5) 
 	 * Get this window's menu
 	 * @tiresult[UI.Menu|null] This window's Menu or null if it is unset
 	 */
 	this->SetMethod("getMenu", &UserWindow::_GetMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=0.5)
 	 * @tiapi Set this window's context menu
 	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the context menu or null to unset
 	 */
 	this->SetMethod("setContextMenu", &UserWindow::_SetContextMenu);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=0.5)
 	 * Get this window's context menu
 	 * @tiresult[UI.Menu|null] This window's context menu or null if it is unset
 	 */
@@ -390,7 +390,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.createWindow,since=0.2) Creates a new window as a child of the current window
-	 * @tiarg(for=UI.UserWindow.createWindow,name=options,type=mixed,optional=True) a string containing a url of the new window's content or an object containing properties for the new window
+	 * @tiarg[type=String|Object,options, optional=True] A string containing a url of the new window or an object containing properties for the new window
 	 * @tiresult(for=UI.UserWindow.createWindow,type=object) a UserWindow object
 	 */
 	this->SetMethod("createWindow", &UserWindow::_CreateWindow);
@@ -418,9 +418,26 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getParent,since=0.3) Returns the parent window
-	 * @tiresult(for=UI.UserWindow.getParent,type=mixed) a UserWindow object referencing the parent window or null if no parent
+	 * @tiresult(for=UI.UserWindow.getParent,type=UI.UserWindow|null) a UserWindow object referencing the parent window or null if no parent
 	 */
 	this->SetMethod("getParent", &UserWindow::_GetParent);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getChildren,since=0.5)
+	 * @tiresult[Array<UI.UserWindow>] An array of window representing the children of this window.
+	 */
+	this->SetMethod("getChildren", &UserWindow::_GetChildren);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getDOMWindow,since=0.5)
+	 * @tiresult[Object|null] The DOM Window for this UserWindow or null if there currently is none
+	 */
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getWindow,since=0.5)
+	 * @tiresult[Object|null] The DOM Window for this UserWindow or null if there currently is none
+	 */
+	this->SetMethod("getDOMWindow", &UserWindow::_GetDOMWindow);
+	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) show the web inspector
@@ -514,6 +531,11 @@ void UserWindow::Closed()
 void UserWindow::_GetCurrentWindow(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	result->SetObject(GetAutoPtr());
+}
+
+void UserWindow::_GetDOMWindow(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	result->SetObject(this->domWindow);
 }
 
 void UserWindow::_InsertAPI(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1349,6 +1371,20 @@ void UserWindow::_GetParent(const kroll::ValueList& args, kroll::SharedValue res
 	}
 }
 
+void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	SharedKList childList = new StaticBoundList();
+
+	std::vector<AutoUserWindow>::iterator i = this->children.begin();
+	while (i != this->children.end())
+	{
+		SharedKObject child = *i++;
+		childList->Append(Value::NewObject(child));
+	}
+
+	result->SetList(childList);
+}
+
 void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 {
 	//TODO: wrap in sharedptr
@@ -1630,30 +1666,53 @@ bool UserWindow::ShouldHaveTitaniumObject(
 		url.find("file://") == 0;
 }
 
+bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
+{
+	// If this global objects 'parent' property is equal to the object
+	// itself, it is likely the main frame. There might be a better way
+	// to do this determination, but at this point we've left the port-
+	// -dependent code and this should generally work cross-platform.
+	JSStringRef parentPropName = JSStringCreateWithUTF8CString("parent");
+	JSValueRef parentValue = JSObjectGetProperty(ctx, global, parentPropName, NULL);
+	if (!parentValue)
+		return false;
+
+	JSObjectRef parentObject = JSValueToObject(ctx, parentValue, NULL);
+	if (!parentObject)
+		return false;
+
+	return parentObject == global;
+}
+
 void UserWindow::InsertAPI(SharedKObject frameGlobal)
 {
 	// Produce a delegating object to represent the top-level Titanium object.
 	// When a property isn't found in this object it will look for it globally.
-	SharedKObject tiObject = new DelegateStaticBoundObject(host->GetGlobalObject());
+	SharedKObject windowTiObject = new AccessorBoundObject();
+	SharedKObject windowUIObject = new AccessorBoundObject();
 
-	// Create a delegate object for the UI API.
-	KObject* delegateUIAPI = new DelegateStaticBoundObject(binding, new AccessorBoundObject());
+	// Place currentWindow in the delegate base.
+	windowUIObject->Set("getCurrentWindow", this->Get("getCurrentWindow"));
 
-	// Place currentWindow in the delegate.
-	delegateUIAPI->Set("getCurrentWindow", this->Get("getCurrentWindow"));
+	// Place currentWindow.createWindow in the delegate base.
+	windowUIObject->Set("createWindow", this->Get("createWindow"));
 
-	// Place currentWindow.createWindow in the delegate.
-	delegateUIAPI->Set("createWindow", this->Get("createWindow"));
+	// Place currentWindow.openFiles in the delegate base.
+	windowUIObject->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
+	windowUIObject->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
+	windowUIObject->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
 
-	// Place currentWindow.openFiles in the delegate.
-	delegateUIAPI->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
-	delegateUIAPI->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
-	delegateUIAPI->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
-
-	tiObject->Set("UI", Value::NewObject(delegateUIAPI));
+	// Create a delegate object for the UI API. When a property cannot be
+	// found in binding, DelegateStaticBoundObject will search for it in
+	// the base. When developers modify this object, it will be modified
+	// globally.
+	KObject* delegateUIAPI = new DelegateStaticBoundObject(binding, windowUIObject);
+	windowTiObject->Set("UI", Value::NewObject(delegateUIAPI));
 
 	// Place the Titanium object into the window's global object
-	frameGlobal->SetObject(GLOBAL_NS_VARNAME, tiObject);
+	SharedKObject delegateGlobalObject = new DelegateStaticBoundObject(
+		host->GetGlobalObject(), windowTiObject);
+	frameGlobal->SetObject(GLOBAL_NS_VARNAME, delegateGlobalObject);
 }
 
 void UserWindow::RegisterJSContext(JSGlobalContextRef context)
@@ -1665,16 +1724,18 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// Get the global object as a KKJSObject
 	SharedKObject frameGlobal = new KKJSObject(context, globalObject);
 
+	// We only want to set this UserWindow's DOM window property if the
+	// particular frame that just loaded was the main frame. Each frame
+	// that loads on a page will follow this same code path.
+	if (IsMainFrame(context, globalObject))
+		this->domWindow = frameGlobal->GetObject("window", 0);
+
+	// Only certain pages should get the Titanium object. This is to prevent
+	// malicious sites from always getting access to the user's system. This
+	// can be overridden by any other API that calls InsertAPI on this DOM window.
 	if (this->ShouldHaveTitaniumObject(context, globalObject))
 	{
 		this->InsertAPI(frameGlobal);
-
-		// FIXME: This is broken for documents with more than one frame
-		// Bind the window into currentWindow so you can call things like
-		// Titanium.UI.currentWindow.getParent().window to get the parent's
-		// window and global variable scope
-		this->Set("window", frameGlobal->Get("window"));
-
 		UserWindow::LoadUIJavaScript(context);
 	}
 

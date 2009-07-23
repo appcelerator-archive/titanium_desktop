@@ -537,7 +537,7 @@ namespace ti
 		if (active && nativeWindow != nil)
 		{
 			std::string nurl = NormalizeURL(url);
-			NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:nurl]];
+			NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:nurl.c_str()]];
 			[[[nativeWindow webView] mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
 		}
 	}

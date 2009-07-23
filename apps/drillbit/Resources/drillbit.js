@@ -40,7 +40,7 @@ function show_test_details(name)
 {
 	var w = Titanium.UI.currentWindow.createWindow();
 	w.setHeight(600);
-	w.setWidth(600);
+	w.setWidth(850);
 	w.setURL('app://test_results/' + name + '.html');
 	w.open();
 }

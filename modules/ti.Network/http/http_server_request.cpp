@@ -142,7 +142,7 @@ namespace ti
 		}
 		char *buf = new char[max_size];
 		in.read(buf,max_size);
-		std::streamsize count = in.gcount();
+		int count = static_cast<int>(in.gcount());
 		if (count == 0)
 		{
 			result->SetNull();
