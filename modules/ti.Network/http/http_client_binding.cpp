@@ -444,7 +444,7 @@ namespace ti
 				try
 				{
 					rs.read((char*)&buf,8095);
-					std::streamsize c = rs.gcount();
+					int c = static_cast<int>(rs.gcount());
 					if (c > 0)
 					{
 						buf[c]='\0';
