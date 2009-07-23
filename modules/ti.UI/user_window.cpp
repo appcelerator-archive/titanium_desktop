@@ -85,13 +85,13 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=1.0) Checks whether a window is in fullscreen
+	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.5) Checks whether a window is in fullscreen
 	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=Boolean) true if the window is in fullscreen, false if otherwise
 	 */
 	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=1.0) Makes a window fullscreen
+	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=0.5) Makes a window fullscreen
 	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=Boolean) set to true for fullscreen, false if otherwise
 	 */
 	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
@@ -337,28 +337,28 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.5)
 	 * @tiapi Set this window's menu
 	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the menu or null to unset
 	 */
 	this->SetMethod("setMenu", &UserWindow::_SetMenu);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=1.0) 
+	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=0.5) 
 	 * Get this window's menu
 	 * @tiresult[UI.Menu|null] This window's Menu or null if it is unset
 	 */
 	this->SetMethod("getMenu", &UserWindow::_GetMenu);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=0.5)
 	 * @tiapi Set this window's context menu
 	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the context menu or null to unset
 	 */
 	this->SetMethod("setContextMenu", &UserWindow::_SetContextMenu);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=1.0)
+	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=0.5)
 	 * Get this window's context menu
 	 * @tiresult[UI.Menu|null] This window's context menu or null if it is unset
 	 */
@@ -390,7 +390,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.createWindow,since=0.2) Creates a new window as a child of the current window
-	 * @tiarg(for=UI.UserWindow.createWindow,name=options,type=mixed,optional=True) a string containing a url of the new window's content or an object containing properties for the new window
+	 * @tiarg[type=String|Object,options, optional=True] A string containing a url of the new window or an object containing properties for the new window
 	 * @tiresult(for=UI.UserWindow.createWindow,type=object) a UserWindow object
 	 */
 	this->SetMethod("createWindow", &UserWindow::_CreateWindow);
@@ -418,9 +418,15 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getParent,since=0.3) Returns the parent window
-	 * @tiresult(for=UI.UserWindow.getParent,type=mixed) a UserWindow object referencing the parent window or null if no parent
+	 * @tiresult(for=UI.UserWindow.getParent,type=UI.UserWindow|null) a UserWindow object referencing the parent window or null if no parent
 	 */
 	this->SetMethod("getParent", &UserWindow::_GetParent);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getChildren,since=0.5)
+	 * @tiresult[Array<UI.UserWindow>] An array of window representing the children of this window.
+	 */
+	this->SetMethod("getChildren", &UserWindow::_GetChildren);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getDOMWindow,since=0.5)
@@ -434,7 +440,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=1.0) show the web inspector
+	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) show the web inspector
 	 * @tiarg(for=UI.UserWindow.showInspector,type=bool,name=console,optional=True) show the interactive console (default false)
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
@@ -1363,6 +1369,20 @@ void UserWindow::_GetParent(const kroll::ValueList& args, kroll::SharedValue res
 	{
 		result->SetObject(this->parent);
 	}
+}
+
+void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	SharedKList childList = new StaticBoundList();
+
+	std::vector<AutoUserWindow>::iterator i = this->children.begin();
+	while (i != this->children.end())
+	{
+		SharedKObject child = *i++;
+		childList->Append(Value::NewObject(child));
+	}
+
+	result->SetList(childList);
 }
 
 void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)

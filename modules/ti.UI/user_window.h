@@ -108,6 +108,7 @@ namespace ti
 			void _GetIcon(const kroll::ValueList&, kroll::SharedValue);
 			void _SetIcon(const kroll::ValueList&, kroll::SharedValue);
 			void _GetParent(const kroll::ValueList&, kroll::SharedValue);
+			void _GetChildren(const kroll::ValueList&, kroll::SharedValue);
 			void _CreateWindow(const kroll::ValueList&, kroll::SharedValue);
 			void _OpenFileChooserDialog(const ValueList& args, SharedValue result);
 			void _OpenFolderChooserDialog(const ValueList& args, SharedValue result);
