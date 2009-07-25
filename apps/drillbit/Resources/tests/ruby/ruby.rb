@@ -197,3 +197,40 @@ def test_rubykobject_method_missing_exception(o)
 	end
 	return exception
 end
+
+def test_rubyklist_length(l, length)
+	if l.length == length
+		return ""
+	else
+		return "Length should have been " + length + " but was " + l.length
+	end
+
+	# Test invalid argument handling with the length method
+	exception = ""
+	begin
+		l.length("what, what")
+		exception = "length() did not throw an exception"
+	rescue ArgumentError
+		exception = ""
+	rescue
+		exception = "length() hrew an unknown exception"
+	end
+end
+
+def test_rubyklist_each(l, *list_items)
+	length = l.length
+	exp_length = list_items.length
+	if length != exp_length
+		return "Length should have been #{exp_length} but was #{length}"
+	end
+
+	i = 0
+	l.each { |item|
+		if (item != list_items[i])
+			return "Item #{i} should have been #{list_items[i].inspect} but was #{item.inspect}"
+		end
+		i = i + 1
+	}
+
+	return ""
+end

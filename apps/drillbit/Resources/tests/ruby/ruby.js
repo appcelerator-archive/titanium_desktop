@@ -189,5 +189,27 @@ describe("Ruby Tests",
 		a.phillip = 34;
 		a.undef = undefined;
 		value_of(test_rubykobject_method_missing_exception(a)).should_be("");
+	},
+	test_rubyklist_length: function()
+	{
+		a = [];
+		value_of(test_rubyklist_length(a, 0)).should_be("");
+
+		a = [0, 1, 2, 3];
+		value_of(test_rubyklist_length(a, 4)).should_be("");
+
+		a[99] = "blah";
+		value_of(test_rubyklist_length(a, 100)).should_be("");
+	},
+	test_rubyklist_each: function()
+	{
+		a = [];
+		value_of(test_rubyklist_each(a)).should_be("");
+
+		a = [0, 1, 2, 3];
+		value_of(test_rubyklist_each(a, 0, 1, 2, 3)).should_be("");
+
+		a[9] = "blah";
+		value_of(test_rubyklist_each(a, 0, 1, 2, 3, undefined, undefined, undefined, undefined, undefined, "blah")).should_be("");
 	}
 });
