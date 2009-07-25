@@ -7,7 +7,7 @@
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
-	KEventObject("UserWindow"),
+	KEventObject("UI.UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
 	domWindow(0),

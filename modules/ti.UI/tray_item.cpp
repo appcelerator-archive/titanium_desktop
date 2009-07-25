@@ -10,7 +10,7 @@ namespace ti
 {
 
 	TrayItem::TrayItem(std::string& iconURL) : 
-		StaticBoundObject("TrayItem"),
+		AccessorBoundObject("UI.TrayItem"),
 		iconURL(iconURL),
 		iconPath(URLToPathOrURL(iconURL))
 	{
