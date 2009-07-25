@@ -231,6 +231,28 @@ def test_rubyklist_each(l, *list_items)
 		end
 		i = i + 1
 	}
-
 	return ""
+end
+
+def get_ruby_proc()
+	p = Proc.new { |x| x + "foo!" }
+	return p
+end
+
+def get_ruby_proc_arity(arity)
+	if (arity == 0)
+		p = Proc.new { "|" }
+	elsif (arity == 1)
+		p = Proc.new { |x| x + "|" }
+	elsif (arity == 2)
+		p = Proc.new { |x, y| x + "|" + y + "|" }
+	elsif (arity == 3)
+		p = Proc.new { |x, y, z| x + "|" + y + "|" + z + "|" }
+	elsif (arity == -1)
+		p = Proc.new { |x, *y| x + "|" + y.join("|") + "|" }
+	elsif (arity == -2)
+		p = Proc.new { |x, y, *z| x + "|" + y + "|" + z.join("|") + "|" }
+	end
+
+	return p
 end
