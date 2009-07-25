@@ -8,7 +8,7 @@
 #include <kroll/kroll.h>
 namespace ti
 {
-	class Menu : public StaticBoundObject
+	class Menu : public AccessorBoundObject
 	{
 	public:
 		// Platform-independent implementation

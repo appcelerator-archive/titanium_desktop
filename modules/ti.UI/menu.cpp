@@ -11,7 +11,7 @@ namespace ti
 	using std::vector;
 	using std::string;
 
-	Menu::Menu() : StaticBoundObject("UI.Menu")
+	Menu::Menu() : AccessorBoundObject("UI.Menu")
 	{
 
 		/**

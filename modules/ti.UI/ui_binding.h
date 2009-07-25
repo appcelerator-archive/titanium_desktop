@@ -31,13 +31,6 @@ namespace ti
 		void RemoveFromOpenWindows(AutoUserWindow);
 		void ClearTray();
 		void UnregisterTrayItem(TrayItem*);
-		static void SendEventToListeners(
-			std::vector<SharedKMethod> eventListeners,
-			std::string eventType,
-			SharedKObject eventSource,
-			SharedKObject event = new StaticBoundObject());
-		static void SendEventToListener(SharedKMethod listener, SharedKObject event);
-
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
 		void _GetMainWindow(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
