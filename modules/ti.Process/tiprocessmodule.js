@@ -55,4 +55,60 @@
 		return process;
 	};
 	
+	/**
+	 * @tiapi(method=True,name=Process.launch,since=0.2,deprecated=True)
+	 * @tiapi This method is deprecated. See Process.Process.createProcess()
+	 * @tiarg[String, command] The command to launch
+	 * @tiarg[Array<String>, arguments] A list of arguments to the command
+	 */
+	Titanium.Process.launch = function(cmd, args)
+	{
+		if (!args) args = [];
+		args.unshift(cmd);
+		
+		var process = ti_createProcess.call(Titanium.Process, args);
+		var buffer = '';
+		var onRead = null;
+		var onExit = null;
+		process.setOnRead(function(event)
+		{
+			if (!onRead)
+			{
+				buffer += event.data.toString();
+			}
+			else
+			{
+				if (buffer.length > 0)
+				{
+					onRead(buffer);
+					buffer = '';
+				}
+				else
+				{
+					onRead(event.data.toString());
+				}
+			}
+		});
+		process.setOnExit(function(event)
+		{
+			if (onExit) onExit(process.getExitCode());
+		});
+		
+		// wrap so AccessorBound doesn't take control
+		var processWrapper =
+		{
+			set onread(fn)
+			{
+				onRead = fn;
+			},
+			
+			set onexit(fn)
+			{
+				onExit = fn;
+			}
+		};
+		
+		process.launch();
+		return processWrapper;
+	};
 })();
