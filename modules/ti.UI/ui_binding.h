@@ -53,6 +53,7 @@ namespace ti
 		void _SetContextMenu(const ValueList& args, SharedValue result);
 		void _GetContextMenu(const ValueList& args, SharedValue result);
 		void _SetIcon(const ValueList& args, SharedValue result);
+		void _SetIcon(std::string iconURL);
 		void _AddTray(const ValueList& args, SharedValue result);
 		void _ClearTray(const ValueList& args, SharedValue result);
 		void _GetIdleTime(const ValueList& args, SharedValue result);

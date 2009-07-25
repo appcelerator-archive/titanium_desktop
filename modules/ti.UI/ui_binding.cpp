@@ -340,11 +340,19 @@ namespace ti
 	void UIBinding::_SetIcon(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("setIcon", "s|0");
-		std::string iconPath = this->iconURL = "";
-		if (args.size() > 0) {
-			this->iconURL = args.GetString(0);
+
+		std::string iconURL;
+		if (args.size() > 0)
+			iconURL = args.GetString(0);
+		this->_SetIcon(iconURL);
+	}
+
+	void UIBinding::_SetIcon(std::string iconURL)
+	{
+		std::string iconPath;
+		this->iconURL = iconURL;
+		if (!iconURL.empty())
 			iconPath = URLToPathOrURL(this->iconURL);
-		}
 
 		this->SetIcon(iconPath); // platform-specific impl
 
