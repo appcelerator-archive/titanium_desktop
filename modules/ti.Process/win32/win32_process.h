@@ -11,10 +11,6 @@
 #include "win32_pipe.h"
 #include "../process.h"
 
-#undef stdin
-#undef stdout
-#undef stderr
-
 namespace ti
 {
 	class Win32Process : public Process
