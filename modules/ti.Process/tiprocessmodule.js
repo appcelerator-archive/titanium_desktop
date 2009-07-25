@@ -105,7 +105,10 @@
 			set onexit(fn)
 			{
 				onExit = fn;
-			}
+			},
+			
+			terminate: function() { process.terminate(); },
+			isRunning: function() { return process.isRunning(); }
 		};
 		
 		process.launch();
