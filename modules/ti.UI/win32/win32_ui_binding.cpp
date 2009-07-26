@@ -22,20 +22,20 @@ namespace ti
 		iconPath("")
 	{
 	
-		if (!Win32UIBinding::IsWindowsXP())
-		{
-			// Use Activation Context API by pointing it at the WebKit
-			// manifest. This should allos us to load our COM object.
-			ACTCTX actctx; 
-			ZeroMemory(&actctx, sizeof(actctx)); 
-			actctx.cbSize = sizeof(actctx); 
+		//if (!Win32UIBinding::IsWindowsXP())
+		//{
+		//	// Use Activation Context API by pointing it at the WebKit
+		//	// manifest. This should allos us to load our COM object.
+		//	ACTCTX actctx; 
+		//	ZeroMemory(&actctx, sizeof(actctx)); 
+		//	actctx.cbSize = sizeof(actctx); 
 
-			std::string source = host->GetRuntimePath();
-			source = FileUtils::Join(source.c_str(), "WebKit.manifest", NULL);
-			actctx.lpSource = source.c_str(); // Path to the Side-by-Side Manifest File 
-			this->pActCtx = CreateActCtx(&actctx); 
-			ActivateActCtx(pActCtx, &this->lpCookie);
-		}
+		//	std::string source = host->GetRuntimePath();
+		//	source = FileUtils::Join(source.c_str(), "WebKit.manifest", NULL);
+		//	actctx.lpSource = source.c_str(); // Path to the Side-by-Side Manifest File 
+		//	this->pActCtx = CreateActCtx(&actctx); 
+		//	ActivateActCtx(pActCtx, &this->lpCookie);
+		//}
 		
 		INITCOMMONCONTROLSEX InitCtrlEx;
 
@@ -122,7 +122,14 @@ namespace ti
 
 	void Win32UIBinding::SetIcon(std::string& iconPath)
 	{
-		this->iconPath = iconPath;
+		if (!FileUtils::IsFile(iconPath))
+		{
+			this->iconPath = "";
+		}
+		else
+		{
+			this->iconPath = iconPath;
+		}
 	}
 
 	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cb)

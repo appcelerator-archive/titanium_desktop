@@ -19,7 +19,6 @@ namespace ti
 		public:
 		Win32UIBinding(Module* uiModule, Host *host);
 		~Win32UIBinding();
-		static bool IsWindowsXP();
 
 		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
 		void ErrorDialog(std::string);

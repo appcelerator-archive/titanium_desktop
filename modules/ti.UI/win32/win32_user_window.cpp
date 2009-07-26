@@ -243,8 +243,8 @@ void Win32UserWindow::InitWindow()
 
 void Win32UserWindow::InitWebKit()
 {
-	HRESULT hr = CoCreateInstance(CLSID_WebView, 0, CLSCTX_ALL, IID_IWebView,
-			(void**) &(this->web_view));
+	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0,
+		 IID_IWebView, (void**) &(this->web_view));
 	
 	if (FAILED(hr))
 	{
@@ -301,8 +301,8 @@ void Win32UserWindow::InitWebKit()
 	std::string appid = appConfig->GetAppID();
 
 	IWebPreferences *prefs = NULL;
-	hr = CoCreateInstance(CLSID_WebPreferences, 0, CLSCTX_ALL,
-			IID_IWebPreferences, (void**) &prefs);
+	hr = WebKitCreateInstance(CLSID_WebPreferences, 0,
+		IID_IWebPreferences, (void**) &prefs);
 	if (FAILED(hr) || prefs == NULL)
 	{
 		logger->Error("Couldn't create the web preferences object");
@@ -743,7 +743,8 @@ void Win32UserWindow::SetURL(std::string& url_)
 	std::wstring wurl = UTF8ToWide(url);
 
 	logger->Debug("CoCreateInstance");
-	HRESULT hr = CoCreateInstance(CLSID_WebMutableURLRequest, 0, CLSCTX_ALL, IID_IWebMutableURLRequest, (void**)&request);
+	HRESULT hr = WebKitCreateInstance(CLSID_WebMutableURLRequest, 0, 
+		IID_IWebMutableURLRequest, (void**) &request);
 	if (FAILED(hr))
 		goto exit;
 
