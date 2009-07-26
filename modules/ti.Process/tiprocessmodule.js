@@ -1,5 +1,5 @@
 /*
- * Appcelerator Kroll - licensed under the Apache Public License 2
+ * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008-2009 Appcelerator, Inc. All Rights Reserved.
  */
@@ -63,6 +63,9 @@
 	 */
 	Titanium.Process.launch = function(cmd, args)
 	{
+		Titanium.API.warn(
+			"Titanium.Process.launch is deprecated, please use Titanium.Process.createProcess instead");
+		
 		if (!args) args = [];
 		args.unshift(cmd);
 		
