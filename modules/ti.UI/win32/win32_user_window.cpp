@@ -727,8 +727,8 @@ void Win32UserWindow::SetTitle(std::string& title)
 
 void Win32UserWindow::SetURL(std::string& url_)
 {
-	std::string url = url_;
-	url = ti::NormalizeURL(url);
+	std::string url = ti::NormalizeURL(url_);
+	Win32UIBinding::SetProxyForURL(url);
 
 	IWebMutableURLRequest* request = 0;
 	std::wstring method = L"GET" ;

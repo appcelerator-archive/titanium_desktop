@@ -5,6 +5,7 @@
  */
 #include "../ui_module.h"
 #define _WINSOCKAPI_
+#include <cstdlib>
 
 using std::vector;
 namespace ti
@@ -357,6 +358,34 @@ namespace ti
 			}
 		}
 
+	}
+
+	/*static*/
+	void Win32UIBinding::SetProxyForURL(std::string& url)
+	{
+		SharedPtr<Proxy> proxy = ProxyConfig::GetProxyForURL(url);
+		if (!proxy.isNull())
+		{
+			printf("setting proxy\n");
+			// We make a copy of the URI here so that we can  modify it 
+			// without worrying about changing a potentially global one.
+			Poco::URI proxyURI(*proxy->info);
+			Poco::URI uri = Poco::URI(url);
+			proxyURI.setScheme(uri.getScheme());
+
+			std::string proxyEnv;
+			if (proxyURI.getScheme() == "http")
+			{
+				printf("setting http_proxy=%s\n", proxyURI.toString().c_str());
+				proxyEnv.append("http_proxy=");
+			}
+			else if (proxyURI.getScheme() == "https")
+			{
+				proxyEnv.append("HTTPS_PROXY=");
+			}
+			proxyEnv.append(proxyURI.toString());
+			_putenv(proxyEnv.c_str());
+		}
 	}
 
 }

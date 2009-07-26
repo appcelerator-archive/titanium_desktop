@@ -47,6 +47,7 @@ namespace ti
 		static cairo_surface_t* ScaleCairoSurface(
 			cairo_surface_t *oldSurface, int newWidth, int newHeight);
 		static void ReleaseImage(HANDLE);
+		static void SetProxyForURL(std::string& url);
 
 		private:
 		ScriptEvaluator evaluator;
