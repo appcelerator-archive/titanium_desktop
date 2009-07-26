@@ -453,44 +453,5 @@ namespace ti
 	{
 		result->SetDouble(this->GetIdleTime());
 	}
-
-	/*static*/
-	void UIBinding::SendEventToListeners(
-		std::vector<SharedKMethod> eventListeners,
-		std::string eventType,
-		SharedKObject eventSource,
-		SharedKObject event)
-	{
-		event->SetObject("source", eventSource);
-		event->SetString("type", eventType);
-
-		std::vector<SharedKMethod>::iterator i = eventListeners.begin();
-		while (i != eventListeners.end())
-		{
-			UIBinding::SendEventToListener((*i++), event);
-		}
-	}
-
-	/*static*/
-	void UIBinding::SendEventToListener(
-		SharedKMethod listener, SharedKObject event)
-	{
-		if (listener.isNull())
-			return;
-
-		try {
-			listener->Call(ValueList(Value::NewObject(event)));
-
-		} catch (ValueException& e) {
-			Logger* logger = Logger::Get("UI.UIBinding");
-			SharedString exceptionSS = e.DisplayString();
-			SharedString eventTypeSS = event->Get("type")->DisplayString();
-			logger->Error(
-				"Event listener for %s event failed with exception: %s",
-				eventTypeSS->c_str(),
-				exceptionSS->c_str());
-		}
-	}
-
 }
 
