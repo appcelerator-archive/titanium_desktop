@@ -5,6 +5,7 @@
  */
 #include "../ui_module.h"
 #define _WINSOCKAPI_
+#include <cstdlib>
 
 using std::vector;
 namespace ti
@@ -20,22 +21,6 @@ namespace ti
 		contextMenu(0),
 		iconPath("")
 	{
-	
-		if (!Win32UIBinding::IsWindowsXP())
-		{
-			// Use Activation Context API by pointing it at the WebKit
-			// manifest. This should allos us to load our COM object.
-			ACTCTX actctx; 
-			ZeroMemory(&actctx, sizeof(actctx)); 
-			actctx.cbSize = sizeof(actctx); 
-
-			std::string source = host->GetRuntimePath();
-			source = FileUtils::Join(source.c_str(), "WebKit.manifest", NULL);
-			actctx.lpSource = source.c_str(); // Path to the Side-by-Side Manifest File 
-			this->pActCtx = CreateActCtx(&actctx); 
-			ActivateActCtx(pActCtx, &this->lpCookie);
-		}
-		
 		INITCOMMONCONTROLSEX InitCtrlEx;
 
 		InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -60,19 +45,6 @@ namespace ti
 
 	Win32UIBinding::~Win32UIBinding()
 	{
-		if (!Win32UIBinding::IsWindowsXP())
-		{
-   			DeactivateActCtx(0, this->lpCookie); 
-			ReleaseActCtx(this->pActCtx);
-		}
-	}
-
-	bool Win32UIBinding::IsWindowsXP()
-	{
-		OSVERSIONINFO osVersion;
-		osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		::GetVersionEx(&osVersion);
-		return osVersion.dwMajorVersion == 5;
 	}
 
 	AutoUserWindow Win32UIBinding::CreateWindow(
@@ -121,7 +93,14 @@ namespace ti
 
 	void Win32UIBinding::SetIcon(std::string& iconPath)
 	{
-		this->iconPath = iconPath;
+		if (!FileUtils::IsFile(iconPath))
+		{
+			this->iconPath = "";
+		}
+		else
+		{
+			this->iconPath = iconPath;
+		}
 	}
 
 	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
@@ -357,6 +336,34 @@ namespace ti
 			}
 		}
 
+	}
+
+	/*static*/
+	void Win32UIBinding::SetProxyForURL(std::string& url)
+	{
+		SharedPtr<Proxy> proxy = ProxyConfig::GetProxyForURL(url);
+		if (!proxy.isNull())
+		{
+			printf("setting proxy\n");
+			// We make a copy of the URI here so that we can  modify it 
+			// without worrying about changing a potentially global one.
+			Poco::URI proxyURI(*proxy->info);
+			Poco::URI uri = Poco::URI(url);
+			proxyURI.setScheme(uri.getScheme());
+
+			std::string proxyEnv;
+			if (proxyURI.getScheme() == "http")
+			{
+				printf("setting http_proxy=%s\n", proxyURI.toString().c_str());
+				proxyEnv.append("http_proxy=");
+			}
+			else if (proxyURI.getScheme() == "https")
+			{
+				proxyEnv.append("HTTPS_PROXY=");
+			}
+			proxyEnv.append(proxyURI.toString());
+			_putenv(proxyEnv.c_str());
+		}
 	}
 
 }

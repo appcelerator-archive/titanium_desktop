@@ -590,5 +590,38 @@ describe("process tests",
 		{
 			callback.failed('timed out waiting for process to relaunch');
 		},10000);
+	},
+	
+	test_deprecated_process_as_async: function(callback)
+	{
+		var cmd = Titanium.platform == "win32" ? "C:\\Windows\\System32\\cmd.exe" : "/bin/ls";
+		var args = Titanium.platform == "win32" ? ["/C","dir"] : [];
+		
+		var p = Titanium.Process.launch(cmd, args);
+		var buf = '';
+		var timer = 0;
+		
+		timer = setTimeout(function(){
+			callback.failed("Deprecated process timed out")
+		}, 3000);
+		
+		p.onread = function(data)
+		{
+			buf += data;
+		};
+		p.onexit = function(exitcode)
+		{
+			clearTimeout(timer);
+			try
+			{
+				value_of(buf.length).should_be_greater_than(0);
+				value_of(exitcode).should_be(0);
+				callback.passed();
+			}
+			catch (e)
+			{
+				callback.failed("caught error: " + e);
+			}
+		};
 	}
 });

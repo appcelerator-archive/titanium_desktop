@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	class TrayItem : public StaticBoundObject
+	class TrayItem : public AccessorBoundObject
 	{
 
 	public:
