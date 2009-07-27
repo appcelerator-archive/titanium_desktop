@@ -338,11 +338,25 @@
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-	return nil;
+	WindowConfig *config = new WindowConfig();
+	NSString *url = [[request URL] relativeString];
+	if ([url length] > 0)
+	{
+		std::string urlStr = [url UTF8String];
+		config->SetURL(urlStr);
+	}
+	
+	AutoUserWindow uw = [window userWindow]->GetAutoPtr();
+	AutoUserWindow newWindow = UIBinding::GetInstance()->CreateWindow(config, uw);
+	AutoPtr<OSXUserWindow> osxWindow = newWindow.cast<OSXUserWindow>();
+	osxWindow->Open();
+	
+	return [osxWindow->GetNative() webView];
 }
 
 - (void)webViewShow:(WebView *)sender
 {
+	[window userWindow]->Show();
 }
 
 - (void)webViewClose:(WebView *)wv 
