@@ -7,6 +7,7 @@
 #include "../ui_module.h"
 #include <iostream>
 #include <Poco/Process.h>
+#define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
 
 namespace ti
 {
@@ -15,6 +16,8 @@ namespace ti
 	static void WindowObjectClearedCallback(WebKitWebView*,
 		WebKitWebFrame*, JSGlobalContextRef, JSObjectRef, gpointer);
 	static void PopulatePopupCallback(WebKitWebView*, GtkMenu*, gpointer);
+	static WebKitWebView* CreateWebViewCallback(
+		WebKitWebView*, WebKitWebFrame*, gpointer);
 	static gint NewWindowPolicyDecisionCallback(WebKitWebView*,
 		WebKitWebFrame*, WebKitNetworkRequest*, WebKitWebNavigationAction*,
 		WebKitWebPolicyDecision *, gchar*);
@@ -57,8 +60,9 @@ namespace ti
 	{
 		if (this->gtkWindow == NULL)
 		{
-			WebKitWebView* webView = WEBKIT_WEB_VIEW(webkit_web_view_new ());
-	
+			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
+
 			g_signal_connect(
 				G_OBJECT(webView), "window-object-cleared",
 				G_CALLBACK(WindowObjectClearedCallback), this);
@@ -71,6 +75,9 @@ namespace ti
 			g_signal_connect(
 				G_OBJECT(webView), "load-finished",
 				G_CALLBACK(LoadFinishedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "create-web-view",
+				G_CALLBACK(CreateWebViewCallback), this);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
@@ -118,7 +125,6 @@ namespace ti
 			gtk_container_add(GTK_CONTAINER(window), vbox);
 	
 			this->gtkWindow = GTK_WINDOW(window);
-			this->webView = webView;
 
 			gtk_widget_realize(window);
 			this->SetupDecorations();
@@ -466,6 +472,28 @@ namespace ti
 		}
 	
 		return FALSE;
+	}
+
+	WebKitWebView* CreateWebViewCallback(WebKitWebView* webView,
+		WebKitWebFrame* frame, gpointer data)
+	{
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		AutoUserWindow newWindow = userWindow->CreateWindow(new WindowConfig());
+		newWindow->Open();
+
+		AutoPtr<GtkUserWindow> gtkNewWindow = newWindow.cast<GtkUserWindow>();
+		if (!gtkNewWindow.isNull())
+		{
+			// We aren't saving a reference to this new window, but we don't
+			// want it to disappear either. We'll release this once the window
+			// is shown.
+			return gtkNewWindow->GetWebView();
+		}
+		else
+		{
+			// Don't you dare ever happen.
+			return 0;
+		}
 	}
 
 	static gint NewWindowPolicyDecisionCallback(

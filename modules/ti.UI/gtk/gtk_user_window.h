@@ -143,13 +143,12 @@ namespace ti
 		AutoMenu GetMenu();
 		void SetContextMenu(AutoMenu);
 		AutoMenu GetContextMenu();
-
 		void SetIcon(std::string& iconPath);
 		std::string& GetIcon();
-
 		void SetInspectorWindow(GtkWidget* inspectorWindow);
 		GtkWidget *GetInspectorWindow();
 		virtual void ShowInspector(bool console);
+		inline WebKitWebView* GetWebView() { return this->webView; }
 
 		// These values contain the most-recently-set dimension
 		// information for this UserWindow. GDK is asynchronous,
@@ -166,7 +165,7 @@ namespace ti
 		bool targetMaximized;
 		bool targetMinimized;
 
-	protected:
+		protected:
 		GtkWindow* gtkWindow;
 		GtkWidget* vbox;
 		WebKitWebView* webView;
