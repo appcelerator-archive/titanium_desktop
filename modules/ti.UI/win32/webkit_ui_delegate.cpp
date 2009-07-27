@@ -21,20 +21,20 @@ Win32WebKitUIDelegate::QueryInterface(REFIID riid, void **ppvObject)
 {
 	*ppvObject = 0;
 
-    if (IsEqualGUID(riid, IID_IUnknown))
-        *ppvObject = static_cast<IWebUIDelegate*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegate))
-        *ppvObject = static_cast<IWebUIDelegate*>(this);
-        /*
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate))
-        *ppvObject = static_cast<IWebUIDelegatePrivate*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate2))
-        *ppvObject = static_cast<IWebUIDelegatePrivate2*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate3))
-        *ppvObject = static_cast<IWebUIDelegatePrivate3*>(this);
+	if (IsEqualGUID(riid, IID_IUnknown))
+		*ppvObject = static_cast<IWebUIDelegate*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegate))
+		*ppvObject = static_cast<IWebUIDelegate*>(this);
+		/*
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate))
+		*ppvObject = static_cast<IWebUIDelegatePrivate*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate2))
+		*ppvObject = static_cast<IWebUIDelegatePrivate2*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate3))
+		*ppvObject = static_cast<IWebUIDelegatePrivate3*>(this);
 		*/
-    else
-        return E_NOINTERFACE;
+	else
+		return E_NOINTERFACE;
 
 	return S_OK;
 }
@@ -388,8 +388,8 @@ Win32WebKitUIDelegate::exceededDatabaseQuota(
 {
 	logger->Debug("exceededDatabaseQuota() not implemented");
 
-    static const unsigned long long defaultQuota = 100 * 1024 * 1024;	// 100MB
-    origin->setQuota(defaultQuota);
+	static const unsigned long long defaultQuota = 100 * 1024 * 1024;	// 100MB
+	origin->setQuota(defaultQuota);
 
 	return E_NOTIMPL;
 }
