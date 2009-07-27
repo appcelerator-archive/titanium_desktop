@@ -21,22 +21,6 @@ namespace ti
 		contextMenu(0),
 		iconPath("")
 	{
-	
-		//if (!Win32UIBinding::IsWindowsXP())
-		//{
-		//	// Use Activation Context API by pointing it at the WebKit
-		//	// manifest. This should allos us to load our COM object.
-		//	ACTCTX actctx; 
-		//	ZeroMemory(&actctx, sizeof(actctx)); 
-		//	actctx.cbSize = sizeof(actctx); 
-
-		//	std::string source = host->GetRuntimePath();
-		//	source = FileUtils::Join(source.c_str(), "WebKit.manifest", NULL);
-		//	actctx.lpSource = source.c_str(); // Path to the Side-by-Side Manifest File 
-		//	this->pActCtx = CreateActCtx(&actctx); 
-		//	ActivateActCtx(pActCtx, &this->lpCookie);
-		//}
-		
 		INITCOMMONCONTROLSEX InitCtrlEx;
 
 		InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -61,19 +45,6 @@ namespace ti
 
 	Win32UIBinding::~Win32UIBinding()
 	{
-		if (!Win32UIBinding::IsWindowsXP())
-		{
-   			DeactivateActCtx(0, this->lpCookie); 
-			ReleaseActCtx(this->pActCtx);
-		}
-	}
-
-	bool Win32UIBinding::IsWindowsXP()
-	{
-		OSVERSIONINFO osVersion;
-		osVersion.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		::GetVersionEx(&osVersion);
-		return osVersion.dwMajorVersion == 5;
 	}
 
 	AutoUserWindow Win32UIBinding::CreateWindow(
