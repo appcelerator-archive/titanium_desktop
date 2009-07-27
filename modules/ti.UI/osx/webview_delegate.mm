@@ -173,45 +173,6 @@
 - (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary*) actionInformation request:(NSURLRequest*) request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
 {
 	[listener use];
-	//int type = [[actionInformation objectForKey:WebActionNavigationTypeKey] intValue];
-	//
-	//switch (type)
-	//{
-	//	case WebNavigationTypeBackForward:
-	//	case WebNavigationTypeReload:
-	//	{
-	//		[listener use];
-	//		return;
-	//	}
-	//	case WebNavigationTypeLinkClicked:
-	//	case WebNavigationTypeFormSubmitted:
-	//	case WebNavigationTypeFormResubmitted:
-	//	{
-	//		break;
-	//	}
-	//	case WebNavigationTypeOther:
-	//	{
-	//		break;
-	//	}
-	//	default:
-	//	{
-	//		[listener ignore];
-	//		return;
-	//	}
-	//}
-	//NSString *protocol = 
-	//	[[actionInformation objectForKey:WebActionOriginalURLKey] scheme]; 
-	//if ([protocol isEqual:@"app"] || [protocol isEqual:@"ti"] ||
-	//	[protocol isEqual:@"http"] || [protocol isEqual:@"https"])
-	//{
-	//	[listener use];
-	//}
-	//else
-	//{
-	//	logger->Warn("Application attempted to navigate to illegal location: %s",
-	//		[[newURL absoluteString] UTF8String]);
-	//	[listener ignore];
-	//}
 }
 
 // WebFrameLoadDelegate Methods
@@ -338,19 +299,19 @@
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-	WindowConfig *config = new WindowConfig();
+	AutoUserWindow newWindow = 0;
 	NSString *url = [[request URL] relativeString];
 	if ([url length] > 0)
 	{
-		std::string urlStr = [url UTF8String];
-		config->SetURL(urlStr);
+		newWindow = [window userWindow]->CreateWindow([url UTF8String]);
 	}
-	
-	AutoUserWindow uw = [window userWindow]->GetAutoPtr();
-	AutoUserWindow newWindow = UIBinding::GetInstance()->CreateWindow(config, uw);
+	else
+	{
+		newWindow = [window userWindow]->CreateWindow(new WindowConfig());
+	}
+
 	AutoPtr<OSXUserWindow> osxWindow = newWindow.cast<OSXUserWindow>();
 	osxWindow->Open();
-	
 	return [osxWindow->GetNative() webView];
 }
 

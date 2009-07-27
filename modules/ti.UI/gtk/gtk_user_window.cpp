@@ -7,44 +7,25 @@
 #include "../ui_module.h"
 #include <iostream>
 #include <Poco/Process.h>
+#define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
 
 namespace ti
 {
-	static gboolean destroy_cb(
-		GtkWidget* widget,
-		GdkEvent* event,
-		gpointer data);
-	static gboolean event_cb(
-		GtkWidget* window,
-		GdkEvent* event,
-		gpointer user_data);
-	static void window_object_cleared_cb(
-		WebKitWebView*,
-		WebKitWebFrame*,
-		JSGlobalContextRef,
-		JSObjectRef, gpointer);
-	static void populate_popup_cb(
-		WebKitWebView *webView,
-		GtkMenu *menu,
-		gpointer data);
-	static gint new_window_policy_decision_callback(
-		WebKitWebView* webView,
-		WebKitWebFrame* frame,
-		WebKitNetworkRequest* request,
-		WebKitWebNavigationAction* navigationAction,
-		WebKitWebPolicyDecision *policyDecision,
-		gchar* frameName);
-	static void load_finished_cb(
-		WebKitWebView* view,
-		WebKitWebFrame* frame,
-		gpointer data);
-	static WebKitWebView* inspect_web_view_cb(
-		WebKitWebInspector* webInspector,
-		WebKitWebView* page,
-		gpointer data);
-	static gboolean inspector_show_window_cb(
-		WebKitWebInspector* inspector,
-		gpointer data);
+	static gboolean DestroyCallback(GtkWidget*, GdkEvent*, gpointer);
+	static gboolean EventCallback(GtkWidget*, GdkEvent*, gpointer);
+	static void WindowObjectClearedCallback(WebKitWebView*,
+		WebKitWebFrame*, JSGlobalContextRef, JSObjectRef, gpointer);
+	static void PopulatePopupCallback(WebKitWebView*, GtkMenu*, gpointer);
+	static WebKitWebView* CreateWebViewCallback(
+		WebKitWebView*, WebKitWebFrame*, gpointer);
+	static gint NewWindowPolicyDecisionCallback(WebKitWebView*,
+		WebKitWebFrame*, WebKitNetworkRequest*, WebKitWebNavigationAction*,
+		WebKitWebPolicyDecision *, gchar*);
+	static void LoadFinishedCallback(WebKitWebView*, WebKitWebFrame*,
+		gpointer);
+	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
+		WebKitWebView*, gpointer);
+	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
@@ -79,20 +60,24 @@ namespace ti
 	{
 		if (this->gtkWindow == NULL)
 		{
-			WebKitWebView* webView = WEBKIT_WEB_VIEW(webkit_web_view_new ());
-	
+			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
+
 			g_signal_connect(
 				G_OBJECT(webView), "window-object-cleared",
-				G_CALLBACK(window_object_cleared_cb), this);
+				G_CALLBACK(WindowObjectClearedCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "new-window-policy-decision-requested",
-				G_CALLBACK(new_window_policy_decision_callback), this);
+				G_CALLBACK(NewWindowPolicyDecisionCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "populate-popup",
-				G_CALLBACK(populate_popup_cb), this);
+				G_CALLBACK(PopulatePopupCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "load-finished",
-				G_CALLBACK(load_finished_cb), this);
+				G_CALLBACK(LoadFinishedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "create-web-view",
+				G_CALLBACK(CreateWebViewCallback), this);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
@@ -101,10 +86,10 @@ namespace ti
 			WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
 			g_signal_connect(
 				G_OBJECT(inspector), "inspect-web-view",
-				G_CALLBACK(inspect_web_view_cb), this);
+				G_CALLBACK(InspectWebViewCallback), this);
 			g_signal_connect(
 				G_OBJECT(inspector), "show-window",
-				G_CALLBACK(inspector_show_window_cb), this);
+				G_CALLBACK(InspectorShowWindowCallback), this);
 
 			GtkWidget* view_container = NULL;
 			if (this->IsUsingScrollbars())
@@ -133,14 +118,13 @@ namespace ti
 			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
 
 			this->destroyCallbackId = g_signal_connect(
-				G_OBJECT(window), "delete-event", G_CALLBACK(destroy_cb), this);
+				G_OBJECT(window), "delete-event", G_CALLBACK(DestroyCallback), this);
 			g_signal_connect(
-				G_OBJECT(window), "event", G_CALLBACK(event_cb), this);
+				G_OBJECT(window), "event", G_CALLBACK(EventCallback), this);
 
 			gtk_container_add(GTK_CONTAINER(window), vbox);
 	
 			this->gtkWindow = GTK_WINDOW(window);
-			this->webView = webView;
 
 			gtk_widget_realize(window);
 			this->SetupDecorations();
@@ -188,7 +172,7 @@ namespace ti
 		}
 	}
 
-	static gboolean destroy_cb(
+	static gboolean DestroyCallback(
 		GtkWidget* widget,
 		GdkEvent* event,
 		gpointer data)
@@ -206,7 +190,7 @@ namespace ti
 
 		// Destroy the GTK bits, if we have them first, because
 		// we need to assume the GTK window is gone for  everything
-		// below (this method might be called by destroy_cb)
+		// below (this method might be called by DestroyCallback)
 		if (this->gtkWindow != NULL)
 		{
 			// We don't want the destroy signal handler to fire after now.
@@ -401,7 +385,7 @@ namespace ti
 		gtk_window_set_icon(this->gtkWindow, icon);
 	}
 
-	static gboolean event_cb(
+	static gboolean EventCallback(
 		GtkWidget *w,
 		GdkEvent *event,
 		gpointer data)
@@ -490,7 +474,29 @@ namespace ti
 		return FALSE;
 	}
 
-	static gint new_window_policy_decision_callback(
+	WebKitWebView* CreateWebViewCallback(WebKitWebView* webView,
+		WebKitWebFrame* frame, gpointer data)
+	{
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		AutoUserWindow newWindow = userWindow->CreateWindow(new WindowConfig());
+		newWindow->Open();
+
+		AutoPtr<GtkUserWindow> gtkNewWindow = newWindow.cast<GtkUserWindow>();
+		if (!gtkNewWindow.isNull())
+		{
+			// We aren't saving a reference to this new window, but we don't
+			// want it to disappear either. We'll release this once the window
+			// is shown.
+			return gtkNewWindow->GetWebView();
+		}
+		else
+		{
+			// Don't you dare ever happen.
+			return 0;
+		}
+	}
+
+	static gint NewWindowPolicyDecisionCallback(
 		WebKitWebView* webView,
 		WebKitWebFrame* frame,
 		WebKitNetworkRequest* request,
@@ -519,7 +525,7 @@ namespace ti
 		return TRUE;
 	}
 	
-	static void load_finished_cb(
+	static void LoadFinishedCallback(
 		WebKitWebView* view,
 		WebKitWebFrame* frame,
 		gpointer data)
@@ -538,7 +544,7 @@ namespace ti
 		}
 	}
 	
-	static void window_object_cleared_cb(
+	static void WindowObjectClearedCallback(
 		WebKitWebView* webView,
 		WebKitWebFrame* web_frame,
 		JSGlobalContextRef context,
@@ -550,7 +556,7 @@ namespace ti
 		user_window->RegisterJSContext(context);
 	}
 	
-	static void populate_popup_cb(
+	static void PopulatePopupCallback(
 		WebKitWebView *webView,
 		GtkMenu *menu,
 		gpointer data)
@@ -585,7 +591,7 @@ namespace ti
 	}
 	
 
-	static WebKitWebView* inspect_web_view_cb(
+	static WebKitWebView* InspectWebViewCallback(
 		WebKitWebInspector* webInspector,
 		WebKitWebView* page,
 		gpointer data)
@@ -614,7 +620,7 @@ namespace ti
 		return WEBKIT_WEB_VIEW(newWebView);
 	}
 
-	static gboolean inspector_show_window_cb(
+	static gboolean InspectorShowWindowCallback(
 		WebKitWebInspector* inspector,
 		gpointer data)
 	{
@@ -1267,7 +1273,7 @@ namespace ti
 		if (!GetInspectorWindow())
 		{
 			// calling these callbacks directly probably isn't the best way to do this?
-			inspect_web_view_cb(inspector, webView, this);
+			InspectWebViewCallback(inspector, webView, this);
 		}
 		gtk_widget_show(GetInspectorWindow());
 	}

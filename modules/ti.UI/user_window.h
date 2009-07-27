@@ -220,6 +220,9 @@ namespace ti
 				SharedKObject scope, std::string &url, JSGlobalContextRef context);
 			virtual void AppIconChanged() {};
 			virtual void AppMenuChanged() {};
+			AutoUserWindow CreateWindow(WindowConfig* config);
+			AutoUserWindow CreateWindow(std::string& url);
+			AutoUserWindow CreateWindow(SharedKObject properties);
 			AutoUserWindow GetAutoPtr();
 			static bool ShouldHaveTitaniumObject(JSGlobalContextRef, JSObjectRef);
 			static bool IsMainFrame(JSGlobalContextRef, JSObjectRef);
