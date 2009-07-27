@@ -249,7 +249,14 @@ namespace ti
 				//FIXME - we need to notify of unsupported error here
 			}
 			
-			
+			std::string uriString = uri.toString();
+			SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
+			if (!proxy.isNull())
+			{
+				session->setProxyHost(proxy->info->getHost());
+				session->setProxyPort(proxy->info->getPort());
+			}
+
 			// set the timeout for the request
 			Poco::Timespan to((long)binding->timeout,0L);
 			session->setTimeout(to);

@@ -784,5 +784,60 @@ describe("UI Module Tests",{
 		w2.close();
 		w3.close();
 		w.close();
+	},
+	test_window_opener_not_present: function()
+	{
+		// window.opener should be null when a single window with no parent
+		value_of(window.opener).should_be_null();
+	},
+	test_window_opener_as_async: function(callback)
+	{
+		Titanium.API.ui_test_opener_value = undefined;
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://test_window_opener.html');
+		w.open();
+		setTimeout(function()
+		{
+			var failed = true;
+			try
+			{
+				value_of(Titanium.API.ui_test_opener_value).should_be_true();
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+			try
+			{
+				value_of(w.window.opener).should_be_object();
+				failed = false;
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+			w.close();
+			if (!failed)
+			{
+				callback.passed();
+			}
+		},1000);
+	},
+	test_window_opener_different_domain_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com/');
+		w.open();
+		setTimeout(function()
+		{
+			try
+			{
+				value_of(w.window.opener).should_be_null();
+				callback.passed();
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+			w.close();
+		},1500);
 	}
 });

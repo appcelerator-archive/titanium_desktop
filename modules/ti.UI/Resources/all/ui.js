@@ -11,6 +11,18 @@
 //
 (function()
 {
+	// ensure that the window.opener property is set when we open a native 
+	// window in the same domain as this window (assuming this window is a child)
+	if (Titanium.UI.getCurrentWindow().getParent())
+	{
+		var d = Titanium.UI.getCurrentWindow().getParent().window.document;
+		// make sure in the same domain
+		if (d.domain == document.domain)
+		{
+			window.opener = Titanium.UI.getCurrentWindow().getParent().window;
+		}
+	}
+	
 	window.onload=function()
 	{
 		// Add app:// support to jquery's http success function

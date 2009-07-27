@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+#
 # quick script to automate build/run of titanium developer
 import os, sys, platform, shutil, distutils.dir_util as dir_util
 import titanium_version, subprocess

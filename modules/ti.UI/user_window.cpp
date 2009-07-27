@@ -7,7 +7,7 @@
 
 using namespace ti;
 UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
-	KEventObject("UserWindow"),
+	KEventObject("UI.UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
 	domWindow(0),
@@ -89,12 +89,14 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=Boolean) true if the window is in fullscreen, false if otherwise
 	 */
 	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
+	this->SetMethod("isFullScreen", &UserWindow::_IsFullscreen);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=0.5) Makes a window fullscreen
 	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=Boolean) set to true for fullscreen, false if otherwise
 	 */
 	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
+	this->SetMethod("setFullScreen", &UserWindow::_SetFullscreen);
 
 	/**
 	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.getID,since=0.2) Returns the id of a window

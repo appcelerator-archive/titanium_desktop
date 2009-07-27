@@ -49,6 +49,18 @@ namespace ti
 		}
 
 		this->uiBinding->CreateMainWindow(main_window_config);
+
+		try
+		{
+			std::string& appIcon = host->GetApplication()->image;
+			if (!appIcon.empty())
+				this->uiBinding->_SetIcon(appIcon);
+		}
+		catch (ValueException& e)
+		{
+			SharedString ss = e.DisplayString();
+			Logger::Get("UI")->Error("Could not set default icon: %s", ss->c_str());
+		}
 	}
 
 	void UIModule::Stop()

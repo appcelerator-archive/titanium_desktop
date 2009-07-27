@@ -31,6 +31,7 @@ namespace ti
 #undef IsMinimized
 
 #include "WebKit.h"
+#include "WebKit/WebKitCOMAPI.h"
 #include <cairo/cairo.h>
 #include <cairo/cairo-win32.h>
 #include "../url/url.h"

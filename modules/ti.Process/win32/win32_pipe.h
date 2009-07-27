@@ -7,8 +7,6 @@
 #ifndef _WIN32_PIPE_H_
 #define _WIN32_PIPE_H_
 
-#include <kroll/base.h>
-#include <windows.h>
 #include <kroll/kroll.h>
 #include "../native_pipe.h"
 

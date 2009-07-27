@@ -19,8 +19,7 @@ if build.is_osx():
 	sources += Glob('osx/*.cpp') + Glob('osx/*.mm')
 
 elif build.is_win32():
-	env.Append(CPPPATH=['C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Include', path.join(build.third_party, 'microsoft', 'include')])
-	env.Append(LIBPATH=['C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2\Lib'])
+	env.Append(CPPPATH=[path.join(build.third_party, 'microsoft', 'include')])
 	env.Append(LIBS = ['user32', 'shell32', 'kernel32', 'shlwapi', 'strmiids','ole32','comdlg32','comctl32','oleaut32', 'comsuppw'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
 	sources += Glob('win32/*.cpp')

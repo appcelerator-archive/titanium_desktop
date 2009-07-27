@@ -1,8 +1,10 @@
 +=======================================================================================+
-+                                Appcelerator Titanium                                  +
++                           Appcelerator Titanium (for Desktop)                         +
 +=======================================================================================+
 
-For details on Titanium, please see <http://titaniumapp.com>.
+For details on Titanium, please see <http://www.appcelerator.com>.  Titanium source code
+is licensed under the terms of the Apache Public License, version 2. Please see the 
+LICENSE file for more information.
 
 ---------------------
  Build Prerequisites
@@ -29,7 +31,7 @@ IRC or email information).
 -------
 
 You will first need to update the kroll submodule that is checked in to Titanium before
-you can succesfully build.  You can run the following command from the root source 
+you can successfully build.  You can run the following command from the root source 
 directory to update the submodule:
 
 > git submodule update --init
@@ -59,8 +61,8 @@ build/osx for OSX.
  Testing
 -----------
 
-Titanium uses the Drillbit application under apps/ to perfrom tests.
-You can build and run Drillbit by typing:
+Titanium uses the Drillbit application under apps/ to perform tests. You can build 
+and run Drillbit:
 
 > scons drillbit run=1
 
@@ -147,15 +149,19 @@ You may need a later version of Scons for Linux if you get build errors.  (>=1.2
  Getting Assistance
 --------------------
 
-For more details on Titanium, please see the website at <http://titaniumapp.com>
+For more details on Titanium, please see the website at <http://www.appcelerator.com>
 
-We invite you to visit us on IRC at #titanium_app on irc.freenode.net.
+We invite you to visit us on IRC at #titanium_app on irc.freenode.net. For core 
+developer conversation, please visit #titanium_dev.
 
 If you need more assistance, please go to the Appcelerator Developer Community
-at <http://community.appcelerator.org>.
+at <http://www.appcelerator.com/community>.
 
 To report a bug or make a feature request, please visit our Issue Tracking portal
-at <http://jira.appcelerator.org>.
+at <http://support.appcelerator.net>.
+
+We'd also encourage you to follow us on Twitter at <http://twitter.com/appcelerator> or
+@appcelerator.
 
 -- The Appcelerator Team
 
@@ -173,9 +179,14 @@ Titanium was made possible by a number of awesome contributors:
 - Nolan Wright, Apps + Testing
 - Don Thorp, Mobile Lead
 - Blain Hamon, OSX
+- Chris Warner, Win32
 - Paolo F, Apps + Testing
 - Mark Obcena, Documentation + Testing (and moral support)
 - Will Robertson, Build + Testing on various Linux distros
+- Kevin Whinnery, Testing, Documentation and Developer Evangelism
+- Josh Roesslein, Python
+- Mital Vora, Win32
+
 
 (and lots others who we don't necessarily know your name but we know you have helped)
 
@@ -183,7 +194,7 @@ Special thanks to all those who continually stop by the IRC channel to
 offer assistance, bug reports and moral support.  We love you!
 
 If you are interested in becoming a community developer and contributing to
-Titanium, please contact us at <info@appcelerator.org>.
+Titanium, please contact us at <info@appcelerator.com>.
 
 -------------
  Legal Stuff
