@@ -24,10 +24,10 @@ webkit_inc = path.join(webkit_tp, 'include')
 
 if build.is_linux():
 	sources = sources + Glob('gtk/*.cpp')
-	env.Append(LIBS=['webkittitanium-1.0', 'Xss'])
+	env.Append(LIBS=['webkittitanium-1.0', 'Xss', 'libsoup-2.4', 'libsoup-gnome-2.4'])
 	env.Append(LIBPATH=[webkit_lib])
 	env.Append(CPPPATH=[webkit_inc])
-	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext libsoup-2.4')
+	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext')
 
 elif build.is_win32():
 	sources = sources + Glob('win32/*.cpp') + Glob('win32/*.cc') + Glob('url/*.cpp')
