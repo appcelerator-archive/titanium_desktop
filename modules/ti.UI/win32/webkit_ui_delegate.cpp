@@ -60,8 +60,23 @@ Win32WebKitUIDelegate::createWebViewWithRequest(
 	/* [in] */ IWebURLRequest *request,
 	/* [retval][out] */ IWebView **newWebView)
 {
-	logger->Debug("createWebViewWithRequest() not implemented");
-	return E_NOTIMPL;
+	
+	WindowConfig *config = new WindowConfig();
+	BSTR burl;
+	request->URL(&burl);
+	std::string url = _bstr_t(burl);
+	
+	if (url.size() > 0)
+	{
+		config->SetURL(url);
+	}
+	
+	AutoUserWindow parent = this->window->GetAutoPtr();
+	AutoUserWindow window = UIBinding::GetInstance()->CreateWindow(config, parent);
+	window->Open();
+	
+	*newWebView = window.cast<Win32UserWindow>()->GetWebView();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE

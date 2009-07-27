@@ -99,6 +99,7 @@ namespace ti
 
 		virtual void AppIconChanged();
 		virtual void AppMenuChanged();
+		IWebView* GetWebView() { return web_view; };
 	
 		protected:
 		kroll::Win32Host *win32_host;
