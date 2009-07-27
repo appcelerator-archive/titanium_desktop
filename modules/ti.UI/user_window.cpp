@@ -1389,33 +1389,51 @@ void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::SharedValue r
 
 void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 {
-	//TODO: wrap in sharedptr
-	WindowConfig *config = NULL;
+	SharedKObject newWindow = 0;
 
 	if (args.size() > 0 && args.at(0)->IsObject())
 	{
-		SharedKObject props = SharedKObject(new StaticBoundObject());
-		config = new WindowConfig();
-		props = args.at(0)->ToObject();
-		config->UseProperties(props);
+		SharedKObject properties = args.GetObject(0);
+		newWindow = this->CreateWindow(properties);
 	}
 	else if (args.size() > 0 && args.at(0)->IsString())
 	{
-		// String might match a url spec
 		std::string url = args.at(0)->ToString();
-		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
-
-		url = NormalizeURL(url);
-		config = new WindowConfig(matchedConfig, url);
+		newWindow = this->CreateWindow(url);
 	}
 	else
 	{
-		config = new WindowConfig();
+		newWindow = this->CreateWindow(new WindowConfig());
 	}
 
+	result->SetObject(newWindow);
+}
+
+AutoUserWindow UserWindow::CreateWindow(SharedKObject properties)
+{
+	WindowConfig* config = new WindowConfig();
+	config->UseProperties(properties);
+	return this->CreateWindow(config);
+}
+
+AutoUserWindow UserWindow::CreateWindow(std::string& url)
+{
+	if (!url.empty())
+	{
+		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
+		url = NormalizeURL(url);
+		return this->CreateWindow(new WindowConfig(matchedConfig, url));
+	}
+	else
+	{
+		return this->CreateWindow(new WindowConfig());
+	}
+}
+
+AutoUserWindow UserWindow::CreateWindow(WindowConfig* windowConfig)
+{
 	AutoUserWindow autothis = GetAutoPtr();
-	AutoUserWindow new_window = this->binding->CreateWindow(config, autothis);
-	result->SetObject(new_window);
+	return this->binding->CreateWindow(config, autothis);
 }
 
 void UserWindow::UpdateWindowForURL(std::string url)
@@ -1435,9 +1453,7 @@ void UserWindow::UpdateWindowForURL(std::string url)
 	b.y = config->GetY();
 	b.width = config->GetWidth();
 	b.height = config->GetHeight();
-
 	this->SetBounds(b);
-
 	this->SetMinimizable(config->IsMinimizable());
 	this->SetMaximizable(config->IsMaximizable());
 	this->SetCloseable(config->IsCloseable());
