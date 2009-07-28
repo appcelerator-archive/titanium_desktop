@@ -303,7 +303,8 @@
 	NSString *url = [[request URL] relativeString];
 	if ([url length] > 0)
 	{
-		newWindow = [window userWindow]->CreateWindow([url UTF8String]);
+		std::string urlStr = [url UTF8String];
+		newWindow = [window userWindow]->CreateWindow(urlStr);
 	}
 	else
 	{
