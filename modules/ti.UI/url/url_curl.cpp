@@ -24,7 +24,7 @@ namespace ti
 			stURL = string("ti://") + stURL;
 		}
 
-		std::string path = TiURLToPath(stURL);
+		std::string path = URLUtils::URLToPath(stURL);
 		return strdup(path.c_str());
 	}
 
@@ -36,7 +36,7 @@ namespace ti
 			stURL = string("app://") + stURL;
 		}
 
-		std::string path = AppURLToPath(stURL);
+		std::string path = URLUtils::URLToPath(stURL);
 		return strdup(path.c_str());
 	}
 }
