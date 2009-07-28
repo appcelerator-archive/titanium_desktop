@@ -707,12 +707,14 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	boundsRect.top = bounds.y;
 	boundsRect.bottom = bounds.y + bounds.height;
 	
-	if (this->config->IsUsingChrome()) {
+	if (this->config->IsUsingChrome())
+	{
 		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), !menu.isNull());
 		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
 		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
 	}
-	else {
+	else
+	{
 		this->chromeWidth = 0;
 		this->chromeHeight = 0;
 	}
@@ -727,7 +729,7 @@ void Win32UserWindow::SetTitle(std::string& title)
 
 void Win32UserWindow::SetURL(std::string& url_)
 {
-	std::string url = ti::NormalizeURL(url_);
+	std::string url = URLUtils::NormalizeURL(url_);
 	Win32UIBinding::SetProxyForURL(url);
 
 	IWebMutableURLRequest* request = 0;
