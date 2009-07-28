@@ -14,9 +14,7 @@
 #include "http/http_client_binding.h"
 #include "http/http_server_binding.h"
 #include "proxy/proxy.h"
-
-
-using kroll::DataUtils;
+using kroll::URLUtils;
 
 namespace ti
 {
@@ -326,7 +324,7 @@ namespace ti
 		else if (args.at(0)->IsString())
 		{
 			std::string src = args.at(0)->ToString();
-			std::string sResult = DataUtils::EncodeURIComponent(src);
+			std::string sResult = URLUtils::EncodeURIComponent(src);
 			result->SetString(sResult);
 		}
 		else if (args.at(0)->IsDouble())
@@ -362,7 +360,7 @@ namespace ti
 		else if (args.at(0)->IsString())
 		{
 			std::string src = args.at(0)->ToString();
-			std::string sResult = DataUtils::DecodeURIComponent(src);
+			std::string sResult = URLUtils::DecodeURIComponent(src);
 			result->SetString(sResult);
 		}
 		else

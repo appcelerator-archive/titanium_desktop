@@ -366,7 +366,7 @@ namespace ti
 	{
 		this->iconPath = this->iconURL = iconURL;
 		if (!iconURL.empty()) {
-			this->iconPath = URLToPathOrURL(this->iconURL);
+			this->iconPath = URLUtils::URLToPath(this->iconURL);
 		}
 		this->SetIconImpl(this->iconPath); // platform-specific impl
 	}

@@ -16,12 +16,13 @@ namespace ti
 {
 	class MediaBinding : public StaticBoundObject
 	{
-	public:
+		public:
 		MediaBinding(SharedKObject);
-	protected:
+
+		protected:
 		virtual ~MediaBinding();
-		std::string GetResourcePath(const char *URL);
-	private:
+
+		private:
 		SharedKObject global;
 		void _CreateSound(const ValueList& args, SharedValue result);
 		void _Beep(const ValueList& args, SharedValue result);

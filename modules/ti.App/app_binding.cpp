@@ -185,25 +185,12 @@ namespace ti
 		host->Exit(args.size()==0 ? 0 : args.at(0)->ToInt());
 	}
 
-	static const char *kAppURLPrefix = "Resources";
 	void AppBinding::AppURLToPath(const ValueList& args, SharedValue result)
 	{
-		//FIXME - use FileUtils for this... so we can a common implementation
-		
-		result->SetString("");
-
-		if (args.size() < 0 || !args.at(0)->IsString())
-			return;
-
-//FIXME: take into consider the appid which is in the host position of the URL
-		std::string url = std::string(args.at(0)->ToString());
-		if (url.find("app://") == 0)
-		{
-			url = url.substr(6, url.length() - 6);
-		}
-		std::string path = Poco::Environment::get("KR_HOME", "");
-
-		result->SetString(std::string(path + KR_PATH_SEP + kAppURLPrefix + KR_PATH_SEP + url).c_str());
+		args.VerifyException("appURLToPath", "s");
+		std::string url = args.GetString(0);
+		std::string path = URLUtils::URLToPath(url);
+		result->SetString(path);
 	}
 
 	void AppBinding::CreateProperties(const ValueList& args, SharedValue result)

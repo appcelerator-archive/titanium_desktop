@@ -352,7 +352,7 @@ namespace ti
 		std::string iconPath;
 		this->iconURL = iconURL;
 		if (!iconURL.empty())
-			iconPath = URLToPathOrURL(this->iconURL);
+			iconPath = URLUtils::URLToPath(this->iconURL);
 
 		this->SetIcon(iconPath); // platform-specific impl
 
@@ -411,7 +411,7 @@ namespace ti
 		std::string iconPath;
 		if (args.size() > 0) {
 			std::string in = args.GetString(0);
-			iconPath = URLToPathOrURL(in);
+			iconPath = URLUtils::URLToPath(in);
 		}
 		this->SetDockIcon(iconPath);
 	}
@@ -441,7 +441,7 @@ namespace ti
 		std::string iconPath;
 		if (args.size() > 0) {
 			std::string in = args.GetString(0);
-			iconPath = URLToPathOrURL(in);
+			iconPath = URLUtils::URLToPath(in);
 		}
 
 		this->SetBadgeImage(iconPath);

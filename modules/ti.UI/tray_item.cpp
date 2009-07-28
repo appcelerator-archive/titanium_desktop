@@ -12,7 +12,7 @@ namespace ti
 	TrayItem::TrayItem(std::string& iconURL) : 
 		AccessorBoundObject("UI.TrayItem"),
 		iconURL(iconURL),
-		iconPath(URLToPathOrURL(iconURL))
+		iconPath(URLUtils::URLToPath(iconURL))
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Tray.setIcon,since=0.2) Sets a TrayItem's icon
@@ -71,7 +71,7 @@ namespace ti
 		this->iconPath = this->iconURL = "";
 		if (args.size() > 0) {
 			this->iconURL = args.GetString(0);
-			this->iconPath = URLToPathOrURL(iconURL);
+			this->iconPath = URLUtils::URLToPath(iconURL);
 		}
 
 		this->SetIcon(this->iconPath);

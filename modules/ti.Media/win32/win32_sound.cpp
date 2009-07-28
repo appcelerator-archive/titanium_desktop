@@ -36,17 +36,23 @@ namespace ti
 		if (FAILED(hr)) throw ValueException::FromString("Failed querying IMediaSeeking for sound");
 	}
 
-	Win32Sound::Win32Sound(std::string &url) : Sound(url), callback(0), graphBuilder(NULL), mediaControl(NULL), mediaEventEx(NULL), mediaSeeking(NULL)
+	Win32Sound::Win32Sound(std::string &url) :
+		Sound(url),
+		callback(0),
+		graphBuilder(NULL),
+		mediaControl(NULL),
+		mediaEventEx(NULL),
+		mediaSeeking(NULL)
 	{
 		InitGraphBuilder();
 
-		std::string path = Host::GetInstance()->
-			GetGlobalObject()->CallNS("App.appURLToPath", Value::NewString(url))->ToString();
+		std::string path = URLUtils::AppURLToPath(url);
 		BSTR pathBstr = _bstr_t(path.c_str());
 
 		// why does a sound event need an HWND?? oh windows..
 		SharedValue value = Host::GetInstance()->GetGlobalObject()->GetNS("UI.mainWindow.windowHandle");
-		if (value->IsVoidPtr()) {
+		if (value->IsVoidPtr())
+		{
 			HWND hwnd = (HWND) value->ToVoidPtr();
 			mediaEventEx->SetNotifyWindow((OAHWND)hwnd, graphNotifyMessage, 0);
 			
@@ -56,7 +62,7 @@ namespace ti
 			Host::GetInstance()->GetGlobalObject()->CallNS(
 				"UI.mainWindow.addMessageHandler", Value::NewInt(graphNotifyMessage), Value::NewMethod(method));
 		}
-		
+
 		graphBuilder->RenderFile(pathBstr, NULL);
 	}
 

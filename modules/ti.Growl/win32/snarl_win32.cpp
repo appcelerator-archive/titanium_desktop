@@ -48,17 +48,14 @@ namespace ti {
 		snarlStruct.text[len] = 0;
 		delete[] buf;
 
-		if (iconURL.size() > 0) {
-
-			SharedValue iconPathValue = global->CallNS("App.appURLToPath", Value::NewString(iconURL));
-			if (iconPathValue->IsString()) {
-				std::string iconPath = iconPathValue->ToString();
-				std::wstring wicon(iconPath.begin(), iconPath.end());
-				buf = SnarlInterface::convertToMultiByte(wicon, &len);
-				strncpy(snarlStruct.icon, buf, SnarlInterface::SNARL_STRING_LENGTH - 1);
-				snarlStruct.icon[len] = 0;
-				delete[] buf;
-			}
+		if (!iconURL.empty())
+		{
+			std::string iconPath = URLUtils::URLToPath(iconURL);
+			std::wstring wicon(iconPath.begin(), iconPath.end());
+			buf = SnarlInterface::convertToMultiByte(wicon, &len);
+			strncpy(snarlStruct.icon, buf, SnarlInterface::SNARL_STRING_LENGTH - 1);
+			snarlStruct.icon[len] = 0;
+			delete[] buf;
 		}
 
 		snarlStruct.timeout = notification_delay;

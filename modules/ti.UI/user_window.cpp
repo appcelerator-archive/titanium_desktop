@@ -1124,7 +1124,7 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 	args.VerifyException("setURL", "s");
 
 	std::string url = args.at(0)->ToString();
-	url = NormalizeURL(url);
+	url = URLUtils::NormalizeURL(url);
 
 	this->config->SetURL(url);
 	if (this->active)
@@ -1347,7 +1347,7 @@ void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::SharedValue resul
 	std::string iconPath;
 	if (args.size() > 0) {
 		std::string in = args.GetString(0);
-		iconPath = URLToPathOrURL(in);
+		iconPath = URLUtils::URLToPath(in);
 	}
 
 	if (this->active)
@@ -1411,9 +1411,9 @@ void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 
 AutoUserWindow UserWindow::CreateWindow(SharedKObject properties)
 {
-	WindowConfig* config = new WindowConfig();
-	config->UseProperties(properties);
-	return this->CreateWindow(config);
+	WindowConfig* newConfig = new WindowConfig();
+	newConfig->UseProperties(properties);
+	return this->CreateWindow(newConfig);
 }
 
 AutoUserWindow UserWindow::CreateWindow(std::string& url)
@@ -1421,7 +1421,7 @@ AutoUserWindow UserWindow::CreateWindow(std::string& url)
 	if (!url.empty())
 	{
 		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
-		url = NormalizeURL(url);
+		url = URLUtils::NormalizeURL(url);
 		return this->CreateWindow(new WindowConfig(matchedConfig, url));
 	}
 	else
@@ -1430,10 +1430,10 @@ AutoUserWindow UserWindow::CreateWindow(std::string& url)
 	}
 }
 
-AutoUserWindow UserWindow::CreateWindow(WindowConfig* windowConfig)
+AutoUserWindow UserWindow::CreateWindow(WindowConfig* newConfig)
 {
 	AutoUserWindow autothis = GetAutoPtr();
-	return this->binding->CreateWindow(config, autothis);
+	return this->binding->CreateWindow(newConfig, autothis);
 }
 
 void UserWindow::UpdateWindowForURL(std::string url)

@@ -16,14 +16,15 @@ namespace ti {
 	class GrowlOSX : public GrowlBinding {
 	protected:
 		TiGrowlDelegate *delegate;
-		void * URLWithAppCString(const char * inputCString);
 
 	public:
 		GrowlOSX(SharedKObject global);
 		virtual ~GrowlOSX();
 
 		void CopyToApp(kroll::Host *host, kroll::Module *module);
-		virtual void ShowNotification(std::string& title, std::string& description, std::string& iconURL, int notification_delay, SharedKMethod callback);
+		virtual void ShowNotification(std::string& title,
+			std::string& description, std::string& iconURL,
+			int notification_delay, SharedKMethod callback);
 		virtual bool IsRunning();
 	};
 }

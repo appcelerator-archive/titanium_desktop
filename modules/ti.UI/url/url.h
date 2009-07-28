@@ -8,12 +8,7 @@
 #define TITANIUM_URL_H_
 namespace ti
 {
-	std::string TiURLToPath(string tiURL);
-	std::string AppURLToPath(string appURL);
-	std::string NormalizeURL(string& url);
-	std::string NormalizeAppURL(string& url);
 	void NormalizeURLCallback(const char* url, char* buffer, int bufferLength);
 	void URLToFileURLCallback(const char* url, char* buffer, int bufferLength);
-	std::string URLToPathOrURL(string& url);
 }
 #endif
