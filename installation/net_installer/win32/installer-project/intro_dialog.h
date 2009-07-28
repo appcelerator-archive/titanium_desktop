@@ -1,7 +1,7 @@
 #ifndef TI_INTRO_DIALOG_H
 #define TI_INTRO_DIALOG_H
 
-#include "Dialog.h"
+#include "dialog.h"
 
 namespace ti
 {

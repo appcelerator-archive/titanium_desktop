@@ -1,5 +1,5 @@
 
-#include "UpdateDialog.h"
+#include "update_dialog.h"
 #include "Resource.h"
 #include <commctrl.h>
 #include <iostream>

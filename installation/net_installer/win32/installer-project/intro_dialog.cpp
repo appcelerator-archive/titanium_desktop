@@ -7,9 +7,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils.h>
-#include "Progress.h"
+#include "progress_dialog.h"
 #include "Resource.h"
-#include "IntroDialog.h"
+#include "intro_dialog.h"
 #include "api/utils/utils.h"
 
 using std::string;

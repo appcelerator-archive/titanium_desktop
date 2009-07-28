@@ -4,14 +4,14 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "Progress.h"
+#include "progress_dialog.h"
 #include "Resource.h"
 
 using std::string;
 using std::wstring;
 extern wstring StringToWString(string);
 
-Progress::Progress()
+ProgressDialog::ProgressDialog()
 {
 	HRESULT hr = CoCreateInstance(
 		CLSID_ProgressDialog,
@@ -25,44 +25,44 @@ Progress::Progress()
 	}
 }
 
-Progress::~Progress()
+ProgressDialog::~ProgressDialog()
 {
 	dialog->Release();
 	CoUninitialize();
 }
 
-void Progress::SetCancelMessage(std::wstring message)
+void ProgressDialog::SetCancelMessage(std::wstring message)
 {
 	dialog->SetCancelMsg (message.c_str(),NULL);
 }
 
-void Progress::SetTitle(std::wstring title)
+void ProgressDialog::SetTitle(std::wstring title)
 {
 	dialog->SetTitle(title.c_str());
 }
 
-void Progress::SetLineText(DWORD line, std::string message, bool compact)
+void ProgressDialog::SetLineText(DWORD line, std::string message, bool compact)
 {
 	std::wstring wMessage = StringToWString(message);
 	this->SetLineText(line, wMessage, compact);
 }
 
-void Progress::SetLineText(DWORD line, std::wstring message, bool compact)
+void ProgressDialog::SetLineText(DWORD line, std::wstring message, bool compact)
 {
 	dialog->SetLine(line, message.c_str(), compact, NULL);
 }
 
-void Progress::Update(DWORD value, DWORD max)
+void ProgressDialog::Update(DWORD value, DWORD max)
 {
-	dialog->SetProgress(value,max);
+	dialog->SetProgress(value, max);
 }
 
-bool Progress::IsCancelled()
+bool ProgressDialog::IsCancelled()
 {
 	return dialog->HasUserCancelled()==TRUE;
 }
 
-void Progress::Show()
+void ProgressDialog::Show()
 {
 	DWORD flags = PROGDLG_NORMAL | PROGDLG_AUTOTIME | PROGDLG_NOMINIMIZE;
 	HRESULT hr = dialog->StartProgressDialog(GetDesktopWindow(), NULL, flags, NULL);
@@ -96,7 +96,7 @@ void Progress::Show()
 	}
 }
 
-void Progress::Hide()
+void ProgressDialog::Hide()
 {
 	dialog->StopProgressDialog();
 }

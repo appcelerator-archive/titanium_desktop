@@ -10,11 +10,11 @@
 #include <shlguid.h>
 #include <string>
 
-class Progress
+class ProgressDialog
 {
-public:
-	Progress();
-	~Progress();
+	public:
+	ProgressDialog();
+	~ProgressDialog();
 
 	void SetTitle(std::wstring title);
 	void SetCancelMessage(std::wstring message);
@@ -25,6 +25,6 @@ public:
 	void Hide();
 	bool IsCancelled();
 
-private:
+	private:
 	IProgressDialog* dialog;
 };

@@ -1,4 +1,4 @@
-#include "Dialog.h"
+#include "dialog.h"
 #include <stdio.h>
 
 namespace ti {
