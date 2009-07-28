@@ -200,6 +200,9 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 		0, szDomainName, INTERNET_MAX_URL_LENGTH, &cchDecodedUrl, 0);
 	if (hr != S_OK)
 	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
 		return false;
 	}
 	
@@ -208,6 +211,9 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 		80, L" ", L" ", INTERNET_SERVICE_HTTP, 0, 0 );
 	if (!hConnection)
 	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
 		return false;
 	}
 	
@@ -225,6 +231,11 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 	if (!hRequest)
 	{
 		InternetCloseHandle(hConnection);
+
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
+
 		return false;
 	}
 
@@ -239,12 +250,31 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 	wchar_t msg[255];
 	
 	HttpSendRequest(hRequest, NULL, 0, NULL, 0);
-		
+
 	DWORD contentLength = 0;
+	DWORD statusCode = 0;
 	DWORD size = sizeof(contentLength);
 	
-	HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+	BOOL success = HttpQueryInfo(hRequest, 
+		HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER,
+		(LPDWORD) &statusCode, (LPDWORD) &size, NULL);
+	if (!success || statusCode != 200)
+	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: invalid status code");
+		ShowError(error);
+		return false;
+	}
+	
+	success = HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
 		(LPDWORD)&contentLength, (LPDWORD)&size, NULL);
+	if (!success)
+	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not determine content length") + error;
+		ShowError(error);
+		return false;
+	}
 	
 	std::wstring contentLengthStr = SizeString(contentLength);
 	while (InternetReadFile(hRequest, buffer, 2047, &dwRead ) )
@@ -600,7 +630,7 @@ int WINAPI WinMain(
 	string jobsFile;
 	bool quiet = false;
 	
-	DebugBreak();
+	//DebugBreak();
 	for (int i = 1; i < argc; i++)
 	{
 		string arg = argv[i];
