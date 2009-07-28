@@ -3,7 +3,9 @@ var TFS = Titanium.Filesystem;
 var TA  = Titanium.App;
 var Drillbit = Titanium.Drillbit;
 
+var run_link_disabled = false;
 var frontend = {
+	passed: 0, failed: 0,
 	test_status:function(name,classname)
 	{
 		var el = $('#suite_'+name+'_status');
@@ -12,6 +14,16 @@ var frontend = {
 			.removeClass('passed').addClass(classname.toLowerCase());
 		$('#suite_'+name).removeClass('suite-untested').removeClass('suite-failed')
 			.removeClass('suite-running').removeClass('suite-passed').addClass('suite-'+classname.toLowerCase());
+	},
+	
+	test_passed: function(suite, test)
+	{
+		this.passed++;
+	},
+	
+	test_failed: function(suite, test, line_number, error)
+	{
+		this.failed++;
 	},
 	
 	suite_started:function(suite)
@@ -33,6 +45,12 @@ var frontend = {
 	add_assertion:function(test_name, line_number)
 	{
 		$('#assertion-count').html(Drillbit.total_assertions+' assertions');
+	},
+	
+	all_finished: function()
+	{
+		run_link_disabled = false;
+		$('#current-test').html('<b>Finished.</b> Took ' + Drillbit.test_duration + 's');
 	}
 };
 
@@ -146,9 +164,10 @@ $(window).ready(function()
 	
 	run_link.click(function ()
 	{
-		if (!run_link.disabled)
+		if (!run_link_disabled)
 		{
-			run_link.disabled = true;
+			Drillbit.reset();
+			run_link_disabled = true;
 			var tests = [];
 			$.each($('div[id^=suite_]'),function()
 			{
