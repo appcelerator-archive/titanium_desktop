@@ -19,7 +19,7 @@ static TiApplicationDelegate *tiAppInstance = NULL;
 +(NSString*)appID
 {
 	AppConfig *config = AppConfig::Instance();
-	return [NSString stringWithCString:config->GetAppID().c_str() encoding:NSUTF8StringEncoding];
+	return [NSString stringWithUTF8String:config->GetAppID().c_str()];
 }
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {

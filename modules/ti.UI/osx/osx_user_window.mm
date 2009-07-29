@@ -725,11 +725,11 @@ namespace ti
 
 		if (!defaultName.empty())
 		{
-			filename = [NSString stringWithCString:defaultName.c_str() encoding:NSUTF8StringEncoding];
+			filename = [NSString stringWithUTF8String:defaultName.c_str()];
 		}
 		if (!path.empty())
 		{
-			begin = [NSString stringWithCString:path.c_str() encoding:NSUTF8StringEncoding];
+			begin = [NSString stringWithUTF8String:path.c_str()];
 		}
 		if (types.size() > 0)
 		{
@@ -737,7 +737,7 @@ namespace ti
 			for (size_t t = 0; t < types.size(); t++)
 			{
 				const char *s = types.at(t).c_str();
-				[filetypes addObject:[NSString stringWithCString:s encoding:NSUTF8StringEncoding]];
+				[filetypes addObject:[NSString stringWithUTF8String:s]];
 			}
 		}
 
@@ -801,7 +801,7 @@ namespace ti
 		while (iter != types.end())
 		{
 			std::string ft = (*iter++);
-			[filetypes addObject:[NSString stringWithCString:ft.c_str() encoding:NSUTF8StringEncoding]];
+			[filetypes addObject:[NSString stringWithUTF8String:ft.c_str()]];
 		}
 
 		NSSavePanel *sp = [NSSavePanel savePanel];
@@ -812,7 +812,9 @@ namespace ti
 			[sp setAllowedFileTypes:filetypes];
 		}
 
-		runResult = [sp runModalForDirectory:[NSString stringWithCString:path.c_str() encoding:NSUTF8StringEncoding] file:[NSString stringWithCString:defaultName.c_str() encoding:NSUTF8StringEncoding]];
+		runResult = [sp 
+			runModalForDirectory:[NSString stringWithUTF8String:path.c_str()]
+			file:[NSString stringWithUTF8String:defaultName.c_str()]];
 
 		ValueList args;
 
