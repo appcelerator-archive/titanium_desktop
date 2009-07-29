@@ -9,13 +9,16 @@
 using namespace ti;
 using namespace kroll;
 
-Win32WebKitFrameLoadDelegate::Win32WebKitFrameLoadDelegate(Win32UserWindow *window_) : window(window_), ref_count(1) {
+Win32WebKitFrameLoadDelegate::Win32WebKitFrameLoadDelegate(Win32UserWindow *window_) :
+	window(window_),
+	ref_count(1)
+{
 	// TODO Auto-generated constructor stub
 
 }
 
-HRESULT STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(IWebView *webView, IWebFrame *frame)
+HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
+	IWebView *webView, IWebFrame *frame)
 {
 	JSGlobalContextRef context = frame->globalContext();
 	JSObjectRef global_object = JSContextGetGlobalObject(context);
@@ -37,42 +40,59 @@ Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(IWebView *webView, IWebFrame
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::didClearWindowObject (
-		IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject, IWebFrame *frame)
+HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didClearWindowObject(
+		IWebView *webView, JSContextRef context, 
+		JSObjectRef windowScriptObject, IWebFrame *frame)
 {
 	Win32UserWindow* userWindow = this->window;
 	userWindow->RegisterJSContext((JSGlobalContextRef) context);
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::QueryInterface(REFIID riid, void **ppvObject)
+HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::QueryInterface(
+	REFIID riid, void **ppvObject)
 {
 	*ppvObject = 0;
-	if (IsEqualGUID(riid, IID_IUnknown)) {
+	if (IsEqualGUID(riid, IID_IUnknown))
+	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
 	}
-	else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate)) {
+	else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate))
+	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
 	}
-	else {
+	else
+	{
 		return E_NOINTERFACE;
 	}
 	return S_OK;
 }
 
-ULONG STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::AddRef()
+ULONG STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::AddRef()
 {
 	return ++ref_count;
 }
 
-ULONG STDMETHODCALLTYPE
-Win32WebKitFrameLoadDelegate::Release()
+ULONG STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::Release()
 {
 	ULONG new_count = --ref_count;
 	if (!new_count) delete(this);
 
 	return new_count;
+}
+
+HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didReceiveTitle(
+	/* [in] */ IWebView *webView,
+	/* [in] */ BSTR title,
+	/* [in] */ IWebFrame *frame)
+{
+	Win32UserWindow* userWindow = this->window;
+
+	if (title)
+	{
+		std::string newTitle;
+		newTitle.append(bstr_t(title));
+		userWindow->SetTitle(newTitle);
+	}
+	return S_OK;
 }

@@ -44,7 +44,7 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE didReceiveTitle(
 		/* [in] */ IWebView *webView,
 		/* [in] */ BSTR title,
-		/* [in] */ IWebFrame *frame) { return S_OK; }
+		/* [in] */ IWebFrame *frame);
 
 	virtual HRESULT STDMETHODCALLTYPE didReceiveIcon(
 		/* [in] */ IWebView *webView,
