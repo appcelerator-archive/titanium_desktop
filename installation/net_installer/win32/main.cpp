@@ -261,7 +261,7 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 	if (!success || statusCode != 200)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: invalid status code");
+		error = string("Could not download file: ") + error;
 		ShowError(error);
 		return false;
 	}
@@ -271,7 +271,7 @@ bool DownloadURL(HINTERNET hINet, std::wstring url, std::wstring outFilename, st
 	if (!success)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not determine content length") + error;
+		error = string("Could not determine content length: ") + error;
 		ShowError(error);
 		return false;
 	}
