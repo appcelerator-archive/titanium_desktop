@@ -69,7 +69,7 @@ namespace ti
 		void SetMinHeight(double height);
 		Bounds GetBounds();
 		void SetBounds(Bounds bounds);
-		void SetTitle(std::string& title);
+		void SetTitleImpl(std::string& title);
 		void SetURL(std::string& url);
 		void SetResizable(bool resizable);
 		void SetMaximizable(bool maximizable);

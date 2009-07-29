@@ -514,11 +514,11 @@ namespace ti
 		return this->config->GetTitle();
 	}
 
-	void OSXUserWindow::SetTitle(std::string& title)
+	void OSXUserWindow::SetTitleImpl(std::string& newTitle)
 	{
 		if (active && nativeWindow != nil)
 		{
-			[nativeWindow setTitle:[NSString stringWithCString:this->config->GetTitle().c_str() encoding:NSUTF8StringEncoding]];
+			[nativeWindow setTitle:[NSString stringWithUTF8String:newTitle.c_str()]];
 		}
 	}
 
