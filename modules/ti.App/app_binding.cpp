@@ -189,6 +189,10 @@ namespace ti
 	{
 		args.VerifyException("appURLToPath", "s");
 		std::string url = args.GetString(0);
+		if (url.find("app://") != 0 && url.find("://") == std::string::npos)
+		{
+			url = std::string("app://") + url;
+		}
 		std::string path = URLUtils::URLToPath(url);
 		result->SetString(path);
 	}
