@@ -35,7 +35,7 @@ namespace ti
 		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
 
-		lstrcpy(notifyIconData->szTip, "Titanium Application");
+		lstrcpy(notifyIconData->szTip, L"Titanium Application");
 		Shell_NotifyIcon(NIM_ADD, notifyIconData);
 		this->trayIconData = notifyIconData;
 
@@ -68,8 +68,11 @@ namespace ti
 		{
 			// NotifyIconData.szTip has 128 character limit.
 			ZeroMemory(this->trayIconData->szTip, 128);
+
 			// make sure we don't overflow the static buffer.
-			lstrcpyn(this->trayIconData->szTip, hint.c_str(), 128);
+			std::wstring hintW = UTF8ToWide(hint);
+			lstrcpyn(this->trayIconData->szTip, hintW.c_str(), 128);
+
 			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 		}
 	}

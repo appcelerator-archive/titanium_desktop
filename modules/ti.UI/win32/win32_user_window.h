@@ -140,7 +140,7 @@ namespace ti
 			std::vector<std::string>& types, std::string& typesDescription);
 		SharedKList SelectDirectory(
 			bool multiple, std::string& title, std::string& path, std::string& defaultName);
-		static void ParseStringNullSeparated(const char *s, std::vector<std::string> &tokens);
+		static void ParseStringNullSeparated(const wchar_t *s, std::vector<std::string> &tokens);
 		Logger* logger;
 
 		public:

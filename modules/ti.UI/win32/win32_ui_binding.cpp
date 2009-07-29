@@ -57,7 +57,8 @@ namespace ti
 
 	void Win32UIBinding::ErrorDialog(std::string msg)
 	{
-		MessageBox(NULL,msg.c_str(),"Application Error",MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
+		std::wstring msgW = UTF8ToWide(msg);
+		MessageBox(NULL, msgW.c_str(), L"Application Error", MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
 		UIBinding::ErrorDialog(msg);
 	}
 

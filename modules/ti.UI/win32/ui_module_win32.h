@@ -24,7 +24,7 @@ namespace ti
 #include <commctrl.h>
 #include <shlobj.h>
 #include <winbase.h>
-#define FormatMessage FormatMessageA
+#define FormatMessage FormatMessageW
 #include <comdef.h>
 
 #undef IsMaximized

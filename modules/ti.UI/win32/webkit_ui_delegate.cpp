@@ -152,20 +152,17 @@ Win32WebKitUIDelegate::runJavaScriptAlertPanelWithMessage(
 	/* [in] */ BSTR message)
 {
 	HWND handle = window->GetWindowHandle();
-	std::string title(window->GetTitle());
-	std::string msg;
-
-	if(message)
-	{
+	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring msg;
+	if (message)
 		msg.append(bstr_t(message));
-	}
 
 	//Win32PopupDialog popupDialog(handle);
 	//popupDialog.SetTitle(title);
 	//popupDialog.SetMessage(msg);
 	//int r = popupDialog.Show();
 
-	MessageBox(0,msg.c_str(),title.c_str(),0);
+	MessageBox(0, msg.c_str(), title.c_str(), 0);
 
 	return S_OK;
 }
@@ -177,13 +174,10 @@ Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMessage(
 	/* [retval][out] */ BOOL *result)
 {
 	HWND handle = window->GetWindowHandle();
-	std::string title(window->GetTitle());
-	std::string msg;
-
-	if(message)
-	{
+	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring msg;
+	if (message)
 		msg.append(bstr_t(message));
-	}
 
 	//Win32PopupDialog popupDialog(handle);
 	//popupDialog.SetTitle(title);
@@ -191,8 +185,7 @@ Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMessage(
 	//popupDialog.SetShowCancelButton(true);
 	//int r = popupDialog.Show();
 
-	int r = MessageBox(0,msg.c_str(),title.c_str(),MB_ICONINFORMATION | MB_OKCANCEL);
-
+	int r = MessageBox(0, msg.c_str(), title.c_str(), MB_ICONINFORMATION | MB_OKCANCEL);
 	*result = (r == IDOK);
 
 	return S_OK;
@@ -283,9 +276,9 @@ Win32WebKitUIDelegate::trackCustomPopupMenu(
 	if (this->nativeContextMenu) {
 
 		if (host->IsDebugMode()) {
-			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, "Separator");
+			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, L"Separator");
 			AppendMenu(this->nativeContextMenu,
-				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, "Show Inspector");
+				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, L"Show Inspector");
 		}
 
 		TrackPopupMenu(this->nativeContextMenu,
