@@ -839,5 +839,85 @@ describe("UI Module Tests",{
 			}
 			w.close();
 		},1500);
+	},
+	test_yahoo_white_black_window_as_async:function(callback)
+	{
+		// this is a small variation (for automation purposes) of the yahoo white/black test case for controlling
+		// multiple titanium windows cross-domain and being able to inject variables/functions into
+		// one or more cross domain ti windows and being able to do cross-window communication
+		
+		window.childWindows = {};
+		var window_count = 0;
+		
+		function openPage(page_name,run_test) 
+		{
+			var w = Titanium.UI.createWindow("http://api.appcelerator.net/p/pages/unittest/"+page_name+".html");
+			w.setWidth(320);
+			w.setHeight(90);
+			w.addEventListener(function(e)
+			{
+				if (e.getType()==e.PAGE_INITIALIZED)
+				{
+					// "give" child reference to our windows hash
+					window.childWindows[page_name] = e.scope;
+					e.scope.childWindows = window.childWindows;
+				}
+				else if (e.getType() == e.PAGE_LOADED)
+				{
+					window_count++;
+					// wait to make sure we've got both windows open before running
+					if (window_count == 2)
+					{
+						run_test();
+					}
+				}
+			});
+			w.open();
+		}
+		function runTest()
+		{
+			var passed = false;
+			
+			try
+			{
+				value_of(window.childWindows["black_page"]).should_be_object();
+				value_of(window.childWindows["white_page"]).should_be_object();
+				value_of(window.childWindows["black_page"].document).should_be_object();
+				value_of(window.childWindows["white_page"].document).should_be_object();
+
+				value_of(window.childWindows["black_page"].document.getElementById("button")).should_be_object();
+				value_of(window.childWindows["white_page"].document.getElementById("button")).should_be_object();
+				
+				window.childWindows["black_page"].document.getElementById("button").click();
+				window.childWindows["white_page"].document.getElementById("button").click();
+				
+				value_of(window.childWindows["black_page"].poke_result).should_be("The White Page");
+				value_of(window.childWindows["white_page"].poke_result).should_be("The Black Page");
+
+				passed = true;
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+			
+			try
+			{
+				window.childWindows["black_page"].close();
+			}
+			catch(e)
+			{
+			}
+			try
+			{
+				window.childWindows["white_page"].close();
+			}
+			catch(e)
+			{
+			}
+			if (passed) callback.passed();
+		}
+		openPage("black_page",runTest);
+		openPage("white_page",runTest);
 	}
 });
