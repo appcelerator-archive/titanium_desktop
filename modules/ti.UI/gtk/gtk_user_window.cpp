@@ -23,6 +23,8 @@ namespace ti
 		WebKitWebPolicyDecision *, gchar*);
 	static void LoadFinishedCallback(WebKitWebView*, WebKitWebFrame*,
 		gpointer);
+	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
+		gchar*, gpointer);
 	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
 		WebKitWebView*, gpointer);
 	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
@@ -75,6 +77,9 @@ namespace ti
 			g_signal_connect(
 				G_OBJECT(webView), "load-finished",
 				G_CALLBACK(LoadFinishedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "title-changed",
+				G_CALLBACK(TitleChangedCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "create-web-view",
 				G_CALLBACK(CreateWebViewCallback), this);
@@ -179,8 +184,8 @@ namespace ti
 	{
 		// Let the close handler actually destroy this window,
 		// as we want things to happen in a very particular order.
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		user_window->Close();
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		userWindow->Close();
 		return FALSE;
 	}
 
@@ -525,9 +530,7 @@ namespace ti
 		return TRUE;
 	}
 	
-	static void LoadFinishedCallback(
-		WebKitWebView* view,
-		WebKitWebFrame* frame,
+	static void LoadFinishedCallback(WebKitWebView* view, WebKitWebFrame* frame,
 		gpointer data)
 	{
 		JSGlobalContextRef context = webkit_web_frame_get_global_context(frame);
@@ -539,11 +542,22 @@ namespace ti
 		const gchar* uri = webkit_web_frame_get_uri(frame);
 		if (uri) {
 			std::string uriString = uri;
-			GtkUserWindow* user_window = static_cast<GtkUserWindow*>(data);
-			user_window->PageLoaded(frame_global, uriString, context);
+			GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+			userWindow->PageLoaded(frame_global, uriString, context);
 		}
 	}
-	
+
+	static void TitleChangedCallback(WebKitWebView* view, WebKitWebFrame* frame,
+		gchar* newTitle, gpointer data)
+	{
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		if (NULL == webkit_web_frame_get_parent(frame))
+		{
+			std::string newTitleString = newTitle;
+			userWindow->SetTitle(newTitleString);
+		}
+	}
+
 	static void WindowObjectClearedCallback(
 		WebKitWebView* webView,
 		WebKitWebFrame* web_frame,
@@ -552,8 +566,8 @@ namespace ti
 		gpointer data)
 	{
 	
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		user_window->RegisterJSContext(context);
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		userWindow->RegisterJSContext(context);
 	}
 	
 	static void PopulatePopupCallback(
@@ -900,7 +914,7 @@ namespace ti
 		return this->config->GetTitle();
 	}
 	
-	void GtkUserWindow::SetTitle(std::string& title)
+	void GtkUserWindow::SetTitleImpl(std::string& title)
 	{
 		if (this->gtkWindow != NULL)
 		{

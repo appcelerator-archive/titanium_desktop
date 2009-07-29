@@ -720,7 +720,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y, bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
 }
 
-void Win32UserWindow::SetTitle(std::string& title)
+void Win32UserWindow::SetTitleImpl(std::string& title)
 {
 	SetWindowText(windowHandle, title.c_str());
 }
