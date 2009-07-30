@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+import os.path as path
+
+Import('build')
+
+Env = build.env.Clone()
+Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
+
+Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32', 'user32', 'shell32', 'advapi32', 'gdi32', 'iphlpapi'])
+
+atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
+if not path.exists(atlmfc_path):
+	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
+
+Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
+
+ccf = Env['CCFLAGS'][:]
+cflags = Env['CPPDEFINES'][:]
+
+if '/GR' in ccf: 
+	ccf.remove('/GR')
+	ccf.append('/GR-')
+
+
+if 'NDEBUG' in cflags:
+	if '/MD' in ccf: ccf.remove('/MD')
+	ccf.append('/MT')
+	ccf.append('/Os')
+	ccf.append('/O1')
+else:
+	if '/MDd' in ccf: ccf.remove('/MDd')
+	ccf.append('/MTd')
+	ccf.append('/RTC1')
+
+Env.Append(CPPDEFINES = ('_WINDOWS', 1))
+Env.Append(CPPDEFINES = ('_ATL_STATIC_REGISTRY', 1))
+Env.Append(CPPDEFINES = ('_ATL_MIN_CRT', 1))
+Env.Append(CPPDEFINES = ('_UNICODE', 1))
+Env.Append(CPPDEFINES = ('UNICODE', 1))
+
+Env.Append(CCFLAGS=ccf)
+#Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+sources = Glob("ti_depends/*.cpp") + Env.RES("ti_depends/ti_depends.rc")
+out_file = path.join(build.runtime_build_dir, 'ti_depends', 'ti_depends.exe')
+
+p = Env.Program(out_file, sources)
+build.mark_build_target(p)
+

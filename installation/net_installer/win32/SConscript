@@ -16,10 +16,16 @@ Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
 Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
 
 ccf = Env['CCFLAGS']
+cflags = Env['CPPDEFINES']
+
 if '/MD' in ccf: ccf.remove('/MD')
 ccf.append('/MT')
-ccf.append('/Os')
-ccf.append('/O1')
+
+# we only need these switches in release mode.  In debug mode all optimizations are turned off.
+if 'NDEBUG' in cflags:
+	ccf.append('/Os')
+	ccf.append('/O1')
+	
 Env.Append(CCFLAGS=ccf)
 #Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
 sources = Glob("installer-project/*.cpp") + Env.RES("installer-project/progress.rc")
