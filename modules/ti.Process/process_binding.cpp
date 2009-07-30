@@ -42,7 +42,7 @@ namespace ti
 		 */
 		signals["SIGHUP"] = SIGHUP;
 		/**
-		 * @tiapi(property=True,name=Process.SIGINT,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGINT,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGINT"] = SIGINT;
 		/**
@@ -50,7 +50,7 @@ namespace ti
 		 */
 		signals["SIGQUIT"] = SIGQUIT;
 		/**
-		 * @tiapi(property=True,name=Process.SIGILL,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGILL,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGILL"] = SIGILL;
 		/**
@@ -58,11 +58,11 @@ namespace ti
 		 */
 		signals["SIGTRAP"] = SIGTRAP;
 		/**
-		 * @tiapi(property=True,name=Process.SIGABRT,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGABRT,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGABRT"] = SIGABRT;
 		/**
-		 * @tiapi(property=True,name=Process.SIGFPE,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGFPE,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGFPE"] = SIGFPE;
 		/**
@@ -74,7 +74,7 @@ namespace ti
 		 */
 		signals["SIGBUS"] = SIGBUS;
 		/**
-		 * @tiapi(property=True,name=Process.SIGSEGV,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGSEGV,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGSEGV"] = SIGSEGV;
 		/**
@@ -90,7 +90,7 @@ namespace ti
 		 */
 		signals["SIGALRM"] = SIGALRM;
 		/**
-		 * @tiapi(property=True,name=Process.SIGTERM,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGTERM,since=0.5,platforms=osx|linux|win32)
 		 */
 		signals["SIGTERM"] = SIGTERM;
 		/**
