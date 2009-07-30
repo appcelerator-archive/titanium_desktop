@@ -187,7 +187,6 @@ namespace ti
 	}
 	HTTPClientBinding::~HTTPClientBinding()
 	{
-		KR_DUMP_LOCATION
 		this->shutdown = true;
 		if (this->thread!=NULL)
 		{
