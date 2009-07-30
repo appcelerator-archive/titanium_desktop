@@ -29,9 +29,8 @@ extern bool doInstall;
 extern bool installStartMenuIcon;
 extern bool forceInstall;
 
-extern wstring StringToWString(string);
-
-namespace ti {
+namespace ti
+{
 	IntroDialog::IntroDialog() : Dialog()
 	{
 		Create(IDD_INTRODIALOG);
@@ -140,14 +139,15 @@ namespace ti {
 	void IntroDialog::InstallLocationClicked()
 	{
 		BROWSEINFO bi = { 0 };
-		bi.lpszTitle =  (LPCSTR) "Pick installation directory";
+		bi.lpszTitle =  (LPCWSTR) L"Pick installation directory";
 		LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
 		if (pidl != 0)
 		{
-			TCHAR path[MAX_PATH];
-			if (SHGetPathFromIDList(pidl, path))
+			TCHAR pathW[MAX_PATH];
+			if (SHGetPathFromIDList(pidl, pathW))
 			{
-				appInstallPath = FileUtils::Join(path, app->name.c_str(), NULL);
+				std::string path = KrollUtils::WideToUTF8(pathW);
+				appInstallPath = FileUtils::Join(path.c_str(), app->name.c_str(), NULL);
 				SendMessage(installLocationText, WM_SETTEXT, 0, (LPARAM) appInstallPath.c_str());
 			}
 

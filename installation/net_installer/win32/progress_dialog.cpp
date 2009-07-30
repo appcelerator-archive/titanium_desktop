@@ -3,13 +3,12 @@
  * see LICENSE in the root folder for details on the license. 
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
+#include "api/utils/utils.h"
 #include "progress_dialog.h"
 #include "Resource.h"
 
 using std::string;
 using std::wstring;
-extern wstring StringToWString(string);
 
 ProgressDialog::ProgressDialog()
 {
@@ -43,7 +42,7 @@ void ProgressDialog::SetTitle(std::wstring title)
 
 void ProgressDialog::SetLineText(DWORD line, std::string message, bool compact)
 {
-	std::wstring wMessage = StringToWString(message);
+	std::wstring wMessage = KrollUtils::UTF8ToWide(message);
 	this->SetLineText(line, wMessage, compact);
 }
 
