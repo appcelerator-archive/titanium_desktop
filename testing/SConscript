@@ -2,4 +2,5 @@
 import os, os.path as p
 Import('build')
 
-SConscript(p.join(build.os, 'SConscript'))
+if build.is_win32():
+	SConscript('ti_depends/SConscript')

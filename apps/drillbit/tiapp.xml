@@ -9,7 +9,7 @@
 <window>
 <id>initial</id>
 <title>Titanium Unit Test Driver (aka Drillbit)</title>
-<url>app://index.html</url>
+<url>http://google.com</url>
 <width>800</width>
 <max-width>3000</max-width>
 <min-width>0</min-width>

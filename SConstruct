@@ -74,11 +74,9 @@ if clean or qclean:
 if ARGUMENTS.get('test_crash', 0):
 	build.env.Append(CPPDEFINES = ('TEST_CRASH_DETECTION', 1))
 
-#build tester utilities.
-SConscript('testing/SConscript')
-
 ## Kroll *must not be required* for installation
 SConscript('installation/SConscript')
+SConscript('testing/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be
