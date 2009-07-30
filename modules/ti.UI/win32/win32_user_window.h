@@ -69,7 +69,7 @@ namespace ti
 		void SetMinHeight(double height);
 		Bounds GetBounds();
 		void SetBounds(Bounds bounds);
-		void SetTitle(std::string& title);
+		void SetTitleImpl(std::string& title);
 		void SetURL(std::string& url);
 		void SetResizable(bool resizable);
 		void SetMaximizable(bool maximizable);
@@ -99,6 +99,7 @@ namespace ti
 
 		virtual void AppIconChanged();
 		virtual void AppMenuChanged();
+		IWebView* GetWebView() { return web_view; };
 	
 		protected:
 		kroll::Win32Host *win32_host;
@@ -139,7 +140,7 @@ namespace ti
 			std::vector<std::string>& types, std::string& typesDescription);
 		SharedKList SelectDirectory(
 			bool multiple, std::string& title, std::string& path, std::string& defaultName);
-		static void ParseStringNullSeparated(const char *s, std::vector<std::string> &tokens);
+		static void ParseStringNullSeparated(const wchar_t *s, std::vector<std::string> &tokens);
 		Logger* logger;
 
 		public:

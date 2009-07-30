@@ -75,7 +75,7 @@ namespace ti
 		if (!FileUtils::IsDirectory(dbdir))
 		{
 			logger->Debug("creating new db dir: %s",dbdir.c_str());
-			FileUtils::CreateDirectory2(dbdir);
+			FileUtils::CreateDirectory(dbdir);
 		}
 		std::string fullpath = FileUtils::Join(dbdir.c_str(),filename.c_str(),NULL);
 		logger->Debug("path to new db : %s",fullpath.c_str());

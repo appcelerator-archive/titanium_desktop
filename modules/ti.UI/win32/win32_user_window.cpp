@@ -9,6 +9,8 @@
 
 #define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
 #define UnsetFlag(x,flag) (x &= ~flag)=
+#define USERWINDOW_WINDOW_CLASS L"Win32UserWindow"
+
 using namespace ti;
 
 // slightly off white, there's probably a better way to do this
@@ -31,19 +33,16 @@ Win32UserWindow* Win32UserWindow::FromWindow(HWND hWnd)
 	return reinterpret_cast<Win32UserWindow*> (GetWindowUserData(hWnd));
 }
 
-const TCHAR *windowClassName = "Win32UserWindow";
-
 /*static*/
 void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 {
 	static bool class_initialized = false;
 	if (!class_initialized)
 	{
-		//LoadString(hInstance, IDC_TIUSERWINDOW, windowClassName, 100);
+		//LoadString(hInstance, IDC_TIUSERWINDOW, USERWINDOW_WINDOW_CLASS, 100);
 
-		WNDCLASSEX wcex;
-		wcex.cbSize = sizeof(WNDCLASSEX);
-
+		WNDCLASSEXW wcex;
+		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
 		wcex.lpfnWndProc = Win32UserWindow::WndProc;
 		wcex.cbClsExtra = 0;
@@ -54,10 +53,10 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 		wcex.hCursor = LoadCursor(hInstance, IDC_ARROW);
 		//wcex.hbrBackground	= (HBRUSH)(COLOR_BACKGROUND+1);
 		wcex.hbrBackground = CreateSolidBrush(transparencyColor);
-		wcex.lpszMenuName = "";
-		wcex.lpszClassName = windowClassName;
+		wcex.lpszMenuName = L"";
+		wcex.lpszClassName = USERWINDOW_WINDOW_CLASS;
 
-		ATOM result = RegisterClassEx(&wcex);
+		ATOM result = RegisterClassExW(&wcex);
 		if (result == NULL)
 		{
 			Logger::Get("UI.Win32UserWindow")->Error("Error Registering Window Class: %d", GetLastError());
@@ -218,11 +217,15 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 void Win32UserWindow::InitWindow()
 {
 	Win32UserWindow::RegisterWindowClass(win32_host->GetInstanceHandle());
-	this->windowHandle
-			= CreateWindowEx(WS_EX_APPWINDOW /*WS_EX_LAYERED*/, windowClassName,
-					config->GetTitle().c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT,
-					0, CW_USEDEFAULT, 0, NULL, NULL,
-					win32_host->GetInstanceHandle(), NULL);
+
+	std::wstring titleW = UTF8ToWide(config->GetTitle());
+	this->windowHandle = CreateWindowExW(
+		WS_EX_APPWINDOW /*WS_EX_LAYERED*/, 
+		USERWINDOW_WINDOW_CLASS,
+		titleW.c_str(),
+		WS_CLIPCHILDREN, CW_USEDEFAULT,
+		0, CW_USEDEFAULT, 0, NULL, NULL,
+		win32_host->GetInstanceHandle(), NULL);
 
 	if (this->windowHandle == NULL)
 	{
@@ -248,19 +251,33 @@ void Win32UserWindow::InitWebKit()
 	
 	if (FAILED(hr))
 	{
-		std::ostringstream createError;
-		createError << "Error Creating WebView: ";
-		switch (hr) {
-			case REGDB_E_CLASSNOTREG: createError << "REGDB_E_CLASSNOTREG"; break;
-			case CLASS_E_NOAGGREGATION: createError << "CLASS_E_NOAGGREGATION"; break;
-			case E_NOINTERFACE: createError << "E_NOINTERFACE"; break;
-			case E_UNEXPECTED: createError << "E_UNEXPECTED"; break;
-			case E_OUTOFMEMORY: createError << "E_OUTOFMEMORY"; break;
-			case E_INVALIDARG: createError << "E_INVALIDARG"; break;
-			default: createError << "Unknown Error: " << hr; break;
+		std::string createError("Error creating WebKitWebView: ");
+		switch (hr)
+		{
+			case REGDB_E_CLASSNOTREG: 
+				createError += "REGDB_E_CLASSNOTREG";
+				break;
+			case CLASS_E_NOAGGREGATION: 
+				createError += "CLASS_E_NOAGGREGATION"; 
+				break;
+			case E_NOINTERFACE: 
+				createError += "E_NOINTERFACE"; 
+				break;
+			case E_UNEXPECTED: 
+				createError += "E_UNEXPECTED";
+				break;
+			case E_OUTOFMEMORY: 
+				createError += "E_OUTOFMEMORY";
+				break;
+			case E_INVALIDARG:
+				createError += "E_INVALIDARG";
+				break;
+			default:
+				createError += "Unknown Error: ";
+				break;
 		}
-		logger->Error(createError.str());
-		MessageBox(NULL, createError.str().c_str(), "Error Initializing WebKit", MB_ICONERROR | MB_OK);
+		logger->Error(createError.c_str());
+		MessageBoxA(NULL, createError.c_str(), "Error Initializing WebKit", MB_ICONERROR | MB_OK);
 		exit(-1);
 	}
 
@@ -430,7 +447,7 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	// set initial window icon to icon associated with exe file
 	char exePath[MAX_PATH];
 	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	defaultIcon = ExtractIcon(win32_host->GetInstanceHandle(), exePath, 0);
+	defaultIcon = ExtractIconA(win32_host->GetInstanceHandle(), exePath, 0);
 	if (defaultIcon)
 	{
 		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
@@ -707,12 +724,14 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	boundsRect.top = bounds.y;
 	boundsRect.bottom = bounds.y + bounds.height;
 	
-	if (this->config->IsUsingChrome()) {
+	if (this->config->IsUsingChrome())
+	{
 		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), !menu.isNull());
 		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
 		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
 	}
-	else {
+	else
+	{
 		this->chromeWidth = 0;
 		this->chromeHeight = 0;
 	}
@@ -720,9 +739,10 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y, bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
 }
 
-void Win32UserWindow::SetTitle(std::string& title)
+void Win32UserWindow::SetTitleImpl(std::string& title)
 {
-	SetWindowText(windowHandle, title.c_str());
+	std::wstring titleW = UTF8ToWide(title);
+	SetWindowTextW(windowHandle, titleW.c_str());
 }
 
 void Win32UserWindow::SetURL(std::string& url_)
@@ -1118,11 +1138,14 @@ SharedKList Win32UserWindow::SelectFile(
 	std::vector<std::string>& types,
 	std::string& typesDescription)
 {
-	std::string filter;
+	std::wstring filter;
+	std::wstring typesDescriptionW = UTF8ToWide(typesDescription);
+	std::wstring typeW = UTF8ToWide(type);
+
 	if (types.size() > 0)
 	{
 		//"All\0*.*\0Test\0*.TXT\0";
-		filter.append(typesDescription);
+		filter.append(typesDescriptionW);
 		filter.push_back('\0');
 
 		for (int i = 0; i < types.size(); i++)
@@ -1133,39 +1156,36 @@ SharedKList Win32UserWindow::SelectFile(
 			size_t found = type.find("*.");
 			if (found != 0)
 			{
-				filter.append("*.");
+				filter.append(L"*.");
 			}
-			filter.append(type);
-			filter.append(";");
+			filter.append(typeW);
+			filter.append(L";");
 		}
 
 		filter.push_back('\0');
 	}
 
 	OPENFILENAME ofn;
-	char filen[MAX_PATH];
-	ZeroMemory(&filen, sizeof(filen));
-	if (defaultName.size() >= 0)
-	{
-		strcpy(filen, defaultName.c_str());
-	}
+	std::wstring filenameW = UTF8ToWide(defaultName);
 
 	// init OPENFILE
+	std::wstring pathW = UTF8ToWide(path);
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = this->windowHandle;
-	ofn.lpstrFile = filen;
-	ofn.nMaxFile = sizeof(filen);
-	ofn.lpstrFilter = (filter.empty() ? NULL : filter.c_str());
+	ofn.lpstrFile = (LPWSTR) (filenameW.empty() ? NULL : filenameW.c_str());
+	ofn.nMaxFile = filenameW.size();
+	ofn.lpstrFilter = (LPWSTR) (filter.empty() ? NULL : filter.c_str());
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = (path.length() == 0 ? NULL : path.c_str());
+	ofn.lpstrInitialDir = (LPWSTR) (pathW.length() == 0 ? NULL : pathW.c_str());
 	ofn.Flags = OFN_EXPLORER;
 
 	if (!title.empty())
 	{
-		ofn.lpstrTitle = title.c_str();
+		std::wstring titleW = UTF8ToWide(title);
+		ofn.lpstrTitle = titleW.c_str();
 	}
 
 	if (!saveDialog)
@@ -1251,17 +1271,20 @@ SharedKList Win32UserWindow::SelectDirectory(
 	SharedKList results = new StaticBoundList();
 
 	BROWSEINFO bi = { 0 };
-	bi.lpszTitle = title.c_str();
+	std::wstring titleW = UTF8ToWide(title);
+	bi.lpszTitle = titleW.c_str();
 	bi.hwndOwner = this->windowHandle;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS;
 	LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
 
 	if (pidl != 0)
 	{
-		TCHAR in_path[MAX_PATH];
+		wchar_t in_path[MAX_PATH];
 		if (SHGetPathFromIDList(pidl, in_path))
 		{
-			results->Append(Value::NewString(std::string(in_path)));
+			std::wstring inPathW = in_path;
+			std::string inPath = WideToUTF8(inPathW);
+			results->Append(Value::NewString(inPath));
 		}
 
 		IMalloc * imalloc = 0;
@@ -1275,7 +1298,7 @@ SharedKList Win32UserWindow::SelectDirectory(
 }
 
 void Win32UserWindow::ParseStringNullSeparated(
-	const char *s, std::vector<std::string> &tokens)
+	const wchar_t *s, std::vector<std::string> &tokens)
 {
 	std::string token;
 
@@ -1283,7 +1306,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 	int i = 0;
 	while (true)
 	{
-		char c;
+		wchar_t c;
 
 		c = s[i++];
 

@@ -189,6 +189,10 @@ namespace ti
 	{
 		args.VerifyException("appURLToPath", "s");
 		std::string url = args.GetString(0);
+		if (url.find("app://") != 0 && url.find("://") == std::string::npos)
+		{
+			url = std::string("app://") + url;
+		}
 		std::string path = URLUtils::URLToPath(url);
 		result->SetString(path);
 	}
@@ -278,18 +282,29 @@ namespace ti
 		const SharedApplication app = this->host->GetApplication();
 		std::string stream = app->stream;
 		
+		// environment should always override stream setting
+		if (EnvironmentUtils::Has("TITANIUM_STREAM"))
+		{
+			stream = EnvironmentUtils::Get("TITANIUM_STREAM");
+		}
+		
 		std::string url = "https://api.appcelerator.net/";
-		if (stream == "production")
+		if (stream == "production" || stream == "p")
 		{
 			url+="p/v1";
 		}
-		else if (stream == "dev")
+		else if (stream == "dev" || stream == "d")
 		{
 			url+="d/v1";
 		}
-		else if (stream == "test")
+		else if (stream == "test" || stream == "t")
 		{
 			url+="t/v1";
+		}
+		else if (stream == "local" || stream == "l")
+		{
+			// allow localhost testing
+			url = "http://localhost/v1";
 		}
 		else
 		{

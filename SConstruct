@@ -41,39 +41,24 @@ build.env.Append(CPPPATH=[
 ])
 
 # debug build flags
-if ARGUMENTS.get('debug', 0):
+debug = ARGUMENTS.get('debug', 0)
+if debug:
 	build.env.Append(CPPDEFINES = ('DEBUG', 1))
-	debug = 1
-	if not build.is_win32():
-		build.env.Append(CCFLAGS = ['-g'])  # debug
+	if build.is_win32():
+		build.env.Append(CCFLAGS=['/Z7'])  # max debug
+		build.env.Append(CPPDEFINES=('WIN32_CONSOLE', 1))
 	else:
-		build.env.Append(CCFLAGS = ['/Z7','/GR', '/Od' ])  # max debug, C++ RTTI, disable optimization
-#		build.env.Append(CCFLAGS = ['/Z7','/GR' ])
+		build.env.Append(CCFLAGS=['-g'])  # debug
 else:
 	build.env.Append(CPPDEFINES = ('NDEBUG', 1 ))
-	debug = 0
 	if not build.is_win32():
 		build.env.Append(CCFLAGS = ['-O9']) # max optimizations
-	else:
-		build.env.Append(CCFLAGS = ['/GR', '/O1' ]) # C++ RTTI, maximum optimization
-#		build.env.Append(CCFLAGS = ['/GR' ])
-
-# turn on special debug printouts for reference counting
-if ARGUMENTS.get('debug_refcount', 0) == 1:
-	build.env.Append(CPPDEFINES = ('DEBUG_REFCOUNT', 1))
-
-
 if build.is_win32():
-	execfile('kroll/site_scons/win32.py')
-	build.env.Append(CCFLAGS=['/EHsc', '/Wp64', '/nologo' ]) # enable syncronous exception handling, enable 32-64bit incompatibilities, no logo
-	if build.debug:
-		build.env.Append(CPPDEFINES=('WIN32_CONSOLE', 1))
+	build.env.Append(CCFLAGS=['/EHsc', '/GR', '/MD'])
 	build.env.Append(LINKFLAGS=['/DEBUG', '/PDB:${TARGET}.pdb'])
 
-	
 Export('build')
 targets = COMMAND_LINE_TARGETS
-
 clean = 'clean' in targets or ARGUMENTS.get('clean', 0)
 qclean = 'qclean' in targets or ARGUMENTS.get('qclean', 0)
 build.nopackage = ARGUMENTS.get('nopackage', 0)

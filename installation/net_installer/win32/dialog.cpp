@@ -1,4 +1,5 @@
-#include "Dialog.h"
+#include "dialog.h"
+#include "api/utils/utils.h"
 #include <stdio.h>
 
 namespace ti {

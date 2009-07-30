@@ -28,7 +28,7 @@ namespace ti
 		//This is a path so, turn it into a file:// URL
 		std::string myurl = url;
 		std::string path = URLUtils::URLToPath(url);
-		if (path.find("://") != std::string::npos)
+		if (path.find("://") == std::string::npos)
 		{
 			myurl = URLUtils::PathToFileURL(path);
 		}

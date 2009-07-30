@@ -237,19 +237,23 @@
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
+	std::string newTitle = [title UTF8String];
+	[window userWindow]->SetTitle(newTitle);
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
 
-	if (![self isGlobalObjectRegisteredForFrame:frame]) {
+	if (![self isGlobalObjectRegisteredForFrame:frame])
+	{
 		// This was a failed load, so do not continue
 		return;
 	}
 
 	JSGlobalContextRef context = [frame globalContext];
 	SharedKObject global = [self globalObjectForFrame:frame];
-	if (global.isNull()) {
+	if (global.isNull())
+	{
 		// The load was successful, but this page doesn't have a script tag
 		global = [self registerJSContext:context forFrame:frame];
 	}
@@ -303,7 +307,8 @@
 	NSString *url = [[request URL] relativeString];
 	if ([url length] > 0)
 	{
-		newWindow = [window userWindow]->CreateWindow([url UTF8String]);
+		std::string urlStr = [url UTF8String];
+		newWindow = [window userWindow]->CreateWindow(urlStr);
 	}
 	else
 	{

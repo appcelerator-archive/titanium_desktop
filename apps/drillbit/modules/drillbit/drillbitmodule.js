@@ -15,6 +15,8 @@
 		this.total_tests = 0;
 		this.total_files = 0;
 		this.current_test = null;
+		this.tests_started = 0;
+		this.test_duration = 0;
 		
 		var current_test_load = null;
 		var excludes = ['before','before_all','after','after_all','timeout'];
@@ -35,7 +37,6 @@
 		var tiapp_backup = null, tiapp = null;
 		var manifest_backup = null, manifest = null;
 		var non_visual_ti = null;
-		var tests_started = 0;
 		var self = this;
 		
 
@@ -246,7 +247,7 @@
 				running_tests+=entry.assertion_count;
 			}
 		
-			tests_started = new Date().getTime();
+			this.tests_started = new Date().getTime();
 			if (this.run_tests_async)
 			{
 				this.window.setTimeout(function(){self.run_next_test();}, 1);
@@ -518,11 +519,11 @@
 		{
 			if (executing_tests==null || executing_tests.length == 0)
 			{
+				this.test_duration = (new Date().getTime() - this.tests_started)/1000;
 				this.frontend_do('all_finished');
-				var test_duration = (new Date().getTime() - tests_started)/1000;
 				executing_tests = null;
 				this.current_test = null;
-				self.frontend_do('update_status', 'Testing complete ... took ' + test_duration + ' seconds',true);
+				self.frontend_do('update_status', 'Testing complete ... took ' + this.test_duration + ' seconds',true);
 				var f = TFS.getFile(this.results_dir,'drillbit.json');
 				f.write("{\"success\":" + String(!test_failures) + "}");
 				if (self.auto_close)

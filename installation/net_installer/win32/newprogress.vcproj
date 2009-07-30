@@ -178,15 +178,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\IntroDialog.cpp"
+				RelativePath=".\dialog.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Main.cpp"
+				RelativePath=".\install_job.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Progress.cpp"
+				RelativePath=".\intro_dialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\progress_dialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\update_dialog.cpp"
 				>
 			</File>
 		</Filter>
@@ -196,15 +208,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\IntroDialog.h"
+				RelativePath=".\dialog.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Progress.h"
+				RelativePath=".\install_job.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Resource.h"
+				RelativePath=".\intro_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\progress_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\update_dialog.h"
 				>
 			</File>
 		</Filter>

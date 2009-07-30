@@ -41,7 +41,7 @@ namespace ti {
 			}
 
 			NSURL* iconNSURL = [NSURL URLWithString:
-				[NSString stringWithUTF8String:myIconURL.c_str]];
+				[NSString stringWithUTF8String:myIconURL.c_str()]];
 			iconData = [NSData dataWithContentsOfURL:iconNSURL];
 		}
 

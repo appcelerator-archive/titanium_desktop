@@ -1,11 +1,11 @@
 #ifndef TI_UPDATE_DIALOG_H
 #define TI_UPDATE_DIALOG_H
 
-#include "Dialog.h"
+#include "dialog.h"
 #include <commctrl.h>
 #include <string>
 #include <vector>
-#include "InstallJob.h"
+#include "install_job.h"
 
 namespace ti
 {

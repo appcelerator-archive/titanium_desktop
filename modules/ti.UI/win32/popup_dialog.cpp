@@ -68,14 +68,16 @@ namespace ti
 	/*static*/
 	void Win32PopupDialog::HandleOKClick(HWND hDlg)
 	{
-		char textEntered[MAX_INPUT_LENGTH];
+		TCHAR textEntered[MAX_INPUT_LENGTH];
 		GetDlgItemText(hDlg, ID_INPUT_FIELD, textEntered, MAX_INPUT_LENGTH);
 
 		Win32PopupDialog* popupDialog = popups[GetCurrentThreadId()];
-		if(popupDialog)
+		if (popupDialog)
 		{
+			std::wstring textEnteredW = textEntered;
+			std::string textEnteredU = WideToUTF8(textEnteredW);
 			popupDialog->inputText.clear();
-			popupDialog->inputText.append(textEntered);
+			popupDialog->inputText.append(textEnteredU);
 			popupDialog->result = IDOK;
 		}
 		else

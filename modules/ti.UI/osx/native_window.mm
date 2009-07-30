@@ -245,7 +245,7 @@
 		// will cause the window to be shown once the url is loaded
 		requiresDisplay = YES;
 	}
-	std::string url = ti::NormalizeURL(config->GetURL());
+	std::string url = kroll::URLUtils::NormalizeURL(config->GetURL());
 	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
 }

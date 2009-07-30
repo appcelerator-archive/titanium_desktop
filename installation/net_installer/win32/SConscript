@@ -11,10 +11,10 @@ Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32
 atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
 if not path.exists(atlmfc_path):
 	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
-
 Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
 Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
 
+<<<<<<< HEAD:installation/net_installer/win32/SConscript
 ccf = Env['CCFLAGS']
 cflags = Env['CPPDEFINES']
 
@@ -29,6 +29,18 @@ if 'NDEBUG' in cflags:
 Env.Append(CCFLAGS=ccf)
 #Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
 sources = Glob("installer-project/*.cpp") + Env.RES("installer-project/progress.rc")
+=======
+ccf = Env['CCFLAGS'][:]
+if '/MD' in ccf: ccf.remove('/MD')
+ccf.append('/MT') # Allow threads
+ccf.append('/Os') # Favor size optimizations
+ccf.append('/O1') # Optimize for minimum size
+ccf.append('/DUNICODE') # Use wchar_t functions
+ccf.append('/D_UNICODE') # Ditto
+Env['CCFLAGS'] = ccf
+
+sources = Glob("*.cpp") + Env.RES("progress.rc")
+>>>>>>> 67f23f6aabd9a1560fd2019e2e2fc1679f5ea5a8:installation/net_installer/win32/SConscript
 out_file = path.join(build.runtime_build_dir, 'installer', 'Installer.exe')
 
 Env.Append(CPPPATH=[build.kroll_utils_dir])

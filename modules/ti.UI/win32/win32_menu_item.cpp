@@ -112,7 +112,9 @@ namespace ti
 			itemInfo->fMask = itemInfo->fMask | MIIM_STRING | MIIM_SUBMENU | MIIM_STATE;
 			itemInfo->fType = MFT_STRING;
 			itemInfo->fState = this->IsEnabled() ? MFS_ENABLED : MFS_DISABLED;
-			itemInfo->dwTypeData = (LPSTR) this->oldLabel.c_str();
+
+			std::wstring oldLabelW = UTF8ToWide(this->oldLabel);
+			itemInfo->dwTypeData = (LPWSTR) oldLabelW.c_str();
 
 			AutoPtr<Win32Menu> wsubmenu = this->submenu.cast<Win32Menu>();
 			if (!wsubmenu.isNull()) {

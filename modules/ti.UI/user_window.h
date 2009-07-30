@@ -188,7 +188,8 @@ namespace ti
 			virtual Bounds GetBounds() = 0;
 			virtual void SetBounds(Bounds bounds) = 0;
 			virtual std::string GetTitle() = 0;
-			virtual void SetTitle(std::string& title) = 0;
+			virtual void SetTitle(std::string& title);
+			virtual void SetTitleImpl(std::string& title) = 0;
 			virtual std::string GetURL() = 0;
 			virtual void SetURL(std::string &url) = 0;
 			virtual bool IsResizable() = 0;

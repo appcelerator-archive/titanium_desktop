@@ -122,17 +122,14 @@ class ProxyHandler (BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def _read_write(self, sock, max_idling=20):
 		rfile = self.rfile
-		if hasattr(rfile, '_rbuf'):	 # on BeOS?
-			data = rfile._rbuf
+		if self.headers.has_key('Content-Length'):
+			n = int(self.headers['Content-Length'])
+			data = rfile.read(n)
 		else:
-			if self.headers.has_key('Content-Length'):
-				n = int(self.headers['Content-Length'])
-				data = rfile.read(n)
-			else:
-				self.connection.setblocking(0)
-				try: data = rfile.read()
-				except IOError: data = ''
-				self.connection.setblocking(1)
+			self.connection.setblocking(0)
+			try: data = rfile.read()
+			except IOError: data = ''
+			self.connection.setblocking(1)
 		rfile.close()
 		if data:
 			sock.send(data)

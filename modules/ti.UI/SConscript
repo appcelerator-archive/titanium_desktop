@@ -30,14 +30,14 @@ if build.is_linux():
 	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext')
 
 elif build.is_win32():
-	sources = sources + Glob('win32/*.cpp') + Glob('win32/*.cc') + Glob('url/*.cpp')
+	sources = sources + Glob('win32/*.cpp') + Glob('url/*.cpp')
 	sources += Glob('binding/kjs*.cpp')
 	env.Append(LIBPATH=[webkit_lib])
 	env.Append(CPPPATH=[webkit_inc, path.join(webkit_inc, 'webkit'), path.join(webkit_inc, 'JavaScriptCore'), 
-	    path.join(webkit_inc,'WebCore','ForwardingHeaders'),
-		path.join(build.third_party, 'icu', 'include'), '#kroll'])
+	path.join(webkit_inc,'WebCore','ForwardingHeaders'),
+	path.join(build.third_party, 'icu', 'include'), '#kroll'])
 	env.Append(LIBS=['WebKitGUID', 'WebKit', 'kernel32','shell32','user32','ole32','comdlg32','comctl32','gdi32','shlwapi', 'oleaut32', 'icuuc','pthreadVC2','libcurl_imp','khost','comsuppw','cairo'])
-	env.Append(CCFLAGS=['/MD'])
+	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
 
 elif build.is_osx():

@@ -1,5 +1,5 @@
 
-#include "UpdateDialog.h"
+#include "update_dialog.h"
 #include "Resource.h"
 #include <commctrl.h>
 #include <iostream>
@@ -20,11 +20,12 @@ namespace ti
 		TV_INSERTSTRUCT insert;
 		std::cout << "name=" << name << "\nversion= " << newVersion << std::endl;
 		std::string text = name + ": " + newVersion;
+		std::wstring textW = KrollUtils::UTF8ToWide(text);
 		
 		insert.hParent = NULL;
 		insert.hInsertAfter = TVI_ROOT;
 		insert.item.mask = TVIF_TEXT | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
-		insert.item.pszText = (char*)text.c_str();
+		insert.item.pszText = (wchar_t*) textW.c_str();
 		insert.item.iImage = 0;
 		insert.item.iSelectedImage = 0;
 		return (HTREEITEM) SendMessage(updateList, TVM_INSERTITEM, 0, (LPARAM)&insert);

@@ -15,20 +15,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils.h>
-#include "Progress.h"
+#include "progress_dialog.h"
 #include "Resource.h"
-#include "IntroDialog.h"
-#include "UpdateDialog.h"
+#include "intro_dialog.h"
+#include "update_dialog.h"
 #include "api/utils/utils.h"
+#undef CreateDirectory
 
 using std::string;
 using std::wstring;
 using std::vector;
 using KrollUtils::Application;
 using KrollUtils::SharedApplication;
+using KrollUtils::KComponentType;
 using KrollUtils::FileUtils;
 using KrollUtils::BootUtils;
-using KrollUtils::KComponentType;
+using KrollUtils::Win32Utils;
 
 HINSTANCE mainInstance;
 HICON mainIcon;
@@ -44,6 +46,7 @@ string temporaryPath;
 bool doInstall = false;
 bool installStartMenuIcon = false;
 bool forceInstall = false;
+ProgressDialog* progressDialog;
 
 enum IType
 {
@@ -61,24 +64,9 @@ public:
 	std::string name, version, url;
 };
 
-wstring StringToWString(string in)
-{
-	wstring out(in.length(), L' ');
-	copy(in.begin(), in.end(), out.begin());
-	return out; 
-}
-
-string WStringToString(wstring in)
-{
-	// XXX: Not portable
-	string s(in.begin(), in.end());
-	s.assign(in.begin(), in.end());
-	return s;
-}
-
 void ShowError(string msg)
 {
-	wstring wmsg = StringToWString(msg);
+	wstring wmsg = KrollUtils::UTF8ToWide(msg);
 	MessageBoxW(
 		GetDesktopWindow(),
 		wmsg.c_str(),
@@ -88,8 +76,8 @@ void ShowError(string msg)
 
 std::wstring ParseQueryParam(string uri8, string key8)
 {
-	std::wstring uri = StringToWString(uri8);
-	std::wstring key = StringToWString(key8);
+	std::wstring uri = KrollUtils::UTF8ToWide(uri8);
+	std::wstring key = KrollUtils::UTF8ToWide(key8);
 	key+=L"=";
 	size_t pos = uri.find(key);
 	if (pos!=std::wstring::npos)
@@ -110,42 +98,6 @@ std::wstring ParseQueryParam(string uri8, string key8)
 		return p;
 	}
 	return L"";
-}
-
-void MyCopyRecursive(string &dir, string &dest, string exclude)
-{
-	if (!FileUtils::IsDirectory(dest))
-	{
-		FileUtils::CreateDirectory(dest);
-	}
-
-	WIN32_FIND_DATA findFileData;
-	string q(dir+"\\*");
-	HANDLE hFind = FindFirstFile(q.c_str(), &findFileData);
-	if (hFind != INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-			string filename = findFileData.cFileName;
-			if (filename == "." || filename == ".."
-				 || (!exclude.empty() && filename == exclude))
-				 continue;
-
-			string srcName = dir + "\\" + filename;
-			string destName = dest + "\\" + filename;
-
-			if (FileUtils::IsDirectory(srcName))
-			{
-				FileUtils::CreateDirectory(destName);
-				MyCopyRecursive(srcName, destName, string());
-			}
-			else
-			{
-				CopyFileA(srcName.c_str(), destName.c_str(), FALSE);
-			}
-		} while (FindNextFile(hFind, &findFileData));
-		FindClose(hFind);
-	}
 }
 
 std::wstring SizeString(DWORD size)
@@ -175,31 +127,47 @@ std::wstring SizeString(DWORD size)
 	return wstr;
 }
 
-bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring outFilename, std::wstring intro)
+bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, std::string introA)
 {
+	std::wstring url = KrollUtils::UTF8ToWide(urlA);
+	std::wstring outFilename = KrollUtils::UTF8ToWide(outFilenameA);
+	std::wstring intro = KrollUtils::UTF8ToWide(introA);
+
 	WCHAR szDecodedUrl[INTERNET_MAX_URL_LENGTH];
 	DWORD cchDecodedUrl = INTERNET_MAX_URL_LENGTH;
 	WCHAR szDomainName[INTERNET_MAX_URL_LENGTH];
 
 	// parse the URL
-	HRESULT hr = CoInternetParseUrl(url.c_str(), PARSE_DECODE, URL_ENCODING_NONE, szDecodedUrl, INTERNET_MAX_URL_LENGTH, &cchDecodedUrl, 0);
+	HRESULT hr = CoInternetParseUrl(url.c_str(), PARSE_DECODE, 
+		URL_ENCODING_NONE, szDecodedUrl, INTERNET_MAX_URL_LENGTH, 
+		&cchDecodedUrl, 0);
 	if (hr != S_OK)
 	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
 		return false;
 	}
 
 	// figure out the domain/hostname
-	hr = CoInternetParseUrl(szDecodedUrl, PARSE_DOMAIN, 0, szDomainName, INTERNET_MAX_URL_LENGTH, &cchDecodedUrl, 0);
+	hr = CoInternetParseUrl(szDecodedUrl, PARSE_DOMAIN, 
+		0, szDomainName, INTERNET_MAX_URL_LENGTH, &cchDecodedUrl, 0);
 	if (hr != S_OK)
 	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
 		return false;
 	}
 	
 	// start the HTTP fetch
-	// cwarner - don't need to specify the 'W' functions since we are compiled with unicode by default.
-	HINTERNET hConnection = InternetConnectW( hINet, szDomainName, 80, L" ", L" ", INTERNET_SERVICE_HTTP, 0, 0 );
-	if ( !hConnection )
+	HINTERNET hConnection = InternetConnectW(hINet, szDomainName, 
+		80, L" ", L" ", INTERNET_SERVICE_HTTP, 0, 0 );
+	if (!hConnection)
 	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
 		return false;
 	}
 	
@@ -207,11 +175,21 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 	std::wstring path = wurl.substr(wurl.find(szDomainName)+wcslen(szDomainName));
 	//std::wstring queryString = url.substr(url.rfind("?")+1);
 	//astd::wstring object = path + "?" + queryString;
-	HINTERNET hRequest = HttpOpenRequestW( hConnection, L"GET", path.c_str(), NULL, NULL, NULL, INTERNET_FLAG_RELOAD|INTERNET_FLAG_NO_CACHE_WRITE|INTERNET_FLAG_NO_COOKIES|INTERNET_FLAG_NO_UI|INTERNET_FLAG_IGNORE_CERT_CN_INVALID|INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0 );
+	HINTERNET hRequest = HttpOpenRequestW(hConnection, L"GET", path.c_str(), 
+		NULL, NULL, NULL, 
+		INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | 
+		INTERNET_FLAG_NO_COOKIES | INTERNET_FLAG_NO_UI | 
+		INTERNET_FLAG_IGNORE_CERT_CN_INVALID | 
+		INTERNET_FLAG_IGNORE_CERT_DATE_INVALID, 0);
 
-	if ( !hRequest )
+	if (!hRequest)
 	{
 		InternetCloseHandle(hConnection);
+
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
+
 		return false;
 	}
 
@@ -225,22 +203,41 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 	DWORD total = 0;
 	wchar_t msg[255];
 	
-	HttpSendRequest( hRequest, NULL, 0, NULL, 0);
-		
+	HttpSendRequest(hRequest, NULL, 0, NULL, 0);
+
 	DWORD contentLength = 0;
+	DWORD statusCode = 0;
 	DWORD size = sizeof(contentLength);
 	
-	HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+	BOOL success = HttpQueryInfo(hRequest, 
+		HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER,
+		(LPDWORD) &statusCode, (LPDWORD) &size, NULL);
+	if (!success || statusCode != 200)
+	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not download file: ") + error;
+		ShowError(error);
+		return false;
+	}
+	
+	success = HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
 		(LPDWORD)&contentLength, (LPDWORD)&size, NULL);
+	if (!success)
+	{
+		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
+		error = string("Could not determine content length: ") + error;
+		ShowError(error);
+		return false;
+	}
 	
 	std::wstring contentLengthStr = SizeString(contentLength);
-	while( InternetReadFile( hRequest, buffer, 2047, &dwRead ) )
+	while (InternetReadFile(hRequest, buffer, 2047, &dwRead ) )
 	{
-		if ( dwRead == 0)
+		if (dwRead == 0)
 		{
 			break;
 		}
-		if (p->IsCancelled())
+		if (progressDialog->IsCancelled())
 		{
 			failed = true;
 			break;
@@ -248,8 +245,8 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 		buffer[dwRead] = '\0';
 		total+=dwRead;
 		ostr.write(buffer, dwRead);
-		p->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
-		p->Update(total, contentLength);
+		progressDialog->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
+		progressDialog->Update(total, contentLength);
 	}
 	ostr.close();
 	InternetCloseHandle(hConnection);
@@ -260,12 +257,11 @@ bool DownloadURL(Progress *p, HINTERNET hINet, std::wstring url, std::wstring ou
 
 void UnzipProgress(char *message, int current, int total, void *data)
 {
-	Progress* progress = (Progress*)data;
-	progress->SetLineText(2, message, true);
-	progress->Update(current, total);
+	progressDialog->SetLineText(2, message, true);
+	progressDialog->Update(current, total);
 }
 
-void Install(IType type, Progress *progress, string name, string version, string path)
+void Install(IType type, string name, string version, string path)
 {
 	string destination;
 	if (type == MODULE)
@@ -293,10 +289,10 @@ void Install(IType type, Progress *progress, string name, string version, string
 
 	// Recursively create directories
 	FileUtils::CreateDirectory(destination, true);
-	FileUtils::Unzip(path, destination, &UnzipProgress, (void*)progress);
+	FileUtils::Unzip(path, destination, &UnzipProgress, 0);
 }
 
-void ProcessUpdate(Progress *p, HINTERNET hINet)
+void ProcessUpdate(HINTERNET hINet)
 {
 	string version = app->version;
 	string name = app->name;
@@ -307,22 +303,22 @@ void ProcessUpdate(Progress *p, HINTERNET hINet)
 
 	// Figure out the path and destination
 	string intro = string("Downloading application update");
-	bool downloaded = DownloadURL(p, hINet, StringToWString(url), StringToWString(path), StringToWString(intro));
+	bool downloaded = DownloadURL(hINet, url, path, intro);
 	if (downloaded)
 	{
-		p->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
-		Install(UPDATE, p, name, version, path);
+		progressDialog->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
+		Install(UPDATE, name, version, path);
 	}
 }
 
-void ProcessURL(string url, Progress *p, HINTERNET hINet)
+void ProcessURL(string url, HINTERNET hINet)
 {
 	std::wstring wuuid = ParseQueryParam(url, "uuid");
 	std::wstring wname = ParseQueryParam(url, "name");
 	std::wstring wversion = ParseQueryParam(url, "version");
-	string uuid = WStringToString(wuuid);
-	string name = WStringToString(wname);
-	string version = WStringToString(wversion);
+	string uuid = KrollUtils::WideToUTF8(wuuid);
+	string name = KrollUtils::WideToUTF8(wname);
+	string version = KrollUtils::WideToUTF8(wversion);
 	IType type = UNKNOWN;
 
 	string path = "";
@@ -357,16 +353,21 @@ void ProcessURL(string url, Progress *p, HINTERNET hINet)
 
 	// Figure out the path and destination
 	string intro = string("Downloading ") + name + " " + version;
-	bool downloaded = DownloadURL(p, hINet, StringToWString(url), StringToWString(path), StringToWString(intro));
+	bool downloaded = DownloadURL(hINet, url, path, intro);
 
 	if (downloaded)
 	{
-		p->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
-		Install(type, p, name, version, path);
+		std::string lineText = "Installing ";
+		lineText.append(name);
+		lineText.append("-");
+		lineText.append(version);
+		lineText.append("...");
+		progressDialog->SetLineText(2, lineText, true);
+		Install(type, name, version, path);
 	}
 }
 
-void ProcessFile(string fullPath, Progress *p)
+void ProcessFile(string fullPath)
 {
 	IType type = UNKNOWN;
 	string name = "";
@@ -404,22 +405,22 @@ void ProcessFile(string fullPath, Progress *p)
 	end = path.find(".zip", start);
 	version = path.substr(start, end - start);
 
-	p->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
-	Install(type, p, name, version, fullPath);
+	progressDialog->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
+	Install(type, name, version, fullPath);
 }
 
-bool InstallApplication(Progress *p)
+bool InstallApplication()
 {
 	if (forceInstall || !app->IsInstalled())
 	{
-		p->SetLineText(2, string("Installing to ") + appInstallPath, true);
+		progressDialog->SetLineText(2, string("Installing to ") + appInstallPath, true);
 		FileUtils::CreateDirectory(appInstallPath);
-		MyCopyRecursive(app->path, appInstallPath, "dist");
+		FileUtils::CopyRecursive(app->path, appInstallPath, "dist");
 	}
 	return true;
 }
 
-bool HandleAllJobs(vector<ti::InstallJob*> jobs, Progress* p)
+bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 {
 	temporaryPath = FileUtils::GetTempDirectory();
 	FileUtils::CreateDirectory(temporaryPath);
@@ -428,13 +429,13 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs, Progress* p)
 	bool success = true;
 
 	// Create our progress indicator class
-	p->SetTitle(L"Titanium Installer");
-	p->SetCancelMessage(L"Cancelling, one moment...");
+	progressDialog->SetTitle(L"Titanium Installer");
+	progressDialog->SetCancelMessage(L"Cancelling, one moment...");
 
 	wchar_t buf[255];
 	wsprintfW(buf,L"Preparing to download %d file%s", count, (count > 1 ? L"s" : L""));
-	p->SetLineText(2,std::wstring(buf),true);
-	p->Update(0, count);
+	progressDialog->SetLineText(2,std::wstring(buf),true);
+	progressDialog->Update(0, count);
 	
 	// Initialize the Interent DLL
 	HINTERNET hINet = InternetOpenW(
@@ -447,25 +448,25 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs, Progress* p)
 	
 	for (int i = 0; i < jobs.size(); i++)
 	{
-		p->Update(x++, count);
+		progressDialog->Update(x++, count);
 		ti::InstallJob *job = jobs[i];
 		
-		p->SetLineText(3, "Downloading: " + job->url, true);
+		progressDialog->SetLineText(3, "Downloading: " + job->url, true);
 		if (job->isUpdate)
 		{
-			ProcessUpdate(p, hINet);
+			ProcessUpdate(hINet);
 		}
 
 		if (FileUtils::IsFile(job->url))
 		{
-			ProcessFile(job->url, p);
+			ProcessFile(job->url);
 		}
 		else
 		{
-			ProcessURL(job->url, p, hINet);
+			ProcessURL(job->url, hINet);
 		}
 
-		if (p->IsCancelled())
+		if (progressDialog->IsCancelled())
 		{
 			return false;
 		}
@@ -474,7 +475,7 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs, Progress* p)
 	// done with iNet - so close it
 	InternetCloseHandle(hINet);
 
-	if (p->IsCancelled())
+	if (progressDialog->IsCancelled())
 		success = false;
 
 	if (!temporaryPath.empty()  && FileUtils::IsDirectory(temporaryPath))
@@ -482,7 +483,7 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs, Progress* p)
 	return success;
 }
 
-bool CreateLink(LPCSTR lpszPathObj, LPCSTR lpszPathLink, LPCSTR lpszDesc) 
+bool CreateLink(std::string& path, std::string& linkPath, std::string& description) 
 { 
 	HRESULT hres; 
 	IShellLink* psl; 
@@ -492,27 +493,22 @@ bool CreateLink(LPCSTR lpszPathObj, LPCSTR lpszPathLink, LPCSTR lpszDesc)
 	if (SUCCEEDED(hres)) 
 	{ 
 		IPersistFile* ppf; 
+		wstring pathW = KrollUtils::UTF8ToWide(path);
+		wstring linkPathW = KrollUtils::UTF8ToWide(linkPath);
+		wstring descriptionW = KrollUtils::UTF8ToWide(description);
  
 		// Set the path to the shortcut target and add the description. 
-		psl->SetPath(lpszPathObj); 
-		psl->SetDescription(lpszDesc); 
+		psl->SetPath(pathW.c_str()); 
+		psl->SetDescription(descriptionW.c_str()); 
  
 		// Query IShellLink for the IPersistFile interface for saving the 
 		// shortcut in persistent storage. 
-		hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf); 
+		hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*) &ppf); 
  
 		if (SUCCEEDED(hres)) 
 		{ 
-			WCHAR wsz[MAX_PATH]; 
- 
-			// Ensure that the string is Unicode. 
-			MultiByteToWideChar(CP_ACP, 0, lpszPathLink, -1, wsz, MAX_PATH); 
-			
-			// Add code here to check return value from MultiByteWideChar 
-			// for success.
- 
 			// Save the link by calling IPersistFile::Save. 
-			hres = ppf->Save(wsz, TRUE); 
+			hres = ppf->Save(linkPathW.c_str(), TRUE); 
 			ppf->Release(); 
 			return true;
 		} 
@@ -539,19 +535,23 @@ bool FinishInstallation()
 
 	if(!updateFile.empty() && FileUtils::IsFile(updateFile))
 	{
-		DeleteFile(updateFile.c_str());
+		wstring updateFileW = KrollUtils::UTF8ToWide(updateFile);
+		DeleteFile(updateFileW.c_str());
 	}
 
 	if (installStartMenuIcon && (forceInstall || !app->IsInstalled()))
 	{
 		string newExe = FileUtils::Basename(exePath);
 		newExe = FileUtils::Join(appInstallPath.c_str(), newExe.c_str(), NULL);
-		char path[MAX_PATH];
-		if (SHGetSpecialFolderPath(NULL, path, CSIDL_PROGRAMS, TRUE))
+
+		wchar_t pathW[MAX_PATH];
+		if (SHGetSpecialFolderPath(NULL, pathW, CSIDL_PROGRAMS, TRUE))
 		{
+			std::wstring pathWStr = pathW;
+			string path = KrollUtils::WideToUTF8(pathWStr);
 			string linkPath = app->name + ".lnk";
-			linkPath = FileUtils::Join(path, linkPath.c_str(), NULL);
-			CreateLink(newExe.c_str(), linkPath.c_str(), "");
+			linkPath = FileUtils::Join(path.c_str(), linkPath.c_str(), NULL);
+			CreateLink(newExe, linkPath, string(""));
 		}
 	}
 
@@ -560,11 +560,17 @@ bool FinishInstallation()
 
 string GetDefaultInstallationDirectory()
 {
-	char path[MAX_PATH];
-	if (SHGetSpecialFolderPath(NULL, path, CSIDL_PROGRAM_FILES, FALSE))
-		return FileUtils::Join(path, app->name.c_str(), NULL);
+	wchar_t pathW[MAX_PATH];
+	if (SHGetSpecialFolderPath(NULL, pathW, CSIDL_PROGRAM_FILES, FALSE))
+	{
+		std::wstring pathWStr = pathW;
+		std::string path = KrollUtils::WideToUTF8(pathWStr);
+		return FileUtils::Join(path.c_str(), app->name.c_str(), NULL);
+	}
 	else // That would be really weird, but handle it
+	{
 		return FileUtils::Join("C:", app->name.c_str(), NULL);
+	}
 }
 
 int WINAPI WinMain(
@@ -572,7 +578,6 @@ int WINAPI WinMain(
 	HINSTANCE hPrevInstance,
 	LPSTR lpCmdLine,
 	int nCmdShow)
-//int main(int argc, char **argv)
 {
 	mainInstance = ::GetModuleHandle(NULL);
 	mainIcon = LoadIcon(mainInstance, MAKEINTRESOURCE(IDR_MAINFRAME));
@@ -583,6 +588,7 @@ int WINAPI WinMain(
 	string jobsFile;
 	bool quiet = false;
 	
+	//DebugBreak();
 	for (int i = 1; i < argc; i++)
 	{
 		string arg = argv[i];
@@ -656,7 +662,8 @@ int WINAPI WinMain(
 	componentInstallPath = FileUtils::GetSystemRuntimeHomeDirectory();
 
 	jobs = ti::InstallJob::ReadJobs(jobsFile);
-	if (!updateFile.empty()) {
+	if (!updateFile.empty())
+	{
 		ti::InstallJob* updateJob = new ti::InstallJob(true);
 		updateJob->name = app->name;
 		updateJob->version = app->version;
@@ -709,12 +716,12 @@ int WINAPI WinMain(
 
 	if (doInstall)
 	{
-		Progress *p = new Progress;
-		p->SetLineText(1, app->name, false);
-		p->Show();
+		progressDialog = new ProgressDialog;
+		progressDialog->SetLineText(1, app->name, false);
+		progressDialog->Show();
 		bool success = 
-			InstallApplication(p) &&
-			HandleAllJobs(jobs, p) &&
+			InstallApplication() &&
+			HandleAllJobs(jobs) &&
 			FinishInstallation();
 		CoUninitialize();
 		return success ? 0 : 1;
