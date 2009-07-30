@@ -539,22 +539,27 @@ describe("UI Module Tests",{
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://multi_open.html');
 		var w2 = Titanium.UI.getCurrentWindow().createWindow('app://multi_open.html');
-		w.setTitle("Set!");
+		w.setTitle("Set1!");
+		w.setTitle("Set2!");
+
+		w.addEventListener(Titanium.PAGE_INITIALIZED, function(event) {
+			w.setTitle("blah");
+		});
+
 		w.open();
 		w2.open();
-
 		setTimeout(function()
 		{
-			if (w.getTitle() != "Set!") {
+			if (w.getTitle() != "blah") {
 				w.close();
 				callback.failed("Set title did not override header title");
 			} else {
 				w.close();
 				callback.passed();
 			}
-			if (w2.getTitle() != Titanium.API.getApplication().getName()) {
+			if (w2.getTitle() != "My fancy new title!") {
 				w.close();
-				callback.failed("Set title did not override header title 2");
+				callback.failed("Title tag did not override title");
 			} else {
 				w.close();
 				callback.passed();
