@@ -103,7 +103,7 @@ void WindowConfig::SetDefaults ()
 	this->maxWidth = -1;
 	this->maxHeight = -1;
 
-	this->url = AppConfig::Instance()->InsertAppIDIntoURL("app://index.html");
+	this->url = "about:blank";
 	this->title = "Titanium Application";
 }
 
