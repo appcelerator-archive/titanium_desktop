@@ -238,19 +238,17 @@
 
 - (void)open
 {
-	if (config->GetURL().size() > 0)
+	if (config->IsVisible() && !config->IsMinimized())
 	{
-		if (config->IsVisible() && !config->IsMinimized())
-		{
-			// if we call open and we're initially visible
-			// we need to basically set requires display which
-			// will cause the window to be shown once the url is loaded
-			requiresDisplay = YES;
-		}
-		std::string url = kroll::URLUtils::NormalizeURL(config->GetURL());
-		NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
-		[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
+		// if we call open and we're initially visible
+		// we need to basically set requires display which
+		// will cause the window to be shown once the url is loaded
+		requiresDisplay = YES;
 	}
+	std::string url = kroll::URLUtils::NormalizeURL(config->GetURL());
+	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
+	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
+	
 }
 
 - (void)close

@@ -1128,7 +1128,10 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 	args.VerifyException("setURL", "s");
 
 	std::string url = args.at(0)->ToString();
-	url = URLUtils::NormalizeURL(url);
+	if (url.empty())
+		url = WindowConfig::blankPageURL;
+	else
+		url = URLUtils::NormalizeURL(url);
 
 	this->config->SetURL(url);
 	if (this->active)
