@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os.path as path
-
 Import('build')
+Import('debug')
 
 Env = build.env.Clone()
 Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
@@ -21,9 +21,7 @@ cflags = Env['CPPDEFINES'][:]
 if '/GR' in ccf: 
 	ccf.remove('/GR')
 	ccf.append('/GR-')
-
-
-if 'NDEBUG' in cflags:
+if not debug:
 	if '/MD' in ccf: ccf.remove('/MD')
 	ccf.append('/MT')
 	ccf.append('/Os')
@@ -32,18 +30,18 @@ else:
 	if '/MDd' in ccf: ccf.remove('/MDd')
 	ccf.append('/MTd')
 	ccf.append('/RTC1')
-
 Env.Append(CPPDEFINES = ('_WINDOWS', 1))
 Env.Append(CPPDEFINES = ('_ATL_STATIC_REGISTRY', 1))
-Env.Append(CPPDEFINES = ('_ATL_MIN_CRT', 1))
 Env.Append(CPPDEFINES = ('_UNICODE', 1))
 Env.Append(CPPDEFINES = ('UNICODE', 1))
 
-Env.Append(CCFLAGS=ccf)
-#Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
-sources = Glob("ti_depends/*.cpp") + Env.RES("ti_depends/ti_depends.rc")
-out_file = path.join(build.runtime_build_dir, 'ti_depends', 'ti_depends.exe')
+# This following causes linking to fail on my machine - Martin
+# Env.Append(CPPDEFINES = ('_ATL_MIN_CRT', 1))
+# Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+
+sources = Glob("*.cpp") + Env.RES("ti_depends.rc")
+out_file = path.join(build.dir, 'ti_depends', 'ti_depends.exe')
 
 p = Env.Program(out_file, sources)
-build.mark_build_target(p)
+Alias('tidepends', p)
 

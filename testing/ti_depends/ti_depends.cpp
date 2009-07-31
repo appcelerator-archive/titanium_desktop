@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "ti_depends.h"
-#include "MainDlg.h"
+#include "main_dialog.h"
 
 #define MAX_LOADSTRING 100
 
@@ -41,7 +41,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	}
 
 
-	CMainDlg dlgMain;
+	CMainDialog dlgMain;
 
 	dlgMain.hModlibeay32 = hModlibeay32;
 	dlgMain.hModssleay32 = hModssleay32;

@@ -40,4 +40,4 @@
 #include <atlwin.h>
 
 // TODO: reference additional headers your program requires here
-#include "Resource.h"
+#include "resource.h"

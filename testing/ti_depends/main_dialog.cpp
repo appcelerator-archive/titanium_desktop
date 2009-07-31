@@ -1,7 +1,7 @@
 #include "StdAfx.h"
-#include "MainDlg.h"
+#include "main_dialog.h"
 
-CMainDlg::CMainDlg(void)
+CMainDialog::CMainDialog(void)
 {
 	hModlibeay32 = NULL;
 	hModssleay32 = NULL;
@@ -9,12 +9,12 @@ CMainDlg::CMainDlg(void)
 	hModlibxml2 = NULL;
 }
 
-CMainDlg::~CMainDlg(void)
+CMainDialog::~CMainDialog(void)
 {
 }
 
 
-LRESULT CMainDlg::OnInitDialog(UINT uMsg, WPARAM wparam, LPARAM lparam, BOOL &bHandled )
+LRESULT CMainDialog::OnInitDialog(UINT uMsg, WPARAM wparam, LPARAM lparam, BOOL &bHandled )
 {
 	// center the dialog on the screen
 	CenterWindow();
@@ -59,7 +59,7 @@ LRESULT CMainDlg::OnInitDialog(UINT uMsg, WPARAM wparam, LPARAM lparam, BOOL &bH
 	return TRUE;
 }
 
-LRESULT CMainDlg::CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
+LRESULT CMainDialog::CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled)
 {
 	BOOL bRet = FALSE;
 

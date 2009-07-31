@@ -1,11 +1,11 @@
 #pragma once
 
-class CMainDlg : public CDialogImpl<CMainDlg>
+class CMainDialog : public CDialogImpl<CMainDialog>
 {
 public:
 	enum { IDD = IDD_DIALOG1 };
 
-	BEGIN_MSG_MAP(CMainDlg)
+	BEGIN_MSG_MAP(CMainDialog)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_ID_HANDLER(IDOK, CommandHandler)
 		COMMAND_ID_HANDLER(IDCANCEL, CommandHandler)
@@ -15,8 +15,8 @@ public:
 	LRESULT CommandHandler(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& bHandled);
 
 
-	CMainDlg(void);
-	~CMainDlg(void);
+	CMainDialog(void);
+	~CMainDialog(void);
 
 	HMODULE hModlibeay32;
 	HMODULE hModssleay32;

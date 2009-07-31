@@ -57,7 +57,7 @@ if build.is_win32():
 	build.env.Append(CCFLAGS=['/EHsc', '/GR', '/MD'])
 	build.env.Append(LINKFLAGS=['/DEBUG', '/PDB:${TARGET}.pdb'])
 
-Export('build')
+Export('build', 'debug')
 targets = COMMAND_LINE_TARGETS
 clean = 'clean' in targets or ARGUMENTS.get('clean', 0)
 qclean = 'qclean' in targets or ARGUMENTS.get('qclean', 0)
