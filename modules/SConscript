@@ -2,10 +2,26 @@
 Import('build')
 import os
 
-modules = ['App','UI','Network','Growl','Filesystem','Media','Desktop','Platform','Process','Notification','Monkey','Analytics','Database','Worker']
+# These each have their own line because we can comment
+# them out easily if we need temporarily disable one.
+modules = [
+	'ti.App', 
+	'ti.UI',
+	'ti.Network',
+	'ti.Growl',
+	'ti.Filesystem',
+	'ti.Media',
+	'ti.Desktop',
+	'ti.Platform',
+	'ti.Process',
+	'ti.Notification',
+	'ti.Monkey',
+	'ti.Analytics',
+	'ti.Database',
+	#'ti.Worker'
+]
 
 for module in modules:
-	module = "ti.%s" % module
 	module_dir = os.path.join(build.dir, 'objs', 'modules', module)
 	SConscript(os.path.join(module,'SConscript'), build_dir=module_dir, duplicate=0)
 
