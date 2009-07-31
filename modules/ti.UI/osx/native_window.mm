@@ -248,6 +248,7 @@
 	std::string url = kroll::URLUtils::NormalizeURL(config->GetURL());
 	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
+	
 }
 
 - (void)close

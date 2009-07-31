@@ -33,6 +33,7 @@
 	[webPrefs setPlugInsEnabled:YES]; 
 	[webPrefs setJavaEnabled:YES];
 	[webPrefs setJavaScriptEnabled:YES];
+	[webPrefs setJavaScriptCanOpenWindowsAutomatically:YES];
 
 	if ([webPrefs respondsToSelector:@selector(setDatabasesEnabled:)])
 	{
@@ -304,10 +305,11 @@
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
 	AutoUserWindow newWindow = 0;
-	NSString *url = [[request URL] relativeString];
+	NSString *url = [[request URL] absoluteString];
 	if ([url length] > 0)
 	{
 		std::string urlStr = [url UTF8String];
+		logger->Debug("creating new webView window with url: %s", urlStr.c_str());
 		newWindow = [window userWindow]->CreateWindow(urlStr);
 	}
 	else
