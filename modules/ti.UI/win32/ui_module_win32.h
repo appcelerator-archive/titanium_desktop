@@ -36,7 +36,6 @@ namespace ti
 #include <cairo/cairo-win32.h>
 #include "../url/url.h"
 #include "../url/url_curl.h"
-#include "string_util.h"
 #include "popup_dialog.h"
 #include "../../../kroll/modules/javascript/javascript_module.h"
 #include "script_evaluator.h"

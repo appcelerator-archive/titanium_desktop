@@ -41,37 +41,24 @@ build.env.Append(CPPPATH=[
 ])
 
 # debug build flags
-if ARGUMENTS.get('debug', 0):
+debug = ARGUMENTS.get('debug', 0)
+if debug:
 	build.env.Append(CPPDEFINES = ('DEBUG', 1))
-	debug = 1
-	if not build.is_win32():
-		build.env.Append(CCFLAGS = ['-g'])  # debug
+	if build.is_win32():
+		build.env.Append(CCFLAGS=['/Z7'])  # max debug
+		build.env.Append(CPPDEFINES=('WIN32_CONSOLE', 1))
 	else:
-		build.env.Append(CCFLAGS = ['/Z7','/GR'])  # max debug, C++ RTTI
+		build.env.Append(CCFLAGS=['-g'])  # debug
 else:
 	build.env.Append(CPPDEFINES = ('NDEBUG', 1 ))
-	debug = 0
 	if not build.is_win32():
 		build.env.Append(CCFLAGS = ['-O9']) # max optimizations
-	else:
-		build.env.Append(CCFLAGS = ['/GR']) # C++ RTTI
-
-# turn on special debug printouts for reference counting
-if ARGUMENTS.get('debug_refcount', 0) == 1:
-	build.env.Append(CPPDEFINES = ('DEBUG_REFCOUNT', 1))
-
-
 if build.is_win32():
-	execfile('kroll/site_scons/win32.py')
-	build.env.Append(CCFLAGS=['/EHsc'])
-	if build.debug:
-		build.env.Append(CPPDEFINES=('WIN32_CONSOLE', 1))
+	build.env.Append(CCFLAGS=['/EHsc', '/GR', '/MD'])
 	build.env.Append(LINKFLAGS=['/DEBUG', '/PDB:${TARGET}.pdb'])
 
-	
-Export('build')
+Export('build', 'debug')
 targets = COMMAND_LINE_TARGETS
-
 clean = 'clean' in targets or ARGUMENTS.get('clean', 0)
 qclean = 'qclean' in targets or ARGUMENTS.get('qclean', 0)
 build.nopackage = ARGUMENTS.get('nopackage', 0)
@@ -89,6 +76,7 @@ if ARGUMENTS.get('test_crash', 0):
 
 ## Kroll *must not be required* for installation
 SConscript('installation/SConscript')
+SConscript('testing/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be

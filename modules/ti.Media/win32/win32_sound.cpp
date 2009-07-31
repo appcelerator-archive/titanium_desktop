@@ -46,7 +46,7 @@ namespace ti
 	{
 		InitGraphBuilder();
 
-		std::string path = URLUtils::AppURLToPath(url);
+		std::string path = URLUtils::URLToPath(url);
 		BSTR pathBstr = _bstr_t(path.c_str());
 
 		// why does a sound event need an HWND?? oh windows..

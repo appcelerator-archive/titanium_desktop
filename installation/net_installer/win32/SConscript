@@ -6,22 +6,20 @@ Import('build')
 Env = build.env.Clone()
 Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
 
-Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32', 'user32', 'shell32', 'advapi32', 'gdi32', 'iphlpapi'])
+Env.Append(LIBS=[
+	'wininet', 'urlmon', 'comctl32', 'comdlg32', 
+	'ole32', 'kernel32', 'user32', 'shell32', 
+	'advapi32', 'gdi32', 'iphlpapi'])
 
-atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
-if not path.exists(atlmfc_path):
-	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
-
-Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
-Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
-
-ccf = Env['CCFLAGS']
+ccf = Env['CCFLAGS'][:]
 if '/MD' in ccf: ccf.remove('/MD')
-ccf.append('/MT')
-ccf.append('/Os')
-ccf.append('/O1')
-Env.Append(CCFLAGS=ccf)
-#Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+ccf.append('/MT') # Allow threads
+ccf.append('/Os') # Favor size optimizations
+ccf.append('/O1') # Optimize for minimum size
+ccf.append('/DUNICODE') # Use wchar_t functions
+ccf.append('/D_UNICODE') # Ditto
+Env['CCFLAGS'] = ccf
+
 sources = Glob("*.cpp") + Env.RES("progress.rc")
 out_file = path.join(build.runtime_build_dir, 'installer', 'Installer.exe')
 

@@ -16,7 +16,7 @@ namespace ti
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
-		AutoUserWindow uw = NULL;
+		AutoUserWindow uw = 0;
 		std::vector<AutoUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
 		std::vector<AutoUserWindow>::iterator i = windows.begin();
 		if (i != windows.end())
@@ -49,7 +49,7 @@ namespace ti
 	
 	void Win32TrayItem::SetIcon(std::string& iconPath)
 	{
-		if (this->trayIconData == NULL)
+		if (this->trayIconData)
 		{
 			HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 			this->trayIconData->hIcon = icon;
@@ -64,7 +64,7 @@ namespace ti
 	
 	void Win32TrayItem::SetHint(std::string& hint)
 	{
-		if (this->trayIconData == NULL)
+		if (this->trayIconData)
 		{
 			// NotifyIconData.szTip has 128 character limit.
 			ZeroMemory(this->trayIconData->szTip, 128);
@@ -79,16 +79,17 @@ namespace ti
 	
 	void Win32TrayItem::Remove()
 	{
-		if (this->trayIconData == NULL)
+		if (this->trayIconData)
 		{
 			Shell_NotifyIcon(NIM_DELETE, this->trayIconData);
-			this->trayIconData = NULL;
+			this->trayIconData = 0;
 		}
 	}
 
 	void Win32TrayItem::HandleRightClick()
 	{
-		if (this->oldNativeMenu) {
+		if (this->oldNativeMenu)
+		{
 			DestroyMenu(this->oldNativeMenu);
 			this->oldNativeMenu = 0;
 		}
@@ -112,11 +113,13 @@ namespace ti
 		if (callback.isNull())
 			return;
 
-		try {
+		try
+		{
 			ValueList args;
 			callback->Call(args);
-
-		} catch (ValueException& e) {
+		}
+		catch (ValueException& e)
+		{
 			Logger* logger = Logger::Get("UI.Win32TrayItem");
 			SharedString ss = e.DisplayString();
 			logger->Error("Tray icon callback failed: %s", ss->c_str());
