@@ -74,8 +74,8 @@
 			<Tool
 				Name="VCManifestTool"
 				ManifestResourceFile="$(TargetFileName).$(ConfigurationName).manifest"
-				SuppressStartupBanner="false"
-				VerboseOutput="true"
+				SuppressStartupBanner="true"
+				VerboseOutput="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
