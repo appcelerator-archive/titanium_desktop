@@ -13,6 +13,7 @@
 	var initialized = false;
 	var window = null;
 	var refresh_components = true;
+	var update_check_timer = null;
 	
 	function send(qsv,async,timeout)
 	{
@@ -199,6 +200,10 @@
 	{
 		try
 		{
+			if (!Titanium.Network.online)
+			{
+				return;
+			}
 			limit = (limit==undefined) ? 1 : limit;
 			var url = Titanium.App.getStreamURL("release-list");
 			var xhr = Titanium.Network.createHTTPClient();
@@ -355,6 +360,11 @@
 	
 	Titanium.API.addEventListener(Titanium.EXIT, function(event)
 	{
+		if (update_check_timer)
+		{
+			window.clearTimeout(update_check_timer);
+			update_check_timer=null;
+		}
 		if (initialized)
 		{
 			window = null;
@@ -389,7 +399,7 @@
 			send({'event':'ti.start'});
 			
 			// schedule the update check
-			window.setTimeout(function(){
+			update_check_timer = window.setTimeout(function(){
 				checkForUpdate();
 			},update_check_delay);
 		}

@@ -8,7 +8,7 @@
 	{
 		if (initialized && db)
 		{
-			Titanium.API.debug("Shuttig down tinetworkmodule.js");
+			Titanium.API.debug("Shutting down tinetworkmodule.js");
 			db.close();
 			db = null;
 		}

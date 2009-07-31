@@ -2,7 +2,7 @@
 Import('build')
 import os
 
-modules = ['App','UI','Network','Growl','Filesystem','Media','Desktop','Platform','Process','Notification','Monkey','Analytics','Database']
+modules = ['App','UI','Network','Growl','Filesystem','Media','Desktop','Platform','Process','Notification','Monkey','Analytics','Database','Worker']
 
 for module in modules:
 	module = "ti.%s" % module

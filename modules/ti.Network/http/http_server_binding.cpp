@@ -93,7 +93,6 @@ namespace ti
 			this->socket = NULL;
 		}
 		this->callback = NULL;
-		NetworkBinding::RemoveBinding(this);
 	}
 	void HTTPServerBinding::Close(const ValueList& args, SharedValue result)
 	{
