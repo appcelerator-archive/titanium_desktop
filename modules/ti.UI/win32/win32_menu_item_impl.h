@@ -37,9 +37,6 @@ namespace ti
 		void Disable();
 		void SetLabel(std::string label);
 		void SetIcon(std::string icon_path);
-		
-		void Mark();
-		void Unmark();
 
 		HMENU GetMenu();
 		HMENU GetMenuBar();
