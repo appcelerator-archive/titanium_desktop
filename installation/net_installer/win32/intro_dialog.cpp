@@ -60,19 +60,29 @@ namespace ti
 		newFontStruct.lfHeight = 30;
 		HFONT newFont = CreateFontIndirect(&newFontStruct);
 		SendMessage(nameLabel, WM_SETFONT, (WPARAM)newFont, LPARAM(0));
-		SendMessage(nameLabel, WM_SETTEXT, 0, (LPARAM) app->name.c_str());
+
+		std::wstring wideAppName = KrollUtils::UTF8ToWide(app->name);
+		SendMessage(nameLabel, WM_SETTEXT, 0, (LPARAM) wideAppName.c_str());
 
 		string version = "Unknown";
 		if (!app->version.empty())
 			version = app->version;
 		if (!updateFile.empty())
 			version.append(" (Update)");
-		SendMessage(versionLabel, WM_SETTEXT, 0, (LPARAM) version.c_str());
+
+		std::wstring wideVersion = KrollUtils::UTF8ToWide(app->version);
+		SendMessage(versionLabel, WM_SETTEXT, 0, (LPARAM) wideVersion.c_str());
 
 		if (!app->publisher.empty())
-			SendMessage(publisherLabel, WM_SETTEXT, 0, (LPARAM) app->publisher.c_str());
+		{
+			std::wstring widePublisher = KrollUtils::UTF8ToWide(app->publisher);
+			SendMessage(publisherLabel, WM_SETTEXT, 0, (LPARAM) widePublisher.c_str());
+		}
 		if (!app->url.empty())
-			SendMessage(urlLabel, WM_SETTEXT, 0, (LPARAM) app->url.c_str());
+		{
+			std::wstring wideURL = KrollUtils::UTF8ToWide(app->url);
+			SendMessage(urlLabel, WM_SETTEXT, 0, (LPARAM) wideURL.c_str());
+		}
 
 		// Set license text
 		string licenseText = app->GetLicenseText();
@@ -83,7 +93,7 @@ namespace ti
 
 			// *wince* -- I can't believe I'm about to do this
 			int width = 530;
-			int height = 260;
+			int height = 270;
 			SetWindowPos(hwnd, NULL, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 			int installBoxX = 10;
@@ -99,7 +109,8 @@ namespace ti
 		}
 		else
 		{
-			SendMessage(licenseTextBox, WM_SETTEXT, 0, (LPARAM) licenseText.c_str());
+			std::wstring wideLicense = KrollUtils::UTF8ToWide(licenseText);
+			SendMessage(licenseTextBox, WM_SETTEXT, 0, (LPARAM) wideLicense.c_str());
 		}
 
 		// Hide installation location controls when this isn't a full app installation
@@ -109,7 +120,8 @@ namespace ti
 			::ShowWindow(startMenuCheck , SW_HIDE);
 		}
 
-		SendMessage(installLocationText, WM_SETTEXT, 0, (LPARAM) appInstallPath.c_str());
+		std::wstring wideAppInstallPath = KrollUtils::UTF8ToWide(appInstallPath);
+		SendMessage(installLocationText, WM_SETTEXT, 0, (LPARAM) wideAppInstallPath.c_str());
 
 		// Set intro dialog icon
 		SendMessage(hwnd, WM_SETICON, (WPARAM)true, (LPARAM)mainIcon);
@@ -148,7 +160,8 @@ namespace ti
 			{
 				std::string path = KrollUtils::WideToUTF8(pathW);
 				appInstallPath = FileUtils::Join(path.c_str(), app->name.c_str(), NULL);
-				SendMessage(installLocationText, WM_SETTEXT, 0, (LPARAM) appInstallPath.c_str());
+				std::wstring wideAppInstallPath = KrollUtils::UTF8ToWide(appInstallPath);
+				SendMessage(installLocationText, WM_SETTEXT, 0, (LPARAM) wideAppInstallPath.c_str());
 			}
 
 			IMalloc * imalloc = 0;
