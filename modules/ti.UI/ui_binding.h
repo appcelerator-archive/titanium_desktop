@@ -75,8 +75,7 @@ namespace ti
 		virtual void SetContextMenu(SharedPtr<MenuItem>) = 0;
 		virtual void SetIcon(SharedString icon_path) = 0;
 		virtual SharedPtr<TrayItem> AddTray(SharedString icon_path,
-			SharedKMethod cb_single_click,
-			SharedKMethod cb_double_click) = 0;
+		                                    SharedKMethod cb) = 0;
 
 		void _GetIdleTime(const ValueList& args, SharedValue result);
 

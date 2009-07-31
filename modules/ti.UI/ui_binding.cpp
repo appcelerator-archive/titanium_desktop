@@ -323,12 +323,10 @@ namespace ti
 		if (icon_path.isNull())
 			return;
 
-		SharedKMethod cb_single_click = SharedKMethod(NULL);
-		SharedKMethod cb_double_click = SharedKMethod(NULL);
-		GET_ARG(1, Method, cb_single_click);
-		GET_ARG(2, Method, cb_double_click);
+		SharedKMethod cb = SharedKMethod(NULL);
+		GET_ARG(1, Method, cb);
 
-		SharedPtr<TrayItem> item = this->AddTray(icon_path, cb_single_click, cb_double_click);
+		SharedPtr<TrayItem> item = this->AddTray(icon_path, cb);
 
 		UIModule::AddTrayItem(item);
 		result->SetObject(item);
