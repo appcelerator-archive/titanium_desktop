@@ -1,6 +1,9 @@
 #include "StdAfx.h"
 #include "main_dialog.h"
 
+#include <string>
+
+extern std::string GetModuleInfo(HMODULE hMod);
 CMainDialog::CMainDialog(void)
 {
 	hModlibeay32 = NULL;
@@ -21,39 +24,74 @@ LRESULT CMainDialog::OnInitDialog(UINT uMsg, WPARAM wparam, LPARAM lparam, BOOL 
 
 	if ( hModlibeay32 )
 	{
-		TCHAR szBuf[MAX_PATH];
-		DWORD dwRet = ::GetModuleFileName(hModlibeay32, szBuf, MAX_PATH);
-		if ( dwRet != 0)
+		std::string sOut = GetModuleInfo(hModlibeay32);
+		if (!sOut.empty())
 		{
-			::SetDlgItemText(this->m_hWnd, IDC_EDIT1,szBuf);
+			int charLen = MAX_PATH;
+			TCHAR szTmp[MAX_PATH] = {0};
+			if ( MultiByteToWideChar(CP_ACP, 0, sOut.c_str(), (int)sOut.length(), szTmp, charLen ) )
+			{
+				::SetDlgItemText(this->m_hWnd, IDC_EDIT1,szTmp);
+			}
 		}
 	}
+	else 
+	{
+		::SetDlgItemText(this->m_hWnd, IDC_EDIT1,_T("libeay32.dll not found in DLL search path"));
+	}
+
 	if ( hModssleay32 )
 	{
-		TCHAR szBuf[MAX_PATH];
-		DWORD dwRet = ::GetModuleFileName(hModssleay32, szBuf, MAX_PATH);
-		if ( dwRet != 0)
+		std::string sOut = GetModuleInfo(hModssleay32);
+		if (!sOut.empty())
 		{
-			::SetDlgItemText(this->m_hWnd, IDC_EDIT2,szBuf);
+			int charLen = MAX_PATH;
+			TCHAR szTmp[MAX_PATH] = {0};
+			if ( MultiByteToWideChar(CP_ACP, 0, sOut.c_str(), (int)sOut.length(), szTmp, charLen ) )
+			{
+				::SetDlgItemText(this->m_hWnd, IDC_EDIT2,szTmp);
+			}
 		}
 	}
+	else 
+	{
+		::SetDlgItemText(this->m_hWnd, IDC_EDIT3,_T("ssleay32.dll not found in DLL search path"));
+	}
+
 	if ( hModzlib )
 	{
-		TCHAR szBuf[MAX_PATH];
-		DWORD dwRet = ::GetModuleFileName(hModzlib, szBuf, MAX_PATH);
-		if ( dwRet != 0)
+		std::string sOut = GetModuleInfo(hModzlib);
+		if (!sOut.empty())
 		{
-			::SetDlgItemText(this->m_hWnd, IDC_EDIT3,szBuf);
+			int charLen = MAX_PATH;
+			TCHAR szTmp[MAX_PATH] = {0};
+			if ( MultiByteToWideChar(CP_ACP, 0, sOut.c_str(), (int)sOut.length(), szTmp, charLen ) )
+			{
+				::SetDlgItemText(this->m_hWnd, IDC_EDIT3,szTmp);
+			}
 		}
 	}
+	else 
+	{
+		::SetDlgItemText(this->m_hWnd, IDC_EDIT3,_T("zlib2.dll not found in DLL search path"));
+	}
+
 	if ( hModlibxml2 )
 	{
-		TCHAR szBuf[MAX_PATH];
-		DWORD dwRet = ::GetModuleFileName(hModlibxml2, szBuf, MAX_PATH);
-		if ( dwRet != 0)
+		std::string sOut = GetModuleInfo(hModlibxml2);
+		if (!sOut.empty())
 		{
-			::SetDlgItemText(this->m_hWnd, IDC_EDIT4,szBuf);
+			int charLen = MAX_PATH;
+			TCHAR szTmp[MAX_PATH] = {0};
+			if ( MultiByteToWideChar(CP_ACP, 0, sOut.c_str(), (int)sOut.length(), szTmp, charLen ) )
+			{
+				::SetDlgItemText(this->m_hWnd, IDC_EDIT4,szTmp);
+			}
 		}
+	}
+	else 
+	{
+		::SetDlgItemText(this->m_hWnd, IDC_EDIT4,_T("libxml2.dll not found in DLL search path"));
 	}
 
 	return TRUE;

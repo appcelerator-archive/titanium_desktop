@@ -208,6 +208,10 @@
 				RelativePath=".\ti_depends.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\verinfo.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -232,6 +236,10 @@
 			</File>
 			<File
 				RelativePath=".\ti_depends.h"
+				>
+			</File>
+			<File
+				RelativePath=".\verinfo.h"
 				>
 			</File>
 		</Filter>
