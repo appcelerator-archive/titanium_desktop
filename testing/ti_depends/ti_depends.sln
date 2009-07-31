@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ti_depends", "ti_depends\ti_depends.vcproj", "{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ti_depends", "ti_depends.vcproj", "{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SCONS", "SCONS", "{5354EE5F-0756-4D80-93F9-8B0BD546A07F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CA435353-68A6-4663-A2FA-7DB440E37894}"
 	ProjectSection(SolutionItems) = preProject
 		SConscript = SConscript
+		ti_depends.exe.Debug.manifest = ti_depends.exe.Debug.manifest
+		ti_depends.exe.Release.manifest = ti_depends.exe.Release.manifest
 	EndProjectSection
 EndProject
 Global
@@ -14,10 +16,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}.Debug|Win32.Build.0 = Debug|Win32
-		{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}.Release|Win32.ActiveCfg = Release|Win32
-		{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}.Release|Win32.Build.0 = Release|Win32
+		{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}.Debug|Win32.ActiveCfg = Debug|Win32
+		{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}.Debug|Win32.Build.0 = Debug|Win32
+		{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}.Release|Win32.ActiveCfg = Release|Win32
+		{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

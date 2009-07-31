@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="8.00"
 	Name="ti_depends"
-	ProjectGUID="{5BF004FF-07DB-4FBF-A6C6-94CE75FB25C6}"
+	ProjectGUID="{92C380D2-7AD6-4E3B-ACDD-4065CBE14D89}"
 	RootNamespace="ti_depends"
 	Keyword="Win32Proj"
 	>
@@ -63,6 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
+				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -72,6 +73,9 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				ManifestResourceFile="$(TargetFileName).$(ConfigurationName).manifest"
+				SuppressStartupBanner="false"
+				VerboseOutput="true"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -98,7 +102,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfATL="1"
-			ATLMinimizesCRunTimeLibraryUsage="true"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -138,6 +142,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
+				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -149,6 +154,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				ManifestResourceFile="$(TargetFileName).$(ConfigurationName).manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -179,10 +185,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\main_dialog.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -212,6 +214,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\main_dialog.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\main_dialog.h"
 				>
@@ -245,14 +251,6 @@
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\ti_depends.exe.Debug.manifest"
-			>
-		</File>
-		<File
-			RelativePath=".\ti_depends.exe.Release.manifest"
 			>
 		</File>
 	</Files>

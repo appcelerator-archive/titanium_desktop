@@ -3,8 +3,8 @@
   <dependency>
     <dependentAssembly>
       <assemblyIdentity type='win32' 
-                        name='Microsoft.VC80.CRT' 
-                        version='8.0.50727.4053' 
+                        name='Microsoft.VC80.DebugCRT' 
+                        version='8.0.50727.762' 
                         processorArchitecture='x86' />
     </dependentAssembly>
   </dependency>

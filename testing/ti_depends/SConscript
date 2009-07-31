@@ -4,9 +4,20 @@ Import('build')
 Import('debug')
 
 Env = build.env.Clone()
-Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
+#Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
 
-Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32', 'user32', 'shell32', 'advapi32', 'gdi32', 'iphlpapi'])
+Env.Append(LIBS=['wininet', 'urlmon', 'comctl32', 'comdlg32', 'ole32', 'kernel32', 'user32', 'shell32', 'advapi32', 'gdi32', 'iphlpapi', 'winspool', 'shell32', 'oleaut32', 'uuid', 'odbc32', 'odbccp32'])
+ 
+
+atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc'
+if not path.exists(atlmfc_path):
+	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc'
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
+
+atlmfc_path = 'C:\\Program Files\\Microsoft Visual Studio 8\\VC\\atlmfc\\lib'
+if not path.exists(atlmfc_path):
+	atlmfc_path = 'C:\\Program Files (x86)\\Microsoft Visual Studio 8\\VC\\atlmfc\\lib'
+Env.Append(LIBPATH=[path.join(atlmfc_path, 'i386')])
 
 ccf = Env['CCFLAGS'][:]
 cflags = Env['CPPDEFINES'][:]
@@ -28,13 +39,14 @@ Env.Append(CPPDEFINES = ('_ATL_STATIC_REGISTRY', 1))
 Env.Append(CPPDEFINES = ('_UNICODE', 1))
 Env.Append(CPPDEFINES = ('UNICODE', 1))
 
-# This following causes linking to fail on my machine - Martin
-# Env.Append(CPPDEFINES = ('_ATL_MIN_CRT', 1))
-# Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
-
 sources = Glob("*.cpp") + Env.RES("ti_depends.rc")
 out_file = path.join(build.dir, 'ti_depends', 'ti_depends.exe')
 
 p = Env.Program(out_file, sources)
 Alias('tidepends', p)
 
+# runtime_manifest = path.join(build.cwd(), 'ti_depends.exe.Debug.manifest')
+# if not debug:
+# 	runtime_manifest = path.join(build.cwd(), 'ti_depends.exe.Release.manifest')
+# 	
+# Env.AddPostAction(p, 'mt.exe -nologo -verbose -manifest "%s" -outputresource:"%s;#1"' % (runtime_manifest, out_file))
