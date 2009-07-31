@@ -14,15 +14,15 @@ if not path.exists(atlmfc_path):
 Env.Append(CPPPATH=[path.join(atlmfc_path, 'include')])
 Env.Append(LIBPATH=[path.join(atlmfc_path, 'lib')])
 
-ccf = Env['CCFLAGS']
+ccf = Env['CCFLAGS'][:]
 if '/MD' in ccf: ccf.remove('/MD')
-ccf.append('/MT')
-ccf.append('/Os')
-ccf.append('/O1')
-ccf.append('/DUNICODE')
-ccf.append('/D_UNICODE')
-#Env['CCFLAGS']=ccf
-#Env.Append(LINKFLAGS=['/SUBSYSTEM:CONSOLE'])
+ccf.append('/MT') # Allow threads
+ccf.append('/Os') # Favor size optimizations
+ccf.append('/O1') # Optimize for minimum size
+ccf.append('/DUNICODE') # Use wchar_t functions
+ccf.append('/D_UNICODE') # Ditto
+Env['CCFLAGS'] = ccf
+
 sources = Glob("*.cpp") + Env.RES("progress.rc")
 out_file = path.join(build.runtime_build_dir, 'installer', 'Installer.exe')
 
