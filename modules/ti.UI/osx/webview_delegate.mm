@@ -33,6 +33,7 @@
 	[webPrefs setPlugInsEnabled:YES]; 
 	[webPrefs setJavaEnabled:YES];
 	[webPrefs setJavaScriptEnabled:YES];
+	[webPrefs setJavaScriptCanOpenWindowsAutomatically:YES];
 
 	if ([webPrefs respondsToSelector:@selector(setDatabasesEnabled:)])
 	{
