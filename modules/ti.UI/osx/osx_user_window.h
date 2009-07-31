@@ -5,13 +5,6 @@
  */
 #ifndef OSX_USER_WINDOW_H
 #define OSX_USER_WINDOW_H
-
-#import "preinclude.h"
-#import <WebKit/WebKit.h>
-#import "../menu_item.h"
-#import "../user_window.h"
-#import "native_window.h"
-
 namespace ti
 {
 	class OSXUIBinding;
@@ -20,7 +13,7 @@ namespace ti
 	class OSXUserWindow : public UserWindow
 	{
 		public:
-			OSXUserWindow(WindowConfig* config, SharedUserWindow& parent);
+			OSXUserWindow(WindowConfig* config, AutoUserWindow& parent);
 			~OSXUserWindow();
 		public:
 
@@ -95,7 +88,7 @@ namespace ti
 			Bounds GetBounds();
 			void SetBounds(Bounds bounds);
 			std::string GetTitle();
-			void SetTitle(std::string& title);
+			void SetTitleImpl(std::string& title);
 			std::string GetURL();
 			void SetURL(std::string& url);
 			bool IsResizable();
@@ -113,37 +106,30 @@ namespace ti
 			bool IsTopMost();
 			void SetTopMost(bool topmost);
 
-			void SetMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetMenu();
-			void SetContextMenu(SharedPtr<MenuItem> menu);
-			SharedPtr<MenuItem> GetContextMenu();
-			void SetIcon(SharedString icon_path);
-			SharedString GetIcon();
+			void SetMenu(AutoMenu menu);
+			AutoMenu GetMenu();
+			void SetContextMenu(AutoMenu menu);
+			AutoMenu GetContextMenu();
+			void SetIcon(std::string& iconPath);
+			std::string& GetIcon();
 
 			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
 			void Unfocused();
+			
+			virtual void ShowInspector(bool console=false);
 
 		private:
 			NativeWindow *nativeWindow;
-			bool opened;
-			bool closed;
-			bool topmost;
 			bool focused;
-			SharedPtr<MenuItem> menu;
-			SharedPtr<MenuItem> context_menu;
-			SharedPtr<OSXUIBinding> osx_binding;
+			AutoPtr<OSXMenu> menu;
+			AutoPtr<OSXMenu> contextMenu;
+			AutoPtr<OSXUIBinding> osxBinding;
 			static bool initial;
+			std::string iconPath;
 
 			NSScreen* GetWindowScreen();
 			NSRect CalculateWindowFrame(double, double, double, double);
-			double real_x;
-			double real_y;
-			double real_w;
-			double real_h;
-
-			void InstallMenu(OSXMenuItem *menu);
-
 			DISALLOW_EVIL_CONSTRUCTORS(OSXUserWindow);
 	};
 }

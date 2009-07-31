@@ -161,9 +161,6 @@ namespace ti
 	}
 	void DatabaseBinding::Open(const ValueList& args, SharedValue result)
 	{
-		//FIXME: name can be optional which is "unnamed"
-		args.VerifyException("open", "s?");
-		
 		if (database)
 		{
 			delete database;
@@ -176,7 +173,7 @@ namespace ti
 		}
 		std::string appid = host->GetApplicationID();
 		std::string dbdir = FileUtils::GetApplicationDataDirectory(appid);
-		dbname = args.at(0)->ToString();
+		dbname = args.GetString(0, "unnamed");
 		origin = GetSecurityOrigin(appid);
 
 		static Logger* logger = Logger::Get("Database");

@@ -1,0 +1,26 @@
+#appname:UnitTest Harness
+#version:0.5.0
+#appid:com.titaniumapp.unittest
+#publisher:Appcelerator
+#image:default_app_logo.png
+#url:http://titaniumapp.com
+#guid:CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4
+#desc:Unit Test Harness
+runtime:0.4
+api:0.4
+javascript:0.4
+tianalytics:0.4
+tiapp:0.4
+tifilesystem:0.4
+tiplatform:0.4
+tiui:0.4
+python:0.4
+ruby:0.4
+tidesktop:0.4
+tigrowl:0.4
+timedia:0.4
+timonkey:0.4
+tinetwork:0.4
+tinotification:0.4
+tiprocess:0.4
+tidatabase:0.4

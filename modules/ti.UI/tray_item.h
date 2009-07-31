@@ -11,22 +11,31 @@
 
 namespace ti
 {
-	class TrayItem : public StaticBoundObject
+	class TrayItem : public AccessorBoundObject
 	{
 
 	public:
-		TrayItem();
+		TrayItem(std::string& iconURL);
 		~TrayItem();
 
-		virtual void SetIcon(SharedString icon_path) = 0;
-		virtual void SetMenu(SharedPtr<MenuItem> menu) = 0;
-		virtual void SetHint(SharedString hint) = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
+		virtual void SetMenu(AutoMenu menu) = 0;
+		virtual void SetHint(std::string& hint) = 0;
 		virtual void Remove() = 0;
 
 		void _SetIcon(const ValueList& args, SharedValue result);
 		void _SetMenu(const ValueList& args, SharedValue result);
 		void _SetHint(const ValueList& args, SharedValue result);
+		void _GetIcon(const ValueList& args, SharedValue result);
+		void _GetMenu(const ValueList& args, SharedValue result);
+		void _GetHint(const ValueList& args, SharedValue result);
 		void _Remove(const ValueList& args, SharedValue result);
+
+	protected:
+		AutoMenu menu;
+		std::string iconURL;
+		std::string iconPath;
+		std::string hint;
 
 	};
 }

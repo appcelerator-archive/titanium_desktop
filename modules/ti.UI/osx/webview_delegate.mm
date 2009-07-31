@@ -15,23 +15,25 @@
 
 @implementation WebViewDelegate
 
-- (void)setup 
+-(void)setupPreferences
 {
 	AppConfig *appConfig = AppConfig::Instance();
 	std::string appid = appConfig->GetAppID();
-	NSString *appID = [NSString stringWithCString:appid.c_str() encoding:NSUTF8StringEncoding];
-	
-	[webView setPreferencesIdentifier:appID];
-	
-	WebPreferences *webPrefs = [[WebPreferences alloc] initWithIdentifier:appID];
-	// This indicates that WebViews in this app will not browse multiple pages, but rather show a small number.
-	// this reduces memory cache footprint significantly.
+	NSString *appID = [NSString stringWithUTF8String:appid.c_str()];
+	[[window webView] setPreferencesIdentifier:appID];
 
+	WebPreferences *webPrefs = [[WebPreferences alloc] initWithIdentifier:appID];
+
+	// This indicates that WebViews in this app will not browse multiple pages,
+	// but rather show a small number. This reduces memory cache footprint
+	// significantly.
 	[webPrefs setCacheModel:WebCacheModelDocumentBrowser];
+
 	[webPrefs setDeveloperExtrasEnabled:host->IsDebugMode()];
 	[webPrefs setPlugInsEnabled:YES]; 
 	[webPrefs setJavaEnabled:YES];
 	[webPrefs setJavaScriptEnabled:YES];
+
 	if ([webPrefs respondsToSelector:@selector(setDatabasesEnabled:)])
 	{
 		[webPrefs setDatabasesEnabled:YES];
@@ -42,13 +44,13 @@
 	}
 	[webPrefs setDOMPasteAllowed:YES];
 	[webPrefs setUserStyleSheetEnabled:NO];
-	
+
 	// Setup the DB to store it's DB under our data directory for the app
-	NSString *datadir = [NSString stringWithCString:kroll::FileUtils::GetApplicationDataDirectory(appid).c_str() encoding:NSUTF8StringEncoding];
+	NSString *datadir = [NSString stringWithUTF8String:
+		kroll::FileUtils::GetApplicationDataDirectory(appid).c_str()];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
 
 	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
-
 	[standardUserDefaults
 		setObject:[NSNumber numberWithInt:1]
 		forKey:WebKitEnableFullDocumentTeardownPreferenceKey];
@@ -57,71 +59,64 @@
 		forKey:@"WebDatabaseDirectory"];
 	[standardUserDefaults synchronize];
 
-	[webView setPreferences:webPrefs];
+	[[window webView] setPreferences:webPrefs];
 	[webPrefs release];
 
-	// this stuff adjusts the webview/window for chromeless windows.
+}
+
+-(id)initWithWindow:(NativeWindow*)inWindow
+{
+	self = [super init];
+	if (self == nil)
+		return self;
+
+	window = inWindow;
+	logger = Logger::Get("UI.WebViewDelegate");
+	frameToGlobalObject = new std::map<WebFrame*, SharedKObject>();
+	host = Host::GetInstance();
+	WebView* webView = [window webView];
+
+	[self setupPreferences];
+
+	// This stuff adjusts the webview/window for chromeless windows.
 	WindowConfig *o = [window config];
-	
-	if (o->IsUsingScrollbars())
-	{
+	if (o->IsUsingScrollbars()) {
 		[[[webView mainFrame] frameView] setAllowsScrolling:YES];
-	}
-	else
-	{
+	} else {
 		[[[webView mainFrame] frameView] setAllowsScrolling:NO];
 	}
-	if (o->IsResizable() && o->IsUsingChrome())
-	{
+	if (o->IsResizable() && o->IsUsingChrome()) {
 		[window setShowsResizeIndicator:YES];
-	}
-	else
-	{
+	} else {
 		[window setShowsResizeIndicator:NO];
 	}
-	
+
 	[webView setBackgroundColor:[NSColor clearColor]];
 	[webView setAutoresizingMask:NSViewHeightSizable | NSViewWidthSizable];
 	[webView setShouldCloseWithWindow:NO];
-	
+
 	// if we use a textured window mask, this is on by default which we don't want
 	[window setMovableByWindowBackground:NO];
-}
 
--(id)initWithWindow:(NativeWindow*)win host:(Host*)h
-{
-	self = [super init];
+	// TI-303 we need to add safari UA to our UA to resolve broken
+	// sites that look at Safari and not WebKit for UA
+	NSString *appName = [NSString
+		stringWithFormat:@"Version/4.0 Safari/528.16 %s/%s",
+		PRODUCT_NAME, STRING(PRODUCT_VERSION)];
+	[webView setApplicationNameForUserAgent:appName];
 
-	logger = Logger::Get("UI.WebViewDelegate");
-	if (self != nil)
-	{
-		window = win;
-		host = h;
-		webView = [window webView];
-		frames = new std::map<WebFrame*,SharedKObject>();
-		[self setup];
-		[webView setFrameLoadDelegate:self];
-		[webView setUIDelegate:self];
-		[webView setResourceLoadDelegate:self];
-		[webView setPolicyDelegate:self];
+	// place our user agent string in the global so we can later use it
+	SharedKObject global = host->GetGlobalObject();
+	NSString* fullUserAgent = [webView userAgentForURL:
+		[NSURL URLWithString:@"http://titaniumapp.com"]];
+	global->SetString("userAgent", [fullUserAgent UTF8String]);
 
-		SharedKObject global = host->GetGlobalObject();
-		const char* version = global->Get("version")->ToString();
-		//TI-303 we need to add safari UA to our UA to resolve broken
-		//sites that look at Safari and not WebKit for UA
-		NSString *useragent = [NSString stringWithFormat:@"Version/4.0 Safari/528.16 %s/%s",PRODUCT_NAME,version];
-		[webView setApplicationNameForUserAgent:useragent];
-		// place our user agent string in the global so we can later use it
-		const char *ua = [[webView userAgentForURL:[NSURL URLWithString:@"http://titaniumapp.com"]] UTF8String];
-		global->Set("userAgent",Value::NewString(ua));
-	}
 	return self;
 }
 
 -(void)dealloc
 {
-	delete frames;
-	[url release];
+	delete frameToGlobalObject;
 	[super dealloc];
 }
 
@@ -130,17 +125,6 @@
 	WindowConfig *config = [window config];
 	config->SetVisible(true);
 	[window makeKeyAndOrderFront:nil];
-}
-
-- (NSURL *)url
-{
-	return url;
-}
-
--(void)setURL:(NSURL*)newURL
-{
-	[url release];
-	url = [newURL copy];
 }
 
 -(DOMElement*)findAnchor:(DOMNode*)node
@@ -156,251 +140,153 @@
 	return nil;
 }
 
--(BOOL)newWindowAction:(NSDictionary*)actionInformation request:(NSURLRequest*)request listener:(id < WebPolicyDecisionListener >)listener
-{
-	NSDictionary* elementDict = [actionInformation objectForKey:WebActionElementKey];
-	DOMNode *target = [elementDict objectForKey:WebElementDOMNodeKey];
-	DOMElement *anchor = [self findAnchor:target];
-	
-	
-	NSString* frameName = 0;
-	if (anchor && (frameName = [anchor getAttribute:@"target"]))
-	{
-		if ([frameName isEqualToString:@"ti:systembrowser"] ||
-			[frameName isEqualToString:@"_blank"])
-		{
-			NSURL *newURL = [request URL];
-			[[NSWorkspace sharedWorkspace] openURL:newURL];
-			[listener ignore];
-			return NO;
-		}
-	}
-
-	NSString *protocol = [[actionInformation objectForKey:WebActionOriginalURLKey] scheme]; 
-	NSURL *newURL = [request URL];
-	if ([newURL isEqual:url])
-	{
-		[listener use];
-		return NO;
-	}
-	
-	if ([protocol isEqual:@"app"])
-	{
-		
-		// if ([[TiController instance] shouldOpenInNewWindow])
-		// {
-		// 	// if we're trying to open an internal page, we essentially need to always open a 
-		// 	// new document and later close the old document.  we have to do this because 
-		// 	// each document could have a different window spec.
-		// 	
-		// 	TiDocument *doc = [[TiController instance] createDocument:newURL visible:YES config:nil];
-		// 	[doc setPrecedent:self];
-		// 	
-		// 	//TODO: window opens slightly offset from current doc, make sure we 
-		// 	//get the bounds from self and set on doc
-		// 	[listener ignore];
-		// }
-		// else
-		// {
-		// 	// tell him to open in the same document and set our new URL
-		// 	[self setURL:newURL];
-		// 	[listener use];
-		// }
-		[self setURL:newURL];
-		[listener use];
-	}
-	else if ([protocol isEqual:@"http"] || [protocol isEqual:@"https"])
-	{
-		// TODO: we need to probably make this configurable to support
-		// opening the URL in the system browser (code below). for now 
-		// we just open inside the same frame
-		//[[NSWorkspace sharedWorkspace] openURL:newURL];
-		[listener use];
-	}
-	return YES;
-}
-
 #pragma mark -
 #pragma mark WebPolicyDelegate
 
 - (void)webView:(WebView *)sender decidePolicyForNewWindowAction:(NSDictionary *)actionInformation request:(NSURLRequest *)request newFrameName:(NSString *)frameName decisionListener:(id < WebPolicyDecisionListener >)listener
 {
-	if (NO == [self newWindowAction:actionInformation request:request listener:listener])
-	{
-		return;
-	}
-	[listener ignore];
-}
+	NSString *protocol = 
+		[[actionInformation objectForKey:WebActionOriginalURLKey] scheme]; 
 
-- (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary*) actionInformation request:(NSURLRequest*) request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
-{
-	int type = [[actionInformation objectForKey:WebActionNavigationTypeKey] intValue];
-	
-	switch (type)
+	if (frameName &&
+		([frameName isEqualToString:@"ti:systembrowser"] ||
+		[frameName isEqualToString:@"_blank"]))
 	{
-		case WebNavigationTypeBackForward:
-		case WebNavigationTypeReload:
-		{
-			[listener use];
-			return;
-		}
-		case WebNavigationTypeLinkClicked:
-		case WebNavigationTypeFormSubmitted:
-		case WebNavigationTypeFormResubmitted:
-		{
-			break;
-		}
-		case WebNavigationTypeOther:
-		{
-			break;
-		}
-		default:
-		{
-			[listener ignore];
-			return;
-		}
+		NSURL *newURL = [request URL];
+		[[NSWorkspace sharedWorkspace] openURL:newURL];
+		[listener ignore];
 	}
-	NSString *protocol = [[actionInformation objectForKey:WebActionOriginalURLKey] scheme]; 
-	NSURL *newURL = [request URL];
-	if ([newURL isEqual:url])
+	else if ([[request URL] isEqual:[sender mainFrameURL]])
 	{
-		[listener use];
-		return ;
-	}
-	
-	if ([protocol isEqual:@"app"] || [protocol isEqual:@"ti"])
-	{
-		// we only care about loading new TiDocuments if this is the main frame,
-		// otherwise we're an internal frame of some kind
-		if (frame != [[frame webView] mainFrame]) {
-			[listener use];
-			[self setURL:newURL];
-			return;
-		}
-		[self setURL:newURL];
 		[listener use];
 	}
 	else if ([protocol isEqual:@"http"] || [protocol isEqual:@"https"])
 	{
-		if (NO == [self newWindowAction:actionInformation request:request listener:listener])
-		{
-			return;
-		}
-		
-		[self setURL:newURL];
 		[listener use];
 	}
 	else
 	{
-		logger->Warn("Application attempted to navigate to illegal location: %s",
-			[[newURL absoluteString] UTF8String]);
 		[listener ignore];
 	}
+}
+
+- (void)webView:(WebView *)sender decidePolicyForNavigationAction:(NSDictionary*) actionInformation request:(NSURLRequest*) request frame:(WebFrame*)frame decisionListener:(id <WebPolicyDecisionListener>)listener
+{
+	[listener use];
 }
 
 // WebFrameLoadDelegate Methods
 #pragma mark -
 #pragma mark WebFrameLoadDelegate
 
-- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame
+- (void)registerGlobalObject:(SharedKObject)globalObject forFrame:(WebFrame *)frame
 {
-	(*frames)[frame]=SharedKObject(NULL);
+	(*frameToGlobalObject)[frame] = globalObject;
 }
 
-- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
-{
-	// Only report feedback for the main frame.
-	// set the title on the config in case they
-	// programatically set the title on the window
-	// so that it correctly is reflected in the config 
-	WindowConfig *config = [window config];
-	std::string t = std::string([title UTF8String]);
-	config->SetTitle(t);
-	[window setTitle:title];
-}
-
-- (SharedKObject)inject:(WebScriptObject *)windowScriptObject context:(JSGlobalContextRef)context frame:(WebFrame*)frame store:(BOOL)store
+- (SharedKObject)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame
 {
 	UserWindow* userWindow = [window userWindow];
 	userWindow->RegisterJSContext(context);
 
 	// Track that we've cleared this frame
-	JSObjectRef global_object = JSContextGetGlobalObject(context);
-	KObject *global_bound_object = new KKJSObject(context, global_object);
-	SharedKObject shared_global = global_bound_object;
-	if (store)
-	{
-		(*frames)[frame] = shared_global;
+	JSObjectRef globalObject = JSContextGetGlobalObject(context);
+	SharedKObject globalKObject  = new KKJSObject(context, globalObject);
+	[self registerGlobalObject:globalKObject forFrame:frame];
+
+	return globalKObject;
+}
+
+- (BOOL)isGlobalObjectRegisteredForFrame:(WebFrame*) frame
+{
+	std::map<WebFrame*, SharedKObject>::iterator iter =
+		frameToGlobalObject->find(frame);
+	return iter != frameToGlobalObject->end();
+}
+
+- (SharedKObject)globalObjectForFrame:(WebFrame*) frame
+{
+	std::map<WebFrame*, SharedKObject>::iterator iter =
+		frameToGlobalObject->find(frame);
+	if (iter == frameToGlobalObject->end()) {
+		return NULL;
+	} else {
+		return iter->second;
 	}
-	return shared_global;
+}
+
+- (void)deregisterGlobalObjectForFrame:(WebFrame *)frame
+{
+	std::map<WebFrame*, SharedKObject>::iterator i =
+		frameToGlobalObject->find(frame);
+	frameToGlobalObject->erase(frame);
+}
+
+- (void)webView:(WebView *)sender didStartProvisionalLoadForFrame:(WebFrame *)frame
+{
+	// If this NULL value is registered when the load finishes, we need
+	// to manually inject Titanium into the frame. if the frame isn't in
+	// the map at all -- an error happened and we shouldn't inject Titanium.
+	[self registerGlobalObject:NULL forFrame:frame];
+}
+
+- (void)webView:(WebView *)senderwillCloseFrame:(WebFrame *)frame
+{
+	[self deregisterGlobalObjectForFrame:frame];
+}
+
+- (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
+{
+	std::string newTitle = [title UTF8String];
+	[window userWindow]->SetTitle(newTitle);
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame
 {
-	// we need to inject even in child frames
-	std::map<WebFrame*,SharedKObject>::iterator iter = frames->find(frame);
-	bool scriptCleared = false;
 
-	SharedKObject global_object = SharedKObject(NULL);
-	if (iter != frames->end())
+	if (![self isGlobalObjectRegisteredForFrame:frame])
 	{
-		std::pair<WebFrame*,SharedKObject> pair = (*iter);
-		global_object = pair.second;
-		scriptCleared = global_object.get() != NULL;
-		frames->erase(iter);
-	}
-	else
-	{
-		logger->Error("Tried to clear a non-existant frame: %lx", (long int) frame);
+		// This was a failed load, so do not continue
+		return;
 	}
 
 	JSGlobalContextRef context = [frame globalContext];
-	if (!scriptCleared)
+	SharedKObject global = [self globalObjectForFrame:frame];
+	if (global.isNull())
 	{
-		logger->Info("Page loaded with no <script> tags, manually injecting Titanium object");
-		// return the global object but don't store it since we're forcely
-		// creating it since we need the global_object to be passed below
-		global_object=[self inject:[frame windowObject] context:context frame:frame store:NO];
+		// The load was successful, but this page doesn't have a script tag
+		global = [self registerJSContext:context forFrame:frame];
 	}
 
-
-	NSURL *theurl = [[[frame dataSource] request] URL];
 	// fire load event
-	UserWindow *user_window = [window userWindow];
-	std::string url_str = [[theurl absoluteString] UTF8String];
-	user_window->PageLoaded(global_object, url_str, context);
-	
-	if (![theurl isEqual:url])
-	{
-		[self setURL:theurl];
-	}
+	UserWindow *userWindow = [window userWindow];
+	std::string url = [[[[[frame dataSource] request] URL] absoluteString] UTF8String];
+	userWindow->PageLoaded(global, url, context);
 
-	if (initialDisplay==NO)
+	if (!initialDisplay)
 	{
-		initialDisplay=YES;
 		// cause the initial window to show since it was initially opened hidden
-		// so you don't get the nasty wide screen while content is loading
+		// so you don't get the nasty white screen while content is loading
+		initialDisplay = YES;
 		[window performSelector:@selector(frameLoaded) withObject:nil afterDelay:.005];
 	}
 }
 
 - (void)webView:(WebView *)sender didFailProvisionalLoadWithError:(NSError *)error forFrame:(WebFrame *)frame
 {
+	// The fact that this frame is missing from our list or registered
+	// global contexts means that the frame load failed and we shouldn't
+	// register this context or fire the page loaded message.
+	[self deregisterGlobalObjectForFrame:frame];
 
-	if ([error code]==-999 && [[error domain] isEqual:NSURLErrorDomain])
-	{
-		//this is OK, this is a cancel to a pending web load request and can be ignored...
-		return;
-	}
-
-	Logger* logger = Logger::Get("UI.WebViewDelegate");
-	std::string err = [[NSString stringWithFormat:@"Error loading URL: %@. %@", url,[error localizedDescription]] UTF8String];
-	logger->Error(err);
+	NSString* urlString = [[[[frame dataSource] request] URL] absoluteString];
+	logger->Error("didFailProvisionalLoadWithError (%s): %s",
+		[urlString UTF8String], [[error localizedDescription] UTF8String]);
 
 	// in this case we need to ensure that the window is showing if not initially shown
-	if (initialDisplay==NO)
+	if (!initialDisplay)
 	{
-		initialDisplay=YES;
+		initialDisplay = YES;
 		[window performSelector:@selector(frameLoaded) withObject:nil afterDelay:.005];
 	}
 }
@@ -408,7 +294,7 @@
 - (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowScriptObject forFrame:(WebFrame*)frame 
 {
 	JSGlobalContextRef context = [frame globalContext];
-	[self inject:windowScriptObject context:context frame:frame store:YES];
+	[self registerJSContext:context forFrame:frame];
 }
 
 // WebUIDelegate Methods
@@ -417,24 +303,26 @@
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
 {
-	// this is called when you attempt to create a new child window from this document
-	// for example using window.open
-	NSURL *newurl = [request URL];
-	if (newurl==nil)
+	AutoUserWindow newWindow = 0;
+	NSString *url = [[request URL] relativeString];
+	if ([url length] > 0)
 	{
-		// this will be null in certain cases where the browser want's to call loadURL
-		// on the new webview and he will pass nil .... just open a blank document
-		// and return
-		newurl = [NSURL URLWithString:@"about:blank"];
+		std::string urlStr = [url UTF8String];
+		newWindow = [window userWindow]->CreateWindow(urlStr);
 	}
-	// TiDocument *newDoc = [[TiController instance] createDocument:newurl visible:YES config:nil];
-	// [newDoc setPrecedent:self];
-	// return [newDoc webView];
-	return nil;
+	else
+	{
+		newWindow = [window userWindow]->CreateWindow(new WindowConfig());
+	}
+
+	AutoPtr<OSXUserWindow> osxWindow = newWindow.cast<OSXUserWindow>();
+	osxWindow->Open();
+	return [osxWindow->GetNative() webView];
 }
 
 - (void)webViewShow:(WebView *)sender
 {
+	[window userWindow]->Show();
 }
 
 - (void)webViewClose:(WebView *)wv 
@@ -530,8 +418,9 @@
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
 {
-	logger->Error("didFailLoadingWithError: %s",
-		[[error localizedDescription] UTF8String]);
+	NSString* urlString = [[[dataSource request] URL] absoluteString];
+	logger->Error("didFailLoadingWithError (%s): %s",
+		[urlString UTF8String], [[error localizedDescription] UTF8String]);
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFinishLoadingFromDataSource:(WebDataSource *)dataSource
@@ -540,19 +429,24 @@
 
 - (void)webView:(WebView *)wv runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
-	NSRunInformationalAlertPanel([window title], // title
-		message, // message
-		NSLocalizedString(@"OK", @""), // default button
-		nil, // alt button
-		nil); // other button
+	if (!initialDisplay)
+	{
+		initialDisplay = YES;
+		[window frameLoaded];
+	}
 
 	// only show if already visible
 	if ([window userWindow]->IsVisible())
 	{
 		[window userWindow]->Show();
 	}
-}
 
+	NSRunInformationalAlertPanel([window title], // title
+		message, // message
+		NSLocalizedString(@"OK", @""), // default button
+		nil, // alt button
+		nil); // other button
+}
 
 - (BOOL)webView:(WebView *)wv runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
@@ -571,36 +465,44 @@
 }
 
 
-- (void)webView:(WebView *)wv runOpenPanelForFileButtonWithResultListener:(id <WebOpenPanelResultListener>)resultListener 
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id<WebOpenPanelResultListener>)resultListener;
 {
 	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
-	[openPanel beginSheetForDirectory:nil 
+	[openPanel setAllowsMultipleSelection:NO];
+	[openPanel setCanChooseDirectories:NO];
+	[openPanel beginSheetForDirectory:nil
 		file:nil 
 		modalForWindow:window
 		modalDelegate:self
 		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
 		contextInfo:resultListener];
-
-	// only show if already visible
-	if ([window userWindow]->IsVisible())
-	{
-		[window userWindow]->Show();
-	}
-	[window userWindow]->Show();
+	[openPanel retain];
+	[resultListener retain];
 }
 
+- (void)webView:(WebView *)sender runOpenPanelForFileButtonWithResultListener:(id<WebOpenPanelResultListener>)resultListener allowMultipleFiles:(BOOL)allowMultipleFiles 
+{
+	NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+	[openPanel setAllowsMultipleSelection:allowMultipleFiles];
+	[openPanel setCanChooseDirectories:NO];
+	[openPanel beginSheetForDirectory:nil
+		file:nil 
+		modalForWindow:window
+		modalDelegate:self
+		didEndSelector:@selector(openPanelDidEnd:returnCode:contextInfo:) 
+		contextInfo:resultListener];
+	[openPanel retain];
+	[resultListener retain];
+}
 
-- (void)openPanelDidEnd:(NSSavePanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo 
+- (void)openPanelDidEnd:(NSOpenPanel *)openPanel returnCode:(int)returnCode contextInfo:(void *)contextInfo 
 {
 	id <WebOpenPanelResultListener>resultListener = (id <WebOpenPanelResultListener>)contextInfo;
-	// only show if already visible
-	if ([window userWindow]->IsVisible())
-	{
-		[window userWindow]->Show();
-	}
-	[window userWindow]->Show();
+
 	if (NSOKButton == returnCode) {
-		[resultListener chooseFilename:[openPanel filename]];
+		[resultListener chooseFilenames:[openPanel filenames]];
+		[resultListener autorelease];
+		[openPanel autorelease];
 	}
 }
 
@@ -644,91 +546,20 @@
 
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems
 {
+	NSMutableArray *menuItems = [[[NSMutableArray alloc] init] autorelease];
+
 	UserWindow *uw = [window userWindow];
-	SharedPtr<MenuItem> menu = uw->GetContextMenu();
-	NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
-	// window takes precedent - try him first
-	if (menu.isNull())
-	{
-		// if no window, try the app context
-		menu = UIModule::GetContextMenu();
+	AutoPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
+	if (menu.isNull()) {
+		menu = UIBinding::GetInstance()->GetContextMenu().cast<OSXMenu>();
 	}
-	if (!menu.isNull())
-	{
-		for (unsigned int c=0;c<menu->Size();c++)
-		{
-			SharedKObject item = menu->At(c)->ToObject();
-			SharedPtr<OSXMenuItem> osx_menu = item.cast<OSXMenuItem>();
-			NSMenuItem *native = osx_menu->CreateNative();
-			[array addObject:native]; 
-			[native release];
-		}
+
+	if (!menu.isNull()) {
+		menu->AddChildrenToNSArray(menuItems);
 	}
-	return array;
+	return menuItems;
 }
 
-#pragma mark -
-#pragma mark WebScriptDebugDelegate
-
-// some source was parsed, establishing a "source ID" (>= 0) for future reference
-- (void)webView:(WebView *)webView
-	didParseSource:(NSString *)source
-	baseLineNumber:(unsigned int)lineNumber
-	fromURL:(NSURL *)aurl
-	sourceId:(int)sid
-	forWebFrame:(WebFrame *)webFrame
-{
-}
-
-// some source failed to parse
-- (void)webView:(WebView *)webView
-	failedToParseSource:(NSString *)source
-	baseLineNumber:(unsigned int)lineNumber
-	fromURL:(NSURL *)theurl
-	withError:(NSError *)error
-	forWebFrame:(WebFrame *)webFrame
-{
-	logger->Error("Failed to parse javascript from %s at line number %i: %s",
-		[[theurl absoluteString] UTF8String],
-		lineNumber,
-		[[error localizedDescription] UTF8String]);
-}
-
-// just entered a stack frame (i.e. called a function, or started global scope)
-- (void)webView:(WebView *)webView
-	didEnterCallFrame:(WebScriptCallFrame *)frame
-	sourceId:(int)sid
-	line:(int)lineno
-	forWebFrame:(WebFrame *)webFrame
-{
-}
-
-// about to execute some code
-- (void)webView:(WebView *)webView
-	willExecuteStatement:(WebScriptCallFrame *)frame
-	sourceId:(int)sid
-	line:(int)lineno
-	forWebFrame:(WebFrame *)webFrame
-{
-}
-
-// about to leave a stack frame (i.e. return from a function)
-- (void)webView:(WebView *)webView
-	willLeaveCallFrame:(WebScriptCallFrame *)frame
-	sourceId:(int)sid
-	line:(int)lineno
-	forWebFrame:(WebFrame *)webFrame
-{
-}
-
-// exception is being thrown
-- (void)webView:(WebView *)webView
-	exceptionWasRaised:(WebScriptCallFrame *)frame
-	sourceId:(int)sid
-	line:(int)lineno
-	forWebFrame:(WebFrame *)webFrame
-{
-}
 
 // return whether or not quota has been reached for a db (enabling db support)
 - (void)webView:(WebView*)webView

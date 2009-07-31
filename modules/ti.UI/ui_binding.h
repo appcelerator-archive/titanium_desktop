@@ -16,83 +16,73 @@ namespace ti
 	{
 
 	public:
+		static int CENTERED;
+
 		UIBinding(Host *host);
 		virtual ~UIBinding();
 		Host* GetHost();
-
+		static UIBinding* GetInstance() { return instance; }
 		virtual void CreateMainWindow(WindowConfig*);
-		virtual SharedUserWindow CreateWindow(WindowConfig*, SharedUserWindow& parent) = 0;
+		virtual AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent) = 0;
 		virtual void ErrorDialog(std::string);
 
-		std::vector<SharedUserWindow>& GetOpenWindows();
-		void AddToOpenWindows(SharedUserWindow);
-		void RemoveFromOpenWindows(SharedUserWindow);
-
-		static UIBinding* GetInstance() { return instance; }
-
-		static int CENTERED;
-		static std::string FOCUSED;
-		static std::string UNFOCUSED;
-		static std::string OPEN;
-		static std::string OPENED;
-		static std::string CLOSE;
-		static std::string CLOSED;
-		static std::string HIDDEN;
-		static std::string SHOWN;
-		static std::string FULLSCREENED;
-		static std::string UNFULLSCREENED;
-		static std::string MAXIMIZED;
-		static std::string MINIMIZED;
-		static std::string RESIZED;
-		static std::string MOVED;
-		static std::string PAGE_INITIALIZED;
-		static std::string PAGE_LOADED;
-		static std::string CREATE;
-
-	protected:
-		Host* host;
-		SharedUserWindow mainWindow;
-
-	private:
-		static UIBinding* instance;
-		std::vector<SharedUserWindow> openWindows;
-		SharedKList openWindowList;
-
+		std::vector<AutoUserWindow>& GetOpenWindows();
+		void AddToOpenWindows(AutoUserWindow);
+		void RemoveFromOpenWindows(AutoUserWindow);
+		void ClearTray();
+		void UnregisterTrayItem(TrayItem*);
 		void _GetOpenWindows(const ValueList& args, SharedValue result);
 		void _GetMainWindow(const ValueList& args, SharedValue result);
 		void _CreateMenu(const ValueList& args, SharedValue result);
-		void _CreateTrayMenu(const ValueList& args, SharedValue result);
+		void _CreateMenuItem(const ValueList& args, SharedValue result);
+		void _CreateCheckMenuItem(const ValueList& args, SharedValue result);
+		void _CreateSeparatorMenuItem(const ValueList& args, SharedValue result);
+		AutoMenu __CreateMenu(const ValueList& args);
+		AutoMenuItem __CreateMenuItem(const ValueList& args);
+		AutoMenuItem __CreateCheckMenuItem(const ValueList& args);
+		AutoMenuItem __CreateSeparatorMenuItem(const ValueList& args);
 		void _SetMenu(const ValueList& args, SharedValue result);
 		void _GetMenu(const ValueList& args, SharedValue result);
 		void _SetContextMenu(const ValueList& args, SharedValue result);
 		void _GetContextMenu(const ValueList& args, SharedValue result);
 		void _SetIcon(const ValueList& args, SharedValue result);
+		void _SetIcon(std::string iconURL);
 		void _AddTray(const ValueList& args, SharedValue result);
 		void _ClearTray(const ValueList& args, SharedValue result);
-
-		virtual SharedPtr<MenuItem> CreateMenu(bool trayMenu) = 0;
-		virtual void SetMenu(SharedPtr<MenuItem>) = 0;
-		virtual void SetContextMenu(SharedPtr<MenuItem>) = 0;
-		virtual void SetIcon(SharedString icon_path) = 0;
-		virtual SharedPtr<TrayItem> AddTray(SharedString icon_path,
-		                                    SharedKMethod cb) = 0;
-
 		void _GetIdleTime(const ValueList& args, SharedValue result);
-
+		
+		
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
 		void _SetDockMenu(const ValueList& args, SharedValue result);
 		void _SetBadge(const ValueList& args, SharedValue result);
 		void _SetBadgeImage(const ValueList& args, SharedValue result);
 
-		/* These have empty impls, because are OS X-only for now */
-		virtual void SetDockIcon(SharedString icon_path) {}
-		virtual void SetDockMenu(SharedPtr<MenuItem>) {}
-		virtual void SetBadge(SharedString badge_label) {}
-		virtual void SetBadgeImage(SharedString badge_path) {}
-
+		virtual AutoMenu CreateMenu() = 0;
+		virtual AutoMenuItem CreateMenuItem() = 0;;
+		virtual AutoMenuItem CreateCheckMenuItem() = 0;
+		virtual AutoMenuItem CreateSeparatorMenuItem() = 0;
+		virtual void SetMenu(AutoMenu) = 0;
+		virtual void SetContextMenu(AutoMenu) = 0;
+		virtual void SetIcon(std::string& iconPath) = 0;
+		virtual AutoTrayItem AddTray(std::string& iconPath, SharedKMethod cb) = 0;
+		virtual AutoMenu GetMenu() = 0;
+		virtual AutoMenu GetContextMenu() = 0;
 		virtual long GetIdleTime() = 0;
 
+		/* These have empty impls, because are OS X-only for now */
+		virtual void SetDockIcon(std::string& icon_path) {}
+		virtual void SetDockMenu(AutoMenu) {}
+		virtual void SetBadge(std::string& badgeLabel) {}
+		virtual void SetBadgeImage(std::string& badgeImagePath) {}
+
+	protected:
+		static UIBinding* instance;
+		Host* host;
+		AutoUserWindow mainWindow;
+		std::vector<AutoUserWindow> openWindows;
+		std::vector<AutoTrayItem> trayItems;
+		std::string iconURL;
 	};
 }
 

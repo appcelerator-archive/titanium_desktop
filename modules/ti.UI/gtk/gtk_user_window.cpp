@@ -7,88 +7,82 @@
 #include "../ui_module.h"
 #include <iostream>
 #include <Poco/Process.h>
+#define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
 
 namespace ti
 {
-	static void destroy_cb(
-		GtkWidget* widget,
-		gpointer data);
-	static gboolean event_cb(
-		GtkWidget* window,
-		GdkEvent* event,
-		gpointer user_data);
-	static void window_object_cleared_cb(
-		WebKitWebView*,
-		WebKitWebFrame*,
-		JSGlobalContextRef,
-		JSObjectRef, gpointer);
-	static void populate_popup_cb(
-		WebKitWebView *webView,
-		GtkMenu *menu,
-		gpointer data);
-	static gint new_window_policy_decision_callback(
-		WebKitWebView* webView,
-		WebKitWebFrame* frame,
-		WebKitNetworkRequest* request,
-		WebKitWebNavigationAction* navigationAction,
-		WebKitWebPolicyDecision *policyDecision,
-		gchar* frameName);
-	static void load_finished_cb(
-		WebKitWebView* view,
-		WebKitWebFrame* frame,
-		gpointer data);
-	static WebKitWebView* inspect_web_view_cb(
-		WebKitWebInspector* webInspector,
-		WebKitWebView* page,
-		gpointer data);
-	static gboolean inspector_show_window_cb(
-		WebKitWebInspector* inspector,
-		gpointer data);
+	static gboolean DestroyCallback(GtkWidget*, GdkEvent*, gpointer);
+	static gboolean EventCallback(GtkWidget*, GdkEvent*, gpointer);
+	static void WindowObjectClearedCallback(WebKitWebView*,
+		WebKitWebFrame*, JSGlobalContextRef, JSObjectRef, gpointer);
+	static void PopulatePopupCallback(WebKitWebView*, GtkMenu*, gpointer);
+	static WebKitWebView* CreateWebViewCallback(
+		WebKitWebView*, WebKitWebFrame*, gpointer);
+	static gint NewWindowPolicyDecisionCallback(WebKitWebView*,
+		WebKitWebFrame*, WebKitNetworkRequest*, WebKitWebNavigationAction*,
+		WebKitWebPolicyDecision *, gchar*);
+	static void LoadFinishedCallback(WebKitWebView*, WebKitWebFrame*,
+		gpointer);
+	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
+		gchar*, gpointer);
+	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
+		WebKitWebView*, gpointer);
+	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
 
-	GtkUserWindow::GtkUserWindow(WindowConfig* config, SharedUserWindow& parent) :
+	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
-		gdkWidth(-1),
-		gdkHeight(-1),
-		gdkX(-1),
-		gdkY(-1),
-		gdkMaximized(false),
-		gdkMinimized(false),
-		gtkWindow(NULL),
-		vbox(NULL),
-		webView(NULL),
+		targetWidth(-1),
+		targetHeight(-1),
+		targetX(-1),
+		targetY(-1),
+		targetMaximized(false),
+		targetMinimized(false),
+		gtkWindow(0),
+		vbox(0),
+		webView(0),
 		topmost(false),
-		menu(NULL),
-		menuInUse(NULL),
-		menuBar(NULL),
-		iconPath(NULL),
-		context_menu(NULL),
+		menu(0),
+		activeMenu(0),
+		contextMenu(0),
+		nativeMenu(0),
+		iconPath(""),
 		inspectorWindow(0)
 	{
 	}
 
 	GtkUserWindow::~GtkUserWindow()
 	{
-		this->Close();
+		if (this->active)
+		{
+			this->Close();
+		}
 	}
-	
+
 	void GtkUserWindow::Open()
 	{
 		if (this->gtkWindow == NULL)
 		{
-			WebKitWebView* webView = WEBKIT_WEB_VIEW(webkit_web_view_new ());
-	
+			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
+
 			g_signal_connect(
 				G_OBJECT(webView), "window-object-cleared",
-				G_CALLBACK(window_object_cleared_cb), this);
+				G_CALLBACK(WindowObjectClearedCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "new-window-policy-decision-requested",
-				G_CALLBACK(new_window_policy_decision_callback), this);
+				G_CALLBACK(NewWindowPolicyDecisionCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "populate-popup",
-				G_CALLBACK(populate_popup_cb), this);
+				G_CALLBACK(PopulatePopupCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "load-finished",
-				G_CALLBACK(load_finished_cb), this);
+				G_CALLBACK(LoadFinishedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "title-changed",
+				G_CALLBACK(TitleChangedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "create-web-view",
+				G_CALLBACK(CreateWebViewCallback), this);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
@@ -97,10 +91,10 @@ namespace ti
 			WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
 			g_signal_connect(
 				G_OBJECT(inspector), "inspect-web-view",
-				G_CALLBACK(inspect_web_view_cb), this);
+				G_CALLBACK(InspectWebViewCallback), this);
 			g_signal_connect(
 				G_OBJECT(inspector), "show-window",
-				G_CALLBACK(inspector_show_window_cb), this);
+				G_CALLBACK(InspectorShowWindowCallback), this);
 
 			GtkWidget* view_container = NULL;
 			if (this->IsUsingScrollbars())
@@ -129,14 +123,13 @@ namespace ti
 			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
 
 			this->destroyCallbackId = g_signal_connect(
-				G_OBJECT(window), "destroy", G_CALLBACK(destroy_cb), this);
+				G_OBJECT(window), "delete-event", G_CALLBACK(DestroyCallback), this);
 			g_signal_connect(
-				G_OBJECT(window), "event", G_CALLBACK(event_cb), this);
+				G_OBJECT(window), "event", G_CALLBACK(EventCallback), this);
 
 			gtk_container_add(GTK_CONTAINER(window), vbox);
 	
 			this->gtkWindow = GTK_WINDOW(window);
-			this->webView = webView;
 
 			gtk_widget_realize(window);
 			this->SetupDecorations();
@@ -176,46 +169,45 @@ namespace ti
 			}
 
 			UserWindow::Open();
-			this->FireEvent(OPENED);
+			this->FireEvent(Event::OPENED);
 		}
 		else
 		{
 			this->Show();
 		}
 	}
-	
-	// Notify this GtkUserWindow that the GTK bits are invalid
-	void GtkUserWindow::Destroyed()
-	{
-		this->gtkWindow = NULL;
-		this->webView = NULL;
-	}
-	
-	static void destroy_cb(
+
+	static gboolean DestroyCallback(
 		GtkWidget* widget,
+		GdkEvent* event,
 		gpointer data)
 	{
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		user_window->Destroyed(); // Inform the GtkUserWindow we are done
-		user_window->Close();
+		// Let the close handler actually destroy this window,
+		// as we want things to happen in a very particular order.
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		userWindow->Close();
+		return FALSE;
 	}
-	
+
 	void GtkUserWindow::Close()
 	{
+		UserWindow::Close();
+
 		// Destroy the GTK bits, if we have them first, because
 		// we need to assume the GTK window is gone for  everything
-		// below (this method might be called by destroy_cb)
+		// below (this method might be called by DestroyCallback)
 		if (this->gtkWindow != NULL)
 		{
 			// We don't want the destroy signal handler to fire after now.
 			g_signal_handler_disconnect(this->gtkWindow, this->destroyCallbackId);
 			gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
-			this->Destroyed();
+
+			this->gtkWindow = NULL;
+			this->webView = NULL;
 		}
 		this->RemoveOldMenu(); // Cleanup old menu
-	
-		UserWindow::Close();
-		this->FireEvent(CLOSED);
+
+		this->Closed();
 	}
 	
 	void GtkUserWindow::SetupTransparency()
@@ -349,8 +341,8 @@ namespace ti
 			// Another alternative would be to block until a resize
 			// is detected, but that might leave the application in
 			// a funky state.
-			this->gdkX = x;
-			this->gdkY = y;
+			this->targetX = x;
+			this->targetY = y;
 		}
 	}
 	
@@ -367,8 +359,8 @@ namespace ti
 			// Another alternative would be to block until a resize
 			// is detected, but that might leave the application in
 			// a funky state.
-			this->gdkWidth = this->config->GetWidth();
-			this->gdkHeight = this->config->GetHeight();
+			this->targetWidth = this->config->GetWidth();
+			this->targetHeight = this->config->GetHeight();
 		}
 	}
 	
@@ -378,41 +370,47 @@ namespace ti
 			return;
 	
 		GdkPixbuf* icon = NULL; // NULL is an unset.
-		SharedString iconPath = this->iconPath;
-		if (iconPath.isNull() && !UIModule::GetIcon().isNull())
-			iconPath = UIModule::GetIcon();
+		std::string iconPath = this->iconPath;
+
+		if (iconPath.empty()) {
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			iconPath = b->GetIcon();
+		}
 	
-		if (!iconPath.isNull())
+		if (!iconPath.empty())
 		{
 			GError* error = NULL;
-			icon = gdk_pixbuf_new_from_file(iconPath->c_str(), &error);
+			icon = gdk_pixbuf_new_from_file(iconPath.c_str(), &error);
 	
-			if (icon == NULL && error != NULL)
-			{
-				std::cerr << "Could not load icon because: "
-				          << error->message << std::endl;
+			if (icon == NULL && error != NULL) {
+				logger->Error("Failed to load icon: %s\n", error->message);
 				g_error_free(error);
 			}
 		}
 		gtk_window_set_icon(this->gtkWindow, icon);
 	}
 
-	static gboolean event_cb(
+	static gboolean EventCallback(
 		GtkWidget *w,
 		GdkEvent *event,
 		gpointer data)
 	{
+		static int oldWidth = -1;
+		static int oldHeight = -1;
+		static int oldX = -1;
+		static int oldY = -1;
+
 		GtkUserWindow* window = (GtkUserWindow*) data;
 		if (event->type == GDK_FOCUS_CHANGE)
 		{
 			GdkEventFocus* f = (GdkEventFocus*) event;
 			if (f->in)
 			{
-				window->FireEvent(FOCUSED);
+				window->FireEvent(Event::FOCUSED);
 			}
 			else
 			{
-				window->FireEvent(UNFOCUSED);
+				window->FireEvent(Event::UNFOCUSED);
 			}
 		}
 		else if (event->type == GDK_WINDOW_STATE)
@@ -421,60 +419,89 @@ namespace ti
 			if ((f->changed_mask & GDK_WINDOW_STATE_WITHDRAWN)
 				&& (f->new_window_state & GDK_WINDOW_STATE_WITHDRAWN))
 			{
-				window->FireEvent(HIDDEN);
+				window->FireEvent(Event::HIDDEN);
 			}
 
 			if ((f->changed_mask & GDK_WINDOW_STATE_ICONIFIED)
 				&& (f->new_window_state & GDK_WINDOW_STATE_ICONIFIED))
 			{
-				window->FireEvent(MINIMIZED);
+				window->FireEvent(Event::MINIMIZED);
 			}
 
 			if (((f->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)
 				&& (f->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)))
 			{
-				window->FireEvent(FULLSCREENED);
+				window->FireEvent(Event::FULLSCREENED);
 			}
 
 			if (f->changed_mask & GDK_WINDOW_STATE_FULLSCREEN)
 			{
-				window->FireEvent(UNFULLSCREENED);
+				window->FireEvent(Event::UNFULLSCREENED);
 			}
 
 			if (((f->changed_mask & GDK_WINDOW_STATE_MAXIMIZED)
 				&& (f->new_window_state & GDK_WINDOW_STATE_MAXIMIZED)))
 			{
-				window->FireEvent(MAXIMIZED);
+				window->FireEvent(Event::MAXIMIZED);
 			}
 
-			window->gdkMinimized =
+			window->targetMinimized =
 				f->new_window_state & GDK_WINDOW_STATE_ICONIFIED;
 
-			window->gdkMaximized =
+			window->targetMaximized =
 				f->new_window_state & GDK_WINDOW_STATE_MAXIMIZED;
 		}
 		else if (event->type == GDK_CONFIGURE)
 		{
 			GdkEventConfigure* c = (GdkEventConfigure*) event;
-			if (c->x != window->gdkX || c->y != window->gdkY)
+			if ((oldX != -1 && c->x != oldX) || 
+				(oldY != -1 && c->y != oldY))
 			{
-				window->gdkX = c->x;
-				window->gdkY = c->y;
-				window->FireEvent(MOVED);
+				window->targetX = c->x;
+				window->targetY = c->y;
+				window->FireEvent(Event::MOVED);
 			}
-	
-			if (c->width != window->gdkWidth || c->height != window->gdkHeight)
+
+			if ((oldWidth != -1 && c->width != oldWidth) ||
+				(oldHeight != -1 && c->height != oldHeight))
 			{
-				window->gdkHeight = c->height;
-				window->gdkWidth = c->width;
-				window->FireEvent(RESIZED);
+				window->targetHeight = c->height;
+				window->targetWidth = c->width;
+				window->FireEvent(Event::RESIZED);
 			}
+
+			oldHeight = c->height;
+			oldWidth = c->width;
+			oldX = c->x;
+			oldY = c->y;
 		}
 	
 		return FALSE;
 	}
 
-	static gint new_window_policy_decision_callback(
+	WebKitWebView* CreateWebViewCallback(WebKitWebView* webView,
+		WebKitWebFrame* frame, gpointer data)
+	{
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		AutoUserWindow newWindow = userWindow->CreateWindow(new WindowConfig());
+		newWindow->Open();
+
+		AutoPtr<GtkUserWindow> gtkNewWindow = newWindow.cast<GtkUserWindow>();
+		if (!gtkNewWindow.isNull())
+		{
+			// We aren't saving a reference to this new window, but we don't
+			// want it to disappear either. We'll release this once the window
+			// is shown.
+			return gtkNewWindow->GetWebView();
+		}
+		else
+		{
+			// Don't you dare ever happen.
+			return 0;
+		}
+	}
+
+	static gint NewWindowPolicyDecisionCallback(
 		WebKitWebView* webView,
 		WebKitWebFrame* frame,
 		WebKitNetworkRequest* request,
@@ -503,9 +530,7 @@ namespace ti
 		return TRUE;
 	}
 	
-	static void load_finished_cb(
-		WebKitWebView* view,
-		WebKitWebFrame* frame,
+	static void LoadFinishedCallback(WebKitWebView* view, WebKitWebFrame* frame,
 		gpointer data)
 	{
 		JSGlobalContextRef context = webkit_web_frame_get_global_context(frame);
@@ -517,12 +542,23 @@ namespace ti
 		const gchar* uri = webkit_web_frame_get_uri(frame);
 		if (uri) {
 			std::string uriString = uri;
-			GtkUserWindow* user_window = static_cast<GtkUserWindow*>(data);
-			user_window->PageLoaded(frame_global, uriString, context);
+			GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+			userWindow->PageLoaded(frame_global, uriString, context);
 		}
 	}
-	
-	static void window_object_cleared_cb(
+
+	static void TitleChangedCallback(WebKitWebView* view, WebKitWebFrame* frame,
+		gchar* newTitle, gpointer data)
+	{
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		if (NULL == webkit_web_frame_get_parent(frame))
+		{
+			std::string newTitleString = newTitle;
+			userWindow->SetTitle(newTitleString);
+		}
+	}
+
+	static void WindowObjectClearedCallback(
 		WebKitWebView* webView,
 		WebKitWebFrame* web_frame,
 		JSGlobalContextRef context,
@@ -530,41 +566,46 @@ namespace ti
 		gpointer data)
 	{
 	
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		user_window->RegisterJSContext(context);
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		userWindow->RegisterJSContext(context);
 	}
 	
-	static void populate_popup_cb(
+	static void PopulatePopupCallback(
 		WebKitWebView *webView,
 		GtkMenu *menu,
 		gpointer data)
 	{
-		GtkUserWindow* user_window = (GtkUserWindow*) data;
-		SharedPtr<GtkMenuItemImpl> m =
-			user_window->GetContextMenu().cast<GtkMenuItemImpl>();
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		AutoPtr<GtkMenu> m = userWindow->GetContextMenu().cast<GtkMenu>();
 	
-		if (m.isNull())
-			m = UIModule::GetContextMenu().cast<GtkMenuItemImpl>();
-	
-		// If we are not in debug mode, remove the default WebKit menu items
-		if (!user_window->GetHost()->IsDebugMode())
-		{
-			GList* children = gtk_container_get_children(GTK_CONTAINER(menu));
-			for (size_t i = 0; i < g_list_length(children); i++)
-			{
-				GtkWidget* w = (GtkWidget*) g_list_nth_data(children, i);
-				gtk_container_remove(GTK_CONTAINER(menu), w);
-			}
+		if (m.isNull()) {
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			m = b->GetContextMenu().cast<GtkMenu>();
 		}
 	
-		if (m.isNull())
-			return;
-	
-		m->AddChildrenTo(GTK_WIDGET(menu));
+		// Remove existing unused context menu items
+		GList* children = gtk_container_get_children(GTK_CONTAINER(menu));
+		size_t extent = g_list_length(children);
+
+		// If we are in debug mode, leave the last two --
+		// a separator and the web inspector
+		if (userWindow->GetHost()->IsDebugMode())
+			extent = extent - 2;
+
+		// If we are not in debug mode, remove the default WebKit menu items
+		for (size_t i = 0; i < extent; i++)
+		{
+			GtkWidget* w = (GtkWidget*) g_list_nth_data(children, i);
+			gtk_container_remove(GTK_CONTAINER(menu), w);
+		}
+
+		if (!m.isNull()) {
+			m->AddChildrenToNativeMenu(GTK_MENU_SHELL(menu), false);
+		}
 	}
 	
 
-	static WebKitWebView* inspect_web_view_cb(
+	static WebKitWebView* InspectWebViewCallback(
 		WebKitWebInspector* webInspector,
 		WebKitWebView* page,
 		gpointer data)
@@ -593,7 +634,7 @@ namespace ti
 		return WEBKIT_WEB_VIEW(newWebView);
 	}
 
-	static gboolean inspector_show_window_cb(
+	static gboolean InspectorShowWindowCallback(
 		WebKitWebInspector* inspector,
 		gpointer data)
 	{
@@ -636,7 +677,7 @@ namespace ti
 
 			// There is no GDK event to detect when the window is shown,
 			// so we force the firing of this event here.
-			this->FireEvent(SHOWN);
+			this->FireEvent(Event::SHOWN);
 		}
 	}
 	
@@ -651,7 +692,7 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMinimized = true;
+		this->targetMinimized = true;
 	}
 	
 	void GtkUserWindow::Unminimize()
@@ -665,14 +706,14 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMinimized = false;
+		this->targetMinimized = false;
 	}
 
 	bool GtkUserWindow::IsMinimized()
 	{
 		if (this->gtkWindow != NULL)
 		{
-			return this->gdkMinimized;
+			return this->targetMinimized;
 		}
 		else
 		{
@@ -692,7 +733,7 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMaximized = true;
+		this->targetMaximized = true;
 	}
 
 	void GtkUserWindow::Unmaximize()
@@ -707,14 +748,14 @@ namespace ti
 		// Another alternative would be to block until a resize
 		// is detected, but that might leave the application in
 		// a funky state.
-		this->gdkMaximized = false;
+		this->targetMaximized = false;
 	}
 
 	bool GtkUserWindow::IsMaximized()
 	{
 		if (this->gtkWindow != NULL)
 		{
-			return this->gdkMaximized;
+			return this->targetMaximized;
 		}
 		else
 		{
@@ -728,12 +769,18 @@ namespace ti
 			gtk_window_present(this->gtkWindow);
 	}
 	
-	void GtkUserWindow::Unfocus(){
+	void GtkUserWindow::Unfocus()
+	{
 		if (gtk_window_has_toplevel_focus(this->gtkWindow))
 		{
 			gdk_window_focus(
 				gdk_get_default_root_window(),
 				gtk_get_current_event_time());
+
+			// FIXME: GDK unfocus events seem to fire very spottily, so we
+			// force the event to fire here. This means that the UNFOCUSED event
+			// may fire twice.
+			FireEvent(Event::UNFOCUSED);
 		}
 	}
 	
@@ -768,7 +815,7 @@ namespace ti
 	
 	double GtkUserWindow::GetX()
 	{
-		return this->gdkX;
+		return this->targetX;
 	}
 	
 	void GtkUserWindow::SetX(double x)
@@ -778,7 +825,7 @@ namespace ti
 	
 	double GtkUserWindow::GetY()
 	{
-		return this->gdkY;
+		return this->targetY;
 	}
 	
 	void GtkUserWindow::SetY(double y)
@@ -788,7 +835,7 @@ namespace ti
 
 	double GtkUserWindow::GetWidth()
 	{
-		return this->gdkWidth;
+		return this->targetWidth;
 	}
 
 	void GtkUserWindow::SetWidth(double width)
@@ -818,7 +865,7 @@ namespace ti
 
 	double GtkUserWindow::GetHeight()
 	{
-		return this->gdkHeight;
+		return this->targetHeight;
 	}
 
 	void GtkUserWindow::SetHeight(double height)
@@ -849,10 +896,10 @@ namespace ti
 	Bounds GtkUserWindow::GetBounds()
 	{
 		Bounds b;
-		b.width = gdkWidth;
-		b.height = gdkHeight;
-		b.x = gdkX;
-		b.y = gdkY;
+		b.width = targetWidth;
+		b.height = targetHeight;
+		b.x = targetX;
+		b.y = targetY;
 		return b;
 	}
 	
@@ -867,7 +914,7 @@ namespace ti
 		return this->config->GetTitle();
 	}
 	
-	void GtkUserWindow::SetTitle(std::string& title)
+	void GtkUserWindow::SetTitleImpl(std::string& title)
 	{
 		if (this->gtkWindow != NULL)
 		{
@@ -971,103 +1018,94 @@ namespace ti
 		}
 	}
 	
-	void GtkUserWindow::SetMenu(SharedPtr<MenuItem> value)
+	void GtkUserWindow::SetMenu(AutoMenu value)
 	{
-		SharedPtr<GtkMenuItemImpl> menu = value.cast<GtkMenuItemImpl>();
+		AutoPtr<GtkMenu> menu = value.cast<GtkMenu>();
 		this->menu = menu;
 		this->SetupMenu();
 	}
-	
-	SharedPtr<MenuItem> GtkUserWindow::GetMenu()
+
+	AutoMenu GtkUserWindow::GetMenu()
 	{
 		return this->menu;
 	}
-	
-	void GtkUserWindow::SetContextMenu(SharedPtr<MenuItem> value)
+
+	void GtkUserWindow::SetContextMenu(AutoMenu value)
 	{
-		SharedPtr<GtkMenuItemImpl> menu = value.cast<GtkMenuItemImpl>();
-		this->context_menu = menu;
+		AutoPtr<GtkMenu> menu = value.cast<GtkMenu>();
+		this->contextMenu = menu;
 	}
-	
-	SharedPtr<MenuItem> GtkUserWindow::GetContextMenu()
+
+	AutoMenu GtkUserWindow::GetContextMenu()
 	{
-		return this->context_menu;
+		return this->contextMenu;
 	}
-	
-	
-	void GtkUserWindow::SetIcon(SharedString iconPath)
+
+	void GtkUserWindow::SetIcon(std::string& iconPath)
 	{
 		this->iconPath = iconPath;
 		this->SetupIcon();
 	}
-	
-	SharedString GtkUserWindow::GetIcon()
+
+	std::string& GtkUserWindow::GetIcon()
 	{
 		return this->iconPath;
 	}
-	
+
 	void GtkUserWindow::RemoveOldMenu()
 	{
-	
-		// Only clear a realization if we have one
-		if (!this->menuInUse.isNull() && this->menuBar != NULL)
-			this->menuInUse->ClearRealization(this->menuBar);
-	
-		// Only remove the old menu if we still have a window
-		if (this->gtkWindow != NULL)
-			gtk_container_remove(GTK_CONTAINER(this->vbox), this->menuBar);
-	
-		this->menuInUse = NULL;
-		this->menuBar = NULL;
+		if (!this->activeMenu.isNull() && this->nativeMenu) {
+			this->activeMenu->DestroyNative(GTK_MENU_SHELL(this->nativeMenu));
+		}
+
+		if (this->gtkWindow != NULL && this->nativeMenu) {
+			gtk_container_remove(GTK_CONTAINER(this->vbox), GTK_WIDGET(this->nativeMenu));
+		}
+
+		this->activeMenu = 0;
+		this->nativeMenu = 0;
 	}
-	
+
 	void GtkUserWindow::SetupMenu()
 	{
-		SharedPtr<GtkMenuItemImpl> menu = this->menu;
-		SharedPtr<MenuItem> app_menu = UIModule::GetMenu();
+		AutoPtr<GtkMenu> menu = this->menu;
 	
 		// No window menu, try to use the application menu.
-		if (menu.isNull() && !app_menu.isNull())
+		if (menu.isNull())
 		{
-			menu = app_menu.cast<GtkMenuItemImpl>();
+			GtkUIBinding* b = static_cast<GtkUIBinding*>(UIBinding::GetInstance());
+			menu = b->GetMenu().cast<GtkMenu>();
 		}
 	
 		// Only do this if the menu is actually changing.
-		if (menu == this->menuInUse)
-			return;
-	
-		this->RemoveOldMenu();
-	
-		if (!menu.isNull() && this->gtkWindow != NULL)
-		{
-			GtkWidget* menuBar = menu->GetMenuBar();
-			gtk_box_pack_start(GTK_BOX(this->vbox), menuBar,
-			                   FALSE, FALSE, 2);
-			gtk_box_reorder_child(GTK_BOX(this->vbox), menuBar, 0);
-			gtk_widget_show(menuBar);
-			this->menuBar = menuBar;
+		if (menu.get() != this->activeMenu.get()) {
+			this->RemoveOldMenu();
+
+			if (!menu.isNull() && this->gtkWindow) {
+				GtkMenuBar* newNativeMenu = GTK_MENU_BAR(menu->CreateNativeBar(true));
+				gtk_box_pack_start(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), FALSE, FALSE, 2);
+				gtk_box_reorder_child(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), 0);
+				gtk_widget_show_all(GTK_WIDGET(newNativeMenu));
+				this->nativeMenu = newNativeMenu;
+			}
+			this->activeMenu = menu;
 		}
-	
-		this->menuInUse = menu;
-	
 	}
-	
+
 	void GtkUserWindow::AppMenuChanged()
 	{
-		if (this->menu.isNull())
-		{
+		if (this->menu.isNull()) {
 			this->SetupMenu();
 		}
 	}
-	
+
 	void GtkUserWindow::AppIconChanged()
 	{
-		if (this->iconPath.isNull())
-		{
+		if (this->iconPath.empty()) {
 			this->SetupIcon();
 		}
 	}
-	
+
 	namespace GtkUserWindowNS
 	{
 		std::string openFilesDirectory = "";
@@ -1239,6 +1277,19 @@ namespace ti
 		this->ShowFileChooser(
 			GtkUserWindowNS::SAVE_FILE,
 			callback, false, title, path, defaultName, types, typesDescription);
+	}
+	
+	void GtkUserWindow::ShowInspector(bool console)
+	{
+		WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
+		
+		// TODO we need to expose showConsole ala win32/osx
+		if (!GetInspectorWindow())
+		{
+			// calling these callbacks directly probably isn't the best way to do this?
+			InspectWebViewCallback(inspector, webView, this);
+		}
+		gtk_widget_show(GetInspectorWindow());
 	}
 }
 

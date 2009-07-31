@@ -5,25 +5,20 @@
  */
 #ifndef TI_WEBKIT_WIN32_UI_DELEGATE_H_
 #define TI_WEBKIT_WIN32_UI_DELEGATE_H_
-
-#include <kroll/kroll.h>
 #include <windows.h>
-
-#include "WebKit.h"
-#include "popup_dialog.h"
-
 namespace ti {
 
 class Win32UserWindow;
 
 //class Win32WebKitUIDelegate : public IWebUIDelegate, IWebUIDelegatePrivate3 {
 class Win32WebKitUIDelegate : public IWebUIDelegate {
-protected:
-	int ref_count;
+	protected:
 	Win32UserWindow *window;
+	HMENU nativeContextMenu;
 	Logger* logger;
+	int ref_count;
 	
-public:
+	public:
 	Win32WebKitUIDelegate(Win32UserWindow *window);
 
 	// These function declarations copied from WebKit source (UIDelegate.cpp)
@@ -237,8 +232,8 @@ public:
 		
 	
 	virtual HRESULT STDMETHODCALLTYPE printFrame( 
-            /* [in] */ IWebView *webView,
-            /* [in] */ IWebFrame *frame) { return E_NOTIMPL; }
+			/* [in] */ IWebView *webView,
+			/* [in] */ IWebFrame *frame) { return E_NOTIMPL; }
 
 	virtual HRESULT STDMETHODCALLTYPE webViewHeaderHeight( 
 		/* [in] */ IWebView *webView,
@@ -252,7 +247,7 @@ public:
 		/* [in] */ IWebView *webView,
 		/* [in] */ RECT *rect,
 		/* [in] */ OLE_HANDLE drawingContext) { return E_NOTIMPL; }
-        
+		
 	virtual HRESULT STDMETHODCALLTYPE drawFooterInRect( 
 		/* [in] */ IWebView *webView,
 		/* [in] */ RECT *rect,
@@ -281,9 +276,9 @@ public:
 		/* [in] */ IWebView *webView) { return E_NOTIMPL; }
 	
 	virtual HRESULT STDMETHODCALLTYPE isMenuBarVisible( 
-            /* [in] */ IWebView *webView,
-            /* [retval][out] */ BOOL *visible) { return E_NOTIMPL; }
-        
+			/* [in] */ IWebView *webView,
+			/* [retval][out] */ BOOL *visible) { return E_NOTIMPL; }
+		
 	virtual HRESULT STDMETHODCALLTYPE setMenuBarVisible( 
 		/* [in] */ IWebView *webView,
 		/* [in] */ BOOL visible) { return E_NOTIMPL; }
@@ -293,7 +288,7 @@ public:
 		/* [in] */ BSTR displayName,
 		/* [in] */ IWebFrame *initiatedByFrame,
 		/* [retval][out] */ BOOL *allowed) { return E_NOTIMPL; }
-        
+		
 	virtual HRESULT STDMETHODCALLTYPE paintCustomScrollbar( 
 		/* [in] */ IWebView *webView,
 		/* [in] */ HDC hDC,

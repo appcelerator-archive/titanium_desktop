@@ -30,7 +30,6 @@ namespace ti
 			SharedKMethod callback);
 
 		std::string GetAppName();
-		SharedString GetResourcePath(const char *URL);
 	};
 }
 

@@ -111,7 +111,7 @@ function TitaniumNotification(window)
 
 		mywindow.setTransparency(.99);
 		mywindow.callback = notificationClicked;
-		mywindow.setURL('ti://tinotification/tinotification.html?title='+encodeURIComponent(title)+'&message='+encodeURIComponent(message)+'&icon='+encodeURIComponent(icon));
+			mywindow.setURL('ti://tinotification/tinotification.html?title='+encodeURIComponent(title)+'&message='+encodeURIComponent(message)+'&icon='+encodeURIComponent(icon));
 		mywindow.open();
 		mywindow.show();
 		if (autohide)
@@ -150,6 +150,7 @@ function TitaniumNotification(window)
 	 */
 	Titanium.Notification = {
 		createNotification : function(window) {
+			if (!window) throw "You must supply a DOM Window as the first argument";
 			return new TitaniumNotification(window);
 		}
 	};

@@ -6,141 +6,118 @@
 #include "ui_module.h"
 #include <string>
 
-#define GET_ARG_OR_RETURN(INDEX, TYPE, VAR) \
-	if ((int) args.size() < INDEX - 1 || !args.at(INDEX)->Is##TYPE()) \
-		return; \
-	VAR = args.at(INDEX)->To##TYPE();
-
-#define GET_ARG(INDEX, TYPE, VAR) \
-	if ((int) args.size() > INDEX && args.at(INDEX)->Is##TYPE()) \
-		VAR = args.at(INDEX)->To##TYPE();
-
-
 namespace ti
 {
-
 	UIBinding* UIBinding::instance = NULL;
 
 	// Module constants
 	int UIBinding::CENTERED = WindowConfig::DEFAULT_POSITION;
-	std::string UIBinding::FOCUSED = "focused";
-	std::string UIBinding::UNFOCUSED = "unfocused";
-	std::string UIBinding::OPEN = "open";
-	std::string UIBinding::OPENED = "opened";
-	std::string UIBinding::CLOSE = "close";
-	std::string UIBinding::CLOSED = "closed";
-	std::string UIBinding::HIDDEN = "hidden";
-	std::string UIBinding::SHOWN = "shown";
-	std::string UIBinding::FULLSCREENED = "fullscreened";
-	std::string UIBinding::UNFULLSCREENED = "unfullscreened";
-	std::string UIBinding::MAXIMIZED = "maximized";
-	std::string UIBinding::MINIMIZED = "minimized";
-	std::string UIBinding::RESIZED = "resized";
-	std::string UIBinding::MOVED = "moved";
-	std::string UIBinding::PAGE_INITIALIZED = "page.init";
-	std::string UIBinding::PAGE_LOADED = "page.load";
-	std::string UIBinding::CREATE = "create";
 
-	UIBinding::UIBinding(Host *host) : AccessorBoundObject("UI"), host(host)
+	UIBinding::UIBinding(Host *host) :
+		AccessorBoundObject("UI"),
+		host(host)
 	{
 		instance = this;
 
 		// @tiproperty[integer, UI.CENTERED, since=1.0] The CENTERED event constant
 		this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
-		// @tiproperty[integer, UI.FOCUSED, since=1.0] The FOCUSED event constant
-		this->Set("FOCUSED", Value::NewString(UIBinding::FOCUSED));
-		// @tiproperty[integer, UI.UNFOCUSED, since=1.0] The UNFOCUSED event constant
-		this->Set("UNFOCUSED", Value::NewString(UIBinding::UNFOCUSED));
-		// @tiproperty[integer, UI.OPEN, since=1.0] The OPEN event constant
-		this->Set("OPEN", Value::NewString(UIBinding::OPEN));
-		// @tiproperty[integer, UI.OPENED, since=1.0] The OPENED event constant
-		this->Set("OPENED", Value::NewString(UIBinding::OPENED));
-		// @tiproperty[integer, UI.CLOSE, since=1.0] The CLOSE event constant
-		this->Set("CLOSE", Value::NewString(UIBinding::CLOSE));
-		// @tiproperty[integer, UI.CLOSED, since=1.0] The CLOSED event constant
-		this->Set("CLOSED", Value::NewString(UIBinding::CLOSED));
-		// @tiproperty[integer, UI.HIDDEN, since=1.0] The HIDDEN event constant
-		this->Set("HIDDEN", Value::NewString(UIBinding::HIDDEN));
-		// @tiproperty[integer, UI.SHOWN, since=1.0] The SHOWN event constant
-		this->Set("SHOWN", Value::NewString(UIBinding::SHOWN));
-		// @tiproperty[integer, UI.FULLSCREENED, since=1.0] The FULLSCREENED event constant
-		this->Set("FULLSCREENED", Value::NewString(UIBinding::FULLSCREENED));
-		// @tiproperty[integer, UI.UNFULLSCREENED, since=1.0] The UNFULLSCREENED event constant
-		this->Set("UNFULLSCREENED", Value::NewString(UIBinding::UNFULLSCREENED));
-		// @tiproperty[integer, UI.MAXIMIZED, since=1.0] The MAXIMIZED event constant
-		this->Set("MAXIMIZED", Value::NewString(UIBinding::MAXIMIZED));
-		// @tiproperty[integer, UI.MINIMIZED, since=1.0] The MINIMIZED event constant
-		this->Set("MINIMIZED", Value::NewString(UIBinding::MINIMIZED));
-		// @tiproperty[integer, UI.RESIZED, since=1.0] The RESIZED event constant
-		this->Set("RESIZED", Value::NewString(UIBinding::RESIZED));
-		// @tiproperty[integer, UI.MOVED, since=1.0] The MOVED event constant
-		this->Set("MOVED", Value::NewString(UIBinding::MOVED));
-		// @tiproperty[integer, UI.PAGE_INITIALIZED, since=1.0] The PAGE_INITIALIZED event constant
-		this->Set("PAGE_INITIALIZED", Value::NewString(UIBinding::PAGE_INITIALIZED));
-		// @tiproperty[integer, UI.PAGE_LOADED, since=1.0] The PAGE_LOADED event constant
-		this->Set("PAGE_LOADED", Value::NewString(UIBinding::PAGE_LOADED));
-		// @tiproperty[integer, UI.CREATE, since=1.0] The CREATE event constant
-		this->Set("CREATE", Value::NewString(UIBinding::CREATE));
 
 		/**
-		 * @tiapi(method=True,name=UI.createMenu,version=0.2) Creates a MenuItem object
-		 * @tiresult(for=UI.createMenu,type=object) a MenuItem object
+		 * @tiapi(method=True,name=UI.createMenu,version=1.0)
+		 * @tiapi Create a new menu
+		 * @tiresult[UI.Menu] A new menu
 		 */
 		this->SetMethod("createMenu", &UIBinding::_CreateMenu);
+
 		/**
-		 * @tiapi(method=True,name=UI.createTrayMenu,version=0.2) Creates a TrayItem object
-		 * @tiresult(for=UI.createTrayMenu,type=object) a TrayItem object
+		 * @tiapi(method=True,name=UI.createMenuItem,version=1.0)
+		 * @tiapi Create a new menu item.
+		 * @tiarg[String, label] The label for this menu item
+		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
+		 * @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
+		 * @tiresult[UI.MenuItem] A new menu item
 		 */
-		this->SetMethod("createTrayMenu", &UIBinding::_CreateTrayMenu);
+		this->SetMethod("createMenuItem", &UIBinding::_CreateMenuItem);
+
+		/**
+		 * @tiapi(method=True,name=UI.createCheckMenuItem,version=1.0)
+		 * @tiapi Create a new CheckMenuItem object.
+		 * @tiarg[String, label] The label for this menu item
+		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
+		 * @tiresult[UI.CheckMenuItem] The new CheckMenuItem object
+		 */
+		this->SetMethod("createCheckMenuItem", &UIBinding::_CreateCheckMenuItem);
+
+		/**
+		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,version=1.0)
+		 * @tiapi Create a new separator menu item.
+		 * @tiresult[UI.SeparatorMenuItem] A new separator menu item
+		 */
+		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
+
 		/**
 		 * @tiapi(method=True,name=UI.setMenu,version=0.2) Sets a menu for the application
-		 * @tiarg(for=UI.setMenu,type=object,name=menu) a MenuItem object or null to unset
+		 * @tiarg[UI.Menu|null, menu] A Menu object to use as the menu or null to unset the menu
 		 */
 		this->SetMethod("setMenu", &UIBinding::_SetMenu);
+
 		/**
 		 * @tiapi(method=True,name=UI.getMenu,version=0.2) Returns the application's main MenuItem
-		 * @tiresult(for=UI.getMenu,type=object) the application's main MenuItem
+		 * @tiresult[UI.Menu|null] The application's main menu
 		 */
 		this->SetMethod("getMenu", &UIBinding::_GetMenu);
+
 		/**
 		 * @tiapi(method=True,name=UI.setContextMenu,version=0.2) Sets the application's context menu
-		 * @tiarg(for=UI.setContextMenu,type=object,name=menu) a MenuItem object or null to unset
+		 * @tiarg(for=UI.setContextMenu,type=UI.Menu|null,name=menu) a MenuItem object or null to unset
 		 */
 		this->SetMethod("setContextMenu", &UIBinding::_SetContextMenu);
+
 		/**
 		 * @tiapi(method=True,name=UI.getContextMenu,version=0.2) Returns the application context menu
-		 * @tiresult(for=UI.getContextMenu,type=object) the application's context MenuItem object
+		 * @tiresult(for=UI.getContextMenu,type=UI.Menu|null) the application's context MenuItem object
 		 */
 		this->SetMethod("getContextMenu", &UIBinding::_GetContextMenu);
+
 		/**
 		 * @tiapi(method=True,name=UI.setIcon,version=0.2) Sets the application's icon
-		 * @tiarg(for=UI.setIcon,type=object,name=menu) path to the icon
+		 * @tiarg(for=UI.setIcon,type=String,name=menu) path to the icon
 		 */
 		this->SetMethod("setIcon", &UIBinding::_SetIcon);
+
 		/**
-		 * @tiapi(method=True,name=UI.addTray,version=0.2) Adds a tray menu
-		 * @tiarg(for=UI.addTray,type=object,name=menu) a TrayItem to add
+		 * @tiapi(method=True,name=UI.addTray,version=0.2,deprecated=True)
+		 * @tiapi Create and add a tray icon
+		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
+		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
+		 * @tiresult(for=UI.addTray,type=UI.Tray|null) the application's Tray icon object
 		 */
 		this->SetMethod("addTray", &UIBinding::_AddTray);
+
 		/**
-		 * @tiapi(method=True,name=UI.clearTray,version=0.2) Removes a tray menu
+		 * @tiapi(method=True,name=UI.clearTray,version=0.2)
+		 * @tiapi Empty the tray of all this application's tray items
 		 */
 		this->SetMethod("clearTray", &UIBinding::_ClearTray);
+
 		/**
 		 * @tiapi(method=True,name=UI.setDockIcon,version=0.2) Sets the dock icon
 		 * @tiarg(for=UI.setDockIcon,type=string,name=icon) path to the icon
 		 */
 		this->SetMethod("setDockIcon", &UIBinding::_SetDockIcon);
+
 		/**
 		 * @tiapi(method=True,name=UI.setDockMenu,version=0.2) Sets the dock menu
 		 * @tiarg(for=UI.setDockMenu,type=object,name=menu) a MenuItem object
 		 */
 		this->SetMethod("setDockMenu", &UIBinding::_SetDockMenu);
+
 		/**
 		 * @tiapi(method=True,name=UI.setBadge,version=0.2) Sets the application's badge value
 		 * @tiarg(for=UI.setBadge,type=string,name=badge) badge value
 		 */
 		this->SetMethod("setBadge", &UIBinding::_SetBadge);
+
 		/**
 		 * @tiapi(method=True,name=UI.setBadgeImage,version=0.2) Sets the application's badge image
 		 * @tiarg(for=UI.setBadge,type=string,name=badge_image) path to badge image
@@ -148,17 +125,22 @@ namespace ti
 		this->SetMethod("setBadgeImage", &UIBinding::_SetBadgeImage);
 
 		/**
-		 * @tiapi(method=True,name=UI.getIdleTime,version=0.2) Returns the user's idle time (for the machine, not just the application)
+		 * @tiapi(method=True,name=UI.getIdleTime,version=0.2)
+		 * @tiapi Returns the user's idle time (for the desktop, not just the application)
 		 * @tiresult(for=UI.getIdleTime,type=double) the idle time as a double
 		 */
 		this->SetMethod("getIdleTime", &UIBinding::_GetIdleTime);
 
 		/**
 		 * @tiapi(method=True,name=UI.getOpenWindows,version=0.4) Returns the list of currently open windows
-		 * @tiresult(for=UI.getOpenWindows,type=list) the list of open windows
+		 * @tiresult(for=UI.getOpenWindows,type=Array<UI.UserWindow>) the list of open windows
 		 */
-		this->openWindowList = new StaticBoundList();
+		/**
+		 * @tiapi(method=True,name=UI.getWindows,version=0.4) Returns the list of currently open windows
+		 * @tiresult(for=UI.getWindows,type=Array<UI.UserWindow>) the list of open windows
+		 */
 		this->SetMethod("getOpenWindows", &UIBinding::_GetOpenWindows);
+		this->SetMethod("getWindows", &UIBinding::_GetOpenWindows);
 
 		/**
 		 * @tiapi(method=True,name=UI.getMainWindow,version=1.0)
@@ -167,21 +149,14 @@ namespace ti
 		 */
 		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
 
-		/**
-		 * @tiapi(property=True,name=UI.windows,version=0.2) Returns a list of open user created windows
-		 * @tideprecated(for=UI.windows,version=0.4)
-		 */
-		this->Set("windows", Value::NewList(this->openWindowList));
-
 		SharedKObject global = host->GetGlobalObject();
 		SharedValue ui_binding_val = Value::NewObject(this);
 		global->Set("UI", ui_binding_val);
-
 	}
 
 	void UIBinding::CreateMainWindow(WindowConfig* config)
 	{
-		SharedPtr<UserWindow> no_parent = NULL;
+		AutoPtr<UserWindow> no_parent = NULL;
 		this->mainWindow = this->CreateWindow(config, no_parent);
 		this->mainWindow->Open();
 	}
@@ -193,6 +168,7 @@ namespace ti
 
 	UIBinding::~UIBinding()
 	{
+		this->ClearTray();
 	}
 
 	Host* UIBinding::GetHost()
@@ -200,21 +176,20 @@ namespace ti
 		return host;
 	}
 
-	std::vector<SharedUserWindow>& UIBinding::GetOpenWindows()
+	std::vector<AutoUserWindow>& UIBinding::GetOpenWindows()
 	{
 		return this->openWindows;
 	}
 
-	void UIBinding::AddToOpenWindows(SharedUserWindow window)
+	void UIBinding::AddToOpenWindows(AutoUserWindow window)
 	{
-		this->openWindowList->Append(Value::NewObject(window));
 		this->openWindows.push_back(window);
 	}
 
-	void UIBinding::RemoveFromOpenWindows(SharedUserWindow window)
+	void UIBinding::RemoveFromOpenWindows(AutoUserWindow window)
 	{
 		static Logger* logger = Logger::Get("UI");
-		std::vector<SharedUserWindow>::iterator w = openWindows.begin();
+		std::vector<AutoUserWindow>::iterator w = openWindows.begin();
 		while (w != openWindows.end())
 		{
 			if ((*w).get() == window.get())
@@ -227,12 +202,17 @@ namespace ti
 				w++;
 			}
 		}
-		logger->Warn("Tried to remove a non-existant window: 0x%lx", (long int) window.get());
+		logger->Warn("Tried to remove a non-existant window: %lx", (long int) window.get());
 	}
 
 	void UIBinding::_GetOpenWindows(const ValueList& args, SharedValue result)
 	{
-		result->SetList(this->openWindowList);
+		SharedKList list = new StaticBoundList();
+		std::vector<AutoUserWindow>::iterator w = openWindows.begin();
+		while (w != openWindows.end()) {
+			list->Append(Value::NewObject(*w++));
+		}
+		result->SetList(list);
 	}
 
 	void UIBinding::_GetMainWindow(const ValueList& args, SharedValue result)
@@ -242,152 +222,229 @@ namespace ti
 
 	void UIBinding::_CreateMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = this->CreateMenu(false);
-		result->SetList(menu);
+		result->SetObject(__CreateMenu(args));
 	}
 
-	void UIBinding::_CreateTrayMenu(const ValueList& args, SharedValue result)
+	AutoMenu UIBinding::__CreateMenu(const ValueList& args)
 	{
-		SharedPtr<MenuItem> menu = this->CreateMenu(true);
-		result->SetList(menu);
+		// call into the native code to retrieve the menu
+		return this->CreateMenu();
+	}
+
+	void UIBinding::_CreateMenuItem(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(__CreateMenuItem(args));
+	}
+
+	AutoMenuItem UIBinding::__CreateMenuItem(const ValueList& args)
+	{
+		args.VerifyException("createMenuItem", "?s m|0 s|0");
+		std::string label = args.GetString(0, "");
+		SharedKMethod eventListener = args.GetMethod(1, NULL);
+		std::string iconURL = args.GetString(2, "");
+
+		AutoMenuItem item = this->CreateMenuItem();
+		if (!label.empty())
+			item->SetLabel(label);
+		if (!iconURL.empty())
+			item->SetIcon(iconURL);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
+
+		return item;
+	}
+
+
+	void UIBinding::_CreateCheckMenuItem(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(__CreateCheckMenuItem(args));
+	}
+
+	AutoMenuItem UIBinding::__CreateCheckMenuItem(const ValueList& args)
+	{
+		args.VerifyException("createCheckMenuItem", "?s m|0");
+		std::string label = args.GetString(0, "");
+		SharedKMethod eventListener = args.GetMethod(1, NULL);
+
+		AutoMenuItem item = this->CreateCheckMenuItem();
+		if (!label.empty())
+			item->SetLabel(label);
+		if (!eventListener.isNull())
+			item->AddEventListener(Event::CLICKED, eventListener);
+
+		return item;
+	}
+
+	void UIBinding::_CreateSeparatorMenuItem(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(__CreateSeparatorMenuItem(args));
+	}
+
+	AutoMenuItem UIBinding::__CreateSeparatorMenuItem(const ValueList& args)
+	{
+		return this->CreateSeparatorMenuItem();
 	}
 
 	void UIBinding::_SetMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsList())
+		args.VerifyException("setMenu", "o|0");
+		SharedKObject argObj = args.GetObject(0, NULL);
+		AutoMenu menu = NULL;
+
+		if (!argObj.isNull())
 		{
-			SharedKList list = args.at(0)->ToList();
-			menu = list.cast<MenuItem>();
+			menu = argObj.cast<Menu>();
 		}
-		UIModule::SetMenu(menu);
-		this->SetMenu(menu);
+
+		this->SetMenu(menu); // platform-specific impl
+
+		// Notify all windows that the app menu has changed.
+		std::vector<AutoUserWindow>::iterator i = openWindows.begin();
+		while (i != openWindows.end()) {
+			(*i++)->AppMenuChanged();
+		}
 	}
 
 	void UIBinding::_GetMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = UIModule::GetMenu();
-		if (menu.get() != NULL)
+		AutoMenu menu = this->GetMenu();
+		if (menu.isNull())
 		{
-			result->SetList(menu);
+			result->SetNull();
 		}
 		else
 		{
-			result->SetUndefined();
+			result->SetObject(menu);
 		}
 	}
 
 	void UIBinding::_SetContextMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsList())
+		args.VerifyException("setContextMenu", "o|0");
+		SharedKObject argObj = args.GetObject(0, NULL);
+		AutoMenu menu = NULL;
+
+		if (!argObj.isNull())
 		{
-			SharedKList list = args.at(0)->ToList();
-			menu = list.cast<MenuItem>();
+			menu = argObj.cast<Menu>();
 		}
-		UIModule::SetContextMenu(menu);
 		this->SetContextMenu(menu);
 	}
 
 	void UIBinding::_GetContextMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = UIModule::GetContextMenu();
-		if (menu.get() != NULL)
-		{
-			SharedKList list = menu;
-			result->SetList(list);
-		}
-		else
-		{
-			result->SetUndefined();
-		}
+		AutoMenu menu = this->GetContextMenu();
+		result->SetObject(menu);
 	}
 
 	void UIBinding::_SetIcon(const ValueList& args, SharedValue result)
 	{
-		SharedString icon_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *icon_url = args.at(0)->ToString();
-			icon_path = UIModule::GetResourcePath(icon_url);
+		args.VerifyException("setIcon", "s|0");
+
+		std::string iconURL;
+		if (args.size() > 0)
+			iconURL = args.GetString(0);
+		this->_SetIcon(iconURL);
+	}
+
+	void UIBinding::_SetIcon(std::string iconURL)
+	{
+		std::string iconPath;
+		this->iconURL = iconURL;
+		if (!iconURL.empty())
+			iconPath = URLUtils::URLToPath(this->iconURL);
+
+		this->SetIcon(iconPath); // platform-specific impl
+
+		// Notify all windows that the app menu has changed.
+		std::vector<AutoUserWindow>::iterator i = openWindows.begin();
+		while (i != openWindows.end()) {
+			(*i++)->AppIconChanged();
 		}
-		UIModule::SetIcon(icon_path);
-		this->SetIcon(icon_path);
 	}
 
 	void UIBinding::_AddTray(const ValueList& args, SharedValue result)
 	{
-		const char *icon_url;
-		GET_ARG_OR_RETURN(0, String, icon_url);
-		SharedString icon_path = UIModule::GetResourcePath(icon_url);
-		if (icon_path.isNull())
-			return;
+		args.VerifyException("createTrayIcon", "s,?m");
+		std::string iconURL = args.GetString(0);
 
-		SharedKMethod cb = SharedKMethod(NULL);
-		GET_ARG(1, Method, cb);
-
-		SharedPtr<TrayItem> item = this->AddTray(icon_path, cb);
-
-		UIModule::AddTrayItem(item);
+		SharedKMethod cb = args.GetMethod(1, NULL);
+		AutoTrayItem item = this->AddTray(iconURL, cb);
+		this->trayItems.push_back(item);
 		result->SetObject(item);
 	}
 
 	void UIBinding::_ClearTray(const ValueList& args, SharedValue result)
 	{
-		UIModule::ClearTrayItems();
+		this->ClearTray();
+	}
+
+	void UIBinding::ClearTray()
+	{
+		std::vector<AutoTrayItem>::iterator i = this->trayItems.begin();
+		while (i != this->trayItems.end())
+		{
+			(*i++)->Remove();
+		}
+		this->trayItems.clear();
+	}
+
+	void UIBinding::UnregisterTrayItem(TrayItem* item)
+	{
+		std::vector<AutoTrayItem>::iterator i = this->trayItems.begin();
+		while (i != this->trayItems.end())
+		{
+			AutoTrayItem c = *i;
+			if (c.get() == item)
+			{
+				i = this->trayItems.erase(i);
+			}
+			else
+			{
+				i++;
+			}
+		}
 	}
 
 	void UIBinding::_SetDockIcon(const ValueList& args, SharedValue result)
 	{
-		SharedString icon_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *icon_url = args.at(0)->ToString();
-			icon_path = UIModule::GetResourcePath(icon_url);
+		std::string iconPath;
+		if (args.size() > 0) {
+			std::string in = args.GetString(0);
+			iconPath = URLUtils::URLToPath(in);
 		}
-		this->SetDockIcon(icon_path);
+		this->SetDockIcon(iconPath);
 	}
 
 	void UIBinding::_SetDockMenu(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsList())
+		AutoPtr<Menu> menu = NULL; // A NULL value is an unset
+		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			SharedKList list = args.at(0)->ToList();
-			menu = list.cast<MenuItem>();
+			menu = args.at(0)->ToObject().cast<Menu>();
 		}
 		this->SetDockMenu(menu);
 	}
 
 	void UIBinding::_SetBadge(const ValueList& args, SharedValue result)
 	{
-		// badges are just labels right now
-		// we might want to support custom images too
-		SharedString badge_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *badge_url = args.at(0)->ToString();
-			if (badge_url!=NULL)
-			{
-				badge_path = SharedString(new std::string(badge_url));
-			}
+		std::string badgeText;
+		if (args.size() > 0) {
+			badgeText = args.GetString(0);
 		}
-		this->SetBadge(badge_path);
+
+		this->SetBadge(badgeText);
 	}
 
 	void UIBinding::_SetBadgeImage(const ValueList& args, SharedValue result)
 	{
-		SharedString image_path = NULL; // a NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsString())
-		{
-			const char *image_url = args.at(0)->ToString();
-			if (image_url!=NULL)
-			{
-				image_path = UIModule::GetResourcePath(image_url);
-			}
+		std::string iconPath;
+		if (args.size() > 0) {
+			std::string in = args.GetString(0);
+			iconPath = URLUtils::URLToPath(in);
 		}
 
-		this->SetBadgeImage(image_path);
+		this->SetBadgeImage(iconPath);
 	}
 
 	void UIBinding::_GetIdleTime(
@@ -396,6 +453,5 @@ namespace ti
 	{
 		result->SetDouble(this->GetIdleTime());
 	}
-
 }
 

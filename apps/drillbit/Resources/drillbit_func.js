@@ -256,11 +256,18 @@ TitaniumTest =
 	tests:[],
 	success:0,
 	failed:0,
+	totalAssertions:0,
 	
 	runningTest:function(suite,name)
 	{
 		Titanium.App.stdout('DRILLBIT_TEST: '+suite+','+name);
 		Titanium.API.debug('DRILLBIT_TEST: '+suite+','+name);
+	},
+	
+	assertion:function(subject)
+	{
+		Titanium.App.stdout('DRILLBIT_ASSERTION: ' + TitaniumTest.currentTest + "," + subject.lineNumber);
+		TitaniumTest.totalAssertions++;
 	},
 	
 	testPassed:function(name, lineNumber)
@@ -286,8 +293,9 @@ TitaniumTest =
 			lineNumber:e.line,
 			message:e.message || String(e)
 		});
-		Titanium.App.stdout("DRILLBIT_FAIL: "+name+" --- "+e);
-		Titanium.API.debug("DRILLBIT_FAIL: "+name+" --- "+e);
+		
+		Titanium.App.stdout("DRILLBIT_FAIL: "+name+","+e.line+" --- "+String(e).replace("\n","\\n"));
+		Titanium.API.debug("DRILLBIT_FAIL: "+name+","+e.line+" --- "+e);
 		TitaniumTest.run_next_test();
 	},
 	
@@ -329,7 +337,8 @@ TitaniumTest =
 			'results':this.results,
 			'count':this.results.length,
 			'success':this.success,
-			'failed':this.failed
+			'failed':this.failed,
+			'assertions':this.assertions
 		};
 		f.write(JSON.stringify(data));
 	},
@@ -387,9 +396,9 @@ TitaniumTest =
 		if (failed)
 		{
 			var app = Titanium.API.getApplication();
-			var script = Titanium.Filesystem.getFile(
-				app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
-			var scriptText = script.read();
+			//var script = Titanium.Filesystem.getFile(
+			//app.getResourcesPath(), "userscripts", TitaniumTest.NAME + "_driver.js");
+			var scriptText = Titanium.Filesystem.getFile(TitaniumTest.SOURCE).read();
 			var lines = scriptText.toString().split("\n");
 
 			text.push('<table style="font-family: monospace; font-size: 10pt;">');
@@ -446,7 +455,7 @@ TitaniumTest.Error = function(message,line)
 
 TitaniumTest.Error.prototype.toString = function()
 {
-	return this.message + ' at ' + this.line;
+	return this.message;
 };
 
 TitaniumTest.Subject = function(target) {
@@ -499,6 +508,7 @@ TitaniumTest.Scope.prototype.failed = function(ex)
 TitaniumTest.Subject.prototype.should_be = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target != expected)
 	{
 		throw new TitaniumTest.Error('should be: "'+expected+'", was: "'+this.target+'"',lineNumber);
@@ -508,6 +518,7 @@ TitaniumTest.Subject.prototype.should_be = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_not_be = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target == expected)
 	{
 		throw new TitaniumTest.Error('should not be: '+expected+', was: '+this.target,lineNumber);
@@ -517,6 +528,7 @@ TitaniumTest.Subject.prototype.should_not_be = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_not_be_null = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target === null)
 	{
 		throw new TitaniumTest.Error('should not be null, was: '+this.target,lineNumber);
@@ -526,6 +538,7 @@ TitaniumTest.Subject.prototype.should_not_be_null = function(expected,lineNumber
 TitaniumTest.Subject.prototype.should_not_be_undefined = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target === undefined)
 	{
 		throw new TitaniumTest.Error('should not be undefined, was: '+this.target,lineNumber);
@@ -535,6 +548,7 @@ TitaniumTest.Subject.prototype.should_not_be_undefined = function(expected,lineN
 TitaniumTest.Subject.prototype.should_be_exactly = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target !== expected)
 	{
 		throw new TitaniumTest.Error('should be exactly: '+expected+', was: '+this.target,lineNumber);
@@ -544,6 +558,7 @@ TitaniumTest.Subject.prototype.should_be_exactly = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_null = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target !== null)
 	{
 		throw new TitaniumTest.Error('should be null, was: '+this.target,lineNumber);
@@ -553,6 +568,7 @@ TitaniumTest.Subject.prototype.should_be_null = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_string = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (typeof this.target !== 'string')
 	{
 		throw new TitaniumTest.Error('should be string, was: '+typeof(this.target),lineNumber);
@@ -562,6 +578,7 @@ TitaniumTest.Subject.prototype.should_be_string = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_undefined = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target !== undefined)
 	{
 		throw new TitaniumTest.Error('should be undefined, was: '+this.target,lineNumber);
@@ -572,6 +589,7 @@ TitaniumTest.Subject.prototype.should_be_undefined = function(expected,lineNumbe
 TitaniumTest.Subject.prototype.should_be_function = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (typeof(this.target) != 'function')
 	{
 		throw new TitaniumTest.Error('should be a function, was: '+typeof(this.target),lineNumber);
@@ -581,6 +599,7 @@ TitaniumTest.Subject.prototype.should_be_function = function(expected,lineNumber
 TitaniumTest.Subject.prototype.should_be_object = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (typeof(this.target) != 'object')
 	{
 		throw new TitaniumTest.Error('should be a object, was: '+typeof(this.target),lineNumber);
@@ -590,6 +609,7 @@ TitaniumTest.Subject.prototype.should_be_object = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_number = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (typeof(this.target) != 'number')
 	{
 		throw new TitaniumTest.Error('should be a number, was: '+typeof(this.target),lineNumber);
@@ -599,6 +619,7 @@ TitaniumTest.Subject.prototype.should_be_number = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_boolean = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (typeof(this.target) != 'boolean')
 	{
 		throw new TitaniumTest.Error('should be a boolean, was: '+typeof(this.target),lineNumber);
@@ -608,6 +629,7 @@ TitaniumTest.Subject.prototype.should_be_boolean = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_true = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target!==true)
 	{
 		throw new TitaniumTest.Error('should be true, was: '+this.target,lineNumber);
@@ -617,6 +639,7 @@ TitaniumTest.Subject.prototype.should_be_true = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_false = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target!==false)
 	{
 		throw new TitaniumTest.Error('should be false, was: '+this.target,lineNumber);
@@ -626,6 +649,7 @@ TitaniumTest.Subject.prototype.should_be_false = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_zero = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target!==0)
 	{
 		throw new TitaniumTest.Error('should be 0 (zero), was: '+this.target+' ('+typeof(this.target)+')',lineNumber);
@@ -635,6 +659,7 @@ TitaniumTest.Subject.prototype.should_be_zero = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_array = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	// better way to check? we need to support our duck-typing too..
 	if (this.target.constructor != Array)
 	{
@@ -645,6 +670,7 @@ TitaniumTest.Subject.prototype.should_be_array = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_contain = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target.indexOf(expected)==-1)
 	{
 		throw new TitaniumTest.Error('should contain: '+expected+', was: '+this.target,lineNumber);
@@ -654,6 +680,7 @@ TitaniumTest.Subject.prototype.should_contain = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_be_one_of = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (expected.indexOf(this.target)==-1)
 	{
 		throw new TitaniumTest.Error('should contain one of: ['+expected.join(",")+'] was: '+this.target,lineNumber);
@@ -663,6 +690,7 @@ TitaniumTest.Subject.prototype.should_be_one_of = function(expected,lineNumber)
 TitaniumTest.Subject.prototype.should_match_array = function(expected,lineNumber)
 {
 	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
 	if (this.target.length && expected.length && this.target.length == expected.length) {
 		for (var i = 0; i < expected.length; i++) {
 			if (expected[i] != this.target[i]) {
@@ -673,4 +701,73 @@ TitaniumTest.Subject.prototype.should_match_array = function(expected,lineNumber
 	else {
 		throw new TitaniumTest.Error('array lengths differ, expected: '+expected+', was: '+this.target,lineNumber);
 	}
+};
+
+TitaniumTest.Subject.prototype.should_be_greater_than = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target <= expected)
+	{
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' <= ' + expected,lineNumber);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_less_than = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target >= expected)
+	{
+		throw new TitaniumTest.Error('should be less than, was ' + this.target + ' >= ' + expected,lineNumber);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_greater_than_equal = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target < expected)
+	{
+		throw new TitaniumTest.Error('should be greater than equal, was ' + this.target + ' < ' + expected,lineNumber);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_be_less_than_equal = function(expected, lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (this.target > expected)
+	{
+		throw new TitaniumTest.Error('should be greater than, was ' + this.target + ' > ' + expected,lineNumber);
+	}
+};
+
+TitaniumTest.Subject.prototype.should_throw_exception = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (typeof(this.target) == 'function')
+	{
+		try {
+			this.target();
+		} catch (e) { return; }
+		throw new TitaniumTest.Error("should throw exception, but didn't",lineNumber);
+	}
+	else throw new TitaniumTest.Error("should throw exception, but target isn't a function",lineNumber);
+};
+
+TitaniumTest.Subject.prototype.should_not_throw_exception = function(expected,lineNumber)
+{
+	this.lineNumber = lineNumber;
+	TitaniumTest.assertion(this);
+	if (typeof(this.target) == 'function')
+	{
+		try {
+			this.target();
+		} catch (e) { 
+			throw new TitaniumTest.Error("should not throw exception, but did",lineNumber);	
+		}
+	}
+	else throw new TitaniumTest.Error("should not throw exception, but target isn't a function",lineNumber);
 };

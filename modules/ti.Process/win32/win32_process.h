@@ -7,54 +7,49 @@
 #ifndef _WIN32_PROCESS_H_
 #define _WIN32_PROCESS_H_
 
-#include "win32_pipe.h"
 #include <sstream>
+#include "win32_pipe.h"
+#include "../process.h"
 
 namespace ti
 {
-	class ProcessBinding;
-	
-	class Win32Process : public StaticBoundObject
+	class Win32Process : public Process
 	{
 	public:
-		Win32Process(ProcessBinding* parent, std::string& command, std::vector<std::string>& args);
-
-	protected:
+		Win32Process();
 		virtual ~Win32Process();
-		virtual void Set(const char *name, SharedValue value);
 
-	private:
-		ProcessBinding *parent;
+		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
+		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
+
+		virtual int GetPID();
+		virtual void Terminate();
+		virtual void Kill();
+		virtual void SendSignal(int signal);
+		virtual void ForkAndExec();
+		virtual void MonitorAsync();
+		virtual AutoBlob MonitorSync();
+		virtual int Wait();
+		virtual std::string ArgumentsToString();
+		void ReadCallback(const ValueList& args, SharedValue result);
+		virtual void RecreateNativePipes();
+		
+	protected:
+		std::string ArgListToString(SharedKList argList);
+		
 		Poco::Thread exitMonitorThread;
-		Poco::Thread stdOutThread;
-		Poco::Thread stdErrorThread;
-		Poco::RunnableAdapter<Win32Process>* monitorAdapter;
-		Poco::RunnableAdapter<Win32Process>* stdOutAdapter;
-		Poco::RunnableAdapter<Win32Process>* stdErrorAdapter;
-		bool running;
-		bool complete;
+		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
+		AutoPtr<Win32Pipe> nativeIn, nativeOut, nativeErr;
+		Poco::Mutex mutex;
+		
+		Poco::Mutex processOutputMutex;
+		std::vector<AutoBlob> processOutput;
+		
 		int pid;
 		HANDLE process;
-		int exitCode;
-		std::vector<std::string> arguments;
-		std::string command;
-		Win32Pipe *in, *out, *err;
-		std::ostringstream outBuffer, errBuffer;
-		SharedKObject *shared_input, *shared_output, *shared_error;
+		
 		Logger* logger;
-
-		void Terminate(const ValueList& args, SharedValue result);
-		void Terminate();
-		void StartProcess();
-		void StartThreads();
-		
-		void InvokeOnExit();
-		void InvokeOnRead(char *buffer, bool isStdError);
-		void InvokeOnRead(std::ostringstream& buffer, bool isErr);
-		
-		void Monitor();
-		void ReadStdOut();
-		void ReadStdErr();
 	};
 }
 

@@ -138,7 +138,7 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			SharedPtr<Blob> blob = args.at(0)->ToObject().cast<Blob>();
+			AutoPtr<Blob> blob = args.at(0)->ToObject().cast<Blob>();
 			if (!blob.isNull())
 			{
 				const char *data = blob->Get();

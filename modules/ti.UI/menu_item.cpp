@@ -1,243 +1,422 @@
 /**
- * Appcelerator Titanium - licensed under the Apache Public License 2
- * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
- */
+* Appcelerator Titanium - licensed under the Apache Public License 2
+* see LICENSE in the root folder for details on the license.
+* Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
+*/
 
 #include <kroll/kroll.h>
-#include "menu_item.h"
-
+#include "ui_module.h"
 namespace ti
 {
+	using std::string;
+	using std::vector;
 
-	MenuItem::MenuItem() : AccessorBoundList("MenuItem")
+	MenuItem::MenuItem(MenuItemType type) :
+	KEventObject("UI.MenuItem"),
+		type(type),
+		enabled(true),
+		label(""),
+		submenu(0),
+		state(false),
+		autoCheck(true)
 	{
-		// query methods
+
 		/**
-		 * @tiapi(method=True,name=UI.Menu.isSeparator,since=0.2) Checks whether a menu item is a separator
-		 * @tiresult(for=UI.Menu.isSeparator,type=boolean) true if the menu item is a separator, false if otherwise
-		 */
+		* @tiapi(method=True,name=UI.MenuItem.isSeparator,version=1.0)
+		* @tiresult[Boolean] True if this item is a separator and false otherwise
+		*/
 		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.isItem,since=0.2) Checks whether a menu item is a selectable item
-		 * @tiresult(for=UI.Menu.isItem,type=boolean) true if the menu item is a selectable item, false if otherwise
-		 */
-		this->SetMethod("isItem", &MenuItem::_IsItem);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.isSubMenu,since=0.2) Checks whether a menu item is a submenu
-		 * @tiresult(for=UI.Menu.isSubMenu,type=boolean) true if the menu item is a submenu, false if otherwise
-		 */
-		this->SetMethod("isSubMenu", &MenuItem::_IsSubMenu);
-
-		// submenu methods
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addSeparator,since=0.2) Adds a separator to a menu
-		 * @tiresult(for=UI.Menu.addSeparator,type=object) a separator MenuItem
-		 */
-		this->SetMethod("addSeparator", &MenuItem::_AddSeparator);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addItem,since=0.2) Adds a selectable item to a menu
-		 * @tiarg(for=UI.Menu.addItem,name=label,type=string,optional=True) label for the item
-		 * @tiarg(for=UI.Menu.addItem,name=callback,type=method,optional=True) callback function for the item
-		 * @tiarg(for=UI.Menu.addItem,name=icon,type=string,optional=True) icon for the item
-		 * @tiresult(for=UI.Menu.addItem,type=object) a MenuItem
-		 */
-		this->SetMethod("addItem", &MenuItem::_AddItem);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.addSubMenu,since=0.2) Adds a submenu item to a menu
-		 * @tiarg(for=UI.Menu.addItem,name=label,type=string,optional=True) label for the item
-		 * @tiarg(for=UI.Menu.addItem,name=icon,type=string,optional=True) icon for the item
-		 * @tiresult(for=UI.Menu.addSubMenu,type=object) a MenuItem
-		 */
-		this->SetMethod("addSubMenu", &MenuItem::_AddSubMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.Menu.enable,since=0.2) Enables a MenuItem
-		 */
-		this->SetMethod("enable", &MenuItem::_Enable);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.disable,since=0.2) Disable a MenuItem
-		 */
-		this->SetMethod("disable", &MenuItem::_Disable);
+		* @tiapi(method=True,name=UI.MenuItem.isCheck,version=1.0)
+		* @tiresult[Boolean] True if this item is a check item and false otherwise
+		*/
+		this->SetMethod("isCheck", &MenuItem::_IsCheck);
 
-		/**
-		 * @tiapi(method=True,name=UI.Menu.setLabel,since=0.2) Sets the MenuItem's label
-		 * @tiarg(for=UI.Menu.setLabel,name=label,type=string) label for the menu item
-		 */
-		this->SetMethod("setLabel", &MenuItem::_SetLabel);
-		/**
-		 * @tiapi(method=True,name=UI.Menu.setIcon,since=0.2) Sets the icon for the MenuItem
-		 * @tiarg(for=UI.Menu.setIcon,name=icon,type=string) path to the icon file
-		 */
-		this->SetMethod("setIcon", &MenuItem::_SetIcon);
+		if (this->type == NORMAL || this->type == CHECK)
+		{
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.setLabel,version=1.0)
+			* @tiapi Set the label for this item.
+			* @tiapi This method is not available for separator items.
+			* @tiarg[String, label] The new label for this item
+			*/
+			this->SetMethod("setLabel", &MenuItem::_SetLabel);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.getLabel,version=1.0)
+			* @tiapi Get this item's label.
+			* @tiapi This method is not available for separator items.
+			* @tiresult[String] The label for this item
+			*/
+			this->SetMethod("getLabel", &MenuItem::_GetLabel);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.setSubmenu,version=1.0)
+			* @tiapi Set this item's submenu.
+			* @tiapi This method is not available for separator items.
+			* @tiarg[UI.Menu|null, menu] The submenu to use for this item or null to unset it
+			*/
+			this->SetMethod("setSubmenu", &MenuItem::_SetSubmenu);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.getSubmenu,version=1.0)
+			* @tiapi Get this item's submenu.
+			* @tiapi This method is not available for separator items.
+			* @tiresult[UI.Menu|null] This item's submenu or null if it does not have one
+			*/
+			this->SetMethod("getSubmenu", &MenuItem::_GetSubmenu);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.enable,version=1.0)
+			* @tiapi Enable this item i.e. make it clickable.
+			* @tiapi This method is not available for separator items.
+			*/
+			this->SetMethod("enable", &MenuItem::_Enable);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.disable,version=1.0)
+			* @tiapi Disable this item i.e. make it non-clickable.
+			* @tiapi This method is not available for separator items.
+			*/
+			this->SetMethod("disable", &MenuItem::_Disable);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.isEnabled,version=1.0)
+			* @tiresult[Boolean] Whether or not this item is enabled
+			* @tiapi This method is not available for separator items.
+			*/
+			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
+
+			/**
+			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi Add an item to this menu item's submenu with the given attributes.
+			* @tiapi If this menu item does not have a submenu, it will be created.
+			* @tiapi This method is not available for separator items.
+			* @tiarg[String, label] The label for the new item
+			* @tiarg[Function, listener, optional=True] An event listener callback for the item
+			* @tiarg[String, iconURL] The URL for this item's icon
+			* @tiresult[UI.MenuItem] The newly added item
+			*/
+			this->SetMethod("addItem", &MenuItem::_AddItem);
+
+			/**
+			* @tiapi(method=True,name=UI.Menu.addSeparatorItem,version=1.0)
+			* @tiapi Add a separator item to this menu item's submenu.
+			* @tiapi If this menu item does not have a submenu, it will be created.
+			* @tiapi This method is not available for separator items.
+			* @tiresult[UI.MenuItem] The newly added separator item
+			*/
+			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
+
+			/**
+			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi Add a check item to this menu item's submenu with the given attributes.
+			* @tiapi If this menu item does not have a submenu, it will be created.
+			* @tiapi This method is not available for separator items.
+			* @tiarg[String, label] The label for the new item
+			* @tiarg[Function, listener, optional=True] An event listener callback for the item
+			* @tiresult[UI.MenuItem] The newly added check item
+			*/
+			this->SetMethod("addCheckItem", &MenuItem::_AddCheckItem);
+
+			// This is only for testing and should remain undocumented
+			this->SetMethod("click", &MenuItem::_Click);
+		}
+
+		if (this->type == NORMAL)
+		{
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.setIcon,version=1.0)
+			* @tiapi Set the icon URL for this item
+			* @tiapi This method is not available for separator or check items.
+			* @tiarg[String|null, iconURL] The new icon URL for this item or null to unset it
+			*/
+			this->SetMethod("setIcon", &MenuItem::_SetIcon);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.getIcon,version=1.0)
+			* @tiapi Get this item's icon URL
+			* @tiapi This method is not available for separator or check items.
+			* @tiresult[String|null] The icon URL for this item or null if it does not have one
+			*/
+			this->SetMethod("getIcon", &MenuItem::_GetIcon);
+		}
+
+		if (this->type == CHECK)
+		{
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.setState,version=1.0)
+			* @tiapi Sets the state of this check item
+			* @tiapi This method is only available for check items.
+			* @tiarg[Boolean, state] A True state is checked, while a False state in unchecked
+			*/
+			this->SetMethod("setState", &MenuItem::_SetState);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.getState,version=1.0)
+			* @tiapi Gets the state of this check item
+			* @tiapi This method is only available for check items.
+			* @tiresult[Boolean] True if this item is checked, false otherwise
+			*/
+			this->SetMethod("getState", &MenuItem::_GetState);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.setAutoCheck,version=1.0)
+			* @tiapi Set whether or not this check item is an autocheck item. An autocheck
+			* @tiapi item (the default) will automatically flip the state of the check on a
+			* @tiapi a click event. Turning off this behavior makes the check item more useful
+			* @tiapi as a radio button.
+			* @tiapi This method is only available for check items.
+			* @tiarg[Boolean, autocheck] Whether or not this item should be an autocheck
+			*/
+			this->SetMethod("setAutoCheck", &MenuItem::_SetAutoCheck);
+
+			/**
+			* @tiapi(method=True,name=UI.MenuItem.getAutoCheck,version=1.0)
+			* @tiapi This method is only available for check items.
+			* @tiarg[Boolean, autocheck] Whether or not this item should is an autocheck
+			*/
+			this->SetMethod("isAutoCheck", &MenuItem::_IsAutoCheck);
+		}
 	}
 
 	MenuItem::~MenuItem()
 	{
 	}
 
-	void MenuItem::SetMethod(const char *name, void (MenuItem::*method)(const ValueList&, SharedValue))
-	{
-		MethodCallback* callback = NewCallback<MenuItem, const ValueList&, SharedValue>(static_cast<MenuItem*>(this), method);
-		SharedKMethod bound_method = new StaticBoundMethod(callback);
-		SharedValue method_value = Value::NewMethod(bound_method);
-		this->RawSet(name, method_value);
-	}
-
-	bool MenuItem::IsSeparator()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == SEP);
-	}
-
-	bool MenuItem::IsItem()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == ITEM);
-	}
-
-	bool MenuItem::IsSubMenu()
-	{
-		SharedValue type = this->RawGet("type");
-		return (type->IsInt() && type->ToInt() == SUBMENU);
-	}
-
 	void MenuItem::_IsSeparator(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(this->IsSeparator());
+		result->SetBool(this->type == SEPARATOR);
 	}
 
-	void MenuItem::_IsItem(const ValueList& args, SharedValue result)
+	void MenuItem::_IsCheck(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(this->IsItem());
-	}
-
-	void MenuItem::_IsSubMenu(const ValueList& args, SharedValue result)
-	{
-		result->SetBool(this->IsSubMenu());
-	}
-
-	void MenuItem::_AddSeparator(const ValueList& args, SharedValue result)
-	{
-		SharedValue new_item = this->AddSeparator();
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
-	{
-		SharedValue label = Value::Undefined;
-		SharedValue icon_url = Value::Undefined;
-		SharedValue callback = Value::Undefined;
-
-		if (args.size() > 0 && args.at(0)->IsString())
-			label = args.at(0);
-
-		if (args.size() > 1 && args.at(1)->IsMethod())
-			callback = args.at(1);
-
-		if (args.size() > 2 && args.at(2)->IsString())
-			icon_url = args.at(2);
-
-		SharedValue new_item = this->AddItem(label, callback, icon_url);
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_AddSubMenu(const ValueList& args, SharedValue result)
-	{
-		SharedValue label = Value::Undefined;
-		SharedValue icon_url = Value::Undefined;
-
-		if (args.size() > 0 && args.at(0)->IsString())
-			label = args.at(0);
-
-		if (args.size() > 1 && args.at(1)->IsString())
-			icon_url = args.at(1);
-
-		SharedValue new_item = this->AddSubMenu(label, icon_url);
-		result->SetValue(new_item);
-	}
-
-	void MenuItem::_Enable(const ValueList& args, SharedValue result)
-	{
-		this->Enable();
-		this->RawSet("enabled", Value::NewBool(true));
-	}
-
-	void MenuItem::_Disable(const ValueList& args, SharedValue result)
-	{
-		this->Disable();
-		this->RawSet("enabled", Value::NewBool(false));
+		result->SetBool(this->type == CHECK);
 	}
 
 	void MenuItem::_SetLabel(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("label", args.at(0));
-
-		std::string label = std::string(args.at(0)->ToString());
-		this->SetLabel(label);
+		args.VerifyException("setLabel", "s|0");
+		string newLabel = args.GetString(0, "");
+		this->SetLabel(newLabel);
 	}
+
+	void MenuItem::_GetLabel(const ValueList& args, SharedValue result)
+	{
+		result->SetString(this->label);
+	}
+
 	void MenuItem::_SetIcon(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("icon", args.at(0));
-		std::string icon_path = std::string(args.at(0)->ToString());
-		this->SetLabel(icon_path);
+		args.VerifyException("setIcon", "s|0");
+		std::string newIcon = "";
+		if (args.size() > 0) {
+			newIcon = args.GetString(0);
+		}
+		this->SetIcon(newIcon);
 	}
 
-	/* The function below, modify the bound object values
-	 * of this object and are used by subclasses to ensure
-	 * a consistent state */
-	void MenuItem::MakeSeparator()
+	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(SEP));
-		this->RawSet("iconURL", Value::Undefined);
-		this->RawSet("label", Value::Undefined);
+		result->SetString(this->iconURL);
 	}
 
-	void MenuItem::MakeItem(SharedValue label,
-	                       SharedValue callback,
-	                       SharedValue icon_url)
+	void MenuItem::_SetState(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(ITEM));
-		this->RawSet("label", label);
-		this->RawSet("callback", callback);
-		this->RawSet("iconURL", icon_url);
+		args.VerifyException("setState", "b");
+		this->SetState(args.GetBool(0));
 	}
 
-	void MenuItem::MakeSubMenu(SharedValue label,
-	                          SharedValue icon_url)
+	void MenuItem::_GetState(const ValueList& args, SharedValue result)
 	{
-		this->RawSet("type", Value::NewInt(SUBMENU));
-		this->RawSet("label", label);
-		this->RawSet("iconURL", icon_url);
-		this->RawSet("callback", Value::Undefined);
+		result->SetBool(this->state);
 	}
 
-	SharedValue MenuItem::AddToListModel(MenuItem* item)
+	void MenuItem::_SetSubmenu(const ValueList& args, SharedValue result)
 	{
-		SharedKList so = SharedKList(item);
-		SharedValue v = Value::NewList(so);
-		this->Append(v);
-		return v;
+		args.VerifyException("setCallback", "o|0");
+		AutoMenu newSubmenu = NULL;
+
+		if (args.at(0)->IsObject())
+		{
+			SharedKObject o = args.at(0)->ToObject();
+			o = KObject::Unwrap(o);
+			newSubmenu = o.cast<Menu>();
+		}
+
+		if (!newSubmenu.isNull() && newSubmenu->ContainsItem(this))
+		{
+			throw ValueException::FromString("Tried to construct a recursive menu");
+		}
+
+		this->submenu = newSubmenu;
+		this->SetSubmenuImpl(newSubmenu);
 	}
 
-
-	/* Handy accessor functions */
-	const char* MenuItem::GetLabel()
+	void MenuItem::_GetSubmenu(const ValueList& args, SharedValue result)
 	{
-		SharedValue label_value = this->RawGet("label");
-		if (label_value->IsString())
-			return label_value->ToString();
+		if (this->submenu.isNull())
+		{
+			result->SetNull();
+		}
 		else
-			return NULL;
+		{
+			result->SetObject(this->submenu);
+		}
 	}
 
-	const char* MenuItem::GetIconURL()
+	void MenuItem::_Enable(const ValueList& args, SharedValue result)
 	{
-		SharedValue label_value = this->RawGet("iconURL");
-		if (label_value->IsString())
-			return label_value->ToString();
-		else
-			return NULL;
+		this->enabled = true;
+		this->SetEnabledImpl(true);
 	}
 
+	void MenuItem::_Disable(const ValueList& args, SharedValue result)
+	{
+		this->enabled = false;
+		this->SetEnabledImpl(true);
+	}
+
+	void MenuItem::_SetAutoCheck(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setAutoCheck", "b");
+		this->autoCheck = args.GetBool(0);
+	}
+
+	void MenuItem::_IsAutoCheck(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->autoCheck);
+	}
+
+	void MenuItem::_IsEnabled(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(this->enabled);
+	}
+
+	void MenuItem::_Click(const ValueList& args, SharedValue result)
+	{
+		this->HandleClickEvent(0);
+	}
+
+	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("addItem", "?s m|0 s|0");
+		UIBinding* binding = UIBinding::GetInstance();
+
+		// Create a menu item object and add it to this item's submenu
+		AutoMenuItem newItem = binding->__CreateMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::_AddSeparatorItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+		AutoMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::_AddCheckItem(const ValueList& args, SharedValue result)
+	{
+		UIBinding* binding = UIBinding::GetInstance();
+
+		// Create a menu item object
+		AutoMenuItem newItem = binding->__CreateCheckMenuItem(args);
+		this->EnsureHasSubmenu();
+		this->submenu->AppendItem(newItem);
+
+		result->SetObject(newItem);
+	}
+
+	void MenuItem::HandleClickEvent(SharedKObject source)
+	{
+		if (this->IsCheck() && this->autoCheck)
+		{
+			// Execute this later on the main thread
+			Host* host = Host::GetInstance();
+			host->InvokeMethodOnMainThread(
+				this->Get("setState")->ToMethod(),
+				ValueList(Value::NewBool(!this->GetState())),
+				false);
+		}
+
+		this->FireEvent(Event::CLICKED);
+	}
+
+	void MenuItem::SetState(bool newState)
+	{
+		this->state = newState;
+		this->SetStateImpl(newState);
+	}
+
+	void MenuItem::SetLabel(string& newLabel)
+	{
+		this->label = newLabel;
+		this->SetLabelImpl(newLabel);
+	}
+
+	void MenuItem::SetIcon(string& iconURL)
+	{
+		this->iconPath = this->iconURL = iconURL;
+		if (!iconURL.empty()) {
+			this->iconPath = URLUtils::URLToPath(this->iconURL);
+		}
+		this->SetIconImpl(this->iconPath); // platform-specific impl
+	}
+
+	bool MenuItem::GetState()
+	{
+		return this->state;
+	}
+
+	std::string& MenuItem::GetLabel()
+	{
+		return this->label;
+	}
+
+	bool MenuItem::IsSeparator()
+	{
+		return this->type == SEPARATOR;
+	}
+
+	bool MenuItem::IsCheck()
+	{
+		return this->type == CHECK;
+	}
+
+	bool MenuItem::IsEnabled()
+	{
+		return this->enabled;
+	}
+
+	void MenuItem::EnsureHasSubmenu()
+	{
+		if (this->submenu.isNull())
+		{
+			UIBinding* binding = UIBinding::GetInstance();
+			AutoMenu newSubmenu = binding->CreateMenu();
+			this->SetSubmenuImpl(newSubmenu);
+			this->submenu = newSubmenu;
+		}
+	}
+
+	bool MenuItem::ContainsItem(MenuItem* item)
+	{
+		return !this->submenu.isNull() &&
+			this->submenu->ContainsItem(item);
+	}
+
+	bool MenuItem::ContainsSubmenu(Menu* submenu)
+	{
+		return !this->submenu.isNull() &&
+			(this->submenu.get() == submenu ||
+			this->submenu->ContainsSubmenu(submenu));
+	}
 }

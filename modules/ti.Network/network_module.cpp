@@ -23,10 +23,10 @@ namespace ti
 		SharedValue value = Value::NewObject(this->variables);
 		host->GetGlobalObject()->Set("Network", value);
 	}
-	
-	void NetworkModule::Stop ()
+
+	void NetworkModule::Stop()
 	{
-		SharedPtr<NetworkBinding> b = this->variables.cast<NetworkBinding>();
+		AutoPtr<NetworkBinding> b = this->variables.cast<NetworkBinding>();
 		b->Shutdown();
 	}
 	

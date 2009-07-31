@@ -36,9 +36,8 @@ namespace ti
 	{
 
 		public:
-		GtkUserWindow(WindowConfig*, SharedUserWindow&);
+		GtkUserWindow(WindowConfig*, AutoUserWindow&);
 		virtual ~GtkUserWindow();
-		void Destroyed();
 		void SetupDecorations();
 		void SetupTransparency();
 		void SetupSizeLimits();
@@ -46,8 +45,8 @@ namespace ti
 		void SetupPosition();
 		void SetupMenu();
 		void SetupIcon();
-		void AppMenuChanged();
-		void AppIconChanged();
+		virtual void AppMenuChanged();
+		virtual void AppIconChanged();
 		void RemoveOldMenu();
 
 		void ShowFileChooser(
@@ -123,7 +122,7 @@ namespace ti
 		Bounds GetBounds();
 		void SetBounds(Bounds bounds);
 		std::string GetTitle();
-		void SetTitle(std::string& title);
+		void SetTitleImpl(std::string& title);
 		std::string GetURL();
 		void SetURL(std::string& url);
 		bool IsResizable();
@@ -140,50 +139,45 @@ namespace ti
 		void SetFullscreen(bool fullscreen);
 		bool IsTopMost();
 		void SetTopMost(bool topmost);
-
-		void SetMenu(SharedPtr<MenuItem> menu);
-		SharedPtr<MenuItem> GetMenu();
-
-		void SetContextMenu(SharedPtr<MenuItem> menu);
-		SharedPtr<MenuItem> GetContextMenu();
-
-		void SetIcon(SharedString iconPath);
-		SharedString GetIcon();
-
+		void SetMenu(AutoMenu);
+		AutoMenu GetMenu();
+		void SetContextMenu(AutoMenu);
+		AutoMenu GetContextMenu();
+		void SetIcon(std::string& iconPath);
+		std::string& GetIcon();
 		void SetInspectorWindow(GtkWidget* inspectorWindow);
 		GtkWidget *GetInspectorWindow();
+		virtual void ShowInspector(bool console);
+		inline WebKitWebView* GetWebView() { return this->webView; }
 
-		int gdkWidth;
-		int gdkHeight;
-		int gdkX;
-		int gdkY;
-		bool gdkMaximized;
-		bool gdkMinimized;
+		// These values contain the most-recently-set dimension
+		// information for this UserWindow. GDK is asynchronous,
+		// so if a user sets the value the and fetches it without
+		// giving up control to the UI thread, returning one of them
+		// will yield the correct information. When we actually
+		// detect a GDK window resize, these values will also be
+		// updated, so they will be an accurate representation of
+		// the window size.
+		int targetWidth;
+		int targetHeight;
+		int targetX;
+		int targetY;
+		bool targetMaximized;
+		bool targetMinimized;
 
-	protected:
+		protected:
 		GtkWindow* gtkWindow;
 		GtkWidget* vbox;
 		WebKitWebView* webView;
 		bool topmost;
 		gulong destroyCallbackId;
 
-		// The window-specific menu.
-		SharedPtr<GtkMenuItemImpl> menu;
-
-		// This window's menu -- may just be a pointer to the app menu
-		SharedPtr<GtkMenuItemImpl> menuInUse;
-
-		// The widget this window uses for a menu.
-		GtkWidget* menuBar;
-
-		// The path to this window's icon
-		SharedString iconPath;
-
-		// The widget this window uses for a context menu.
-		SharedPtr<GtkMenuItemImpl> context_menu;
-
-		// This window's web inspector window
-		GtkWidget *inspectorWindow;
+		AutoPtr<GtkMenu> menu; // The window-specific menu.
+		AutoPtr<GtkMenu> activeMenu; // This window's active menu 
+		AutoPtr<GtkMenu> contextMenu; // The window specific context menu 
+		::GtkMenuBar* nativeMenu; // The widget this window uses for a menu.
+		std::string iconPath; // The path to this window's icon
+		GtkWidget *inspectorWindow; // This window's web inspector window
 
 		void _FileChooserWork(const ValueList&, SharedValue);
 		static std::string openFilesDirectory;

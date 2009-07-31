@@ -66,22 +66,6 @@ namespace ti
 		 * @tiresult(for=Network.HTTPServerRequest.read,type=string) the data read from this request
 		 */
 		SetMethod("read",&HttpServerRequest::Read);
-
-		// FIXME: This is a memory leak -- Poco manages the reference
-		// count of this objects, yet we need to pass it into Kroll.
-		// Things we could do:
-		// 1. Keep a static registration of all SharedPtr* to these objects
-		//    and lazily free them.
-		// - Why not: Poco keeps an AutoPtr to this object and may try to free
-		//   it before or after we do.
-		//
-		// 2. Bump the reference count and try to manage destruction ourselves.
-		// - Why not: We have no good way of knowing when Poco is done
-		//   with the object, so we can't ever safely delete it.
-		//
-		// Solution for now: leak.
-		// Solution for later: move from SharedPtr to AutoPtr
-		this->sharedPtr = new SharedPtr<HttpServerRequest>(this);
 	}
 
 	HttpServerRequest::~HttpServerRequest()
@@ -91,7 +75,13 @@ namespace ti
 	void HttpServerRequest::handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
 	{
 		ValueList args;
-		args.push_back(Value::NewObject(*this->sharedPtr));
+
+		// We MUST duplicate 'this' before casting it into an
+		// AutoPtr or else we will free this memory at the wrong time.
+		this->duplicate();
+		AutoPtr<HttpServerRequest> autoThis = this;
+
+		args.push_back(Value::NewObject(autoThis));
 		args.push_back(Value::NewObject(new HttpServerResponse(response)));
 		host->InvokeMethodOnMainThread(callback, args);
 	}
@@ -152,7 +142,7 @@ namespace ti
 		}
 		char *buf = new char[max_size];
 		in.read(buf,max_size);
-		std::streamsize count = in.gcount();
+		int count = static_cast<int>(in.gcount());
 		if (count == 0)
 		{
 			result->SetNull();

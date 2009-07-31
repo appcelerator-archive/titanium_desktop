@@ -39,12 +39,14 @@ namespace ti
 		bool HasNetworkStatusListeners();
 		void NetworkStatusChange(bool online);
 		Host* GetHost();
+		void Shutdown();
 
 	private:
 		Host* host;
 		std::string modulePath;
 		SharedKObject global;
-		Proxy * proxy;
+		AutoPtr<Proxy> proxy;
+
 		static std::vector<SharedKObject> bindings;
 		struct Listener {
 			SharedKMethod callback;
@@ -64,10 +66,8 @@ namespace ti
 		void CreateIRCClient(const ValueList& args, SharedValue result);
 		void CreateHTTPClient(const ValueList& args, SharedValue result);
 		void CreateHTTPServer(const ValueList& args, SharedValue result);
-
 		void EncodeURIComponent(const ValueList &args, SharedValue result);
 		void DecodeURIComponent(const ValueList &args, SharedValue result);
-		
 		void _GetByHost(std::string host, SharedValue result);
 		void GetHostByName(const ValueList& args, SharedValue result);
 		void GetHostByAddress(const ValueList& args, SharedValue result);
@@ -76,10 +76,6 @@ namespace ti
 		void FireOnlineStatusChange(const ValueList& args, SharedValue result);
 		void SetProxy(const ValueList& args, SharedValue result);
 		void GetProxy(const ValueList& args, SharedValue result);	
-		
-		// called by the module
-		void Shutdown();	
-		friend class NetworkModule;
 	};
 }
 

@@ -12,18 +12,27 @@
 #include <X11/extensions/scrnsaver.h>
 #include <gdk/gdkx.h>
 #include <Poco/Thread.h>
+#include <libsoup/soup.h>
+#include <libsoup/soup-gnome.h>
 
 namespace ti
 {
 	GtkUIBinding::GtkUIBinding(Host *host) :
 		UIBinding(host),
-		evaluator(new ScriptEvaluator())
+		evaluator(new ScriptEvaluator()),
+		menu(0),
+		contextMenu(0),
+		iconPath("")
 	{
-		/* Prepare the custom URL handlers */
+		// Prepare the custom URL handlers
 		webkit_titanium_set_normalize_url_cb(NormalizeURLCallback);
 		webkit_titanium_set_url_to_file_url_cb(URLToFileURLCallback);
 
-		/* Register the script evaluator */
+		// Setup libsoup proxy support
+		SoupSession* session = webkit_get_default_session();
+		soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
+
+		// Register the script evaluator
 		webkit_titanium_add_script_evaluator(evaluator);
 
 		char buf[256];
@@ -40,12 +49,12 @@ namespace ti
 		global->Set("userAgent", Value::NewString(user_agent));
 	}
 
-	SharedUserWindow GtkUIBinding::CreateWindow(
+	AutoUserWindow GtkUIBinding::CreateWindow(
 		WindowConfig* config,
-		SharedUserWindow& parent)
+		AutoUserWindow& parent)
 	{
 		UserWindow* w = new GtkUserWindow(config, parent);
-		return w->GetSharedPtr();
+		return w->GetAutoPtr();
 	}
 
 	void GtkUIBinding::ErrorDialog(std::string msg)
@@ -62,49 +71,44 @@ namespace ti
 		UIBinding::ErrorDialog(msg);
 	}
 
-	SharedPtr<MenuItem> GtkUIBinding::CreateMenu(bool trayMenu)
+	AutoMenu GtkUIBinding::CreateMenu()
 	{
-		SharedPtr<MenuItem> menu = new GtkMenuItemImpl();
-		return menu;
+		return new GtkMenu();
 	}
 
-	void GtkUIBinding::SetMenu(SharedPtr<MenuItem> new_menu)
+	AutoMenuItem GtkUIBinding::CreateMenuItem()
 	{
-		// Notify all windows that the app menu has changed.
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end())
-		{
-			SharedPtr<GtkUserWindow> guw = (*i).cast<GtkUserWindow>();
-			if (!guw.isNull())
-				guw->AppMenuChanged();
-			i++;
-		}
+		return new GtkMenuItem(MenuItem::NORMAL);
 	}
 
-	void GtkUIBinding::SetContextMenu(SharedPtr<MenuItem> new_menu)
+	AutoMenuItem GtkUIBinding::CreateSeparatorMenuItem()
 	{
+		return new GtkMenuItem(MenuItem::SEPARATOR);
 	}
 
-	void GtkUIBinding::SetIcon(SharedString icon_path)
+	AutoMenuItem GtkUIBinding::CreateCheckMenuItem()
 	{
-		// Notify all windows that the app icon has changed.
-		std::vector<SharedUserWindow>& windows = this->GetOpenWindows();
-		std::vector<SharedUserWindow>::iterator i = windows.begin();
-		while (i != windows.end())
-		{
-			SharedPtr<GtkUserWindow> guw = (*i).cast<GtkUserWindow>();
-			if (!guw.isNull())
-				guw->AppIconChanged();
-			i++;
-		}
+		return new GtkMenuItem(MenuItem::CHECK);
 	}
 
-	SharedPtr<TrayItem> GtkUIBinding::AddTray(
-		SharedString icon_path,
-		SharedKMethod cb)
+	void GtkUIBinding::SetMenu(AutoMenu newMenu)
 	{
-		SharedPtr<TrayItem> item = new GtkTrayItem(icon_path, cb);
+		this->menu = newMenu.cast<GtkMenu>();
+	}
+
+	void GtkUIBinding::SetContextMenu(AutoMenu newMenu)
+	{
+		this->contextMenu = newMenu.cast<GtkMenu>();
+	}
+
+	void GtkUIBinding::SetIcon(std::string& iconPath)
+	{
+		this->iconPath = iconPath;
+	}
+
+	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	{
+		AutoTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;
 	}
 
@@ -121,6 +125,21 @@ namespace ti
 		XFree(mit_info);
 
 		return idle_time;
+	}
+
+	AutoMenu GtkUIBinding::GetMenu()
+	{
+		return this->menu;
+	}
+
+	AutoMenu GtkUIBinding::GetContextMenu()
+	{
+		return this->contextMenu;
+	}
+
+	std::string& GtkUIBinding::GetIcon()
+	{
+		return this->iconPath;
 	}
 
 }

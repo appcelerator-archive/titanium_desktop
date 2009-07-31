@@ -3,15 +3,13 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#import <Cocoa/Cocoa.h>
-#import <kroll/kroll.h>
-#import "osx_menu_item.h"
-
-
-@interface OSXMenuDelegate : NSMenuItem
+@interface OSXMenuDelegate : NSObject
 {
-	ti::OSXMenuItem *delegate;
+	ti::OSXMenu* menu;
+	BOOL dirty;
+	BOOL registerNative;
 }
--(id)initWithMenu:(ti::OSXMenuItem*)item menu:(NSMenu*)menu;
--(void)invoke:(id)sender;
+- (id)initWithMenu:(ti::OSXMenu*)menu willRegister:(BOOL)willRegister;
+- (void)menuNeedsUpdate:(NSMenu *)menu;
+- (void)markAsDirty;
 @end

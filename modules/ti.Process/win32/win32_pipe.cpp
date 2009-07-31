@@ -8,32 +8,58 @@
 
 namespace ti
 {
-	Win32Pipe::Win32Pipe() : StaticBoundObject("Pipe"), closed(false)
+	Win32Pipe::Win32Pipe(bool isReader) :
+		NativePipe(isReader),
+		readHandle(INVALID_HANDLE_VALUE),
+		writeHandle(INVALID_HANDLE_VALUE),
+		logger(Logger::Get("Process.Win32Pipe"))
+	{
+	}
+
+	void Win32Pipe::CreateHandles()
 	{
 		SECURITY_ATTRIBUTES attr;
 		attr.nLength              = sizeof(attr);
 		attr.lpSecurityDescriptor = NULL;
 		attr.bInheritHandle       = FALSE;
 		
-		CreatePipe(&read, &write, &attr, 0);
-		
-		// don't doc these, apicoverage already picks them up in ../pipe.cpp
-		this->Set("closed",Value::NewBool(false));
-		this->SetMethod("close",&Win32Pipe::Close);
-		this->SetMethod("write",&Win32Pipe::Write);
-		this->SetMethod("read",&Win32Pipe::Read);
+		::CreatePipe(&readHandle, &writeHandle, &attr, 0);
 	}
-	
-	Win32Pipe::~Win32Pipe()
+
+	void Win32Pipe::Close()
 	{
-		Close();
+		NativePipe::Close();
 	}
-	
-	int Win32Pipe::Write(char *buffer, int length)
+
+	int Win32Pipe::RawRead(char *buffer, int size)
 	{
-		if (write != INVALID_HANDLE_VALUE) {
+		if (readHandle != INVALID_HANDLE_VALUE)
+		{
+			DWORD bytesRead;
+			BOOL ok = ReadFile(readHandle, buffer, size, &bytesRead, NULL);
+			int error = GetLastError();
+			if (ok)
+			{
+				return bytesRead;
+			}
+			else if (error == ERROR_BROKEN_PIPE)
+			{
+				return -1;
+			}
+			else
+			{
+				throw ValueException::FromString("Error writing anonymous pipe");
+			}
+		}
+		return -1;
+	}
+
+	int Win32Pipe::RawWrite(const char *data, int size)
+	{
+		if (writeHandle != INVALID_HANDLE_VALUE)
+		{
 			DWORD bytesWritten;
-			BOOL ok = WriteFile(this->GetWriteHandle(), buffer, length, &bytesWritten, NULL);
+			BOOL ok = WriteFile(writeHandle, (LPCVOID)data, size, &bytesWritten, NULL);
 			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
 				return bytesWritten;
 			}
@@ -41,76 +67,36 @@ namespace ti
 				throw ValueException::FromString("Error writing anonymous pipe");
 			}
 		}
-		return -1;
-	}
-	
-	void Win32Pipe::Write(const ValueList& args, SharedValue result)
-	{
-		if (closed)
-		{
-			throw ValueException::FromString("Pipe is already closed");
-		}
-		if (!args.at(0)->IsString())
-		{
-			throw ValueException::FromString("Can only write string data");
-		}
-		
-		std::string str = args.at(0)->ToString();
-		int written = this->Write((char *)str.c_str(), str.size());
-		result->SetInt(written);
-	}
-	
-	int Win32Pipe::Read(char *buffer, int length)
-	{
-		if (read != INVALID_HANDLE_VALUE) {
-			DWORD bytesRead;
-			BOOL ok = ReadFile(this->GetReadHandle(), buffer, length, &bytesRead, NULL);
-			if (ok || GetLastError() == ERROR_BROKEN_PIPE) {
-				return bytesRead;
-			}
-			else {
-				throw ValueException::FromString("Error writing anonymous pipe");
-			}
-		}
-		return -1;
-	}
-	
-	void Win32Pipe::Read(const ValueList& args, SharedValue result)
-	{
-		if (closed)
-		{
-			throw ValueException::FromString("Pipe is already closed");
-		}
-		
-		int bufferSize = 1024;
-		if (args.size() > 0 && args.at(0)->IsInt())
-		{
-			bufferSize = args.at(0)->ToInt();
-		}
-		
-		char *buffer = new char[bufferSize+1];
-		int read = this->Read(buffer, bufferSize);
-		if (read > 0) {
-			buffer[read] = '\0';
-			result->SetString(buffer);
-		}
-		delete [] buffer;
-	}
-	
-	void Win32Pipe::Close(const ValueList& args, SharedValue result)
-	{
-		Close();
+		return 0;
 	}
 
-	void Win32Pipe::Close()
+	void Win32Pipe::DuplicateRead(HANDLE process, LPHANDLE handle)
 	{
-		if (!closed) {
-			closed = true;
-			
-			if (read != INVALID_HANDLE_VALUE)
-				CloseHandle(read);
-			if (write != INVALID_HANDLE_VALUE)
-				CloseHandle(write);
+		DuplicateHandle(process, readHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+		this->CloseNativeRead();
+	}
+
+	void Win32Pipe::DuplicateWrite(HANDLE process, LPHANDLE handle)
+	{
+		DuplicateHandle(process, writeHandle, process, handle, 0, TRUE, DUPLICATE_SAME_ACCESS);
+		this->CloseNativeWrite();
+	}
+
+	void Win32Pipe::CloseNativeRead()
+	{
+		if (readHandle != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(readHandle);
+			readHandle = INVALID_HANDLE_VALUE;
+		}
+	}
+
+	void Win32Pipe::CloseNativeWrite()
+	{
+		if (writeHandle != INVALID_HANDLE_VALUE)
+		{
+			CloseHandle(writeHandle);
+			writeHandle = INVALID_HANDLE_VALUE;
 		}
 	}
 }

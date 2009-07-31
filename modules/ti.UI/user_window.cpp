@@ -3,17 +3,14 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-
-/* This object is that represents Titanium.UI.currentWindow */
-
 #include "ui_module.h"
-#include <stdlib.h>
 
 using namespace ti;
-UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
-	AccessorBoundObject("UserWindow"),
+UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
+	KEventObject("UI.UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
+	domWindow(0),
 	host(kroll::Host::GetInstance()),
 	config(config),
 	parent(parent),
@@ -21,13 +18,16 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	active(false),
 	initialized(false)
 {
-	this->shared_this = this;
-
 	// This method is on Titanium.UI, but will be delegated to this class.
 	/**
 	 * @tiapi(method=True,name=UI.getCurrentWindow,since=0.4) Returns the current window
+	 * @tiresult(for=UI.getCurrentWindow,type=UI.UserWindow) true if the window uses system chrome, false if otherwise
 	 */
 	this->SetMethod("getCurrentWindow", &UserWindow::_GetCurrentWindow);
+
+	// This is an undocumented method which allows other modules to manually
+	// insert this window's Titanium object into a KObject.
+	this->SetMethod("insertAPI", &UserWindow::_InsertAPI);
 
 	// @tiproperty[integer, UI.UserWindow.CENTERED,since=0.3,deprecated=true] The CENTERED event constant
 	this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
@@ -74,43 +74,33 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isUsingChrome,since=0.2) Checks whether a window uses system chrome
-	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=boolean) true if the window uses system chrome, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=Boolean) true if the window uses system chrome, false if otherwise
 	 */
 	this->SetMethod("isUsingChrome", &UserWindow::_IsUsingChrome);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setUsingChrome,since=0.2) Sets whether a window should use system chrome
-	 * @tiarg(for=UI.UserWindow.setUsingChrome,name=chrome,type=boolean) set to true to use system chrome, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setUsingChrome,name=chrome,type=Boolean) set to true to use system chrome, false if otherwise
 	 */
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullScreen,since=0.2,deprecated=True) Checks whether a window is in fullscreen
-	 * @tiarg(for=UI.UserWindow.isFullScreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
+	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.5) Checks whether a window is in fullscreen
+	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=Boolean) true if the window is in fullscreen, false if otherwise
 	 */
+	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
 	this->SetMethod("isFullScreen", &UserWindow::_IsFullscreen);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=1.0) Checks whether a window is in fullscreen
-	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=boolean) true if the window is in fullscreen, false if otherwise
+	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=0.5) Makes a window fullscreen
+	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=Boolean) set to true for fullscreen, false if otherwise
 	 */
-	this->SetMethod("isFullscreen", &UserWindow::_IsFullscreen);
-
-	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullScreen,since=0.2,deprecated=True) Makes a window fullscreen
-	 * @tiarg(for=UI.UserWindow.setFullScreen,name=fullscreen,type=boolean) set to true for fullscreen, false if otherwise
-	 */
+	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
 	this->SetMethod("setFullScreen", &UserWindow::_SetFullscreen);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setFullscreen,since=1.0) Makes a window fullscreen
-	 * @tiarg(for=UI.UserWindow.setFullscreen,name=fullscreen,type=boolean) set to true for fullscreen, false if otherwise
-	 */
-	this->SetMethod("setFullscreen", &UserWindow::_SetFullscreen);
-
-	/**
 	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.getID,since=0.2) Returns the id of a window
-	 * @tiresult(for=UI.UserWindow.getID,type=string) the id of the window
+	 * @tiresult(for=UI.UserWindow.getID,type=String) the id of the window
 	 */
 	this->SetMethod("getID", &UserWindow::_GetId);
 
@@ -125,98 +115,98 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	this->SetMethod("close", &UserWindow::_Close);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getX,since=0.2) Returns a window's horizontal (X-axis) position
-	 * @tiresult(for=UI.UserWindow.getX,type=double) the horizontal position of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getX,since=0.2) Returns a window's horizontal (X-axis) position
+	 * @tiresult(for=UI.UserWindow.getX,type=Double) the horizontal position of the window
 	 */
 	this->SetMethod("getX", &UserWindow::_GetX);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setX,since=0.2) Sets a window's horizontal (X-axis) position
-	 * @tiarg(for=UI.UserWindow.setX,type=double,name=x) the horizontal position
+	 * @tiarg(for=UI.UserWindow.setX,type=Double,name=x) the horizontal position
 	 */
 	this->SetMethod("setX", &UserWindow::_SetX);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getY,since=0.2) Returns a window's vertical (Y-axis) position
-	 * @tiresult(for=UI.UserWindow.getY,type=double) the vertical position of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getY,since=0.2) Returns a window's vertical (Y-axis) position
+	 * @tiresult(for=UI.UserWindow.getY,type=Double) the vertical position of the window
 	 */
 	this->SetMethod("getY", &UserWindow::_GetY);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setY,since=0.2) Sets a window's vertical (Y-axis) position
-	 * @tiarg(for=UI.UserWindow.setY,type=double,name=y) the vertical position
+	 * @tiarg(for=UI.UserWindow.setY,type=Double,name=y) the vertical position
 	 */
 	this->SetMethod("setY", &UserWindow::_SetY);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getWidth,since=0.2) Returns a window's width
-	 * @tiresult(for=UI.UserWindow.getWidth,type=double) the width of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getWidth,since=0.2) Returns a window's width
+	 * @tiresult(for=UI.UserWindow.getWidth,type=Double) the width of the window
 	 */
 	this->SetMethod("getWidth", &UserWindow::_GetWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setWidth,since=0.2) Sets a window's width
-	 * @tiarg(for=UI.UserWindow.setWidth,type=double,name=width) the width of the window
+	 * @tiarg(for=UI.UserWindow.setWidth,type=Double,name=width) the width of the window
 	 */
 	this->SetMethod("setWidth", &UserWindow::_SetWidth);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getMaxWidth,since=0.2) Returns a window's max-width
-	 * @tiresult(for=UI.UserWindow.getMaxWidth,type=double) the max-width value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMaxWidth,since=0.2) Returns a window's max-width
+	 * @tiresult(for=UI.UserWindow.getMaxWidth,type=Double) the max-width value of the window
 	 */
 	this->SetMethod("getMaxWidth", &UserWindow::_GetMaxWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMaxWidth,since=0.2) Sets a window's max-width
-	 * @tiarg(for=UI.UserWindow.setMaxWidth,type=double,name=width) the max-width value of the window
+	 * @tiarg(for=UI.UserWindow.setMaxWidth,type=Double,name=width) the max-width value of the window
 	 */
 	this->SetMethod("setMaxWidth", &UserWindow::_SetMaxWidth);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getMinWidth,since=0.2) Returns a window's min-width
-	 * @tiresult(for=UI.UserWindow.getMinWidth,type=double) the min-width value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMinWidth,since=0.2) Returns a window's min-width
+	 * @tiresult(for=UI.UserWindow.getMinWidth,type=Double) the min-width value of the window
 	 */
 	this->SetMethod("getMinWidth", &UserWindow::_GetMinWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMinWidth,since=0.2) Sets a window's min-width
-	 * @tiarg(for=UI.UserWindow.setMinWidth,type=double,name=width) the min-width value of the window
+	 * @tiarg(for=UI.UserWindow.setMinWidth,type=Double,name=width) the min-width value of the window
 	 */
 	this->SetMethod("setMinWidth", &UserWindow::_SetMinWidth);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getHeight,since=0.2) Returns a window's height
-	 * @tiresult(for=UI.UserWindow.getHeight,type=double) the height value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getHeight,since=0.2) Returns a window's height
+	 * @tiresult(for=UI.UserWindow.getHeight,type=Double) the height value of the window
 	 */
 	this->SetMethod("getHeight", &UserWindow::_GetHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setHeight,since=0.2) Sets a window's height
-	 * @tiarg(for=UI.UserWindow.setHeight,type=double,name=height) the height value of the window
+	 * @tiarg(for=UI.UserWindow.setHeight,type=Double,name=height) the height value of the window
 	 */
 	this->SetMethod("setHeight", &UserWindow::_SetHeight);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getMaxHeight,since=0.2) Returns a window's max height
-	 * @tiresult(for=UI.UserWindow.getMaxHeight,type=double) the max-height value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMaxHeight,since=0.2) Returns a window's max height
+	 * @tiresult(for=UI.UserWindow.getMaxHeight,type=Double) the max-height value of the window
 	 */
 	this->SetMethod("getMaxHeight", &UserWindow::_GetMaxHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMaxHeight,since=0.2) Sets a window's max-height
-	 * @tiarg(for=UI.UserWindow.setMaxHeight,type=double,name=height) the max-height value of the window
+	 * @tiarg(for=UI.UserWindow.setMaxHeight,type=Double,name=height) the max-height value of the window
 	 */
 	this->SetMethod("setMaxHeight", &UserWindow::_SetMaxHeight);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getMinHeight,since=0.2) Returns a window's min-height
-	 * @tiresult(for=UI.UserWindow.getMinHeight,type=double) the min-height value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMinHeight,since=0.2) Returns a window's min-height
+	 * @tiresult(for=UI.UserWindow.getMinHeight,type=Double) the min-height value of the window
 	 */
 	this->SetMethod("getMinHeight", &UserWindow::_GetMinHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMinHeight,since=0.2) Sets a window's min height
-	 * @tiarg(for=UI.UserWindow.setMinHeight,type=double,name=height) the min-height value of the window
+	 * @tiarg(for=UI.UserWindow.setMinHeight,type=Double,name=height) the min-height value of the window
 	 */
 	this->SetMethod("setMinHeight", &UserWindow::_SetMinHeight);
 
@@ -233,8 +223,8 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	this->SetMethod("setBounds", &UserWindow::_SetBounds);
 
 	/**
-	 * @tiapi(method=True,returns=string,name=UI.UserWindow.getTitle,since=0.2) Returns the title of a window
-	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=boolean) the title of the window
+	 * @tiapi(method=True,returns=String,name=UI.UserWindow.getTitle,since=0.2) Returns the title of a window
+	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=Boolean) the title of the window
 	 */
 	this->SetMethod("getTitle", &UserWindow::_GetTitle);
 
@@ -245,163 +235,164 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 	this->SetMethod("setTitle", &UserWindow::_SetTitle);
 
 	/**
-	 * @tiapi(method=True,returns=string,name=UI.UserWindow.getURL,since=0.2) Returns the url for a window
-	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=boolean) the url for the window
+	 * @tiapi(method=True,returns=String,name=UI.UserWindow.getURL,since=0.2) Returns the url for a window
+	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=Boolean) the url for the window
 	 */
 	this->SetMethod("getURL", &UserWindow::_GetURL);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setURL,since=0.2) Sets the url for a window
-	 * @tiarg(for=UI.UserWindow.setURL,type=string,name=url) the url for the window
+	 * @tiarg(for=UI.UserWindow.setURL,type=String,name=url) the url for the window
 	 */
 	this->SetMethod("setURL", &UserWindow::_SetURL);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isResizable,since=0.2) Checks whether a window is resizable
-	 * @tiresult(for=UI.UserWindow.isResizable,type=boolean) true if the window is resizable, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isResizable,type=Boolean) true if the window is resizable, false if otherwise
 	 */
 	this->SetMethod("isResizable", &UserWindow::_IsResizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setResizable,since=0.2) Sets whether a window could be resized or not
-	 * @tiarg(for=UI.UserWindow.setResizable,type=boolean,name=resizable) true if the window could be resized, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setResizable,type=Boolean,name=resizable) true if the window could be resized, false if otherwise
 	 */
 	this->SetMethod("setResizable", &UserWindow::_SetResizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isMaximized,since=0.4) Checks whether a window is maximized
-	 * @tiresult(for=UI.UserWindow.isMaximized,type=boolean) true if the window is maximized, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isMaximized,type=Boolean) true if the window is maximized, false if otherwise
 	 */
 	this->SetMethod("isMaximized", &UserWindow::_IsMaximized);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isMinimized,since=0.4) Checks whether a window is minimized
-	 * @tiresult(for=UI.UserWindow.isMinimized,type=boolean) true if the window is minimized, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isMinimized,type=Boolean) true if the window is minimized, false if otherwise
 	 */
 	this->SetMethod("isMinimized", &UserWindow::_IsMinimized);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isMaximizable,since=0.2) Checks whether a window could be maximized or not
-	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=boolean) true if the window could be maximized, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isUsingChrome,type=Boolean) true if the window could be maximized, false if otherwise
 	 */
 	this->SetMethod("isMaximizable", &UserWindow::_IsMaximizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMaximizable,since=0.2) Sets whether a window could be maximized or not
-	 * @tiarg(for=UI.UserWindow.setMaximizable,type=boolean,name=maximizable) true if the window could be maximized, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setMaximizable,type=Boolean,name=maximizable) true if the window could be maximized, false if otherwise
 	 */
 	this->SetMethod("setMaximizable", &UserWindow::_SetMaximizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isMinimizable,since=0.2) Checks whether a window could be minimized or not
-	 * @tiresult(for=UI.UserWindow.isMinimizable,type=boolean) true if the window could be minimized, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isMinimizable,type=Boolean) true if the window could be minimized, false if otherwise
 	 */
 	this->SetMethod("isMinimizable", &UserWindow::_IsMinimizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMinimizable,since=0.2) Sets whether a window could be maximized or not
-	 * @tiarg(for=UI.UserWindow.setMinimizable,type=boolean,name=minimizable) true if the window could be minimized, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setMinimizable,type=Boolean,name=minimizable) true if the window could be minimized, false if otherwise
 	 */
 	this->SetMethod("setMinimizable", &UserWindow::_SetMinimizable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isCloseable,since=0.2) Checks whether a window could be closed or not
-	 * @tiresult(for=UI.UserWindow.isCloseable,type=boolean) true if the window could be closed, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isCloseable,type=Boolean) true if the window could be closed, false if otherwise
 	 */
 	this->SetMethod("isCloseable", &UserWindow::_IsCloseable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setCloseable,since=0.2) Sets whether a window could be closed or not
-	 * @tiarg(for=UI.UserWindow.setCloseable,type=boolean,name=closeable) true if the window could be closed, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setCloseable,type=Boolean,name=closeable) true if the window could be closed, false if otherwise
 	 */
 	this->SetMethod("setCloseable", &UserWindow::_SetCloseable);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isVisible,since=0.2) Checks whether a window is visible
-	 * @tiresult(for=UI.UserWindow.isVisible,type=boolean) true if the window is visible, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isVisible,type=Boolean) true if the window is visible, false if otherwise
 	 */
 	this->SetMethod("isVisible", &UserWindow::_IsVisible);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setVisible,since=0.2) Sets the visibility of the window
-	 * @tiarg(for=UI.UserWindow.setVisible,type=boolean,name=visible) true if the window should be visible, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setVisible,type=Boolean,name=visible) true if the window should be visible, false if otherwise
 	 */
 	this->SetMethod("setVisible", &UserWindow::_SetVisible);
 
 	/**
-	 * @tiapi(method=True,returns=double,name=UI.UserWindow.getTransparency,since=0.2) Returns a window's transparency value
-	 * @tiresult(for=UI.UserWindow.getTransparency,type=double) the transparency value of the window
+	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getTransparency,since=0.2) Returns a window's transparency value
+	 * @tiresult(for=UI.UserWindow.getTransparency,type=Double) the transparency value of the window
 	 */
 	this->SetMethod("getTransparency", &UserWindow::_GetTransparency);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setTransparency,since=0.2) Sets a window's transparency value
-	 * @tiarg(for=UI.UserWindow.setTransparency,type=double,name=url) the transparency value of the window
+	 * @tiarg(for=UI.UserWindow.setTransparency,type=Double,name=url) the transparency value of the window
 	 */
 
 	this->SetMethod("setTransparency", &UserWindow::_SetTransparency);
 
 	/**
-	 * @tiapi(method=True,returns=string,name=UI.UserWindow.getTransparencyColor,since=0.2) Returns a transparency color for the window
-	 * @tiresult(for=UI.UserWindow.getTransparencyColor,type=string) the transparency color of the window
+	 * @tiapi(method=True,returns=String,name=UI.UserWindow.getTransparencyColor,since=0.2) Returns a transparency color for the window
+	 * @tiresult(for=UI.UserWindow.getTransparencyColor,type=String) the transparency color of the window
 	 */
 	this->SetMethod("getTransparencyColor", &UserWindow::_GetTransparencyColor);
 
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.2) Sets a window's menu
-	 * @tiarg(for=UI.UserWindow.setMenu,type=object,name=menu) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.5)
+	 * @tiapi Set this window's menu
+	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the menu or null to unset
 	 */
 	this->SetMethod("setMenu", &UserWindow::_SetMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=0.2) Returns a window's menu
-	 * @tiresult(for=UI.UserWindow.getMenu,type=object) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.getMenu,since=0.5) 
+	 * Get this window's menu
+	 * @tiresult[UI.Menu|null] This window's Menu or null if it is unset
 	 */
 	this->SetMethod("getMenu", &UserWindow::_GetMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=0.2) Sets a window's context menu
-	 * @tiarg(for=UI.UserWindow.setContextMenu,type=object,name=menu) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.setContextMenu,since=0.5)
+	 * @tiapi Set this window's context menu
+	 * @tiarg[UI.Menu|null, menu] The Menu object to use as the context menu or null to unset
 	 */
 	this->SetMethod("setContextMenu", &UserWindow::_SetContextMenu);
 
-
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=0.2) Returns a window's context menu
-	 * @tiresult(for=UI.UserWindow.getContextMenu,type=object) a MenuItem object
+	 * @tiapi(method=True,name=UI.UserWindow.getContextMenu,since=0.5)
+	 * Get this window's context menu
+	 * @tiresult[UI.Menu|null] This window's context menu or null if it is unset
 	 */
 	this->SetMethod("getContextMenu", &UserWindow::_GetContextMenu);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setIcon,since=0.2) Sets a window's icon
-	 * @tiarg(for=UI.UserWindow.setIcon,type=string,name=icon) path to the icon file
+	 * @tiarg(for=UI.UserWindow.setIcon,type=String,name=icon) path to the icon file
 	 */
 	this->SetMethod("setIcon", &UserWindow::_SetIcon);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getIcon,since=0.2) Returns a window's icon
-	 * @tiresult(for=UI.UserWindow.getIcon,type=string) path to the icon file
+	 * @tiresult(for=UI.UserWindow.getIcon,type=String) path to the icon file
 	 */
 	this->SetMethod("getIcon", &UserWindow::_GetIcon);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setTopMost,since=0.3) Sets whether a window is top most (above other windows)
-	 * @tiarg(for=UI.UserWindow.setTopMost,type=boolean,name=topmost) true if top most, false if otherwise
+	 * @tiarg(for=UI.UserWindow.setTopMost,type=Boolean,name=topmost) true if top most, false if otherwise
 	 */
 	this->SetMethod("setTopMost", &UserWindow::_SetTopMost);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isTopMost,since=0.3) Checks whether a window is top most
-	 * @tiresult(for=UI.UserWindow.isTopMost,type=boolean) true if top most, false if otherwise
+	 * @tiresult(for=UI.UserWindow.isTopMost,type=Boolean) true if top most, false if otherwise
 	 */
 	this->SetMethod("isTopMost", &UserWindow::_IsTopMost);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.createWindow,since=0.2) Creates a new window as a child of the current window
-	 * @tiarg(for=UI.UserWindow.createWindow,name=options,type=mixed,optional=True) a string containing a url of the new window's content or an object containing properties for the new window
+	 * @tiarg[type=String|Object,options, optional=True] A string containing a url of the new window or an object containing properties for the new window
 	 * @tiresult(for=UI.UserWindow.createWindow,type=object) a UserWindow object
 	 */
 	this->SetMethod("createWindow", &UserWindow::_CreateWindow);
@@ -429,26 +420,34 @@ UserWindow::UserWindow(WindowConfig *config, SharedUserWindow& parent) :
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getParent,since=0.3) Returns the parent window
-	 * @tiresult(for=UI.UserWindow.getParent,type=mixed) a UserWindow object referencing the parent window or null if no parent
+	 * @tiresult(for=UI.UserWindow.getParent,type=UI.UserWindow|null) a UserWindow object referencing the parent window or null if no parent
 	 */
 	this->SetMethod("getParent", &UserWindow::_GetParent);
 
 	/**
-	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.addEventListener,since=0.3) Adds an event listener to the window
-	 * @tiarg(for=UI.UserWindow.addEventListener,type=method,name=listener) the event listener function to be fired for the event
-	 * @tiresult(for=UI.UserWindow.addEventListener,type=integer) the id of the event listener used for removal
+	 * @tiapi(method=True,name=UI.UserWindow.getChildren,since=0.5)
+	 * @tiresult[Array<UI.UserWindow>] An array of window representing the children of this window.
 	 */
-	this->SetMethod("addEventListener", &UserWindow::_AddEventListener);
+	this->SetMethod("getChildren", &UserWindow::_GetChildren);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.removeEventListener,since=0.3) Removes an event listener from the window
-	 * @tiarg(for=UI.UserWindow.removeEventListener,type=integer,name=id) the id returned from addEventListener
-	 * @tiresult(for=UI.UserWindow.removeEventListener,type=boolean) true if the listener was removed, false if otherwise
+	 * @tiapi(method=True,name=UI.UserWindow.getDOMWindow,since=0.5)
+	 * @tiresult[Object|null] The DOM Window for this UserWindow or null if there currently is none
 	 */
-	this->SetMethod("removeEventListener", &UserWindow::_RemoveEventListener);
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getWindow,since=0.5)
+	 * @tiresult[Object|null] The DOM Window for this UserWindow or null if there currently is none
+	 */
+	this->SetMethod("getDOMWindow", &UserWindow::_GetDOMWindow);
+	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 
-	this->api = host->GetGlobalObject()->GetNS("API.fire")->ToMethod();
-	this->FireEvent(CREATE);
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) show the web inspector
+	 * @tiarg(for=UI.UserWindow.showInspector,type=bool,name=console,optional=True) show the interactive console (default false)
+	 */
+	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
+	
+	this->FireEvent(Event::CREATED);
 }
 
 UserWindow::~UserWindow()
@@ -459,9 +458,10 @@ UserWindow::~UserWindow()
 	}
 }
 
-SharedUserWindow UserWindow::GetSharedPtr()
+AutoUserWindow UserWindow::GetAutoPtr()
 {
-	return this->shared_this;
+	this->duplicate();
+	return this;
 }
 
 Host* UserWindow::GetHost()
@@ -471,15 +471,15 @@ Host* UserWindow::GetHost()
 
 void UserWindow::Open()
 {
-	this->FireEvent(OPEN);
+	this->FireEvent(Event::OPEN);
 
 	// We are now in the UI binding's open window list
-	this->binding->AddToOpenWindows(this->shared_this);
+	this->binding->AddToOpenWindows(GetAutoPtr());
 
 	// Tell the parent window that we are open for business
 	if (!parent.isNull())
 	{
-		parent->AddChild(this->shared_this);
+		parent->AddChild(GetAutoPtr());
 	}
 
 	this->initialized = true;
@@ -488,16 +488,25 @@ void UserWindow::Open()
 
 void UserWindow::Close()
 {
-	this->active = false;
+	// We want to fire the CLOSE event synchronously, because we
+	// want to ensure that listeners on the originating window get
+	// this event.
+	this->active = false; // prevent further modification
+	this->FireEvent(Event::CLOSE);
+}
+
+void UserWindow::Closed()
+{
+	this->FireEvent(Event::CLOSED);
 
 	// Close all children and cleanup
-	std::vector<SharedUserWindow>::iterator iter = this->children.begin();
+	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
 	while (iter != this->children.end())
 	{
 		// Save a pointer to the child here, because it may
 		// be freed by the SharedPtr otherwise and that will
 		// make this iterator seriously, seriously unhappy.
-		SharedUserWindow child = (*iter);
+		AutoUserWindow child = (*iter);
 		iter = children.erase(iter);
 		child->Close();
 	}
@@ -505,35 +514,41 @@ void UserWindow::Close()
 	// Tell our parent that we are now closed
 	if (!this->parent.isNull())
 	{
-		this->parent->RemoveChild(this->shared_this);
+		this->parent->RemoveChild(GetAutoPtr());
 		this->parent->Focus(); // Focus the parent
 	}
 
 	// Tell the UIBinding that we are closed
-	this->binding->RemoveFromOpenWindows(this->shared_this);
-
-	// fire our close event
-	this->FireEvent(CLOSE);
+	this->binding->RemoveFromOpenWindows(GetAutoPtr());
 
 	// When we have no more open windows, we exit...
-	std::vector<SharedUserWindow> windows = this->binding->GetOpenWindows();
-	if (windows.size() == 0)
-	{
+	std::vector<AutoUserWindow> windows = this->binding->GetOpenWindows();
+	if (windows.size() == 0) {
 		this->host->Exit(0);
-	}
-	else
-	{
+	} else {
 		windows.at(0)->Focus();
 	}
-
-	// This should be the last reference to this window
-	// after all external references are destroyed.
-	this->shared_this = NULL;
 }
 
 void UserWindow::_GetCurrentWindow(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	result->SetObject(this->shared_this);
+	result->SetObject(GetAutoPtr());
+}
+
+void UserWindow::_GetDOMWindow(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	result->SetObject(this->domWindow);
+}
+
+void UserWindow::_InsertAPI(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	if (!this->active)
+		return;
+
+	if (args.size() > 0 && args.at(0)->IsObject())
+	{
+		this->InsertAPI(args.GetObject(0));
+	}
 }
 
 void UserWindow::_Hide(const kroll::ValueList& args, kroll::SharedValue result)
@@ -657,7 +672,7 @@ void UserWindow::_IsTopMost(const kroll::ValueList& args, kroll::SharedValue res
 {
 	if (this->active)
 	{
-		result->SetBool(this->IsUsingChrome());
+		result->SetBool(this->IsTopMost());
 	}
 	else
 	{
@@ -1081,12 +1096,16 @@ void UserWindow::_GetTitle(const kroll::ValueList& args, kroll::SharedValue resu
 void UserWindow::_SetTitle(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	args.VerifyException("setTitle", "s");
+	std::string newTitle = args.at(0)->ToString();
+	this->SetTitle(newTitle);
+}
 
-	std::string title = args.at(0)->ToString();
-	this->config->SetTitle(title);
+void UserWindow::SetTitle(std::string& newTitle)
+{
+	this->config->SetTitle(newTitle);
 	if (this->active)
 	{
-		this->SetTitle(title);
+		this->SetTitleImpl(newTitle);
 	}
 }
 
@@ -1109,7 +1128,8 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 	args.VerifyException("setURL", "s");
 
 	std::string url = args.at(0)->ToString();
-	url = AppConfig::Instance()->InsertAppIDIntoURL(url);
+	url = URLUtils::NormalizeURL(url);
+
 	this->config->SetURL(url);
 	if (this->active)
 	{
@@ -1273,61 +1293,71 @@ void UserWindow::_GetTransparencyColor(const kroll::ValueList& args, kroll::Shar
 
 void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsList())
-	{
-		SharedKList list = args.at(0)->ToList();
-		menu = list.cast<MenuItem>();
+	args.VerifyException("setMenu", "?o");
+	AutoMenu menu = NULL;
+	if (args.size() > 0) {
+		menu = args.at(0)->ToObject().cast<Menu>();
 	}
-	this->SetMenu(menu);
+
+	if (this->active)
+	{
+		this->SetMenu(menu);
+	}
 }
 
 void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedKList menu = this->GetMenu();
+	AutoMenu menu = this->GetMenu();
 	if (!menu.isNull())
 	{
-		result->SetList(menu);
+		result->SetObject(menu);
 	}
 	else
 	{
-		result->SetUndefined();
+		result->SetNull();
 	}
 }
 
 void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedPtr<MenuItem> menu = NULL; // A NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsList())
-	{
-		SharedKList list = args.at(0)->ToList();
-		menu = list.cast<MenuItem>();
+	args.VerifyException("setContextMenu", "?o");
+	AutoMenu menu = NULL;
+	if (args.size() > 0) {
+		menu = args.at(0)->ToObject().cast<Menu>();
 	}
-	this->SetContextMenu(menu);
+
+	if (this->active)
+	{
+		this->SetContextMenu(menu);
+	}
 }
 
 void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedKList menu = this->GetContextMenu();
+	AutoMenu menu = this->GetContextMenu();
 	if (!menu.isNull())
 	{
-		result->SetList(menu);
+		result->SetObject(menu);
 	}
 	else
 	{
-		result->SetUndefined();
+		result->SetNull();
 	}
 }
 
 void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	SharedString icon_path = NULL; // a NULL value is an unset
-	if (args.size() > 0 && args.at(0)->IsString())
-	{
-		const char *icon_url = args.at(0)->ToString();
-		icon_path = UIModule::GetResourcePath(icon_url);
+	args.VerifyException("setIcon", "s|0");
+	std::string iconPath;
+	if (args.size() > 0) {
+		std::string in = args.GetString(0);
+		iconPath = URLUtils::URLToPath(in);
 	}
-	this->SetIcon(icon_path);
+
+	if (this->active)
+	{
+		this->SetIcon(iconPath);
+	}
 }
 
 void UserWindow::_GetIcon(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1347,34 +1377,67 @@ void UserWindow::_GetParent(const kroll::ValueList& args, kroll::SharedValue res
 	}
 }
 
+void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	SharedKList childList = new StaticBoundList();
+
+	std::vector<AutoUserWindow>::iterator i = this->children.begin();
+	while (i != this->children.end())
+	{
+		SharedKObject child = *i++;
+		childList->Append(Value::NewObject(child));
+	}
+
+	result->SetList(childList);
+}
+
 void UserWindow::_CreateWindow(const ValueList& args, SharedValue result)
 {
-	//TODO: wrap in sharedptr
-	WindowConfig *config = NULL;
+	SharedKObject newWindow = 0;
 
 	if (args.size() > 0 && args.at(0)->IsObject())
 	{
-		SharedKObject props = SharedKObject(new StaticBoundObject());
-		config = new WindowConfig();
-		props = args.at(0)->ToObject();
-		config->UseProperties(props);
+		SharedKObject properties = args.GetObject(0);
+		newWindow = this->CreateWindow(properties);
 	}
 	else if (args.size() > 0 && args.at(0)->IsString())
 	{
-		// String might match a url spec
 		std::string url = args.at(0)->ToString();
-		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
-
-		url = AppConfig::Instance()->InsertAppIDIntoURL(url);
-		config = new WindowConfig(matchedConfig, url);
+		newWindow = this->CreateWindow(url);
 	}
 	else
 	{
-		config = new WindowConfig();
+		newWindow = this->CreateWindow(new WindowConfig());
 	}
 
-	SharedUserWindow new_window = this->binding->CreateWindow(config, shared_this);
-	result->SetObject(new_window);
+	result->SetObject(newWindow);
+}
+
+AutoUserWindow UserWindow::CreateWindow(SharedKObject properties)
+{
+	WindowConfig* newConfig = new WindowConfig();
+	newConfig->UseProperties(properties);
+	return this->CreateWindow(newConfig);
+}
+
+AutoUserWindow UserWindow::CreateWindow(std::string& url)
+{
+	if (!url.empty())
+	{
+		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
+		url = URLUtils::NormalizeURL(url);
+		return this->CreateWindow(new WindowConfig(matchedConfig, url));
+	}
+	else
+	{
+		return this->CreateWindow(new WindowConfig());
+	}
+}
+
+AutoUserWindow UserWindow::CreateWindow(WindowConfig* newConfig)
+{
+	AutoUserWindow autothis = GetAutoPtr();
+	return this->binding->CreateWindow(newConfig, autothis);
 }
 
 void UserWindow::UpdateWindowForURL(std::string url)
@@ -1394,9 +1457,7 @@ void UserWindow::UpdateWindowForURL(std::string url)
 	b.y = config->GetY();
 	b.width = config->GetWidth();
 	b.height = config->GetHeight();
-
 	this->SetBounds(b);
-
 	this->SetMinimizable(config->IsMinimizable());
 	this->SetMaximizable(config->IsMaximizable());
 	this->SetCloseable(config->IsCloseable());
@@ -1464,8 +1525,15 @@ void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue resul
 			types,
 			typesDescription);
 	}
-	this->OpenFileChooserDialog(
-		callback, multiple, title, path, defaultName, types, typesDescription);
+	if (this->active)
+	{
+		this->OpenFileChooserDialog(
+			callback, multiple, title, path, defaultName, types, typesDescription);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to open file chooser on an inactive window.");
+	}
 }
 
 void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue result)
@@ -1491,8 +1559,15 @@ void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue res
 			types,
 			typesDescription);
 	}
-	this->OpenFolderChooserDialog(
-		callback, multiple, title, path, defaultName);
+
+	if (this->active)
+	{
+		this->OpenFolderChooserDialog(callback, multiple, title, path, defaultName);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to open folder chooser on an inactive window.");
+	}
 }
 
 void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
@@ -1518,148 +1593,46 @@ void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
 			types,
 			typesDescription);
 	}
-	this->OpenSaveAsDialog(
-		callback, title, path, defaultName, types, typesDescription);
+	if (this->active)
+	{
+		this->OpenSaveAsDialog(
+			callback, title, path, defaultName, types, typesDescription);
+	}
+	else
+	{
+		throw ValueException::FromString("Tried to save dialog on an inactive window.");
+	}
 }
 
-void UserWindow::_AddEventListener(const ValueList& args, SharedValue result)
+void UserWindow::_ShowInspector(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("addEventListener", "m");
+	if (!this->active)
+		return;
 
-	SharedKMethod target = args.at(0)->ToMethod();
-	Listener listener = Listener();
-	listener.id = this->next_listener_id++;
-	listener.callback = target;
-	this->listeners.push_back(listener);
-
-	result->SetInt(listener.id);
+	if (args.size() > 0 && args.at(0)->IsBool())
+	{
+		bool console = args.at(0)->ToBool();
+		this->ShowInspector(console);
+	}
+	else
+	{
+		this->ShowInspector();
+	}
 }
 
-void UserWindow::_RemoveEventListener(const ValueList& args, SharedValue result)
-{
-	if (args.size() != 1 || !args.at(0)->IsNumber())
-	{
-		throw ValueException::FromString("invalid argument");
-	}
-	int id = args.at(0)->ToInt();
-
-	std::vector<Listener>::iterator it = this->listeners.begin();
-	while (it != this->listeners.end())
-	{
-		if ((*it).id == id)
-		{
-			this->listeners.erase(it);
-			result->SetBool(true);
-			return;
-		}
-		it++;
-	}
-	result->SetBool(false);
-}
-
-void UserWindow::FireEvent(UserWindowEvent eventType, SharedKObject event)
-{
-	std::string name;
-	switch (eventType)
-	{
-		case FOCUSED:
-			name = UIBinding::FOCUSED;
-			break;
-		case UNFOCUSED:
-			name = UIBinding::UNFOCUSED;
-			break;
-		case OPEN:
-			name = UIBinding::OPEN;
-			break;
-		case OPENED:
-			name = UIBinding::OPENED;
-			break;
-		case CLOSE:
-			name = UIBinding::CLOSE;
-			break;
-		case CLOSED:
-			name = UIBinding::CLOSED;
-			break;
-		case HIDDEN:
-			name = UIBinding::HIDDEN;
-			break;
-		case SHOWN:
-			name = UIBinding::SHOWN;
-			break;
-		case FULLSCREENED:
-			name = UIBinding::FULLSCREENED;
-			break;
-		case UNFULLSCREENED:
-			name = UIBinding::UNFULLSCREENED;
-			break;
-		case MAXIMIZED:
-			name = UIBinding::MAXIMIZED;
-			break;
-		case MINIMIZED:
-			name = UIBinding::MINIMIZED;
-			break;
-		case RESIZED:
-			name = UIBinding::RESIZED;
-			break;
-		case MOVED:
-			name = UIBinding::MOVED;
-			break;
-		case PAGE_INITIALIZED:
-			name = UIBinding::PAGE_INITIALIZED;
-			break;
-		case PAGE_LOADED:
-			name = UIBinding::PAGE_LOADED;
-			break;
-		case CREATE:
-			name = UIBinding::CREATE;
-			break;
-		default:
-			logger->Warn("Tried to fire an unknown event: %i\n", eventType);
-			return;
-	}
-	if (event.isNull())
-	{
-		event = new StaticBoundObject();
-	}
-	event->Set("window", Value::NewObject(this->shared_this));
-
-	// Send the event to any event listeners registered for this window
-	ValueList args;
-	args.push_back(Value::NewString(name));
-	args.push_back(Value::NewObject(event));
-	std::vector<Listener>::iterator it = this->listeners.begin();
-	while (it != this->listeners.end())
-	{
-		SharedKMethod callback = (*it++).callback;
-		try
-		{
-			this->host->InvokeMethodOnMainThread(callback, args, false);
-		}
-		catch (ValueException &e)
-		{
-			SharedString ss = e.DisplayString();
-			logger->Error("Exception caught during window event callback: %s", ss->c_str());
-		}
-	}
-
-	// Also send this event to the API module's event system
-	std::string fullName = std::string("ti.UI.window.") + name;
-	this->api->Call(fullName.c_str(), Value::NewObject(event));
-}
-
-SharedUserWindow UserWindow::GetParent()
+AutoUserWindow UserWindow::GetParent()
 {
 	return this->parent;
 }
 
-void UserWindow::AddChild(SharedUserWindow child)
+void UserWindow::AddChild(AutoUserWindow child)
 {
 	this->children.push_back(child);
 }
 
-void UserWindow::RemoveChild(SharedUserWindow child)
+void UserWindow::RemoveChild(AutoUserWindow child)
 {
-	std::vector<SharedUserWindow>::iterator iter = this->children.begin();
+	std::vector<AutoUserWindow>::iterator iter = this->children.begin();
 	while (iter != this->children.end())
 	{
 		if ((*iter).get() == child.get())
@@ -1715,75 +1688,83 @@ bool UserWindow::ShouldHaveTitaniumObject(
 		url.find("file://") == 0;
 }
 
+bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
+{
+	// If this global objects 'parent' property is equal to the object
+	// itself, it is likely the main frame. There might be a better way
+	// to do this determination, but at this point we've left the port-
+	// -dependent code and this should generally work cross-platform.
+	JSStringRef parentPropName = JSStringCreateWithUTF8CString("parent");
+	JSValueRef parentValue = JSObjectGetProperty(ctx, global, parentPropName, NULL);
+	if (!parentValue)
+		return false;
+
+	JSObjectRef parentObject = JSValueToObject(ctx, parentValue, NULL);
+	if (!parentObject)
+		return false;
+
+	return parentObject == global;
+}
+
+void UserWindow::InsertAPI(SharedKObject frameGlobal)
+{
+	// Produce a delegating object to represent the top-level Titanium object.
+	// When a property isn't found in this object it will look for it globally.
+	SharedKObject windowTiObject = new AccessorBoundObject();
+	SharedKObject windowUIObject = new AccessorBoundObject();
+
+	// Place currentWindow in the delegate base.
+	windowUIObject->Set("getCurrentWindow", this->Get("getCurrentWindow"));
+
+	// Place currentWindow.createWindow in the delegate base.
+	windowUIObject->Set("createWindow", this->Get("createWindow"));
+
+	// Place currentWindow.openFiles in the delegate base.
+	windowUIObject->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
+	windowUIObject->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
+	windowUIObject->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
+
+	// Create a delegate object for the UI API. When a property cannot be
+	// found in binding, DelegateStaticBoundObject will search for it in
+	// the base. When developers modify this object, it will be modified
+	// globally.
+	KObject* delegateUIAPI = new DelegateStaticBoundObject(binding, windowUIObject);
+	windowTiObject->Set("UI", Value::NewObject(delegateUIAPI));
+
+	// Place the Titanium object into the window's global object
+	SharedKObject delegateGlobalObject = new DelegateStaticBoundObject(
+		host->GetGlobalObject(), windowTiObject);
+	frameGlobal->SetObject(GLOBAL_NS_VARNAME, delegateGlobalObject);
+}
+
 void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
 	KJSUtil::ProtectGlobalContext(context);
 
-	if (!this->ShouldHaveTitaniumObject(context, globalObject))
+	// Get the global object as a KKJSObject
+	SharedKObject frameGlobal = new KKJSObject(context, globalObject);
+
+	// We only want to set this UserWindow's DOM window property if the
+	// particular frame that just loaded was the main frame. Each frame
+	// that loads on a page will follow this same code path.
+	if (IsMainFrame(context, globalObject))
+		this->domWindow = frameGlobal->GetObject("window", 0);
+
+	// Only certain pages should get the Titanium object. This is to prevent
+	// malicious sites from always getting access to the user's system. This
+	// can be overridden by any other API that calls InsertAPI on this DOM window.
+	if (this->ShouldHaveTitaniumObject(context, globalObject))
 	{
-		return;
+		this->InsertAPI(frameGlobal);
+		UserWindow::LoadUIJavaScript(context);
 	}
 
-	// Produce a delegating object to represent the top-level
-	// Titanium object. When a property isn't found in this object
-	// it will look for it in global_tibo.
-	SharedKObject global_tibo = this->host->GetGlobalObject();
-	KObject* ti_object = new DelegateStaticBoundObject(global_tibo);
-	SharedKObject shared_ti_obj = SharedKObject(ti_object);
-
-	SharedValue ui_api_value = ti_object->Get("UI");
-	if (ui_api_value->IsObject())
-	{
-		// Create a delegate object for the UI API.
-		SharedKObject ui_api = ui_api_value->ToObject();
-		KObject* delegate_ui_api = new DelegateStaticBoundObject(ui_api, new AccessorBoundObject());
-
-		// Place currentWindow in the delegate.
-		SharedValue user_window_val = Value::NewObject(this->GetSharedPtr());
-		delegate_ui_api->Set("getCurrentWindow", this->Get("getCurrentWindow"));
-
-		// Place currentWindow.createWindow in the delegate.
-		SharedValue create_window_value = this->Get("createWindow");
-		delegate_ui_api->Set("createWindow", create_window_value);
-
-		// Place currentWindow.openFiles in the delegate.
-		delegate_ui_api->Set("openFileChooserDialog", this->Get("openFileChooserDialog"));
-		delegate_ui_api->Set("openFolderChooserDialog", this->Get("openFolderChooserDialog"));
-		delegate_ui_api->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
-
-		ti_object->Set("UI", Value::NewObject(delegate_ui_api));
-	}
-	else
-	{
-		std::cerr << "Could not find UI API point!" << std::endl;
-	}
-
-	// Get the global object into a KKJSObject
-	SharedKObject frame_global = new KKJSObject(context, globalObject);
-
-	// Copy the document and window properties to the Titanium object
-	SharedValue doc_value = frame_global->Get("document");
-	ti_object->Set("document", doc_value);
-	SharedValue window_value = frame_global->Get("window");
-	ti_object->Set("window", window_value);
-
-	// Place the Titanium object into the window's global object
-	SharedValue ti_object_value = Value::NewObject(shared_ti_obj);
-	frame_global->Set(GLOBAL_NS_VARNAME, ti_object_value);
-
-	// bind the window into currentWindow so you can call things like
-	// Titanium.UI.currentWindow.getParent().window to get the parents
-	// window and global variable scope
-	this->Set("window", window_value);
-
-	UserWindow::LoadUIJavaScript(context);
-
-	SharedKObject event = new StaticBoundObject();
-	event->Set("scope", Value::NewObject(frame_global));
-	event->Set("url", Value::NewString(config->GetURL().c_str()));
-	this->FireEvent(PAGE_INITIALIZED, event);
+	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
+	event->SetObject("scope", frameGlobal);
+	event->SetString("url", config->GetURL());
+	this->FireEvent(event);
 }
 
 void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)
@@ -1810,19 +1791,19 @@ void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)
 void UserWindow::PageLoaded(
 	SharedKObject globalObject, std::string &url, JSGlobalContextRef context)
 {
-	SharedKObject event = new StaticBoundObject();
-	event->Set("scope", Value::NewObject(globalObject));
-	event->Set("url", Value::NewString(url.c_str()));
-	this->FireEvent(PAGE_LOADED, event);
+	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_LOADED);
+	event->SetObject("scope", globalObject);
+	event->SetString("url", url);
+	this->FireEvent(event);
 }
 
 double UserWindow::Constrain(double value, double min, double max)
 {
-	if (min > 0 && value < min)
+	if (min >= 0.0 && value < min)
 	{
 		value = min;
 	}
-	if (max > 0 && value > max)
+	if (max >= 0.0 && value > max)
 	{
 		value = max;
 	}

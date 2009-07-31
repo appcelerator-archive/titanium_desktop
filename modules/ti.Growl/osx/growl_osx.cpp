@@ -24,50 +24,25 @@ namespace ti {
 		[delegate release];
 	}
 
-
-	void * GrowlOSX::URLWithAppCString(const char * inputCString)
+	void GrowlOSX::ShowNotification(std::string& title, std::string& description,
+		std::string& iconURL, int notification_delay, SharedKMethod callback)
 	{
-		if (inputCString == NULL) return nil;
-		NSString * inputString = [NSString stringWithUTF8String:inputCString];
-		NSURL * result = [NSURL URLWithString:inputString];
-		NSString * scheme = [result scheme];
-		
-		BOOL isAppPath = [scheme isEqualToString:@"app"] || [scheme isEqualToString:@"ti"];
-		if ((scheme != nil) && !isAppPath) return result;
-		
-		NSString * resourceSpecifier = [result resourceSpecifier];
-		if (isAppPath || [resourceSpecifier hasPrefix:@"//"]){
-			resourceSpecifier = [resourceSpecifier substringFromIndex:2];
-		}
-		
-		SharedValue iconPathValue = global->CallNS("App.appURLToPath", Value::NewString([resourceSpecifier UTF8String]));
-		if (!(iconPathValue->IsString())) return nil;
-		
-		std::string iconPath = iconPathValue->ToString();
-		const char * iconPathCString = iconPath.c_str();
-		
-		if (iconPathCString == NULL) return nil;
-		return [NSURL fileURLWithPath:[NSString stringWithUTF8String:iconPathCString]];
-	}
-	
-
-	void GrowlOSX::ShowNotification(std::string& title, std::string& description, std::string& iconURL, int notification_delay, SharedKMethod callback)
-	{
+		std::string myIconURL = iconURL;
 		NSData *iconData = nil;
 
-		if (iconURL.size() > 0)
+		if (!iconURL.empty())
 		{
-			const char * iconURLCString = iconURL.c_str();
-			//TODO: This should be more generalized and using centralized methods, but for now,
+			std::string iconPath = URLUtils::URLToPath(iconURL);
 
-			NSURL * iconNSURL = (NSURL *)URLWithAppCString(iconURLCString);
-
-			if ([iconNSURL isFileURL]){
-				iconData = [NSData dataWithContentsOfURL:iconNSURL];
-			} else if (iconNSURL != nil){
-				iconData = [NSData dataWithContentsOfURL:iconNSURL];
-				//TODO: Delayed load and fire.
+			// If the path was not modified, it's still a URL.
+			if (iconPath != iconURL)
+			{
+				myIconURL = URLUtils::PathToFileURL(iconPath);
 			}
+
+			NSURL* iconNSURL = [NSURL URLWithString:
+				[NSString stringWithUTF8String:myIconURL.c_str()]];
+			iconData = [NSData dataWithContentsOfURL:iconNSURL];
 		}
 
 		//NSMutableArray* clickContext = [[NSMutableArray alloc] init];
@@ -86,13 +61,13 @@ namespace ti {
 		}
 
 		[GrowlApplicationBridge
-			 notifyWithTitle:titleString
-			 description:descriptionString
-			 notificationName:@"tiNotification"
-			 iconData:iconData
-			 priority:0
-			 isSticky:NO
-			 clickContext:nil];
+			notifyWithTitle:titleString
+			description:descriptionString
+			notificationName:@"tiNotification"
+			iconData:iconData
+			priority:0
+			isSticky:NO
+			clickContext:nil];
 	}
 
 	bool GrowlOSX::IsRunning()

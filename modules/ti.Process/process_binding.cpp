@@ -7,200 +7,303 @@
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
 #include "process_binding.h"
-
-#ifdef OS_OSX
-	#include <Foundation/Foundation.h>
-	#include "osx/osx_process.h"
-#elif defined(OS_WIN32)
-# include <windows.h>
-# include "win32/win32_process.h"
-#else
-# include "process.h"
-#endif
-
+#include "process.h"
+#include <signal.h>
 
 namespace ti
 {
-	ProcessBinding::ProcessBinding(Host *h, SharedKObject global) : host(h),global(global)
-	{
-		/**
-		 * @tiapi(property=True,type=integer,name=Process.pid,since=0.3) The process id of the application
-		 */
-#ifdef OS_OSX
-		NSProcessInfo *p = [NSProcessInfo processInfo];
-		this->Set("pid",Value::NewInt([p processIdentifier]));
-#else
-		this->Set("pid",Value::NewInt((int)Poco::Process::id()));
-#endif
-		//TODO: support times api
-		//static void times(long& userTime, long& kernelTime);
 
+	std::map<std::string,int> ProcessBinding::signals;
+	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
+	{
+		
 		/**
-		 * @tiapi(method=True,returns=list,name=Process.getEnv,since=0.2) Returns the value of an environment variable in the system
-		 * @tiarg(for=Process.getEnv,name=name,type=string) name of the environment property
-		 * @tiresult(for=Process.getEnv,type=string) the value of the environment variable
+		 * @tiapi(method=True,name=Process.createProcess,since=0.5)
+		 * @tiapi Create a Process object. There are two main ways to use this function:
+		 * @tiapi  With an options object (preferred):
+		 * @tiapi  Titanium.Process.createProcess({args: ['mycmd', 'arg1', 'arg2'],
+		 * @tiapi     env: {'PATH': '/something'}, stdin: pipeIn, stdout: pipeOut, stderr: pipeErr});
+		 * @tiapi OR
+		 * @tiapi  Titanium.Process.createProcess(args[, environment, stdin, stdout, stderr]);
+		 * @tiresult[Process.Process, process] The process object
 		 */
-		this->SetMethod("getEnv",&ProcessBinding::GetEnv);
+		SetMethod("createProcess", &ProcessBinding::CreateProcess);
+		
 		/**
-		 * @tiapi(method=True,returns=void,name=Process.setEnv,since=0.2) Sets the value of an environment variable in the system
-		 * @tiarg(for=Process.setEnv,name=name,type=string) name of the environment variable
-		 * @tiarg(for=Process.setEnv,name=value,type=string) value of the environment variable
+		 * @tiapi(method=True,name=Process.createPipe,since=0.5)
+		 * @tiapi Create an pipe for attach to/from any number of processes.
+		 * @tiresult[Process.Pipe, pipe] A new pipe
 		 */
-		this->SetMethod("setEnv",&ProcessBinding::SetEnv);
+		SetMethod("createPipe", &ProcessBinding::CreatePipe);
+
+#if defined(OS_OSX) || (OS_LINUX)
 		/**
-		 * @tiapi(method=True,name=Process.hasEnv,since=0.2) Checks whether an environment variable is present in the system
-		 * @tiarg(for=Process.hasEnv,name=name,type=string) name of the environment variable
-		 * @tiresult(for=Process.hasEnv,type=boolean) true if the system has the environment variable, false if otherwise
+		 * @tiapi(property=True,name=Process.SIGHUP,since=0.5,platforms=osx|linux)
 		 */
-		this->SetMethod("hasEnv",&ProcessBinding::HasEnv);
+		signals["SIGHUP"] = SIGHUP;
 		/**
-		 * @tiapi(method=True,name=Process.launch,since=0.2) Launches an external process using a command string
-		 * @tiarg(for=Process.launch,name=command,type=string) command to use to launch the external process
-		 * @tiresult(for=Process.launch,type=object) a Process object
+		 * @tiapi(property=True,name=Process.SIGINT,since=0.5,platforms=osx|linux)
 		 */
-		this->SetMethod("launch",&ProcessBinding::Launch);
+		signals["SIGINT"] = SIGINT;
 		/**
-		 * @tiapi(method=True,returns=void,name=Process.restart,since=0.3) Restarts the application
+		 * @tiapi(property=True,name=Process.SIGQUIT,since=0.5,platforms=osx|linux)
 		 */
-		this->SetMethod("restart",&ProcessBinding::Restart);
+		signals["SIGQUIT"] = SIGQUIT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGILL,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGILL"] = SIGILL;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTRAP,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGTRAP"] = SIGTRAP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGABRT,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGABRT"] = SIGABRT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGFPE,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGFPE"] = SIGFPE;
+		/**
+		 * @tiapi(property=True,name=Process.SIGKILL,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGKILL"] = SIGKILL;
+		/**
+		 * @tiapi(property=True,name=Process.SIGBUS,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGBUS"] = SIGBUS;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSEGV,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGSEGV"] = SIGSEGV;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSYS,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGSYS"] = SIGSYS;
+		/**
+		 * @tiapi(property=True,name=Process.SIGPIPE,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGPIPE"] = SIGPIPE;
+		/**
+		 * @tiapi(property=True,name=Process.SIGALRM,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGALRM"] = SIGALRM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTERM,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGTERM"] = SIGTERM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGURG,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGURG"] = SIGURG;
+		/**
+		 * @tiapi(property=True,name=Process.SIGSTOP,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGSTOP"] = SIGSTOP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTSTP,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGTSTP"] = SIGTSTP;
+		/**
+		 * @tiapi(property=True,name=Process.SIGCHLD,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGCHLD"] = SIGCHLD;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTTIN,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGTTIN"] = SIGTTIN;
+		/**
+		 * @tiapi(property=True,name=Process.SIGTTOU,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGTTOU"] = SIGTTOU;
+		/**
+		 * @tiapi(property=True,name=Process.SIGIO,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGIO"] = SIGIO;
+		/**
+		 * @tiapi(property=True,name=Process.SIGXCPU,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGXCPU"] = SIGXCPU;
+		/**
+		 * @tiapi(property=True,name=Process.SIGXFSZ,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGXFSZ"] = SIGXFSZ;
+		/**
+		 * @tiapi(property=True,name=Process.v,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGVTALRM"] = SIGVTALRM;
+		/**
+		 * @tiapi(property=True,name=Process.SIGPROF,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGPROF"] = SIGPROF;
+		/**
+		 * @tiapi(property=True,name=Process.SIGWINCH,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGWINCH"] = SIGWINCH;
+		/**
+		 * @tiapi(property=True,name=Process.SIGUSR1,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGUSR1"] = SIGUSR1;
+		/**
+		 * @tiapi(property=True,name=Process.SIGUSR2,since=0.5,platforms=osx|linux)
+		 */
+		signals["SIGUSR2"] = SIGUSR2;
+		
+#elif defined(OS_WIN32)
+		signals["SIGABRT"] = SIGABRT;
+		signals["SIGFPE"] = SIGFPE;
+		signals["SIGILL"] = SIGILL;
+		signals["SIGINT"] = SIGINT;
+		signals["SIGSEGV"] = SIGSEGV;
+		signals["SIGTERM"] = SIGTERM;
+#endif
+#if defined(OS_OSX)
+		/**
+		 * @tiapi(property=True,name=Process.SIGEMT,since=0.5,platforms=osx)
+		 */
+		signals["SIGEMT"] = SIGEMT;
+		/**
+		 * @tiapi(property=True,name=Process.SIGINFO,since=0.5,platforms=osx)
+		 */
+		signals["SIGINFO"] = SIGINFO;
+#endif
+		std::map<std::string,int>::iterator iter;
+		for (iter = signals.begin(); iter != signals.end(); iter++)
+		{
+			Set(iter->first.c_str(), Value::NewInt(iter->second));
+		}
 	}
+
 	ProcessBinding::~ProcessBinding()
 	{
 	}
-	void ProcessBinding::Launch(const ValueList& args, SharedValue result)
+
+	void ProcessBinding::CreateProcess(const ValueList& args, SharedValue result)
 	{
-		std::vector<std::string> arguments;
-		std::string cmd = std::string(args.at(0)->ToString());
-		if (args.size()>1)
+		args.VerifyException("createProcess", "o|l");
+		SharedKObject temp = 0;
+		SharedKList argList = 0;
+		SharedKObject environment = 0;
+		AutoPipe stdinPipe = 0;
+		AutoPipe stdoutPipe = 0;
+		AutoPipe stderrPipe = 0;
+
+		if (args.at(0)->IsObject())
 		{
-			if (args.at(1)->IsString())
+			SharedKObject options = args.GetObject(0);
+			argList = options->GetList("args", 0);
+			if (argList.isNull())
+				throw ValueException::FromString(
+					"Titanium.Process option 'args' must be an array");
+
+			environment = options->GetObject("env", 0);
+
+			temp = options->GetObject("stdin");
+			if (!temp.isNull())
+				stdinPipe = temp.cast<Pipe>();
+
+			temp = options->GetObject("stdout");
+			if (!temp.isNull())
+				stdoutPipe = temp.cast<Pipe>();
+
+			temp = options->GetObject("stderr");
+			if (!temp.isNull())
+				stderrPipe = temp.cast<Pipe>();
+
+		}
+		else if (args.at(0)->IsList())
+		{
+			argList = args.at(0)->ToList();
+			
+			if (args.size() > 1)
+				environment = args.GetObject(1);
+
+			if (args.size() > 2)
 			{
-				std::string arglist = args.at(1)->ToString();
-				kroll::FileUtils::Tokenize(arglist,arguments," ");
+				temp = args.GetObject(2);
+				if (!temp.isNull())
+					stdinPipe = temp.cast<Pipe>();
 			}
-			else if (args.at(1)->IsList())
+
+			if (args.size() > 3)
 			{
-				SharedKList list = args.at(1)->ToList();
-				for (unsigned int c = 0; c < list->Size(); c++)
-				{
-					SharedValue value = list->At(c);
-					arguments.push_back(value->ToString());
-				}
+				temp = args.GetObject(3);
+				if (!temp.isNull())
+					stdoutPipe = temp.cast<Pipe>();
+			}
+
+			if (args.size() > 4)
+			{
+				temp = args.GetObject(4);
+				if (!temp.isNull())
+					stderrPipe = temp.cast<Pipe>();
 			}
 		}
 
-		Logger* logger = Logger::Get("Process");
-		logger->Debug("Launching: %s with %d args",cmd.c_str(),arguments.size());
-		if (arguments.size()>0)
+		if (argList.isNull())
 		{
-			std::vector<std::string>::const_iterator i = arguments.begin();
-			while(arguments.end()!=i)
-			{
-				logger->Debug("Argument: %s",(*i).c_str());
-				i++;
-			}
+			throw ValueException::FromString(
+				"Titanium.Process option argument 'args' was undefined");
 		}
-#ifdef OS_OSX
-		SharedKObject p = new OSXProcess(this, cmd, arguments);
-#elif defined(OS_WIN32)
-		SharedKObject p = new Win32Process(this, cmd, arguments);
-#else
-		SharedKObject p = new Process(this, cmd, arguments);
-#endif
-		processes.push_back(p);
-		result->SetObject(p);
+
+		if (argList->Size() == 0)
+		{
+			throw ValueException::FromString(
+				"Titanium.Process option argument 'args' must have at least 1 element");
+		}
+		else if (argList->At(0)->IsNull() ||
+			(argList->At(0)->IsString() && strlen(argList->At(0)->ToString()) == 0))
+		{
+			throw ValueException::FromString(
+				"Titanium.Process 1st argument must not be null/empty");
+		}
+
+		SharedKList argsClone = new StaticBoundList();
+		ExtendArgs(argsClone, argList);
+
+		AutoProcess process = Process::CreateProcess();
+		process->SetArguments(argsClone);
+
+		if (!environment.isNull())
+			process->SetEnvironment(environment);
+		if (!stdinPipe.isNull())
+			process->SetStdin(stdinPipe);
+		if (!stdoutPipe.isNull())
+			process->SetStdout(stdoutPipe);
+		if (!stderrPipe.isNull())
+			process->SetStderr(stderrPipe);
+
+		// this is a callable object
+		result->SetMethod(process);
 	}
-#ifdef OS_WIN32
-	void ProcessBinding::Terminated(Win32Process *p)
-#else
-	void ProcessBinding::Terminated(Process* p)
-#endif
+	
+	void ProcessBinding::ExtendArgs(SharedKList dest, SharedKList args)
 	{
-		PRINTD("Process Terminated");
-		std::vector<SharedKObject>::iterator i = processes.begin();
-		while(i!=processes.end())
+		for (size_t i = 0; i < args->Size(); i++)
 		{
-			SharedKObject obj = (*i);
-			if (obj.get()==(void*)p)
+			SharedValue arg = Value::Undefined;
+			if (args->At(i)->IsList())
 			{
-				processes.erase(i);
-				break;
+				SharedKList list = args->At(i)->ToList();
+				ExtendArgs(dest, list);
+				continue;
 			}
-			i++;
-		}
-	}
-	void ProcessBinding::GetEnv(const ValueList& args, SharedValue result)
-	{
-		std::string key(args.at(0)->ToString());
-		try
-		{
-			std::string value = Poco::Environment::get(key);
-			result->SetString(value.c_str());
-		}
-		catch(...)
-		{
-			// if they specified a default as 2nd parameter, return it
-			// otherwise, return null
-			if (args.size()==2)
+			else if (!args->At(i)->IsString())
 			{
-				result->SetString(args.at(1)->ToString());
+				SharedString ss = args->At(i)->DisplayString();
+				arg = Value::NewString(ss);
 			}
 			else
 			{
-				result->SetNull();
+				arg = args->At(i);
 			}
+			dest->Append(arg);
 		}
 	}
-	void ProcessBinding::HasEnv(const ValueList& args, SharedValue result)
+
+	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)
 	{
-		std::string key(args.at(0)->ToString());
-		result->SetBool(Poco::Environment::has(key));
-	}
-	void ProcessBinding::SetEnv(const ValueList& args, SharedValue result)
-	{
-		std::string key(args.at(0)->ToString());
-		std::string value(args.at(1)->ToString());
-		Poco::Environment::set(key,value);
-	}
-	void ProcessBinding::Restart(const ValueList& args, SharedValue result)
-	{
-#ifdef OS_OSX
-		NSProcessInfo *p = [NSProcessInfo processInfo];
-		NSString *path = [[NSBundle mainBundle] bundlePath];
-		NSString *killArg1AndOpenArg2Script = [NSString stringWithFormat:@"kill -9 %d\n open \"%@\"",[p processIdentifier],path];
-		NSArray *shArgs = [NSArray arrayWithObjects:@"-c", // -c tells sh to execute the next argument, passing it the remaining arguments.
-			killArg1AndOpenArg2Script,nil];
-		NSTask *restartTask = [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:shArgs];
-		[restartTask waitUntilExit]; //wait for killArg1AndOpenArg2Script to finish
-#elif OS_WIN32
-		std::string cmdline = host->GetCommandLineArg(0);
-		STARTUPINFO si;
-		PROCESS_INFORMATION pi;
-		ZeroMemory( &si, sizeof(si) );
-		si.cb = sizeof(si);
-		ZeroMemory( &pi, sizeof(pi) );
-		CreateProcessA(NULL,
-			(LPSTR)cmdline.c_str(),
-			NULL, /*lpProcessAttributes*/
-			NULL, /*lpThreadAttributes*/
-			FALSE, /*bInheritHandles*/
-			NORMAL_PRIORITY_CLASS,
-			NULL,
-			NULL,
-			&si,
-			&pi);
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
-#elif OS_LINUX
-		std::string cmdline = host->GetCommandLineArg(0);
-		size_t idx;
-		while ((idx = cmdline.find_first_of('\"')) != std::string::npos)
-		{
-			cmdline.replace(idx, 1, "\\\"");
-		}
-		std::string script = "\"" + cmdline + "\" &";
-		system(script.c_str());
-#endif
-		host->Exit(999);
+		result->SetObject(new Pipe());
 	}
 }

@@ -6,357 +6,503 @@
 #include <vector>
 #include "process.h"
 #include "pipe.h"
-#include <Poco/Path.h>
-#include <Poco/RunnableAdapter.h>
-#include <Poco/ScopedLock.h>
-#include <Poco/PipeImpl.h>
-
+#include "process_binding.h"
+#if defined(OS_WIN32)
+#include "win32/win32_process.h"
+#else
+#include "posix/posix_process.h"
+#endif
 using Poco::RunnableAdapter;
 
 namespace ti
 {
-	Process::Process(ProcessBinding* parent, std::string& cmd, std::vector<std::string>& args) :
-		StaticBoundObject("Process"),
-		running(false),
-		complete(false),
-		pid(-1),
-		exitCode(-1),
-		errp(0),
-		outp(0),
-		inp(0),
-		logger(Logger::Get("Process.Process"))
+	/*static*/
+	AutoProcess Process::CreateProcess()
 	{
-		this->parent = parent;
-		this->errp = new Poco::Pipe();
-		this->outp = new Poco::Pipe();
-		this->inp = new Poco::Pipe();
+#if defined(OS_WIN32)
+		AutoProcess process = new Win32Process();
+#else
+		AutoProcess process = new PosixProcess();
+#endif
+		return process;
+	}
 
-		logger->Debug("Running process %s", cmd.c_str());
-		try
-		{
-			this->arguments = args;
-			this->command = cmd;
-		}
-		catch (std::exception &e)	
-		{
-			throw ValueException::FromString(e.what());
-		}
-
+	Process::Process() :
+		KEventMethod("Process.Process"),
+		stdoutPipe(new Pipe()),
+		stderrPipe(new Pipe()),
+		stdinPipe(new Pipe()),
+		environment(GetCurrentEnvironment()),
+		pid(-1),
+		exitCode(Value::Null),
+		onRead(0),
+		onExit(0),
+		exitMonitorAdapter(new RunnableAdapter<Process>(
+			*this, &Process::ExitMonitorAsync)),
+		running(false)
+	{
 		/**
-		 * @tiapi(property=True,type=string,name=Process.Process.command,version=0.2)
-		 * @tiapi The command used for the Process object
+		 * @tiapi(method=True,name=Process.Process.getPID,since=0.5)
+		 * @tiresult[int, pid] The PID of this process
 		 */
-		this->SetString("command", cmd);
-
+		SetMethod("getPID", &Process::_GetPID);
+		
 		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.pid,version=0.2)
-		 * @tiapi The process id of the Process object
+		 * @tiapi(method=True,name=Process.Process.getExitCode,since=0.5)
+		 * @tiresult[int, pid] The exit code of this process. If the process is still running, this will return -1
 		 */
-		this->SetNull("pid");
-
+		SetMethod("getExitCode", &Process::_GetExitCode);
+		
 		/**
-		 * @tiapi(property=True,type=boolean,name=Process.Process.running,version=0.2)
-		 * @tiapi The running status of the Process object
+		 * @tiapi(method=True,name=Process.Process.getArguments,since=0.5)
+		 * @tiresult[List<String>, arguments] The list of arguments this process was created with
 		 */
-		this->SetBool("running", false);
-
+		SetMethod("getArguments", &Process::_GetArguments);
+		
 		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.err,version=0.2)
-		 * @tiapi The Pipe object of the error stream
+		 * @tiapi(method=True,name=Process.Process.getEnvironment,since=0.5)
+		 * @tiarg[String, key] an environment key
+		 * @tiresult[Any<String,Object> result] either the string value of the passed-in environment key, or the entire environment object
 		 */
-		this->err = new Pipe(new Poco::PipeInputStream(*errp));
-		this->shared_error = new SharedKObject(this->err);
-		this->SetObject("err", *shared_error);
-
+		SetMethod("getEnvironment", &Process::_GetEnvironment);
+		
 		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.out,version=0.2)
-		 * @tiapi The Pipe object of the output stream
+		 * @tiapi(method=True,name=Process.Process.setEnvironment,since=0.5) Set an environment variable for this process
+		 * @tiarg[String, key] an environment key
+		 * @tiarg[String, value] the value
 		 */
-		this->out = new Pipe(new Poco::PipeInputStream(*outp));
-		this->shared_output = new SharedKObject(this->out);
-		this->SetObject("out", *shared_output);
-
+		SetMethod("setEnvironment", &Process::_SetEnvironment);
+		
 		/**
-		 * @tiapi(property=True,type=object,name=Process.Process.in,version=0.2)
-		 * @tiapi The Pipe object of the input stream
+		 * @tiapi(method=True,name=Process.Process.cloneEnvironment,since=0.5)
+		 * @tiresult[Object, environment] A clone of this process' environment
 		 */
-		this->in = new Pipe(new Poco::PipeOutputStream(*inp));
-		this->shared_input = new SharedKObject(this->in);
-		this->SetObject("in", *shared_input);
-
+		SetMethod("cloneEnvironment", &Process::_CloneEnvironment);
+		
 		/**
-		 * @tiapi(method=True,name=Process.Process.terminate,version=0.2)
-		 * @tiapi Terminates a running process
+		 * @tiapi(method=True,name=Process.Process.launch,since=0.5)
+		 * @tiapi Launch this process asynchronously (not waiting for it's exit)
 		 */
-		this->SetMethod("terminate", &Process::Terminate);
-
+		SetMethod("launch", &Process::_Launch);
+		
 		/**
-		 * @tiapi(property=True,type=integer,name=Process.Process.exitCode,version=0.4)
-		 * @tiapi The exit code or null if not yet exited
+		 * @tiapi(method=True,name=Process.Process.terminate,since=0.5)
+		 * @tiapi Terminate this process (SIGTERM in Unix, TerminateProcess in Windows)
 		 */
-		this->SetNull("exitCode");
-
+		SetMethod("terminate", &Process::_Terminate);
+		
 		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onread,since=0.4)
-		 * @tiapi The function handler to call when sys out is read
+		 * @tiapi(method=True,name=Process.Process.kill,since=0.5)
+		 * @tiapi Kill this process (SIGINT in Unix, TerminateProcess in Windows)
 		 */
-		this->SetNull("onread");
-
+		SetMethod("kill", &Process::_Kill);
+		
 		/**
-		 * @tiapi(property=True,type=method,name=Process.Process.onexit,since=0.4)
-		 * @tiapi The function handler to call when the process exits
+		 * @tiapi(method=True,name=Process.Process.sendSignal,since=0.5)
+		 * @tiapi NOTE: this method does nothing in Windows
+		 * @tiarg[Any<int,String> signal] send a signal, i.e. Process.SIGHUP
 		 */
-		this->SetNull("onexit");
-
-		// setup threads which can read output and also monitor the exit
-		this->monitorAdapter = new RunnableAdapter<Process>(*this, &Process::Monitor);
-		this->exitMonitorThread.start(*monitorAdapter);
+		SetMethod("sendSignal", &Process::_SendSignal);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setOnRead,since=0.5)
+		 * @tiapi Set an onRead event handler for this process stdout and stderr
+		 * @tiarg[Function, onRead] a handler that is passed an event, with a "data" Blob full of data read from the pipe
+		 */
+		SetMethod("setOnRead", &Process::_SetOnRead);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.setOnExit,since=0.5)
+		 * @tiapi Set an onExit event handler for this process
+		 * @tiarg[Function, onExit] a function
+		 */
+		SetMethod("setOnExit", &Process::_SetOnExit);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStdin,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard input pipe for this process
+		 */
+		SetMethod("getStdin", &Process::_GetStdin);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStdout,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard output pipe for this process
+		 */
+		SetMethod("getStdout", &Process::_GetStdout);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.getStderr,since=0.5)
+		 * @tiresult[Process.Pipe, pipe] the standard error pipe for this process
+		 */
+		SetMethod("getStderr", &Process::_GetStderr);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.isRunning,since=0.5)
+		 * @tiresult[bool, running] whether or not this process is actively running
+		 */
+		SetMethod("isRunning", &Process::_IsRunning);
+		
+		/**
+		 * @tiapi(method=True,name=Process.Process.toString,since=0.5)
+		 * @tiresult[String, str] the arguments of this process as a string
+		 */
+		SetMethod("toString", &Process::_ToString);
 	}
 
 	Process::~Process()
 	{
-		Terminate();
-
-		if (this->exitMonitorThread.isRunning())
-		{
-			try
-			{
-				this->exitMonitorThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with exit monitor thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		if (this->stdOutThread.isRunning())
-		{
-			try
-			{
-				this->stdOutThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stdout thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		if (this->stdErrorThread.isRunning())
-		{
-			try
-			{
-				this->stdErrorThread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				logger->Error(
-					"Exception while try to join with stderr thread: %s",
-					e.displayText().c_str());
-			}
-		}
-
-		delete monitorAdapter;
-		delete stdOutAdapter;
-		delete stdErrorAdapter;
-		delete shared_output;
-		delete shared_input;
-		delete shared_error;
+		delete exitMonitorAdapter;
 	}
 
-	void Process::StartReadThreads()
+	void Process::Exited(bool async)
 	{
-		this->logger->Debug("Starting output handler threads...");
-		if (!stdOutThread.isRunning())
-		{
-			this->stdOutAdapter = new RunnableAdapter<Process>(*this, &Process::ReadStdOut);
-			stdOutThread.start(*stdOutAdapter);
-		}
+		this->GetNativeStdout()->Close();
+		this->GetNativeStderr()->Close();
 
-		if (!stdErrorThread.isRunning())
-		{
-			RunnableAdapter<Process> adapter(*this, &Process::ReadStdError);
-			this->stdErrorAdapter = new RunnableAdapter<Process>(*this, &Process::ReadStdError);
-			stdErrorThread.start(*stdErrorAdapter);
-		}
-	}
-
-	void Process::Monitor()
-	{
-		this->Set("running", Value::NewBool(true));
-		this->running = true;
-
-		try
-		{
-			Poco::ProcessHandle ph = Poco::Process::launch(
-				this->command, this->arguments,
-				this->inp, this->outp, this->errp);
-			this->StartReadThreads();
-			this->pid = (int) ph.id();
-			this->Set("pid", Value::NewInt(this->pid));
-
-			this->exitCode = ph.wait();
-			this->Set("exitCode", Value::NewInt(this->exitCode));
-			logger->Debug("%s exited with return code %i", 
-				this->command.c_str(), this->exitCode);
-		}
-		catch (Poco::SystemException &se)
-		{
-			logger->Error("System Exception starting: %s, message: %s",
-				this->command.c_str(), se.what());
-		}
-		catch (std::exception &e)
-		{
-			logger->Error("Exception starting: %s, message: %s",
-				this->command.c_str(), e.what());
-		}
-
-		this->Set("running", Value::NewBool(false));
+		this->DetachPipes();
+		this->RecreateNativePipes();
 		this->running = false;
 
-		this->InvokeOnExitCallback();
-
-		// We must set complete to true after we call the callback, so
-		// that it is only called once -- see this->Set(...)
-		this->complete = true;
-
-		this->parent->Terminated(this);
-	}
-
-	void Process::InvokeOnExitCallback()
-	{
-		SharedValue sv = this->Get("onexit");
-		if (!sv->IsMethod())
+		if (async)
 		{
-			return;
-		}
-
-		ValueList args(Value::NewInt(this->exitCode));
-		SharedKMethod callback = sv->ToMethod();
-		this->parent->GetHost()->InvokeMethodOnMainThread(
-			callback, args, false);
-	}
-
-	void Process::InvokeOnReadCallback(bool isStdError)
-	{
-		SharedValue sv = this->Get("onread");
-		if (!sv->IsMethod())
-		{
-			return;
-		}
-
-		std::string output;
-		if (isStdError)
-		{
-			Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-			output = stdErrorBuffer.str();
-			stdErrorBuffer.str("");
+			this->duplicate();
+			AutoPtr<Event> event = new Event(this, Event::EXIT);
+			Poco::Mutex::ScopedLock lock(Pipe::eventsMutex);
+			Pipe::events.push(event);
 		}
 		else
 		{
-			Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-			output = stdOutBuffer.str();
-			stdOutBuffer.str("");
-		}
-
-		if (!output.empty())
-		{
-			ValueList args(
-				Value::NewString(output),
-				Value::NewBool(isStdError));
-			SharedKMethod callback = sv->ToMethod();
-			this->parent->GetHost()->InvokeMethodOnMainThread(
-				callback, args, false);
+			this->FireEvent(Event::EXIT);
 		}
 	}
 
-	void Process::ReadStdOut()
-	{
-		while (this->running)
-		{
-			SharedValue result = Value::NewUndefined();
-			this->out->Read(ValueList(), result);
-
-			if (result->IsString())
-			{
-				Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-				stdOutBuffer << result->ToString();
-				this->InvokeOnReadCallback(false);
-			}
-		}
-	}
-
-	void Process::ReadStdError()
-	{
-		while (this->running)
-		{
-			SharedValue result = Value::NewUndefined();
-			this->err->Read(ValueList(), result);
-
-			if (result->IsString())
-			{
-				Poco::ScopedLock<Poco::Mutex> lock(outputBufferMutex);
-				stdErrorBuffer << result->ToString();
-				this->InvokeOnReadCallback(true);
-			}
-		}
-	}
-
-	void Process::Terminate(const ValueList& args, SharedValue result)
-	{
-		Terminate();
-	}
-
-	void Process::Terminate()
+	void Process::SetOnRead(SharedKMethod newOnRead)
 	{
 		if (running)
 		{
-			this->running = false;
-#ifdef OS_WIN32
-			// win32 needs a kill to terminate process
-			Poco::Process::kill(this->pid);
-#else
-			// this sends a more graceful SIGINT instead of SIGKILL
-			// which is important for programs that manage child processes
-			// and handle their own signals
-			Poco::Process::requestTermination(this->pid);
-#endif			
-			this->Set("running", Value::NewBool(false));
-			this->parent->Terminated(this);
+			this->GetNativeStdout()->AddEventListener(Event::READ, newOnRead);
+			this->GetNativeStderr()->AddEventListener(Event::READ, newOnRead);
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->RemoveEventListener(Event::READ, onRead);
+		}
+		this->onRead = newOnRead;
+	}
+
+	void Process::SetOnExit(SharedKMethod newOnExit)
+	{
+		this->AddEventListener(Event::EXIT, newOnExit);
+		if (!this->onExit.isNull())
+			this->RemoveEventListener(Event::EXIT, this->onExit);
+		this->onExit = newOnExit;
+	}
+
+	SharedKObject Process::CloneEnvironment()
+	{
+		SharedStringList properties = environment->GetPropertyNames();
+		SharedKObject clonedEnvironment = new StaticBoundObject();
+		for (size_t i = 0; i < properties->size(); i++)
+		{
+			std::string property = *properties->at(i);
+			std::string value = environment->Get(property.c_str())->ToString();
+			clonedEnvironment->Set(property.c_str(), Value::NewString(value.c_str()));
+		}
+		return clonedEnvironment;
+	}
+
+	std::string Process::ArgumentsToString()
+	{
+		std::ostringstream str;
+		for (size_t i = 0; i < this->args->Size(); i++)
+		{
+			str << " \"" << this->args->At(i)->ToString() << "\" ";
+		}
+		return str.str();
+	}
+
+	void Process::AttachPipes(bool async)
+	{
+		this->GetNativeStdout()->Attach(stdoutPipe);
+		this->GetNativeStderr()->Attach(stderrPipe);
+
+		if (async && !onRead.isNull())
+		{
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			this->GetNativeStderr()->AddEventListener(Event::READ, onRead);
 		}
 	}
 
-	void Process::Set(const char *name, SharedValue value)
+	void Process::DetachPipes()
 	{
-		// We need to check the previous value of certain incomming values
-		// *before* we actually do the Set(...) on this object.
-		bool flushOnRead = 
-			(!strcmp("onread", name)) && (!this->Get("onread")->IsMethod());
-		bool flushOnExit = 
-			(!strcmp("onexit", name)) && (!this->Get("onexit")->IsMethod());
+		// We don't detach event listeners because we want any pending
+		// READ events to fire. It should be okay though, because
+		// native pipes should not be re-used.
+		stdinPipe->Detach(this->GetNativeStdin());
+		this->GetNativeStdout()->Detach(stdoutPipe);
+		this->GetNativeStderr()->Detach(stderrPipe);
+	}
 
+	void Process::LaunchAsync()
+	{
+		this->running = true;
+		this->exitCode = Value::Null;
 
-		StaticBoundObject::Set(name, value);
+		this->AttachPipes(true);
+		ForkAndExec();
+		MonitorAsync();
 
-		if (flushOnRead)
+		this->exitCallback = StaticBoundMethod::FromMethod<Process>(
+			this, &Process::ExitCallback);
+		this->exitMonitorThread.start(*exitMonitorAdapter);
+	}
+
+	AutoBlob Process::LaunchSync()
+	{
+		this->running = true;
+		this->exitCode = Value::Null;
+
+		this->AttachPipes(false);
+		ForkAndExec();
+		AutoBlob output = MonitorSync();
+
+		// Manually fire read events here so that
+		// we can be precise about the ordering.
+		if (!onRead.isNull())
 		{
-			// If we had no previous onread callback flush our output
-			// buffers, so that onread will be called even when it is
-			// attached after a process finishes executing.
-			this->InvokeOnReadCallback(false);
-			this->InvokeOnReadCallback(true);
+			this->GetNativeStdout()->AddEventListener(Event::READ, onRead);
+			AutoPtr<Event> event = new ReadEvent(this->GetNativeStdin(), output);
+			this->GetNativeStdout()->FireEvent(event);
+			this->GetNativeStdout()->RemoveEventListener(Event::READ, onRead);
 		}
 
-		// this->complete is the signal that monitor thread has already
-		// attempted to call the onexit callback. If it's false, the monitor
-		// thread will take care of calling it.
-		if (flushOnExit && this->complete)
+		this->Exited(false);
+		return output;
+	}
+
+	void Process::ExitMonitorSync()
+	{
+		this->exitCode = Value::NewInt(this->Wait());
+
+		this->GetNativeStdin()->StopMonitors();
+		this->GetNativeStdout()->StopMonitors();
+		this->GetNativeStderr()->StopMonitors();
+		if (!exitCallback.isNull())
+			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+	}
+
+	void Process::ExitMonitorAsync()
+	{
+		this->exitCode = Value::NewInt(this->Wait());
+
+		// We want the onRead callbacks to fire before the exit
+		// event, so we do a little hack here and stop the event
+		// threads on the native pipes. It shouldn't matter anyhow
+		// because these pipes are now dead and will be replaced on
+		// next launch. Don't do this for synchronous process
+		// launch becauase we are already on the main thread and that
+		// will cause a deadlock.
+		this->GetNativeStdin()->StopMonitors();
+		this->GetNativeStdout()->StopMonitors();
+		this->GetNativeStderr()->StopMonitors();
+
+		if (!exitCallback.isNull())
+			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+	}
+
+	void Process::ExitCallback(const ValueList& args, SharedValue result)
+	{
+		this->Exited(true);
+	}
+
+	void Process::_GetPID(const ValueList& args, SharedValue result)
+	{
+		int pid = GetPID();
+		if (pid != -1)
+			result->SetInt(GetPID());
+		else
+			result->SetNull();
+	}
+
+	void Process::_GetExitCode(const ValueList& args, SharedValue result)
+	{
+		result->SetValue(exitCode);
+	}
+	
+	void Process::_GetArguments(const ValueList& args, SharedValue result)
+	{
+		result->SetList(this->args);
+	}
+	
+	void Process::_GetEnvironment(const ValueList& args, SharedValue result)
+	{
+		if (args.size() > 0 && args.at(0)->IsString())
 		{
-			this->InvokeOnExitCallback();
+			SharedValue value = environment->Get(args.at(0)->ToString());
+			result->SetValue(value);
 		}
+		else {
+			result->SetObject(environment);
+		}
+	}
+	
+	void Process::_SetEnvironment(const ValueList& args, SharedValue result)
+	{
+		if (args.size() >= 2 && args.at(0)->IsString() && args.at(1)->IsString())
+		{
+			SetEnvironment(args.at(0)->ToString(), args.at(1)->ToString());
+		}
+	}
+	
+	void Process::_CloneEnvironment(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(CloneEnvironment());
+	}
+	
+	void Process::_Launch(const ValueList& args, SharedValue result)
+	{
+		LaunchAsync();
+	}
+	
+	void Process::_Terminate(const ValueList& args, SharedValue result)
+	{
+		Terminate();
+	}
+	
+	void Process::_Kill(const ValueList& args, SharedValue result)
+	{
+		Kill();
+	}
+	
+	void Process::_SendSignal(const ValueList& args, SharedValue result)
+	{
+		if (args.size() >= 1 && args.at(0)->IsNumber())
+		{
+			int code = -1;
+			if (args.at(0)->IsString()) {
+				std::string signalName = args.at(0)->ToString();
+				if (ProcessBinding::signals.find(signalName) != ProcessBinding::signals.end())
+				{
+					code = ProcessBinding::signals[signalName];
+				}
+				else
+				{
+					std::ostringstream str;
+					str << "Error, signal name: \"" << signalName << "\" is unrecognized";
+					throw ValueException::FromString(str.str());
+				}
+			}
+			else if (args.at(0)->IsNumber())
+			{
+				code = args.at(0)->ToInt();
+				
+				bool found = false;
+				for (std::map<std::string,int>::const_iterator iter = ProcessBinding::signals.begin();
+					iter != ProcessBinding::signals.end();
+					iter++)
+				{
+					if (iter->second == code)
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					std::ostringstream str;
+					str << "Error, signal number: " << code << " is unrecognized";
+					throw ValueException::FromString(str.str());
+				}
+			}
+			
+			
+			SendSignal(args.at(0)->ToInt());
+		}
+	}
+
+	void Process::_SetOnRead(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setOnRead", "m");
+		this->SetOnRead(args.GetMethod(0));
+	}
+
+	void Process::_SetOnExit(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setOnExit", "m");
+		this->SetOnExit(args.GetMethod(0));
+	}
+
+	void Process::_GetStdin(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(stdinPipe);
+	}
+	
+	void Process::_GetStdout(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(stdoutPipe);
+	}
+	
+	void Process::_GetStderr(const ValueList& args, SharedValue result)
+	{
+		result->SetObject(stderrPipe);
+	}
+	
+	void Process::_IsRunning(const ValueList& args, SharedValue result)
+	{
+		result->SetBool(running);
+	}
+
+	SharedValue Process::Call(const ValueList& args)
+	{
+		AutoBlob output = LaunchSync();
+		return Value::NewObject(output);
+	}
+
+	void Process::_ToString(const ValueList& args, SharedValue result)
+	{
+		result->SetString(ArgumentsToString().c_str());
+	}
+
+	/*static*/
+	SharedKObject Process::GetCurrentEnvironment()
+	{
+		SharedKObject kenv = new StaticBoundObject();
+		std::map<std::string, std::string> env = EnvironmentUtils::GetEnvironment();
+
+		std::map<std::string, std::string>::iterator i = env.begin();
+		while (i != env.end())
+		{
+			kenv->SetString(i->first.c_str(), i->second.c_str());
+			i++;
+		}
+		return kenv;
+	}
+
+	void Process::SetStdin(AutoPipe newStdin)
+	{
+		if (running)
+		{
+			newStdin->Attach(this->GetNativeStdin());
+			this->stdinPipe->Detach(this->GetNativeStdin());
+		}
+		this->stdinPipe = stdinPipe;
+	}
+
+	void Process::SetStdout(AutoPipe newStdout)
+	{
+		if (running)
+		{
+			this->GetNativeStdout()->Attach(newStdout);
+			this->GetNativeStdout()->Detach(this->stdoutPipe);
+		}
+		this->stdoutPipe = newStdout;
+	}
+
+	void Process::SetStderr(AutoPipe newStderr)
+	{
+		if (running)
+		{
+			this->GetNativeStderr()->Attach(newStderr);
+			this->GetNativeStderr()->Detach(this->stderrPipe);
+		}
+		this->stderrPipe = newStderr;
 	}
 }
 

@@ -1,0 +1,15 @@
+<html>
+<body>
+<script>
+	Titanium.UI.currentWindow.addEventListener(
+		function(event) {
+			if (event.type == Titanium.CLOSED) {
+				Titanium.API.saw_closed = true;
+			}
+			if (event.type == Titanium.CLOSE) {
+				Titanium.API.saw_close = true;
+			}
+		});
+</script>
+</body>
+</html>

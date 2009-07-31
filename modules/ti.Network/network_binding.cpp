@@ -14,9 +14,7 @@
 #include "http/http_client_binding.h"
 #include "http/http_server_binding.h"
 #include "proxy/proxy.h"
-
-
-using kroll::DataUtils;
+using kroll::URLUtils;
 
 namespace ti
 {
@@ -140,13 +138,12 @@ namespace ti
 	void NetworkBinding::Shutdown()
 	{
 		PRINTD("NetworkBinding::Shutdown start");
-		bindings.clear();
 		listeners.clear();
 		PRINTD("NetworkBinding::Shutdown finish");
 	}
 	void NetworkBinding::_GetByHost(std::string hostname, SharedValue result)
 	{
-		SharedPtr<HostBinding> binding = new HostBinding(hostname);
+		AutoPtr<HostBinding> binding = new HostBinding(hostname);
 		if (binding->IsInvalid())
 		{
 			throw ValueException::FromString("Could not resolve address");
@@ -158,14 +155,14 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			SharedKObject obj = args.at(0)->ToObject();
-			SharedPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
+			AutoPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{
 				// in this case, they've passed us an IPAddressBinding
 				// object, which we can just retrieve the ipaddress
 				// instance and resolving using it
 				IPAddress addr(b->GetAddress()->toString());
-				SharedPtr<HostBinding> binding = new HostBinding(addr);
+				AutoPtr<HostBinding> binding = new HostBinding(addr);
 				if (binding->IsInvalid())
 				{
 					throw ValueException::FromString("Could not resolve address");
@@ -200,7 +197,7 @@ namespace ti
 	}
 	void NetworkBinding::CreateIPAddress(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
+		AutoPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
 		if (binding->IsInvalid())
 		{
 			throw ValueException::FromString("Invalid address");
@@ -210,12 +207,12 @@ namespace ti
 	void NetworkBinding::CreateTCPSocket(const ValueList& args, SharedValue result)
 	{
 		//TODO: check for args
-		SharedPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
+		AutoPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
 		result->SetObject(tcp);
 	}
 	void NetworkBinding::CreateIRCClient(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<IRCClientBinding> irc = new IRCClientBinding(host);
+		AutoPtr<IRCClientBinding> irc = new IRCClientBinding(host);
 		result->SetObject(irc);
 	}
 	void NetworkBinding::RemoveBinding(void* binding)
@@ -234,21 +231,19 @@ namespace ti
 	}
 	void NetworkBinding::CreateHTTPClient(const ValueList& args, SharedValue result)
 	{
-		HTTPClientBinding* http = new HTTPClientBinding(host,modulePath);
-		SharedKObject obj = http->GetSelf()->ToObject();
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
-		this->bindings.push_back(obj);
-		result->SetObject(obj);
+		SharedKObject http = new HTTPClientBinding(host,modulePath);
+		this->bindings.push_back(http);
+		result->SetObject(http);
 	}
 	void NetworkBinding::CreateHTTPServer(const ValueList& args, SharedValue result)
 	{
-		HTTPServerBinding* http = new HTTPServerBinding(host);
-		SharedKObject obj = http->GetSelf()->ToObject();
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
-		this->bindings.push_back(obj);
-		result->SetObject(obj);
+		SharedKObject http = new HTTPServerBinding(host);
+		this->bindings.push_back(http);
+		result->SetObject(http);
 	}
 	void NetworkBinding::AddConnectivityListener(const ValueList& args, SharedValue result)
 	{
@@ -329,7 +324,7 @@ namespace ti
 		else if (args.at(0)->IsString())
 		{
 			std::string src = args.at(0)->ToString();
-		   	std::string sResult = DataUtils::EncodeURIComponent(src);
+			std::string sResult = URLUtils::EncodeURIComponent(src);
 			result->SetString(sResult);
 		}
 		else if (args.at(0)->IsDouble())
@@ -365,7 +360,7 @@ namespace ti
 		else if (args.at(0)->IsString())
 		{
 			std::string src = args.at(0)->ToString();
-			std::string sResult = DataUtils::DecodeURIComponent(src);
+			std::string sResult = URLUtils::DecodeURIComponent(src);
 			result->SetString(sResult);
 		}
 		else
@@ -380,11 +375,6 @@ namespace ti
 		std::string port = args.at(1)->ToString();
 		std::string username = args.at(2)->ToString();
 		std::string password = args.at(3)->ToString();
-		if(proxy)
-		{
-			delete proxy;
-			proxy = NULL;
-		}
 
 #if defined(OS_WIN32)
 		std::string http_proxy = "http://";
@@ -396,19 +386,18 @@ namespace ti
 			result->SetBool(false);
 		}
 #endif
-
+		
+		// this handles the updating of the reference count for the proxy shared ptr.
 		proxy = new ti::Proxy(hostname, port, username,password);
 		result->SetBool(true);
   	}
 
 	void NetworkBinding::GetProxy(const ValueList& args, SharedValue result)
 	{
-		if(proxy)
-		{
-			result->SetObject(this->proxy);
-		}
+		// setObject will return null if the proxy hasn't been configured, so we
+		// don't need a null check here.
+		result->SetObject(this->proxy);
 	}
-
 
 	Host* NetworkBinding::GetHost()
 	{

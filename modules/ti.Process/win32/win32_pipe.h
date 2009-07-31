@@ -8,30 +8,30 @@
 #define _WIN32_PIPE_H_
 
 #include <kroll/kroll.h>
+#include "../native_pipe.h"
 
 namespace ti
 {
-	class Win32Pipe : public StaticBoundObject
+	class Win32Pipe : public NativePipe
 	{
 	public:
-		Win32Pipe();
-		virtual ~Win32Pipe();
+		Win32Pipe(bool isReader);
+		virtual void CreateHandles();
+		virtual void Close();
+		virtual void CloseNativeRead();
+		virtual void CloseNativeWrite();
+		void DuplicateWrite(HANDLE process, LPHANDLE handle);
+		void DuplicateRead(HANDLE process, LPHANDLE handle);
+		HANDLE GetReadHandle() { return readHandle; }
+		HANDLE GetWriteHandle() { return writeHandle; }
 		
-		HANDLE GetReadHandle() { return read; }
-		HANDLE GetWriteHandle() { return write; }
+	protected:
+		virtual int RawRead(char *buffer, int size);
+		virtual int RawWrite(const char *buffer, int size);
 		
-		int Read(char *buffer, int size);
-		int Write(char *buffer, int length);
-		
-	private:
-		HANDLE read, write;
-		bool closed;
-
-	public:
-		void Write(const ValueList& args, SharedValue result);
-		void Read(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void Close();
+		Poco::Mutex mutex;
+		HANDLE readHandle, writeHandle;
+		Logger *logger;
 	};
 }
 

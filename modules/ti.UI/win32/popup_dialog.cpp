@@ -3,15 +3,11 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "popup_dialog.h"
-#include <windows.h>
-#include <windowsx.h>
-#include <vector>
-
+#include "../ui_module.h"
 #define ID_INPUT_FIELD 101
 
-
-namespace ti {
+namespace ti 
+{
 	std::map<DWORD, Win32PopupDialog*> Win32PopupDialog::popups;
 
 	class DialogTemplate {
@@ -72,14 +68,16 @@ namespace ti {
 	/*static*/
 	void Win32PopupDialog::HandleOKClick(HWND hDlg)
 	{
-		char textEntered[MAX_INPUT_LENGTH];
+		TCHAR textEntered[MAX_INPUT_LENGTH];
 		GetDlgItemText(hDlg, ID_INPUT_FIELD, textEntered, MAX_INPUT_LENGTH);
 
 		Win32PopupDialog* popupDialog = popups[GetCurrentThreadId()];
-		if(popupDialog)
+		if (popupDialog)
 		{
+			std::wstring textEnteredW = textEntered;
+			std::string textEnteredU = WideToUTF8(textEnteredW);
 			popupDialog->inputText.clear();
-			popupDialog->inputText.append(textEntered);
+			popupDialog->inputText.append(textEnteredU);
 			popupDialog->result = IDOK;
 		}
 		else

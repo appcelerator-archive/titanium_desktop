@@ -5,39 +5,34 @@
  */
 #ifndef TI_WIN32_TRAY_ITEM_H_
 #define TI_WIN32_TRAY_ITEM_H_
-
-#include <kroll/base.h>
-#include <kroll/kroll.h>
 #include <windows.h>
 #include <shellapi.h>
-#include "../tray_item.h"
-#include "win32_menu_item_impl.h"
-
 namespace ti
 {
 
 class Win32TrayItem: public TrayItem
 {
-public:
-	Win32TrayItem(SharedString iconPath, SharedKMethod cb);
+	public:
+	Win32TrayItem(std::string& iconURL, SharedKMethod cb);
 	virtual ~Win32TrayItem();
 
-	void SetIcon(SharedString iconPath);
-	void SetMenu(SharedPtr<MenuItem> menu);
-	void SetHint(SharedString hint);
+	void SetIcon(std::string& iconPath);
+	void SetMenu(AutoMenu menu);
+	void SetHint(std::string& hint);
 	void Remove();
+	void ShowTrayMenu();
 
-	static bool InvokeLeftClickCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	static bool InvokeLeftClickCallback(int trayIconID);
-	static bool ShowTrayMenu(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	static bool ShowTrayMenu(int trayIconID);
-private:
+	void HandleRightClick();
+	void HandleLeftClick();
+	UINT GetId();
+
+	static void HandleClickEvent(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+	private:
 	SharedKMethod callback;
-	SharedPtr<Win32MenuItemImpl> trayMenu;
-	HMENU trayMenuHandle;
-
+	HMENU oldNativeMenu;
 	NOTIFYICONDATA* trayIconData;
-	void CreateTrayIcon(std::string &iconPath, std::string &caption);
+	static std::vector<AutoPtr<Win32TrayItem> > trayItems;
 };
 
 }

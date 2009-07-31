@@ -3,10 +3,7 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
-
-#include "webkit_policy_delegate.h"
-#include "win32_user_window.h"
+#include "../ui_module.h"
 #include <shellapi.h>
 #include <string>
 
@@ -115,13 +112,13 @@ namespace ti {
 		return S_OK;
 	}
 
-    HRESULT STDMETHODCALLTYPE Win32WebKitPolicyDelegate::decidePolicyForNewWindowAction(
-        /* [in] */ IWebView *webView,
-        /* [in] */ IPropertyBag *actionInformation,
-        /* [in] */ IWebURLRequest *request,
-        /* [in] */ BSTR frameName,
-        /* [in] */ IWebPolicyDecisionListener *listener)
-    {
+	HRESULT STDMETHODCALLTYPE Win32WebKitPolicyDelegate::decidePolicyForNewWindowAction(
+		/* [in] */ IWebView *webView,
+		/* [in] */ IPropertyBag *actionInformation,
+		/* [in] */ IWebURLRequest *request,
+		/* [in] */ BSTR frameName,
+		/* [in] */ IWebPolicyDecisionListener *listener)
+	{
 		std::wstring frame(frameName);
 		transform(frame.begin(), frame.end(), frame.begin(), tolower);
 
@@ -142,7 +139,7 @@ namespace ti {
 		}
 
 		return S_OK;
-    }
+	}
 
 	HRESULT STDMETHODCALLTYPE Win32WebKitPolicyDelegate::decidePolicyForMIMEType(
 		/* [in] */ IWebView *webView,

@@ -6,11 +6,6 @@
 
 #ifndef TI_WIN32_WEBKIT_FRAME_LOAD_DELEGATE_H_
 #define TI_WIN32_WEBKIT_FRAME_LOAD_DELEGATE_H_
-#include <kroll/kroll.h>
-#include <windows.h>
-
-#include "WebKit.h"
-
 namespace ti {
 
 class Win32UserWindow;
@@ -49,7 +44,7 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE didReceiveTitle(
 		/* [in] */ IWebView *webView,
 		/* [in] */ BSTR title,
-		/* [in] */ IWebFrame *frame) { return S_OK; }
+		/* [in] */ IWebFrame *frame);
 
 	virtual HRESULT STDMETHODCALLTYPE didReceiveIcon(
 		/* [in] */ IWebView *webView,

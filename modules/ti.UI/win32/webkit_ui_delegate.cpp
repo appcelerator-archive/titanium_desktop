@@ -3,16 +3,17 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "webkit_ui_delegate.h"
-
-#include "win32_user_window.h"
-#include "win32_ui_binding.h"
+#include "../ui_module.h"
 #include <comutil.h>
 
 using namespace ti;
 
-Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) : window(window_), ref_count(1) {
-	logger = Logger::Get("UI.Win32WebKitUIDelegate");
+Win32WebKitUIDelegate::Win32WebKitUIDelegate(Win32UserWindow *window_) :
+	window(window_),
+	nativeContextMenu(0),
+	logger(Logger::Get("UI.Win32WebKitUIDelegate")),
+	ref_count(1)
+{
 }
 
 HRESULT STDMETHODCALLTYPE
@@ -20,20 +21,20 @@ Win32WebKitUIDelegate::QueryInterface(REFIID riid, void **ppvObject)
 {
 	*ppvObject = 0;
 
-    if (IsEqualGUID(riid, IID_IUnknown))
-        *ppvObject = static_cast<IWebUIDelegate*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegate))
-        *ppvObject = static_cast<IWebUIDelegate*>(this);
-        /*
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate))
-        *ppvObject = static_cast<IWebUIDelegatePrivate*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate2))
-        *ppvObject = static_cast<IWebUIDelegatePrivate2*>(this);
-    else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate3))
-        *ppvObject = static_cast<IWebUIDelegatePrivate3*>(this);
+	if (IsEqualGUID(riid, IID_IUnknown))
+		*ppvObject = static_cast<IWebUIDelegate*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegate))
+		*ppvObject = static_cast<IWebUIDelegate*>(this);
+		/*
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate))
+		*ppvObject = static_cast<IWebUIDelegatePrivate*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate2))
+		*ppvObject = static_cast<IWebUIDelegatePrivate2*>(this);
+	else if (IsEqualGUID(riid, IID_IWebUIDelegatePrivate3))
+		*ppvObject = static_cast<IWebUIDelegatePrivate3*>(this);
 		*/
-    else
-        return E_NOINTERFACE;
+	else
+		return E_NOINTERFACE;
 
 	return S_OK;
 }
@@ -59,8 +60,23 @@ Win32WebKitUIDelegate::createWebViewWithRequest(
 	/* [in] */ IWebURLRequest *request,
 	/* [retval][out] */ IWebView **newWebView)
 {
-	logger->Debug("createWebViewWithRequest() not implemented");
-	return E_NOTIMPL;
+	
+	WindowConfig *config = new WindowConfig();
+	BSTR burl;
+	request->URL(&burl);
+	std::string url = _bstr_t(burl);
+	
+	if (url.size() > 0)
+	{
+		config->SetURL(url);
+	}
+	
+	AutoUserWindow parent = this->window->GetAutoPtr();
+	AutoUserWindow window = UIBinding::GetInstance()->CreateWindow(config, parent);
+	window->Open();
+	
+	*newWebView = window.cast<Win32UserWindow>()->GetWebView();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE
@@ -136,20 +152,17 @@ Win32WebKitUIDelegate::runJavaScriptAlertPanelWithMessage(
 	/* [in] */ BSTR message)
 {
 	HWND handle = window->GetWindowHandle();
-	std::string title(window->GetTitle());
-	std::string msg;
-
-	if(message)
-	{
+	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring msg;
+	if (message)
 		msg.append(bstr_t(message));
-	}
 
 	//Win32PopupDialog popupDialog(handle);
 	//popupDialog.SetTitle(title);
 	//popupDialog.SetMessage(msg);
 	//int r = popupDialog.Show();
 
-	MessageBox(0,msg.c_str(),title.c_str(),0);
+	MessageBox(0, msg.c_str(), title.c_str(), 0);
 
 	return S_OK;
 }
@@ -161,13 +174,10 @@ Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMessage(
 	/* [retval][out] */ BOOL *result)
 {
 	HWND handle = window->GetWindowHandle();
-	std::string title(window->GetTitle());
-	std::string msg;
-
-	if(message)
-	{
+	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring msg;
+	if (message)
 		msg.append(bstr_t(message));
-	}
 
 	//Win32PopupDialog popupDialog(handle);
 	//popupDialog.SetTitle(title);
@@ -175,8 +185,7 @@ Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMessage(
 	//popupDialog.SetShowCancelButton(true);
 	//int r = popupDialog.Show();
 
-	int r = MessageBox(0,msg.c_str(),title.c_str(),MB_ICONINFORMATION | MB_OKCANCEL);
-
+	int r = MessageBox(0, msg.c_str(), title.c_str(), MB_ICONINFORMATION | MB_OKCANCEL);
 	*result = (r == IDOK);
 
 	return S_OK;
@@ -238,24 +247,42 @@ Win32WebKitUIDelegate::hasCustomMenuImplementation(
 HRESULT STDMETHODCALLTYPE
 Win32WebKitUIDelegate::trackCustomPopupMenu(
 	/* [in] */ IWebView *sender,
-	/* [in] */ OLE_HANDLE menu,
+	/* [in] */ OLE_HANDLE inMenu,
 	/* [in] */ LPPOINT point)
 {
-	HMENU contextMenu = this->window->GetContextMenuHandle();
-	if(! contextMenu)
+	AutoPtr<Win32Menu> menu = this->window->GetContextMenu().cast<Win32Menu>();
+
+	// No window menu, try to use the application menu.
+	if (menu.isNull())
 	{
-		contextMenu = Win32UIBinding::getContextMenuInUseHandle();
-	}
-	if(! contextMenu)
-	{
-		contextMenu = Win32MenuItemImpl::GetDefaultContextMenu();
+		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
+		menu = b->GetContextMenu().cast<Win32Menu>();
 	}
 
-	if(contextMenu)
-	{
-		TrackPopupMenu(contextMenu,
-			TPM_BOTTOMALIGN,
-			point->x, point->y, 0,
+	if (this->nativeContextMenu) {
+		DestroyMenu(this->nativeContextMenu);
+		this->nativeContextMenu = 0;
+	}
+
+	Host* host = Host::GetInstance();
+	if (!menu.isNull()) {
+		this->nativeContextMenu = menu->CreateNative(false);
+
+	} else if (host->IsDebugMode()) {
+		this->nativeContextMenu = CreatePopupMenu();
+		Win32Menu::ApplyNotifyByPositionStyleToNativeMenu(this->nativeContextMenu);
+	}
+
+	if (this->nativeContextMenu) {
+
+		if (host->IsDebugMode()) {
+			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, L"Separator");
+			AppendMenu(this->nativeContextMenu,
+				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, L"Show Inspector");
+		}
+
+		TrackPopupMenu(this->nativeContextMenu,
+			TPM_BOTTOMALIGN, point->x, point->y, 0,
 			this->window->GetWindowHandle(), NULL);
 	}
 
@@ -369,8 +396,8 @@ Win32WebKitUIDelegate::exceededDatabaseQuota(
 {
 	logger->Debug("exceededDatabaseQuota() not implemented");
 
-    static const unsigned long long defaultQuota = 100 * 1024 * 1024;	// 100MB
-    origin->setQuota(defaultQuota);
+	static const unsigned long long defaultQuota = 100 * 1024 * 1024;	// 100MB
+	origin->setQuota(defaultQuota);
 
 	return E_NOTIMPL;
 }

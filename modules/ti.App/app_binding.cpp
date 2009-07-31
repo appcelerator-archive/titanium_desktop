@@ -116,7 +116,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=App.loadProperties,since=0.2) Loads a properties list from a file path
 		 * @tiarg(for=App.loadProperties,type=string,name=path) path to properties file
-		 * @tiresult(for=App.loadProperties,type=list) returns the properties as a list
+		 * @tiresult(for=App.loadProperties,type=Array<App.Properties>) returns the properties as a list
 		 */
 		this->SetMethod("loadProperties", &AppBinding::LoadProperties);
 
@@ -133,13 +133,13 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=App.getSystemProperties,since=0.4) get the system properties defined in tiapp.xml
-		 * @tiresult(for=App.getSystemProperties,type=Properties) returns the system properties object (see Titanium.App.Properties)
+		 * @tiresult(for=App.getSystemProperties,type=App.Properties) returns the system properties object (see Titanium.App.Properties)
 		 */
 		this->SetMethod("getSystemProperties", &AppBinding::GetSystemProperties);
 
 		/**
 		 * @tiapi(method=True,name=App.getIcon,since=0.4) Returns the application icon
-		 * @tiresult(for=App.getIcon,type=string) returns the icon path
+		 * @tiresult(for=App.getIcon,type=String) returns the icon path
 		 */
 		this->SetMethod("getIcon", &AppBinding::GetIcon);
 	}
@@ -185,30 +185,21 @@ namespace ti
 		host->Exit(args.size()==0 ? 0 : args.at(0)->ToInt());
 	}
 
-	static const char *kAppURLPrefix = "Resources";
 	void AppBinding::AppURLToPath(const ValueList& args, SharedValue result)
 	{
-		//FIXME - use FileUtils for this... so we can a common implementation
-		
-		result->SetString("");
-
-		if (args.size() < 0 || !args.at(0)->IsString())
-			return;
-
-//FIXME: take into consider the appid which is in the host position of the URL
-		std::string url = std::string(args.at(0)->ToString());
-		if (url.find("app://") == 0)
+		args.VerifyException("appURLToPath", "s");
+		std::string url = args.GetString(0);
+		if (url.find("app://") != 0 && url.find("://") == std::string::npos)
 		{
-			url = url.substr(6, url.length() - 6);
+			url = std::string("app://") + url;
 		}
-		std::string path = Poco::Environment::get("KR_HOME", "");
-
-		result->SetString(std::string(path + KR_PATH_SEP + kAppURLPrefix + KR_PATH_SEP + url).c_str());
+		std::string path = URLUtils::URLToPath(url);
+		result->SetString(path);
 	}
 
 	void AppBinding::CreateProperties(const ValueList& args, SharedValue result)
 	{
-		SharedPtr<PropertiesBinding> properties = new PropertiesBinding();
+		AutoPtr<PropertiesBinding> properties = new PropertiesBinding();
 		result->SetObject(properties);
 		
 		if (args.size() > 0 && args.at(0)->IsObject())
@@ -250,22 +241,38 @@ namespace ti
 
 	void AppBinding::StdOut(const ValueList& args, SharedValue result)
 	{
-		for (size_t c=0;c<args.size();c++)
+		for (size_t c=0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
-			const char *s = arg->ToString();
-			std::cout << s;
+			if (arg->IsString())
+			{
+				const char *s = arg->ToString();
+				std::cout << s;
+			}
+			else
+			{
+				SharedString ss = arg->DisplayString();
+				std::cout << *ss;
+			}
 		}
 		std::cout << std::endl;
 	}
 
 	void AppBinding::StdErr(const ValueList& args, SharedValue result)
 	{
-		for (size_t c=0;c<args.size();c++)
+		for (size_t c=0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
-			const char *s = arg->ToString();
-			std::cerr << s;
+			if (arg->IsString())
+			{
+				const char *s = arg->ToString();
+				std::cerr << s;
+			}
+			else
+			{
+				SharedString ss = arg->DisplayString();
+				std::cerr << *ss;
+			}
 		}
 		std::cerr << std::endl;
 	}
@@ -275,18 +282,29 @@ namespace ti
 		const SharedApplication app = this->host->GetApplication();
 		std::string stream = app->stream;
 		
+		// environment should always override stream setting
+		if (EnvironmentUtils::Has("TITANIUM_STREAM"))
+		{
+			stream = EnvironmentUtils::Get("TITANIUM_STREAM");
+		}
+		
 		std::string url = "https://api.appcelerator.net/";
-		if (stream == "production")
+		if (stream == "production" || stream == "p")
 		{
 			url+="p/v1";
 		}
-		else if (stream == "dev")
+		else if (stream == "dev" || stream == "d")
 		{
 			url+="d/v1";
 		}
-		else if (stream == "test")
+		else if (stream == "test" || stream == "t")
 		{
 			url+="t/v1";
+		}
+		else if (stream == "local" || stream == "l")
+		{
+			// allow localhost testing
+			url = "http://localhost/v1";
 		}
 		else
 		{
@@ -308,11 +326,9 @@ namespace ti
 	void AppBinding::GetIcon(const ValueList& args, SharedValue result)
 	{
 		const SharedApplication app = this->host->GetApplication();
-		if (app->image.empty())
-		{
-			result->SetNull();
-		}
-		else
+		result->SetNull();	
+
+		if (app && !app->image.empty())
 		{
 			std::string iconPath = app->image;
 			result->SetString(iconPath);

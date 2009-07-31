@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+import os, os.path as p
+Import('build')
+
+if build.is_win32():
+	build_dir = p.join(build.dir, 'objs', 'ti_depends')
+	SConscript('ti_depends/SConscript', build_dir=build_dir, duplicate=0)

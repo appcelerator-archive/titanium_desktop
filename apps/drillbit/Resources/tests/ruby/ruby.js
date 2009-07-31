@@ -112,7 +112,7 @@ describe("Ruby Tests",
 	test_type_proc: function()
 	{
 		var p = test_type_proc();
-		value_of(p).should_be_object();
+		value_of(p).should_be_function();
 		// try invoking the returned proc
 		value_of(p.call()).should_be('hello world');
 	},
@@ -144,6 +144,10 @@ describe("Ruby Tests",
 	{
 		value_of(test_js_type_klist([1,2,3])).should_be_true();
 	},
+	test_js_klist_elements: function()
+	{
+		value_of(test_js_klist_elements([1,2,3])).should_be_true();
+	},
 	test_js_type_dict: function()
 	{
 		value_of(test_js_type_kobject({'a1':'sauce'})).should_be_true();
@@ -168,4 +172,66 @@ describe("Ruby Tests",
 	{
 		value_of(test_js_type_false_bool(false)).should_be_true();
 	},
+	test_rubykobject_respond_to: function()
+	{
+		a = Object();
+		a.sheep = "baaah";
+		a.cow = function() { return 'moo'; };
+		a.phillip = 34;
+		a.undef = undefined;
+		value_of(test_rubykobject_respond_to(a)).should_be("");
+	},
+	test_rubykobject_method_missing_exception: function()
+	{
+		a = Object();
+		a.sheep = "baaah";
+		a.cow = function() { return 'moo'; };
+		a.phillip = 34;
+		a.undef = undefined;
+		value_of(test_rubykobject_method_missing_exception(a)).should_be("");
+	},
+	test_rubyklist_length: function()
+	{
+		a = [];
+		value_of(test_rubyklist_length(a, 0)).should_be("");
+
+		a = [0, 1, 2, 3];
+		value_of(test_rubyklist_length(a, 4)).should_be("");
+
+		a[99] = "blah";
+		value_of(test_rubyklist_length(a, 100)).should_be("");
+	},
+	test_rubyklist_each: function()
+	{
+		a = [];
+		value_of(test_rubyklist_each(a)).should_be("");
+
+		a = [0, 1, 2, 3];
+		value_of(test_rubyklist_each(a, 0, 1, 2, 3)).should_be("");
+
+		a[9] = "blah";
+		value_of(test_rubyklist_each(a, 0, 1, 2, 3, undefined, undefined, undefined, undefined, undefined, "blah")).should_be("");
+	},
+	test_ruby_proc: function()
+	{
+		var procMethod = get_ruby_proc();
+		var x = procMethod("duh");
+		value_of(x).should_be("duhfoo!");
+	},
+	test_ruby_arity: function()
+	{
+		var procMethod = get_ruby_proc_arity(0);
+		value_of(procMethod()).should_be("|");
+
+		procMethod = get_ruby_proc_arity(1);
+		value_of(procMethod("boo")).should_be("boo|");
+		procMethod = get_ruby_proc_arity(2);
+		value_of(procMethod("boo", "foo")).should_be("boo|foo|");
+		procMethod = get_ruby_proc_arity(3);
+		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
+		procMethod = get_ruby_proc_arity(-1);
+		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
+		procMethod = get_ruby_proc_arity(-2);
+		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
+	}
 });

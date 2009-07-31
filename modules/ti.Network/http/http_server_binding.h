@@ -24,9 +24,7 @@ namespace ti
 	public:
 		HTTPServerBinding(Host* host);
 		virtual ~HTTPServerBinding();
-		
-		SharedValue GetSelf() { return self;}
-		
+
 	private:
 		Host* host;
 		SharedKObject global;
@@ -34,7 +32,6 @@ namespace ti
 		std::string ipaddress;
 		int port;
 		Poco::Thread *thread;
-		SharedValue self;
 		Poco::Net::ServerSocket *socket;
 		Poco::Net::HTTPServer *connection;
 		
