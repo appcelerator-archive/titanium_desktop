@@ -144,7 +144,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	if (hr != S_OK)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: ") + error;
+		error = string("Could not decode URL: ") + error;
 		ShowError(error);
 		return false;
 	}
@@ -155,7 +155,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	if (hr != S_OK)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: ") + error;
+		error = string("Could not parse domain: ") + error;
 		ShowError(error);
 		return false;
 	}
@@ -166,7 +166,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	if (!hConnection)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: ") + error;
+		error = string("Could not start connection: ") + error;
 		ShowError(error);
 		return false;
 	}
@@ -187,7 +187,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 		InternetCloseHandle(hConnection);
 
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: ") + error;
+		error = string("Could not open request: ") + error;
 		ShowError(error);
 
 		return false;
@@ -215,7 +215,13 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	if (!success || statusCode != 200)
 	{
 		std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not download file: ") + error;
+		if (success)
+		{
+			std::ostringstream str;
+			str << "Invalid HTTP Status Code (" << statusCode << ")";
+			error = str.str();
+		}
+		error = string("Could not query info: ") + error;
 		ShowError(error);
 		return false;
 	}
