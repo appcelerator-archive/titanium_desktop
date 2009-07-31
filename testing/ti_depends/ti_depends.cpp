@@ -4,6 +4,13 @@
 #include "stdafx.h"
 #include "ti_depends.h"
 #include "main_dialog.h"
+#include "verinfo.h"
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
 
 #define MAX_LOADSTRING 100
 
@@ -16,9 +23,12 @@ HMODULE hModlibeay32;
 HMODULE hModssleay32;
 HMODULE hModzlib;
 HMODULE hModlibxml2;
+BOOL	bUseConsole = TRUE;	// use stdout by default
 
 // Forward declarations of functions included in this code module:
 BOOL				InitInstance(HINSTANCE, int);
+string				GetModuleInfo(HMODULE hMod );
+
 //INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
@@ -26,10 +36,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
                      LPTSTR    lpCmdLine,
                      int       nCmdShow)
 {
-
 	//TODO: add command line switches.
 	UNREFERENCED_PARAMETER(hPrevInstance);
-	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	if ( lpCmdLine != NULL )
+	{
+		// check to see if we have a switch that allows us to use the GUI,
+		// otherwise we want to use the console.
+		CString szCmdLine = lpCmdLine;	// use a CString because it works better with TCHARS
+
+		if ( (szCmdLine.Find(_T("--gui") ) >= 0) || (szCmdLine.Find(_T("--GUI") ) >= 0))
+		{
+			bUseConsole = FALSE;
+		}
+	}
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -40,15 +60,60 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		return FALSE;
 	}
 
+	int nRet = 0;
 
-	CMainDialog dlgMain;
+	if ( bUseConsole ) 
+	{
+		AttachConsole(ATTACH_PARENT_PROCESS);
 
-	dlgMain.hModlibeay32 = hModlibeay32;
-	dlgMain.hModssleay32 = hModssleay32;
-	dlgMain.hModzlib = hModzlib;
-	dlgMain.hModlibxml2 = hModlibxml2;
+		ifstream conin("con"); //input/output to the newly allocated console
+		ofstream conout("con");
+		cout.rdbuf(conout.rdbuf()); //attach standard stream objects to allocated console
+		cerr.rdbuf(conout.rdbuf()); //(if you don't use cerr and clog you can of course leave them out)
+		clog.rdbuf(conout.rdbuf());
+		cin.rdbuf(conin.rdbuf());
 
-	int nRet = (int)dlgMain.DoModal();
+		if ( hModlibeay32 )
+		{
+			string sOut = GetModuleInfo(hModlibeay32);
+			if (!sOut.empty())
+				cout << sOut << endl;
+		}
+
+		if ( hModssleay32 )
+		{
+			string sOut = GetModuleInfo(hModssleay32);
+			if (!sOut.empty())
+				cout << sOut << endl;
+		}
+
+		if ( hModzlib )
+		{
+			string sOut = GetModuleInfo(hModzlib);
+			if (!sOut.empty())
+				cout << sOut << endl;
+		}
+
+		if ( hModlibxml2 )
+		{
+			string sOut = GetModuleInfo(hModlibxml2);
+			if (!sOut.empty())
+				cout << sOut << endl;
+		}
+		FreeConsole();
+	}
+	else 
+	{
+		CMainDialog dlgMain;
+
+		dlgMain.hModlibeay32 = hModlibeay32;
+		dlgMain.hModssleay32 = hModssleay32;
+		dlgMain.hModzlib = hModzlib;
+		dlgMain.hModlibxml2 = hModlibxml2;
+
+		nRet = (int)dlgMain.DoModal();
+
+	}
 
 	return (int) nRet;
 }
@@ -76,6 +141,59 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hModlibxml2 = LoadLibrary(L"libxml2");
 
    return TRUE;
+}
+
+string GetModuleInfo(HMODULE hMod )
+{
+	string sRet;
+	TCHAR   wszTmp[ 512 ] = {0};
+	TCHAR wszBuf[MAX_PATH] = {0};
+
+	if ( hMod )
+	{
+		DWORD dwRet = ::GetModuleFileName(hMod, wszBuf, MAX_PATH);
+		if ( dwRet != 0)
+		{
+			CFileVersionInfo	fvi;
+			if ( fvi.Open(wszBuf))
+			{
+				::wsprintf( wszTmp, 
+					_T( "Loaded DLL '%s'  \t\tversion %d.%d.%d.%d" ),wszBuf, 
+					fvi.GetFileVersionMajor(),
+					fvi.GetFileVersionMinor(),
+					fvi.GetFileVersionBuild(),
+					fvi.GetFileVersionQFE() 
+					);
+
+				size_t wcharLen = wcslen(wszTmp);
+				int charLen = MAX_PATH;
+				char szTmp[MAX_PATH] = {0};
+				if ( WideCharToMultiByte(CP_ACP, 0, wszTmp, (int)wcharLen, szTmp, charLen,NULL, NULL ) )
+				{
+					sRet = szTmp;
+				}
+				fvi.Close();
+			}
+			else 
+			{
+				::wsprintf( wszTmp, _T( "Loaded DLL '%s'  has no version infomation" ),wszBuf);
+
+				size_t wcharLen = wcslen(wszTmp);
+				int charLen = MAX_PATH;
+				char szTmp[MAX_PATH] = {0};
+				if ( WideCharToMultiByte(CP_ACP, 0, wszTmp, (int)wcharLen, szTmp, charLen,NULL, NULL ) )
+				{
+					sRet = szTmp;
+				}
+			}
+		}
+	}
+	else 
+	{
+		sRet = "DLL not loaded";
+	}
+
+	return sRet;
 }
 
 // Message handler for about box.
