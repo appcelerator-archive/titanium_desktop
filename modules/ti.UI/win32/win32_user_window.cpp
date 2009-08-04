@@ -333,6 +333,7 @@ void Win32UserWindow::InitWebKit()
 		prefs->setPlugInsEnabled(true);
 		prefs->setJavaEnabled(true);
 		prefs->setJavaScriptEnabled(true);
+		prefs->setJavaScriptCanOpenWindowsAutomatically(true);
 		prefs->setDOMPasteAllowed(true);
 
 		IWebPreferencesPrivate* privatePrefs = NULL;
