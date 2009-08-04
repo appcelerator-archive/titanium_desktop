@@ -62,7 +62,7 @@ namespace ti
 
 		// our reactor event handlers
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, ReadableNotification>(*this, &TCPSocketBinding::OnRead));
-		//this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
+		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, TimeoutNotification>(*this, &TCPSocketBinding::OnTimeout));
 	}
 	TCPSocketBinding::~TCPSocketBinding()
@@ -160,18 +160,12 @@ namespace ti
 	}
 	void TCPSocketBinding::OnWrite(const Poco::AutoPtr<WritableNotification>& n)
 	{
-		Poco::Mutex::ScopedLock lock(bufferMutex);
-		if (buffer != "")
+		if (this->onWrite.isNull())
 		{
-			int count = this->socket.sendBytes(buffer.c_str(),buffer.length());
-			buffer = "";
-			if (!this->onWrite.isNull())
-			{
-				ValueList args;
-				ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
-			}
+			return;
 		}
-		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
+		ValueList args;
+		ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
 	}
 	void TCPSocketBinding::OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n)
 	{
@@ -192,18 +186,15 @@ namespace ti
 
 		try
 		{
-			Poco::Mutex::ScopedLock lock(bufferMutex);
-			buffer += args.at(0)->ToString();
-			this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
-			// std::string buf = args.at(0)->ToString();
-			// int count = this->socket.sendBytes(buf.c_str(),buf.length());
-			// result->SetInt(count);
-			result->SetBool(true);
+			std::string buf = args.at(0)->ToString();
+			int count = this->socket.sendBytes(buf.c_str(),buf.length());
+			result->SetInt(count);
 		}
 		catch(Poco::Exception &e)
 		{
 			throw ValueException::FromString(eprefix + e.displayText());
 		}
+
 	}
 	void TCPSocketBinding::Close(const ValueList& args, SharedValue result)
 	{
