@@ -55,6 +55,11 @@ namespace ti
 		 */
 		this->SetMethod("onTimeout",&TCPSocketBinding::SetOnTimeout);
 		/**
+		 * @tiapi(method=True,name=Network.TCPSocket.onError,version=0.5) Sets the callback function that will be fired when a socket throws an error
+		 * @tiarg(for=Network.TCPSocket.onError,type=method,name=callback) callback function to be fired when a socket throws an error
+		 */
+		this->SetMethod("onError",&TCPSocketBinding::SetOnError);
+		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.onReadComplete,version=0.2) Sets the callback function that will be fired when no more data is available
 		 * @tiarg(for=Network.TCPSocket.onReadComplete,type=method,name=callback) callback function be fired when no more data is available
 		 */
@@ -64,6 +69,7 @@ namespace ti
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, ReadableNotification>(*this, &TCPSocketBinding::OnRead));
 		//this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, TimeoutNotification>(*this, &TCPSocketBinding::OnTimeout));
+		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, ErrorNotification>(*this, &TCPSocketBinding::OnError));
 	}
 	TCPSocketBinding::~TCPSocketBinding()
 	{
@@ -85,6 +91,10 @@ namespace ti
 	{
 		this->onTimeout = args.at(0)->ToMethod();
 	}
+	void TCPSocketBinding::SetOnError(const ValueList& args, SharedValue result)
+	{
+		this->onError = args.at(0)->ToMethod();
+	}
 	void TCPSocketBinding::SetOnReadComplete(const ValueList& args, SharedValue result)
 	{
 		this->onReadComplete = args.at(0)->ToMethod();
@@ -103,6 +113,7 @@ namespace ti
 		try
 		{
 			SocketAddress a(this->host.c_str(),this->port);
+			this->reactor.setTimeout(Poco::Timespan(1,0)); // 1 second
 			this->socket.connectNB(a);
 			this->thread.start(this->reactor);
 			this->opened = true;
@@ -181,6 +192,15 @@ namespace ti
 		}
 		ValueList args;
 		ti_host->InvokeMethodOnMainThread(this->onTimeout, args, false);
+	}
+	void TCPSocketBinding::OnError(const Poco::AutoPtr<ErrorNotification>& n)
+	{
+		if (this->onError.isNull())
+		{
+			return;
+		}
+		ValueList args;
+		ti_host->InvokeMethodOnMainThread(this->onError, args, false);
 	}
 	void TCPSocketBinding::Write(const ValueList& args, SharedValue result)
 	{

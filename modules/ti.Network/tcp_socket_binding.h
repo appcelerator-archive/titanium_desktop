@@ -53,6 +53,7 @@ namespace ti
 		SharedKMethod onRead;
 		SharedKMethod onWrite;
 		SharedKMethod onTimeout;
+		SharedKMethod onError;
 		SharedKMethod onReadComplete;
 
 		void Connect(const ValueList& args, SharedValue result);
@@ -62,11 +63,13 @@ namespace ti
 		void SetOnRead(const ValueList& args, SharedValue result);
 		void SetOnWrite(const ValueList& args, SharedValue result);
 		void SetOnTimeout(const ValueList& args, SharedValue result);
+		void SetOnError(const ValueList& args, SharedValue result);
 		void SetOnReadComplete(const ValueList& args, SharedValue result);
 
 		void OnRead(const Poco::AutoPtr<ReadableNotification>& n);
 		void OnWrite(const Poco::AutoPtr<WritableNotification>& n);
 		void OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n);
+		void OnError(const Poco::AutoPtr<ErrorNotification>& n);
 	};
 }
 
