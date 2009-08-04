@@ -47,6 +47,8 @@ namespace ti
 		SocketReactor reactor;
 		Thread thread;
 		bool opened;
+		std::string buffer;
+		Poco::Mutex bufferMutex; 
 
 		SharedKMethod onRead;
 		SharedKMethod onWrite;
