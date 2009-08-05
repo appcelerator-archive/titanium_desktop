@@ -130,6 +130,7 @@ namespace ti
 			gtk_container_add(GTK_CONTAINER(window), vbox);
 	
 			this->gtkWindow = GTK_WINDOW(window);
+			this->SetupTransparency();
 
 			gtk_widget_realize(window);
 			this->SetupDecorations();
@@ -141,9 +142,6 @@ namespace ti
 			this->SetTopMost(config->IsTopMost());
 			this->SetCloseable(config->IsCloseable());
 			this->SetResizable(config->IsResizable());
-
-			// TI-62: Transparency currently causes bad crashes
-			//this->SetupTransparency();
 
 			gtk_widget_grab_focus(GTK_WIDGET(webView));
 			webkit_web_view_open(webView, this->config->GetURL().c_str());
@@ -212,19 +210,14 @@ namespace ti
 	
 	void GtkUserWindow::SetupTransparency()
 	{
-		if (this->gtkWindow != NULL)
+		if (this->gtkWindow)
 		{
-			GValue val = {0,};
-			g_value_init(&val, G_TYPE_BOOLEAN);
-			g_value_set_boolean(&val, 1);
-			g_object_set_property(G_OBJECT(this->webView), "transparent", &val);
-	
 			GdkScreen* screen = gtk_widget_get_screen(GTK_WIDGET(this->gtkWindow));
 			GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
 			if (!colormap)
 			{
 				std::cerr << "Could not use ARGB colormap. "
-				          << "True transparency not available." << std::endl;
+					<< "True transparency not available." << std::endl;
 				colormap = gdk_screen_get_rgb_colormap(screen);
 			}
 			gtk_widget_set_colormap(GTK_WIDGET(this->gtkWindow), colormap);
@@ -1001,7 +994,10 @@ namespace ti
 	void GtkUserWindow::SetTransparency(double alpha)
 	{
 		if (this->gtkWindow != NULL)
+		{
 			gtk_window_set_opacity(this->gtkWindow, alpha);
+			webkit_web_view_set_transparent(this->webView, alpha < 1.0);
+		}
 	}
 	
 	bool GtkUserWindow::IsTopMost()
