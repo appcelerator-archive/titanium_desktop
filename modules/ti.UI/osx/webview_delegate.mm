@@ -314,12 +314,8 @@
 		logger->Debug("creating new webView window with url: %s", urlStr.c_str());
 		config->SetURL(urlStr);
 	}
-
-	id resizable = [features objectForKey:@"resizable"];
-	if (resizable != nil)
-	{
-		config->SetResizable([(NSNumber*)resizable boolValue]);
-	}
+	// webkit and firefox both ignore the 'resizable' flag
+	// see WebCore/page/WindowFeatures.cpp line 133
 	id fullscreen = [features objectForKey:@"fullscreen"];
 	if (fullscreen != nil)
 	{
