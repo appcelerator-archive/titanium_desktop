@@ -6,20 +6,22 @@ describe("UI Window Tests",{
 		{
 			var w = window.open.apply(window, args);
 			value_of(w).should_be_object();
-			var timer = 0;
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
+			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function()
 			{
-				clearTimeout(timer);
-				try
+				w.callback = function()
 				{
-					assertFn.apply(self, [w]);
-					w.close();
-					test.passed();
-				}
-				catch (e)
-				{
-					test.failed(e);
-				}
+					clearTimeout(timer);
+					try
+					{
+						assertFn.apply(self, [w]);
+						w.close();
+						test.passed();
+					}
+					catch (e)
+					{
+						test.failed(e);
+					}
+				};	
 			});
 			timer = setTimeout(function(){
 				test.failed("open url timed out");
