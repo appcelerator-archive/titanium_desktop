@@ -54,10 +54,25 @@ Win32WebKitUIDelegate::Release()
 	return new_count;
 }
 
+int PropertyBagGetIntProperty(IPropertyBag *bag, const wchar_t *property)
+{
+	VARIANT value;
+	::VariantInit(&value);
+	if (bag->Read(property, &value, NULL) == S_OK)
+	{
+		if (::VariantChangeType(&value, &value, VARIANT_LOCALBOOL, VT_I4) == S_OK)
+		{
+			return value.intVal;
+		}
+	}
+	return -1;
+}
+
 HRESULT STDMETHODCALLTYPE
 Win32WebKitUIDelegate::createWebViewWithRequest(
 	/* [in] */ IWebView *sender,
 	/* [in] */ IWebURLRequest *request,
+	/* [in] */ IPropertyBag *features,
 	/* [retval][out] */ IWebView **newWebView)
 {
 	
@@ -69,6 +84,32 @@ Win32WebKitUIDelegate::createWebViewWithRequest(
 	if (url.size() > 0)
 	{
 		config->SetURL(url);
+	}
+	
+	int fullscreen = PropertyBagGetIntProperty(features, L"fullscreen");
+	if (fullscreen != -1)
+	{
+		config->SetFullscreen(fullscreen == 1);
+	}
+	int x = PropertyBagGetIntProperty(features, L"x");
+	if (x != -1)
+	{
+		config->SetX(x);
+	}
+	int y = PropertyBagGetIntProperty(features, L"y");
+	if (y != -1)
+	{
+		config->SetY(y);
+	}
+	int width = PropertyBagGetIntProperty(features, L"width");
+	if (width != -1)
+	{
+		config->SetWidth(width);
+	}
+	int height = PropertyBagGetIntProperty(features, L"height");
+	if (height != -1)
+	{
+		config->SetHeight(height);
 	}
 	
 	AutoUserWindow parent = this->window->GetAutoPtr();

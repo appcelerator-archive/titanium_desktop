@@ -111,7 +111,7 @@ describe("UI Window Tests",{
 			value_of(w.Titanium.UI.getCurrentWindow().getHeight()).should_be(100);
 		}, ["a.html","a","height=100"]);
 	},
-	test_open_width_100_as_async: function(test)
+	test_open_width_121_as_async: function(test)
 	{
 		this.async_window_open(test, function(w)
 		{
@@ -119,9 +119,9 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(100);
+			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(121);
 			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_true();
-		}, ["a.html","a","width=100"]);
+		}, ["a.html","a","width=121"]);
 	},
 	// webkit and firefox both ignore the 'resizable' flag
 	// see WebCore/page/WindowFeatures.cpp line 133
@@ -157,10 +157,10 @@ describe("UI Window Tests",{
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
 			value_of(w.Titanium.UI.getCurrentWindow().getY()).should_be(125);
 			value_of(w.Titanium.UI.getCurrentWindow().getX()).should_be(125);
-			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(101);
+			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(121);
 			value_of(w.Titanium.UI.getCurrentWindow().getHeight()).should_be(101);
 			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
-		}, ["a.html","a","left=125,top=125,fullscreen=0,width=101,height=101"]);
+		}, ["a.html","a","left=125,top=125,fullscreen=0,width=121,height=101"]);
 	},
 	test_open_child_dom_as_async: function(test)
 	{
