@@ -172,4 +172,15 @@ describe("UI Window Tests",{
 			value_of(w.result).should_be('Hello');
 		}, ["a.html"]);
 	},
+	test_open_relative_app_url_as_async: function(test)
+	{
+		this.async_window_open(test, function(w)
+		{
+			value_of(w).should_be_object();
+			value_of(w.Titanium).should_be_object();
+			value_of(w.document.title).should_be("Hello");
+			value_of(w.result).should_be('Hello');
+			value_of(w.a_value).should_be(42);
+		}, ["app://rel.html"]);
+	}
 });
