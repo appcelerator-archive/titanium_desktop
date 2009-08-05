@@ -302,21 +302,47 @@
 #pragma mark -
 #pragma mark WebUIDelegate
 
-- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request
+- (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request windowFeatures:(NSDictionary *)features
 {
 	AutoUserWindow newWindow = 0;
 	NSString *url = [[request URL] absoluteString];
+	WindowConfig *config = new WindowConfig();
+	
 	if ([url length] > 0)
 	{
 		std::string urlStr = [url UTF8String];
 		logger->Debug("creating new webView window with url: %s", urlStr.c_str());
-		newWindow = [window userWindow]->CreateWindow(urlStr);
+		config->SetURL(urlStr);
 	}
-	else
+	// webkit and firefox both ignore the 'resizable' flag
+	// see WebCore/page/WindowFeatures.cpp line 133
+	id fullscreen = [features objectForKey:@"fullscreen"];
+	if (fullscreen != nil)
 	{
-		newWindow = [window userWindow]->CreateWindow(new WindowConfig());
+		config->SetFullscreen([(NSNumber*)fullscreen boolValue]);
 	}
-
+	id x = [features objectForKey:@"x"];
+	if (x != nil)
+	{
+		config->SetX([(NSNumber*)x intValue]);
+	}
+	id y = [features objectForKey:@"y"];
+	if (y != nil)
+	{
+		config->SetY([(NSNumber*)y intValue]);
+	}
+	id width = [features objectForKey:@"width"];
+	if (width != nil)
+	{
+		config->SetWidth([(NSNumber*)width intValue]);
+	}
+	id height = [features objectForKey:@"height"];
+	if (height != nil)
+	{
+		config->SetHeight([(NSNumber*)height intValue]);
+	}
+	
+	newWindow = [window userWindow]->CreateWindow(config);
 	AutoPtr<OSXUserWindow> osxWindow = newWindow.cast<OSXUserWindow>();
 	osxWindow->Open();
 	return [osxWindow->GetNative() webView];

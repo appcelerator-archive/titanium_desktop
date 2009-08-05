@@ -6,20 +6,22 @@ describe("UI Window Tests",{
 		{
 			var w = window.open.apply(window, args);
 			value_of(w).should_be_object();
-			var timer = 0;
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
+			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function()
 			{
-				clearTimeout(timer);
-				try
+				w.callback = function()
 				{
-					assertFn.apply(self, [w]);
-					w.close();
-					test.passed();
-				}
-				catch (e)
-				{
-					test.failed(e);
-				}
+					clearTimeout(timer);
+					try
+					{
+						assertFn.apply(self, [w]);
+						w.close();
+						test.passed();
+					}
+					catch (e)
+					{
+						test.failed(e);
+					}
+				};	
 			});
 			timer = setTimeout(function(){
 				test.failed("open url timed out");
@@ -121,50 +123,8 @@ describe("UI Window Tests",{
 			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_true();
 		}, ["a.html","a","width=100"]);
 	},
-	test_open_resizable_1_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_true();
-		}, ["a.html","a","resizable=1"]);
-	},
-	test_open_resizable_0_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_false();
-		}, ["a.html","a","resizable=0"]);
-	},
-	test_open_resizable_true_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_true();
-		}, ["a.html","a","resizable=true"]);
-	},
-	test_open_resizable_false_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isResizable()).should_be_false();
-		}, ["a.html","a","resizable=false"]);
-	},
+	// webkit and firefox both ignore the 'resizable' flag
+	// see WebCore/page/WindowFeatures.cpp line 133
 	test_open_left_as_async: function(test)
 	{
 		this.async_window_open(test, function(w)
@@ -173,8 +133,8 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().getX()).should_be(2);
-		}, ["a.html","a","left=2"]);
+			value_of(w.Titanium.UI.getCurrentWindow().getX()).should_be(125);
+		}, ["a.html","a","left=125"]);
 	},
 	test_open_top_as_async: function(test)
 	{
@@ -184,8 +144,8 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().getY()).should_be(2);
-		}, ["a.html","a","top=2"]);
+			value_of(w.Titanium.UI.getCurrentWindow().getY()).should_be(125);
+		}, ["a.html","a","top=125"]);
 	},
 	test_open_multiple_props_as_async: function(test)
 	{
@@ -195,12 +155,12 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().getY()).should_be(2);
-			value_of(w.Titanium.UI.getCurrentWindow().getX()).should_be(2);
-			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(10);
-			value_of(w.Titanium.UI.getCurrentWindow().getHeight()).should_be(10);
+			value_of(w.Titanium.UI.getCurrentWindow().getY()).should_be(125);
+			value_of(w.Titanium.UI.getCurrentWindow().getX()).should_be(125);
+			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(101);
+			value_of(w.Titanium.UI.getCurrentWindow().getHeight()).should_be(101);
 			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
-		}, ["a.html","a","left=2,top=2,fullscreen=0,width=10,height=10"]);
+		}, ["a.html","a","left=125,top=125,fullscreen=0,width=101,height=101"]);
 	},
 	test_open_child_dom_as_async: function(test)
 	{
