@@ -25,6 +25,8 @@ namespace ti
 		gpointer);
 	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
 		gchar*, gpointer);
+	static void FeaturesChangedCallback(WebKitWebView* view, GParamSpec *pspec,
+		 gpointer data);
 	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
 		WebKitWebView*, gpointer);
 	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
@@ -80,6 +82,9 @@ namespace ti
 			g_signal_connect(
 				G_OBJECT(webView), "title-changed",
 				G_CALLBACK(TitleChangedCallback), this);
+			g_signal_connect(
+				G_OBJECT(webView), "notify::window-features",
+				G_CALLBACK(FeaturesChangedCallback), this);
 			g_signal_connect(
 				G_OBJECT(webView), "create-web-view",
 				G_CALLBACK(CreateWebViewCallback), this);
@@ -549,6 +554,29 @@ namespace ti
 			std::string newTitleString = newTitle;
 			userWindow->SetTitle(newTitleString);
 		}
+	}
+
+	static void FeaturesChangedCallback(WebKitWebView* view, GParamSpec *pspec, gpointer data)
+	{
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		WebKitWebWindowFeatures* features = webkit_web_view_get_window_features(view);
+
+		gint width, height, x, y;
+		g_object_get(features,
+			"width", &width,
+			"height", &height,
+			"x", &x,
+			"y", &y,
+			NULL);
+
+		if (width != -1)
+			userWindow->_SetWidth((double) width);
+		if (height != -1)
+			userWindow->_SetHeight((double) height);
+		if (x != -1)
+			userWindow->_SetX((double) x);
+		if (y != -1)
+			userWindow->_SetY((double) y);
 	}
 
 	static void WindowObjectClearedCallback(

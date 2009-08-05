@@ -35,16 +35,6 @@ namespace ti
 			void UpdateWindowForURL(std::string url);
 			Host* GetHost();
 	
-		private:
-			void ReadChooserDialogObject(
-				SharedKObject o,
-				bool& multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription);
-
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::SharedValue);
 			void _GetDOMWindow(const kroll::ValueList&, kroll::SharedValue);
 			void _InsertAPI(const kroll::ValueList&, kroll::SharedValue);
@@ -67,17 +57,25 @@ namespace ti
 			void _Open(const kroll::ValueList&, kroll::SharedValue);
 			void _Close(const kroll::ValueList&, kroll::SharedValue);
 			void _GetX(const kroll::ValueList&, kroll::SharedValue);
+			double _GetX();
 			void _SetX(const kroll::ValueList&, kroll::SharedValue);
+			void _SetX(double x);
 			void _GetY(const kroll::ValueList&, kroll::SharedValue);
+			double _GetY();
 			void _SetY(const kroll::ValueList&, kroll::SharedValue);
+			void _SetY(double y);
 			void _GetWidth(const kroll::ValueList&, kroll::SharedValue);
+			double _GetWidth();
 			void _SetWidth(const kroll::ValueList&, kroll::SharedValue);
+			void _SetWidth(double width);
 			void _GetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
 			void _SetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
 			void _GetMinWidth(const kroll::ValueList&, kroll::SharedValue);
 			void _SetMinWidth(const kroll::ValueList&, kroll::SharedValue);
 			void _GetHeight(const kroll::ValueList&, kroll::SharedValue);
+			double _GetHeight();
 			void _SetHeight(const kroll::ValueList&, kroll::SharedValue);
+			void _SetHeight(double height);
 			void _GetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
 			void _SetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
 			void _GetMinHeight(const kroll::ValueList&, kroll::SharedValue);
@@ -116,14 +114,7 @@ namespace ti
 			void _IsTopMost(const kroll::ValueList&, kroll::SharedValue);
 			void _SetTopMost(const kroll::ValueList&, kroll::SharedValue);
 			virtual void _ShowInspector(const ValueList& args, SharedValue result);
-	
-			struct Listener {
-				SharedKMethod callback;
-				long id;
-			};
-			std::vector<Listener> listeners;
-	
-		public:
+
 			virtual void OpenFileChooserDialog(
 				SharedKMethod callback,
 				bool multiple,
@@ -242,11 +233,19 @@ namespace ti
 			virtual AutoUserWindow GetParent();
 			virtual void AddChild(AutoUserWindow);
 			virtual void RemoveChild(AutoUserWindow);
+			void ReadChooserDialogObject(
+				SharedKObject o,
+				bool& multiple,
+				std::string& title,
+				std::string& path,
+				std::string& defaultName,
+				std::vector<std::string>& types,
+				std::string& typesDescription);
+			static double Constrain(double, double, double);
+			static void LoadUIJavaScript(JSGlobalContextRef context);
 
 		private:
 			DISALLOW_EVIL_CONSTRUCTORS(UserWindow);
-			static double Constrain(double, double, double);
-			static void LoadUIJavaScript(JSGlobalContextRef context);
 	};
 }
 #endif

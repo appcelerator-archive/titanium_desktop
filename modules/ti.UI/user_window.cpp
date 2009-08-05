@@ -755,13 +755,18 @@ void UserWindow::_Close(const kroll::ValueList& args, kroll::SharedValue result)
 
 void UserWindow::_GetX(const kroll::ValueList& args, kroll::SharedValue result)
 {
+	result->SetDouble(this->_GetX());
+}
+
+double UserWindow::_GetX()
+{
 	if (this->active)
 	{
-		result->SetDouble(this->GetX());
+		return this->GetX();
 	}
 	else
 	{
-		result->SetDouble(this->config->GetX());
+		return this->config->GetX();
 	}
 }
 
@@ -771,23 +776,33 @@ void UserWindow::_SetX(const kroll::ValueList& args, kroll::SharedValue result)
 	if (args.size() > 0 && args.at(0)->IsNumber())
 	{
 		double x = args.at(0)->ToNumber();
-		this->config->SetX(x);
-		if (this->active)
-		{
-			this->SetX(x);
-		}
+		this->_SetX(x);
+	}
+}
+
+void UserWindow::_SetX(double x)
+{
+	this->config->SetX(x);
+	if (this->active)
+	{
+		this->SetX(x);
 	}
 }
 
 void UserWindow::_GetY(const kroll::ValueList& args, kroll::SharedValue result)
 {
+	result->SetDouble(this->_GetY());
+}
+
+double UserWindow::_GetY()
+{
 	if (this->active)
 	{
-		result->SetDouble(this->GetY());
+		return this->GetY();
 	}
 	else
 	{
-		result->SetDouble(this->config->GetY());
+		return this->config->GetY();
 	}
 }
 
@@ -797,23 +812,34 @@ void UserWindow::_SetY(const kroll::ValueList& args, kroll::SharedValue result)
 	if (args.size() > 0 && args.at(0)->IsNumber())
 	{
 		double y = args.at(0)->ToNumber();
-		this->config->SetY(y);
-		if (this->active)
-		{
-			this->SetY(y);
-		}
+		this->_SetY(y);
 	}
+}
+
+void UserWindow::_SetY(double y)
+{
+	this->config->SetY(y);
+	if (this->active)
+	{
+		this->SetY(y);
+	}
+
 }
 
 void UserWindow::_GetWidth(const kroll::ValueList& args, kroll::SharedValue result)
 {
+	result->SetDouble(this->_GetWidth());
+}
+
+double UserWindow::_GetWidth()
+{
 	if (this->active)
 	{
-		result->SetDouble(this->GetWidth());
+		return this->GetWidth();
 	}
 	else
 	{
-		result->SetDouble(this->config->GetWidth());
+		return this->config->GetWidth();
 	}
 }
 
@@ -823,14 +849,19 @@ void UserWindow::_SetWidth(const kroll::ValueList& args, kroll::SharedValue resu
 	if (args.size() > 0 && args.at(0)->IsNumber())
 	{
 		double w = args.at(0)->ToNumber();
-		if (w > 0)
+		this->_SetWidth(w);
+	}
+}
+
+void UserWindow::_SetWidth(double w)
+{
+	if (w > 0)
+	{
+		w = UserWindow::Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
+		this->config->SetWidth(w);
+		if (this->active)
 		{
-			w = UserWindow::Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
-			this->config->SetWidth(w);
-			if (this->active)
-			{
-				this->SetWidth(w);
-			}
+			this->SetWidth(w);
 		}
 	}
 }
@@ -913,13 +944,18 @@ void UserWindow::_SetMaxWidth(const kroll::ValueList& args, kroll::SharedValue r
 
 void UserWindow::_GetHeight(const kroll::ValueList& args, kroll::SharedValue result)
 {
+	result->SetDouble(this->_GetHeight());
+}
+
+double UserWindow::_GetHeight()
+{
 	if (this->active)
 	{
-		result->SetDouble(this->GetHeight());
+		return this->GetHeight();
 	}
 	else
 	{
-		result->SetDouble(this->config->GetHeight());
+		return this->config->GetHeight();
 	}
 }
 
@@ -929,14 +965,19 @@ void UserWindow::_SetHeight(const kroll::ValueList& args, kroll::SharedValue res
 	if (args.size() > 0 && args.at(0)->IsNumber())
 	{
 		double h = args.at(0)->ToNumber();
-		if (h > 0)
+		this->_SetHeight(h);
+	}
+}
+
+void UserWindow::_SetHeight(double h)
+{
+	if (h > 0)
+	{
+		h = UserWindow::Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
+		this->config->SetHeight(h);
+		if (this->active)
 		{
-			h = UserWindow::Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
-			this->config->SetHeight(h);
-			if (this->active)
-			{
-				this->SetHeight(h);
-			}
+			this->SetHeight(h);
 		}
 	}
 }
