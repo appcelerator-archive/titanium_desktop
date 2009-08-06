@@ -12,7 +12,7 @@ namespace ti
 	Win32MenuItem::Win32MenuItem(MenuItemType type) :
 		MenuItem(type),
 		oldSubmenu(0),
-		oldLabel(label)
+		wideOldLabel(UTF8ToWide(label))
 	{
 	}
 
@@ -22,12 +22,14 @@ namespace ti
 
 	void Win32MenuItem::SetLabelImpl(std::string newLabel)
 	{
-		if (!this->IsSeparator()) {
+		if (!this->IsSeparator())
+		{
+			this->wideOldLabel = UTF8ToWide(newLabel);;
 			this->RecreateAllNativeItems();
-			this->oldLabel = newLabel;
 		}
 
-		if (this->nativeItems.size() > 0) {
+		if (this->nativeItems.size() > 0)
+		{
 			Win32UserWindow::RedrawAllMenus();
 		}
 	}
@@ -36,45 +38,53 @@ namespace ti
 	{
 		this->iconPath = newIconPath;
 
-		if (!this->IsCheck() && !this->IsSeparator()) {
+		if (!this->IsCheck() && !this->IsSeparator())
+		{
 			this->RecreateAllNativeItems();
 		}
 
-		if (this->nativeItems.size() > 0) {
+		if (this->nativeItems.size() > 0)
+		{
 			Win32UserWindow::RedrawAllMenus();
 		}
 	}
 
 	void Win32MenuItem::SetStateImpl(bool newState)
 	{
-		if (this->IsCheck()) {
+		if (this->IsCheck())
+		{
 			this->RecreateAllNativeItems();
 		}
 
-		if (this->nativeItems.size() > 0) {
+		if (this->nativeItems.size() > 0)
+		{
 			Win32UserWindow::RedrawAllMenus();
 		}
 	}
 
 	void Win32MenuItem::SetSubmenuImpl(AutoMenu newSubmenu)
 	{
-		if (!this->IsSeparator()) {
+		if (!this->IsSeparator())
+		{
 			this->RecreateAllNativeItems();
 			this->oldSubmenu = newSubmenu.cast<Win32Menu>();
 		}
 
-		if (this->nativeItems.size() > 0) {
+		if (this->nativeItems.size() > 0)
+		{
 			Win32UserWindow::RedrawAllMenus();
 		}
 	}
 
 	void Win32MenuItem::SetEnabledImpl(bool enabled)
 	{
-		if (!this->IsSeparator()) {
+		if (!this->IsSeparator())
+		{
 			this->RecreateAllNativeItems();
 		}
 
-		if (this->nativeItems.size() > 0) {
+		if (this->nativeItems.size() > 0)
+		{
 			Win32UserWindow::RedrawAllMenus();
 		}
 	}
@@ -82,7 +92,8 @@ namespace ti
 	void Win32MenuItem::RecreateAllNativeItems()
 	{
 		std::vector<NativeItemBits*>::iterator i = this->nativeItems.begin();
-		while (i != this->nativeItems.end()) {
+		while (i != this->nativeItems.end())
+		{
 			NativeItemBits* bits = (*i++);
 			this->RecreateMenuItem(bits);
 		}
@@ -105,42 +116,46 @@ namespace ti
 		itemInfo->fMask = MIIM_ID | MIIM_FTYPE | MIIM_DATA;
 
 		HMENU nativeSubmenu = 0;
-		if (this->IsSeparator()) {
+		if (this->IsSeparator())
+		{
 			itemInfo->fType = MFT_SEPARATOR;
-
-		} else {
+		}
+		else
+		{
 			itemInfo->fMask = itemInfo->fMask | MIIM_STRING | MIIM_SUBMENU | MIIM_STATE;
 			itemInfo->fType = MFT_STRING;
 			itemInfo->fState = this->IsEnabled() ? MFS_ENABLED : MFS_DISABLED;
-
-			std::wstring oldLabelW = UTF8ToWide(this->oldLabel);
-			itemInfo->dwTypeData = (LPWSTR) oldLabelW.c_str();
+			itemInfo->dwTypeData = (LPWSTR) this->wideOldLabel.c_str();
 
 			AutoPtr<Win32Menu> wsubmenu = this->submenu.cast<Win32Menu>();
-			if (!wsubmenu.isNull()) {
+			if (!wsubmenu.isNull())
 				nativeSubmenu = wsubmenu->CreateNative(registerNative);
-			}
+
 			itemInfo->hSubMenu = nativeSubmenu;
 
-			if (this->IsCheck()) {
+			if (this->IsCheck())
+			{
 				itemInfo->fState |= this->GetState() ? MFS_CHECKED : MFS_UNCHECKED;
-
-			} else if (!this->iconPath.empty()) {
+			}
+			else if (!this->iconPath.empty())
+			{
 				HBITMAP bitmap = Win32UIBinding::LoadImageAsBitmap(iconPath, 0, 0);
-				if (bitmap) {
+				if (bitmap)
+				{
 					itemInfo->fMask = itemInfo->fMask | MIIM_BITMAP;
 					itemInfo->hbmpItem = bitmap;
 				}
 				else
 				{
 					std::string error = Win32Utils::QuickFormatMessage(GetLastError());
-					printf("%s\n", error.c_str());
-
+					Logger::Get("UI.MenuItem")->Error("Could not load icon (%s): %s",
+						iconPath.c_str(), error.c_str());
 				}
 			}
 		}
 
-		if (registerNative) {
+		if (registerNative)
+		{
 			NativeItemBits* bits = new NativeItemBits;
 			bits->id = itemInfo->wID;
 			bits->parentMenu = nativeParentMenu;
@@ -153,15 +168,16 @@ namespace ti
 	{
 		// Erase the reference to this item in our registry
 		vector<NativeItemBits*>::iterator i = nativeItems.begin();
-		while (i != nativeItems.end()) {
-			if (*i == bits) {
+		while (i != nativeItems.end())
+		{
+			if (*i == bits)
 				i = nativeItems.erase(i);
-			} else {
+			else
 				i++;
-			}
 		}
 
-		if (bits->submenu) {
+		if (bits->submenu)
+		{
 			this->oldSubmenu->DestroyNative(bits->submenu);
 		}
 
@@ -174,11 +190,13 @@ namespace ti
 		HMENU submenu = GetSubMenu(nativeParent, position);
 
 		vector<NativeItemBits*>::iterator i = nativeItems.begin();
-		while (i != nativeItems.end()) {
+		while (i != nativeItems.end())
+		{
 			NativeItemBits* b = *i++;
 
 			if ((b->submenu && submenu) ||
-				(!b->submenu && b->id == nativeId)) {
+				(!b->submenu && b->id == nativeId))
+			{
 				this->DestroyNative(b);
 				return;
 			}
@@ -189,12 +207,12 @@ namespace ti
 	int Win32MenuItem::GetNativeMenuItemPosition(NativeItemBits* bits)
 	{
 		int count = GetMenuItemCount(bits->parentMenu);
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++)
+		{
 
 			if ((bits->submenu && GetSubMenu(bits->parentMenu, i) == bits->submenu) ||
-				(bits->id == GetMenuItemID(bits->parentMenu, i))) {	
+				(bits->id == GetMenuItemID(bits->parentMenu, i)))
 				return i;
-			}
 		}
 
 		throw ValueException::FromString("Could not find native item index in native menu.");
@@ -209,7 +227,8 @@ namespace ti
 		itemInfo.fMask = MIIM_DATA;
 		GetMenuItemInfo(nativeMenu, position, TRUE, &itemInfo);
 
-		if (itemInfo.dwItemData) {
+		if (itemInfo.dwItemData)
+		{
 			MenuItem* item = (MenuItem*) itemInfo.dwItemData;
 			item->HandleClickEvent(NULL);
 			return true;
