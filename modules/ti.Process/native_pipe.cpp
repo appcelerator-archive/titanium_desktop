@@ -148,6 +148,7 @@ namespace ti
 		while (!closed || buffers.size() > 0)
 		{
 			PollForWriteIteration();
+			Poco::Thread::sleep(50);
 		}
 
 		this->CloseNativeWrite();
