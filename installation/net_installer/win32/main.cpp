@@ -11,6 +11,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
