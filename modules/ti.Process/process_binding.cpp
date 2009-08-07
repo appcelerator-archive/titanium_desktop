@@ -25,14 +25,14 @@ namespace ti
 		 * @tiapi     env: {'PATH': '/something'}, stdin: pipeIn, stdout: pipeOut, stderr: pipeErr});
 		 * @tiapi OR
 		 * @tiapi  Titanium.Process.createProcess(args[, environment, stdin, stdout, stderr]);
-		 * @tiresult[Process.Process, process] The process object
+		 * @tiresult[Process.Process] The process object
 		 */
 		SetMethod("createProcess", &ProcessBinding::CreateProcess);
 		
 		/**
 		 * @tiapi(method=True,name=Process.createPipe,since=0.5)
 		 * @tiapi Create an pipe for attach to/from any number of processes.
-		 * @tiresult[Process.Pipe, pipe] A new pipe
+		 * @tiresult[Process.Pipe] A new pipe
 		 */
 		SetMethod("createPipe", &ProcessBinding::CreatePipe);
 

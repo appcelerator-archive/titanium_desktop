@@ -114,8 +114,8 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Database.DB.execute,since=0.4) Executes an SQL query on the database.
-		 * @tiarg(for=Database.DB.execute,name=sql,type=string) the SQL query to execute.
-		 * @tiresult(for=Database.DB.execute,type=object) returns a Database.ResultSet
+		 * @tiarg(for=Database.DB.execute,name=sql,type=String) the SQL query to execute.
+		 * @tiresult(for=Database.DB.execute,type=Database.ResultSet) returns a Database.ResultSet
 		 */
 		this->SetMethod("execute",&DatabaseBinding::Execute);
 		/**

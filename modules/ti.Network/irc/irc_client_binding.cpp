@@ -29,7 +29,7 @@ namespace ti
 		 * @tiarg(for=Network.IRCClient.connect,type=String,name=name) the users full name
 		 * @tiarg(for=Network.IRCClient.connect,type=String,name=user) the users login name
 		 * @tiarg(for=Network.IRCClient.connect,type=String,name=pass) the users password
-		 * @tiarg(for=Network.IRCClient.connect,type=callback,name=callback) a callback function to recieve IRC events.
+		 * @tiarg(for=Network.IRCClient.connect,type=Function,name=callback) a callback function to recieve IRC events.
 		 */
 		this->SetMethod("connect",&IRCClientBinding::Connect);
 		/**
@@ -54,7 +54,7 @@ namespace ti
 		this->SetMethod("getNick",&IRCClientBinding::GetNick);
 		/**
 		 * @tiapi(method=True,name=Network.IRCClient.getUsers,since=0.2) Returns a list of users for the channel
-		 * @tiresult(for=Network.IRCClient.getUsers,type=List) the users of the current channel
+		 * @tiresult(for=Network.IRCClient.getUsers,type=Array<String>) the users of the current channel
 		 */
 		this->SetMethod("getUsers",&IRCClientBinding::GetUsers);
 		/**
@@ -73,7 +73,7 @@ namespace ti
 		 */
 		this->SetMethod("isOp",&IRCClientBinding::IsOp);
 		/**
-		 * @tiapi(method=True,returns=boolean,name=Network.IRCClient.isVoice,since=0.2) Checks whether a user has VOICE status
+		 * @tiapi(method=True,returns=Boolean,name=Network.IRCClient.isVoice,since=0.2) Checks whether a user has VOICE status
 		 * @tiresult(for=Network.IRCClient.isVoice,type=Boolean) true if the user has VOICE status, false if otherwise
 		 */
 		this->SetMethod("isVoice",&IRCClientBinding::IsVoice);

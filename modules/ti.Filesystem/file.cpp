@@ -46,173 +46,173 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.toString,since=0.2) Returns a string representation of the File object
-		 * @tiresult(for=Filesystem.File.toString,type=string) the string representation of the File object
+		 * @tiresult(for=Filesystem.File.toString,type=String) the string representation of the File object
 		 */
 		this->SetMethod("toString",&File::ToString);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isFile,since=0.2) Checks whether a File object references a file
-		 * @tiresult(for=Filesystem.File.isFile,type=boolean) true if the File object references a file, false if otherwise
+		 * @tiresult(for=Filesystem.File.isFile,type=Boolean) true if the File object references a file, false if otherwise
 		 */
 		this->SetMethod("isFile",&File::IsFile);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isDirectory,since=0.2) Checks whether a File object references a directory
-		 * @tiresult(for=Filesystem.File.isDirectory,type=boolean) true if the File object references a directory, false if otherwise
+		 * @tiresult(for=Filesystem.File.isDirectory,type=Boolean) true if the File object references a directory, false if otherwise
 		 */
 		this->SetMethod("isDirectory",&File::IsDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isHidden,since=0.2) Checks whether a file or directory is hidden
-		 * @tiresult(for=Filesystem.File.isHidden,type=boolean) true if the file or directory is hidden, false if otherwise
+		 * @tiresult(for=Filesystem.File.isHidden,type=Boolean) true if the file or directory is hidden, false if otherwise
 		 */
 		this->SetMethod("isHidden",&File::IsHidden);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isSymbolicLink,since=0.2) Checks whether the File object references a symbolic link
-		 * @tiresult(for=Filesystem.File.isSymbolicLink,type=boolean) true if the File object references a symbolic link, false if otherwise
+		 * @tiresult(for=Filesystem.File.isSymbolicLink,type=Boolean) true if the File object references a symbolic link, false if otherwise
 		 */
 		this->SetMethod("isSymbolicLink",&File::IsSymbolicLink);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isExecutable,since=0.2) Checks whether a file is an executable file
-		 * @tiresult(for=Filesystem.File.isExecutable,type=boolean) true if the file is an executable file, false if otherwise
+		 * @tiresult(for=Filesystem.File.isExecutable,type=Boolean) true if the file is an executable file, false if otherwise
 		 */
 		this->SetMethod("isExecutable",&File::IsExecutable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isReadonly,since=0.2) Checks whether a file or directory is read-only
-		 * @tiresult(for=Filesystem.File.isReadonly,type=boolean) true if the file or directory is read-only, false if otherwise
+		 * @tiresult(for=Filesystem.File.isReadonly,type=Boolean) true if the file or directory is read-only, false if otherwise
 		 */
 		this->SetMethod("isReadonly",&File::IsReadonly);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.isWriteable,since=0.2) Checks whether a file or directory is writeable
-		 * @tiresult(for=Filesystem.File.isWriteable,type=boolean) true if the file or directory is writeable, false if otherwise
+		 * @tiresult(for=Filesystem.File.isWriteable,type=Boolean) true if the file or directory is writeable, false if otherwise
 		 */
 		this->SetMethod("isWriteable",&File::IsWriteable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.resolve,since=0.2) Resolves a File object to a file path
 		 * @tiarg(for=Filesystem.File.resolve,name=path) path to resolve
-		 * @tiresult(for=Filesystem.File.resolve,type=object) a File object referencing the path
+		 * @tiresult(for=Filesystem.File.resolve,type=Filesystem.File) a File object referencing the path
 		 */
 		this->SetMethod("resolve",&File::Resolve);
 		/**
-		 * @tiapi(method=True,returns=void,name=Filesystem.File.write,since=0.2) Writes data to the file
-		 * @tiarg(for=Filesystem.File.write,type=string,name=data) data to write
+		 * @tiapi(method=True,name=Filesystem.File.write,since=0.2) Writes data to the file
+		 * @tiarg(for=Filesystem.File.write,type=String|Blob,name=data) data to write
 		 */
 		this->SetMethod("write",&File::Write);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.read,since=0.2) Reads a file and returns the content as a string
-		 * @tiresult(for=Filesystem.File.read,type=string) The contents of the file as a string
+		 * @tiresult(for=Filesystem.File.read,type=Blob) The contents of the file as a blob
 		 */
 		this->SetMethod("read",&File::Read);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.readLine,since=0.2) Returns one line (separated by line ending) from a file
-		 * @tiresult(for=Filesystem.File.readLine,type=string) a string of data from the file
+		 * @tiresult(for=Filesystem.File.readLine,type=String) a string of data from the file
 		 */
 		this->SetMethod("readLine",&File::ReadLine);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.copy,since=0.2) Copies a file to a specified location
-		 * @tiarg(for=Filesystem.File.copy,type=string,name=destination) destination to copy to
-		 * @tiresult(for=Filesystem.File.copy,type=boolean) true if the file was successfully copied, false if otherwise
+		 * @tiarg(for=Filesystem.File.copy,type=String,name=destination) destination to copy to
+		 * @tiresult(for=Filesystem.File.copy,type=Boolean) true if the file was successfully copied, false if otherwise
 		 */
 		this->SetMethod("copy",&File::Copy);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.move,since=0.2) Moves a file to a specified location
-		 * @tiarg(for=Filesystem.File.move,type=string,name=destination) destination to move to
-		 * @tiresult(for=Filesystem.File.move,type=boolean) true if the file was successfully moved, false if otherwise
+		 * @tiarg(for=Filesystem.File.move,type=String,name=destination) destination to move to
+		 * @tiresult(for=Filesystem.File.move,type=Boolean) true if the file was successfully moved, false if otherwise
 		 */
 		this->SetMethod("move",&File::Move);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.rename,since=0.2) Renames a file
-		 * @tiarg(for=Filesystem.File.rename,type=string,name=destination) destination to rename to
-		 * @tiresult(for=Filesystem.File.rename,type=boolean) true if the file was successfully renamed, false if otherwise
+		 * @tiarg(for=Filesystem.File.rename,type=String,name=destination) destination to rename to
+		 * @tiresult(for=Filesystem.File.rename,type=Boolean) true if the file was successfully renamed, false if otherwise
 		 */
 		this->SetMethod("rename",&File::Rename);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.createDirectory,since=0.2) Creates a new directory
-		 * @tiresult(for=Filesystem.File.createDirectory,type=boolean) true if the directory was succesfully created, false if otherwise
+		 * @tiresult(for=Filesystem.File.createDirectory,type=Boolean) true if the directory was succesfully created, false if otherwise
 		 */
 		this->SetMethod("createDirectory",&File::CreateDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.deleteDirectory,since=0.2) Deletes a directory
-		 * @tiresult(for=Filesystem.File.deleteDirectory,type=boolean) true if the directory was successfully deleted, false if otherwise
+		 * @tiresult(for=Filesystem.File.deleteDirectory,type=Boolean) true if the directory was successfully deleted, false if otherwise
 		 */
 		this->SetMethod("deleteDirectory",&File::DeleteDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.deleteFile,since=0.2) Deletes a file
-		 * @tiresult(for=Filesystem.File.deleteFile,type=boolean) true if the file was successfully deleted, false if otherwise
+		 * @tiresult(for=Filesystem.File.deleteFile,type=Boolean) true if the file was successfully deleted, false if otherwise
 		 */
 		this->SetMethod("deleteFile",&File::DeleteFile);
 		/**
-		 * @tiapi(method=True,returns=list,name=Filesystem.File.getDirectoryListing,since=0.2) Returns a list containing the names of items inside a directory.
-		 * @tiresult(for=Filesystem.File.getDirectoryListing,type=list) a list of items inside the directory
+		 * @tiapi(method=True,returns=Array<Filesystem.File>,name=Filesystem.File.getDirectoryListing,since=0.2) Returns a list containing the names of items inside a directory.
+		 * @tiresult(for=Filesystem.File.getDirectoryListing,type=Array<Filesystem.File>) an array of files inside the directory
 		 */
 		this->SetMethod("getDirectoryListing",&File::GetDirectoryListing);
 		/**
-		 * @tiapi(method=True,returns=file,name=Filesystem.File.parent,since=0.2) Returns the parent directory of a file or directory
-		 * @tiresult(for=Filesystem.File.parent,type=object) the parent directory of the file or directory
+		 * @tiapi(method=True,returns=Filesystem.File,name=Filesystem.File.parent,since=0.2) Returns the parent directory of a file or directory
+		 * @tiresult(for=Filesystem.File.parent,type=Filesystem.File) the parent directory of the file or directory
 		 */
 		this->SetMethod("parent",&File::GetParent);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.exists,since=0.2) Checks whether a file or directory exists in the users system
-		 * @tiresult(for=Filesystem.File.exists,type=boolean) returns true if the file or directory exists, false if otherwise
+		 * @tiresult(for=Filesystem.File.exists,type=Boolean) returns true if the file or directory exists, false if otherwise
 		 */
 		this->SetMethod("exists",&File::GetExists);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.createTimestamp,since=0.2) Returns the created timestamp of a file or directory
-		 * @tiresult(for=Filesystem.File.createTimestamp,type=double) the created timestamp of the file or directory
+		 * @tiresult(for=Filesystem.File.createTimestamp,type=Number) the created timestamp of the file or directory
 		 */
 		this->SetMethod("createTimestamp",&File::GetCreateTimestamp);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.modificationTimestamp,since=0.2) Returns the modification timestamp of a file or directory
-		 * @tiresult(for=Filesystem.File.modificationTimestamp,type=double) the modification timestamp of the a file or directory
+		 * @tiresult(for=Filesystem.File.modificationTimestamp,type=Number) the modification timestamp of the a file or directory
 		 */
 		this->SetMethod("modificationTimestamp",&File::GetModificationTimestamp);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.name,since=0.2) Returns the name of a file or directory
-		 * @tiresult(for=Filesystem.File.name,type=string) the name of the file or directory
+		 * @tiresult(for=Filesystem.File.name,type=String) the name of the file or directory
 		 */
 		this->SetMethod("name",&File::GetName);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.extension,since=0.2) Returns the extension of a file
-		 * @tiresult(for=Filesystem.File.extension,type=string) extension of the file
+		 * @tiresult(for=Filesystem.File.extension,type=String) extension of the file
 		 */
 		this->SetMethod("extension",&File::GetExtension);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.nativePath,since=0.2) Returns the full native path of a file or directory
-		 * @tiresult(for=Filesystem.File.nativePath,type=string) full native path of the file or directory
+		 * @tiresult(for=Filesystem.File.nativePath,type=String) full native path of the file or directory
 		 */
 		this->SetMethod("nativePath",&File::GetNativePath);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.size,since=0.2) Returns the size of the file in bytes
-		 * @tiresult(for=Filesystem.File.size,type=double) file size of a file or directory in bytes
+		 * @tiresult(for=Filesystem.File.size,type=Number) file size of a file or directory in bytes
 		 */
 		this->SetMethod("size",&File::GetSize);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.spaceAvailable,since=0.2) Returns the space available on the filesystem
-		 * @tiresult(for=Filesystem.File.spaceAvailable,type=double) the space available on the filesystem
+		 * @tiresult(for=Filesystem.File.spaceAvailable,type=Number) the space available on the filesystem
 		 */
 		this->SetMethod("spaceAvailable",&File::GetSpaceAvailable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.createShortcut,since=0.2) Creates a shortcut to a file or directory
 		 * @tiarg(for=Filesystem.File.createShortcut,name=destination) the destination path where the shortcut will be created
-		 * @tiresult(for=Filesystem.File.createShortcut,type=boolean) returns true if the shortcut was successfully created, false if otherwise
+		 * @tiresult(for=Filesystem.File.createShortcut,type=Boolean) returns true if the shortcut was successfully created, false if otherwise
 		 */
 		this->SetMethod("createShortcut",&File::CreateShortcut);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.setExecutable,since=0.2) Makes the file or directory executable
-		 * @tiresult(for=Filesystem.File.setExecutable,type=boolean) returns true if successful
+		 * @tiresult(for=Filesystem.File.setExecutable,type=Boolean) returns true if successful
 		 */
 		this->SetMethod("setExecutable",&File::SetExecutable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.setReadonly,since=0.2) Makes the file or directory readonly
-		 * @tiresult(for=Filesystem.File.setReadonly,type=boolean) returns true if successful
+		 * @tiresult(for=Filesystem.File.setReadonly,type=Boolean) returns true if successful
 		 */
 		this->SetMethod("setReadonly",&File::SetReadonly);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.setWriteable,since=0.2) Makes the file or directory writeable
-		 * @tiresult(for=Filesystem.File.setWriteable,type=boolean) returns true if successful
+		 * @tiresult(for=Filesystem.File.setWriteable,type=Boolean) returns true if successful
 		 */
 		this->SetMethod("setWriteable",&File::SetWriteable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.unzip,since=0.3) Unzips a zip into a directory directory
-		 * @tiarg(for=Filesystem.File.unzip,type=object,name=destination) destination to unzip to
-		* @tiresult(for=Filesystem.File.unzip,type=boolean) returns true if successful
+		 * @tiarg(for=Filesystem.File.unzip,type=Filesystem.File|String,name=destination) destination to unzip to
+		* @tiresult(for=Filesystem.File.unzip,type=Boolean) returns true if successful
 		 */
 		this->SetMethod("unzip",&File::Unzip);
 

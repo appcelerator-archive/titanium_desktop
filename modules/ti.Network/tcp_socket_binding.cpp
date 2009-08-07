@@ -18,45 +18,45 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.connect,version=0.2) Connects a Socket object to the host specified during creation
-		 * @tiresult(for=Network.TCPSocket.connect,type=boolean) true if the Socket object successfully connects, false if otherwise
+		 * @tiresult(for=Network.TCPSocket.connect,type=Boolean) true if the Socket object successfully connects, false if otherwise
 		 */
 		this->SetMethod("connect",&TCPSocketBinding::Connect);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.close,version=0.2) Close the connection of a Socket object
-		 * @tiresult(for=Network.TCPSocket.close,type=boolean) true if the connection was successfully close, false if otherwise
+		 * @tiresult(for=Network.TCPSocket.close,type=Boolean) true if the connection was successfully close, false if otherwise
 		 */
 		this->SetMethod("close",&TCPSocketBinding::Close);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.write,version=0.2) Writes data to a socket
-		 * @tiarg(for=Network.TCPSocket.write,type=string,name=data) data to write
-		 * @tiresult(for=Network.TCPSocket.write,type=boolean) true if the data was successfully written to the socket, false if otherwise
+		 * @tiarg(for=Network.TCPSocket.write,type=String,name=data) data to write
+		 * @tiresult(for=Network.TCPSocket.write,type=Boolean) true if the data was successfully written to the socket, false if otherwise
 		 */
 		this->SetMethod("write",&TCPSocketBinding::Write);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.isClosed,version=0.2) Checks whether a Socket object is closed
-		 * @tiresult(for=Network.TCPSocket.isClosed,type=boolean) true if a Socket object is closed, false if otherwise
+		 * @tiresult(for=Network.TCPSocket.isClosed,type=Boolean) true if a Socket object is closed, false if otherwise
 		 */
 		this->SetMethod("isClosed",&TCPSocketBinding::IsClosed);
 
 		// event handler callbacks
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.onRead,version=0.2) Sets a callback function that will be fired when data is received from a socket
-		 * @tiarg(for=Network.TCPSocket.onRead,type=method,name=callback) callback function to be fired when data is received from a socket connection
+		 * @tiarg(for=Network.TCPSocket.onRead,type=Function,name=callback) callback function to be fired when data is received from a socket connection
 		 */
 		this->SetMethod("onRead",&TCPSocketBinding::SetOnRead);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.onWrite,version=0.2) Sets a callback function that will be fired when data is written to the socket
-		 * @tiarg(for=Network.TCPSocket.onWrite,type=method,name=callback) callback function to be fired when data is written to the socket
+		 * @tiarg(for=Network.TCPSocket.onWrite,type=Function,name=callback) callback function to be fired when data is written to the socket
 		 */
 		this->SetMethod("onWrite",&TCPSocketBinding::SetOnWrite);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.onTimeout,version=0.2) Sets the callback function that will be fired when a socket times-out
-		 * @tiarg(for=Network.TCPSocket.onTimeout,type=method,name=callback) callback function to be fired when a socket times-out
+		 * @tiarg(for=Network.TCPSocket.onTimeout,type=Function,name=callback) callback function to be fired when a socket times-out
 		 */
 		this->SetMethod("onTimeout",&TCPSocketBinding::SetOnTimeout);
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.onReadComplete,version=0.2) Sets the callback function that will be fired when no more data is available
-		 * @tiarg(for=Network.TCPSocket.onReadComplete,type=method,name=callback) callback function be fired when no more data is available
+		 * @tiarg(for=Network.TCPSocket.onReadComplete,type=Function,name=callback) callback function be fired when no more data is available
 		 */
 		this->SetMethod("onReadComplete",&TCPSocketBinding::SetOnReadComplete);
 

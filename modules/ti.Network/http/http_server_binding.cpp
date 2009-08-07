@@ -29,9 +29,9 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
-		 * @tiarg(for=Network.HTTPServer.bind,name=port,type=integer) port to bind on
-		 * @tiarg(for=Network.HTTPServer.bind,name=address,type=string,optional=True) address to bind to
-		 * @tiarg(for=Network.HTTPServer.bind,name=callback,type=function) callback for server logic (in seperate thread)
+		 * @tiarg(for=Network.HTTPServer.bind,name=port,type=Number) port to bind on
+		 * @tiarg(for=Network.HTTPServer.bind,name=address,type=String,optional=True) address to bind to
+		 * @tiarg(for=Network.HTTPServer.bind,name=callback,type=Method) callback for server logic (in seperate thread)
 		 */
 		SetMethod("bind",&HTTPServerBinding::Bind);
 		
@@ -42,7 +42,7 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServer.isClosed,since=0.3) check to see if this server socket is closed
-		 * @tiresult(for=Network.HTTPServer.isClosed,type=boolean) return whether or not this server socket is closed
+		 * @tiresult(for=Network.HTTPServer.isClosed,type=Boolean) return whether or not this server socket is closed
 		 */
 		SetMethod("isClosed",&HTTPServerBinding::IsClosed);
 	}

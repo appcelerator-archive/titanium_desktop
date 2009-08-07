@@ -57,7 +57,7 @@ namespace ti
 		this->properties_binding = pb;
 		SharedValue properties_value = Value::NewObject(this->properties_binding);
 		/**
-		 * @tiapi(property=True,type=object,name=App.Properties,since=0.2) The application's private Properties object
+		 * @tiapi(property=True,type=App.Properties,name=App.Properties,since=0.2) The application's private Properties object
 		 */
 		this->app_binding->Set("Properties", properties_value);
 		

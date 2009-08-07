@@ -86,8 +86,11 @@ namespace ti
 		this->SetMethod("decodeURIComponent",&NetworkBinding::DecodeURIComponent);
 
 		/**
-		 * @tiapi(method=True,name=Network.addConnectivityListener,since=0.2) Adds a connectivity change listener that fires when the system connects or disconnects from the internet
-		 * @tiarg(for=Network.addConnectivityListener,type=method,name=listener) a callback method to be fired when the system connects or disconnects from the internet
+		 * @tiapi(method=True,name=Network.addConnectivityListener,since=0.2)
+		 * @tiapi Adds a connectivity change listener that fires when the system
+		 * @tiapi connects or disconnects from the internet
+		 * @tiarg(for=Network.addConnectivityListener,type=Function,name=listener) 
+		 * @tiarg A callback method to be fired when the system connects or disconnects from the internet
 		 * @tiresult(for=Network.addConnectivityListener,type=Number) a callback id for the event
 		 */
 		this->SetMethod("addConnectivityListener",&NetworkBinding::AddConnectivityListener);

@@ -15,55 +15,55 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setStatus,since=0.3) set the status of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setStatus,type=string,name=status) the status, i.e "200"
+		 * @tiarg(for=Network.HTTPServerResponse.setStatus,type=String,name=status) the status, i.e "200"
 		 */
 		SetMethod("setStatus",&HttpServerResponse::SetStatus);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setReason,since=0.3) set the reason of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setReason,type=string,name=reason) the reason, i.e "OK"
+		 * @tiarg(for=Network.HTTPServerResponse.setReason,type=String,name=reason) the reason, i.e "OK"
 		 */
 		SetMethod("setReason",&HttpServerResponse::SetReason);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setStatusAndReason,since=0.3) set the status and reason of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=string,name=status) the status, i.e "200"
-		 * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=string,name=reason) the reason, i.e "OK"
+		 * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=String,name=status) the status, i.e "200"
+		 * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=String,name=reason) the reason, i.e "OK"
 		 */
 		SetMethod("setStatusAndReason",&HttpServerResponse::SetStatusAndReason);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setContentType,since=0.3) set the content type of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setContentType,type=string,name=type) the content type, i.e "text/plain"
+		 * @tiarg(for=Network.HTTPServerResponse.setContentType,type=String,name=type) the content type, i.e "text/plain"
 		 */
 		SetMethod("setContentType",&HttpServerResponse::SetContentType);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setContentLength,since=0.3) set the content length of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setContentLength,type=integer,name=length) the content length, i.e 100
+		 * @tiarg(for=Network.HTTPServerResponse.setContentLength,type=Number,name=length) the content length, i.e 100
 		 */
 		SetMethod("setContentLength",&HttpServerResponse::SetContentLength);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.addCookie,since=0.3) add a cookie to this response
-		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=string,name=name) the cookie name
-		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=string,name=value) the cookie value
-		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=integer,name=maxAge,optional=True) the cookie's maximum age
-		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=string,name=domain,optional=True) the cookie's domain
-		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=string,name=path,optional=True) the cookie's path
+		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=name) the cookie name
+		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=value) the cookie value
+		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=Number,name=maxAge,optional=True) the cookie's maximum age
+		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=domain,optional=True) the cookie's domain
+		 * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=path,optional=True) the cookie's path
 		 */
 		SetMethod("addCookie",&HttpServerResponse::AddCookie);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.setHeader,since=0.3) set an HTTP header of this response
-		 * @tiarg(for=Network.HTTPServerResponse.setHeader,type=string,name=name) the header name
-		 * @tiarg(for=Network.HTTPServerResponse.setHeader,type=string,name=value) the header value
+		 * @tiarg(for=Network.HTTPServerResponse.setHeader,type=String,name=name) the header name
+		 * @tiarg(for=Network.HTTPServerResponse.setHeader,type=String,name=value) the header value
 		 */
 		SetMethod("setHeader",&HttpServerResponse::SetHeader);
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.write,since=0.3) write content into this response
-		 * @tiarg(for=Network.HTTPServerResponse.write,type=string,name=data) content to write (can be string or blob content)
+		 * @tiarg(for=Network.HTTPServerResponse.write,type=String,name=data) content to write (can be string or blob content)
 		 */
 		SetMethod("write",&HttpServerResponse::Write);
 	}

@@ -29,7 +29,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	// insert this window's Titanium object into a KObject.
 	this->SetMethod("insertAPI", &UserWindow::_InsertAPI);
 
-	// @tiproperty[integer, UI.UserWindow.CENTERED,since=0.3,deprecated=true] The CENTERED event constant
+	// @tiproperty[Number, UI.UserWindow.CENTERED,since=0.3,deprecated=true] The CENTERED event constant
 	this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
 	/**
@@ -99,7 +99,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setFullScreen", &UserWindow::_SetFullscreen);
 
 	/**
-	 * @tiapi(method=True,returns=integer,name=UI.UserWindow.getID,since=0.2) Returns the id of a window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getID,since=0.2) Returns the id of a window
 	 * @tiresult(for=UI.UserWindow.getID,type=String) the id of the window
 	 */
 	this->SetMethod("getID", &UserWindow::_GetId);
@@ -115,98 +115,98 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("close", &UserWindow::_Close);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getX,since=0.2) Returns a window's horizontal (X-axis) position
-	 * @tiresult(for=UI.UserWindow.getX,type=Double) the horizontal position of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getX,since=0.2) Returns a window's horizontal (X-axis) position
+	 * @tiresult(for=UI.UserWindow.getX,type=Number) the horizontal position of the window
 	 */
 	this->SetMethod("getX", &UserWindow::_GetX);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setX,since=0.2) Sets a window's horizontal (X-axis) position
-	 * @tiarg(for=UI.UserWindow.setX,type=Double,name=x) the horizontal position
+	 * @tiarg(for=UI.UserWindow.setX,type=Number,name=x) the horizontal position
 	 */
 	this->SetMethod("setX", &UserWindow::_SetX);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getY,since=0.2) Returns a window's vertical (Y-axis) position
-	 * @tiresult(for=UI.UserWindow.getY,type=Double) the vertical position of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getY,since=0.2) Returns a window's vertical (Y-axis) position
+	 * @tiresult(for=UI.UserWindow.getY,type=Number) the vertical position of the window
 	 */
 	this->SetMethod("getY", &UserWindow::_GetY);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setY,since=0.2) Sets a window's vertical (Y-axis) position
-	 * @tiarg(for=UI.UserWindow.setY,type=Double,name=y) the vertical position
+	 * @tiarg(for=UI.UserWindow.setY,type=Number,name=y) the vertical position
 	 */
 	this->SetMethod("setY", &UserWindow::_SetY);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getWidth,since=0.2) Returns a window's width
-	 * @tiresult(for=UI.UserWindow.getWidth,type=Double) the width of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getWidth,since=0.2) Returns a window's width
+	 * @tiresult(for=UI.UserWindow.getWidth,type=Number) the width of the window
 	 */
 	this->SetMethod("getWidth", &UserWindow::_GetWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setWidth,since=0.2) Sets a window's width
-	 * @tiarg(for=UI.UserWindow.setWidth,type=Double,name=width) the width of the window
+	 * @tiarg(for=UI.UserWindow.setWidth,type=Number,name=width) the width of the window
 	 */
 	this->SetMethod("setWidth", &UserWindow::_SetWidth);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMaxWidth,since=0.2) Returns a window's max-width
-	 * @tiresult(for=UI.UserWindow.getMaxWidth,type=Double) the max-width value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getMaxWidth,since=0.2) Returns a window's max-width
+	 * @tiresult(for=UI.UserWindow.getMaxWidth,type=Number) the max-width value of the window
 	 */
 	this->SetMethod("getMaxWidth", &UserWindow::_GetMaxWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMaxWidth,since=0.2) Sets a window's max-width
-	 * @tiarg(for=UI.UserWindow.setMaxWidth,type=Double,name=width) the max-width value of the window
+	 * @tiarg(for=UI.UserWindow.setMaxWidth,type=Number,name=width) the max-width value of the window
 	 */
 	this->SetMethod("setMaxWidth", &UserWindow::_SetMaxWidth);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMinWidth,since=0.2) Returns a window's min-width
-	 * @tiresult(for=UI.UserWindow.getMinWidth,type=Double) the min-width value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getMinWidth,since=0.2) Returns a window's min-width
+	 * @tiresult(for=UI.UserWindow.getMinWidth,type=Number) the min-width value of the window
 	 */
 	this->SetMethod("getMinWidth", &UserWindow::_GetMinWidth);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMinWidth,since=0.2) Sets a window's min-width
-	 * @tiarg(for=UI.UserWindow.setMinWidth,type=Double,name=width) the min-width value of the window
+	 * @tiarg(for=UI.UserWindow.setMinWidth,type=Number,name=width) the min-width value of the window
 	 */
 	this->SetMethod("setMinWidth", &UserWindow::_SetMinWidth);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getHeight,since=0.2) Returns a window's height
-	 * @tiresult(for=UI.UserWindow.getHeight,type=Double) the height value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getHeight,since=0.2) Returns a window's height
+	 * @tiresult(for=UI.UserWindow.getHeight,type=Number) the height value of the window
 	 */
 	this->SetMethod("getHeight", &UserWindow::_GetHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setHeight,since=0.2) Sets a window's height
-	 * @tiarg(for=UI.UserWindow.setHeight,type=Double,name=height) the height value of the window
+	 * @tiarg(for=UI.UserWindow.setHeight,type=Number,name=height) the height value of the window
 	 */
 	this->SetMethod("setHeight", &UserWindow::_SetHeight);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMaxHeight,since=0.2) Returns a window's max height
-	 * @tiresult(for=UI.UserWindow.getMaxHeight,type=Double) the max-height value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getMaxHeight,since=0.2) Returns a window's max height
+	 * @tiresult(for=UI.UserWindow.getMaxHeight,type=Number) the max-height value of the window
 	 */
 	this->SetMethod("getMaxHeight", &UserWindow::_GetMaxHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMaxHeight,since=0.2) Sets a window's max-height
-	 * @tiarg(for=UI.UserWindow.setMaxHeight,type=Double,name=height) the max-height value of the window
+	 * @tiarg(for=UI.UserWindow.setMaxHeight,type=Number,name=height) the max-height value of the window
 	 */
 	this->SetMethod("setMaxHeight", &UserWindow::_SetMaxHeight);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getMinHeight,since=0.2) Returns a window's min-height
-	 * @tiresult(for=UI.UserWindow.getMinHeight,type=Double) the min-height value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getMinHeight,since=0.2) Returns a window's min-height
+	 * @tiresult(for=UI.UserWindow.getMinHeight,type=Number) the min-height value of the window
 	 */
 	this->SetMethod("getMinHeight", &UserWindow::_GetMinHeight);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMinHeight,since=0.2) Sets a window's min height
-	 * @tiarg(for=UI.UserWindow.setMinHeight,type=Double,name=height) the min-height value of the window
+	 * @tiarg(for=UI.UserWindow.setMinHeight,type=Number,name=height) the min-height value of the window
 	 */
 	this->SetMethod("setMinHeight", &UserWindow::_SetMinHeight);
 
@@ -319,14 +319,14 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setVisible", &UserWindow::_SetVisible);
 
 	/**
-	 * @tiapi(method=True,returns=Double,name=UI.UserWindow.getTransparency,since=0.2) Returns a window's transparency value
-	 * @tiresult(for=UI.UserWindow.getTransparency,type=Double) the transparency value of the window
+	 * @tiapi(method=True,returns=Number,name=UI.UserWindow.getTransparency,since=0.2) Returns a window's transparency value
+	 * @tiresult(for=UI.UserWindow.getTransparency,type=Number) the transparency value of the window
 	 */
 	this->SetMethod("getTransparency", &UserWindow::_GetTransparency);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setTransparency,since=0.2) Sets a window's transparency value
-	 * @tiarg(for=UI.UserWindow.setTransparency,type=Double,name=url) the transparency value of the window
+	 * @tiarg(for=UI.UserWindow.setTransparency,type=Number,name=url) the transparency value of the window
 	 */
 
 	this->SetMethod("setTransparency", &UserWindow::_SetTransparency);
@@ -442,8 +442,9 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) show the web inspector
-	 * @tiarg(for=UI.UserWindow.showInspector,type=bool,name=console,optional=True) show the interactive console (default false)
+	 * @tiapi(method=True,name=UI.UserWindow.showInspector,since=0.5) 
+	 * Show the web inspector (currently unsupported on Linux)
+	 * @tiarg[Boolean, console, optional=True] Open the console along with the inspector (defaults to false).
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
 	

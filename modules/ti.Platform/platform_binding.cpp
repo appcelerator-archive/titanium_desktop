@@ -91,22 +91,22 @@ namespace ti
 				std::string display_name = nitf.displayName();
 				std::string name = nitf.name();
 				/**
-				 * @tiapi(property=True,type=string,name=Platform.Interface.address,since=0.2) The IP address of the current system
+				 * @tiapi(property=True,type=String,name=Platform.Interface.address,since=0.2) The IP address of the current system
 				 */
 				obj->Set("address",Value::NewString(ip_addr));
 				/**
-				 * @tiapi(property=True,type=string,name=Platform.Interface.name,since=0.2) The interface name of the current system
+				 * @tiapi(property=True,type=String,name=Platform.Interface.name,since=0.2) The interface name of the current system
 				 */
 				obj->Set("name",Value::NewString(name));
 				/**
-				 * @tiapi(property=True,type=string,name=Platform.Interface.displayName,since=0.2) The interface display name of the current system
+				 * @tiapi(property=True,type=String,name=Platform.Interface.displayName,since=0.2) The interface display name of the current system
 				 */
 				obj->Set("displayName",Value::NewString(display_name));
 				interfaces->Append(Value::NewObject(obj));
 			}
 		}
 		/**
-		 * @tiapi(method=True,type=list,name=Platform.interfaces,since=0.3) A list of network interfaces of the current system
+		 * @tiapi(method=True,type=Array<Platform.Interface>,name=Platform.interfaces,since=0.3) A list of network interfaces of the current system
 		 */
 		this->Set("interfaces", Value::NewList(interfaces));
 
@@ -129,11 +129,11 @@ namespace ti
 		std::string machineid = PlatformUtils::GetMachineId();
 		std::string macAddress = PlatformUtils::GetFirstMACAddress();
 
-//NOTE: for now we determine this at compile time -- in the future
-//we might want to actually programmatically determine if running on
-//64-bit processor or not...
+		//NOTE: for now we determine this at compile time -- in the future
+		//we might want to actually programmatically determine if running on
+		//64-bit processor or not...
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.ostype,since=0.3) The architecture type of the system (either 32 bit or 64 bit)
+		 * @tiapi(property=True,type=String,name=Platform.ostype,since=0.3) The architecture type of the system (either 32 bit or 64 bit)
 		 */
 #ifdef OS_32
 		this->Set("ostype", Value::NewString("32bit"));
@@ -141,43 +141,43 @@ namespace ti
 		this->Set("ostype", Value::NewString("64bit"));
 #endif
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.name,since=0.2) The operating system name
+		 * @tiapi(property=True,type=String,name=Platform.name,since=0.2) The operating system name
 		 */
 		this->Set("name", Value::NewString(os_name));
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.version,since=0.2) The operating system version
+		 * @tiapi(property=True,type=String,name=Platform.version,since=0.2) The operating system version
 		 */
 		this->Set("version", Value::NewString(os_version));
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.architecture,since=0.2) The operating system architecture
+		 * @tiapi(property=True,type=String,name=Platform.architecture,since=0.2) The operating system architecture
 		 */
 		this->Set("architecture", Value::NewString(arch));
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.address,since=0.2) The primary IP address of the system
+		 * @tiapi(property=True,type=String,name=Platform.address,since=0.2) The primary IP address of the system
 		 */
 		this->Set("address", Value::NewString(address));
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.id,since=0.2) The unique machine id of the system
+		 * @tiapi(property=True,type=String,name=Platform.id,since=0.2) The unique machine id of the system
 		 */
 		this->Set("id", Value::NewString(machineid));
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.macaddress,since=0.3) The primary MAC address of the system
+		 * @tiapi(property=True,type=String,name=Platform.macaddress,since=0.3) The primary MAC address of the system
 		 */
 		this->Set("macaddress", Value::NewString(macAddress));
 		/**
-		 * @tiapi(property=True,type=integer,name=Platform.processorCount,since=0.2) The number of processors for the machine
+		 * @tiapi(property=True,type=Number,name=Platform.processorCount,since=0.2) The number of processors for the machine
 		 */
 		this->Set("processorCount", Value::NewInt(num_proc));
 		std::string username = kroll::FileUtils::GetUsername();
 		/**
-		 * @tiapi(property=True,type=string,name=Platform.username,since=0.2) The platform's user name
+		 * @tiapi(property=True,type=String,name=Platform.username,since=0.2) The platform's user name
 		 */
 		this->Set("username", Value::NewString(username));
 
 		// UUID create function for the platform
 		/**
-		 * @tiapi(method=True,returns=string,name=Platform.createUUID,since=0.3) Creates a globally unique id
-		 * @tiresult(for=Platform.createUUID,type=string) a uuid
+		 * @tiapi(method=True,returns=String,name=Platform.createUUID,since=0.3) Creates a globally unique id
+		 * @tiresult(for=Platform.createUUID,type=String) a uuid
 		 */
 		this->SetMethod("createUUID",&PlatformBinding::CreateUUID);
 	}
