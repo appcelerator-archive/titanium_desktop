@@ -8,7 +8,20 @@
 #include <iostream>
 #include <Poco/Process.h>
 #define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
+#define TRANSPARENCY_MAJOR_VERSION 2
+#define TRANSPARENCY_MINOR_VERSION 16
+extern const guint gtk_major_version;
+extern const guint gtk_minor_version;
 
+namespace
+{
+	/*static*/
+	inline bool GtkVersionSupportsWebViewTransparency()
+	{
+		return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
+			gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
+	}
+}
 namespace ti
 {
 	static gboolean DestroyCallback(GtkWidget*, GdkEvent*, gpointer);
@@ -215,7 +228,7 @@ namespace ti
 	
 	void GtkUserWindow::SetupTransparency()
 	{
-		if (this->gtkWindow)
+		if (this->gtkWindow && GtkVersionSupportsWebViewTransparency())
 		{
 			GdkScreen* screen = gtk_widget_get_screen(GTK_WIDGET(this->gtkWindow));
 			GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
@@ -1024,7 +1037,8 @@ namespace ti
 		if (this->gtkWindow != NULL)
 		{
 			gtk_window_set_opacity(this->gtkWindow, alpha);
-			webkit_web_view_set_transparent(this->webView, alpha < 1.0);
+			if (GtkVersionSupportsWebViewTransparency())
+				webkit_web_view_set_transparent(this->webView, alpha < 1.0);
 		}
 	}
 	
@@ -1315,5 +1329,6 @@ namespace ti
 		}
 		gtk_widget_show(GetInspectorWindow());
 	}
+
 }
 
