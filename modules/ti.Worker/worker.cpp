@@ -11,16 +11,19 @@ namespace ti
 		KEventObject("Worker"), host(host), global_object(NULL), code(code), stopped(true), context(NULL)
 	{
 		/**
-		 * @tiapi(method=True,name=Worker.Worker.start,since=0.5) start the worker thread
+		 * @tiapi(method=True,name=Worker.Worker.start,since=0.5)
+		 * @tiapi Start the worker thread
 		 */
 		this->SetMethod("start",&Worker::Start);
 		/**
-		 * @tiapi(method=True,name=Worker.Worker.terminate,since=0.5) terminate the worker thread. the thread can be restarted with start.
+		 * @tiapi(method=True,name=Worker.Worker.terminate,since=0.5)
+		 * @tiapi Terminate the worker thread. The thread can be restarted with Worker.start()
 		 */
 		this->SetMethod("terminate",&Worker::Terminate);
 		/**
-		 * @tiapi(method=True,name=Worker.Worker.postMessage,since=0.5) post a message (async) into the worker threads queue to be handled by onmessage
-		 * @tiarg[Any<Object> data] any valid serializable Javascript data type to pass to the child (as in JSON types). 
+		 * @tiapi(method=True,name=Worker.Worker.postMessage,since=0.5)
+		 * @tiapi Post a message (async) into the worker thread's queue to be handled by onmessage
+		 * @tiarg[any, data] Any JSON serializable type to pass to the child.
 		 */
 		this->SetMethod("postMessage",&Worker::PostMessage);
 	}

@@ -23,6 +23,7 @@ namespace ti
 			strncpy(buffer, normalized.c_str(), bufferLength);
 			buffer[bufferLength - 1] = '\0';
 		}
+		printf("normalize: %s\n", buffer);
 	}
 
 	void URLToFileURLCallback(const char* url, char* buffer, int bufferLength)
@@ -51,5 +52,6 @@ namespace ti
 			Logger* log = Logger::Get("UI.URL");
 			log->Error("Could not convert %s to a path", url);
 		}
+		printf("file url: %s\n", buffer);
 	}
 }

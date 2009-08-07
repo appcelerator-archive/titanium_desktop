@@ -77,7 +77,7 @@ namespace ti
 		this->SetMethod("addSeparatorItem", &Menu::_AddSeparatorItem);
 
 		/**
-		* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+		* @tiapi(method=True,name=UI.Menu.addCheckItem,version=1.0)
 		* @tiapi Add a check item to this menu with the given attributes.
 		* @tiarg[String, label] The label for the new item
 		* @tiarg[Function, listener, optional=True] An event listener callback for the item

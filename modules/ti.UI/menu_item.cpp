@@ -90,7 +90,7 @@ namespace ti
 			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addItem,version=1.0)
 			* @tiapi Add an item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -102,7 +102,7 @@ namespace ti
 			this->SetMethod("addItem", &MenuItem::_AddItem);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addSeparatorItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addSeparatorItem,version=1.0)
 			* @tiapi Add a separator item to this menu item's submenu.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -111,7 +111,7 @@ namespace ti
 			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addCheckItem,version=1.0)
 			* @tiapi Add a check item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
