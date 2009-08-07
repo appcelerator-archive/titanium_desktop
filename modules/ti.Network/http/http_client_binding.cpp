@@ -46,9 +46,14 @@ namespace ti
 	
 	HTTPClientBinding::HTTPClientBinding(Host* host, std::string path) :
 		StaticBoundObject("HTTPClient"),
-		host(host),modulePath(path),global(host->GetGlobalObject()),
-		thread(NULL),response(NULL),async(true),filestream(NULL),
-		timeout(30000),shutdown(false)
+		host(host),
+		modulePath(path),
+		global(host->GetGlobalObject()),
+		thread(0),
+		async(true),
+		filestream(NULL),
+		timeout(30000),
+		shutdown(false)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.abort,since=0.3) Aborts an in progress connection
@@ -187,6 +192,7 @@ namespace ti
 	}
 	HTTPClientBinding::~HTTPClientBinding()
 	{
+		printf("deleting client %lx\n", (long int) this);
 		this->shutdown = true;
 		if (this->thread!=NULL)
 		{
@@ -206,326 +212,329 @@ namespace ti
 			this->filestream = NULL;
 		}
 	}
-	void HTTPClientBinding::Run (void* p)
+	void HTTPClientBinding::Run(void* p)
 	{
+		// We need this binding to stay alive at least until we have
+		// finished this thread.
+		HTTPClientBinding *binding = reinterpret_cast<HTTPClientBinding*>(p);
+		binding->duplicate();
 #ifdef OS_OSX
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 #endif
-		HTTPClientBinding *binding = reinterpret_cast<HTTPClientBinding*>(p);
 
 		PRINTD("HTTPClientBinding:: starting => " << binding->url);
-		try{
-		
-		Poco::Net::HTTPResponse res;
-		std::ostringstream ostr;
-		int max_redirects = 5;
-		int status;
-		std::string url = binding->url;
-
-		bool deletefile = false;
-		for (int x=0;x<max_redirects;x++)
+		try
 		{
-			Poco::URI uri(url);
-			std::string path(uri.getPathAndQuery());
-			if (path.empty()) path = "/";
-			binding->Set("connected",Value::NewBool(true));
-			
-			const std::string& scheme = uri.getScheme();
-			SharedPtr<Poco::Net::HTTPClientSession> session;
-			
-			if (scheme=="https")
+			Poco::Net::HTTPResponse& response = binding->response;
+			std::ostringstream ostr;
+			int max_redirects = 5;
+			int status;
+			std::string url = binding->url;
+
+			bool deletefile = false;
+			for (int x=0;x<max_redirects;x++)
 			{
-				if (HTTPClientBinding::initialized==false)
+				Poco::URI uri(url);
+				std::string path(uri.getPathAndQuery());
+				if (path.empty()) 
+					path = "/";
+				binding->Set("connected",Value::NewBool(true));
+				
+				const std::string& scheme = uri.getScheme();
+				SharedPtr<Poco::Net::HTTPClientSession> session;
+				
+				if (scheme=="https")
 				{
-					HTTPClientBinding::initialized = true;
-					SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert = new Poco::Net::AcceptCertificateHandler(false); 
-					std::string rootpem = FileUtils::Join(binding->modulePath.c_str(),"rootcert.pem",NULL);
-					Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE,"", "", rootpem, Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-					Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
+					if (HTTPClientBinding::initialized==false)
+					{
+						HTTPClientBinding::initialized = true;
+						SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert = new Poco::Net::AcceptCertificateHandler(false); 
+						std::string rootpem = FileUtils::Join(binding->modulePath.c_str(),"rootcert.pem",NULL);
+						Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE,"", "", rootpem, Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+						Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
+					}
+					session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
 				}
-				session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
-			}
-			else if (scheme=="http")
-			{
-				session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-			}
-			else
-			{
-				//FIXME - we need to notify of unsupported error here
-			}
-			
-			std::string uriString = uri.toString();
-			SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
-			if (!proxy.isNull())
-			{
-				session->setProxyHost(proxy->info->getHost());
-				session->setProxyPort(proxy->info->getPort());
-			}
-
-			// set the timeout for the request
-			Poco::Timespan to((long)binding->timeout,0L);
-			session->setTimeout(to);
-
-			std::string method = binding->method;
-			if (method.empty())
-			{
-				method = Poco::Net::HTTPRequest::HTTP_GET;
-			}
-
-			if (!binding->dirstream.empty())
-			{
-				method = Poco::Net::HTTPRequest::HTTP_POST;
-				binding->headers["Content-Type"]="application/zip";
-			}
-
-			Poco::Net::HTTPRequest req(method, path, Poco::Net::HTTPMessage::HTTP_1_1);
-			const char* ua = binding->global->Get("userAgent")->IsString() ? binding->global->Get("userAgent")->ToString() : NULL;
-			PRINTD("HTTPClientBinding:: userAgent = " << ua);
-			if (ua)
-			{
-				req.set("User-Agent",ua);
-			}
-			else
-			{
-				// crap, this means we don't have one for some reason -- just fake it
-				req.set("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/528.7+ (KHTML, like Gecko) "PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
-			}
-			//FIXME: implement cookies
-			//FIXME: implement username/pass
-			//FIXME: use proxy settings of system
-
-			// set the headers
-			if (binding->headers.size()>0)
-			{
-				std::map<std::string,std::string>::iterator i = binding->headers.begin();
-				while(i!=binding->headers.end())
+				else if (scheme=="http")
 				{
-					req.set((*i).first, (*i).second);
-					i++;
+					session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
 				}
-			}
-
-			std::string data;
-			int content_len = 0;
-
-			if (!binding->dirstream.empty())
-			{
-				std::string tmpdir = FileUtils::GetTempDirectory();
-				Poco::File tmpPath (tmpdir);
-				if (!tmpPath.exists()) {
-					tmpPath.createDirectories();
+				else
+				{
+					//FIXME - we need to notify of unsupported error here
 				}
-				std::ostringstream tmpfilename;
-				tmpfilename << "ti";
-				tmpfilename << rand();
-				tmpfilename << ".zip";
-				std::string fn(FileUtils::Join(tmpdir.c_str(),tmpfilename.str().c_str(),NULL));
-				std::ofstream outfile(fn.c_str(), std::ios::binary|std::ios::out|std::ios::trunc);
-				Poco::Zip::Compress compressor(outfile,true);
-				Poco::Path path(binding->dirstream);
-				compressor.addRecursive(path);
-				compressor.close();
-				outfile.close();
-				deletefile = true;
-				binding->filename = std::string(fn.c_str());
-				binding->filestream = new Poco::FileInputStream(binding->filename);
-			}
+				
+				std::string uriString = uri.toString();
+				SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
+				if (!proxy.isNull())
+				{
+					session->setProxyHost(proxy->info->getHost());
+					session->setProxyPort(proxy->info->getPort());
+				}
 
-			if (!binding->datastream.empty())
-			{
-				data = binding->datastream;
-				content_len = data.length();
-			}
+				// set the timeout for the request
+				Poco::Timespan to((long)binding->timeout,0L);
+				session->setTimeout(to);
 
-			// determine the content length
+				std::string method = binding->method;
+				if (method.empty())
+				{
+					method = Poco::Net::HTTPRequest::HTTP_GET;
+				}
+
+				if (!binding->dirstream.empty())
+				{
+					method = Poco::Net::HTTPRequest::HTTP_POST;
+					binding->headers["Content-Type"]="application/zip";
+				}
+
+				Poco::Net::HTTPRequest req(method, path, Poco::Net::HTTPMessage::HTTP_1_1);
+				const char* ua = binding->global->Get("userAgent")->IsString() ? binding->global->Get("userAgent")->ToString() : NULL;
+				PRINTD("HTTPClientBinding:: userAgent = " << ua);
+				if (ua)
+				{
+					req.set("User-Agent",ua);
+				}
+				else
+				{
+					// crap, this means we don't have one for some reason -- just fake it
+					req.set("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/528.7+ (KHTML, like Gecko) "PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
+				}
+				//FIXME: implement cookies
+				//FIXME: implement username/pass
+				//FIXME: use proxy settings of system
+
+				// set the headers
+				if (binding->headers.size()>0)
+				{
+					std::map<std::string,std::string>::iterator i = binding->headers.begin();
+					while(i!=binding->headers.end())
+					{
+						req.set((*i).first, (*i).second);
+						i++;
+					}
+				}
+
+				std::string data;
+				int content_len = 0;
+
+				if (!binding->dirstream.empty())
+				{
+					std::string tmpdir = FileUtils::GetTempDirectory();
+					Poco::File tmpPath (tmpdir);
+					if (!tmpPath.exists()) {
+						tmpPath.createDirectories();
+					}
+					std::ostringstream tmpfilename;
+					tmpfilename << "ti";
+					tmpfilename << rand();
+					tmpfilename << ".zip";
+					std::string fn(FileUtils::Join(tmpdir.c_str(),tmpfilename.str().c_str(),NULL));
+					std::ofstream outfile(fn.c_str(), std::ios::binary|std::ios::out|std::ios::trunc);
+					Poco::Zip::Compress compressor(outfile,true);
+					Poco::Path path(binding->dirstream);
+					compressor.addRecursive(path);
+					compressor.close();
+					outfile.close();
+					deletefile = true;
+					binding->filename = std::string(fn.c_str());
+					binding->filestream = new Poco::FileInputStream(binding->filename);
+				}
+
+				if (!binding->datastream.empty())
+				{
+					data = binding->datastream;
+					content_len = data.length();
+				}
+
+				// determine the content length
+				if (!data.empty())
+				{
+					std::ostringstream l(std::stringstream::binary|std::stringstream::out);
+					l << content_len;
+					req.set("Content-Length",l.str());
+				}
+				else if (!binding->filename.empty())
+				{
+					Poco::File f(binding->filename);
+					std::ostringstream l;
+					l << f.getSize();
+					const char *cl = l.str().c_str();
+					content_len = atoi(cl);
+					req.set("Content-Length", l.str());
+				}
+
+				// send and stream output
+				std::ostream& out = session->sendRequest(req);
+
+				// write out the data
+				if (!data.empty())
+				{
+					out << data;
+				}
+				else if (binding->filestream)
+				{
+					// SharedKMethod sender;
+					// SharedValue sv = binding->Get("onsendstream");
+					// if (sv->IsMethod())
+					// {
+					// 	sender = sv->ToMethod()->Get("apply")->ToMethod();
+					// }
+					std::streamsize bufferSize = 8096;
+					Poco::Buffer<char> buffer(bufferSize);
+					std::streamsize len = 0;
+					std::istream& istr = (*binding->filestream);
+					istr.read(buffer.begin(), bufferSize);
+					std::streamsize n = istr.gcount();
+					int remaining = content_len;
+					while (n > 0)
+					{
+						len += n;
+						remaining -= n;
+						out.write(buffer.begin(), n);
+// 						if (sender.get())
+// 						{
+// 							try
+// 							{
+// #ifdef DEBUG
+// 								std::cout << "ONSENDSTREAM = >> " << len <<" of " << content_len << std::endl;
+// #endif
+// 								ValueList args;
+// 								SharedKList list = new StaticBoundList();
+//
+// 								args.push_back(binding->self); // reference to us
+// 								args.push_back(Value::NewList(list));
+//
+// 								list->Append(Value::NewInt(len)); // bytes sent
+// 								list->Append(Value::NewInt(content_len)); // total size
+// 								list->Append(Value::NewInt(remaining)); // remaining
+// 								binding->host->InvokeMethodOnMainThread(sender,args,true);
+// 							}
+// 							catch(std::exception &e)
+// 							{
+// 								std::cerr << "Caught exception dispatching HTTP callback on transmit, Error: " << e.what() << std::endl;
+// 							}
+// 							catch(...)
+// 							{
+// 								std::cerr << "Caught unknown exception dispatching HTTP callback on transmit" << std::endl;
+// 							}
+//						}
+						if (istr)
+						{
+							istr.read(buffer.begin(), bufferSize);
+							n = istr.gcount();
+						}
+						else n = 0;
+					}
+					binding->filestream->close();
+				}
+
+				std::istream& rs = session->receiveResponse(response);
+				int total = response.getContentLength();
+				status = response.getStatus();
+				PRINTD("HTTPClientBinding:: response length received = " << total << " - " << status << " " << response.getReason());
+				binding->Set("status",Value::NewInt(status));
+				binding->Set("statusText",Value::NewString(response.getReason().c_str()));
+
+				if (status == 301 || status == 302)
+				{
+					if (!response.has("Location"))
+					{
+						break;
+					}
+					url = response.get("Location");
+					PRINTD("redirect to " << url);
+					continue;
+				}
+				SharedValue totalValue = Value::NewInt(total);
+				binding->ChangeState(2); // headers received
+				binding->ChangeState(3); // loading
+
+				int count = 0;
+				char buf[8096];
+
+				SharedKMethod streamer;
+				SharedValue sv = binding->Get("ondatastream");
+				if (sv->IsMethod())
+				{
+					streamer = sv->ToMethod()->Get("apply")->ToMethod();
+				}
+
+				while(!rs.eof() && binding->Get("connected")->ToBool())
+				{
+					try
+					{
+						rs.read((char*)&buf,8095);
+						int c = static_cast<int>(rs.gcount());
+						if (c > 0)
+						{
+							buf[c]='\0';
+							count+=c;
+							if (streamer.get())
+							{
+								ValueList args;
+
+								binding->duplicate();
+								args.push_back(Value::NewObject(binding));
+
+								SharedKList list = new StaticBoundList();
+								list->Append(Value::NewInt(count)); // total count
+								list->Append(totalValue); // total size
+								list->Append(Value::NewObject(new Blob(buf,c))); // buffer
+								list->Append(Value::NewInt(c)); // buffer length
+								args.push_back(Value::NewList(list));
+
+								binding->host->InvokeMethodOnMainThread(streamer,args,binding->shutdown || !binding->async ? false : true);
+							}
+							else
+							{
+								ostr << buf;
+							}
+						}
+					}
+					catch(std::exception &e)
+					{
+						Logger* logger = Logger::Get("Network.HTTPClient");
+						logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.what());
+					}
+					catch(...)
+					{
+						Logger* logger = Logger::Get("Network.HTTPClient");
+						logger->Error("Caught unknown exception dispatching HTTP callback");
+					}
+					if (rs.eof()) break;
+				}
+				break;
+			}
+			std::string data = ostr.str();
 			if (!data.empty())
 			{
-				std::ostringstream l(std::stringstream::binary|std::stringstream::out);
-				l << content_len;
-				req.set("Content-Length",l.str());
+#ifdef DEBUG
+				if (status > 200)
+				{
+					PRINTD("RECEIVED = " << data);
+				}
+#endif
+				binding->Set("responseText",Value::NewString(data.c_str()));
 			}
-			else if (!binding->filename.empty())
+
+			if (deletefile)
 			{
 				Poco::File f(binding->filename);
-				std::ostringstream l;
-				l << f.getSize();
-				const char *cl = l.str().c_str();
-				content_len = atoi(cl);
-				req.set("Content-Length", l.str());
+				f.remove();
 			}
-
-			// send and stream output
-			std::ostream& out = session->sendRequest(req);
-
-			// write out the data
-			if (!data.empty())
-			{
-				out << data;
-			}
-			else if (binding->filestream)
-			{
-				// SharedKMethod sender;
-				// SharedValue sv = binding->Get("onsendstream");
-				// if (sv->IsMethod())
-				// {
-				// 	sender = sv->ToMethod()->Get("apply")->ToMethod();
-				// }
-				std::streamsize bufferSize = 8096;
-				Poco::Buffer<char> buffer(bufferSize);
-				std::streamsize len = 0;
-				std::istream& istr = (*binding->filestream);
-				istr.read(buffer.begin(), bufferSize);
-				std::streamsize n = istr.gcount();
-				int remaining = content_len;
-				while (n > 0)
-				{
-					len += n;
-					remaining -= n;
-					out.write(buffer.begin(), n);
-// 					if (sender.get())
-// 					{
-// 						try
-// 						{
-// #ifdef DEBUG
-// 							std::cout << "ONSENDSTREAM = >> " << len <<" of " << content_len << std::endl;
-// #endif
-// 							ValueList args;
-// 							SharedKList list = new StaticBoundList();
-//
-// 							args.push_back(binding->self); // reference to us
-// 							args.push_back(Value::NewList(list));
-//
-// 							list->Append(Value::NewInt(len)); // bytes sent
-// 							list->Append(Value::NewInt(content_len)); // total size
-// 							list->Append(Value::NewInt(remaining)); // remaining
-// 							binding->host->InvokeMethodOnMainThread(sender,args,true);
-// 						}
-// 						catch(std::exception &e)
-// 						{
-// 							std::cerr << "Caught exception dispatching HTTP callback on transmit, Error: " << e.what() << std::endl;
-// 						}
-// 						catch(...)
-// 						{
-// 							std::cerr << "Caught unknown exception dispatching HTTP callback on transmit" << std::endl;
-// 						}
-//					}
-					if (istr)
-					{
-						istr.read(buffer.begin(), bufferSize);
-						n = istr.gcount();
-					}
-					else n = 0;
-				}
-				binding->filestream->close();
-			}
-
-			std::istream& rs = session->receiveResponse(res);
-			int total = res.getContentLength();
-			status = res.getStatus();
-			PRINTD("HTTPClientBinding:: response length received = " << total << " - " << status << " " << res.getReason());
-			binding->Set("status",Value::NewInt(status));
-			binding->Set("statusText",Value::NewString(res.getReason().c_str()));
-
-			if (status == 301 || status == 302)
-			{
-				if (!res.has("Location"))
-				{
-					break;
-				}
-				url = res.get("Location");
-				PRINTD("redirect to " << url);
-				continue;
-			}
-			SharedValue totalValue = Value::NewInt(total);
-			binding->response = &res;
-			binding->ChangeState(2); // headers received
-			binding->ChangeState(3); // loading
-
-			int count = 0;
-			char buf[8096];
-
-			SharedKMethod streamer;
-			SharedValue sv = binding->Get("ondatastream");
-			if (sv->IsMethod())
-			{
-				streamer = sv->ToMethod()->Get("apply")->ToMethod();
-			}
-
-			while(!rs.eof() && binding->Get("connected")->ToBool())
-			{
-				try
-				{
-					rs.read((char*)&buf,8095);
-					int c = static_cast<int>(rs.gcount());
-					if (c > 0)
-					{
-						buf[c]='\0';
-						count+=c;
-						if (streamer.get())
-						{
-							ValueList args;
-
-							binding->duplicate();
-							args.push_back(Value::NewObject(binding));
-
-							SharedKList list = new StaticBoundList();
-							list->Append(Value::NewInt(count)); // total count
-							list->Append(totalValue); // total size
-							list->Append(Value::NewObject(new Blob(buf,c))); // buffer
-							list->Append(Value::NewInt(c)); // buffer length
-							args.push_back(Value::NewList(list));
-
-							binding->host->InvokeMethodOnMainThread(streamer,args,binding->shutdown || !binding->async ? false : true);
-						}
-						else
-						{
-							ostr << buf;
-						}
-					}
-				}
-				catch(std::exception &e)
-				{
-					Logger* logger = Logger::Get("Network.HTTPClient");
-					logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.what());
-				}
-				catch(...)
-				{
-					Logger* logger = Logger::Get("Network.HTTPClient");
-					logger->Error("Caught unknown exception dispatching HTTP callback");
-				}
-				if (rs.eof()) break;
-			}
-			break;
 		}
-		std::string data = ostr.str();
-		if (!data.empty())
+		catch(...)
 		{
-#ifdef DEBUG
-			if (status > 200)
-			{
-				PRINTD("RECEIVED = " << data);
-			}
-#endif
-			binding->Set("responseText",Value::NewString(data.c_str()));
 		}
-
-		if (deletefile)
-		{
-			Poco::File f(binding->filename);
-			f.remove();
-		}
-}
-catch(...)
-{
-}
 		binding->shutdown = true;
 		binding->Set("connected",Value::NewBool(false));
 		binding->ChangeState(4); // closed
-		binding->response = NULL; // must be done after change state
 //		NetworkBinding::RemoveBinding(binding);
 #ifdef OS_OSX
 		[pool release];
 #endif
+		binding->release();
 	}
 	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
 	{
@@ -703,21 +712,15 @@ catch(...)
 	}
 	void HTTPClientBinding::GetResponseHeader(const ValueList& args, SharedValue result)
 	{
-		if (this->response!=NULL)
+		std::string name = args.at(0)->ToString();
+
+		if (this->response.has(name))
 		{
-			std::string name = args.at(0)->ToString();
-			if (this->response->has(name))
-			{
-				result->SetString(this->response->get(name).c_str());
-			}
-			else
-			{
-				result->SetNull();
-			}
+			result->SetString(this->response.get(name).c_str());
 		}
 		else
 		{
-			throw ValueException::FromString("no available response");
+			result->SetNull();
 		}
 	}
 	void HTTPClientBinding::SetTimeout(const ValueList& args, SharedValue result)
@@ -776,7 +779,7 @@ catch(...)
 					logger->Error("Exception calling onchange. Exception: %s",ex.what());
 				}
 			}
-			this->readystate = NULL;
+			this->readystate = 0;
 		}
 	}
 }
