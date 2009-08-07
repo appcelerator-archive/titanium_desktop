@@ -21,28 +21,29 @@ namespace ti
 		contextMenu(0),
 		iconPath("")
 	{
+		// Initialize common controls so that our Win32 native
+		// components look swanky.
 		INITCOMMONCONTROLSEX InitCtrlEx;
-
 		InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
 		InitCtrlEx.dwICC = 0x00004000; //ICC_STANDARD_CLASSES;
 		InitCommonControlsEx(&InitCtrlEx);
 		
-		InitCurl(uiModule);
+		// Hook up our custom script evaluator to WebKit
 		addScriptEvaluator(&evaluator);
-	}
-	
-	void Win32UIBinding::InitCurl(Module* uiModule)
-	{
-		std::string pemPath = FileUtils::Join(uiModule->GetPath().c_str(), "cacert.pem", NULL);
-		
-		// use _putenv since webkit uses stdlib's getenv which is incompatible with GetEnvironmentVariable
+
+		// Set the cert path for Curl so that HTTPS works properly.
+		// We are using _puetenv here since WebKit uses getenv internally 
+		// which is incompatible with the  Win32 envvar API.
+		std::string pemPath = FileUtils::Join(
+			uiModule->GetPath().c_str(), "cacert.pem", NULL);
 		std::string var = "CURL_CA_BUNDLE_PATH=" + pemPath;
 		_putenv(var.c_str());
 
-		curl_register_local_handler(&CurlTiURLHandler);
-		curl_register_local_handler(&CurlAppURLHandler);
+		// Hook app:// and ti:// URL support to WebKit
+		setNormalizeURLCallback(NormalizeURLCallback);
+		setURLToFileURLCallback(URLToFileURLCallback);
 	}
-
+	
 	Win32UIBinding::~Win32UIBinding()
 	{
 	}

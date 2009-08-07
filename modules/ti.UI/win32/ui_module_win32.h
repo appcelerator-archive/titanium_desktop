@@ -30,12 +30,12 @@ namespace ti
 #undef IsMaximized
 #undef IsMinimized
 
-#include "WebKit.h"
-#include "WebKit/WebKitCOMAPI.h"
+#include <WebKit/WebKit.h>
+#include <WebKit/WebKitCOMAPI.h>
+#include <WebKit/WebKitTitanium.h>
 #include <cairo/cairo.h>
 #include <cairo/cairo-win32.h>
 #include "../url/url.h"
-#include "../url/url_curl.h"
 #include "popup_dialog.h"
 #include "../../../kroll/modules/javascript/javascript_module.h"
 #include "script_evaluator.h"

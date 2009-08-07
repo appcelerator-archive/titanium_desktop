@@ -5,8 +5,6 @@
  */
 #ifndef __TI_WIN32_USER_WINDOW_H
 #define __TI_WIN32_USER_WINDOW_H
-void STDMETHODCALLTYPE addScriptEvaluator(IWebScriptEvaluator *evaluator);
-
 namespace ti
 {
 	class Win32UserWindow : public UserWindow
