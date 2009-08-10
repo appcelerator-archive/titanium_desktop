@@ -75,6 +75,7 @@ if ARGUMENTS.get('test_crash', 0):
 	build.env.Append(CPPDEFINES = ('TEST_CRASH_DETECTION', 1))
 
 ## Kroll *must not be required* for installation
+SConscript('kroll/SConscript.thirdparty', exports='debug')
 SConscript('installation/SConscript')
 
 # After Kroll builds, the environment will  link 
