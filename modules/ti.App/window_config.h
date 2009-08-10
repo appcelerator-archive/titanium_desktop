@@ -9,13 +9,12 @@
 #include <string>
 
 #include "app_api.h"
-#include "app_config.h"
-
+#include "app_config.h" 
 namespace ti {
 
 class TITANIUM_APP_API WindowConfig
 {
-private:
+	private:
 	std::string winid;
 	std::string url;
 	std::string urlRegex;
@@ -46,9 +45,10 @@ private:
 
 	void SetDefaults();
 
-public:
+	public:
 	static int DEFAULT_POSITION;
-	static int window_count;
+	static int windowCount;
+	static std::string blankPageURL;
 
 	WindowConfig() { SetDefaults(); }
 	WindowConfig(void* data);

@@ -208,9 +208,11 @@ def generate_api_coverage(dirs,fs):
 	res_pattern = '@tiresult\(([^\)]*)\)(.*)'
 	dep_pattern = '@tideprecated\(([^\)]*)\)(.*)'
 
-	context_sensitive_api_description = '@tiapi (.*)'
 	context_sensitive_arg_pattern = '@tiarg\[([^\]]+)\](.*)'
 	context_sensitive_result_pattern = '@tiresult\[([^\]]+)\](.*)'
+	context_sensitive_api_description = '@tiapi (.*)'
+	context_sensitive_arg_description = '@tiarg (.*)'
+	context_sensitive_result_description = '@tiresult (.*)'
 	tiproperty_pattern = '@tiproperty\[([^\]]+)\](.*)'
 
 	files = set()
@@ -225,6 +227,8 @@ def generate_api_coverage(dirs,fs):
 
 	for filename in files:
 		current_api = None
+		current_arg = None
+		current_result = None
 		match = None
 		for line in open(filename,'r').read().splitlines():
 			try:
@@ -249,6 +253,7 @@ def generate_api_coverage(dirs,fs):
 						metadata = parse_key_value_pairs(bits[2], metadata)
 					api = API.create_with_full_name(bits[1])
 					api.add_metadata(metadata)
+					current_api = api
 					continue
 			
 				m = re.search(context_sensitive_arg_pattern, line)
@@ -263,7 +268,8 @@ def generate_api_coverage(dirs,fs):
 					metadata['description'] = m.group(2).strip()
 					if len(bits) > 2:
 						metadata = parse_key_value_pairs(bits[2], metadata)
-					current_api.add_argument(APIArgument(metadata, metadata['description']))
+					current_arg = APIArgument(metadata, metadata['description'])
+					current_api.add_argument(current_arg)
 					continue
 			
 				m = re.search(context_sensitive_result_pattern, line)
@@ -274,9 +280,10 @@ def generate_api_coverage(dirs,fs):
 					metadata['type'] = m.group(1).strip()
 					metadata['description'] = m.group(2).strip()
 					metadata['for'] = current_api.name
-					current_api.set_return_type(APIReturnType(metadata, metadata['description']))
+					current_result = APIReturnType(metadata, metadata['description'])
+					current_api.set_return_type(current_result)
 					continue
-			
+
 				m = re.search(context_sensitive_api_description, line)
 				if m is not None:
 					files_with_matches.add(filename)
@@ -284,6 +291,24 @@ def generate_api_coverage(dirs,fs):
 					if current_api:
 						description = current_api['description'] + ' ' + description.strip()
 						current_api['description'] = description.strip()
+						continue
+
+				m = re.search(context_sensitive_arg_description, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(1)
+					if current_arg:
+						description = current_arg['description'] + ' ' + description.strip()
+						current_arg['description'] = description.strip()
+						continue
+
+				m = re.search(context_sensitive_result_description, line)
+				if m is not None:
+					files_with_matches.add(filename)
+					description = m.group(1)
+					if current_result:
+						description = current_result['description'] + ' ' + description.strip()
+						current_result['description'] = description.strip()
 						continue
 			
 				m = re.search(arg_pattern, line)

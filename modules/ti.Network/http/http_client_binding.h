@@ -31,7 +31,7 @@ namespace ti
 		SharedKObject global;
 		Poco::Thread *thread;
 		std::string url;
-		Poco::Net::HTTPResponse* response;
+		Poco::Net::HTTPResponse response;
 		std::map<std::string,std::string> headers;
 		std::string method;
 		bool async;

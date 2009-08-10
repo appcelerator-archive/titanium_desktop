@@ -18,7 +18,6 @@ using kroll::URLUtils;
 
 namespace ti
 {
-	std::vector<SharedKObject> NetworkBinding::bindings;
 	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
 		host(host),modulePath(modulePath),
 		global(host->GetGlobalObject()),
@@ -87,8 +86,11 @@ namespace ti
 		this->SetMethod("decodeURIComponent",&NetworkBinding::DecodeURIComponent);
 
 		/**
-		 * @tiapi(method=True,name=Network.addConnectivityListener,since=0.2) Adds a connectivity change listener that fires when the system connects or disconnects from the internet
-		 * @tiarg(for=Network.addConnectivityListener,type=method,name=listener) a callback method to be fired when the system connects or disconnects from the internet
+		 * @tiapi(method=True,name=Network.addConnectivityListener,since=0.2)
+		 * @tiapi Adds a connectivity change listener that fires when the system
+		 * @tiapi connects or disconnects from the internet
+		 * @tiarg(for=Network.addConnectivityListener,type=Function,name=listener) 
+		 * @tiarg A callback method to be fired when the system connects or disconnects from the internet
 		 * @tiresult(for=Network.addConnectivityListener,type=Number) a callback id for the event
 		 */
 		this->SetMethod("addConnectivityListener",&NetworkBinding::AddConnectivityListener);
@@ -215,26 +217,11 @@ namespace ti
 		AutoPtr<IRCClientBinding> irc = new IRCClientBinding(host);
 		result->SetObject(irc);
 	}
-	void NetworkBinding::RemoveBinding(void* binding)
-	{
-		std::vector<SharedKObject>::iterator i = bindings.begin();
-		while(i!=bindings.end())
-		{
-			SharedKObject b = (*i);
-			if (binding == b.get())
-			{
-				bindings.erase(i);
-				break;
-			}
-			i++;
-		}
-	}
 	void NetworkBinding::CreateHTTPClient(const ValueList& args, SharedValue result)
 	{
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
 		SharedKObject http = new HTTPClientBinding(host,modulePath);
-		this->bindings.push_back(http);
 		result->SetObject(http);
 	}
 	void NetworkBinding::CreateHTTPServer(const ValueList& args, SharedValue result)
@@ -242,7 +229,6 @@ namespace ti
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
 		SharedKObject http = new HTTPServerBinding(host);
-		this->bindings.push_back(http);
 		result->SetObject(http);
 	}
 	void NetworkBinding::AddConnectivityListener(const ValueList& args, SharedValue result)

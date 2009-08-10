@@ -35,7 +35,6 @@ namespace ti
 		NetworkBinding(Host*,std::string);
 		virtual ~NetworkBinding();
 
-		static void RemoveBinding(void* binding);
 		bool HasNetworkStatusListeners();
 		void NetworkStatusChange(bool online);
 		Host* GetHost();
@@ -47,7 +46,6 @@ namespace ti
 		SharedKObject global;
 		AutoPtr<Proxy> proxy;
 
-		static std::vector<SharedKObject> bindings;
 		struct Listener {
 			SharedKMethod callback;
 			long id;

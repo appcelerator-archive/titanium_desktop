@@ -13,6 +13,7 @@
 	var initialized = false;
 	var window = null;
 	var refresh_components = true;
+	var update_check_timer = null;
 	
 	function send(qsv,async,timeout)
 	{
@@ -75,8 +76,8 @@
 	
 	/**
 	 * @tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application
-	 * @tiarg(for=Analytics.addEvent,type=string,name=event) event name
-	 * @tiarg(for=Analytics.addEvent,type=object,name=data,optional=True) event data
+	 * @tiarg(for=Analytics.addEvent,type=String,name=event) event name
+	 * @tiarg(for=Analytics.addEvent,type=Object,name=data,optional=True) event data
 	 */
 	Titanium.API.set("Analytics.addEvent", function(event,data)
 	{
@@ -85,10 +86,10 @@
 	
 	/**
 	 * @tiapi(method=True,name=UpdateManager.startMonitor,since=0.4) Check the update service for a new version
-	 * @tiarg(for=UpdateManager.startMonitor,name=component,type=string) Name of the component
-	 * @tiarg(for=UpdateManager.startMonitor,name=callback,type=function) Function callback to call when completed
-	 * @tiarg(for=UpdateManager.startMonitor,name=interval,type=int) Interval in milliseconds for how often to check for an update
-	 * @tiresult(for=UpdateManager.startMonitor,type=int) Returns a handle which should use used to cancel the monitor
+	 * @tiarg(for=UpdateManager.startMonitor,name=component,type=String) Name of the component
+	 * @tiarg(for=UpdateManager.startMonitor,name=callback,type=Function) Function callback to call when completed
+	 * @tiarg(for=UpdateManager.startMonitor,name=interval,type=Number) Interval in milliseconds for how often to check for an update
+	 * @tiresult(for=UpdateManager.startMonitor,type=Number) Returns a handle which should use used to cancel the monitor
 	 */
 	Titanium.API.set("UpdateManager.startMonitor", function(components,callback,interval)
 	{
@@ -147,7 +148,7 @@
 
 	/**
 	 * @tiapi(method=True,name=UpdateManager.cancelMonitor,since=0.4) Check the update service for a new version
-	 * @tiarg(for=UpdateManager.cancelMonitor,name=id,type=int) The monitor id returned from startMonitor
+	 * @tiarg(for=UpdateManager.cancelMonitor,name=id,type=Number) The monitor id returned from startMonitor
 	 */
 	Titanium.API.set("UpdateManager.cancelMonitor", function(id)
 	{
@@ -175,7 +176,7 @@
 
 	/**
 	 * @tiapi(method=True,name=UpdateManager.installAppUpdate,since=0.4) Install an application update received from update monitor. This method will cause the process to first be restarted for the update to begin.
-	 * @tiarg(for=UpdateManager.installAppUpdate,name=spec,type=object) Update spec object received from update service.
+	 * @tiarg(for=UpdateManager.installAppUpdate,name=spec,type=Object) Update spec object received from update service.
 	 */
 	Titanium.API.set("UpdateManager.installAppUpdate", function(updateSpec)
 	{
@@ -199,6 +200,10 @@
 	{
 		try
 		{
+			if (!Titanium.Network.online)
+			{
+				return;
+			}
 			limit = (limit==undefined) ? 1 : limit;
 			var url = Titanium.App.getStreamURL("release-list");
 			var xhr = Titanium.Network.createHTTPClient();
@@ -355,6 +360,11 @@
 	
 	Titanium.API.addEventListener(Titanium.EXIT, function(event)
 	{
+		if (update_check_timer)
+		{
+			window.clearTimeout(update_check_timer);
+			update_check_timer=null;
+		}
 		if (initialized)
 		{
 			window = null;
@@ -389,7 +399,7 @@
 			send({'event':'ti.start'});
 			
 			// schedule the update check
-			window.setTimeout(function(){
+			update_check_timer = window.setTimeout(function(){
 				checkForUpdate();
 			},update_check_delay);
 		}

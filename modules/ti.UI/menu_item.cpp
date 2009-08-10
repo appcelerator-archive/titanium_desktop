@@ -1,8 +1,8 @@
 /**
-* Appcelerator Titanium - licensed under the Apache Public License 2
-* see LICENSE in the root folder for details on the license.
-* Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
-*/
+ * Appcelerator Titanium - licensed under the Apache Public License 2
+ * see LICENSE in the root folder for details on the license.
+ * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
+ */
 
 #include <kroll/kroll.h>
 #include "ui_module.h"
@@ -12,7 +12,7 @@ namespace ti
 	using std::vector;
 
 	MenuItem::MenuItem(MenuItemType type) :
-	KEventObject("UI.MenuItem"),
+		KEventObject("UI.MenuItem"),
 		type(type),
 		enabled(true),
 		label(""),
@@ -83,14 +83,14 @@ namespace ti
 			this->SetMethod("disable", &MenuItem::_Disable);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.isEnabled,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.isEnabled,version=1.0) 
 			* @tiresult[Boolean] Whether or not this item is enabled
 			* @tiapi This method is not available for separator items.
 			*/
 			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addItem,version=1.0)
 			* @tiapi Add an item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -102,7 +102,7 @@ namespace ti
 			this->SetMethod("addItem", &MenuItem::_AddItem);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addSeparatorItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addSeparatorItem,version=1.0)
 			* @tiapi Add a separator item to this menu item's submenu.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -111,7 +111,7 @@ namespace ti
 			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
 
 			/**
-			* @tiapi(method=True,name=UI.Menu.addItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addCheckItem,version=1.0)
 			* @tiapi Add a check item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -163,7 +163,7 @@ namespace ti
 			this->SetMethod("getState", &MenuItem::_GetState);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setAutoCheck,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.setAutoCheck,version=1.0) 
 			* @tiapi Set whether or not this check item is an autocheck item. An autocheck
 			* @tiapi item (the default) will automatically flip the state of the check on a
 			* @tiapi a click event. Turning off this behavior makes the check item more useful
@@ -174,7 +174,7 @@ namespace ti
 			this->SetMethod("setAutoCheck", &MenuItem::_SetAutoCheck);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getAutoCheck,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.getAutoCheck,version=1.0) 
 			* @tiapi This method is only available for check items.
 			* @tiarg[Boolean, autocheck] Whether or not this item should is an autocheck
 			*/

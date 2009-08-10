@@ -8,7 +8,20 @@
 #include <iostream>
 #include <Poco/Process.h>
 #define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
+#define TRANSPARENCY_MAJOR_VERSION 2
+#define TRANSPARENCY_MINOR_VERSION 16
+extern const guint gtk_major_version;
+extern const guint gtk_minor_version;
 
+namespace
+{
+	/*static*/
+	inline bool GtkVersionSupportsWebViewTransparency()
+	{
+		return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
+			gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
+	}
+}
 namespace ti
 {
 	static gboolean DestroyCallback(GtkWidget*, GdkEvent*, gpointer);
@@ -25,6 +38,8 @@ namespace ti
 		gpointer);
 	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
 		gchar*, gpointer);
+	static void FeaturesChangedCallback(WebKitWebView* view, GParamSpec *pspec,
+		 gpointer data);
 	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
 		WebKitWebView*, gpointer);
 	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
@@ -81,6 +96,9 @@ namespace ti
 				G_OBJECT(webView), "title-changed",
 				G_CALLBACK(TitleChangedCallback), this);
 			g_signal_connect(
+				G_OBJECT(webView), "notify::window-features",
+				G_CALLBACK(FeaturesChangedCallback), this);
+			g_signal_connect(
 				G_OBJECT(webView), "create-web-view",
 				G_CALLBACK(CreateWebViewCallback), this);
 
@@ -130,6 +148,7 @@ namespace ti
 			gtk_container_add(GTK_CONTAINER(window), vbox);
 	
 			this->gtkWindow = GTK_WINDOW(window);
+			this->SetupTransparency();
 
 			gtk_widget_realize(window);
 			this->SetupDecorations();
@@ -141,9 +160,6 @@ namespace ti
 			this->SetTopMost(config->IsTopMost());
 			this->SetCloseable(config->IsCloseable());
 			this->SetResizable(config->IsResizable());
-
-			// TI-62: Transparency currently causes bad crashes
-			//this->SetupTransparency();
 
 			gtk_widget_grab_focus(GTK_WIDGET(webView));
 			webkit_web_view_open(webView, this->config->GetURL().c_str());
@@ -212,19 +228,14 @@ namespace ti
 	
 	void GtkUserWindow::SetupTransparency()
 	{
-		if (this->gtkWindow != NULL)
+		if (this->gtkWindow && GtkVersionSupportsWebViewTransparency())
 		{
-			GValue val = {0,};
-			g_value_init(&val, G_TYPE_BOOLEAN);
-			g_value_set_boolean(&val, 1);
-			g_object_set_property(G_OBJECT(this->webView), "transparent", &val);
-	
 			GdkScreen* screen = gtk_widget_get_screen(GTK_WIDGET(this->gtkWindow));
 			GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
 			if (!colormap)
 			{
 				std::cerr << "Could not use ARGB colormap. "
-				          << "True transparency not available." << std::endl;
+					<< "True transparency not available." << std::endl;
 				colormap = gdk_screen_get_rgb_colormap(screen);
 			}
 			gtk_widget_set_colormap(GTK_WIDGET(this->gtkWindow), colormap);
@@ -556,6 +567,29 @@ namespace ti
 			std::string newTitleString = newTitle;
 			userWindow->SetTitle(newTitleString);
 		}
+	}
+
+	static void FeaturesChangedCallback(WebKitWebView* view, GParamSpec *pspec, gpointer data)
+	{
+		GtkUserWindow* userWindow = (GtkUserWindow*) data;
+		WebKitWebWindowFeatures* features = webkit_web_view_get_window_features(view);
+
+		gint width, height, x, y;
+		g_object_get(features,
+			"width", &width,
+			"height", &height,
+			"x", &x,
+			"y", &y,
+			NULL);
+
+		if (width != -1)
+			userWindow->_SetWidth((double) width);
+		if (height != -1)
+			userWindow->_SetHeight((double) height);
+		if (x != -1)
+			userWindow->_SetX((double) x);
+		if (y != -1)
+			userWindow->_SetY((double) y);
 	}
 
 	static void WindowObjectClearedCallback(
@@ -1001,7 +1035,11 @@ namespace ti
 	void GtkUserWindow::SetTransparency(double alpha)
 	{
 		if (this->gtkWindow != NULL)
+		{
 			gtk_window_set_opacity(this->gtkWindow, alpha);
+			if (GtkVersionSupportsWebViewTransparency())
+				webkit_web_view_set_transparent(this->webView, alpha < 1.0);
+		}
 	}
 	
 	bool GtkUserWindow::IsTopMost()
@@ -1291,5 +1329,6 @@ namespace ti
 		}
 		gtk_widget_show(GetInspectorWindow());
 	}
+
 }
 

@@ -68,14 +68,15 @@
 using namespace ti;
 
 int WindowConfig::DEFAULT_POSITION = -404404404;
-int WindowConfig::window_count = 0;
+int WindowConfig::windowCount = 0;
+std::string WindowConfig::blankPageURL("about:blank");
 
 void WindowConfig::SetDefaults ()
 {
 
-	WindowConfig::window_count++;
+	WindowConfig::windowCount++;
 	std::ostringstream winid;
-	winid << "win_" << WindowConfig::window_count;
+	winid << "win_" << WindowConfig::windowCount;
 	this->winid = winid.str();
 
 	this->maximizable = true;
@@ -103,8 +104,8 @@ void WindowConfig::SetDefaults ()
 	this->maxWidth = -1;
 	this->maxHeight = -1;
 
-	this->url = AppConfig::Instance()->InsertAppIDIntoURL("app://index.html");
-	this->title = "Titanium Application";
+	this->url = WindowConfig::blankPageURL;
+	this->title = Host::GetInstance()->GetApplication()->name;
 }
 
 void WindowConfig::UseProperties(SharedKObject properties)

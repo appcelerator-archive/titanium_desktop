@@ -33,12 +33,12 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Filesystem.createTempFile) Creates a temporary file
-		 * @tiresult(for=Filesystem.createTempFile,type=object) a File object referencing the temporary file
+		 * @tiresult(for=Filesystem.createTempFile,type=Filesystem.File) a File object referencing the temporary file
 		 */
 		this->SetMethod("createTempFile",&FilesystemBinding::CreateTempFile);
 		/**
 		 * @tiapi(method=True,name=Filesystem.createTempDirectory) Creates a temporary directory
-		 * @tiresult(for=Filesystem.createTempDirectory,type=object) a File object referencing the temporary directory
+		 * @tiresult(for=Filesystem.createTempDirectory,type=Filesystem.File) a File object referencing the temporary directory
 		 */
 		this->SetMethod("createTempDirectory",&FilesystemBinding::CreateTempDirectory);
 		/**
@@ -110,23 +110,24 @@ namespace ti
 		this->SetMethod("getRootDirectories",&FilesystemBinding::GetRootDirectories);
 		/**
 		 * @tiapi(method=True,name=Filesystem.asyncCopy) Executes an async copy operation
-		 * @tiarg(for=Filesystem.asyncCopy,name=paths,type=object) either a path or array of paths to copy from
-		 * @tiarg(for=Filesystem.asyncCopy,name=destination,type=object) either a string or file object to copy to
-		 * @tiarg(for=Filesystem.asyncCopy,name=callback,type=method) callback to invoke on each copy completion operation
-		 * @tiresult(for=Filesystem.asyncCopy,type=object) async copy object
+		 * @tiarg(for=Filesystem.asyncCopy,name=paths,type=Array<String|Filesystem.File>|Filesystem.File)
+		 * @tiarg Either a path or array of paths to copy from
+		 * @tiarg(for=Filesystem.asyncCopy,name=destination,type=Filesystem.File|String) either a string or file object to copy to
+		 * @tiarg(for=Filesystem.asyncCopy,name=callback,type=Function) callback to invoke on each copy completion operation
+		 * @tiresult(for=Filesystem.asyncCopy,type=FileSystem.AsyncCopy) async copy object
 		 */
 		this->SetMethod("asyncCopy",&FilesystemBinding::ExecuteAsyncCopy);
 
 		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_READ, since=0.3, type=int) File read constant
+		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_READ, since=0.3, type=Number) File read constant
 		 */
 		this->Set("MODE_READ", Value::NewInt(MODE_READ));
 		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_WRITE, since=0.3, type=int) File write constant
+		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_WRITE, since=0.3, type=Number) File write constant
 		 */
 		this->Set("MODE_WRITE", Value::NewInt(MODE_WRITE));
 		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_APPEND, since=0.3, type=int) File append constant
+		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_APPEND, since=0.3, type=Number) File append constant
 		 */
 		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
 	}

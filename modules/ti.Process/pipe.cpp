@@ -35,8 +35,8 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Process.Pipe.write,since=0.5)
 		 * @tiapi Write data to this pipe
-		 * @tiarg[Any<Blob,String> data] a Blob object or String to write to this pipe
-		 * @tiresult[int, bytesWritten] the number of bytes actually written on this pipe
+		 * @tiarg[Blob|String, data] a Blob object or String to write to this pipe
+		 * @tiresult[Number, bytesWritten] the number of bytes actually written on this pipe
 		 */
 		SetMethod("write", &Pipe::_Write);
 		

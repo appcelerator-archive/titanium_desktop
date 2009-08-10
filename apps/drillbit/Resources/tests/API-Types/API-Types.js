@@ -1,16 +1,15 @@
 describe("Blob, KObject, KList, etc",{
 	test_core_types_harness: function()
 	{
-		value_of(Titanium.CoreTypes).should_be_object();
-		value_of(Titanium.CoreTypes.createKObject).should_be_function();
-		value_of(Titanium.CoreTypes.createKMethod).should_be_function();
-		value_of(Titanium.CoreTypes.createKList).should_be_function();
-		value_of(Titanium.CoreTypes.createBlob).should_be_function();
+		value_of(Titanium.API.createKObject).should_be_function();
+		value_of(Titanium.API.createKMethod).should_be_function();
+		value_of(Titanium.API.createKList).should_be_function();
+		value_of(Titanium.API.createBlob).should_be_function();
 	},
 	test_empty_kobject: function()
 	{
 		var count_properties = function(o) { var n = 0; for (x in o) { n++; } return n; };
-		var o = Titanium.CoreTypes.createKObject();
+		var o = Titanium.API.createKObject();
 		// There should be no properties showing for a blank KObject
 		value_of(count_properties(o)).should_be(0);
 
@@ -22,7 +21,7 @@ describe("Blob, KObject, KList, etc",{
 
 		var other = Object();
 		value_of(o.equals(other)).should_be_false();
-		other = Titanium.CoreTypes.createKObject();
+		other = Titanium.API.createKObject();
 		value_of(o.equals(other)).should_be_false();
 		value_of(o.toString()).should_be_string();
 
@@ -45,7 +44,7 @@ describe("Blob, KObject, KList, etc",{
 		var count_properties = function(o) { var n = 0; for (x in o) { n++; } return n; };
 		var o = Object();
 		o.property_one = "blahblah";
-		var ko = Titanium.CoreTypes.createKObject(o);
+		var ko = Titanium.API.createKObject(o);
 
 		value_of(count_properties(ko)).should_be(1);
 		value_of(count_properties(o)).should_be(1);
@@ -60,7 +59,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_empty_klist: function()
 	{
-		var l = Titanium.CoreTypes.createKList();
+		var l = Titanium.API.createKList();
 		value_of(l.length).should_be_number();
 		value_of(l.equals).should_be_function();
 		value_of(l.toString).should_be_function();
@@ -79,7 +78,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_modifying_klist: function()
 	{
-		var l = Titanium.CoreTypes.createKList();
+		var l = Titanium.API.createKList();
 		value_of(l.length).should_be(0);
 		l.push(123);
 		value_of(l.length).should_be(1);
@@ -123,7 +122,7 @@ describe("Blob, KObject, KList, etc",{
 	test_wrapped_klist: function()
 	{
 		var mylist = [1, 2, 3];
-		var l = Titanium.CoreTypes.createKList(mylist);
+		var l = Titanium.API.createKList(mylist);
 		value_of(l.length).should_be_number();
 		value_of(l.equals).should_be_function();
 		value_of(l.toString).should_be_function();
@@ -206,7 +205,7 @@ describe("Blob, KObject, KList, etc",{
 		}
 
 		variable = "dos";
-		var f = Titanium.CoreTypes.createKMethod(myfunction);
+		var f = Titanium.API.createKMethod(myfunction);
 		var result = f();
 		value_of(result).should_be("dos");
 		value_of(other_variable).should_be("no");
@@ -228,7 +227,7 @@ describe("Blob, KObject, KList, etc",{
 		setTimeout(function()
 		{
 			variable = "dos";
-			var f = Titanium.CoreTypes.createKMethod(myfunction2());
+			var f = Titanium.API.createKMethod(myfunction2());
 			var result = f();
 
 			if (result !== "dos")
@@ -244,7 +243,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_basic_empty_blob: function()
 	{
-		var b1 = Titanium.CoreTypes.createBlob();
+		var b1 = Titanium.API.createBlob();
 		value_of(b1).should_be_object();
 		value_of(b1.length).should_be_number();
 		value_of(b1.toString).should_be_function();
@@ -263,7 +262,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_basic_blob: function()
 	{
-		var b1 = Titanium.CoreTypes.createBlob("abcdefgA");
+		var b1 = Titanium.API.createBlob("abcdefgA");
 		value_of(b1).should_be_object();
 		value_of(b1.length).should_be_number();
 		value_of(b1.toString).should_be_function();
@@ -284,7 +283,7 @@ describe("Blob, KObject, KList, etc",{
 	{
 		// must conform to behavior:
 		// https://developer.mozilla.org/en/core_javascript_1.5_reference/global_objects/string/chara://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/indexOf
-		var b1 = Titanium.CoreTypes.createBlob("abcdefgA");
+		var b1 = Titanium.API.createBlob("abcdefgA");
 		value_of(b1.indexOf).should_be_function();
 		value_of(b1.indexOf("a")).should_be(0);
 		value_of(b1.indexOf("b")).should_be(1);
@@ -315,7 +314,7 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b1.indexOf("bcd", 30)).should_be(-1);
 		value_of(b1.indexOf("defe", 1)).should_be(-1);
 
-		var b2 = Titanium.CoreTypes.createBlob("");
+		var b2 = Titanium.API.createBlob("");
 		value_of(b2.indexOf).should_be_function();
 		value_of(b2.indexOf("a")).should_be(-1);
 		value_of(b2.indexOf("b")).should_be(-1);
@@ -350,7 +349,7 @@ describe("Blob, KObject, KList, etc",{
 	{
 		// must conform to behavior:
 		// https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/String/lastIndexOf
-		var b1 = Titanium.CoreTypes.createBlob("abcdefgA");
+		var b1 = Titanium.API.createBlob("abcdefgA");
 		value_of(b1.lastIndexOf).should_be_function();
 		value_of(b1.lastIndexOf("a")).should_be(0);
 		value_of(b1.lastIndexOf("b")).should_be(1);
@@ -384,7 +383,7 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b1.lastIndexOf("bcd", 30)).should_be(1);
 		value_of(b1.lastIndexOf("defe", 1)).should_be(-1);
 
-		var b2 = Titanium.CoreTypes.createBlob("");
+		var b2 = Titanium.API.createBlob("");
 		value_of(b2.lastIndexOf).should_be_function();
 		value_of(b2.lastIndexOf("a")).should_be(-1);
 		value_of(b2.lastIndexOf("b")).should_be(-1);
@@ -415,7 +414,7 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b2.lastIndexOf("bcd", 30)).should_be(-1);
 		value_of(b2.lastIndexOf("defe", 1)).should_be(-1);
 
-		var b3 = Titanium.CoreTypes.createBlob("abcdefgAadef");
+		var b3 = Titanium.API.createBlob("abcdefgAadef");
 		value_of(b3.lastIndexOf).should_be_function();
 		value_of(b3.lastIndexOf("a")).should_be(8);
 		value_of(b3.lastIndexOf("b")).should_be(1);
@@ -451,7 +450,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_blob_charat: function()
 	{
-		var b1 = Titanium.CoreTypes.createBlob("abcdefg");
+		var b1 = Titanium.API.createBlob("abcdefg");
 		value_of(b1.charAt(-100)).should_be("");
 		value_of(b1.charAt(-1)).should_be("");
 		value_of(b1.charAt(0)).should_be("a");
@@ -464,7 +463,7 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b1.charAt(7)).should_be("");
 		value_of(b1.charAt(700)).should_be("");
 
-		var b2 = Titanium.CoreTypes.createBlob("");
+		var b2 = Titanium.API.createBlob("");
 		value_of(b2.charAt(-100)).should_be("");
 		value_of(b2.charAt(-1)).should_be("");
 		value_of(b2.charAt(0)).should_be("");
@@ -479,31 +478,31 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_blob_split: function()
 	{
-		var b1 = Titanium.CoreTypes.createBlob("abcdefg");
+		var b1 = Titanium.API.createBlob("abcdefg");
 		var b1s = b1.split();
 		value_of(b1s).should_be_object();
 		value_of(b1s.length).should_be(1);
 		value_of(b1s[0]).should_be("abcdefg");
 
-		var b2 = Titanium.CoreTypes.createBlob("");
+		var b2 = Titanium.API.createBlob("");
 		var b2s = b2.split();
 		value_of(b2s.length).should_be(1);
 		value_of(b2s[0]).should_be("");
 
-		var b3 = Titanium.CoreTypes.createBlob("abcdefg");
+		var b3 = Titanium.API.createBlob("abcdefg");
 		var b3s = b3.split(",");
 		value_of(b3s).should_be_object();
 		value_of(b3s.length).should_be(1);
 		value_of(b3s[0]).should_be("abcdefg");
 
-		var b4 = Titanium.CoreTypes.createBlob("ab,cdefg");
+		var b4 = Titanium.API.createBlob("ab,cdefg");
 		var b4s = b4.split(",");
 		value_of(b4s).should_be_object();
 		value_of(b4s.length).should_be(2);
 		value_of(b4s[0]).should_be("ab");
 		value_of(b4s[1]).should_be("cdefg");
 
-		var b5 = Titanium.CoreTypes.createBlob(",ab,cdefg,,");
+		var b5 = Titanium.API.createBlob(",ab,cdefg,,");
 		var b5s = b5.split(",");
 		value_of(b5s).should_be_object();
 		value_of(b5s.length).should_be(5);
@@ -513,19 +512,19 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b5s[3]).should_be("");
 		value_of(b5s[4]).should_be("");
 
-		var b6 = Titanium.CoreTypes.createBlob(",ab,cdefg,");
+		var b6 = Titanium.API.createBlob(",ab,cdefg,");
 		var b6s = b6.split(",", 2);
 		value_of(b6s).should_be_object();
 		value_of(b6s.length).should_be(2);
 		value_of(b6s[0]).should_be("");
 		value_of(b6s[1]).should_be("ab");
 
-		var b7 = Titanium.CoreTypes.createBlob("abc,def,ghi");
+		var b7 = Titanium.API.createBlob("abc,def,ghi");
 		var b7s = b7.split(",", 0);
 		value_of(b7s).should_be_object();
 		value_of(b7s.length).should_be(0);
 
-		var b8 = Titanium.CoreTypes.createBlob("abcde");
+		var b8 = Titanium.API.createBlob("abcde");
 		var b8s = b8.split("");
 		value_of(b8s).should_be_object();
 		value_of(b8s.length).should_be(5);
@@ -537,7 +536,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_blob_substr: function()
 	{
-		var blob = Titanium.CoreTypes.createBlob("abcdefghij");
+		var blob = Titanium.API.createBlob("abcdefghij");
 		value_of(blob.substr).should_be_function();
 		value_of(blob.substr(1,2)).should_be("bc");
 		value_of(blob.substr(-3,2)).should_be("hi");
@@ -550,7 +549,7 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_blob_substring: function()
 	{
-		var blob = Titanium.CoreTypes.createBlob("Mozilla");
+		var blob = Titanium.API.createBlob("Mozilla");
 		value_of(blob.substring).should_be_function();
 		value_of(blob.substring(3,0)).should_be("Moz");
 		value_of(blob.substring(0,3)).should_be("Moz");
@@ -566,29 +565,29 @@ describe("Blob, KObject, KList, etc",{
 	},
 	test_blob_tolowercase: function()
 	{
-		var blob = Titanium.CoreTypes.createBlob("Mozilla123!?");
+		var blob = Titanium.API.createBlob("Mozilla123!?");
 		value_of(blob.toLowerCase).should_be_function();
 		value_of(blob.toLowerCase()).should_be("mozilla123!?");
-		blob = Titanium.CoreTypes.createBlob("mOZILLA123!?");
+		blob = Titanium.API.createBlob("mOZILLA123!?");
 		value_of(blob.toLowerCase()).should_be("mozilla123!?");
-		blob = Titanium.CoreTypes.createBlob("mO   ZILLA123!?");
+		blob = Titanium.API.createBlob("mO   ZILLA123!?");
 		value_of(blob.toLowerCase()).should_be("mo   zilla123!?");
-		blob = Titanium.CoreTypes.createBlob("1234567890-=!@#$%^&*()_+");
+		blob = Titanium.API.createBlob("1234567890-=!@#$%^&*()_+");
 		value_of(blob.toLowerCase()).should_be("1234567890-=!@#$%^&*()_+");
 	},
 	test_blob_touppercase: function()
 	{
-		var blob = Titanium.CoreTypes.createBlob("Mozilla123!?");
+		var blob = Titanium.API.createBlob("Mozilla123!?");
 		value_of(blob.toUpperCase).should_be_function();
 		value_of(blob.toUpperCase()).should_be("MOZILLA123!?");
 
-		blob = Titanium.CoreTypes.createBlob("mOZILLA123!?");
+		blob = Titanium.API.createBlob("mOZILLA123!?");
 		value_of(blob.toUpperCase()).should_be("MOZILLA123!?");
 
-		blob = Titanium.CoreTypes.createBlob("mO   ZILLA123!?");
+		blob = Titanium.API.createBlob("mO   ZILLA123!?");
 		value_of(blob.toUpperCase()).should_be("MO   ZILLA123!?");
 
-		blob = Titanium.CoreTypes.createBlob("1234567890-=!@#$%^&*()_+");
+		blob = Titanium.API.createBlob("1234567890-=!@#$%^&*()_+");
 		value_of(blob.toUpperCase()).should_be("1234567890-=!@#$%^&*()_+");
 	},
 });

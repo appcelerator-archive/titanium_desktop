@@ -27,37 +27,37 @@ namespace ti
 		this->SetMethod("reload",&Sound::Reload);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.setVolume,since=0.2) Sets the volume value of a Sound object
-		 * @tiarg(for=Media.Sound.setVolume,type=double,name=volume) the volume value of the sound, from 0.0 to 1.0
+		 * @tiarg(for=Media.Sound.setVolume,type=Number,name=volume) the volume value of the sound, from 0.0 to 1.0
 		 */
 		this->SetMethod("setVolume",&Sound::SetVolume);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.getVolume,since=0.2) Returns the volume value of a Sound object
-		 * @tiresult(for=Media.Sound.getVolume,type=double) returns the volume of the sound
+		 * @tiresult(for=Media.Sound.getVolume,type=Number) returns the volume of the sound
 		 */
 		this->SetMethod("getVolume",&Sound::GetVolume);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.setLooping,since=0.2) Sets the looping of a Sound object
-		 * @tiarg(for=Media.Sound.setLooping,name=loop,type=boolean) true to set the Sound object to loop, false to remove looping
+		 * @tiarg(for=Media.Sound.setLooping,name=loop,type=Boolean) true to set the Sound object to loop, false to remove looping
 		 */
 		this->SetMethod("setLooping",&Sound::SetLooping);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.isLooping,since=0.2) Checks whether a Sound object is set to loop
-		 * @tiresult(for=Media.Sound.isLooping,type=boolean) true if the Sound object is set to loop, false if otherwise
+		 * @tiresult(for=Media.Sound.isLooping,type=Boolean) true if the Sound object is set to loop, false if otherwise
 		 */
 		this->SetMethod("isLooping",&Sound::IsLooping);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.isPlaying,since=0.2) Checks whether a Sound object is currently playing
-		 * @tiresult(for=Media.Sound.isPlaying,type=boolean) returns true if the Sound object is currently playing, false if otherwise
+		 * @tiresult(for=Media.Sound.isPlaying,type=Boolean) returns true if the Sound object is currently playing, false if otherwise
 		 */
 		this->SetMethod("isPlaying",&Sound::IsPlaying);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.isPaused,since=0.2) Checks whether a Sound object is paused
-		 * @tiresult(for=Media.Sound.isPaused,type=boolean) returns true if the Sound object is pause, false if otherwise
+		 * @tiresult(for=Media.Sound.isPaused,type=Boolean) returns true if the Sound object is pause, false if otherwise
 		 */
 		this->SetMethod("isPaused",&Sound::IsPaused);
 		/**
 		 * @tiapi(method=True,name=Media.Sound.onComplete,since=0.2) Sets an onComplete function that is fired when a sound finished playing
-		 * @tiarg(for=Media.Sound.onComplete,type=method,name=callback) a function to play when the Sound object finishes playing
+		 * @tiarg(for=Media.Sound.onComplete,type=Function,name=callback) a function to play when the Sound object finishes playing
 		 */
 		this->SetMethod("onComplete",&Sound::OnComplete);
 	}

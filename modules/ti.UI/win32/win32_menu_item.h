@@ -41,7 +41,7 @@ namespace ti
 	private:
 		std::string iconPath;
 		AutoPtr<Win32Menu> oldSubmenu;
-		std::string oldLabel;
+		std::wstring wideOldLabel;
 		std::vector<NativeItemBits*> nativeItems;
 
 	};

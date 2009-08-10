@@ -8,7 +8,7 @@
 	{
 		if (initialized && db)
 		{
-			Titanium.API.debug("Shuttig down tinetworkmodule.js");
+			Titanium.API.debug("Shutting down tinetworkmodule.js");
 			db.close();
 			db = null;
 		}
@@ -112,6 +112,10 @@
 				
 				xhr.open = function(method,url)
 				{
+					if (!Titanium.Network.online)
+					{
+						throw "not currently online";
+					}
 					// override to handle set/get of session cookies
 					hostname = getHost(url);
 					if (hostname)

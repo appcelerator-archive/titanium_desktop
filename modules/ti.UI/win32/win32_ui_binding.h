@@ -59,8 +59,6 @@ namespace ti
 		HANDLE pActCtx;
 		static std::vector<HICON> loadedICOs;
 		static std::vector<HBITMAP> loadedBMPs;
-
-		void InitCurl(Module *module);
 	};
 }
 

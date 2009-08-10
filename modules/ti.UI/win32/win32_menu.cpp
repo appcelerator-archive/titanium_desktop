@@ -187,7 +187,7 @@ namespace ti
 		while (i != this->children.end()) {
 			AutoMenuItem item = *i++;
 			AutoPtr<Win32MenuItem> win32Item = item.cast<Win32MenuItem>();
-			Win32Menu::InsertItemIntoNativeMenu(win32Item.get(), nativeMenu, true);
+			Win32Menu::InsertItemIntoNativeMenu(win32Item.get(), nativeMenu, registerNative);
 		}
 	}
 

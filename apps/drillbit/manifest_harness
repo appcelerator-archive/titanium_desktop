@@ -24,3 +24,4 @@ tinetwork:0.4
 tinotification:0.4
 tiprocess:0.4
 tidatabase:0.4
+tiworker:0.4

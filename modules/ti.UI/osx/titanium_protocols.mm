@@ -8,20 +8,37 @@
 
 @implementation TitaniumProtocols
 
-+ (BOOL)canInitWithRequest:(NSURLRequest *)theRequest 
++(BOOL)canInitWithRequest:(NSURLRequest*)theRequest 
 {
-	NSString *theScheme = [[theRequest URL] scheme];
+	NSString* theScheme = [[theRequest URL] scheme];
 	return [theScheme isEqual:@"app"] || [theScheme isEqual:@"ti"];
 }
 
-+(NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request 
++(NSURLRequest*)getNormalizedRequest:(NSURLRequest*)request
 {
-    return request;
+	std::string url = [[[request URL] absoluteString] UTF8String];
+	std::string normalized = URLUtils::NormalizeURL(url);
+	if (url != normalized)
+	{
+		NSURL* newNSURL = [NSURL URLWithString:
+			[NSString stringWithUTF8String:normalized.c_str()]];
+		NSURLRequest* newRequest = [NSURLRequest requestWithURL:newNSURL];
+		return newRequest;
+	}
+	else
+	{
+		return request;
+	}
 }
 
-+(NSString *)mimeTypeFromExtension:(NSString *)ext
++(NSURLRequest*)canonicalRequestForRequest:(NSURLRequest*)request 
 {
-	NSString *mime = @"application/octet-stream";
+	return [TitaniumProtocols getNormalizedRequest:request];
+}
+
++(NSString*)mimeTypeFromExtension:(NSString*)ext
+{
+	NSString* mime = @"application/octet-stream";
 	
 	if ([ext isEqualToString:@"png"])
 	{
@@ -77,17 +94,34 @@
 -(void)startLoading
 {
 	static Logger* logger = Logger::Get("UI.TitaniumProtocols");
-
 	id<NSURLProtocolClient> client = [self client];
 	NSURL* url = [[self request] URL];
 	std::string urlString = [[url absoluteString] UTF8String];
 	std::string path = URLUtils::URLToPath(urlString);
 	NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
 
-	NSError* error;
-	NSData *data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
-	if (data == nil) { // File doesn't exist
+	// First check if this is the non-canonical version of this request.
+	// If it is, we redirect to the canonical version.
+	NSURLRequest* normalized = [TitaniumProtocols getNormalizedRequest:[self request]];
+	if (normalized != [self request])
+	{
+		NSURLResponse* response = [[NSURLResponse alloc]
+			initWithURL:url
+			MIMEType:@"text/plain"
+			expectedContentLength:0
+			textEncodingName:@"utf-8"];
+		[client 
+			URLProtocol:self
+			wasRedirectedToRequest:normalized
+			redirectResponse:response];
+		return;
+	}
 
+	// This is a canonical request, so try to load the file it represents.
+	NSError* error;
+	NSData* data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
+	if (data == nil) // File doesn't exist
+	{ 
 		logger->Error("Error finding %s", [nsPath UTF8String]);
 		[client URLProtocol:self didFailWithError:[NSError
 			errorWithDomain:NSURLErrorDomain
@@ -95,9 +129,10 @@
 			userInfo:nil]];
 		[client URLProtocolDidFinishLoading:self];
 		return;
-
-	} else { // It loaded!
-		NSURLResponse *response = [[NSURLResponse alloc]
+	}
+	else // It loaded!
+	{ 
+		NSURLResponse* response = [[NSURLResponse alloc]
 			initWithURL:url
 			MIMEType:[TitaniumProtocols mimeTypeFromExtension:[nsPath pathExtension]]
 			expectedContentLength:[data length]

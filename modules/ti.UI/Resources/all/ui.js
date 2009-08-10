@@ -136,8 +136,8 @@
 
 	/**
 	 * @tiapi(method=True,name=UI.showDialog,since=0.4) create a UI dialog
-	 * @tiarg(for=UI.showDialog,name=params,type=object) options to pass in to create window
-	 * @tiresult(for=UI.showDialog,type=object) dialog instance
+	 * @tiarg(for=UI.showDialog,name=params,type=Object) options to pass in to create window
+	 * @tiresult(for=UI.showDialog,type=UI.Dialog) dialog instance
 	 */
 	Titanium.UI.showDialog = function(params)
 	{
@@ -161,8 +161,8 @@
 		 * @tiapi(method=True,name=UI.Dialog.getDialogParameter,since=0.4)
 		 * @tiapi Get an incoming UI dialog parameter
 		 * @tiarg[string, name] Name of the parameter
-		 * @tiarg[string, value] Default value of the parameter
-		 * @tiresult[value] The parameter
+		 * @tiarg[string, any] Default value of the parameter
+		 * @tiresult[any] The parameter
 		 */
 		dialogWindow.getDialogParameter = function(name, defaultValue)
 		{
@@ -191,14 +191,14 @@
 	
 	/**
 	 * @tiapi(method=True,name=JSON.stringify,since=0.4) Convert a Javascript object to a JSON string
-	 * @tiarg(for=JSON.stringify,name=object,type=object) Javascript object to convert
-	 * @tiresult(for=JSON.stringify,type=string) Returns the string representation of the object in JSON format
+	 * @tiarg(for=JSON.stringify,name=object,type=Object) Javascript object to convert
+	 * @tiresult(for=JSON.stringify,type=String) Returns the string representation of the object in JSON format
 	 */
 	
 	/**
 	 * @tiapi(method=True,name=JSON.parse,since=0.4) Convert a JSON string to a Javascript object
-	 * @tiarg(for=JSON.parse,name=json,type=string) JSON string to convert
-	 * @tiresult(for=JSON.parse,type=object) Returns the object representation of the string 
+	 * @tiarg(for=JSON.parse,name=json,type=String) JSON string to convert
+	 * @tiresult(for=JSON.parse,type=Object) Returns the object representation of the string 
 	 */
 	
 	

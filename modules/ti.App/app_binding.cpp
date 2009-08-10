@@ -15,76 +15,76 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getID,since=0.2) Returns the application id
-		 * @tiresult(for=App.getID,type=string) returns the id
+		 * @tiresult(for=App.getID,type=String) returns the id
 		 */
 		this->SetMethod("getID", &AppBinding::GetID);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getName,since=0.2) Returns the application name
-		 * @tiresult(for=App.getName,type=string) returns the name
+		 * @tiresult(for=App.getName,type=String) returns the name
 		 */
 		this->SetMethod("getName", &AppBinding::GetName);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getVersion,since=0.2) Returns the application version
-		 * @tiresult(for=App.getVersion,type=string) returns the version
+		 * @tiresult(for=App.getVersion,type=String) returns the version
 		 */
 		this->SetMethod("getVersion", &AppBinding::GetVersion);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getPublisher,since=0.4) Returns the application publisher
-		 * @tiresult(for=App.getPublisher,type=string) returns the publisher
+		 * @tiresult(for=App.getPublisher,type=String) returns the publisher
 		 */
 		this->SetMethod("getPublisher", &AppBinding::GetPublisher);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getURL,since=0.4) Returns the application url
-		 * @tiresult(for=App.getURL,type=string) returns the url for the app
+		 * @tiresult(for=App.getURL,type=String) returns the url for the app
 		 */
 		this->SetMethod("getURL", &AppBinding::GetURL);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getDescription,since=0.4) Returns the application description
-		 * @tiresult(for=App.getDescription,type=string) returns the description for the app
+		 * @tiresult(for=App.getDescription,type=String) returns the description for the app
 		 */
 		this->SetMethod("getDescription", &AppBinding::GetDescription);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getCopyright,since=0.4) Returns the application copyright information
-		 * @tiresult(for=App.getCopyright,type=string) returns the copyright for the app
+		 * @tiresult(for=App.getCopyright,type=String) returns the copyright for the app
 		 */
 		this->SetMethod("getCopyright", &AppBinding::GetCopyright);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getGUID,since=0.2) Returns the application globally unique id
-		 * @tiresult(for=App.getGUID,type=string) returns the unique id
+		 * @tiresult(for=App.getGUID,type=String) returns the unique id
 		 */
 		this->SetMethod("getGUID", &AppBinding::GetGUID);
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getStreamURL,since=0.4) Returns the application stream URL for the update channel
-		 * @tiresult(for=App.getStreamURL,type=string) returns the stream URL
+		 * @tiresult(for=App.getStreamURL,type=String) returns the stream URL
 		 */
 		this->SetMethod("getStreamURL", &AppBinding::GetStreamURL);
 
 		
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.appURLToPath,since=0.2) Returns the full path equivalent of an app: protocol path
-		 * @tiresult(for=App.appURLToPath,type=string) returns the path
+		 * @tiresult(for=App.appURLToPath,type=String) returns the path
 		 */
 		this->SetMethod("appURLToPath", &AppBinding::AppURLToPath);
 		
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=App.path,since=0.2) Returns the full path to the application
+		 * @tiapi(property=True,immutable=True,type=String,name=App.path,since=0.2) Returns the full path to the application
 		 */
 		this->Set("path",Value::NewString(host->GetCommandLineArg(0)));
 
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=App.home,since=0.4) Returns the full path to the application home directory
+		 * @tiapi(property=True,immutable=True,type=String,name=App.home,since=0.4) Returns the full path to the application home directory
 		 */
 		this->Set("home",Value::NewString(host->GetApplicationHomePath()));
 
 
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=version,since=0.2) The Titanium product version
+		 * @tiapi(property=True,immutable=True,type=String,name=version,since=0.2) The Titanium product version
 		 */
 		SharedValue version = Value::NewString(STRING(PRODUCT_VERSION));
 		global->Set("version", version);
 
 		/**
-		 * @tiapi(property=True,immutable=True,type=string,name=platform,since=0.2) The Titanium platform
+		 * @tiapi(property=True,immutable=True,type=String,name=platform,since=0.2) The Titanium platform
 		 */
 		SharedValue platform = Value::NewString(host->GetPlatform());
 		global->Set("platform",platform);
@@ -97,7 +97,7 @@ namespace ti
 		}
 		SharedValue arguments = Value::NewList(argList);
 		/**
-		 * @tiapi(property=True,immutable=True,type=list,name=App.arguments,since=0.2) The command line arguments
+		 * @tiapi(property=True,immutable=True,type=array<String>,name=App.arguments,since=0.2) The command line arguments
 		 */
 		Set("arguments", arguments);
 
@@ -108,26 +108,26 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=App.createProperties,since=1.0) create a new properties object
-		 * @tiarg(for=App.createProperties,type=object,name=initialProperties,optional=True) optional initial properties
+		 * @tiarg(for=App.createProperties,type=App.Properties,name=initialProperties,optional=True) optional initial properties
 		 * @tiresult(for=App.createProperties,type=App.Properties) returns a new properties instance
 		 */
 		this->SetMethod("createProperties", &AppBinding::CreateProperties);
 		
 		/**
 		 * @tiapi(method=True,name=App.loadProperties,since=0.2) Loads a properties list from a file path
-		 * @tiarg(for=App.loadProperties,type=string,name=path) path to properties file
+		 * @tiarg(for=App.loadProperties,type=String,name=path) path to properties file
 		 * @tiresult(for=App.loadProperties,type=Array<App.Properties>) returns the properties as a list
 		 */
 		this->SetMethod("loadProperties", &AppBinding::LoadProperties);
 
 		/**
 		 * @tiapi(method=True,name=App.stdout,since=0.4) Writes to stdout
-		 * @tiarg(for=App.stdout,type=string,name=data) data to write
+		 * @tiarg(for=App.stdout,type=any,name=data) data to write
 		 */
 		this->SetMethod("stdout", &AppBinding::StdOut);
 		/**
 		 * @tiapi(method=True,name=App.stderr,since=0.4) Writes to stderr
-		 * @tiarg(for=App.stderr,type=string,name=data) data to write
+		 * @tiarg(for=App.stderr,type=any,name=data) data to write
 		 */
 		this->SetMethod("stderr", &AppBinding::StdErr);
 		

@@ -19,7 +19,7 @@ namespace ti
 	{
 		instance = this;
 
-		// @tiproperty[integer, UI.CENTERED, since=1.0] The CENTERED event constant
+		// @tiproperty[Number, UI.CENTERED, since=1.0] The CENTERED event constant
 		this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
 		/**
@@ -102,32 +102,32 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=UI.setDockIcon,version=0.2) Sets the dock icon
-		 * @tiarg(for=UI.setDockIcon,type=string,name=icon) path to the icon
+		 * @tiarg(for=UI.setDockIcon,type=String,name=icon) path to the icon
 		 */
 		this->SetMethod("setDockIcon", &UIBinding::_SetDockIcon);
 
 		/**
 		 * @tiapi(method=True,name=UI.setDockMenu,version=0.2) Sets the dock menu
-		 * @tiarg(for=UI.setDockMenu,type=object,name=menu) a MenuItem object
+		 * @tiarg(for=UI.setDockMenu,type=UI.Menu,name=menu) The new menu for the dock
 		 */
 		this->SetMethod("setDockMenu", &UIBinding::_SetDockMenu);
 
 		/**
 		 * @tiapi(method=True,name=UI.setBadge,version=0.2) Sets the application's badge value
-		 * @tiarg(for=UI.setBadge,type=string,name=badge) badge value
+		 * @tiarg(for=UI.setBadge,type=String,name=badge) badge value
 		 */
 		this->SetMethod("setBadge", &UIBinding::_SetBadge);
 
 		/**
 		 * @tiapi(method=True,name=UI.setBadgeImage,version=0.2) Sets the application's badge image
-		 * @tiarg(for=UI.setBadge,type=string,name=badge_image) path to badge image
+		 * @tiarg(for=UI.setBadge,type=String,name=badge_image) path to badge image
 		 */
 		this->SetMethod("setBadgeImage", &UIBinding::_SetBadgeImage);
 
 		/**
 		 * @tiapi(method=True,name=UI.getIdleTime,version=0.2)
 		 * @tiapi Returns the user's idle time (for the desktop, not just the application)
-		 * @tiresult(for=UI.getIdleTime,type=double) the idle time as a double
+		 * @tiresult(for=UI.getIdleTime,type=Number) Number of milliseconds of idle time.
 		 */
 		this->SetMethod("getIdleTime", &UIBinding::_GetIdleTime);
 

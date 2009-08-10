@@ -43,26 +43,26 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=Process.Process.getPID,since=0.5)
-		 * @tiresult[int, pid] The PID of this process
+		 * @tiresult[Number] The PID of this process
 		 */
 		SetMethod("getPID", &Process::_GetPID);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getExitCode,since=0.5)
-		 * @tiresult[int, pid] The exit code of this process. If the process is still running, this will return -1
+		 * @tiresult[Number] The exit code of this process. If the process is still running, this will return -1
 		 */
 		SetMethod("getExitCode", &Process::_GetExitCode);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getArguments,since=0.5)
-		 * @tiresult[List<String>, arguments] The list of arguments this process was created with
+		 * @tiresult[Array<String>] The list of arguments this process was created with
 		 */
 		SetMethod("getArguments", &Process::_GetArguments);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getEnvironment,since=0.5)
 		 * @tiarg[String, key] an environment key
-		 * @tiresult[Any<String,Object> result] either the string value of the passed-in environment key, or the entire environment object
+		 * @tiresult[String|Object] Either the string value of the given key or the entire environment object
 		 */
 		SetMethod("getEnvironment", &Process::_GetEnvironment);
 		
@@ -99,8 +99,9 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.sendSignal,since=0.5)
+		 * @tiapi Send a signal (e.g. Process.SIGHUP) to this Process
 		 * @tiapi NOTE: this method does nothing in Windows
-		 * @tiarg[Any<int,String> signal] send a signal, i.e. Process.SIGHUP
+		 * @tiarg[Number|String, signal] The name of the signal to send.
 		 */
 		SetMethod("sendSignal", &Process::_SendSignal);
 		
@@ -120,31 +121,31 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getStdin,since=0.5)
-		 * @tiresult[Process.Pipe, pipe] the standard input pipe for this process
+		 * @tiresult[Process.Pipe] the standard input pipe for this process
 		 */
 		SetMethod("getStdin", &Process::_GetStdin);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getStdout,since=0.5)
-		 * @tiresult[Process.Pipe, pipe] the standard output pipe for this process
+		 * @tiresult[Process.Pipe] the standard output pipe for this process
 		 */
 		SetMethod("getStdout", &Process::_GetStdout);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.getStderr,since=0.5)
-		 * @tiresult[Process.Pipe, pipe] the standard error pipe for this process
+		 * @tiresult[Process.Pipe] the standard error pipe for this process
 		 */
 		SetMethod("getStderr", &Process::_GetStderr);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.isRunning,since=0.5)
-		 * @tiresult[bool, running] whether or not this process is actively running
+		 * @tiresult[Boolean] whether or not this process is actively running
 		 */
 		SetMethod("isRunning", &Process::_IsRunning);
 		
 		/**
 		 * @tiapi(method=True,name=Process.Process.toString,since=0.5)
-		 * @tiresult[String, str] the arguments of this process as a string
+		 * @tiresult[String] the arguments of this process as a string
 		 */
 		SetMethod("toString", &Process::_ToString);
 	}

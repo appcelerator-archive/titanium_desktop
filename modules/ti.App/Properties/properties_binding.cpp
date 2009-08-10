@@ -41,30 +41,30 @@ namespace ti
 	{
 		/**
 		 * @tiapi(method=True,name=App.Properties.getBool,since=0.2) Returns a property value as boolean
-		 * @tiarg[string, name] The name of the property to return
-		 * @tiarg[bool, default] The value to return if this property is not set
-		 * @tiresult[bool] The value of the property with the given name
+		 * @tiarg[String, name] The name of the property to return
+		 * @tiarg[Boolean, default] The value to return if this property is not set
+		 * @tiresult[Boolean] The value of the property with the given name
 		 */
 		SetMethod("getBool", &PropertiesBinding::GetBool);
 		/**
 		 * @tiapi(method=True,name=App.Properties.getDouble,since=0.2) Returns a property value as double
-		 * @tiarg[string, name] The name of the property to return
-		 * @tiarg[double, default] The value to return if this property is not set
-		 * @tiresult[double] The value of the property with the given name
+		 * @tiarg[String, name] The name of the property to return
+		 * @tiarg[Number, default] The value to return if this property is not set
+		 * @tiresult[Number] The value of the property with the given name
 		 */
 		SetMethod("getDouble", &PropertiesBinding::GetDouble);
 		/**
 		 * @tiapi(method=True,name=App.Properties.getInt,since=0.2) Returns a property value as integer
-		 * @tiarg[string, name] The name of the property to return
-		 * @tiarg[int, default] The value to return if this property is not set
-		 * @tiresult[int] The value of the property with the given name
+		 * @tiarg[String, name] The name of the property to return
+		 * @tiarg[Number, default] The value to return if this property is not set
+		 * @tiresult[Number] The value of the property with the given name
 		 */
 		SetMethod("getInt", &PropertiesBinding::GetInt);
 		/**
 		 * @tiapi(method=True,name=App.Properties.getString,since=0.2) Returns a property value as string
-		 * @tiarg[string, name] The name of the property to return
-		 * @tiarg[string, default] The value to return if this property is not set
-		 * @tiresult[string] The value of the property with the given name
+		 * @tiarg[String, name] The name of the property to return
+		 * @tiarg[String, default] The value to return if this property is not set
+		 * @tiresult[String] The value of the property with the given name
 		 */
 		SetMethod("getString", &PropertiesBinding::GetString);
 		/**
@@ -76,48 +76,48 @@ namespace ti
 		SetMethod("getList", &PropertiesBinding::GetList);
 		/**
 		 * @tiapi(method=True,name=App.Properties.setBool,since=0.2) Sets a boolean property value
-		 * @tiarg(for=App.Properties.setBool,name=name,type=string) the property name
-		 * @tiarg(for=App.Properties.setBool,name=value,type=boolean) the value
+		 * @tiarg(for=App.Properties.setBool,name=name,type=String) the property name
+		 * @tiarg(for=App.Properties.setBool,name=value,type=Boolean) the value
 		 */
 		SetMethod("setBool", &PropertiesBinding::SetBool);
 		/**
 		 * @tiapi(method=True,name=App.Properties.setDouble,since=0.2) Sets a double property value
-		 * @tiarg(for=App.Properties.setDouble,name=name,type=string) the property name
-		 * @tiarg(for=App.Properties.setDouble,name=value,type=double) the value
+		 * @tiarg(for=App.Properties.setDouble,name=name,type=String) the property name
+		 * @tiarg(for=App.Properties.setDouble,name=value,type=Number) the value
 		 */
 		SetMethod("setDouble", &PropertiesBinding::SetDouble);
 		/**
 		 * @tiapi(method=True,name=App.Properties.setInt,since=0.2) Sets an integer property value
-		 * @tiarg(for=App.Properties.setInt,name=name,type=string) the property name
-		 * @tiarg(for=App.Properties.setInt,name=value,type=integer) the value
+		 * @tiarg(for=App.Properties.setInt,name=name,type=String) the property name
+		 * @tiarg(for=App.Properties.setInt,name=value,type=Number) the value
 		 */
 		SetMethod("setInt", &PropertiesBinding::SetInt);
 		/**
 		 * @tiapi(method=True,name=App.Properties.setString,since=0.2) Sets a string property value
-		 * @tiarg(for=App.Properties.setString,name=name,type=string) the property name
-		 * @tiarg(for=App.Properties.setString,name=value,type=string) the value
+		 * @tiarg(for=App.Properties.setString,name=name,type=String) the property name
+		 * @tiarg(for=App.Properties.setString,name=value,type=String) the value
 		 */
 		SetMethod("setString", &PropertiesBinding::SetString);
 		/**
 		 * @tiapi(method=True,name=App.Properties.setList,since=0.2) Sets a list property value
-		 * @tiarg(for=App.Properties.setList,name=name,type=string) the property name
-		 * @tiarg(for=App.Properties.setList,name=value,type=list) the value
+		 * @tiarg(for=App.Properties.setList,name=name,type=String) the property name
+		 * @tiarg(for=App.Properties.setList,name=value,type=Array<String>) the value
 		 */
 		SetMethod("setList", &PropertiesBinding::SetList);
 		/**
 		 * @tiapi(method=True,name=App.Properties.hasProperty,since=0.2) Checks whether a property exists
-		 * @tiarg(for=App.Properties.hasProperty,name=name,type=string) the property name
-		 * @tiresult(for=App.Properties.hasProperty,type=boolean) returns true if the property exists
+		 * @tiarg(for=App.Properties.hasProperty,name=name,type=String) the property name
+		 * @tiresult(for=App.Properties.hasProperty,type=Boolean) returns true if the property exists
 		 */
 		SetMethod("hasProperty", &PropertiesBinding::HasProperty);
 		/**
 		 * @tiapi(method=True,name=App.Properties.listProperties,since=0.2) Returns a list of property values
-		 * @tiresult(for=App.Properties.listProperties,type=list) returns a list of property values
+		 * @tiresult(for=App.Properties.listProperties,type=Array<String>) returns a list of property values
 		 */
 		SetMethod("listProperties", &PropertiesBinding::ListProperties);
 		/**
 		 * @tiapi(method=True,name=App.Properties.saveTo,since=0.2) save this properties object to a file
-		 * @tiarg(for=App.Properties.saveTo,name=filename,type=string) the filename
+		 * @tiarg(for=App.Properties.saveTo,name=filename,type=String) the filename
 		 */
 		SetMethod("saveTo", &PropertiesBinding::SaveTo);
 	
