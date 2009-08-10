@@ -371,7 +371,7 @@ describe("process tests",
 	test_pipe_write: function()
 	{
 		var o = Titanium.Process.createPipe();
-		var blob = Titanium.CoreTypes.createBlob("some data");
+		var blob = Titanium.API.createBlob("some data");
 		var written = o.write(blob);
 		value_of(written).should_be(blob.length);
 		o.close();
