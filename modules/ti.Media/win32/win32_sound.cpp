@@ -194,7 +194,6 @@ namespace ti
 	
 	void Win32Sound::GraphCallback(const ValueList& args, SharedValue result)
 	{
-		printf("graph callback\n");
 		long code, param1, param2;
 
 		// Get the next event on the queue and wait 
@@ -205,7 +204,6 @@ namespace ti
 			mediaEventEx->FreeEventParams(code, param1, param2);
 			if ((EC_COMPLETE == code) || (EC_USERABORT == code))
 			{
-				printf("completed\n");
 				this->Stop();
 
 				// Run the callback before playing.
@@ -220,7 +218,6 @@ namespace ti
 
 			hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0);
 		}
-		printf("Done\n");
 	}
 	
 	void Win32Sound::OnComplete(SharedKMethod callback)
