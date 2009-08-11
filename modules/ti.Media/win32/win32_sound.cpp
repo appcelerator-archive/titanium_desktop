@@ -9,36 +9,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include<sstream>
-
 namespace ti
 {
-	UINT Win32Sound::graphNotifyMessage = ::RegisterWindowMessage(PRODUCT_NAME "GraphNotify");
-
-	void Win32Sound::InitGraphBuilder ()
-	{
-		HRESULT hr;
-
-		hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
-			IID_IGraphBuilder, (void **) &graphBuilder);
-		if (FAILED(hr)) throw ValueException::FromString("Failed creating Graph Builder for sound");
-		
-		hr = graphBuilder->QueryInterface(IID_IBasicAudio, (void**)&basicAudio);
-		if (FAILED(hr)) throw ValueException::FromString("Failed querying IBasicAudio for sound");
-		
-		hr = graphBuilder->QueryInterface(IID_IMediaControl, (void **)&mediaControl);
-		if (FAILED(hr)) throw ValueException::FromString("Failed querying IMediaControl for sound");
-		
-		hr = graphBuilder->QueryInterface(IID_IMediaEventEx, (void **)&mediaEventEx);
-		if (FAILED(hr)) throw ValueException::FromString("Failed querying IMediaEventEx for sound");
-		
-		hr = graphBuilder->QueryInterface(IID_IMediaSeeking, (void **)&mediaSeeking);
-		if (FAILED(hr)) throw ValueException::FromString("Failed querying IMediaSeeking for sound");
-	}
+	UINT Win32Sound::graphNotifyMessage = ::RegisterWindowMessage(PRODUCT_NAME"GraphNotify");
 
 	Win32Sound::Win32Sound(std::string &url) :
 		Sound(url),
+		looping(false),
 		callback(0),
+		path(URLUtils::URLToPath(url)),
+		state(STOPPED),
 		graphBuilder(NULL),
 		mediaControl(NULL),
 		mediaEventEx(NULL),
@@ -46,24 +26,27 @@ namespace ti
 	{
 		InitGraphBuilder();
 
-		std::string path = URLUtils::URLToPath(url);
-		BSTR pathBstr = _bstr_t(path.c_str());
-
 		// why does a sound event need an HWND?? oh windows..
-		SharedValue value = Host::GetInstance()->GetGlobalObject()->GetNS("UI.mainWindow.windowHandle");
+		// TODO: We need to have a hidden window to listen for all these orphan 
+		// messages. There is no risk of a hidden window blinking out of existence. 
+		SharedValue value = Host::GetInstance()->GetGlobalObject()->GetNS(
+			"UI.mainWindow.windowHandle");
 		if (value->IsVoidPtr())
 		{
 			HWND hwnd = (HWND) value->ToVoidPtr();
 			mediaEventEx->SetNotifyWindow((OAHWND)hwnd, graphNotifyMessage, 0);
 			
-			MethodCallback* messageCallback =
-				NewCallback<Win32Sound, const ValueList&, SharedValue>(this, &Win32Sound::GraphCallback);
-			SharedKMethod method = new StaticBoundMethod(messageCallback);
+			SharedKMethod graphCallback = 
+				StaticBoundMethod::FromMethod<Win32Sound>(
+					this, &Win32Sound::GraphCallback);
+
 			Host::GetInstance()->GetGlobalObject()->CallNS(
-				"UI.mainWindow.addMessageHandler", Value::NewInt(graphNotifyMessage), Value::NewMethod(method));
+				"UI.mainWindow.addMessageHandler", 
+				Value::NewInt(graphNotifyMessage), 
+				Value::NewMethod(graphCallback));
 		}
 
-		graphBuilder->RenderFile(pathBstr, NULL);
+		this->LoadFile();
 	}
 
 	Win32Sound::~Win32Sound()
@@ -76,132 +59,172 @@ namespace ti
 			mediaEventEx->Release();
 		if (mediaSeeking)
 			mediaSeeking->Release();
-
-		if (callback)
-		{
-			delete callback;
-		}
 	}
 	
+	void Win32Sound::LoadFile()
+	{
+		BSTR pathBstr = _bstr_t(this->path.c_str());
+		graphBuilder->RenderFile(pathBstr, NULL);
+	}
+
+	void Win32Sound::InitGraphBuilder()
+	{
+		HRESULT hr;
+
+		hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
+			IID_IGraphBuilder, (void **) &graphBuilder);
+		if (FAILED(hr))
+			throw ValueException::FromString("Failed creating Graph Builder for sound");
+		
+		hr = graphBuilder->QueryInterface(IID_IBasicAudio, (void**) &basicAudio);
+		if (FAILED(hr))
+			throw ValueException::FromString("Failed querying IBasicAudio for sound");
+		
+		hr = graphBuilder->QueryInterface(IID_IMediaControl, (void **) &mediaControl);
+		if (FAILED(hr))
+			throw ValueException::FromString("Failed querying IMediaControl for sound");
+		
+		hr = graphBuilder->QueryInterface(IID_IMediaEventEx, (void **) &mediaEventEx);
+		if (FAILED(hr))
+			throw ValueException::FromString("Failed querying IMediaEventEx for sound");
+		
+		hr = graphBuilder->QueryInterface(IID_IMediaSeeking, (void **) &mediaSeeking);
+		if (FAILED(hr))
+			throw ValueException::FromString("Failed querying IMediaSeeking for sound");
+	}
+
 	void Win32Sound::Play()
 	{
-		mediaControl->Run();
+		if (this->state != PLAYING)
+		{
+			this->state = PLAYING;
+			mediaControl->Run();
+		}
 	}
 	
 	void Win32Sound::Pause()
 	{
-		HRESULT hr = mediaControl->Pause();
-		if (hr == S_FALSE) {
-			// wait for the state change
-			FILTER_STATE fs;
-			HRESULT hr = mediaControl->GetState(500, (OAFilterState*)&fs);
+		if (this->state == PLAYING)
+		{
+			this->state = PAUSED;
+			mediaControl->Stop();
 		}
 	}
 	
 	void Win32Sound::Stop()
 	{
-		mediaControl->Stop();
-		//REFERENCE_TIME rt;
-		//mediaSeeking->SetPositions(&rt, AM_SEEKING_AbsolutePositioning, NULL, AM_SEEKING_NoPositioning);
+		if (this->state == PLAYING)
+		{
+			this->state = STOPPED;
+			mediaControl->Stop();
+
+			// Set the stream location to start at 0 (absolute beginning)
+			// and have it end at NoPosition. I.E. keep playing.
+			LONGLONG newStartPosition = 0;
+			mediaSeeking->SetPositions(
+				&newStartPosition, AM_SEEKING_AbsolutePositioning, 
+				NULL, AM_SEEKING_NoPositioning);
+		}
 	}
 	
 	void Win32Sound::Reload()
 	{
+		this->Stop();
+		this->LoadFile();
 	}
 	
 	void Win32Sound::SetVolume(double volume)
 	{
-		if (volume > 1.0) {
+		if (volume > 1.0)
 			volume = 1.0;
-		}
+		else if (volume < 0.0)
+			volume = 0.0;
+
 		long newVolume = -1 * floor((1.0-volume)*4000);
 		basicAudio->put_Volume(newVolume);
 	}
 	
 	double Win32Sound::GetVolume()
 	{
-		long volume;
+		long volume = 0;
 		HRESULT hr = basicAudio->get_Volume(&volume);
-
-		if ( SUCCEEDED(hr) )
+		if (SUCCEEDED(hr))
 		{
-			std::stringstream s;
-			s << volume;
-
-			std::string buf;
-
-			buf = "current volume from IBasicAudio (" + s.str() + ")";
-			PRINTD(buf.c_str());
-
-			if (volume < -4000.0) {
+			if (volume < -4000.0)
 				volume = -4000.0;
-			}
 		}
 		else 
 		{
-			throw ValueException::FromString("IBasicAudio for current volume");		
+			throw ValueException::FromString(
+				"Could not get current volume from IBasicAudio.");		
 		}
 		return 1.0 - (abs(volume) / 4000.0);
 	}
 	
 	void Win32Sound::SetLooping(bool loop)
 	{
+		this->looping = true;
 	}
 	
 	bool Win32Sound::IsLooping()
 	{
-		return false;
+		return this->looping;
 	}
 	
 	bool Win32Sound::IsPlaying()
 	{
-		FILTER_STATE fs;
-		HRESULT hr = mediaControl->GetState(500, (OAFilterState*)&fs);
-		return (fs == State_Running);
+		return state == PLAYING;
 	}
 	
 	bool Win32Sound::IsPaused()
 	{
-		FILTER_STATE fs;
-		HRESULT hr = mediaControl->GetState(500, (OAFilterState*)&fs);
-		return (fs == State_Paused);
+		return state == PAUSED;
 	}
 	
 	void Win32Sound::Completed()
 	{
-		ValueList args;
-		SharedValue arg = Value::NewBool(true);
-		args.push_back(arg);
-		
-		// GraphCallback already executes from the main thread (WndProc event)
-		(*this->callback)->Call(args);
+		if (!callback.isNull())
+		{
+			// GraphCallback already executes from the main thread 
+			// (WndProc event), but we want this to execute in a deferred way.
+			Host::GetInstance()->InvokeMethodOnMainThread(
+				callback, ValueList(Value::NewBool(true)), false);
+		}
 	}
 	
 	void Win32Sound::GraphCallback(const ValueList& args, SharedValue result)
 	{
-		if (!this->callback) return;
-		
+		printf("graph callback\n");
 		long code, param1, param2;
-		HRESULT hr;
-		while (hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0), SUCCEEDED(hr))
+
+		// Get the next event on the queue and wait 
+		// 0 milliseconds when the queue is empty.
+		HRESULT hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0);
+		while (hr == S_OK)
 		{ 
-			hr = mediaEventEx->FreeEventParams(code, param1, param2);
+			mediaEventEx->FreeEventParams(code, param1, param2);
 			if ((EC_COMPLETE == code) || (EC_USERABORT == code))
 			{
-				mediaControl->Stop();
+				printf("completed\n");
+				this->Stop();
+
+				// Run the callback before playing.
+				// The callback may want to halt looping.
 				this->Completed();
-				break;
+
+				if (this->IsLooping())
+					this->Play();
+
+				this->Completed();
 			} 
+
+			hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0);
 		}
+		printf("Done\n");
 	}
 	
 	void Win32Sound::OnComplete(SharedKMethod callback)
 	{
-		if (this->callback)
-		{
-			delete this->callback;
-		}
-		
-		this->callback = new SharedKMethod(callback);
+		this->callback = callback;
 	}
 }

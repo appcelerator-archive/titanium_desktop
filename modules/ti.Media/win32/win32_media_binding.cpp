@@ -7,16 +7,20 @@
 
 namespace ti
 {
-	Win32MediaBinding::Win32MediaBinding(SharedKObject global) : MediaBinding(global)
+	Win32MediaBinding::Win32MediaBinding(SharedKObject global) :
+		MediaBinding(global)
 	{
 	}
+
 	Win32MediaBinding::~Win32MediaBinding()
 	{
 	}
+
 	void Win32MediaBinding::Beep()
 	{
 		MessageBeep(MB_OK);
 	}
+
 	SharedKObject Win32MediaBinding::CreateSound(std::string& url)
 	{
 		return new Win32Sound(url);

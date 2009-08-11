@@ -9,9 +9,8 @@
 
 #include <kroll/kroll.h>
 #include <vector>
-#include "../sound.h"
-
 #include <dshow.h>
+#include "../sound.h"
 
 using namespace kroll;
 
@@ -36,17 +35,25 @@ namespace ti
 		virtual void OnComplete(SharedKMethod callback);
 
 		void GraphCallback(const ValueList& args, SharedValue result);
+		void LoadFile();
 		static UINT graphNotifyMessage;
 		
 	private:
-		bool failedToLoad;
-		IGraphBuilder *graphBuilder;
-		IMediaControl *mediaControl;
-		IMediaEventEx *mediaEventEx;
-		IMediaSeeking *mediaSeeking;
-		IBasicAudio   *basicAudio;
-		
-		SharedKMethod* callback;
+		bool looping;
+		SharedKMethod callback;
+		std::string path;
+		enum PlayState {
+			PLAYING,
+			STOPPED,
+			PAUSED
+		} state;
+
+		IGraphBuilder* graphBuilder;
+		IMediaControl* mediaControl;
+		IMediaEventEx* mediaEventEx;
+		IMediaSeeking* mediaSeeking;
+		IBasicAudio* basicAudio;
+
 			
 		void Completed();
 		void InitGraphBuilder();

@@ -37,61 +37,58 @@ describe("ti.Media tests", {
 	test_play_sound_as_async: function(callback)
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
+		sound.onComplete(function(){
+			clearTimeout(timer);
+			value_of(sound.isPlaying()).should_be_false();
+			callback.passed();
+		});
+
 		sound.play();
-		
-		var timer = 0;
+		setTimeout(function(){
+			try
+			{
+				value_of(sound.isPlaying()).should_be_true();
+				sound.pause();
+				value_of(sound.isPlaying()).should_be_false();
+				value_of(sound.isPaused()).should_be_true();
+				value_of(sound.isLooping()).should_be_false();
+				sound.stop();
+			}
+			catch (exception)
+			{
+				callback.failed(exception);
+			}
+			callback.passed();
+		}, 1000);
 		
 		setTimeout(function(){
-			value_of(sound.isPlaying()).should_be_true();
-			sound.pause();
-			value_of(sound.isPlaying()).should_be_false();
-			value_of(sound.isPaused()).should_be_true();
-			value_of(sound.isLooping()).should_be_false();
-			sound.play();
-			
-			sound.onComplete(function(){
-				clearTimeout(timer);
-				value_of(sound.isPlaying()).should_be_false();
-				callback.passed();
-			});
-		}, 2000);
-		
-		timer = setTimeout(function(){
 			callback.failed("sound onComplete timed out");
 		}, 10000);
 	},
 
 	// We can re-enable this test when looping is implemented on  Win32.
-	//test_play_sound_looping_as_async: function(callback)
-	//{
-	//	var sound = Titanium.Media.createSound("app://sound.wav");
-	//	sound.play();
-	//	
-	//	var timer = 0;
-	//	setTimeout(function(){
-	//		value_of(sound.isPlaying()).should_be_true();
-	//		// FIXME -- these is not implemented 
-	//		// looping isn't implemented, this should be false until
-	//		// we complete the code.
-	//		sound.setLooping(true);
-	//		if (!sound.isLooping())
-	//		{
-	//			sound.stop();
-	//			clearTimeout(timer);
-	//			callback.passed();
-	//		}
-	//		else
-	//		{
-	//			sound.stop();
-	//			clearTimeout(timer);
-	//			callback.failed("unit test has to be updated, sound looping implemented");
-	//		}
-	//	}, 2000);
-	//	
-	//	timer = setTimeout(function(){
-	//		callback.failed("sound error on looping test");
-	//	}, 10000);
-	//},
+	test_play_sound_looping_as_async: function(callback)
+	{
+		var timesPlayed = 0;
+		var sound = Titanium.Media.createSound("app://short_sound.wav");
+
+		sound.setLooping(true);
+		sound.onComplete(function()
+		{
+			timesPlayed = timesPlayed + 1;
+			if (timesPlayed > 1)
+			{
+				callback.passed();
+			}
+		});
+		sound.play();
+		
+		setTimeout(function()
+		{
+			callback.failed("Timeout waiting for sound to loop");
+		}, 4000);
+	},
+
 	test_play_sound_volume_as_async: function(callback)
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
