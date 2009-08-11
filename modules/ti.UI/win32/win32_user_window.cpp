@@ -66,33 +66,11 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 	}
 }
 
-void Win32UserWindow::AddMessageHandler(const ValueList& args,
-		SharedValue result)
-{
-	if (args.size() < 2 || !args.at(0)->IsNumber() || !args.at(1)->IsMethod())
-		return;
-
-	long messageCode = (long) args.at(0)->ToDouble();
-	SharedKMethod callback = args.at(1)->ToMethod();
-
-	messageHandlers[messageCode] = callback;
-}
-
 /*static*/
 LRESULT CALLBACK
 Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	Win32UserWindow *window = Win32UserWindow::FromWindow(hWnd);
-
-	if (window && (window->messageHandlers.size() > 0) && (window->messageHandlers.find(message) != window->messageHandlers.end()))
-	{
-		SharedKMethod handler = window->messageHandlers[message];
-		ValueList args;
-		args.push_back(Value::NewVoidPtr((void*)wParam));
-		args.push_back(Value::NewVoidPtr((void*)lParam));
-		handler->Call(args);
-		return 0;
-	}
 
 	switch (message)
 	{
@@ -104,51 +82,34 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_GETMINMAXINFO:
-			if (window) {
+			if (window)
+			{
 				MINMAXINFO *mmi = (MINMAXINFO*) lParam;
 				static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
 				static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
-				int max_width = (int) window->GetMaxWidth();
-				int min_width = (int) window->GetMinWidth();
-				int max_height = (int) window->GetMaxHeight();
-				int min_height = (int) window->GetMinHeight();
+				int maxWidth = (int) window->GetMaxWidth();
+				int minWidth = (int) window->GetMinWidth();
+				int maxHeight = (int) window->GetMaxHeight();
+				int minHeight = (int) window->GetMinHeight();
 
 				// offset the size of the window chrome
-				if (window->IsUsingChrome()) {
-					if (max_width > -1)
-						max_width += window->chromeWidth;
-					if (min_width > -1)
-						min_width += window->chromeWidth;
+				if (window->IsUsingChrome()) 
+				{
+					if (maxWidth > -1)
+						maxWidth += window->chromeWidth;
+					if (minWidth > -1)
+						minWidth += window->chromeWidth;
 					
-					if (max_height > -1)
-						max_height += window->chromeHeight;
-					if (min_height > -1)
-						min_height += window->chromeHeight;
+					if (maxHeight > -1)
+						maxHeight += window->chromeHeight;
+					if (minHeight > -1)
+						minHeight += window->chromeHeight;
 				}
 
-				if (max_width == -1) {
-					mmi->ptMaxTrackSize.x = INT_MAX; // Uncomfortably large
-				} else {
-					mmi->ptMaxTrackSize.x = max_width;
-				}
-
-				if (min_width == -1) {
-					mmi->ptMinTrackSize.x = minXTrackSize;
-				} else {
-					mmi->ptMinTrackSize.x = min_width;
-				}
-
-				if (max_height == -1) {
-					mmi->ptMaxTrackSize.y = INT_MAX; // Uncomfortably large
-				} else {
-					mmi->ptMaxTrackSize.y = max_height;
-				}
-
-				if (min_height == -1) {
-					mmi->ptMinTrackSize.y = minYTrackSize;
-				} else {
-					mmi->ptMinTrackSize.y = min_height;
-				}
+				mmi->ptMaxTrackSize.x = maxWidth == -1 ? INT_MAX : maxWidth;
+				mmi->ptMinTrackSize.x = minWidth == -1 ? minXTrackSize : minWidth;
+				mmi->ptMaxTrackSize.y = maxHeight == -1 ? INT_MAX : maxHeight;
+				mmi->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
 			}
 			break;
 
@@ -157,10 +118,12 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				window->ResizeSubViews();
 				window->FireEvent(Event::RESIZED);
-				if (wParam == SIZE_MAXIMIZED) {
+				if (wParam == SIZE_MAXIMIZED)
+				{
 					window->FireEvent(Event::MAXIMIZED);
-
-				} else if (wParam == SIZE_MINIMIZED) {
+				}
+				else if (wParam == SIZE_MINIMIZED)
+				{
 					window->FireEvent(Event::MINIMIZED);
 				}
 			}
@@ -182,14 +145,8 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			window->FireEvent(((BOOL)wParam) ? Event::SHOWN : Event::HIDDEN);
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
-		case TI_TRAY_CLICKED: {
-			UINT button = (UINT) lParam;
-			if (button == WM_LBUTTONDOWN || button == WM_RBUTTONDOWN) {
-				Win32TrayItem::HandleClickEvent(hWnd, message, wParam, lParam);
-			}
-		} break;
-
-		case WM_MENUCOMMAND: {
+		case WM_MENUCOMMAND:
+		{
 			HMENU nativeMenu = (HMENU) lParam;
 			UINT position = (UINT) wParam;
 			UINT itemId = GetMenuItemID(nativeMenu, position);
@@ -234,13 +191,13 @@ void Win32UserWindow::InitWindow()
 		logger->Error(error.str());
 	}
 
-	logger->Debug("Initializing windowHandle: %i", windowHandle);
+
+	// these APIs are semi-private -- we probably shouldn't mark them
 	// make our HWND available to 3rd party devs without needing our headers
 	SharedValue windowHandle = Value::NewVoidPtr((void*) this->windowHandle);
-	// these APIs are semi-private -- we probably shouldn't mark them
 	this->Set("windowHandle", windowHandle);
-	this->SetMethod("addMessageHandler", &Win32UserWindow::AddMessageHandler);
-	
+	logger->Debug("Initializing windowHandle: %i", windowHandle);
+
 	SetWindowUserData(this->windowHandle, this);
 }
 

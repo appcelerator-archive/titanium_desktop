@@ -34,7 +34,6 @@ namespace ti
 			std::string& defaultName,
 			std::vector<std::string>& types,
 			std::string& typesDescription);
-		void AddMessageHandler(const ValueList& args, SharedValue result);
 		void ResizeSubViews();
 		HWND GetWindowHandle();
 		void Hide();
@@ -112,7 +111,6 @@ namespace ti
 		IWebView* web_view;
 		IWebFrame *web_frame;
 		IWebInspector *web_inspector;
-		std::map<long, SharedKMethod> messageHandlers;
 		bool requires_display;
 	
 		AutoPtr<Win32Menu> menu; // The window-specific menu

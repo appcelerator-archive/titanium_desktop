@@ -34,10 +34,11 @@ namespace ti
 		virtual bool IsPaused();
 		virtual void OnComplete(SharedKMethod callback);
 
-		void GraphCallback(const ValueList& args, SharedValue result);
 		void LoadFile();
 		static UINT graphNotifyMessage;
-		
+		bool GraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+		static bool StaticGraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 	private:
 		bool looping;
 		SharedKMethod callback;

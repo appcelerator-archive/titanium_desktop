@@ -11,14 +11,24 @@
 #include <string>
 #include "../growl_binding.h"
 
-namespace ti {
-	class SnarlWin32 : public GrowlBinding {
-	public:
+namespace ti
+{
+	class SnarlWin32 : public GrowlBinding
+	{
+		public:
 		SnarlWin32(SharedKObject global);
 		virtual ~SnarlWin32();
 
 		virtual bool IsRunning();
-		virtual void ShowNotification(std::string& title, std::string& description, std::string& iconURL, int notification_delay, SharedKMethod callback);
+		virtual void ShowNotification(std::string& title, 
+			std::string& description, std::string& iconURL, 
+			int timeout, SharedKMethod callback);
+		void InvokeCallback();
+		static bool MessageHandler(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+		private:
+		static UINT snarlWindowMessage;
+		static std::map<long, SharedKMethod> snarlCallbacks;
 	};
 }
 

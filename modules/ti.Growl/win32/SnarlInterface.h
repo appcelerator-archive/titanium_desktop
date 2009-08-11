@@ -10,7 +10,8 @@
 #include <mbstring.h>
 #include <string>
 
-class SnarlInterface {
+class SnarlInterface
+{
 	public:
         static const int SNARL_STRING_LENGTH = 1024;
 		static const int SNARL_UNICODE_LENGTH = SNARL_STRING_LENGTH / 2;
