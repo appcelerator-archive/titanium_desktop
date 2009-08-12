@@ -179,6 +179,7 @@ namespace ti
 			if (!this->onWrite.isNull())
 			{
 				ValueList args;
+				args.push_back(Value::NewInt(count));
 				ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
 			}
 		}
