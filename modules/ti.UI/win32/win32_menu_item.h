@@ -1,8 +1,8 @@
 /**
- * Appcelerator Titanium - licensed under the Apache Public License 2
- * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
- */
+* Appcelerator Titanium - licensed under the Apache Public License 2
+* see LICENSE in the root folder for details on the license.
+* Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
+*/
 #ifndef _WIN32_MENU_ITEM_H_
 #define _WIN32_MENU_ITEM_H_
 namespace ti

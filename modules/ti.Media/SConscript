@@ -7,22 +7,27 @@ env.Append(CPPDEFINES = ('TITANIUM_API_EXPORT', 1))
 env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
-if build.is_osx():
-	env.Append(FRAMEWORKS = ['Cocoa'])
-
-if build.is_linux():
-	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10')
-
 sources = Glob('*.cpp')
 
 if build.is_osx():
-	sources += Glob('osx/*.cpp') + Glob('osx/*.mm')
+	env.Append(FRAMEWORKS = ['Cocoa'])
+	sources.extend(Glob('osx/*.cpp'))
+	sources.extend(Glob('osx/*.mm'))
+
+if build.is_linux():
+	sources.extend(Glob('gst/*.cpp'))
+	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10')
+
 
 elif build.is_win32():
+	sources.extend(Glob('win32/*.cpp'))
+	libs = [
+		'user32', 'shell32', 'kernel32', 'shlwapi',
+		'strmiids','ole32', 'comdlg32', 'comctl32',
+		'oleaut32', 'comsuppw', 'khost']
+	env.Append(LIBS = libs)
 	env.Append(CPPPATH=[path.join(build.third_party, 'microsoft', 'include')])
-	env.Append(LIBS = ['user32', 'shell32', 'kernel32', 'shlwapi', 'strmiids','ole32','comdlg32','comctl32','oleaut32', 'comsuppw'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
-	sources += Glob('win32/*.cpp')
 
 elif build.is_linux():
 	sources += Glob('gst/*.cpp')

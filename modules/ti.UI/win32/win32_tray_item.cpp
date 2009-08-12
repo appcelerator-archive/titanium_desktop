@@ -5,8 +5,6 @@
  */
 #include "../ui_module.h"
 
-#define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
-
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
@@ -16,18 +14,13 @@ namespace ti
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
-		AutoUserWindow uw = 0;
-		std::vector<AutoUserWindow>& windows = UIBinding::GetInstance()->GetOpenWindows();
-		std::vector<AutoUserWindow>::iterator i = windows.begin();
-		if (i != windows.end())
-		{
-			uw = *i;
-		}
 
-		AutoPtr<Win32UserWindow> wuw = (*i).cast<Win32UserWindow>();
+		HWND hwnd = Win32Host::Win32Instance()->AddMessageHandler(
+			&Win32TrayItem::MessageHandler);
+
 		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
 		notifyIconData->cbSize = sizeof(NOTIFYICONDATA);
-		notifyIconData->hWnd = wuw->GetWindowHandle();
+		notifyIconData->hWnd = hwnd;
 		notifyIconData->uID = ++Win32UIBinding::nextItemId;
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
@@ -132,20 +125,42 @@ namespace ti
 	}
 
 	/*static*/
-	void Win32TrayItem::HandleClickEvent(
+	bool Win32TrayItem::MessageHandler(
 		HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		UINT button = (UINT) lParam;
-		int id = LOWORD(wParam);
+		if (message == TI_TRAY_CLICKED)
+		{
+			UINT button = (UINT) lParam;
+			int id = LOWORD(wParam);
+			bool handled = false;
 
-		for (size_t i = 0; i < trayItems.size(); i++) {
-			AutoPtr<Win32TrayItem> item = trayItems[i];
+			for (size_t i = 0; i < trayItems.size(); i++)
+			{
+				AutoPtr<Win32TrayItem> item = trayItems[i];
 
-			if (item->GetId() == id && button == WM_LBUTTONDOWN) {
-				item->HandleLeftClick();
-			} else if (item->GetId() == id && button == WM_RBUTTONDOWN) {
-				item->HandleRightClick();
+				if (item->GetId() == id && button == WM_LBUTTONDOWN)
+				{
+					item->HandleLeftClick();
+					handled = true;
+				}
+				else if (item->GetId() == id && button == WM_RBUTTONDOWN)
+				{
+					item->HandleRightClick();
+					handled = true;
+				}
 			}
+			return handled;
+		}
+		else if (message == WM_MENUCOMMAND)
+		{
+			HMENU nativeMenu = (HMENU) lParam;
+			UINT position = (UINT) wParam;
+			return Win32MenuItem::HandleClickEvent(nativeMenu, position);
+		}
+		else
+		{
+			// Not handled;
+			return false;
 		}
 	}
 }

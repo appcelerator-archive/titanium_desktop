@@ -6,17 +6,6 @@
 				margin:10px;
 			}
 		</style>
-		<script type="text/python">
-from threading import Thread
-import time
-# Create thread to eat cpu
-def mythread():
-  a = 1
-  while True:
-    a = a + 1
-    print "in thread loop %s" % a
-Thread(target=mythread).start()
-</script>
 		<script>
 			var menu = null;
 			var item1 = null;

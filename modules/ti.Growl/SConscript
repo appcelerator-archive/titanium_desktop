@@ -21,7 +21,7 @@ if build.is_osx():
 	sources += Glob('%s/*.cpp' % build.os)
 
 elif build.is_win32():
-	env.Append(LIBS = ['user32', 'shell32', 'advapi32'])
+	env.Append(LIBS = ['user32', 'shell32', 'advapi32', 'khost'])
 	sources += Glob('%s/*.cpp' % build.os)
 
 elif build.is_linux():

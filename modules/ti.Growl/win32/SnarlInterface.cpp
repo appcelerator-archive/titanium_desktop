@@ -5,17 +5,21 @@
  */
 #include "SnarlInterface.h"
 
-SnarlInterface::SnarlInterface() {
+SnarlInterface::SnarlInterface()
+{
 	SNARL_GLOBAL_MESSAGE = "SnarlGlobalMessage";
 }
 
-SnarlInterface::~SnarlInterface() {
+SnarlInterface::~SnarlInterface()
+{
 
 }
 
-long SnarlInterface::snShowMessage(std::wstring title, std::wstring text, long timeout, std::wstring iconPath, HWND hWndReply, long uReplyMsg) {
-    SNARLSTRUCT snarlStruct;
-    snarlStruct.cmd = SNARL_SHOW;
+long SnarlInterface::snShowMessage(std::wstring title, std::wstring text, 
+	long timeout, std::wstring iconPath, HWND hWndReply, long uReplyMsg)
+{
+	SNARLSTRUCT snarlStruct;
+	snarlStruct.cmd = SNARL_SHOW;
 
 	int len;
 	char* buf = convertToMultiByte(title, &len);
@@ -33,16 +37,19 @@ long SnarlInterface::snShowMessage(std::wstring title, std::wstring text, long t
 	snarlStruct.icon[len] = 0;
 	delete[] buf;
 
-    snarlStruct.timeout = timeout;
-    snarlStruct.lngData2 = reinterpret_cast<long>(hWndReply);
-    snarlStruct.id = uReplyMsg;
-    return send(snarlStruct);
+	snarlStruct.timeout = timeout;
+	snarlStruct.lngData2 = reinterpret_cast<long>(hWndReply);
+	snarlStruct.id = uReplyMsg;
+	return send(snarlStruct);
 }
 
-long SnarlInterface::snShowMessageEx(std::wstring title, std::wstring text, long timeout, std::wstring iconPath, HWND hWndReply, long uReplyMsg, std::wstring soundPath, std::wstring msgClass) {
-    SNARLSTRUCTEX snarlStruct;
-    snarlStruct.cmd = SNARL_EX_SHOW;
-    
+long SnarlInterface::snShowMessageEx(std::wstring title, std::wstring text,
+	long timeout, std::wstring iconPath, HWND hWndReply, long uReplyMsg,
+	std::wstring soundPath, std::wstring msgClass)
+{
+	SNARLSTRUCTEX snarlStruct;
+	snarlStruct.cmd = SNARL_EX_SHOW;
+
 	int len;
 	char* buf = convertToMultiByte(title, &len);
 	strncpy(snarlStruct.title, buf, SNARL_STRING_LENGTH - 1);
@@ -64,32 +71,36 @@ long SnarlInterface::snShowMessageEx(std::wstring title, std::wstring text, long
 	snarlStruct.snarlClass[len] = 0;
 	delete[] buf;
 
-    snarlStruct.timeout = timeout;
-    snarlStruct.lngData2 = reinterpret_cast<long>(hWndReply);
-    snarlStruct.id = uReplyMsg;
-    return send(snarlStruct);
+	snarlStruct.timeout = timeout;
+	snarlStruct.lngData2 = reinterpret_cast<long>(hWndReply);
+	snarlStruct.id = uReplyMsg;
+	return send(snarlStruct);
 }
 
-bool SnarlInterface::snHideMessage(long id) {
-    SNARLSTRUCT snarlStruct;
-    snarlStruct.id = id;
-    snarlStruct.cmd = SNARL_HIDE;
-    return static_cast<bool>(send(snarlStruct));
-}
-
-bool SnarlInterface::snIsMessageVisible(long id) {
-    SNARLSTRUCT snarlStruct;
-    snarlStruct.id = id;
-    snarlStruct.cmd = SNARL_IS_VISIBLE;
-    return static_cast<bool>(send(snarlStruct));
-}
-
-bool SnarlInterface::snUpdateMessage(long id, std::wstring title, std::wstring text, std::wstring icon) {
+bool SnarlInterface::snHideMessage(long id)
+{
 	SNARLSTRUCT snarlStruct;
-    snarlStruct.id = id;
-    snarlStruct.cmd = SNARL_UPDATE;
+	snarlStruct.id = id;
+	snarlStruct.cmd = SNARL_HIDE;
+	return static_cast<bool>(send(snarlStruct));
+}
 
-    int len;
+bool SnarlInterface::snIsMessageVisible(long id)
+{
+	SNARLSTRUCT snarlStruct;
+	snarlStruct.id = id;
+	snarlStruct.cmd = SNARL_IS_VISIBLE;
+	return static_cast<bool>(send(snarlStruct));
+}
+
+bool SnarlInterface::snUpdateMessage(long id, std::wstring title, 
+	std::wstring text, std::wstring icon)
+{
+	SNARLSTRUCT snarlStruct;
+	snarlStruct.id = id;
+	snarlStruct.cmd = SNARL_UPDATE;
+
+	int len;
 	char* buf = convertToMultiByte(title, &len);
 	strncpy(snarlStruct.title, buf, SNARL_STRING_LENGTH - 1);
 	snarlStruct.title[len] = 0;
@@ -105,31 +116,35 @@ bool SnarlInterface::snUpdateMessage(long id, std::wstring title, std::wstring t
 	snarlStruct.icon[len] = 0;
 	delete[] buf;
 
-    return static_cast<bool>(send(snarlStruct));
+	return static_cast<bool>(send(snarlStruct));
 }
 
-bool SnarlInterface::snRegisterConfig(HWND hWnd, std::wstring appName, long replyMsg) {
-    SNARLSTRUCT snarlStruct;
-    snarlStruct.cmd = SNARL_REGISTER_CONFIG_WINDOW;
-    snarlStruct.lngData2 = reinterpret_cast<long>(hWnd);
-    snarlStruct.id = replyMsg;
+bool SnarlInterface::snRegisterConfig(HWND hWnd, std::wstring appName,
+	long replyMsg)
+{
+	SNARLSTRUCT snarlStruct;
+	snarlStruct.cmd = SNARL_REGISTER_CONFIG_WINDOW;
+	snarlStruct.lngData2 = reinterpret_cast<long>(hWnd);
+	snarlStruct.id = replyMsg;
 
-    int len;
+	int len;
 	char* buf = convertToMultiByte(appName, &len);
 	strncpy(snarlStruct.title, buf, SNARL_STRING_LENGTH - 1);
 	snarlStruct.title[len] = 0;
 	delete[] buf;
 
-    return static_cast<bool>(send(snarlStruct));
+	return static_cast<bool>(send(snarlStruct));
 }
 
-bool SnarlInterface::snRegisterConfig2(HWND hWnd, std::wstring appName, long replyMsg, std::wstring icon) {
+bool SnarlInterface::snRegisterConfig2(HWND hWnd, std::wstring appName,
+	long replyMsg, std::wstring icon)
+{
 	SNARLSTRUCT snarlStruct;
 
 	snarlStruct.cmd = SNARL_REGISTER_CONFIG_WINDOW_2;
 	snarlStruct.lngData2 = reinterpret_cast<long>(hWnd);
-    snarlStruct.id = replyMsg;
-   
+	snarlStruct.id = replyMsg;
+
 	int len;
 	char* buf = convertToMultiByte(appName, &len);
 	strncpy(snarlStruct.title, buf, SNARL_STRING_LENGTH - 1);
@@ -141,17 +156,19 @@ bool SnarlInterface::snRegisterConfig2(HWND hWnd, std::wstring appName, long rep
 	snarlStruct.icon[len] = 0;
 	delete[] buf;
 
-    return static_cast<bool>(send(snarlStruct));
+	return static_cast<bool>(send(snarlStruct));
 }
 
-bool SnarlInterface::snRevokeConfig(HWND hWnd) {
+bool SnarlInterface::snRevokeConfig(HWND hWnd)
+{
 	SNARLSTRUCT snarlStruct;
-    snarlStruct.cmd = SNARL_REVOKE_CONFIG_WINDOW;
-    snarlStruct.lngData2 = reinterpret_cast<long>(hWnd);
-    return static_cast<bool>(send(snarlStruct));
+	snarlStruct.cmd = SNARL_REVOKE_CONFIG_WINDOW;
+	snarlStruct.lngData2 = reinterpret_cast<long>(hWnd);
+	return static_cast<bool>(send(snarlStruct));
 }
 
-bool SnarlInterface::snRegisterAlert(std::wstring appName, std::wstring alertName) {
+bool SnarlInterface::snRegisterAlert(std::wstring appName, std::wstring alertName)
+{
 	SNARLSTRUCT snarlStruct;
 	snarlStruct.cmd = SNARL_REGISTER_ALERT;
 
@@ -169,39 +186,45 @@ bool SnarlInterface::snRegisterAlert(std::wstring appName, std::wstring alertNam
 	return static_cast<bool>(send(snarlStruct));
 }
 
-bool SnarlInterface::snGetVersion(int* major, int* minor) {
+bool SnarlInterface::snGetVersion(int* major, int* minor)
+{
 	SNARLSTRUCT snarlStruct;
-    snarlStruct.cmd = SNARL_GET_VERSION;
-    long versionInfo = send(snarlStruct);
+	snarlStruct.cmd = SNARL_GET_VERSION;
+	long versionInfo = send(snarlStruct);
 	if (versionInfo) {
 		int maj = static_cast<int>(HIWORD(versionInfo));
 		*major = maj;
 		int min = static_cast<int>(LOWORD(versionInfo));
 		*minor = min;
-        return true;
+		return true;
 	}
 	return false;
 }
 
-long SnarlInterface::snGetVersionEx() {
+long SnarlInterface::snGetVersionEx()
+{
 	SNARLSTRUCT snarlStruct;
 	snarlStruct.cmd = SNARL_GET_VERSION_EX;
 	return send(snarlStruct);
 }
 
-HWND SnarlInterface::snGetSnarlWindow() {
+HWND SnarlInterface::snGetSnarlWindow()
+{
 	return FindWindow(NULL, "Snarl");
 }
 
-long SnarlInterface::snGetGlobalMsg() {
+long SnarlInterface::snGetGlobalMsg()
+{
 	return RegisterWindowMessage(SNARL_GLOBAL_MESSAGE.c_str());
 }
 
-std::string SnarlInterface::snGetIconsPath() {
+std::string SnarlInterface::snGetIconsPath()
+{
 	return snGetAppPath() + "\\etc\\icons";
 }
 
-std::string SnarlInterface::snGetAppPath() {
+std::string SnarlInterface::snGetAppPath()
+{
 	HKEY hKey;
 	DWORD cb;
 	std::string retVal;
@@ -226,7 +249,8 @@ std::string SnarlInterface::snGetAppPath() {
 	return retVal;
 }
 
-std::string SnarlInterface::getPath(std::string path) {
+std::string SnarlInterface::getPath(std::string path)
+{
 	if (path == "")
 		return path;
 
@@ -259,17 +283,20 @@ std::wstring SnarlInterface::convertTowstring(LPSTR str)
 }
 
 template <class T>
-long SnarlInterface::send(T snarlStruct) {
+long SnarlInterface::send(T snarlStruct)
+{
 	HWND hWnd = snGetSnarlWindow();
-	if (IsWindow(hWnd)) {
+	if (IsWindow(hWnd))
+	{
 		DWORD lr;
 		COPYDATASTRUCT cds;
 		cds.dwData = 2;
 		cds.cbData = sizeof(snarlStruct);
 		cds.lpData = &snarlStruct;
 		SendMessageTimeout(hWnd, WM_COPYDATA, 0, (LPARAM)&cds, SMTO_ABORTIFHUNG, 100, &lr);
-		if (lr) {
-            return lr;
+		if (lr)
+		{
+			return lr;
 		}
 	}
 	return 0;
