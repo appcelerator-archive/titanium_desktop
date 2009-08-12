@@ -80,27 +80,22 @@ namespace ti
 			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
 			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
 
-			g_signal_connect(
-				G_OBJECT(webView), "window-object-cleared",
-				G_CALLBACK(WindowObjectClearedCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "new-window-policy-decision-requested",
-				G_CALLBACK(NewWindowPolicyDecisionCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "populate-popup",
-				G_CALLBACK(PopulatePopupCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "load-finished",
-				G_CALLBACK(LoadFinishedCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "title-changed",
-				G_CALLBACK(TitleChangedCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "notify::window-features",
-				G_CALLBACK(FeaturesChangedCallback), this);
-			g_signal_connect(
-				G_OBJECT(webView), "create-web-view",
-				G_CALLBACK(CreateWebViewCallback), this);
+			g_object_connect(G_OBJECT(webView),
+				"signal::window-object-cleared", 
+				G_CALLBACK(WindowObjectClearedCallback), this,
+				"signal::new-window-policy-decision-requested",
+				G_CALLBACK(NewWindowPolicyDecisionCallback), this,
+				"signal::populate-popup",
+				G_CALLBACK(PopulatePopupCallback), this,
+				"signal::load-finished",
+				G_CALLBACK(LoadFinishedCallback), this,
+				"signal::title-changed",
+				G_CALLBACK(TitleChangedCallback), this,
+				"signal::notify::window-features",
+				G_CALLBACK(FeaturesChangedCallback), this,
+				"signal::create-web-view",
+				G_CALLBACK(CreateWebViewCallback), this,
+				NULL);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
