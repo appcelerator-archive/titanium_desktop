@@ -336,10 +336,8 @@ void Win32UserWindow::InitWebKit()
 
 	web_view_private->Release();
 
-	_bstr_t inspector_url("ti://runtime/inspector/inspector.html");
-	_bstr_t localized_strings_url("ti://runtime/inspector/localizedStrings.js");
+	_bstr_t inspector_url("ti://runtime/WebKit.resources/inspector/inspector.html");
 	web_inspector->setInspectorURL(inspector_url.copy());
-	web_inspector->setLocalizedStringsURL(localized_strings_url.copy());
 
 	hr = web_view->mainFrame(&web_frame);
 	//web_view->setShouldCloseWithWindow(TRUE);
