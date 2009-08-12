@@ -34,9 +34,9 @@ describe("Network.Proxy",{
 			value_of( theProxy ).should_be_object();
 			
 			var host	 = theProxy.getHostName();
-			var password = theProxy.getHostName();
-			var port	 = theProxy.getHostName();
-			var userName = theProxy.getHostName();
+			var password = theProxy.getPassword();
+			var port	 = theProxy.getPort();
+			var userName = theProxy.getUserName();
 
 			Titanium.API.debug(host);
 			Titanium.API.debug(password);
@@ -69,9 +69,9 @@ describe("Network.Proxy",{
 			value_of( theProxy ).should_be_object();
 			
 			var host	 = theProxy.getHostName();
-			var password = theProxy.getHostName();
-			var port	 = theProxy.getHostName();
-			var userName = theProxy.getHostName();
+			var password = theProxy.getPassword();
+			var port	 = theProxy.getPort();
+			var userName = theProxy.getUserName();
 
 			Titanium.API.debug(host);
 			Titanium.API.debug(password);
