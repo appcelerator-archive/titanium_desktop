@@ -457,7 +457,7 @@ namespace ti
 				SharedValue sv = binding->Get("ondatastream");
 				if (sv->IsMethod())
 				{
-					streamer = sv->ToMethod()->Get("apply")->ToMethod();
+					streamer = sv->ToMethod()->Get("call")->ToMethod();
 				}
 
 				while(!rs.eof() && binding->Get("connected")->ToBool())
@@ -476,13 +476,10 @@ namespace ti
 
 								binding->duplicate();
 								args.push_back(Value::NewObject(binding));
-
-								SharedKList list = new StaticBoundList();
-								list->Append(Value::NewInt(count)); // total count
-								list->Append(totalValue); // total size
-								list->Append(Value::NewObject(new Blob(buf,c))); // buffer
-								list->Append(Value::NewInt(c)); // buffer length
-								args.push_back(Value::NewList(list));
+								args.push_back(Value::NewInt(count)); // total count
+								args.push_back(totalValue); // total size
+								args.push_back(Value::NewObject(new Blob(buf,c))); // buffer
+								args.push_back(Value::NewInt(c)); // buffer length
 
 								binding->host->InvokeMethodOnMainThread(streamer,args,binding->shutdown || !binding->async ? false : true);
 							}
@@ -491,6 +488,11 @@ namespace ti
 								ostr << buf;
 							}
 						}
+					}
+					catch (ValueException &e)
+					{
+						Logger* logger = Logger::Get("Network.HTTPClient");
+						logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.DisplayString()->c_str());
 					}
 					catch(std::exception &e)
 					{

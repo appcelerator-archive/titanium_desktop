@@ -178,5 +178,35 @@ describe("Network.HTTPClient",
 
 		foo = Titanium.Network.decodeURIComponent(foo);
 		value_of(foo).should_be('a b');
+	},
+	test_ondatastream_as_async: function(callback)
+	{
+		var client = Titanium.Network.createHTTPClient();
+		var timer = 0;
+		client.ondatastream = function() {
+			clearTimeout(timer);
+			callback.passed();
+		
+			/*try
+			{
+				//totalCount, totalSize, buffer, length
+				clearTimeout(timer);
+				value_of(list[3]).should_be_greater_than(0);
+				value_of(buffer.length).should_be(list[3]);
+				callback.passed();
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}*/
+		};
+		
+		timer = setTimeout(function()
+		{
+			callback.failed('ondatastream timed out');
+		},3000);
+		
+		client.open("GET", "http://api.appcelerator.net/p/v1/echo");
+		client.send(null);
 	}
 });
