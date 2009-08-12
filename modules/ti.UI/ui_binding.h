@@ -21,7 +21,7 @@ namespace ti
 		UIBinding(Host *host);
 		virtual ~UIBinding();
 		Host* GetHost();
-		static UIBinding* GetInstance() { return instance; }
+		static inline UIBinding* GetInstance() { return instance; }
 		virtual void CreateMainWindow(WindowConfig*);
 		virtual AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent) = 0;
 		virtual void ErrorDialog(std::string);
@@ -50,7 +50,6 @@ namespace ti
 		void _AddTray(const ValueList& args, SharedValue result);
 		void _ClearTray(const ValueList& args, SharedValue result);
 		void _GetIdleTime(const ValueList& args, SharedValue result);
-		
 		
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, SharedValue result);
@@ -83,6 +82,8 @@ namespace ti
 		std::vector<AutoUserWindow> openWindows;
 		std::vector<AutoTrayItem> trayItems;
 		std::string iconURL;
+
+		static void Log(Logger::Level level, std::string& message);
 	};
 }
 

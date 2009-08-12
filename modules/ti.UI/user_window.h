@@ -34,7 +34,8 @@ namespace ti
 			virtual ~UserWindow();
 			void UpdateWindowForURL(std::string url);
 			Host* GetHost();
-	
+
+			inline SharedKObject GetDOMWindow() { return this->domWindow; }
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::SharedValue);
 			void _GetDOMWindow(const kroll::ValueList&, kroll::SharedValue);
 			void _InsertAPI(const kroll::ValueList&, kroll::SharedValue);

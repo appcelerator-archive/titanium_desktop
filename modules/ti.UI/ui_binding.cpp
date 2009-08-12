@@ -152,6 +152,8 @@ namespace ti
 		SharedKObject global = host->GetGlobalObject();
 		SharedValue ui_binding_val = Value::NewObject(this);
 		global->Set("UI", ui_binding_val);
+
+		Logger::AddLoggerCallback(&UIBinding::Log);
 	}
 
 	void UIBinding::CreateMainWindow(WindowConfig* config)
@@ -452,6 +454,38 @@ namespace ti
 		SharedValue result)
 	{
 		result->SetDouble(this->GetIdleTime());
+	}
+
+	void UIBinding::Log(Logger::Level level, std::string& message)
+	{
+		if (level > Logger::LWARN)
+			return;
+
+		std::string methodName("warn");
+		if (level < Logger::LWARN)
+			methodName = "error";
+
+		std::string origMethodName(methodName);
+		origMethodName.append("_orig");
+
+		std::vector<AutoUserWindow>& openWindows = UIBinding::GetInstance()->GetOpenWindows();
+		for (size_t i = 0; i < openWindows.size(); i++)
+		{
+			SharedKObject domWindow = openWindows[i]->GetDOMWindow();
+			if (domWindow.isNull())
+				continue;
+
+			SharedKObject console = domWindow->GetObject("console", 0);
+			if (console.isNull())
+				continue;
+
+			SharedKMethod method = console->GetMethod(origMethodName.c_str(), 0);
+			if (method.isNull())
+				method = console->GetMethod(methodName.c_str(), 0);
+
+			Host::GetInstance()->InvokeMethodOnMainThread(
+				method, ValueList(Value::NewString(message)), false);
+		}
 	}
 }
 
