@@ -67,12 +67,16 @@ namespace ti
 
 		// our reactor event handlers
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, ReadableNotification>(*this, &TCPSocketBinding::OnRead));
-		//this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
+		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, TimeoutNotification>(*this, &TCPSocketBinding::OnTimeout));
 		this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, ErrorNotification>(*this, &TCPSocketBinding::OnError));
 	}
 	TCPSocketBinding::~TCPSocketBinding()
 	{
+		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, ReadableNotification>(*this, &TCPSocketBinding::OnRead));
+		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
+		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, TimeoutNotification>(*this, &TCPSocketBinding::OnTimeout));
+		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, ErrorNotification>(*this, &TCPSocketBinding::OnError));
 		if (this->opened)
 		{
 			this->reactor.stop();
@@ -105,6 +109,11 @@ namespace ti
 	}
 	void TCPSocketBinding::Connect(const ValueList& args, SharedValue result)
 	{
+		int timeout = 10;
+		if (args.size() > 0)
+		{
+			timeout = args.at(0)->ToInt();
+		}
 		std::string eprefix = "Connect exception: ";
 		if (this->opened)
 		{
@@ -113,7 +122,7 @@ namespace ti
 		try
 		{
 			SocketAddress a(this->host.c_str(),this->port);
-			this->reactor.setTimeout(Poco::Timespan(1,0)); // 1 second
+			this->reactor.setTimeout(Poco::Timespan(timeout, 0));
 			this->socket.connectNB(a);
 			this->thread.start(this->reactor);
 			this->opened = true;
@@ -172,7 +181,7 @@ namespace ti
 	void TCPSocketBinding::OnWrite(const Poco::AutoPtr<WritableNotification>& n)
 	{
 		Poco::Mutex::ScopedLock lock(bufferMutex);
-		if (buffer !="")
+		if (buffer != "")
 		{
 			int count = this->socket.sendBytes(buffer.c_str(),buffer.length());
 			buffer = "";
@@ -183,7 +192,10 @@ namespace ti
 				ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
 			}
 		}
-		this->reactor.removeEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
+		else
+		{
+			::Sleep(100);
+		}
 	}
 	void TCPSocketBinding::OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n)
 	{
@@ -201,6 +213,7 @@ namespace ti
 			return;
 		}
 		ValueList args;
+		args.push_back(Value::NewString(n->name()));
 		ti_host->InvokeMethodOnMainThread(this->onError, args, false);
 	}
 	void TCPSocketBinding::Write(const ValueList& args, SharedValue result)
@@ -215,7 +228,6 @@ namespace ti
 		{
 			Poco::Mutex::ScopedLock lock(bufferMutex);
 			buffer += args.at(0)->ToString();
-			this->reactor.addEventHandler(this->socket,NObserver<TCPSocketBinding, WritableNotification>(*this, &TCPSocketBinding::OnWrite));
 			result->SetBool(true);
 		}
 		catch(Poco::Exception &e)
