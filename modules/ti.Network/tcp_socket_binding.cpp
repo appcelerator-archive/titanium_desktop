@@ -194,7 +194,7 @@ namespace ti
 		}
 		else
 		{
-			::Sleep(100);
+			Poco::Thread::sleep(100);
 		}
 	}
 	void TCPSocketBinding::OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n)
