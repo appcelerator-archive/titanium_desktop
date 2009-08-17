@@ -22,13 +22,13 @@ namespace ti
 	{
 
 		/**
-		* @tiapi(method=True,name=UI.MenuItem.isSeparator,version=1.0)
+		* @tiapi(method=True,name=UI.MenuItem.isSeparator,since=0.6)
 		* @tiresult[Boolean] True if this item is a separator and false otherwise
 		*/
 		this->SetMethod("isSeparator", &MenuItem::_IsSeparator);
 
 		/**
-		* @tiapi(method=True,name=UI.MenuItem.isCheck,version=1.0)
+		* @tiapi(method=True,name=UI.MenuItem.isCheck,since=0.6)
 		* @tiresult[Boolean] True if this item is a check item and false otherwise
 		*/
 		this->SetMethod("isCheck", &MenuItem::_IsCheck);
@@ -37,7 +37,7 @@ namespace ti
 		{
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setLabel,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.setLabel,since=0.6)
 			* @tiapi Set the label for this item.
 			* @tiapi This method is not available for separator items.
 			* @tiarg[String, label] The new label for this item
@@ -45,7 +45,7 @@ namespace ti
 			this->SetMethod("setLabel", &MenuItem::_SetLabel);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getLabel,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.getLabel,since=0.6)
 			* @tiapi Get this item's label.
 			* @tiapi This method is not available for separator items.
 			* @tiresult[String] The label for this item
@@ -53,7 +53,7 @@ namespace ti
 			this->SetMethod("getLabel", &MenuItem::_GetLabel);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setSubmenu,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.setSubmenu,since=0.6)
 			* @tiapi Set this item's submenu.
 			* @tiapi This method is not available for separator items.
 			* @tiarg[UI.Menu|null, menu] The submenu to use for this item or null to unset it
@@ -61,7 +61,7 @@ namespace ti
 			this->SetMethod("setSubmenu", &MenuItem::_SetSubmenu);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getSubmenu,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.getSubmenu,since=0.6)
 			* @tiapi Get this item's submenu.
 			* @tiapi This method is not available for separator items.
 			* @tiresult[UI.Menu|null] This item's submenu or null if it does not have one
@@ -69,28 +69,28 @@ namespace ti
 			this->SetMethod("getSubmenu", &MenuItem::_GetSubmenu);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.enable,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.enable,since=0.6)
 			* @tiapi Enable this item i.e. make it clickable.
 			* @tiapi This method is not available for separator items.
 			*/
 			this->SetMethod("enable", &MenuItem::_Enable);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.disable,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.disable,since=0.6)
 			* @tiapi Disable this item i.e. make it non-clickable.
 			* @tiapi This method is not available for separator items.
 			*/
 			this->SetMethod("disable", &MenuItem::_Disable);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.isEnabled,version=1.0) 
+			* @tiapi(method=True,name=UI.MenuItem.isEnabled,since=0.6) 
 			* @tiresult[Boolean] Whether or not this item is enabled
 			* @tiapi This method is not available for separator items.
 			*/
 			this->SetMethod("isEnabled", &MenuItem::_IsEnabled);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.addItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addItem,since=0.6)
 			* @tiapi Add an item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -102,7 +102,7 @@ namespace ti
 			this->SetMethod("addItem", &MenuItem::_AddItem);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.addSeparatorItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addSeparatorItem,since=0.6)
 			* @tiapi Add a separator item to this menu item's submenu.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -111,7 +111,7 @@ namespace ti
 			this->SetMethod("addSeparatorItem", &MenuItem::_AddSeparatorItem);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.addCheckItem,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.addCheckItem,since=0.6)
 			* @tiapi Add a check item to this menu item's submenu with the given attributes.
 			* @tiapi If this menu item does not have a submenu, it will be created.
 			* @tiapi This method is not available for separator items.
@@ -128,7 +128,7 @@ namespace ti
 		if (this->type == NORMAL)
 		{
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setIcon,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.setIcon,since=0.6)
 			* @tiapi Set the icon URL for this item
 			* @tiapi This method is not available for separator or check items.
 			* @tiarg[String|null, iconURL] The new icon URL for this item or null to unset it
@@ -136,7 +136,7 @@ namespace ti
 			this->SetMethod("setIcon", &MenuItem::_SetIcon);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getIcon,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.getIcon,since=0.6)
 			* @tiapi Get this item's icon URL
 			* @tiapi This method is not available for separator or check items.
 			* @tiresult[String|null] The icon URL for this item or null if it does not have one
@@ -147,7 +147,7 @@ namespace ti
 		if (this->type == CHECK)
 		{
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setState,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.setState,since=0.6)
 			* @tiapi Sets the state of this check item
 			* @tiapi This method is only available for check items.
 			* @tiarg[Boolean, state] A True state is checked, while a False state in unchecked
@@ -155,7 +155,7 @@ namespace ti
 			this->SetMethod("setState", &MenuItem::_SetState);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getState,version=1.0)
+			* @tiapi(method=True,name=UI.MenuItem.getState,since=0.6)
 			* @tiapi Gets the state of this check item
 			* @tiapi This method is only available for check items.
 			* @tiresult[Boolean] True if this item is checked, false otherwise
@@ -163,7 +163,7 @@ namespace ti
 			this->SetMethod("getState", &MenuItem::_GetState);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.setAutoCheck,version=1.0) 
+			* @tiapi(method=True,name=UI.MenuItem.setAutoCheck,since=0.6) 
 			* @tiapi Set whether or not this check item is an autocheck item. An autocheck
 			* @tiapi item (the default) will automatically flip the state of the check on a
 			* @tiapi a click event. Turning off this behavior makes the check item more useful
@@ -174,7 +174,7 @@ namespace ti
 			this->SetMethod("setAutoCheck", &MenuItem::_SetAutoCheck);
 
 			/**
-			* @tiapi(method=True,name=UI.MenuItem.getAutoCheck,version=1.0) 
+			* @tiapi(method=True,name=UI.MenuItem.getAutoCheck,since=0.6) 
 			* @tiapi This method is only available for check items.
 			* @tiarg[Boolean, autocheck] Whether or not this item should is an autocheck
 			*/

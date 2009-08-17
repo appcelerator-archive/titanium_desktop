@@ -130,7 +130,7 @@ namespace ti
 		 */
 		signals["SIGXFSZ"] = SIGXFSZ;
 		/**
-		 * @tiapi(property=True,name=Process.v,since=0.5,platforms=osx|linux)
+		 * @tiapi(property=True,name=Process.SIGVTALRM,since=0.5,platforms=osx|linux)
 		 */
 		signals["SIGVTALRM"] = SIGVTALRM;
 		/**

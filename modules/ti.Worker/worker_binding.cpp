@@ -14,7 +14,7 @@ namespace ti
 	WorkerBinding::WorkerBinding(Host *host, SharedKObject global) : host(host), global(global)
 	{
 		/**
-		 * @tiapi(method=True,name=Worker.createWorker,since=0.5) 
+		 * @tiapi(method=True,name=Worker.createWorker,since=0.6) 
 		 * @tiapi Create a worker thread instance
 		 * @tiarg[String|Function, source] Either a Javascript function (does not 
 		 * @tiarg support closures), the URL of a JavaScript file, or

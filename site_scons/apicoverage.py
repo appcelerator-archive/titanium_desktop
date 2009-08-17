@@ -1,12 +1,22 @@
+#!/usr/bin/env python
 #
 # Titanium API Coverage Generator
 #
 # Initial Author: Jeff Haynie, 3/30/09
 #
 import glob, re, os.path as path
-import fnmatch, os, sys
+import fnmatch, os, sys, types
 import simplejson as json
 import traceback
+
+cwd = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
+sys.path.append(path.join(cwd,"../build"))
+
+import titanium_version
+baseVersion = titanium_version.version
+t = baseVersion.split(".")
+defaultVersion = "%s.%s" % (t[0],t[1])
+
 
 class GlobDirectoryWalker:
 	# a forward iterator that traverses a directory tree
@@ -71,12 +81,13 @@ def get_property(h,name,default,convert=True):
 
 class Module(object):
 	def __init__(self, name):
-		self.name = name
+		self.name = name.strip()
 		self.api_points = []
 		self.api_points_map = {}
 
 	def add_api(self, api):
-		if api.name in self.api_points_map.keys():
+		print ">> adding api = %s" % api.name
+		if api.name in self.api_points_map.keys() and force==False:
 			raise Exception("Tried to add %s API twice!" % api.name)
 		else:
 			self.api_points.append(api)
@@ -85,7 +96,7 @@ class Module(object):
 	
 	def get_api_with_name(self, api_name):
 		if not api_name in self.api_points_map.keys():
-			raise Exception("Tried to modify %s API before defining it!" % api.name)
+			raise Exception("Tried to modify %s API before defining it!" % api_name)
 		else:
 			return self.api_points_map[api_name]
 	
@@ -99,9 +110,29 @@ class Module(object):
 	def all_as_dict():
 		d = {}
 		for m in Module.modules.values():
-			d[m.name] = m.api_points_map
+			c = {}
+			for k in m.api_points_map:
+				v=m.api_points_map[k]
+				if k.find(".")!=-1:
+					a,b = k.split('.',1)
+					if c.has_key(a):
+						obj = c[a]
+						for kk in v:
+							obj[kk] = v[kk]
+					else:
+						c[a]=v
+					if c.has_key("description"):
+						del c["description"]	
+					if c.has_key("deprecated"):
+						del c["deprecated"]
+					if not c.has_key("object"):
+						c["object"]=True
+				else:
+					c[k]=v
+			d[m.name] = c
 		return d
 
+	
 class API(dict):
 	@staticmethod
 	def create_with_full_name(fullName):
@@ -113,9 +144,21 @@ class API(dict):
 		else:
 			module_name, api_name = fullName.strip().split('.', 1)
 			module = Module.get_with_name(module_name)
-			api = API(api_name, module)
+			if api_name.find(".")!=-1:
+				sub_module_name, sub_api_name = api_name.split('.',1)
+				if module.api_points_map.has_key(api_name):
+					sub_module_api = module.api_points_map[api_name]
+				else:
+					sub_module_api = API(sub_module_name,module)
+					module.api_points_map[api_name]=sub_module_api
+				api = API(sub_api_name)
+				sub_module_api.add_object(api)
+				return api
+			else:
+				api = API(api_name, module)
 		
 		module.add_api(api)
+
 		print "adding %s -- %s" % (api.module.name, api.name)
 		return api
 	
@@ -128,13 +171,17 @@ class API(dict):
 	
 	def __init__(self, name, module=None):
 		API.count += 1
-		self.name = self['name'] = name
+		self.name = self['name'] = name.strip()
 		self.module = module
 		self['deprecated'] = False
-		self['since'] = '0.3'
+		self['since'] = defaultVersion
 		self['description'] = ''
 	
-	def add_metadata(self, metadata):
+	def add_object(self,obj):
+		self[obj.name]=obj
+		self['object']=True
+		
+	def add_metadata(self, metadata, is_property = False):
 		self.name = get_property(metadata, 'name', self.name)
 		self['deprecated'] = get_property(metadata, 'deprecated', self['deprecated'])
 		self['description'] = get_property(metadata, 'description', self['description'])
@@ -143,8 +190,18 @@ class API(dict):
 			self['method'] = True
 			self['returns'] = None
 			self['arguments'] = []
-		if get_property(metadata, 'property', False):
+		if get_property(metadata, 'property', False) or is_property:
 			self['property'] = True
+		# default to property	
+		if metadata.has_key('platforms'):
+			platforms = {}
+			for osname in  metadata['platforms'].split('|'):
+				platforms[osname]=[]
+			self['platforms'] = platforms
+		else:
+			self['platforms'] = {"win23":[""], "linux":[""], "osx": [""]}	
+		if self.has_key('method') == False and self.has_key('property') == False:
+			raise Exception("invalid metadata for %s - missing either 'property' or 'method'"  % self.name) 
 	
 	def __str__(self):
 		return 'API<%s>' % self.name
@@ -199,6 +256,7 @@ def get_last_method_before(method_index, start):
 	else:
 		return None
 
+
 def generate_api_coverage(dirs,fs):
 	API.count = 0
 	Module.modules = {}
@@ -252,7 +310,7 @@ def generate_api_coverage(dirs,fs):
 					if len(bits) > 2:
 						metadata = parse_key_value_pairs(bits[2], metadata)
 					api = API.create_with_full_name(bits[1])
-					api.add_metadata(metadata)
+					api.add_metadata(metadata,True)
 					current_api = api
 					continue
 			
@@ -340,7 +398,14 @@ def generate_api_coverage(dirs,fs):
 				print"Exception parsing API metadata in file: %s" % filename
 				raise
 
-	fs.write(json.dumps(Module.all_as_dict(), sort_keys=True, indent=4))
+	j = Module.all_as_dict()
+
+	#global should just be top-level keys
+	g = j["<global>"]
+	for key in g:
+		j[key.strip()]=g[key]
+	del j["<global>"]
+	fs.write(json.dumps(j, sort_keys=True, indent=4))
 
 	print "Found %i APIs for %i modules in %i files" % (API.count, len(Module.modules), len(files_with_matches))
 
