@@ -107,7 +107,7 @@ namespace ti
 		this->SetMethod("exit",&AppBinding::Exit);
 
 		/**
-		 * @tiapi(method=True,name=App.createProperties,since=1.0) create a new properties object
+		 * @tiapi(method=True,name=App.createProperties,since=0.6) create a new properties object
 		 * @tiarg(for=App.createProperties,type=App.Properties,name=initialProperties,optional=True) optional initial properties
 		 * @tiresult(for=App.createProperties,type=App.Properties) returns a new properties instance
 		 */

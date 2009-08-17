@@ -21,21 +21,21 @@ namespace ti
 		this->SetMethod("setIcon", &TrayItem::_SetIcon);
 
 		/**
-		 * @tiapi(method=True,name=UI.Tray.getIcon,since=1.0)
+		 * @tiapi(method=True,name=UI.Tray.getIcon,since=0.6)
 		 * @tiapi Get the icon URL for this TrayItem
 		 * @tiresult[String] The icon URL in use for this TrayItem
 		 */
 		this->SetMethod("getIcon", &TrayItem::_GetIcon);
 
 		/**
-		 * @tiapi(method=True,name=UI.Tray.setMenu,since=1.0)
+		 * @tiapi(method=True,name=UI.Tray.setMenu,since=0.6)
 		 * @tiapi Set the menu for this TrayItem
 		 * @tiarg[UI.Menu|null, menu] The Menu to use for this TrayItem or null to unset
 		 */
 		this->SetMethod("setMenu", &TrayItem::_SetMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.Tray.getMenu,since=1.0)
+		 * @tiapi(method=True,name=UI.Tray.getMenu,since=0.6)
 		 * @tiapi Get the menu for this TrayItem
 		 * @tiresult[UI.Menu|null] The Menu in use for this TrayItem or null if unset
 		 */
@@ -48,7 +48,7 @@ namespace ti
 		this->SetMethod("setHint", &TrayItem::_SetHint);
 
 		/**
-		 * @tiapi(method=True,name=UI.Tray.getHint,since=1.0)
+		 * @tiapi(method=True,name=UI.Tray.getHint,since=0.6)
 		 * @tiapi Get the hint for this TrayItem
 		 * @tiresult[String] The hint in use for this TrayItem or an empty string if unset
 		 */
