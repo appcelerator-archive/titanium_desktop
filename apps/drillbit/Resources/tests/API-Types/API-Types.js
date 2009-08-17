@@ -590,4 +590,15 @@ describe("Blob, KObject, KList, etc",{
 		blob = Titanium.API.createBlob("1234567890-=!@#$%^&*()_+");
 		value_of(blob.toUpperCase()).should_be("1234567890-=!@#$%^&*()_+");
 	},
+	test_blob_concat: function()
+	{
+		var blob = Titanium.API.createBlob("Moz");
+		var blob2 = Titanium.API.createBlob("illa");
+		value_of(blob.concat).should_be_function();
+		value_of(blob.concat("illa")).should_be("Mozilla");
+		value_of(blob.concat("illa", " 123", "456")).should_be("Mozilla 123456");
+		value_of(blob.concat(blob2)).should_be("Mozilla");
+		
+		value_of(Titanium.API.createBlob("Moz",blob2)).should_be("Mozilla");
+	}
 });
