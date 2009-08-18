@@ -121,11 +121,6 @@ namespace ti
 			{
 				flags |= std::ios::in;
 			}
-
-#ifdef DEBUG
-			Logger* logger = Logger::Get("Filesystem.FileStream");
-			logger->Debug("FILE OPEN FLAGS = %d, binary=%d, mode=%d, append=%d",flags,binary,(int)mode,append);
-#endif
 			if (output)
 			{
 				this->stream = new Poco::FileOutputStream(this->filename,flags);
