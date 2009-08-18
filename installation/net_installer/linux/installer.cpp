@@ -752,6 +752,10 @@ int do_install_sudo()
 {
 	// Copy all but the first command-line arg
 	std::vector<std::string> args;
+
+	// Preserve the current environment so that http_proxy
+	// settings still work.
+	args.push_back("-k"); 
 	args.push_back("--description");
 	args.push_back("Titanium Network Installer");
 
@@ -786,6 +790,7 @@ int do_install_sudo()
 		// Erase gksudo specific options
 		args.erase(args.begin());
 		args.erase(args.begin());
+		args.erase(args.begin());
 		cmd = std::string("kdesudo");
 		args.insert(args.begin(), "The Titanium installer needs adminstrator privileges to run. Please enter your password.");
 		args.insert(args.begin(), "--comment");
@@ -799,6 +804,7 @@ int do_install_sudo()
 		args.erase(args.begin());
 		args.erase(args.begin());
 		cmd = std::string("xterm");
+		args.insert(args.begin(), "-E");
 		args.insert(args.begin(), "sudo");
 		args.insert(args.begin(), "-e");
 		r = FileUtils::RunAndWait(cmd, args);
