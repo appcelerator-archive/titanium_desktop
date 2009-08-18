@@ -192,7 +192,6 @@ namespace ti
 	}
 	HTTPClientBinding::~HTTPClientBinding()
 	{
-		printf("deleting client %lx\n", (long int) this);
 		this->shutdown = true;
 		if (this->thread!=NULL)
 		{
