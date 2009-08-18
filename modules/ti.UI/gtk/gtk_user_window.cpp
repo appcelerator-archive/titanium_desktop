@@ -18,8 +18,12 @@ namespace
 	/*static*/
 	inline bool GtkVersionSupportsWebViewTransparency()
 	{
-		return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
-			gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
+		// This is disabled until issues with
+		// WebKit and RGBA colormaps are solved.
+		return false;
+
+		//return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
+		//	gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
 	}
 }
 namespace ti
@@ -356,9 +360,12 @@ namespace ti
 	{
 		if (this->gtkWindow != NULL)
 		{
-			gtk_window_resize(this->gtkWindow,
-				(int) this->config->GetWidth(),
-				(int) this->config->GetHeight());
+			if (this->IsResizable())
+				gtk_window_resize(this->gtkWindow,
+					(int) this->config->GetWidth(),
+					(int) this->config->GetHeight());
+			else
+				this->SetupSizeLimits();
 	
 			// Resizing in GTK is asynchronous, so we prime the
 			// values here in hopes that things will turn out okay.
@@ -984,6 +991,7 @@ namespace ti
 		if (this->gtkWindow != NULL)
 		{
 			gtk_window_set_resizable(this->gtkWindow, resizable ? TRUE : FALSE);
+			this->SetupSizeLimits();
 		}
 	}
 	
