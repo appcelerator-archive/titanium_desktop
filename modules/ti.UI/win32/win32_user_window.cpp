@@ -1056,7 +1056,7 @@ void Win32UserWindow::OpenFileChooserDialog(
 	std::string& typesDescription)
 {
 
-	SharedKList results = SelectFile(
+	SharedKList results = this->SelectFile(
 		false, multiple, title, path, defaultName, types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
@@ -1096,18 +1096,15 @@ SharedKList Win32UserWindow::SelectFile(
 {
 	std::wstring filter;
 	std::wstring typesDescriptionW = UTF8ToWide(typesDescription);
-	std::wstring typeW = UTF8ToWide(type);
-
 	if (types.size() > 0)
 	{
 		//"All\0*.*\0Test\0*.TXT\0";
 		filter.append(typesDescriptionW);
-		filter.push_back('\0');
-
+		filter.push_back(L'\0');
 		for (int i = 0; i < types.size(); i++)
 		{
 			std::string type = types.at(i);
-
+			std::wstring typeW = UTF8ToWide(type);
 			//multiple filters: "*.TXT;*.DOC;*.BAK"
 			size_t found = type.find("*.");
 			if (found != 0)
@@ -1117,21 +1114,25 @@ SharedKList Win32UserWindow::SelectFile(
 			filter.append(typeW);
 			filter.append(L";");
 		}
-
-		filter.push_back('\0');
+		filter.push_back(L'\0');
 	}
 
 	OPENFILENAME ofn;
-	std::wstring filenameW = UTF8ToWide(defaultName);
-
+	wchar_t filenameW[1024];
+	wcscpy(filenameW, UTF8ToWide(defaultName).c_str());
+	
 	// init OPENFILE
 	std::wstring pathW = UTF8ToWide(path);
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = this->windowHandle;
-	ofn.lpstrFile = (LPWSTR) (filenameW.empty() ? NULL : filenameW.c_str());
-	ofn.nMaxFile = filenameW.size();
-	ofn.lpstrFilter = (LPWSTR) (filter.empty() ? NULL : filter.c_str());
+	ofn.lpstrFile = filenameW;
+	if (wcslen(filenameW) == 0)
+	{
+		ofn.lpstrFile[0] = L'\0';
+	}
+	ofn.nMaxFile = 1024;
+	ofn.lpstrFilter = (LPWSTR) (filter.size() == 0 ? NULL : filter.c_str());
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = NULL;
 	ofn.nMaxFileTitle = 0;
@@ -1160,11 +1161,11 @@ SharedKList Win32UserWindow::SelectFile(
 
 	if (saveDialog)
 	{
-		result = GetSaveFileName(&ofn);
+		result = ::GetSaveFileName(&ofn);
 	}
 	else
 	{
-		result = GetOpenFileName(&ofn);
+		result = ::GetOpenFileName(&ofn);
 	}
 
 	if (result)
@@ -1195,6 +1196,9 @@ SharedKList Win32UserWindow::SelectFile(
 	else
 	{
 		DWORD error = CommDlgExtendedError();
+		std::string errorMessage = Win32Utils::QuickFormatMessage(error);
+		Logger::Get("UI.Win32UserWindow")->Error("Error while opening files: %s", errorMessage.c_str());
+		/*
 		printf("Error when opening files: %d\n", error);
 		switch(error)
 		{
@@ -1213,7 +1217,7 @@ SharedKList Win32UserWindow::SelectFile(
 			case FNERR_INVALIDFILENAME: printf("FNERR_INVALIDFILENAME\n"); break;
 			case CDERR_MEMLOCKFAILURE: printf("CDERR_MEMLOCKFAILURE\n"); break;
 			case FNERR_SUBCLASSFAILURE: printf("FNERR_SUBCLASSFAILURE\n"); break;
-		}
+		}*/
 	}
 	return results;
 }
