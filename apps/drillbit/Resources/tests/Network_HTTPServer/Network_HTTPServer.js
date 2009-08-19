@@ -80,6 +80,8 @@ describe("Network.HTTPServer",
 			{
 				value_of(request.getMethod()).should_be('GET');
 				value_of(request.getURI()).should_be('/foo');
+				value_of(request.getHeaders()).should_be_object();
+				value_of(request.getHeaders()['Host']).should_not_be_undefined();
 				response.setContentType('text/plain');
 				response.setContentLength(3);
 				response.setStatusAndReason('200','OK');

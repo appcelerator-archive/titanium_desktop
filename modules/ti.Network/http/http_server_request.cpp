@@ -61,6 +61,13 @@ namespace ti
 		SetMethod("hasHeader",&HttpServerRequest::HasHeader);
 		
 		/**
+		 * @tiapi(method=True,name=Network.HTTPServerRequest.getHeaders,since=0.7) get an HTTP header value from this request
+		 * @tiarg(for=Network.HTTPServerRequest.getHeader,type=String,name=header) the header of the request
+		 * @tiresult(for=Network.HTTPServerRequest.getHeader,type=String) the value of the passed in HTTP header or null
+		 */
+		SetMethod("getHeaders", &HttpServerRequest::GetHeaders);
+	
+		/**
 		 * @tiapi(method=True,name=Network.HTTPServerRequest.read,since=0.3) read content from this request
 		 * @tiarg(for=Network.HTTPServerRequest.read,type=Number,optional=True,name=length) the number of bytes to read (default 8096)
 		 * @tiresult(for=Network.HTTPServerRequest.read,type=String) the data read from this request
@@ -122,6 +129,21 @@ namespace ti
 			result->SetNull();
 		}
 	}
+	
+	void HttpServerRequest::GetHeaders(const ValueList& args, SharedValue result)
+	{
+		Poco::Net::HTTPServerRequest::ConstIterator iter = request.begin();
+		AutoKObject headers = new StaticBoundObject();
+		
+		for(; iter != request.end(); iter++)
+		{
+			std::string name = iter->first;
+			std::string value = iter->second;
+			headers->SetString(name.c_str(), value.c_str());
+		}
+		result->SetObject(headers);
+	}
+	
 	void HttpServerRequest::HasHeader(const ValueList& args, SharedValue result)
 	{
 		std::string name = args.at(0)->ToString();

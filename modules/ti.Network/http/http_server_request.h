@@ -33,6 +33,7 @@ namespace ti
 		void GetContentType(const ValueList& args, SharedValue result);
 		void GetContentLength(const ValueList& args, SharedValue result);
 		void GetHeader(const ValueList& args, SharedValue result);
+		void GetHeaders(const ValueList& args, SharedValue result);
 		void HasHeader(const ValueList& args, SharedValue result);
 		void Read(const ValueList& args, SharedValue result);
 	};
