@@ -16,7 +16,7 @@ namespace ti
 
 	Win32UIBinding::Win32UIBinding(Module *uiModule, Host *host) :
 		UIBinding(host),
-		evaluator(host),
+		evaluator(),
 		menu(0),
 		contextMenu(0),
 		iconPath("")

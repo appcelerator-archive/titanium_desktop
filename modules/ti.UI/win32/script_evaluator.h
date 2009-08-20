@@ -6,26 +6,28 @@
 
 #ifndef SCRIPT_EVALUATOR_H_
 #define SCRIPT_EVALUATOR_H_
-class ScriptEvaluator : public IWebScriptEvaluator {
-public:
-	ScriptEvaluator(kroll::Host *host) : host(host), ref_count(1) {}
-	virtual ~ScriptEvaluator();
+namespace ti
+{
+	class ScriptEvaluator : public IWebScriptEvaluator {
+	public:
+		ScriptEvaluator() : ref_count(1) {}
+		virtual ~ScriptEvaluator();
 
-	// IUnknown
-	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject);
-	virtual ULONG STDMETHODCALLTYPE AddRef(void);
-	virtual ULONG STDMETHODCALLTYPE Release(void);
+		// IUnknown
+		virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject);
+		virtual ULONG STDMETHODCALLTYPE AddRef(void);
+		virtual ULONG STDMETHODCALLTYPE Release(void);
 
-	// IWebScriptEvaluator
-	virtual HRESULT STDMETHODCALLTYPE matchesMimeType(BSTR mimeType, BOOL *result);
-	virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context);
+		// IWebScriptEvaluator
+		virtual HRESULT STDMETHODCALLTYPE matchesMimeType(BSTR mimeType, BOOL *result);
+		virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context);
 
-protected:
-	kroll::Host *host;
-	int ref_count;
+	protected:
+		int ref_count;
 
-	std::string GetModuleName(std::string mimeType);
-	std::string BSTRToString(BSTR bstr);
-};
-
+		std::string GetModuleName(std::string mimeType);
+		SharedValue FindScriptModule(std::string type);
+		std::string BSTRToString(BSTR bstr);
+	};
+}
 #endif /* SCRIPT_EVALUATOR_H_ */
