@@ -13,14 +13,11 @@ env.Append(CPPPATH = [
 	'%s/modules/ti.App' % build.titanium_source_dir])
 
 build.add_thirdparty(env, 'poco')
-#if not build.is_linux():
 env.Append(LIBS=['tiappmodule','javascriptmodule'])
-if build.is_osx(): env.Append(FRAMEWORKS = ['Cocoa'])
 
 sources = Glob('*.cpp') + ['url/url.cpp']
-webkit_tp = path.join(build.third_party, 'webkit')
-webkit_lib = path.join(webkit_tp, 'lib')
-webkit_inc = path.join(webkit_tp, 'include')
+webkit_lib = build.tp('webkit', 'lib')
+webkit_inc = build.tp('webkit', 'include')
 
 if build.is_linux():
 	sources = sources + Glob('gtk/*.cpp')

@@ -11,9 +11,8 @@ env.Append(CPPPATH = ['%s/modules/javascript' % build.kroll_source_dir])
 env.Append(LIBPATH=[build.get_module('javascript').build_dir])
 env.Append(LIBS=['javascriptmodule'])
 
-webkit_tp = path.join(build.third_party, 'webkit')
-webkit_lib = path.join(webkit_tp, 'lib')
-webkit_inc = path.join(webkit_tp, 'include')
+webkit_lib = build.tp('webkit', 'lib')
+webkit_inc = build.tp('webkit', 'include')
 
 if build.is_linux():
 	env.Append(LIBS=['webkittitanium-1.0'])
