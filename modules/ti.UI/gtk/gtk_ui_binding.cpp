@@ -19,7 +19,6 @@ namespace ti
 {
 	GtkUIBinding::GtkUIBinding(Host *host) :
 		UIBinding(host),
-		evaluator(new ScriptEvaluator()),
 		menu(0),
 		contextMenu(0),
 		iconPath("")
@@ -31,9 +30,6 @@ namespace ti
 		// Setup libsoup proxy support
 		SoupSession* session = webkit_get_default_session();
 		soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
-
-		// Register the script evaluator
-		webkit_titanium_add_script_evaluator(evaluator);
 
 		char buf[256];
 		snprintf(buf, 256, "%s/%s", PRODUCT_NAME, STRING(PRODUCT_VERSION));

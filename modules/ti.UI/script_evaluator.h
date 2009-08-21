@@ -47,13 +47,13 @@ namespace ti
 #endif
 	{
 		public:
-		ScriptEvaluator() {}
 		static void Initialize();
 		SharedValue FindScriptModule(std::string type);
 		bool MatchesMimeType(std::string mimeType);
 		SharedValue Evaluate(std::string mimeType, std::string sourceCode, JSContextRef context);
 
 		protected:
+		ScriptEvaluator() {}
 		static AutoPtr<ScriptEvaluator> instance;
 
 		public:

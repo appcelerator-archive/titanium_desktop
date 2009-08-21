@@ -19,8 +19,10 @@ namespace ti
 #if defined(OS_OSX)
 		OSXScriptEvaluator *evaluator = [[OSXScriptEvaluator alloc] initWithEvaluator:instance.get()];
 		[WebScriptElement addScriptEvaluator:evaluator];
-#else
+#elif defined(OS_WIN32)
 		addScriptEvaluator(instance.get());
+#elif defined(OS_LINUX)
+		webkit_titanium_add_script_evaluator(instance.get());
 #endif
 	}
 	
