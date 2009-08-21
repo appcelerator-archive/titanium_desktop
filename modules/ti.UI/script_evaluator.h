@@ -15,13 +15,14 @@
 #	import <WebKit/WebScriptDebugDelegate.h>
 #	import <WebKit/WebScriptObject.h>
 #	import <WebKit/WebPreferencesPrivate.h>
-#else
+#elif defined(OS_LINUX)
 #	include <webkit/webkit.h>
-#	if defined(OS_WIN32)
-#		include <WebKit/WebKitCOMAPI.h>
-#		include <WebKit/WebKitTitanium.h>
-#		include <comutil.h>
-#	endif
+#	include <webkit/webkittitanium.h>
+#elif define
+#	include <WebKit/WebKit.h>
+#	include <WebKit/WebKitCOMAPI.h>
+#	include <WebKit/WebKitTitanium.h>
+#	include <comutil.h>
 #endif
 
 /**
@@ -44,19 +45,30 @@ namespace ti
 		: public ReferenceCounted
 #endif
 	{
-	public:
-#if defined(OS_WIN32)
-		virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject) { return COMReferenceCounted::QueryInterface(riid,ppvObject); }
-		virtual ULONG STDMETHODCALLTYPE AddRef(void) { return COMReferenceCounted::AddRef(); }
-		virtual ULONG STDMETHODCALLTYPE Release(void) { return COMReferenceCounted::Release(); }
-#endif
+		public:
+		ScriptEvaluator() {}
 		static void Initialize();
 		SharedValue FindScriptModule(std::string type);
 		bool MatchesMimeType(std::string mimeType);
 		SharedValue Evaluate(std::string mimeType, std::string sourceCode, JSContextRef context);
-		
+
+		protected:
+		static AutoPtr<ScriptEvaluator> instance;
+
+		public:
 #if defined(OS_WIN32)
-		// IWebScriptEvaluator
+		virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject)
+		{
+			 return COMReferenceCounted::QueryInterface(riid,ppvObject);
+		}
+		virtual ULONG STDMETHODCALLTYPE AddRef(void)
+		{
+			return COMReferenceCounted::AddRef();
+		}
+		virtual ULONG STDMETHODCALLTYPE Release(void)
+		{
+			return COMReferenceCounted::Release();
+		}
 		virtual HRESULT STDMETHODCALLTYPE matchesMimeType(BSTR mimeType, BOOL *result)
 		{
 			*result = this->MatchesMimeType((const char *)_bstr_t(mimeType));
@@ -64,18 +76,22 @@ namespace ti
 		}
 		virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context)
 		{
-			this->Evaluate((const char *)_bstr_t(mimeType), (const char *)_bstr_t(sourceCode),
+			this->Evaluate((const char *)_bstr_t(mimeType),
+				(const char *)_bstr_t(sourceCode),
 				reinterpret_cast<JSContextRef>(context));
 			return S_OK;
 		}
 #elif defined(OS_LINUX)
-		// WebKitWebScriptEvaluator
-		virtual bool matchesMimeType(const gchar *mime_type) { return this->MatchesMimeType(mime_type); }
-		virtual void evaluate(const gchar *mime_type, const gchar *source_code, void* context) { this->Evaluate(mime_type, source_code, context); }
+		virtual bool matchesMimeType(const gchar *mimeType)
+		{
+			return this->MatchesMimeType(mimeType);
+		}
+		virtual void evaluate(const gchar *mimeType, const gchar *sourceCode, void* context)
+		{
+			this->Evaluate(mimeType, sourceCode, 
+				reinterpret_cast<JSContextRef>(context));
+		}
 #endif
-	protected:
-		static AutoPtr<ScriptEvaluator> instance;
-		ScriptEvaluator() {}
 	};
 }
 
