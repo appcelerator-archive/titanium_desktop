@@ -15,10 +15,11 @@
 #	import <WebKit/WebScriptDebugDelegate.h>
 #	import <WebKit/WebScriptObject.h>
 #	import <WebKit/WebPreferencesPrivate.h>
+#	import <WebKit/WebScriptElement.h>
 #elif defined(OS_LINUX)
 #	include <webkit/webkit.h>
 #	include <webkit/webkittitanium.h>
-#elif define
+#else
 #	include <WebKit/WebKit.h>
 #	include <WebKit/WebKitCOMAPI.h>
 #	include <WebKit/WebKitTitanium.h>
@@ -98,9 +99,9 @@ namespace ti
 #if defined(OS_OSX)
 @interface OSXScriptEvaluator : NSObject
 {
-	kroll::ScriptEvaluator* delegate;
+	ti::ScriptEvaluator* delegate;
 }
--(OSXScriptEvaluator*) initWithEvaluator:(kroll::ScriptEvaluator*)evaluator;
+-(OSXScriptEvaluator*) initWithEvaluator:(ti::ScriptEvaluator*)evaluator;
 -(BOOL) matchesMimeType:(NSString*)mimeType;
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context;
 @end

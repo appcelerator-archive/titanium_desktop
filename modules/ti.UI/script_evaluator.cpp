@@ -104,7 +104,7 @@ namespace ti
 
 #if defined(OS_OSX)
 @implementation OSXScriptEvaluator
--(OSXScriptEvaluator*) initWithEvaluator:(kroll::ScriptEvaluator*)evaluator
+-(OSXScriptEvaluator*) initWithEvaluator:(ti::ScriptEvaluator*)evaluator
 {
 	self = [self init];
 	delegate = evaluator;
@@ -116,7 +116,7 @@ namespace ti
 }
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context
 {
-	delegate->Evaluate([mimeType UTF8String], [sourceCode UTF8String], context);
+	delegate->Evaluate([mimeType UTF8String], [sourceCode UTF8String], reinterpret_cast<JSContextRef>(context));
 }
 @end
 #endif

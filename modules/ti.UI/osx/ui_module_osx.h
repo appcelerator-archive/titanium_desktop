@@ -23,7 +23,6 @@ namespace ti
 #include "osx_tray_item.h"
 #include "osx_tray_item_delegate.h"
 
-#include "script_evaluator.h"
 #include "osx_ui_binding.h"
 #include "native_window.h"
 #include "osx_user_window.h"

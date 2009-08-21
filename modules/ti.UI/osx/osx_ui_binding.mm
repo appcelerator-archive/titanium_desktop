@@ -33,8 +33,7 @@ namespace ti
 		contextMenu(0),
 		dockMenu(0),
 		nativeDockMenu(nil),
-		activeWindow(0),
-		scriptEvaluator(nil)
+		activeWindow(0)
 	{
 		application = [[TiApplicationDelegate alloc] initWithBinding:this];
 		[application retain];
@@ -46,10 +45,6 @@ namespace ti
 		// Create a default menu -- so that keybindings and such work out of the box.
 		this->defaultMenu = [NSApp mainMenu];
 		this->SetupMainMenu(true);
-
-		// Add the custom script evaluator which will dynamically
-		// dispatch unknown script types to loaded Kroll modules.
-		scriptEvaluator = [[ScriptEvaluator alloc] initWithHost:host];
 
 		// Register our custom URL handler
 		[NSURLProtocol registerClass:[TitaniumProtocols class]];
@@ -63,7 +58,6 @@ namespace ti
 
 	OSXUIBinding::~OSXUIBinding()
 	{
-		[scriptEvaluator release];
 		[application release];
 		[savedDockView release];
 	}
