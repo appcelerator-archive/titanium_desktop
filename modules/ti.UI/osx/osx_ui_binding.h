@@ -60,7 +60,6 @@ namespace ti
 		NSObject* application;
 		AutoPtr<OSXMenu> activeMenu;
 		AutoPtr<OSXUserWindow> activeWindow;
-		ScriptEvaluator* scriptEvaluator;
 
 		void InstallMenu (OSXMenuItem*);
 	};

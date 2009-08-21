@@ -5,6 +5,7 @@
  */
 #include "ui_module.h"
 #include <algorithm>
+#include <cstring>
 
 namespace ti
 {
@@ -18,8 +19,10 @@ namespace ti
 #if defined(OS_OSX)
 		OSXScriptEvaluator *evaluator = [[OSXScriptEvaluator alloc] initWithEvaluator:instance.get()];
 		[WebScriptElement addScriptEvaluator:evaluator];
-#else
+#elif defined(OS_WIN32)
 		addScriptEvaluator(instance.get());
+#elif defined(OS_LINUX)
+		webkit_titanium_add_script_evaluator(instance.get());
 #endif
 	}
 	
@@ -43,7 +46,7 @@ namespace ti
 		}
 		
 		// Now try all uppercase (I'm looking at you PHP)
-		std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), std::toupper);
+		std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), toupper);
 		moduleValue = global->Get(moduleName.c_str());
 		if (!moduleValue->IsNull() && moduleValue->IsObject())
 		{
@@ -51,7 +54,7 @@ namespace ti
 		}
 		
 		// And lastly, we can support all lowercase too right?
-		std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), std::tolower);
+		std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), tolower);
 		moduleValue = global->Get(moduleName.c_str());
 		if (!moduleValue->IsNull() && moduleValue->IsObject())
 		{
@@ -103,7 +106,7 @@ namespace ti
 
 #if defined(OS_OSX)
 @implementation OSXScriptEvaluator
--(OSXScriptEvaluator*) initWithEvaluator:(kroll::ScriptEvaluator*)evaluator
+-(OSXScriptEvaluator*) initWithEvaluator:(ti::ScriptEvaluator*)evaluator
 {
 	self = [self init];
 	delegate = evaluator;
@@ -115,7 +118,7 @@ namespace ti
 }
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context
 {
-	delegate->Evaluate([mimeType UTF8String], [sourceCode UTF8String], context);
+	delegate->Evaluate([mimeType UTF8String], [sourceCode UTF8String], reinterpret_cast<JSContextRef>(context));
 }
 @end
 #endif
