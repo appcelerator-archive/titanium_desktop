@@ -38,7 +38,6 @@ namespace ti
 #include "../url/url.h"
 #include "popup_dialog.h"
 #include "../../../kroll/modules/javascript/javascript_module.h"
-#include "script_evaluator.h"
 #include "win32_menu.h"
 #include "win32_menu_item.h"
 #include "win32_tray_item.h"

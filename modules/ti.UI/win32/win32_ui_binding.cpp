@@ -16,7 +16,6 @@ namespace ti
 
 	Win32UIBinding::Win32UIBinding(Module *uiModule, Host *host) :
 		UIBinding(host),
-		evaluator(),
 		menu(0),
 		contextMenu(0),
 		iconPath("")
@@ -28,9 +27,6 @@ namespace ti
 		InitCtrlEx.dwICC = 0x00004000; //ICC_STANDARD_CLASSES;
 		InitCommonControlsEx(&InitCtrlEx);
 		
-		// Hook up our custom script evaluator to WebKit
-		addScriptEvaluator(&evaluator);
-
 		// Set the cert path for Curl so that HTTPS works properly.
 		// We are using _puetenv here since WebKit uses getenv internally 
 		// which is incompatible with the  Win32 envvar API.

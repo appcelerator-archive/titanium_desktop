@@ -49,7 +49,6 @@ namespace ti
 		static void SetProxyForURL(std::string& url);
 
 		private:
-		ScriptEvaluator evaluator;
 		AutoPtr<Win32Menu> menu;
 		AutoPtr<Win32Menu> contextMenu;
 		std::string iconPath;

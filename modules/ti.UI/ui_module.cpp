@@ -28,7 +28,7 @@ namespace ti
 #elif OS_LINUX
 		this->uiBinding = new GtkUIBinding(host);
 #endif
-
+		ScriptEvaluator::Initialize();
 		AppConfig *config = AppConfig::Instance();
 		if (config == NULL)
 		{
