@@ -30,9 +30,7 @@ elif build.is_win32():
 	sources = sources + Glob('win32/*.cpp')
 	sources += Glob('binding/kjs*.cpp')
 	env.Append(LIBPATH=[webkit_lib])
-	env.Append(CPPPATH=[webkit_inc, path.join(webkit_inc, 'webkit'), path.join(webkit_inc, 'JavaScriptCore'), 
-	path.join(webkit_inc,'WebCore','ForwardingHeaders'),
-	path.join(build.third_party, 'icu', 'include'), '#kroll'])
+	env.Append(CPPPATH=[webkit_inc, build.tp('icu', 'include')])
 	env.Append(LIBS=[
 		'WebKitGUID', 'WebKit', 'kernel32', 'shell32', 'user32', 
 		'ole32', 'comdlg32', 'comctl32', 'gdi32', 'shlwapi', 'oleaut32',
