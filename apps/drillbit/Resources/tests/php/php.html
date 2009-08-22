@@ -4,9 +4,19 @@
 </head>
 <body>
 	<script type="text/php">
-		$window->php_add = function($a, $b)
+		class testclass {
+			public function testmethod()
+			{
+			}
+		}
+		
+		$window->bind_types = function($obj)
 		{
-			return $a+$b;
+			$obj->number = 1;
+			$obj->str = "string";
+			$obj->list = array(1,2,3,4);
+			$obj->hash = array("a"=>"b","c"=>"d");
+			$obj->object = new testclass();
 		};
 	</script>
 </body>
