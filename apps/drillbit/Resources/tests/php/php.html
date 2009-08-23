@@ -7,6 +7,7 @@
 		class testclass {
 			public function testmethod()
 			{
+				$this->value = 100;
 			}
 		}
 		
@@ -18,6 +19,29 @@
 			$obj->hash = array("a"=>"b","c"=>"d");
 			$obj->object = new testclass();
 		};
+	</script>
+	
+	<script>
+		function my_global_foo(a)
+		{
+			return 'you '+a;
+		}
+		var my_global_var = 'i love you';
+	</script>
+	
+	<div id="a">A</div>
+	<script src="php.php" type="text/php"></script>
+	<script type="text/php">
+		$window->inline_document = function() use ($window, $document)
+		{
+			return $document->getElementById('a');
+		};
+	</script>
+	<script>
+		window.inline_test_result = inline_document().innerHTML;
+		window.external_test_result = external_document().innerHTML;
+		window.test_window_global_result = test_window_global();
+		window.test_document_title_result = test_document_title();
 	</script>
 </body>
 </html>
