@@ -16,15 +16,15 @@ using namespace ti;
 // slightly off white, there's probably a better way to do this
 COLORREF transparencyColor = RGB(0xF9, 0xF9, 0xF9);
 
-static void* SetWindowUserData(HWND hwnd, void* user_data)
+static void* SetWindowUserData(HWND hwnd, void* userData)
 {
 	return reinterpret_cast<void*> (SetWindowLongPtr(hwnd, GWLP_USERDATA,
-			reinterpret_cast<LONG_PTR> (user_data)));
+			reinterpret_cast<LONG_PTR> (userData)));
 }
 
-static void* GetWindowUserData(HWND hwnd)
+static void* GetWindowUserData(HWND hWnd)
 {
-	return reinterpret_cast<void*> (GetWindowLongPtr(hwnd, GWLP_USERDATA));
+	return reinterpret_cast<void*> (GetWindowLongPtr(hWnd, GWLP_USERDATA));
 }
 
 /*static*/
@@ -36,11 +36,9 @@ Win32UserWindow* Win32UserWindow::FromWindow(HWND hWnd)
 /*static*/
 void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 {
-	static bool class_initialized = false;
-	if (!class_initialized)
+	static bool classInitialized = false;
+	if (!classInitialized)
 	{
-		//LoadString(hInstance, IDC_TIUSERWINDOW, USERWINDOW_WINDOW_CLASS, 100);
-
 		WNDCLASSEXW wcex;
 		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -51,7 +49,6 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 		wcex.hIcon = 0;
 		wcex.hIconSm = 0;
 		wcex.hCursor = LoadCursor(hInstance, IDC_ARROW);
-		//wcex.hbrBackground	= (HBRUSH)(COLOR_BACKGROUND+1);
 		wcex.hbrBackground = CreateSolidBrush(transparencyColor);
 		wcex.lpszMenuName = L"";
 		wcex.lpszClassName = USERWINDOW_WINDOW_CLASS;
@@ -62,7 +59,7 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 			Logger::Get("UI.Win32UserWindow")->Error("Error Registering Window Class: %d", GetLastError());
 		}
 
-		class_initialized = true;
+		classInitialized = true;
 	}
 }
 
@@ -114,7 +111,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_SIZE:
-			if (window->web_view)
+			if (window->webView)
 			{
 				window->ResizeSubViews();
 				window->FireEvent(Event::RESIZED);
@@ -173,7 +170,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void Win32UserWindow::InitWindow()
 {
-	Win32UserWindow::RegisterWindowClass(win32_host->GetInstanceHandle());
+	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
 	std::wstring titleW = UTF8ToWide(config->GetTitle());
 	this->windowHandle = CreateWindowExW(
@@ -182,7 +179,7 @@ void Win32UserWindow::InitWindow()
 		titleW.c_str(),
 		WS_CLIPCHILDREN, CW_USEDEFAULT,
 		0, CW_USEDEFAULT, 0, NULL, NULL,
-		win32_host->GetInstanceHandle(), NULL);
+		win32Host->GetInstanceHandle(), NULL);
 
 	if (this->windowHandle == NULL)
 	{
@@ -204,7 +201,7 @@ void Win32UserWindow::InitWindow()
 void Win32UserWindow::InitWebKit()
 {
 	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0,
-		 IID_IWebView, (void**) &(this->web_view));
+		 IID_IWebView, (void**) &(this->webView));
 	
 	if (FAILED(hr))
 	{
@@ -245,15 +242,15 @@ void Win32UserWindow::InitWebKit()
 	//sites that look at Safari and not WebKit for UA
 	sprintf(userAgent, "Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, version);
 	_bstr_t ua(userAgent);
-	web_view->setApplicationNameForUserAgent(ua.copy());
+	webView->setApplicationNameForUserAgent(ua.copy());
 
 	// place our user agent string in the global so we can later use it
 	SharedKObject global = host->GetGlobalObject();
-	_bstr_t uaurl("http://titaniumapp.com");
-	BSTR uaresp;
-	web_view->userAgentForURL(uaurl.copy(), &uaresp);
-	std::string ua_str = _bstr_t(uaresp);
-	global->Set("userAgent", Value::NewString(ua_str.c_str()));
+	_bstr_t uaURL("http://titaniumapp.com");
+	BSTR uaResp;
+	webView->userAgentForURL(uaURL.copy(), &uaResp);
+	std::string uaStr = _bstr_t(uaResp);
+	global->Set("userAgent", Value::NewString(uaStr.c_str()));
 
 	logger->Debug("create frame load delegate ");
 	frameLoadDelegate = new Win32WebKitFrameLoadDelegate(this);
@@ -261,15 +258,15 @@ void Win32UserWindow::InitWebKit()
 	policyDelegate = new Win32WebKitPolicyDelegate(this);
 
 	logger->Debug("set delegates, set host window");
-	hr = web_view->setFrameLoadDelegate(frameLoadDelegate);
-	hr = web_view->setUIDelegate(uiDelegate);
-	hr = web_view->setPolicyDelegate(policyDelegate);
-	hr = web_view->setHostWindow((OLE_HANDLE) windowHandle);
+	hr = webView->setFrameLoadDelegate(frameLoadDelegate);
+	hr = webView->setUIDelegate(uiDelegate);
+	hr = webView->setPolicyDelegate(policyDelegate);
+	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
 
 	logger->Debug("init with frame");
-	RECT client_rect;
-	GetClientRect(windowHandle, &client_rect);
-	hr = web_view->initWithFrame(client_rect, 0, 0);
+	RECT clientRect;
+	GetClientRect(windowHandle, &clientRect);
+	hr = webView->initWithFrame(clientRect, 0, 0);
 
 	AppConfig *appConfig = AppConfig::Instance();
 	std::string appid = appConfig->GetAppID();
@@ -306,41 +303,41 @@ void Win32UserWindow::InitWebKit()
 			privatePrefs->setLocalStorageEnabled(true);
 			privatePrefs->setOfflineWebApplicationCacheEnabled(true);
 
-			_bstr_t db_path(
+			_bstr_t dbPath(
 					FileUtils::GetApplicationDataDirectory(appid).c_str());
-			privatePrefs->setLocalStorageDatabasePath(db_path.copy());
+			privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
 			privatePrefs->Release();
 		}
 
-		web_view->setPreferences(prefs);
+		webView->setPreferences(prefs);
 		prefs->Release();
 	}
 
 	// allow app:// and ti:// to run with local permissions (cross-domain ajax,etc)
-	_bstr_t app_proto("app");
-	web_view->registerURLSchemeAsLocal(app_proto.copy());
+	_bstr_t appProto("app");
+	webView->registerURLSchemeAsLocal(appProto.copy());
 
-	_bstr_t ti_proto("ti");
-	web_view->registerURLSchemeAsLocal(ti_proto.copy());
+	_bstr_t tiProto("ti");
+	webView->registerURLSchemeAsLocal(tiProto.copy());
 
-	IWebViewPrivate *web_view_private;
-	hr = web_view->QueryInterface(IID_IWebViewPrivate,
-			(void**) &web_view_private);
-	hr = web_view_private->viewWindow((OLE_HANDLE*) &viewWindowHandle);
+	IWebViewPrivate *webViewPrivate;
+	hr = webView->QueryInterface(IID_IWebViewPrivate,
+			(void**) &webViewPrivate);
+	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
 
-	hr = web_view_private->inspector(&web_inspector);
-	if (FAILED(hr) || web_inspector == NULL)
+	hr = webViewPrivate->inspector(&webInspector);
+	if (FAILED(hr) || webInspector == NULL)
 	{
 		logger->Error("Couldn't retrieve the web inspector object");
 	}
 
-	web_view_private->Release();
+	webViewPrivate->Release();
 
 	_bstr_t inspector_url("ti://runtime/WebKit.resources/inspector/inspector.html");
-	web_inspector->setInspectorURL(inspector_url.copy());
+	webInspector->setInspectorURL(inspector_url.copy());
 
-	hr = web_view->mainFrame(&web_frame);
-	//web_view->setShouldCloseWithWindow(TRUE);
+	hr = webView->mainFrame(&webFrame);
+	//webView->setShouldCloseWithWindow(TRUE);
 }
 
 Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
@@ -350,11 +347,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	nativeMenu(0),
 	contextMenu(0),
 	defaultIcon(0),
-	web_inspector(0)
+	webInspector(0)
 {
 	logger = Logger::Get("UI.Win32UserWindow");
 	
-	win32_host = static_cast<kroll::Win32Host*>(binding->GetHost());
+	win32Host = static_cast<kroll::Win32Host*>(binding->GetHost());
 	this->InitWindow();
 
 	this->ReloadTiWindowConfig();
@@ -369,13 +366,13 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 
 	this->InitWebKit();
 	
-	//web_view = WebView::createInstance();
+	//webView = WebView::createInstance();
 	logger->Debug("resize subviews");
 	ResizeSubViews();
 
 	// ensure we have valid restore values
-	restore_bounds = GetBounds();
-	restore_styles = GetWindowLong(windowHandle, GWL_STYLE);
+	restoreBounds = GetBounds();
+	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
 
 	if (this->config->IsFullscreen())
 	{
@@ -398,12 +395,12 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	// set this flag to indicate that when the frame is loaded
 	// we want to show the window - we do this to prevent white screen
 	// while the URL is being fetched
-	this->requires_display = true;
+	this->requiresDisplay = true;
 
 	// set initial window icon to icon associated with exe file
 	char exePath[MAX_PATH];
 	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	defaultIcon = ExtractIconA(win32_host->GetInstanceHandle(), exePath, 0);
+	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
 	if (defaultIcon)
 	{
 		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
@@ -422,11 +419,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 
 Win32UserWindow::~Win32UserWindow()
 {
-	if (web_view)
-		web_view->Release();
+	if (webView)
+		webView->Release();
 
-	if (web_frame)
-		web_frame->Release();
+	if (webFrame)
+		webFrame->Release();
 
 	DestroyWindow(windowHandle);
 }
@@ -521,7 +518,7 @@ void Win32UserWindow::Open()
 
 	UserWindow::Open();
 	SetURL(this->config->GetURL());
-	if (!this->requires_display)
+	if (!this->requiresDisplay)
 	{
 		ShowWindow(windowHandle, SW_SHOW);
 		ShowWindow(viewWindowHandle, SW_SHOW);
@@ -735,7 +732,7 @@ void Win32UserWindow::SetURL(std::string& url_)
 		goto exit;
 
 	logger->Debug("load request");
-	hr = web_frame->loadRequest(request);
+	hr = webFrame->loadRequest(request);
 	if (FAILED(hr))
 		goto exit;
 
@@ -784,7 +781,7 @@ void Win32UserWindow::SetTransparency(double transparency)
 {
 	if (config->GetTransparency() < 1.0)
 	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
+		SetWindowLong(this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
 		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
 		config->GetTransparency() * 255), LWA_ALPHA);
 	}
@@ -798,8 +795,8 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 {
 	if (fullscreen)
 	{
-		restore_bounds = GetBounds();
-		restore_styles = GetWindowLong(windowHandle, GWL_STYLE);
+		restoreBounds = GetBounds();
+		restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
 
 		HMONITOR hmon = MonitorFromWindow(this->windowHandle,
 				MONITOR_DEFAULTTONEAREST);
@@ -817,8 +814,8 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 	}
 	else
 	{
-		SetWindowLong(windowHandle, GWL_STYLE, restore_styles);
-		SetBounds(restore_bounds);
+		SetWindowLong(windowHandle, GWL_STYLE, restoreStyles);
+		SetBounds(restoreBounds);
 		FireEvent(Event::UNFULLSCREENED);
 	}
 }
@@ -986,9 +983,9 @@ void Win32UserWindow::ReloadTiWindowConfig()
 // called by frame load delegate to let the window know it's loaded
 void Win32UserWindow::FrameLoaded()
 {
-	if (this->requires_display && this->config->IsVisible())
+	if (this->requiresDisplay && this->config->IsVisible())
 	{
-		this->requires_display = false;
+		this->requiresDisplay = false;
 		ShowWindow(windowHandle, SW_SHOW);
 	}
 }
@@ -1033,15 +1030,15 @@ void Win32UserWindow::SetupSize()
 
 void Win32UserWindow::ShowInspector(bool console)
 {
-	if (this->web_inspector)
+	if (this->webInspector)
 	{
 		if (console)
 		{
-			this->web_inspector->showConsole();
+			this->webInspector->showConsole();
 		}
 		else
 		{
-			this->web_inspector->show();
+			this->webInspector->show();
 		}
 	}
 }

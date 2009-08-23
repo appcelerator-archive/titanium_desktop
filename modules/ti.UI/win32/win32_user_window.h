@@ -96,22 +96,22 @@ namespace ti
 
 		virtual void AppIconChanged();
 		virtual void AppMenuChanged();
-		IWebView* GetWebView() { return web_view; };
+		IWebView* GetWebView() { return webView; };
 	
 		protected:
-		kroll::Win32Host *win32_host;
+		kroll::Win32Host *win32Host;
 		Win32WebKitFrameLoadDelegate *frameLoadDelegate;
 		Win32WebKitUIDelegate *uiDelegate;
 		Win32WebKitPolicyDelegate *policyDelegate;
-		Bounds restore_bounds;
-		long restore_styles;
+		Bounds restoreBounds;
+		long restoreStyles;
 		int chromeWidth, chromeHeight;
 	
 		HWND windowHandle, viewWindowHandle;
-		IWebView* web_view;
-		IWebFrame *web_frame;
-		IWebInspector *web_inspector;
-		bool requires_display;
+		IWebView* webView;
+		IWebFrame *webFrame;
+		IWebInspector *webInspector;
+		bool requiresDisplay;
 	
 		AutoPtr<Win32Menu> menu; // The window-specific menu
 		AutoPtr<Win32Menu> activeMenu; // This window's active menu
