@@ -44,7 +44,7 @@ namespace ti
 		int timeout;
 		bool shutdown;
 		SharedKMethod readystate;
-		SharedKMethod onchange;
+		SharedKMethod onload;
 		static bool initialized;
 		
 		static void Run(void*);

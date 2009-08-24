@@ -189,6 +189,12 @@ namespace ti
 		 * @tiapi The handler function that will be fired as the stream data is sent
 		 */
 		this->SetNull("onsendstream");
+
+		/**
+		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onload,since=0.7)
+		 * @tiapi The handler function that will be fired when request is completed
+		 */
+		this->SetNull("onload");
 	}
 	HTTPClientBinding::~HTTPClientBinding()
 	{
@@ -698,10 +704,10 @@ namespace ti
 		{
 			this->readystate = v->ToMethod();
 		}
-		SharedValue vc = this->Get("onchange");
+		SharedValue vc = this->Get("onload");
 		if (vc->IsMethod())
 		{
-			this->onchange = vc->ToMethod();
+			this->onload = vc->ToMethod();
 		}
 		this->ChangeState(1); // opened
 	}
@@ -761,9 +767,9 @@ namespace ti
 		}
 		if (readyState == 4)
 		{
-			// onchange listener allows you to just get the final state
+			// onload listener allows you to just get the final state
 			// and is implemented in WebKit XHR
-			if (!this->onchange.isNull())
+			if (!this->onload.isNull())
 			{
 				try
 				{
@@ -772,12 +778,12 @@ namespace ti
 					this->duplicate();
 					args.push_back(Value::NewObject(this));
 
-					SharedKMethod callMethod = this->onchange->Get("call")->ToMethod();
+					SharedKMethod callMethod = this->onload->Get("call")->ToMethod();
 					this->host->InvokeMethodOnMainThread(callMethod, args, true);
 				}
 				catch(std::exception &ex)
 				{
-					logger->Error("Exception calling onchange. Exception: %s",ex.what());
+					logger->Error("Exception calling onload. Exception: %s",ex.what());
 				}
 			}
 			this->readystate = 0;

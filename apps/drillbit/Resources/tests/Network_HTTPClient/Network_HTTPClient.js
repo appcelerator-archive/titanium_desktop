@@ -19,7 +19,7 @@ describe("Network.HTTPClient",
 					
 		var props = ['readyState','UNSENT','OPENED','HEADERS_RECEIVED','LOADING',
 					 'DONE','responseText','responseXML','status','statusText',
-					 'connected','onreadystatechange','ondatastream','onsendstream'];
+					 'connected','onreadystatechange','ondatastream','onsendstream', 'onload'];
 
 		for (var c=0;c<methods.length;c++)
 		{
@@ -124,13 +124,13 @@ describe("Network.HTTPClient",
 			callback.failed('native XHR HTTPS timed out');
 		},20000);
 	},
-	http_test_with_onchange_as_async: function(callback)
+	http_test_with_onload_as_async: function(callback)
 	{
 		var url = 'http://api.appcelerator.net/p/v1/echo';
 		var xhr = this.xhr;
 		var timer = null;
 		
-		this.xhr.onchange = function()
+		this.xhr.onload = function()
 		{
 			try
 			{
