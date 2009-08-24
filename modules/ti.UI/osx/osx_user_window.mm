@@ -109,6 +109,7 @@ namespace ti
 		if (active && nativeWindow)
 		{
 			this->Unfocus();
+			[nativeWindow orderOut:nil];
 			this->FireEvent(Event::HIDDEN);
 		}
 	}
