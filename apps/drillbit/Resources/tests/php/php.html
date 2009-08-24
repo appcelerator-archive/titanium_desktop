@@ -4,13 +4,6 @@
 </head>
 <body>
 	<script type="text/php">
-		global $Titanium;
-		
-		$a = "1234";
-		$Titanium->API->debug("a=$a");
-	</script>
-	
-	<!--script type="text/php">
 		class testclass {
 			public function testmethod()
 			{
@@ -26,9 +19,9 @@
 			$obj->hash = array("a"=>"b","c"=>"d");
 			$obj->object = new testclass();
 		};
-	</script-->
+	</script>
 	
-	<!--script>
+	<script>
 		function my_global_foo(a)
 		{
 			return 'you '+a;
@@ -39,8 +32,9 @@
 	<div id="a">A</div>
 	<script src="php.php" type="text/php"></script>
 	<script type="text/php">
-		$window->inline_document = function() use ($window, $document)
+		$window->inline_document = function()
 		{
+			global $window, $document;
 			return $document->getElementById('a');
 		};
 	</script>
@@ -49,6 +43,6 @@
 		window.external_test_result = external_document().innerHTML;
 		window.test_window_global_result = test_window_global();
 		window.test_document_title_result = test_document_title();
-	</script-->
+	</script>
 </body>
 </html>

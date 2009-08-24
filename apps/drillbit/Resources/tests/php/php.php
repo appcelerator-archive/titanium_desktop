@@ -1,17 +1,20 @@
 
 function external_document()
 {
+	global $document;
 	return $document->getElementById('a');
 }
 
 function test_window_global()
 {
+	global $window;
 	return $window->my_global_foo('suck ass');
 }
 
 function test_document_title()
 {
-  return $document->title;
+	global $document;
+	return $document->title;
 }
 
 // tests for conversion from JS into PHP

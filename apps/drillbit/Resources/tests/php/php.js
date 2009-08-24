@@ -1,11 +1,6 @@
 describe("php tests",
 {
-	test_simple_context: function()
-	{
-		value_of(window.a).should_be("1234");
-	}
-	
-	/*test_bind_types: function()
+	test_bind_types: function()
 	{
 		value_of(window.bind_types).should_be_function();
 		
@@ -43,7 +38,7 @@ describe("php tests",
 	
 	test_document_title_from_php: function()
 	{
-		value_of(window.test_document_title_result).should_be('I love Matz');
+		value_of(window.test_document_title_result).should_be('PHP');
 	},
 	test_js_types: function()
 	{
@@ -61,5 +56,5 @@ describe("php tests",
 		value_of(test_js_type_null(undefined)).should_be_true();
 		value_of(test_js_type_false_bool(false)).should_be_true();
 		value_of(test_js_type_true_bool(true)).should_be_true();
-	}*/
+	}
 });
