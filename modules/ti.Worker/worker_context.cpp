@@ -13,11 +13,22 @@ namespace ti
 		this->SetMethod("postMessage",&WorkerContext::PostMessage);
 		this->SetMethod("importScript",&WorkerContext::ImportScripts); // this is just a convenience map
 		this->SetMethod("importScripts",&WorkerContext::ImportScripts);
+		this->SetMethod("sleep",&WorkerContext::Sleep);
 	}
 	WorkerContext::~WorkerContext()
 	{
 		worker = NULL;
 		host = NULL;
+	}
+	void WorkerContext::Terminate()
+	{
+		// if we're blocked in a sleep, signal him to wake up
+		condition.signal();
+	}
+	void WorkerContext::Yield()
+	{
+		// simple - attempt to lock which will block during sleep or immediately lock and unlock if not sleeping
+		Poco::ScopedLock<Poco::Mutex> lock(condmutex);
 	}
 	void WorkerContext::SendQueuedMessages()
 	{
@@ -61,6 +72,22 @@ namespace ti
 		{
 			logger->Error("Error calling onmessage for worker. Error = %s",e.what());
 		}
+	}
+	void WorkerContext::Sleep(const ValueList &args, SharedValue result)
+	{
+		Logger *logger = Logger::Get("WorkerContext");
+		long ms = args.at(0)->ToInt();
+		logger->Debug("worker is sleeping for %d ms", ms);
+		condmutex.lock();
+		if (condition.tryWait(condmutex,ms))
+		{
+			logger->Debug("worker sleep was interrupted");
+			condmutex.unlock();
+			throw ValueException::FromString("interrupted");
+			return;
+		}
+		condmutex.unlock();
+		logger->Debug("worker sleep completed");
 	}
 	void WorkerContext::ImportScripts(const ValueList &args, SharedValue result)
 	{
