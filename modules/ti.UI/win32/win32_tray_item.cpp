@@ -8,10 +8,10 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cb_single_click, SharedKMethod cb_double_click) :
+	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cbSingleClick, SharedKMethod cbDoubleClick) :
 		TrayItem(iconURL),
-		callback_single_click(cb_single_click),
-		callback_double_click(cb_double_click),
+		callbackSingleClick(cbSingleClick),
+		callbackDoubleClick(cbDoubleClick),
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
@@ -104,13 +104,13 @@ namespace ti
 
 	void Win32TrayItem::HandleLeftClick()
 	{
-		if (callback_single_click.isNull())
+		if (callbackSingleClick.isNull())
 			return;
 
 		try
 		{
 			ValueList args;
-			callback_single_click->Call(args);
+			callbackSingleClick->Call(args);
 		}
 		catch (ValueException& e)
 		{
@@ -122,13 +122,13 @@ namespace ti
 	
 	void Win32TrayItem::HandleDoubleLeftClick()
 	{
-		if (callback_double_click.isNull())
+		if (callbackDoubleClick.isNull())
 			return;
 
 		try
 		{
 			ValueList args;
-			callback_double_click->Call(args);
+			callbackDoubleClick->Call(args);
 		}
 		catch (ValueException& e)
 		{

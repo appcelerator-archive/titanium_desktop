@@ -12,7 +12,7 @@ namespace ti
 	class Win32TrayItem: public TrayItem
 	{		
 		public:
-		Win32TrayItem(std::string& iconURL, SharedKMethod cb_single_click, SharedKMethod cb_double_click);
+		Win32TrayItem(std::string& iconURL, SharedKMethod cbSingleClick, SharedKMethod cbDoubleClick);
 		virtual ~Win32TrayItem();
 		void SetIcon(std::string& iconPath);
 		void SetMenu(AutoMenu menu);
@@ -28,8 +28,8 @@ namespace ti
 		static LRESULT CALLBACK DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		private:
-		SharedKMethod callback_single_click;
-		SharedKMethod callback_double_click;
+		SharedKMethod callbackSingleClick;
+		SharedKMethod callbackDoubleClick;
 		HMENU oldNativeMenu;
 		NOTIFYICONDATA* trayIconData;
 		static std::vector<AutoPtr<Win32TrayItem> > trayItems;
