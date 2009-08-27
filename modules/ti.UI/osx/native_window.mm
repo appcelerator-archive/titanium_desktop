@@ -194,6 +194,10 @@
 
 - (void)setFullscreen:(BOOL)yn
 {
+	// if we're not already visible, don't cause setfullscreen to necessarily
+	// cause us to become visible -- this gives us more fine grain control that 
+	// separates hide/show from fullscreen/unfullscreened
+	BOOL display = (*userWindow)->IsVisible() && [self isVisible]; 
 	if (yn)
 	{
 		fullscreen = YES;
@@ -210,20 +214,23 @@
 		frame.size.height += windowBarHeight;
 
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
-		[self setFrame:frame display:YES animate:YES];
+		[self setFrame:frame display:display animate:display];
 		(*userWindow)->FireEvent(Event::FULLSCREENED);
 		[self setShowsResizeIndicator:NO];
 	}
 	else
 	{
 		fullscreen = NO;
-		[self setFrame:savedFrame display:YES animate:YES];
+		[self setFrame:savedFrame display:display animate:display];
 		SetSystemUIMode(kUIModeNormal,0);
 		[self setShowsResizeIndicator:config->IsResizable()];
 		(*userWindow)->FireEvent(Event::UNFULLSCREENED);
 	}
-	[self makeKeyAndOrderFront:nil];
-	[self makeFirstResponder:webView];
+	if (display)
+	{
+		[self makeKeyAndOrderFront:nil];
+		[self makeFirstResponder:webView];
+	}
 }
 
 - (WebView*)webView

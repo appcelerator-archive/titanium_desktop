@@ -83,6 +83,8 @@ namespace ti
 				this->host->InvokeMethodOnMainThread(method,args,false);
 			}
 		}
+
+		AutoPtr<WorkerContext> wc = this->context.cast<WorkerContext>();
 		
 		if (!error)
 		{
@@ -90,6 +92,9 @@ namespace ti
 			// woken up to stop
 			for(;;)
 			{
+				// cause the context to yield to a sleep if we're already sleeping
+				wc->Yield();
+				
 				bool wait = true;
 				{
 					Poco::ScopedLock<Poco::Mutex> lock(mutex);
@@ -102,6 +107,7 @@ namespace ti
 				{
 					condmutex.lock(); // will unlock in wait
 					condition.wait(condmutex);
+					condmutex.unlock();
 				}
 				// check to see if the worker wants to receive messages - we do this 
 				// each time since they could define at any time
@@ -152,9 +158,22 @@ namespace ti
 						}
 					}
 				}
-				if (stopped) break;
+				
+				// hold lock while we check to make sure we're stopped
+				Poco::ScopedLock<Poco::Mutex> lock(mutex);
+				if (stopped) 
+				{
+					logger->Debug("worker thread stopped detected, exiting...");
+					break;
+				}
 			}
 		}
+	
+		// terminate the context waking up any threads that might be waiting
+		wc->Terminate();
+		
+		// go ahead and log while we cleanup
+		Poco::ScopedLock<Poco::Mutex> lock(mutex);
 		
 		// make sure we unregister our global so we don't leak
 		if (global_object!=NULL)
@@ -172,11 +191,13 @@ namespace ti
 	{
 		Logger *logger = Logger::Get("Worker");
 		logger->Debug("Start called");
+		Poco::ScopedLock<Poco::Mutex> lock(mutex);
 		if (!stopped)
 		{
 			throw ValueException::FromString("Worker already started");
 			return;
 		}
+		this->stopped = false;
 		this->context = new WorkerContext(host,this);
 		this->adapter = new Poco::RunnableAdapter<Worker>(*this, &Worker::Run);
 		this->thread.start(*adapter);
@@ -187,11 +208,39 @@ namespace ti
 		Logger *logger = Logger::Get("Worker");
 		logger->Debug("Terminate called");
 		
-		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		if (!stopped)
+		// don't hold the lock after checking
 		{
-			stopped=true;
-			this->condition.signal();
+			Poco::ScopedLock<Poco::Mutex> lock(mutex);
+			if (!stopped)
+			{
+				stopped=true;
+			}
+		}
+		
+		// cause the worker context to terminate if blocked in sleep
+		AutoPtr<WorkerContext> c = this->context.cast<WorkerContext>();
+		c->Terminate();
+		
+		this->condition.signal();
+		if (this->thread.isRunning())
+		{
+			logger->Debug("Waiting for Worker Thread to finish");
+			try
+			{
+				this->thread.join();
+			}
+			catch (Poco::Exception& e)
+			{
+				Logger *logger = Logger::Get("Worker");
+				logger->Error(
+					"Exception while try to join with thread: %s",
+					e.displayText().c_str());
+			}
+			logger->Debug("Worker Thread finished");
+		}
+		else
+		{
+			logger->Debug("Worker Thread already finished");
 		}
 	}
 

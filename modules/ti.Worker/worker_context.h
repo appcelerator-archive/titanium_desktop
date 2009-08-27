@@ -19,16 +19,21 @@ namespace ti
 	public:
 		WorkerContext(Host *host, SharedKObject worker);
 		virtual ~WorkerContext();
+		void Terminate();
+		void Yield();
 	private:
 		Host *host;
 		SharedKObject worker;
 		std::list<SharedValue> messages;
 		Poco::Mutex mutex;
+		Poco::Condition condition;
+		Poco::Mutex condmutex;
 
 		void SendQueuedMessages();
 
 		void PostMessage(const ValueList &args, SharedValue result);
 		void ImportScripts(const ValueList &args, SharedValue result);
+		void Sleep(const ValueList &args, SharedValue result);
 		
 		
 		friend class Worker;

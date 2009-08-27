@@ -56,7 +56,7 @@ namespace ti
 		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
 
 		/**
-		 * @tiapi(method=True,name=UI.setMenu,since=0.2) Sets a menu for the application
+		 * @tiapi(method=True,name=UI.setMenu,since=0.2) Set a menu for the application
 		 * @tiarg[UI.Menu|null, menu] A Menu object to use as the menu or null to unset the menu
 		 */
 		this->SetMethod("setMenu", &UIBinding::_SetMenu);
@@ -68,7 +68,7 @@ namespace ti
 		this->SetMethod("getMenu", &UIBinding::_GetMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.setContextMenu,since=0.2) Sets the application's context menu
+		 * @tiapi(method=True,name=UI.setContextMenu,since=0.2) Set the application's context menu
 		 * @tiarg(for=UI.setContextMenu,type=UI.Menu|null,name=menu) a MenuItem object or null to unset
 		 */
 		this->SetMethod("setContextMenu", &UIBinding::_SetContextMenu);
@@ -80,13 +80,13 @@ namespace ti
 		this->SetMethod("getContextMenu", &UIBinding::_GetContextMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.setIcon,since=0.2) Sets the application's icon
+		 * @tiapi(method=True,name=UI.setIcon,since=0.2) Set the application's icon
 		 * @tiarg(for=UI.setIcon,type=String,name=menu) path to the icon
 		 */
 		this->SetMethod("setIcon", &UIBinding::_SetIcon);
 
 		/**
-		 * @tiapi(method=True,name=UI.addTray,since=0.2,deprecated=True)
+		 * @tiapi(method=True,name=UI.addTray,since=0.2)
 		 * @tiapi Create and add a tray icon
 		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
 		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
@@ -101,26 +101,28 @@ namespace ti
 		this->SetMethod("clearTray", &UIBinding::_ClearTray);
 
 		/**
-		 * @tiapi(method=True,name=UI.setDockIcon,since=0.2) Sets the dock icon
+		 * @tiapi(method=True,name=UI.setDockIcon,since=0.2) Set the dock icon
 		 * @tiarg(for=UI.setDockIcon,type=String,name=icon) path to the icon
 		 */
 		this->SetMethod("setDockIcon", &UIBinding::_SetDockIcon);
 
 		/**
-		 * @tiapi(method=True,name=UI.setDockMenu,since=0.2) Sets the dock menu
+		 * @tiapi(method=True,name=UI.setDockMenu,since=0.2) Set the dock menu
 		 * @tiarg(for=UI.setDockMenu,type=UI.Menu,name=menu) The new menu for the dock
 		 */
 		this->SetMethod("setDockMenu", &UIBinding::_SetDockMenu);
 
 		/**
-		 * @tiapi(method=True,name=UI.setBadge,since=0.2) Sets the application's badge value
-		 * @tiarg(for=UI.setBadge,type=String,name=badge) badge value
+		 * @tiapi(method=True,name=UI.setBadge,since=0.2,platforms=osx)
+		 * @tiapi Set the application icon's badge text.
+		 * @tiarg[String, text] The new badge text.
 		 */
 		this->SetMethod("setBadge", &UIBinding::_SetBadge);
 
 		/**
-		 * @tiapi(method=True,name=UI.setBadgeImage,since=0.2) Sets the application's badge image
-		 * @tiarg(for=UI.setBadge,type=String,name=badge_image) path to badge image
+		 * @tiapi(method=True,name=UI.setBadgeImage,since=0.2,platforms=osx)
+		 * @tiapi Set the application icon's badge image.
+		 * @tiarg[String, imageURL] URL to the new badge image.
 		 */
 		this->SetMethod("setBadgeImage", &UIBinding::_SetBadgeImage);
 
