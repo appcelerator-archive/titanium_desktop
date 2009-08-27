@@ -256,12 +256,14 @@ void Win32UserWindow::InitWebKit()
 	frameLoadDelegate = new Win32WebKitFrameLoadDelegate(this);
 	uiDelegate = new Win32WebKitUIDelegate(this);
 	policyDelegate = new Win32WebKitPolicyDelegate(this);
-
+	resourceLoadDelegate = new Win32WebKitResourceLoadDelegate(this);
+	
 	logger->Debug("set delegates, set host window");
 	hr = webView->setFrameLoadDelegate(frameLoadDelegate);
 	hr = webView->setUIDelegate(uiDelegate);
 	hr = webView->setPolicyDelegate(policyDelegate);
 	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
+	hr = webView->setResourceLoadDelegate(resourceLoadDelegate);
 
 	logger->Debug("init with frame");
 	RECT clientRect;

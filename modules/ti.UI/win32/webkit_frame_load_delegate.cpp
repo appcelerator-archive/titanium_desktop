@@ -13,8 +13,6 @@ Win32WebKitFrameLoadDelegate::Win32WebKitFrameLoadDelegate(Win32UserWindow *wind
 	window(window_),
 	ref_count(1)
 {
-	// TODO Auto-generated constructor stub
-
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
