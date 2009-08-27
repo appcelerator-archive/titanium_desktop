@@ -8,9 +8,10 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cb) :
+	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cb_single_click, SharedKMethod cb_double_click) :
 		TrayItem(iconURL),
-		callback(cb),
+		callback_single_click(cb_single_click),
+		callback_double_click(cb_double_click),
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
@@ -103,19 +104,37 @@ namespace ti
 
 	void Win32TrayItem::HandleLeftClick()
 	{
-		if (callback.isNull())
+		if (callback_single_click.isNull())
 			return;
 
 		try
 		{
 			ValueList args;
-			callback->Call(args);
+			callback_single_click->Call(args);
 		}
 		catch (ValueException& e)
 		{
 			Logger* logger = Logger::Get("UI.Win32TrayItem");
 			SharedString ss = e.DisplayString();
-			logger->Error("Tray icon callback failed: %s", ss->c_str());
+			logger->Error("Tray icon single click callback failed: %s", ss->c_str());
+		}
+	}
+	
+	void Win32TrayItem::HandleDoubleLeftClick()
+	{
+		if (callback_double_click.isNull())
+			return;
+
+		try
+		{
+			ValueList args;
+			callback_double_click->Call(args);
+		}
+		catch (ValueException& e)
+		{
+			Logger* logger = Logger::Get("UI.Win32TrayItem");
+			SharedString ss = e.DisplayString();
+			logger->Error("Tray icon double left click callback failed: %s", ss->c_str());
 		}
 	}
 	
@@ -138,9 +157,17 @@ namespace ti
 			{
 				AutoPtr<Win32TrayItem> item = trayItems[i];
 
+				item->is_double_clicked = false;
+				if(item->GetId() == id && button == WM_LBUTTONDBLCLK)
+				{
+					item->is_double_clicked = true;
+					KillTimer(hWnd, 100);
+					item->HandleDoubleLeftClick();
+					handled = true;
+				}
 				if (item->GetId() == id && button == WM_LBUTTONDOWN)
 				{
-					item->HandleLeftClick();
+					SetTimer(hWnd, 100, GetDoubleClickTime(), (TIMERPROC)DoubleClickTimerProc); 
 					handled = true;
 				}
 				else if (item->GetId() == id && button == WM_RBUTTONDOWN)
@@ -163,4 +190,26 @@ namespace ti
 			return false;
 		}
 	}
+	
+	/*static*/
+	LRESULT CALLBACK Win32TrayItem::DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+	{
+		int id = LOWORD(wParam);
+		bool handled = false;
+
+		KillTimer(hWnd, 100);
+		for (size_t i = 0; i < trayItems.size(); i++)
+		{
+			AutoPtr<Win32TrayItem> item = trayItems[i];
+			if (!(item->is_double_clicked))
+			{
+				item->HandleLeftClick();
+			}
+
+			item->is_double_clicked = false;
+		}
+		return 0;
+	}
 }
+
+

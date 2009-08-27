@@ -105,9 +105,9 @@ namespace ti
 		}
 	}
 
-	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cb_single_click, SharedKMethod cb_double_click)
 	{
-		AutoPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cb);
+		AutoPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cb_single_click, cb_double_click);
 		return trayItem;
 	}
 
