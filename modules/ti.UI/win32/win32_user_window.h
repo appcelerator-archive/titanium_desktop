@@ -132,7 +132,7 @@ namespace ti
 		void SetupDecorations(bool showHide = true);
 		void SetupMenu();
 		void SetupIcon();
-		SharedKList Win32UserWindow::SelectFile(
+		SharedKList SelectFile(
 			bool saveDialog, bool multiple, std::string& title,
 			std::string& path, std::string& defaultName,
 			std::vector<std::string>& types, std::string& typesDescription);
