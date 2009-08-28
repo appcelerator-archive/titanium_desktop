@@ -34,60 +34,6 @@ namespace ti
 		return result;
 	}
 	
-	bool Win32WebKitResourceLoadDelegate::CanPreprocess(Poco::URI& uri)
-	{
-		std::vector<std::string> pathSegments;
-		uri.getPathSegments(pathSegments);
-		if (pathSegments.size() == 0) return false;
-		
-		if (uri.getScheme() == "app" || uri.getScheme() == "ti" || uri.getScheme() == "file")
-		{
-			std::string& resource = pathSegments.at(pathSegments.size()-1);
-			if (resource.find(".php") == resource.size()-4)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	std::string Win32WebKitResourceLoadDelegate::Preprocess(Poco::URI& uri, SharedKObject headers, std::string& method)
-	{
-		std::string path = URLUtils::URLToPath(uri.toString());
-		
-		ValueList args;
-		args.push_back(Value::NewString(uri.toString()));
-		args.push_back(Value::NewObject(headers));
-		args.push_back(Value::NewString(method));
-		args.push_back(Value::NewString(path));
-		
-		SharedValue preprocessed = Host::GetInstance()->GetGlobalObject()->CallNS("PHP.preprocess", args);
-		if (!preprocessed->IsNull() && !preprocessed->IsUndefined())
-		{
-			Poco::File tempFile(Poco::TemporaryFile::tempName()+".html");
-			Poco::TemporaryFile::registerForDeletion(tempFile.path());
-			tempFile.createFile();
-			
-			std::ofstream ostream(tempFile.path().c_str());
-			ostream << preprocessed->ToString();
-			ostream.close();
-			
-			return URLUtils::PathToFileURL(tempFile.path());
-			//const char *tempURLStr = strdup(tempURL.c_str());
-			/*return tempURL;
-			
-			_bstr_t url(tempURL.c_str());
-			
-			IWebMutableURLRequest *mutableRequest;
-			if (SUCCEEDED(request->QueryInterface(IID_IWebMutableURLRequest, (void **)&mutableRequest)))
-			{
-				Logger::Get("UI.Win32WebKitResourceLoadDelegate")->Debug("preprocessed %s into => %s", uri.toString().c_str(), tempURL.c_str());
-				mutableRequest->setURL(url.copy());
-			}*/
-		}
-		return "";
-	}
-	
 	HRESULT Win32WebKitResourceLoadDelegate::willSendRequest(
 			/*[in]*/ IWebView* webView,
 			/*[in]*/ unsigned long identifier,
@@ -120,7 +66,8 @@ namespace ti
 		{
 			return S_OK;
 		}
-		/*if (FAILED(request->HTTPBodyStream(&httpBodyStream))
+		/* TODO: implement HTTPBodyStream in win32
+		if (FAILED(request->HTTPBodyStream(&httpBodyStream))
 		{
 			return S_OK;
 		}*/

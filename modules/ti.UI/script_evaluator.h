@@ -25,15 +25,12 @@
 #	include <WebKit/WebKitTitanium.h>
 #	include <comutil.h>
 #endif
+#include <Poco/URI.h>
 
+#define JSContextToKrollContext(context) \
+	new KKJSObject(reinterpret_cast<JSContextRef>(context), JSContextGetGlobalObject(reinterpret_cast<JSContextRef>(context)))
 /**
- * Script evaluators are responsible for matching and evaluating custom <script> types.
- * In Titanium, we have 1 instance that checks against the binding API using these rules:
- * - Most language mimeTypes will be in the form "text/language". We strip "text/" from the string.
- * - We look for a defined object under the global context that matches "language", "Language", or "LANGUAGE"
- * - If an object is found, a bound method named "evaluate" must exist on that object.
- * If a binding for the language is succesfully found, we call the evaluate method with these arguments:
- * - evaluate(string mimeType, string sourceCode, Object windowContext) 
+ * Script evaluators are responsible for matching and evaluating custom <script> types, and preprocessing URLs
  */
 namespace ti
 {
@@ -48,14 +45,11 @@ namespace ti
 	{
 		public:
 		static void Initialize();
-		SharedValue FindScriptModule(std::string type);
-		bool MatchesMimeType(std::string mimeType);
-		SharedValue Evaluate(std::string mimeType, std::string sourceCode, JSContextRef context);
 
 		protected:
 		ScriptEvaluator() {}
 		static AutoPtr<ScriptEvaluator> instance;
-
+		
 		public:
 #if defined(OS_WIN32)
 		virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject)
@@ -72,25 +66,26 @@ namespace ti
 		}
 		virtual HRESULT STDMETHODCALLTYPE matchesMimeType(BSTR mimeType, BOOL *result)
 		{
-			*result = this->MatchesMimeType((const char *)_bstr_t(mimeType));
+			*result = kroll::Script::GetInstance()->CanEvaluate((const char *)_bstr_t(mimeType));
 			return S_OK;
 		}
 		virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context)
 		{
-			this->Evaluate((const char *)_bstr_t(mimeType),
+			kroll::Script::GetInstance()->->Evaluate((const char *)_bstr_t(mimeType),
+				"<script>",
 				(const char *)_bstr_t(sourceCode),
-				reinterpret_cast<JSContextRef>(context));
+				JSContextToKrollContext(context));
 			return S_OK;
 		}
 #elif defined(OS_LINUX)
 		virtual bool matchesMimeType(const gchar *mimeType)
 		{
-			return this->MatchesMimeType(mimeType);
+			return kroll::Script::GetInstance()->CanEvaluate(mimeType);
 		}
 		virtual void evaluate(const gchar *mimeType, const gchar *sourceCode, void* context)
 		{
-			this->Evaluate(mimeType, sourceCode, 
-				reinterpret_cast<JSContextRef>(context));
+			kroll::Script::GetInstance()->Evaluate(mimeType, "<script>", sourceCode, 
+				JSContextToKrollContext(context));
 		}
 #endif
 	};
