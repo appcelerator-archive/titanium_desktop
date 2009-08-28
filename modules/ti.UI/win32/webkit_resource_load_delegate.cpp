@@ -49,8 +49,7 @@ namespace ti
 		}
 		
 		std::string urlStr = _bstr_t(urlBStr);
-		Poco::URI uri(urlStr);
-		if (!this->CanPreprocess(uri))
+		if (!Script::GetInstance()->CanPreprocess(urlStr.c_str()))
 		{
 			return S_OK;
 		}
@@ -73,8 +72,10 @@ namespace ti
 		}*/
 		
 		std::string httpMethod = _bstr_t(httpMethodBStr);
+		SharedKObject scope = new StaticBoundObject();
 		SharedKObject headers = new StaticBoundObject();
-			
+		scope->Set("httpHeaders", Value::NewObject(headers));
+		
 		IPropertyBag2* httpHeaders2;
 		if (SUCCEEDED(httpHeaders->QueryInterface(IID_IPropertyBag2, (void **)&httpHeaders2)))
 		{
@@ -91,21 +92,23 @@ namespace ti
 						std::string name(nameWString.begin(), nameWString.end());
 						
 						std::string propertyValue = PropertyBagGetStringProperty(httpHeaders, propBag.pstrName);
-						
 						headers->Set(name.c_str(), Value::NewString(propertyValue));
 					}
 				}
 			}
 		}
 		
-		std::string newURL = this->Preprocess(uri, headers, httpMethod);
-		*newRequest = createWebURLRequest();
-		IWebMutableURLRequest *mutableRequest;
-		if (SUCCEEDED((*newRequest)->QueryInterface(IID_IWebMutableURLRequest, (void **)&mutableRequest)))
+		SharedString newURL = Script::GetInstance()->Preprocess(urlStr.c_str(), scope);
+		if (!newURL.isNull())
 		{
-			Logger::Get("UI.Win32WebKitResourceLoadDelegate")->Debug("preprocessed %s into => %s", uri.toString().c_str(), newURL.c_str());
-			_bstr_t newURLBStr(newURL.c_str());
-			mutableRequest->setURL(newURLBStr.copy());
+			*newRequest = createWebURLRequest();
+			IWebMutableURLRequest *mutableRequest;
+			if (SUCCEEDED((*newRequest)->QueryInterface(IID_IWebMutableURLRequest, (void **)&mutableRequest)))
+			{
+				Logger::Get("UI.Win32WebKitResourceLoadDelegate")->Debug("preprocessed %s into => %s", uri.toString().c_str(), newURL->c_str());
+				_bstr_t newURLBStr(newURL->c_str());
+				mutableRequest->setURL(newURLBStr.copy());
+			}
 		}
 		
 		return S_OK;
