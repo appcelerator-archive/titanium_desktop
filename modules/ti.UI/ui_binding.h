@@ -64,7 +64,7 @@ namespace ti
 		virtual void SetMenu(AutoMenu) = 0;
 		virtual void SetContextMenu(AutoMenu) = 0;
 		virtual void SetIcon(std::string& iconPath) = 0;
-		virtual AutoTrayItem AddTray(std::string& iconPath, SharedKMethod cb_single_click, SharedKMethod cb_double_click) = 0;
+		virtual AutoTrayItem AddTray(std::string& iconPath, SharedKMethod cbSingleClick) = 0;
 		virtual AutoMenu GetMenu() = 0;
 		virtual AutoMenu GetContextMenu() = 0;
 		virtual long GetIdleTime() = 0;

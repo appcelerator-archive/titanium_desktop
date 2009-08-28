@@ -28,7 +28,7 @@ namespace ti
 		AutoMenuItem CreateSeparatorMenuItem();
 		AutoMenuItem CreateCheckMenuItem();
 		void SetMenu(AutoMenu);
-		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cb_single_click, SharedKMethod cb_double_click);
+		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cbSingleClick);
 		void SetContextMenu(AutoMenu);
 		void SetIcon(std::string& iconPath);
 		long GetIdleTime();

@@ -372,9 +372,8 @@ namespace ti
 		args.VerifyException("createTrayIcon", "s,?m");
 		std::string iconURL = args.GetString(0);
 
-		SharedKMethod cb_single_click = args.GetMethod(1, NULL);
-		SharedKMethod cb_double_click = args.GetMethod(2, NULL);
-		AutoTrayItem item = this->AddTray(iconURL, cb_single_click, cb_double_click);
+		SharedKMethod cbSingleClick = args.GetMethod(1, NULL);
+		AutoTrayItem item = this->AddTray(iconURL, cbSingleClick);
 		this->trayItems.push_back(item);
 		result->SetObject(item);
 	}

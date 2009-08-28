@@ -8,13 +8,12 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
-	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cbSingleClick, SharedKMethod cbDoubleClick) :
+	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cbSingleClick) :
 		TrayItem(iconURL),
-		callbackSingleClick(cbSingleClick),
-		callbackDoubleClick(cbDoubleClick),
 		oldNativeMenu(0),
 		trayIconData(0)
 	{
+		this->AddEventListener(Event::CLICKED, cbSingleClick);
 
 		HWND hwnd = Win32Host::Win32Instance()->AddMessageHandler(
 			&Win32TrayItem::MessageHandler);
@@ -104,13 +103,9 @@ namespace ti
 
 	void Win32TrayItem::HandleLeftClick()
 	{
-		if (callbackSingleClick.isNull())
-			return;
-
 		try
 		{
-			ValueList args;
-			callbackSingleClick->Call(args);
+			this->FireEvent(Event::CLICKED);
 		}
 		catch (ValueException& e)
 		{
@@ -122,13 +117,9 @@ namespace ti
 	
 	void Win32TrayItem::HandleDoubleLeftClick()
 	{
-		if (callbackDoubleClick.isNull())
-			return;
-
 		try
 		{
-			ValueList args;
-			callbackDoubleClick->Call(args);
+			this->FireEvent(Event::DOUBLE_CLICKED);
 		}
 		catch (ValueException& e)
 		{
