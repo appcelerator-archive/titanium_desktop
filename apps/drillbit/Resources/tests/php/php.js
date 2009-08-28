@@ -18,7 +18,7 @@ describe("php tests",
 		value_of(obj.object.testmethod).should_be_function();
 		
 		obj.object.testmethod();
-		//value_of(obj.object.value).should_be(100);
+		value_of(obj.object.value).should_be(100);
 	},
 	
 	test_inline: function()
@@ -58,5 +58,19 @@ describe("php tests",
 		value_of(test_js_type_null(undefined)).should_be_true();
 		value_of(test_js_type_false_bool(false)).should_be_true();
 		value_of(test_js_type_true_bool(true)).should_be_true();
+	},
+	test_method_arguments: function()
+	{
+		var obj = {};
+		window.bind_types(obj);
+
+		obj.object.testmethod();
+		value_of(obj.object.value).should_be(100);
+
+		obj.object.testmethodonearg(555);
+		value_of(obj.object.value).should_be(555);
+
+		obj.object.testmethodtwoargs(111, 222);
+		value_of(obj.object.value).should_be(333);
 	}
 });
