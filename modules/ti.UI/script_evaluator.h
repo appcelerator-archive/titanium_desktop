@@ -71,7 +71,7 @@ namespace ti
 		}
 		virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context)
 		{
-			kroll::Script::GetInstance()->->Evaluate((const char *)_bstr_t(mimeType),
+			kroll::Script::GetInstance()->Evaluate((const char *)_bstr_t(mimeType),
 				"<script>",
 				(const char *)_bstr_t(sourceCode),
 				JSContextToKrollContext(context));

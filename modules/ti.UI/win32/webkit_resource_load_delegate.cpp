@@ -105,7 +105,7 @@ namespace ti
 			IWebMutableURLRequest *mutableRequest;
 			if (SUCCEEDED((*newRequest)->QueryInterface(IID_IWebMutableURLRequest, (void **)&mutableRequest)))
 			{
-				Logger::Get("UI.Win32WebKitResourceLoadDelegate")->Debug("preprocessed %s into => %s", uri.toString().c_str(), newURL->c_str());
+				Logger::Get("UI.Win32WebKitResourceLoadDelegate")->Debug("preprocessed %s into => %s", urlStr.c_str(), newURL->c_str());
 				_bstr_t newURLBStr(newURL->c_str());
 				mutableRequest->setURL(newURLBStr.copy());
 			}
