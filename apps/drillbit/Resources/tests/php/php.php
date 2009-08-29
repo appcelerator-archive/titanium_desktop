@@ -72,3 +72,13 @@ function test_js_type_null($t)
 {
 	return $t == null;
 }
+
+function test_call_method_prop($o)
+{
+	return $o->f();
+}
+
+function test_call_method_prop_with_arg($o, $arg)
+{
+	return $o->f2($arg);
+}
