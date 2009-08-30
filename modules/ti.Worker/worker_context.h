@@ -7,9 +7,15 @@
 #ifndef _WORKER_CONTEXT_H_
 #define _WORKER_CONTEXT_H_
 
-#include <kroll/kroll.h>
+#include <kroll/base.h>
 #include <Poco/Mutex.h>
 #include <Poco/ScopedLock.h>
+#include <kroll/kroll.h>
+
+#ifdef OS_WIN32
+# undef Yield	
+#endif
+
 #include "worker.h"
 
 namespace ti

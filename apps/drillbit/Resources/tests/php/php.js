@@ -7,11 +7,13 @@ describe("php tests",
 		var obj = {};
 		window.bind_types(obj);
 		
+		
 		value_of(obj.number).should_be(1);
 		value_of(obj.str).should_be("string");
 		value_of(obj.list).should_match_array([1,2,3,4]);
 		value_of(obj.hash).should_be_array();
 		value_of(obj.hash.a).should_be('b');
+		
 		value_of(obj.object).should_be_object();
 		value_of(obj.object.testmethod).should_be_function();
 		
@@ -56,5 +58,49 @@ describe("php tests",
 		value_of(test_js_type_null(undefined)).should_be_true();
 		value_of(test_js_type_false_bool(false)).should_be_true();
 		value_of(test_js_type_true_bool(true)).should_be_true();
+	},
+	test_method_arguments: function()
+	{
+		var obj = {};
+		window.bind_types(obj);
+
+		obj.object.testmethod();
+		value_of(obj.object.value).should_be(100);
+
+		obj.object.testmethodonearg(555);
+		value_of(obj.object.value).should_be(555);
+
+		obj.object.testmethodtwoargs(111, 222);
+		value_of(obj.object.value).should_be(333);
+	},
+	test_calling_method_props_obj: function()
+	{
+		var obj = {};
+		var fun2  = function() { return 1; };
+		var funarg  = function(arg) { return arg; };
+		obj.f = fun2;
+		obj.f2 = funarg
+		value_of(test_call_method_prop(obj)).should_be(1);
+		value_of(test_call_method_prop_with_arg(obj,"toots")).should_be("toots");
+	},
+	test_calling_method_props_array: function()
+	{
+		var arr = [1, 2, 3];
+		var fun2  = function() { return 1; };
+		var funarg  = function(arg) { return arg; };
+		arr.f = fun2;
+		arr.f2 = funarg
+		value_of(test_call_method_prop(arr)).should_be(1);
+		value_of(test_call_method_prop_with_arg(arr, "toots")).should_be("toots");
+	},
+	test_calling_method_props_method: function()
+	{
+		var fun = function() { return 0; };
+		var funarg  = function(arg) { return arg; };
+		var fun2  = function() { return 1; };
+		fun.f = fun2;
+		fun.f2 = funarg
+		value_of(test_call_method_prop(fun)).should_be(1);
+		value_of(test_call_method_prop_with_arg(fun, "toots")).should_be("toots");
 	}
 });

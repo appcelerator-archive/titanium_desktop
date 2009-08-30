@@ -9,9 +9,17 @@
 			{
 				$this->value = 100;
 			}
+			public function testmethodonearg($one)
+			{
+				$this->value = $one;
+			}
+			public function testmethodtwoargs($one, $two)
+			{
+				$this->value = $one + $two;
+			}
 		}
-		
-		$window->bind_types = function($obj)
+
+		function bind_types($obj)
 		{
 			$obj->number = 1;
 			$obj->str = "string";

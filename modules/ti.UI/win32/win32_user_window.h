@@ -103,6 +103,8 @@ namespace ti
 		Win32WebKitFrameLoadDelegate *frameLoadDelegate;
 		Win32WebKitUIDelegate *uiDelegate;
 		Win32WebKitPolicyDelegate *policyDelegate;
+		Win32WebKitResourceLoadDelegate *resourceLoadDelegate;
+		
 		Bounds restoreBounds;
 		long restoreStyles;
 		int chromeWidth, chromeHeight;
@@ -130,7 +132,7 @@ namespace ti
 		void SetupDecorations(bool showHide = true);
 		void SetupMenu();
 		void SetupIcon();
-		SharedKList Win32UserWindow::SelectFile(
+		SharedKList SelectFile(
 			bool saveDialog, bool multiple, std::string& title,
 			std::string& path, std::string& defaultName,
 			std::vector<std::string>& types, std::string& typesDescription);

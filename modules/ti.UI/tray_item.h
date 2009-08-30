@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	class TrayItem : public AccessorBoundObject
+	class TrayItem : public KEventObject
 	{
 
 	public:
