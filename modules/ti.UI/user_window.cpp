@@ -1699,6 +1699,8 @@ bool UserWindow::ShouldHaveTitaniumObject(
 	// Other URLs won't have access for security considerations.
 	JSStringRef docPropName = JSStringCreateWithUTF8CString("document");
 	JSValueRef docValue = JSObjectGetProperty(ctx, global, docPropName, NULL);
+	JSStringRelease(docPropName);
+
 	if (!docValue)
 	{
 		return false;
@@ -1712,6 +1714,8 @@ bool UserWindow::ShouldHaveTitaniumObject(
 
 	JSStringRef locPropName = JSStringCreateWithUTF8CString("location");
 	JSValueRef locValue = JSObjectGetProperty(ctx, docObject, locPropName, NULL);
+	JSStringRelease(locPropName);
+
 	if (!locValue)
 	{
 		return false;
@@ -1731,6 +1735,7 @@ bool UserWindow::ShouldHaveTitaniumObject(
 	return url.find("app://") == 0 || 
 		url.find("ti://") == 0 ||
 		url.find("file://") == 0;
+
 }
 
 bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
@@ -1741,12 +1746,18 @@ bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
 	// -dependent code and this should generally work cross-platform.
 	JSStringRef parentPropName = JSStringCreateWithUTF8CString("parent");
 	JSValueRef parentValue = JSObjectGetProperty(ctx, global, parentPropName, NULL);
+	JSStringRelease(parentPropName);
+
 	if (!parentValue)
+	{
 		return false;
+	}
 
 	JSObjectRef parentObject = JSValueToObject(ctx, parentValue, NULL);
 	if (!parentObject)
+	{
 		return false;
+	}
 
 	return parentObject == global;
 }
