@@ -439,9 +439,11 @@
 	return nil;
 }
 
--(NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponsefromDataSource:(WebDataSource *)dataSource
+-(NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse fromDataSource:(WebDataSource *)dataSource
 {
 	NSURL *url = [request URL];
+	logger->Debug("willSendRequest: %s", [[url absoluteString] UTF8String]);
+	
 	if (!Script::GetInstance()->CanPreprocess([[url absoluteString] UTF8String]))
 	{
 		return request;
@@ -461,7 +463,8 @@
 	SharedString newURL = Script::GetInstance()->Preprocess([[url absoluteString] UTF8String], scope);
 	if (!newURL.isNull())
 	{
-		return [NSURLRequest requestWithURL:[NSString stringWithUTF8String:newURL->c_str()]];
+		logger->Debug("sending new URL request: %s", newURL->c_str());
+		return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:newURL->c_str()]]];
 	}
 	return request;
 }
