@@ -4,6 +4,7 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #include "gst_media_binding.h"
+#include <gdk/gdk.h>
 
 namespace ti
 {
@@ -20,7 +21,7 @@ namespace ti
 
 	void GstMediaBinding::Beep()
 	{
-		printf("\a"); // \a to console should cause the beep sound
+		gdk_beep();
 	}
 
 	SharedKObject GstMediaBinding::CreateSound(std::string& url)
