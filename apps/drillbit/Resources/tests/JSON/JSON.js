@@ -28,7 +28,7 @@ describe("JSON tests",
 		value_of(theObj.intProp).should_be_number();
 		value_of(theObj.strProp).should_be_string();
 		
-		// json always strips out functions for security
-		value_of(theObj.func).should_be_undefined();
+		// The JSON stringifier turns functions into empty objects
+		value_of(theObj.func).should_be_object();
 	}
 });
