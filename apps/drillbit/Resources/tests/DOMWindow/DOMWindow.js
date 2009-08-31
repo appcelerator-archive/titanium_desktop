@@ -57,14 +57,16 @@ describe("UI Window Tests",{
 	},
 	test_open_fullscreen_yes_as_async: function(test)
 	{
-		
 		this.async_window_open(test, function(w)
 		{
 			value_of(w).should_be_object();
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
+			if (Titanium.platform != 'linux')
+			{
+				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
+			}
 		}, ["a.html","a","fullscreen=yes"]);
 	},
 	test_open_fullscreen_no_as_async: function(test)
@@ -75,7 +77,11 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
+
+			if (Titanium.platform != 'linux')
+			{
+				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
+			}
 		}, ["a.html","a","fullscreen=no"]);
 	},
 	test_open_fullscreen_1_as_async: function(test)
@@ -86,7 +92,10 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
+			if (Titanium.platform != 'linux')
+			{
+				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
+			}
 		}, ["a.html","a","fullscreen=1"]);
 	},
 	test_open_fullscreen_0_as_async: function(test)
@@ -97,7 +106,10 @@ describe("UI Window Tests",{
 			value_of(w.Titanium).should_be_object();
 			value_of(w.document.title).should_be("Hello");
 			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
+			if (Titanium.platform != 'linux')
+			{
+				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
+			}
 		}, ["a.html","a","fullscreen=0"]);
 	},
 	test_open_height_100_as_async: function(test)
