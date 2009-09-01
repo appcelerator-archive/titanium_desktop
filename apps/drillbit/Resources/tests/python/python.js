@@ -165,4 +165,29 @@ describe("Python Tests",
 	{
 		value_of(Titanium.UI.currentWindow).should_be_object();
 	},
+	test_python_list: function()
+	{
+		var list = get_python_list();
+		value_of(list[0]).should_be(1);
+		value_of(list[1]).should_be(2);
+		value_of(list[2]).should_be(3);
+		value_of(list[3]).should_be_undefined();
+		value_of(list[300]).should_be_undefined();
+		
+	},
+	test_js_array_sum: function()
+	{
+		var x = new Array();
+		x[0] = 1;
+		x[1] = 3;
+		x[2] = 4;
+		var sum = js_array_sum(x);
+		value_of(sum).should_be(8);
+	},
+	test_js_array_sum2: function()
+	{
+		var x = [1, 2, 3]
+		var sum = js_array_sum(x);
+		value_of(sum).should_be(6);
+	}
 });
