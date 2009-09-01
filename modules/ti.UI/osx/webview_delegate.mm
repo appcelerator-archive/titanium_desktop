@@ -441,31 +441,6 @@
 
 -(NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse fromDataSource:(WebDataSource *)dataSource
 {
-	NSURL *url = [request URL];
-	logger->Debug("willSendRequest: %s", [[url absoluteString] UTF8String]);
-	
-	if (!Script::GetInstance()->CanPreprocess([[url absoluteString] UTF8String]))
-	{
-		return request;
-	}
-	
-	NSDictionary *httpHeaders = [request allHTTPHeaderFields];
-	
-	SharedKObject scope = new StaticBoundObject();
-	SharedKObject headers = new StaticBoundObject();
-	scope->Set("httpHeaders", Value::NewObject(headers));
-	
-	for (NSString* header in [httpHeaders allKeys])
-	{
-		headers->Set([header UTF8String], Value::NewString([(NSString*)[httpHeaders valueForKey:header] UTF8String]));
-	}
-	
-	SharedString newURL = Script::GetInstance()->Preprocess([[url absoluteString] UTF8String], scope);
-	if (!newURL.isNull())
-	{
-		logger->Debug("sending new URL request: %s", newURL->c_str());
-		return [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithUTF8String:newURL->c_str()]]];
-	}
 	return request;
 }
 
