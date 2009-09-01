@@ -16,8 +16,7 @@ if build.is_osx():
 
 if build.is_linux():
 	sources.extend(Glob('gst/*.cpp'))
-	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10')
-
+	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10 gdk-2.0')
 
 elif build.is_win32():
 	sources.extend(Glob('win32/*.cpp'))
@@ -28,9 +27,6 @@ elif build.is_win32():
 	env.Append(LIBS = libs)
 	env.Append(CPPPATH=[build.tp('microsoft', 'include')])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
-
-elif build.is_linux():
-	sources += Glob('gst/*.cpp')
 
 m = build.add_module('ti.Media', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/timediamodule', source = sources)

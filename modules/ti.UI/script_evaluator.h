@@ -71,10 +71,19 @@ namespace ti
 		}
 		virtual HRESULT STDMETHODCALLTYPE evaluate(BSTR mimeType, BSTR sourceCode, int* context)
 		{
-			kroll::Script::GetInstance()->Evaluate((const char *)_bstr_t(mimeType),
-				"<script>",
-				(const char *)_bstr_t(sourceCode),
-				JSContextToKrollContext(context));
+			try
+			{
+				kroll::Script::GetInstance()->Evaluate(
+					(const char *)_bstr_t(mimeType), "<script>",
+					(const char *)_bstr_t(sourceCode),
+					JSContextToKrollContext(context));
+			}
+			catch (ValueException& exception)
+			{
+				Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
+					exception.ToString().c_str());
+
+			}
 			return S_OK;
 		}
 #elif defined(OS_LINUX)
@@ -84,8 +93,17 @@ namespace ti
 		}
 		virtual void evaluate(const gchar *mimeType, const gchar *sourceCode, void* context)
 		{
-			kroll::Script::GetInstance()->Evaluate(mimeType, "<script>", sourceCode, 
-				JSContextToKrollContext(context));
+			try
+			{
+				kroll::Script::GetInstance()->Evaluate(mimeType, "<script>",
+					sourceCode, JSContextToKrollContext(context));
+			}
+			catch (ValueException& exception)
+			{
+				Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
+					exception.ToString().c_str());
+
+			}
 		}
 #endif
 	};
