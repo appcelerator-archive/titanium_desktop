@@ -109,8 +109,6 @@
 	{
 		AutoPtr<PreprocessData> result = 
 			Script::GetInstance()->Preprocess(url, scope);
-		logger->Debug("data=%s", result->data->Get());
-
 		NSData* data = [NSData 
 			dataWithBytes:(void *) result->data->Get()
 			length:result->data->Length()];
