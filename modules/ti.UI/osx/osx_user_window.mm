@@ -221,8 +221,16 @@ namespace ti
 
 	void OSXUserWindow::Close()
 	{
-		if (active && nativeWindow) { // Do not re-close
+		// Guard against re-closing a window
+		if (active && nativeWindow)
+		{
 			UserWindow::Close();
+
+			// If the window is still active at this point, it
+			// indicates an event listener has cancelled this close event.
+			if (this->active)
+				return;
+
 			this->Closed();
 
 			// Actually close the native window and mark

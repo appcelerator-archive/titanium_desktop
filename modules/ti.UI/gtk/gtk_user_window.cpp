@@ -208,6 +208,11 @@ namespace ti
 	{
 		UserWindow::Close();
 
+		// If the window is still active at this point, it
+		// indicates an event listener has cancelled this close event.
+		if (this->active)
+			return;
+
 		// Destroy the GTK bits, if we have them first, because
 		// we need to assume the GTK window is gone for  everything
 		// below (this method might be called by DestroyCallback)
@@ -1019,6 +1024,7 @@ namespace ti
 	{
 		return this->config->IsCloseable();
 	}
+
 	void GtkUserWindow::SetCloseable(bool closeable)
 	{
 		if (this->gtkWindow != NULL)
