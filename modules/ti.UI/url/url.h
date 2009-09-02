@@ -10,5 +10,7 @@ namespace ti
 {
 	void NormalizeURLCallback(const char* url, char* buffer, int bufferLength);
 	void URLToFileURLCallback(const char* url, char* buffer, int bufferLength);
+	int CanPreprocessURLCallback(const char* url);
+	char* PreprocessURLCallback(const char* url, KeyValuePair* headers, char** mimeType);
 }
 #endif

@@ -27,7 +27,6 @@ namespace ti {
 #include <JavaScriptCore/JSContextRef.h>
 
 #include <iostream>
-#include "url/url.h"
 #include "javascript_module.h"
 #include "window_config.h"
 #include "user_window.h"
@@ -44,6 +43,8 @@ namespace ti {
 #elif defined(OS_WIN32)
 #include "win32/ui_module_win32.h"
 #endif
+
+#include "url/url.h"
 
 namespace ti {
 

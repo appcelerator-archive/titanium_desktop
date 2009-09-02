@@ -10,7 +10,6 @@ using Poco::URI;
 using std::string;
 namespace ti
 {
-
 	void NormalizeURLCallback(const char* url, char* buffer, int bufferLength)
 	{
 		strncpy(buffer, url, bufferLength);
@@ -52,4 +51,42 @@ namespace ti
 			log->Error("Could not convert %s to a path", url);
 		}
 	}
+
+	int CanPreprocessURLCallback(const char* url)
+	{
+		return Script::GetInstance()->CanPreprocess(url);
+	}
+
+	char* PreprocessURLCallback(const char* url, KeyValuePair* headers, char** mimeType)
+	{
+		Logger* logger = Logger::Get("UI.URL");
+
+		SharedKObject scope = new StaticBoundObject();
+		SharedKObject kheaders = new StaticBoundObject();
+		while (headers->key)
+		{
+			kheaders->SetString(headers->key, headers->value);
+			headers++;
+		}
+
+		try
+		{
+			AutoPtr<PreprocessData> result = 
+				Script::GetInstance()->Preprocess(url, scope);
+			*mimeType = strdup(result->mimeType.c_str());
+			printf("%s\n", *mimeType);
+			return strdup(result->data->Get());
+		}
+		catch (ValueException& e)
+		{
+			logger->Error("Error in preprocessing: %s", e.ToString().c_str());
+		}
+		catch (...)
+		{
+			logger->Error("Unknown Error in preprocessing");
+		}
+
+		return NULL;
+	}
+
 }
