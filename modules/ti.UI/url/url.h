@@ -6,6 +6,15 @@
 
 #ifndef TITANIUM_URL_H_
 #define TITANIUM_URL_H_
+
+#ifndef KEYVALUESTRUCT
+typedef struct {
+    char* key;
+    char* value;
+} KeyValuePair;
+#define KEYVALUESTRUCT 1
+#endif
+
 namespace ti
 {
 	void NormalizeURLCallback(const char* url, char* buffer, int bufferLength);
