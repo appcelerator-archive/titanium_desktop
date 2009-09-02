@@ -111,3 +111,15 @@ def js_array_sum(jsarray):
 	for x in jsarray:
 		sum = sum + x
 	return sum
+
+def get_empty_python_object():
+	class BlankObject(object):
+		pass
+
+	return BlankObject()
+
+def get_empty_python_dict():
+	return {}
+
+def get_empty_python_list():
+	return []
