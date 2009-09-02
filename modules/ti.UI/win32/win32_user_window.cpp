@@ -539,9 +539,15 @@ void Win32UserWindow::Open()
 
 void Win32UserWindow::Close()
 {
-	this->RemoveOldMenu();
 	UserWindow::Close();
-	UserWindow::Closed();
+
+	// If the window is still active at this point, it
+	// indicates an event listener has cancelled this close event.
+	if (!this->active)
+	{
+		this->RemoveOldMenu();
+		UserWindow::Closed();
+	}
 }
 
 double Win32UserWindow::GetX()

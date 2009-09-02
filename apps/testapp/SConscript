@@ -6,7 +6,7 @@ Import('build')
 
 t = build.env.PackageApp('#testapp-target',
 	[Dir('Resources'), 'tiapp.xml'],
-	FULLNAME='Titanium Test App',
+	FULLNAME='Testapp',
 	ID='com.titaniumapp.testapp',
 	GUID='D36DD8BA-D092-4F20-9073-EB613BFB8F46',
 	PUBLISHER='Appcelerator, Inc.',

@@ -91,6 +91,42 @@
 	return mime;
 }
 
+-(NSData*)preprocessRequest:(const char*)url returningMimeType:(NSString**)mimeType
+{
+	static Logger* logger = Logger::Get("UI.TitaniumProtocols");
+	SharedKObject scope = new StaticBoundObject();
+	SharedKObject headers = new StaticBoundObject();
+	scope->Set("httpHeaders", Value::NewObject(headers));
+
+	NSDictionary *httpHeaders = [[self request] allHTTPHeaderFields];
+	for (NSString* header in [httpHeaders allKeys])
+	{
+		NSString* value = (NSString*) [httpHeaders valueForKey:header];
+		headers->SetString([header UTF8String], [value UTF8String]);
+	}
+
+	try
+	{
+		AutoPtr<PreprocessData> result = 
+			Script::GetInstance()->Preprocess(url, scope);
+		NSData* data = [NSData 
+			dataWithBytes:(void *) result->data->Get()
+			length:result->data->Length()];
+		*mimeType = [NSString stringWithUTF8String:result->mimeType.c_str()];
+
+		return data;
+	}
+	catch (ValueException& e)
+	{
+		logger->Error("Error in preprocessing: %s", e.ToString().c_str());
+	}
+	catch (...)
+	{
+		logger->Error("Unknown Error in preprocessing");
+	}
+	return nil;
+}
+
 -(void)startLoading
 {
 	static Logger* logger = Logger::Get("UI.TitaniumProtocols");
@@ -98,7 +134,7 @@
 	NSURL* url = [[self request] URL];
 	std::string urlString = [[url absoluteString] UTF8String];
 	std::string path = URLUtils::URLToPath(urlString);
-	NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
+	
 
 	// First check if this is the non-canonical version of this request.
 	// If it is, we redirect to the canonical version.
@@ -116,13 +152,35 @@
 			redirectResponse:response];
 		return;
 	}
+	
 
 	// This is a canonical request, so try to load the file it represents.
-	NSError* error;
-	NSData* data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
+	NSError* error = nil;
+	NSData* data = nil;
+	NSString* mimeType = nil;
+	NSURLCacheStoragePolicy cachePolicy;
+
+	if (Script::GetInstance()->CanPreprocess(urlString.c_str()))
+	{
+		data = [self 
+			preprocessRequest:urlString.c_str()
+			returningMimeType:&mimeType];
+		cachePolicy = NSURLCacheStorageNotAllowed;
+	}
+	else
+	{
+		NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
+		data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
+		mimeType = [TitaniumProtocols mimeTypeFromExtension:
+			[nsPath pathExtension]];
+		cachePolicy = NSURLCacheStorageAllowed;
+
+		if (data == nil)
+			logger->Error("Error finding %s", [nsPath UTF8String]);
+	}
+
 	if (data == nil) // File doesn't exist
 	{ 
-		logger->Error("Error finding %s", [nsPath UTF8String]);
 		[client URLProtocol:self didFailWithError:[NSError
 			errorWithDomain:NSURLErrorDomain
 			code:NSURLErrorResourceUnavailable
@@ -134,13 +192,13 @@
 	{ 
 		NSURLResponse* response = [[NSURLResponse alloc]
 			initWithURL:url
-			MIMEType:[TitaniumProtocols mimeTypeFromExtension:[nsPath pathExtension]]
+			MIMEType:mimeType
 			expectedContentLength:[data length]
 			textEncodingName:@"utf-8"];
 
 		[client URLProtocol:self
 			didReceiveResponse:response
-			cacheStoragePolicy:NSURLCacheStorageAllowed];
+			cacheStoragePolicy:cachePolicy];
 		[client URLProtocol:self didLoadData:data];
 
 		[client URLProtocolDidFinishLoading:self];
