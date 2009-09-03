@@ -256,3 +256,16 @@ def get_ruby_proc_arity(arity)
 
 	return p
 end
+
+def get_empty_ruby_object()
+	return Object.new
+end
+
+def get_empty_ruby_list()
+	return []
+end
+
+def get_empty_ruby_hash()
+	#return {} 
+	return Object.new
+end
