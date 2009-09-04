@@ -75,8 +75,10 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_CLOSE:
-			window->Close();
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			if (window->Close())
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			else
+				return 0;
 
 		case WM_GETMINMAXINFO:
 			if (window)
@@ -537,8 +539,11 @@ void Win32UserWindow::Open()
 	FireEvent(Event::OPENED);
 }
 
-void Win32UserWindow::Close()
+bool Win32UserWindow::Close()
 {
+	if (!this->active)
+		return false;
+
 	UserWindow::Close();
 
 	// If the window is still active at this point, it
@@ -548,6 +553,8 @@ void Win32UserWindow::Close()
 		this->RemoveOldMenu();
 		UserWindow::Closed();
 	}
+
+	return !this->active;
 }
 
 double Win32UserWindow::GetX()

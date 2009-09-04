@@ -204,30 +204,35 @@ namespace ti
 		return FALSE;
 	}
 
-	void GtkUserWindow::Close()
+	bool GtkUserWindow::Close()
 	{
+		if (!this->active)
+			return false;
+
 		UserWindow::Close();
 
 		// If the window is still active at this point, it
 		// indicates an event listener has cancelled this close event.
-		if (this->active)
-			return;
-
-		// Destroy the GTK bits, if we have them first, because
-		// we need to assume the GTK window is gone for  everything
-		// below (this method might be called by DestroyCallback)
-		if (this->gtkWindow != NULL)
+		if (!this->active)
 		{
-			// We don't want the destroy signal handler to fire after now.
-			g_signal_handler_disconnect(this->gtkWindow, this->destroyCallbackId);
-			gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
+			// Destroy the GTK bits, if we have them first, because
+			// we need to assume the GTK window is gone for  everything
+			// below (this method might be called by DestroyCallback)
+			if (this->gtkWindow != NULL)
+			{
+				// We don't want the destroy signal handler to fire after now.
+				g_signal_handler_disconnect(this->gtkWindow, this->destroyCallbackId);
+				gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
 
-			this->gtkWindow = NULL;
-			this->webView = NULL;
+				this->gtkWindow = NULL;
+				this->webView = NULL;
+			}
+			this->RemoveOldMenu(); // Cleanup old menu
+
+			this->Closed();
 		}
-		this->RemoveOldMenu(); // Cleanup old menu
 
-		this->Closed();
+		return !this->active;
 	}
 	
 	void GtkUserWindow::SetupTransparency()

@@ -47,7 +47,7 @@ namespace ti
 		void Focus();
 		void Unfocus();
 		void Open();
-		void Close();
+		bool Close();
 		double GetX();
 		void SetX(double x);
 		double GetY();

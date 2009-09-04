@@ -313,6 +313,13 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("isVisible", &UserWindow::_IsVisible);
 
 	/**
+	 * @tiapi(method=True,name=UI.UserWindow.isActive,since=0.7)
+	 * A UserWindow is active if it has been opened and has not yet been closed.
+	 * @tiresult[Boolean] True if the window is active, false otherwise.
+	 */
+	this->SetMethod("isActive", &UserWindow::_IsActive);
+
+	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setVisible,since=0.2) Sets the visibility of the window
 	 * @tiarg(for=UI.UserWindow.setVisible,type=Boolean,name=visible) true if the window should be visible, false if otherwise
 	 */
@@ -447,7 +454,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 * @tiarg[Boolean, console, optional=True] Open the console along with the inspector (defaults to false).
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
-	
+
 	this->FireEvent(Event::CREATED);
 }
 
@@ -487,19 +494,25 @@ void UserWindow::Open()
 	this->active = true;
 }
 
-void UserWindow::Close()
+bool UserWindow::Close()
 {
 	// If FireEvent returns true, stopPropagation or preventDefault
 	// was not called on the event -- and we should continue closing
 	// the window. Otherwise, we want to cancel the close.
-	if (this->FireEvent(Event::CLOSE))
+	printf("--firing close event\n");
+	bool shouldProcess = this->FireEvent(Event::CLOSE);
+	if (shouldProcess)
 	{
+		printf("event was not cancelled\n");
 		this->active = false; // Prevent further modification.
 	}
+
+	return !this->active;
 }
 
 void UserWindow::Closed()
 {
+	this->config->SetVisible(false);
 	this->FireEvent(Event::CLOSED);
 
 	// Close all children and cleanup
@@ -1286,6 +1299,11 @@ void UserWindow::_IsVisible(const kroll::ValueList& args, kroll::SharedValue res
 	{
 		result->SetBool(false);
 	}
+}
+
+void UserWindow::_IsActive(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	result->SetBool(this->active);
 }
 
 void UserWindow::_SetVisible(const kroll::ValueList& args, kroll::SharedValue result)
