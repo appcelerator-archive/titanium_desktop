@@ -98,8 +98,10 @@ namespace ti
 			}
 		}
 		
-		SharedString newURL = Script::GetInstance()->Preprocess(urlStr.c_str(), scope);
-		if (!newURL.isNull())
+		AutoPtr<PreprocessData> data =
+			Script::GetInstance()->Preprocess(urlStr.c_str(), scope);
+		//TODO: implement new preprocess stuff for win32
+		/*if (!newURL.isNull())
 		{
 			*newRequest = createWebURLRequest();
 			IWebMutableURLRequest *mutableRequest;
@@ -109,7 +111,7 @@ namespace ti
 				_bstr_t newURLBStr(newURL->c_str());
 				mutableRequest->setURL(newURLBStr.copy());
 			}
-		}
+		}*/
 		
 		return S_OK;
 	}

@@ -102,3 +102,24 @@ def test_js_type_bool(t):
 	
 def test_js_type_none(t):
 	return type(t) == types.NoneType
+
+def get_python_list():
+	return [1, 2, 3]
+
+def js_array_sum(jsarray):
+	sum = 0
+	for x in jsarray:
+		sum = sum + x
+	return sum
+
+def get_empty_python_object():
+	class BlankObject(object):
+		pass
+
+	return BlankObject()
+
+def get_empty_python_dict():
+	return {}
+
+def get_empty_python_list():
+	return []

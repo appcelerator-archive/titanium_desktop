@@ -2,7 +2,7 @@ describe("Python Tests",
 {
 	test_inline: function()
 	{
-		value_of(window.inline_test_result).should_be('A');
+		value_of(window.inline_test_result).should_be('A'); 
 	},
 	test_external_file: function()
 	{
@@ -165,4 +165,170 @@ describe("Python Tests",
 	{
 		value_of(Titanium.UI.currentWindow).should_be_object();
 	},
+	test_python_list: function()
+	{
+		var list = get_python_list();
+		value_of(list[0]).should_be(1);
+		value_of(list[1]).should_be(2);
+		value_of(list[2]).should_be(3);
+		value_of(list[3]).should_be_undefined();
+		value_of(list[300]).should_be_undefined();
+		
+	},
+	test_js_array_sum: function()
+	{
+		var x = new Array();
+		x[0] = 1;
+		x[1] = 3;
+		x[2] = 4;
+		var sum = js_array_sum(x);
+		value_of(sum).should_be(8);
+	},
+	test_js_array_sum2: function()
+	{
+		var x = [1, 2, 3]
+		var sum = js_array_sum(x);
+		value_of(sum).should_be(6);
+	},
+	test_empty_kpythonobject: function()
+	{
+		var count_properties = function(o) { var n = 0; for (x in o) { n++; } return n; };
+		var o = get_empty_python_object();
+		// There should be no properties showing for a blank KObject
+		var orig_property_count = count_properties(o);
+
+		// Yet there are some hidden methods that should be there
+		value_of(o.equals).should_be_function();
+		value_of(o.toString).should_be_function();
+
+		value_of(o.equals(o)).should_be_true();
+
+		var other = Object();
+		value_of(o.equals(other)).should_be_false();
+		other = get_empty_python_object();
+		value_of(o.equals(other)).should_be_false();
+		value_of(o.toString()).should_be_string();
+
+		o.property_one = "Foo!";
+		value_of(o.property_one).should_be("Foo!");
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = 123;
+		value_of(o.property_one).should_be(123);
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = o;
+		value_of(o.equals(o.property_one)).should_be_true();
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+
+		o.property_two = "Foo2!";
+		value_of(o.property_two).should_be("Foo2!");
+		value_of(count_properties(o)).should_be(orig_property_count + 2);
+
+		o.property_one = "blahblah";
+		value_of(o.property_one).should_be("blahblah");
+
+		o['		 weird property name	   '] = "oh noes";
+		value_of(o['		 weird property name	   ']).should_be("oh noes");
+	},
+	test_empty_kpythondict: function()
+	{
+		var count_properties = function(o) { var n = 0; for (x in o) { n++; } return n; };
+		var o = get_empty_python_dict();
+		// There should be no properties showing for a blank KObject
+		var orig_property_count = count_properties(o);
+
+		// Yet there are some hidden methods that should be there
+		value_of(o.equals).should_be_function();
+		value_of(o.toString).should_be_function();
+
+		value_of(o.equals(o)).should_be_true();
+
+		var other = Object();
+		value_of(o.equals(other)).should_be_false();
+		other = get_empty_python_dict();
+		value_of(o.equals(other)).should_be_false();
+		value_of(o.toString()).should_be_string();
+
+		o.property_one = "Foo!";
+		value_of(o.property_one).should_be("Foo!");
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = 123;
+		value_of(o.property_one).should_be(123);
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = o;
+		value_of(o.equals(o.property_one)).should_be_true();
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+
+		o.property_two = "Foo2!";
+		value_of(o.property_two).should_be("Foo2!");
+		value_of(count_properties(o)).should_be(orig_property_count + 2);
+
+		o.property_one = "blahblah";
+		value_of(o.property_one).should_be("blahblah");
+
+		o['		 weird property name	   '] = "oh noes";
+		value_of(o['		 weird property name	   ']).should_be("oh noes");
+	},
+	test_empty_kpythonlist: function()
+	{
+		var l = get_empty_python_list();
+		value_of(l.length).should_be_number();
+		value_of(l.equals).should_be_function();
+		value_of(l.toString).should_be_function();
+		value_of(l.length).should_be(0);
+
+		value_of(l.pop).should_be_function();
+		value_of(l.push).should_be_function();
+		value_of(l.reverse).should_be_function();
+		value_of(l.shift).should_be_function();
+		value_of(l.sort).should_be_function();
+		value_of(l.splice).should_be_function();
+		value_of(l.unshift).should_be_function();
+		value_of(l.concat).should_be_function();
+		value_of(l.join).should_be_function();
+		value_of(l.slice).should_be_function();
+	},
+	test_modifying_klist: function()
+	{
+		var l = get_empty_python_list();
+		value_of(l.length).should_be_number();
+		value_of(l.length).should_be(0);
+		l.push(123);
+		value_of(l.length).should_be(1);
+		value_of(l[0]).should_be(123);
+
+		l.push("abc");
+		value_of(l.length).should_be(2);
+		value_of(l[1]).should_be("abc");
+
+		var popped = l.pop();
+		value_of(popped).should_be("abc");
+		value_of(l.length).should_be(1);
+		value_of(l[0]).should_be(123);
+
+		l.length = 3;
+		value_of(l.length).should_be(3);
+		value_of(l[0]).should_be(123);
+		value_of(l[1]).should_be(undefined);
+		value_of(l[2]).should_be(undefined);
+
+		l[2] = "blah";
+		value_of(l[0]).should_be(123);
+		value_of(l[1]).should_be(undefined);
+		value_of(l[2]).should_be("blah");
+
+		l.length = 1;
+
+		l.push(l);
+		value_of(l.length).should_be(2);
+		value_of(l[1].equals(l)).should_be_true();
+
+		popped = l.pop();
+		value_of(popped.equals(l)).should_be_true();
+
+		l[20] = "blah";
+		value_of(l.length).should_be(21);
+
+		l.length = 0;
+		value_of(l.length).should_be(0);
+	}
 });

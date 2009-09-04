@@ -82,3 +82,37 @@ function test_call_method_prop_with_arg($o, $arg)
 {
 	return $o->f2($arg);
 }
+
+class Hammer {
+	private $privateVariable;
+	public $publicVariable;
+
+	function __construct()
+	{
+		$this->privateVariable = "bar";
+		$this->publicVariable = "bar";
+	}
+
+	private function privateMethod()
+	{
+		return "foo";
+	}
+
+	public function publicMethod()
+	{
+		return "foo";
+	}
+}
+
+function looks_like_a_nail()
+{
+	return new Hammer();
+}
+
+function php_modify_array($myarray)
+{
+	$myarray[0] = 4;
+	$myarray[1] = 5;
+	$myarray[2] = 6;
+	$myarray[3] = 7;
+}

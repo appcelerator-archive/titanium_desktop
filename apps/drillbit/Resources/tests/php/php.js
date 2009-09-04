@@ -102,5 +102,45 @@ describe("php tests",
 		fun.f2 = funarg
 		value_of(test_call_method_prop(fun)).should_be(1);
 		value_of(test_call_method_prop_with_arg(fun, "toots")).should_be("toots");
+	},
+	test_class_visibility: function()
+	{
+		var hammer = looks_like_a_nail();
+		value_of(hammer.publicVariable).should_be("bar");
+		value_of(hammer.privateVariable).should_be_undefined();
+		value_of(hammer.publicMethod).should_be_function();
+		value_of(hammer.publicMethod()).should_be("foo");
+		value_of(hammer.privateMethod).should_be_undefined();
+	},
+	test_modify_array: function()
+	{
+		var myarray = [1, 2, 3];
+		php_modify_array(myarray);
+		value_of(myarray[0]).should_be(4);
+		value_of(myarray[1]).should_be(5);
+		value_of(myarray[2]).should_be(6);
+		value_of(myarray[3]).should_be(7);
+	},
+	test_preprocess_as_async: function(callback)
+	{
+		var w = Titanium.UI.currentWindow.createWindow('app://test.php');
+		var timer = 0;
+		w.addEventListener(Titanium.PAGE_LOADED, function(event) {
+			clearTimeout(timer);
+			try
+			{
+				var window = w.getDOMWindow();
+				var a = window.document.getElementById("a").innerHTML;
+				value_of(a).should_be("101");
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+		});
+		timer = setTimeout(function() {
+			callback.failed("Timed out waiting for preprocess");
+		}, 3000);
+		w.open();
 	}
 });

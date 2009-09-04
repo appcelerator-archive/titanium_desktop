@@ -26,6 +26,8 @@ namespace ti
 		// Prepare the custom URL handlers
 		webkit_titanium_set_normalize_url_cb(NormalizeURLCallback);
 		webkit_titanium_set_url_to_file_url_cb(URLToFileURLCallback);
+		webkit_titanium_set_can_preprocess_cb(CanPreprocessURLCallback);
+		webkit_titanium_set_preprocess_cb(PreprocessURLCallback);
 
 		// Setup libsoup proxy support
 		SoupSession* session = webkit_get_default_session();

@@ -42,8 +42,17 @@ namespace ti
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context
 {
 	// TODO get source name from webkit
-	kroll::Script::GetInstance()->Evaluate([mimeType UTF8String], "<script>",
-		[sourceCode UTF8String], JSContextToKrollContext(context));
+	try
+	{
+		kroll::Script::GetInstance()->Evaluate([mimeType UTF8String], "<script>",
+			[sourceCode UTF8String], JSContextToKrollContext(context));
+	}
+	catch (ValueException& exception)
+	{
+		Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
+			exception.ToString().c_str());
+
+	}
 }
 @end
 #endif

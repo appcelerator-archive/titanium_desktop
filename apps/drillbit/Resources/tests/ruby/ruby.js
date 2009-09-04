@@ -233,5 +233,167 @@ describe("Ruby Tests",
 		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
 		procMethod = get_ruby_proc_arity(-2);
 		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
+	},
+	test_krubyobject_iterate_properties: function()
+	{
+		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
+		var obj = get_empty_ruby_object();
+
+		// Iterating through Ruby properties many times sometimes casues a segfault
+		var orig_property_count = count_properties(obj);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+		value_of(count_properties(obj)).should_be(orig_property_count);
+	},
+	test_empty_krubyobject: function()
+	{
+		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
+		var o = get_empty_ruby_object();
+		// There should be no properties showing for a blank KObject
+		var orig_property_count = count_properties(o);
+
+		// Yet there are some hidden methods that should be there
+		value_of(o.equals).should_be_function();
+		value_of(o.toString).should_be_function();
+
+		value_of(o.equals(o)).should_be_true();
+
+		var other = Object();
+		value_of(o.equals(other)).should_be_false();
+		other = get_empty_ruby_object();
+		value_of(o.equals(other)).should_be_false();
+		value_of(o.toString()).should_be_string();
+
+		o.property_one = "Foo!";
+		value_of(o.property_one).should_be("Foo!");
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = 123;
+		value_of(o.property_one).should_be(123);
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = o;
+		value_of(o.equals(o.property_one)).should_be_true();
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+
+		o.property_two = "Foo2!";
+		value_of(o.property_two).should_be("Foo2!");
+		value_of(count_properties(o)).should_be(orig_property_count + 2);
+
+		o.property_one = "blahblah";
+		value_of(o.property_one).should_be("blahblah");
+
+		// Ruby does not support setting variable names which have whitespace
+		//o['		 weird property name	   '] = "oh noes";
+		//value_of(o['		 weird property name	   ']).should_be("oh noes");
+	},
+	test_empty_krubyhash: function()
+	{
+		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
+		var o = get_empty_ruby_hash();
+		value_of(true).should_be(true);
+		// There should be no properties showing for a blank KObject
+		var orig_property_count = count_properties(o);
+
+		// Yet there are some hidden methods that should be there
+		value_of(o.equals).should_be_function();
+		value_of(o.toString).should_be_function();
+
+		value_of(o.equals(o)).should_be_true();
+
+		var other = Object();
+		value_of(o.equals(other)).should_be_false();
+		other = get_empty_ruby_hash();
+		value_of(o.equals(other)).should_be_false();
+		value_of(o.toString()).should_be_string();
+
+		o.property_one = "Foo!";
+		value_of(o.property_one).should_be("Foo!");
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = 123;
+		value_of(o.property_one).should_be(123);
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+		o.property_one = o;
+		value_of(o.equals(o.property_one)).should_be_true();
+		value_of(count_properties(o)).should_be(orig_property_count + 1);
+
+		o.property_two = "Foo2!";
+		value_of(o.property_two).should_be("Foo2!");
+		value_of(count_properties(o)).should_be(orig_property_count + 2);
+
+		o.property_one = "blahblah";
+		value_of(o.property_one).should_be("blahblah");
+	},
+	test_empty_krubylist: function()
+	{
+		var l = get_empty_ruby_list();
+		value_of(l.length).should_be_number();
+		value_of(l.equals).should_be_function();
+		value_of(l.toString).should_be_function();
+		value_of(l.length).should_be(0);
+
+		value_of(l.pop).should_be_function();
+		value_of(l.push).should_be_function();
+		value_of(l.reverse).should_be_function();
+		value_of(l.shift).should_be_function();
+		value_of(l.sort).should_be_function();
+		value_of(l.splice).should_be_function();
+		value_of(l.unshift).should_be_function();
+		value_of(l.concat).should_be_function();
+		value_of(l.join).should_be_function();
+		value_of(l.slice).should_be_function();
+	},
+	test_modifying_klist: function()
+	{
+		var l = get_empty_ruby_list();
+		value_of(l.length).should_be_number();
+		value_of(l.length).should_be(0);
+		l.push(123);
+		value_of(l.length).should_be(1);
+		value_of(l[0]).should_be(123);
+
+		l.push("abc");
+		value_of(l.length).should_be(2);
+		value_of(l[1]).should_be("abc");
+
+		var popped = l.pop();
+		value_of(popped).should_be("abc");
+		value_of(l.length).should_be(1);
+		value_of(l[0]).should_be(123);
+
+		l.length = 3;
+		value_of(l.length).should_be(3);
+		value_of(l[0]).should_be(123);
+		value_of(l[1]).should_be(undefined);
+		value_of(l[2]).should_be(undefined);
+
+		l[2] = "blah";
+		value_of(l[0]).should_be(123);
+		value_of(l[1]).should_be(undefined);
+		value_of(l[2]).should_be("blah");
+
+		l.length = 1;
+
+		l.push(l);
+		value_of(l.length).should_be(2);
+		value_of(l[1].equals(l)).should_be_true();
+
+		popped = l.pop();
+		value_of(popped.equals(l)).should_be_true();
+
+		l[20] = "blah";
+		value_of(l.length).should_be(21);
+
+		l.length = 0;
+		value_of(l.length).should_be(0);
 	}
 });

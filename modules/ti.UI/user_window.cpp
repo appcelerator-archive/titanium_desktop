@@ -489,11 +489,13 @@ void UserWindow::Open()
 
 void UserWindow::Close()
 {
-	// We want to fire the CLOSE event synchronously, because we
-	// want to ensure that listeners on the originating window get
-	// this event.
-	this->active = false; // prevent further modification
-	this->FireEvent(Event::CLOSE);
+	// If FireEvent returns true, stopPropagation or preventDefault
+	// was not called on the event -- and we should continue closing
+	// the window. Otherwise, we want to cancel the close.
+	if (this->FireEvent(Event::CLOSE))
+	{
+		this->active = false; // Prevent further modification.
+	}
 }
 
 void UserWindow::Closed()
