@@ -202,25 +202,7 @@
 	 */
 	
 	
-	/*
-	    http://www.JSON.org/json2.js
-	    2009-04-16
 
-	    Public Domain.
-
-	    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
-
-	    See http://www.JSON.org/js.html
-
-	    This is a reference implementation. You are free to copy, modify, or
-	    redistribute.
-
-	    This code should be minified before deployment.
-	    See http://javascript.crockford.com/jsmin.html
-
-	    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
-	    NOT CONTROL.
-	*/
 
 	/*jslint evil: true */
 
@@ -465,85 +447,211 @@
 
 	// If the JSON object does not yet have a parse method, give it one.
 
-		if (typeof Titanium.JSON.parse !== 'function') {
-			Titanium.JSON.parse = function (text, reviver) {
+	    if (typeof Titanium.JSON.parse !== 'function') {
+	
+			// Copyright (C) 2008 Google Inc.
+			//
+			// Licensed under the Apache License, Version 2.0 (the "License");
+			// you may not use this file except in compliance with the License.
+			// You may obtain a copy of the License at
+			//
+			//      http://www.apache.org/licenses/LICENSE-2.0
+			//
+			// Unless required by applicable law or agreed to in writing, software
+			// distributed under the License is distributed on an "AS IS" BASIS,
+			// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+			// See the License for the specific language governing permissions and
+			// limitations under the License.
 
-	// The parse method takes a text and an optional reviver function, and returns
-	// a JavaScript value if the text is a valid JSON text.
+			/**
+			 * Parses a string of well-formed JSON text.
+			 *
+			 * If the input is not well-formed, then behavior is undefined, but it is
+			 * deterministic and is guaranteed not to modify any object other than its
+			 * return value.
+			 *
+			 * This does not use `eval` so is less likely to have obscure security bugs than
+			 * json2.js.
+			 * It is optimized for speed, so is much faster than json_parse.js.
+			 *
+			 * This library should be used whenever security is a concern (when JSON may
+			 * come from an untrusted source), speed is a concern, and erroring on malformed
+			 * JSON is *not* a concern.
+			 *
+			 * @author Mike Samuel <mikesamuel@gmail.com>
+			 */
+			Titanium.JSON.parse = (function () {
+			  var number
+			      = '(?:-?\\b(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\\b)';
+			  var oneChar = '(?:[^\\0-\\x08\\x0a-\\x1f\"\\\\]'
+			      + '|\\\\(?:[\"/\\\\bfnrt]|u[0-9A-Fa-f]{4}))';
+			  var string = '(?:\"' + oneChar + '*\")';
 
-				var j;
+			  // Will match a value in a well-formed JSON file.
+			  // If the input is not well-formed, may match strangely, but not in an unsafe
+			  // way.
+			  // Since this only matches value tokens, it does not match whitespace, colons,
+			  // or commas.
+			  var jsonToken = new RegExp(
+			      '(?:false|true|null|[\\{\\}\\[\\]]'
+			      + '|' + number
+			      + '|' + string
+			      + ')', 'g');
 
-				function walk(holder, key) {
+			  // Matches escape sequences in a string literal
+			  var escapeSequence = new RegExp('\\\\(?:([^u])|u(.{4}))', 'g');
 
-	// The walk method is used to recursively walk the resulting structure so
-	// that modifications can be made.
+			  // Decodes escape sequences in object literals
+			  var escapes = {
+			    '"': '"',
+			    '/': '/',
+			    '\\': '\\',
+			    'b': '\b',
+			    'f': '\f',
+			    'n': '\n',
+			    'r': '\r',
+			    't': '\t'
+			  };
+			  function unescapeOne(_, ch, hex) {
+			    return ch ? escapes[ch] : String.fromCharCode(parseInt(hex, 16));
+			  }
 
-					var k, v, value = holder[key];
-					if (value && typeof value === 'object') {
-						for (k in value) {
-							if (Object.hasOwnProperty.call(value, k)) {
-								v = walk(value, k);
-								if (v !== undefined) {
-									value[k] = v;
-								} else {
-									delete value[k];
-								}
-							}
-						}
-					}
-					return reviver.call(holder, key, value);
-				}
+			  // A non-falsy value that coerces to the empty string when used as a key.
+			  var EMPTY_STRING = new String('');
+			  var SLASH = '\\';
 
+			  // Constructor to use based on an open token.
+			  var firstTokenCtors = { '{': Object, '[': Array };
 
-	// Parsing happens in four stages. In the first stage, we replace certain
-	// Unicode characters with escape sequences. JavaScript handles many characters
-	// incorrectly, either silently deleting them, or treating them as line endings.
+			  var hop = Object.hasOwnProperty;
 
-				cx.lastIndex = 0;
-				if (cx.test(text)) {
-					text = text.replace(cx, function (a) {
-						return '\\u' +
-							('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-					});
-				}
+			  return function (json, opt_reviver) {
+			    // Split into tokens
+			    var toks = json.match(jsonToken);
+			    // Construct the object to return
+			    var result;
+			    var tok = toks[0];
+			    if ('{' === tok) {
+			      result = {};
+			    } else if ('[' === tok) {
+			      result = [];
+			    } else {
+			      throw new Error(tok);
+			    }
 
-	// In the second stage, we run the text against regular expressions that look
-	// for non-JSON patterns. We are especially concerned with '()' and 'new'
-	// because they can cause invocation, and '=' because it can cause mutation.
-	// But just to be safe, we want to reject all unexpected forms.
+			    // If undefined, the key in an object key/value record to use for the next
+			    // value parsed.
+			    var key;
+			    // Loop over remaining tokens maintaining a stack of uncompleted objects and
+			    // arrays.
+			    var stack = [result];
+			    for (var i = 1, n = toks.length; i < n; ++i) {
+			      tok = toks[i];
 
-	// We split the second stage into 4 regexp operations in order to work around
-	// crippling inefficiencies in IE's and Safari's regexp engines. First we
-	// replace the JSON backslash pairs with '@' (a non-JSON character). Second, we
-	// replace all simple value tokens with ']' characters. Third, we delete all
-	// open brackets that follow a colon or comma or that begin the text. Finally,
-	// we look to see that the remaining characters are only whitespace or ']' or
-	// ',' or ':' or '{' or '}'. If that is so, then the text is safe for eval.
+			      var cont;
+			      switch (tok.charCodeAt(0)) {
+			        default:  // sign or digit
+			          cont = stack[0];
+			          cont[key || cont.length] = +(tok);
+			          key = void 0;
+			          break;
+			        case 0x22:  // '"'
+			          tok = tok.substring(1, tok.length - 1);
+			          if (tok.indexOf(SLASH) !== -1) {
+			            tok = tok.replace(escapeSequence, unescapeOne);
+			          }
+			          cont = stack[0];
+			          if (!key) {
+			            if (cont instanceof Array) {
+			              key = cont.length;
+			            } else {
+			              key = tok || EMPTY_STRING;  // Use as key for next value seen.
+			              break;
+			            }
+			          }
+			          cont[key] = tok;
+			          key = void 0;
+			          break;
+			        case 0x5b:  // '['
+			          cont = stack[0];
+			          stack.unshift(cont[key || cont.length] = []);
+			          key = void 0;
+			          break;
+			        case 0x5d:  // ']'
+			          stack.shift();
+			          break;
+			        case 0x66:  // 'f'
+			          cont = stack[0];
+			          cont[key || cont.length] = false;
+			          key = void 0;
+			          break;
+			        case 0x6e:  // 'n'
+			          cont = stack[0];
+			          cont[key || cont.length] = null;
+			          key = void 0;
+			          break;
+			        case 0x74:  // 't'
+			          cont = stack[0];
+			          cont[key || cont.length] = true;
+			          key = void 0;
+			          break;
+			        case 0x7b:  // '{'
+			          cont = stack[0];
+			          stack.unshift(cont[key || cont.length] = {});
+			          key = void 0;
+			          break;
+			        case 0x7d:  // '}'
+			          stack.shift();
+			          break;
+			      }
+			    }
+			    // Fail if we've got an uncompleted object.
+			    if (stack.length) { throw new Error(); }
 
-				if (/^[\],:{}\s]*$/.
-	test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@').
-	replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']').
-	replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
+			    if (opt_reviver) {
+			      // Based on walk as implemented in http://www.json.org/json2.js
+			      var walk = function (holder, key) {
+			        var value = holder[key];
+			        if (value && typeof value === 'object') {
+			          var toDelete = null;
+			          for (var k in value) {
+			            if (hop.call(value, k) && value !== holder) {
+			              // Recurse to properties first.  This has the effect of causing
+			              // the reviver to be called on the object graph depth-first.
 
-	// In the third stage we use the eval function to compile the text into a
-	// JavaScript structure. The '{' operator is subject to a syntactic ambiguity
-	// in JavaScript: it can begin a block or an object literal. We wrap the text
-	// in parens to eliminate the ambiguity.
+			              // Since 'this' is bound to the holder of the property, the
+			              // reviver can access sibling properties of k including ones
+			              // that have not yet been revived.
 
-					j = eval('(' + text + ')');
+			              // The value returned by the reviver is used in place of the
+			              // current value of property k.
+			              // If it returns undefined then the property is deleted.
+			              var v = walk(value, k);
+			              if (v !== void 0) {
+			                value[k] = v;
+			              } else {
+			                // Deleting properties inside the loop has vaguely defined
+			                // semantics in ES3 and ES3.1.
+			                if (!toDelete) { toDelete = []; }
+			                toDelete.push(k);
+			              }
+			            }
+			          }
+			          if (toDelete) {
+			            for (var i = toDelete.length; --i >= 0;) {
+			              delete value[toDelete[i]];
+			            }
+			          }
+			        }
+			        return opt_reviver.call(holder, key, value);
+			      };
+			      result = walk({ '': result }, '');
+			    }
 
-	// In the optional fourth stage, we recursively walk the new structure, passing
-	// each name/value pair to a reviver function for possible transformation.
-
-					return typeof reviver === 'function' ?
-						walk({'': j}, '') : j;
-				}
-
-	// If the text is not JSON parseable, then a SyntaxError is thrown.
-
-				throw new SyntaxError('Titanium.JSON.parse');
-			};
-		}
+			    return result;
+			  };
+			})();
+	    }
 	}());
 
 })();
