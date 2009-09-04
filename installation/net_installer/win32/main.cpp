@@ -680,7 +680,7 @@ int WINAPI WinMain(
 	
 	// Command line arguments from kboot.exe are ANSI encoded, not 100% sure why yet
 	// .. could be ShellExecute
-	std::wstring wideJobsFile = KrollUtils::MBToWide(jobsFile, jobsFile.length(), CP_ACP);
+	std::wstring wideJobsFile = UTILS_NS::MBToWide(jobsFile, jobsFile.length(), CP_ACP);
 	jobs = ti::InstallJob::ReadJobs(wideJobsFile);
 	if (!updateFile.empty())
 	{
