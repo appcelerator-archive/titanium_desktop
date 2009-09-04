@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <fcntl.h>
 #include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -323,9 +324,11 @@ void ProcessURL(string url, HINTERNET hINet)
 	std::wstring wuuid = ParseQueryParam(url, "uuid");
 	std::wstring wname = ParseQueryParam(url, "name");
 	std::wstring wversion = ParseQueryParam(url, "version");
+	
 	string uuid = KrollUtils::WideToUTF8(wuuid);
 	string name = KrollUtils::WideToUTF8(wname);
 	string version = KrollUtils::WideToUTF8(wversion);
+	
 	IType type = UNKNOWN;
 
 	string path = "";
@@ -430,6 +433,7 @@ bool InstallApplication()
 bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 {
 	temporaryPath = FileUtils::GetTempDirectory();
+	
 	FileUtils::CreateDirectory(temporaryPath);
 
 	int count = jobs.size();
@@ -457,7 +461,6 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 	{
 		progressDialog->Update(x++, count);
 		ti::InstallJob *job = jobs[i];
-		
 		progressDialog->SetLineText(3, "Downloading: " + job->url, true);
 		if (job->isUpdate)
 		{
@@ -580,6 +583,8 @@ string GetDefaultInstallationDirectory()
 	}
 }
 
+void RedirectIOToConsole();
+
 int WINAPI WinMain(
 	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -595,10 +600,10 @@ int WINAPI WinMain(
 	string jobsFile;
 	bool quiet = false;
 	
-	//DebugBreak();
 	for (int i = 1; i < argc; i++)
 	{
 		string arg = argv[i];
+		
 		if (arg == "-appPath" && argc > i+1)
 		{
 			i++;
@@ -622,12 +627,16 @@ int WINAPI WinMain(
 		{
 			forceInstall = true;
 		}
+		else if (arg == "-debug")
+		{
+			RedirectIOToConsole();
+		}
 		else
 		{
 			jobsFile = arg;
 		}
 	}
-
+	
 	if (appPath.empty() || exePath.empty())
 	{
 		ShowError("The installer was not given enough information to continue.");
@@ -665,16 +674,28 @@ int WINAPI WinMain(
 	{
 		appInstallPath = GetDefaultInstallationDirectory();
 	}
-
+	
+	
 	componentInstallPath = FileUtils::GetSystemRuntimeHomeDirectory();
-
-	jobs = ti::InstallJob::ReadJobs(jobsFile);
+	
+	// Command line arguments from kboot.exe are ANSI encoded, not 100% sure why yet
+	// .. could be ShellExecute
+	std::wstring wideJobsFile = KrollUtils::MBToWide(jobsFile, jobsFile.length(), CP_ACP);
+	jobs = ti::InstallJob::ReadJobs(wideJobsFile);
 	if (!updateFile.empty())
 	{
 		ti::InstallJob* updateJob = new ti::InstallJob(true);
 		updateJob->name = app->name;
 		updateJob->version = app->version;
 		jobs.push_back(updateJob);
+	}
+	
+	if (jobs.size() == 0)
+	{
+		// Exit if there are no jobs -- i.e. we couldn't read the jobs file for some reason, or there's nothing to be done
+		fprintf(stderr, "Error: No jobs were defined for the installer.\n");
+		CoUninitialize();
+		return 1;
 	}
 	
 	// Major WTF here, Redmond.
@@ -720,7 +741,7 @@ int WINAPI WinMain(
 	{
 		doInstall = true;
 	}
-
+	
 	if (doInstall)
 	{
 		progressDialog = new ProgressDialog;
@@ -739,3 +760,50 @@ int WINAPI WinMain(
 		return 1;
 	}
 }
+
+static const WORD MAX_CONSOLE_LINES = 500;
+
+void RedirectIOToConsole()
+{
+	int hConHandle;
+	long lStdHandle;
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	FILE *fp;
+
+	// allocate a console for this app
+	AllocConsole();
+
+	// set the screen buffer to be big enough to let us scroll text
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+	coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+
+	// redirect unbuffered STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+
+	*stdout = *fp;
+	setvbuf( stdout, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDIN to the console
+	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen( hConHandle, "r" );
+	*stdin = *fp;
+	setvbuf( stdin, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDERR to the console
+	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stderr = *fp;
+	setvbuf( stderr, NULL, _IONBF, 0 );
+
+	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+	// point to console as well
+	std::ios::sync_with_stdio();
+}
+
