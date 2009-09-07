@@ -1745,15 +1745,11 @@ bool UserWindow::ShouldHaveTitaniumObject(
 		return false;
 	}
 
-	char* cStringURL = KJSUtil::ToChars(locString);
-	string url = cStringURL;
-	free(cStringURL);
-
+	string url(KJSUtil::ToChars(locString));
 	transform(url.begin(), url.end(), url.begin(), tolower);
 	return url.find("app://") == 0 || 
 		url.find("ti://") == 0 ||
 		url.find("file://") == 0;
-
 }
 
 bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
