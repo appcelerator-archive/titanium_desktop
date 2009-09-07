@@ -499,11 +499,9 @@ bool UserWindow::Close()
 	// If FireEvent returns true, stopPropagation or preventDefault
 	// was not called on the event -- and we should continue closing
 	// the window. Otherwise, we want to cancel the close.
-	printf("--firing close event\n");
 	bool shouldProcess = this->FireEvent(Event::CLOSE);
 	if (shouldProcess)
 	{
-		printf("event was not cancelled\n");
 		this->active = false; // Prevent further modification.
 	}
 
