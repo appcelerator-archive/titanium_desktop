@@ -28,7 +28,22 @@
 			$obj->object = new testclass();
 		};
 	</script>
-	
+
+
+	<!-- Tests for function persistence across script tags -->
+	<script type="text/php">
+		function across_script_tags2()
+		{
+			return 24;
+		}
+	</script>
+	<script type="text/php">
+		function across_script_tags()
+		{
+			return across_script_tags2();
+		}
+	</script>
+
 	<script>
 		function my_global_foo(a)
 		{
