@@ -38,6 +38,8 @@ namespace ti
 		// Hook app:// and ti:// URL support to WebKit
 		setNormalizeURLCallback(NormalizeURLCallback);
 		setURLToFileURLCallback(URLToFileURLCallback);
+		setCanPreprocessCallback(CanPreprocessURLCallback);
+		setPreprocessCallback(PreprocessURLCallback);
 	}
 	
 	Win32UIBinding::~Win32UIBinding()

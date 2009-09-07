@@ -45,7 +45,6 @@ namespace ti
 #include "webkit_frame_load_delegate.h"
 #include "webkit_policy_delegate.h"
 #include "webkit_ui_delegate.h"
-#include "webkit_resource_load_delegate.h"
 #include "../../../kroll/host/win32/host.h"
 #include "win32_user_window.h"
 #endif
