@@ -458,21 +458,6 @@ namespace ti
 				int count = 0;
 				char buf[8096];
 
-				SharedKMethod streamer;
-				SharedValue sv = binding->Get("ondatastream");
-				if (sv->IsMethod())
-				{
-					streamer = sv->ToMethod();
-
-					// Check if this is a javascript function
-					SharedValue call = streamer->Get("call");
-					if (call->IsMethod())
-					{
-						// Use call() to override "this"
-						streamer = call->ToMethod();
-					}
-				}
-
 				while(!rs.eof() && binding->Get("connected")->ToBool())
 				{
 					try
@@ -483,7 +468,7 @@ namespace ti
 						{
 							buf[c]='\0';
 							count+=c;
-							if (streamer.get())
+							if (!binding->ondatastream.isNull())
 							{
 								ValueList args;
 
@@ -494,7 +479,7 @@ namespace ti
 								args.push_back(Value::NewObject(new Blob(buf,c))); // buffer
 								args.push_back(Value::NewInt(c)); // buffer length
 
-								binding->host->InvokeMethodOnMainThread(streamer, args,
+								binding->host->InvokeMethodOnMainThread(binding->ondatastream, args,
 									binding->shutdown || !binding->async ? false : true);
 							}
 							else
