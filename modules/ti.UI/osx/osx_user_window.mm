@@ -219,7 +219,7 @@ namespace ti
 		return this->config->GetID();
 	}
 
-	void OSXUserWindow::Close()
+	bool OSXUserWindow::Close()
 	{
 		// Guard against re-closing a window
 		if (!this->active || !this->nativeWindow)
