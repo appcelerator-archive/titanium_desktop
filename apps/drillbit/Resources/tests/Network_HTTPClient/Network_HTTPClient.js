@@ -10,6 +10,8 @@ describe("Network.HTTPClient",
 			],
 		});
 		this.httpd.launch();
+
+		this.text = "here is some text for you!";
 	},
 
 	after_all: function()
@@ -20,6 +22,7 @@ describe("Network.HTTPClient",
 	before: function()
 	{
 		this.client = Titanium.Network.createHTTPClient();
+		this.url = "http://127.0.0.1:8888/";
 	},
 	
 	after: function()
@@ -61,52 +64,6 @@ describe("Network.HTTPClient",
 
 	},
 	
-	twitter_as_async:function(callback)
-	{
-		value_of(this.client).should_be_object();
-	
-		var timer = null;
-		var url = 'http://twitter.com/statuses/public_timeline.json';
-		var client = this.client;
-		
-		this.client.onreadystatechange = function()
-		{
-			try
-			{
-				if (this.readyState == client.HEADERS_RECEIVED)
-				{
-					// ah, different web servers it appears on twitter side
-					// have to compensate for space and without space separators
-					var ct = client.getResponseHeader('Content-Type');
-					value_of(ct).should_be_string();
-					ct = ct.replace(' ','');
-					value_of(ct).should_be('application/json;charset=utf-8');
-				}
-				else if (this.readyState == client.DONE)
-				{
-					clearTimeout(timer);
-					var text = client.responseText;
-					value_of(text).should_be_string();
-					value_of(text.length > 0).should_be_true();
-					callback.passed();
-				}
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
-		};
-		this.client.open("GET",url);
-		value_of(this.client.readyState).should_be(this.client.OPENED);
-		this.client.send(null);
-		
-		timer = setTimeout(function()
-		{
-			callback.failed('twitter test timed out');
-		},20000);
-	},
-	
 	https_test_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
@@ -139,7 +96,7 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			callback.failed('HTTPS test timed out');
-		},20000);
+		},5000);
 	},
 
 	test_encode_decode: function()
@@ -169,18 +126,101 @@ describe("Network.HTTPClient",
 		value_of(foo).should_be('a b');
 	},
 
+	http_onreadystate_as_async: function(callback)
+	{
+		var timer = null;
+
+		this.client.onreadystatechange = function()
+		{
+			try
+			{
+				value_of(this.readyState).should_be_number();
+				if (this.readyState == this.DONE)
+				{
+					clearTimeout(timer);
+					callback.passed();
+				}
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		};
+
+		timer = setTimeout(function()
+		{
+			callback.failed('HTTP onreadystate test timed out');
+		},5000);
+
+		this.client.open("GET", this.url);
+		this.client.send(null);
+	},
+
+	test_ondatastream_as_async: function(callback)
+	{
+		var timer = null;
+		var text = this.text;
+		var readCount = 0;
+
+		this.client.ondatastream = function(totalRead, totalSize, buffer, bufferLength)
+		{	
+			try
+			{
+				value_of(this).should_be_object();
+				value_of(totalRead).should_be_number();
+				value_of(totalSize).should_be_number();
+				value_of(buffer).should_be_object();
+				value_of(bufferLength).should_be_number();
+
+				value_of(totalRead).should_be(readCount + buffer.length);
+				value_of(totalSize).should_be(text.length);
+				value_of(buffer).should_be(text.substring(readCount, readCount+buffer.length));
+				value_of(bufferLength).should_be(buffer.length);
+
+				readCount += buffer.length;
+				if (readCount >= text.length)
+				{
+					clearTimeout(timer);
+					callback.passed();
+				}
+			}
+			catch (e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		};
+		
+		timer = setTimeout(function()
+		{
+			callback.failed('HTTP ondatastream test timed out');
+		},5000);
+		
+		this.client.open("GET", this.url);
+		this.client.send(null);
+	},
+
+	/*http_onsendstream_as_async: function(callback)
+	{
+		var timer = null;
+		var text = this.text;
+
+		this.client.onsendstream = function()
+		{
+		},
+	},*/
+
 	http_onload_as_async: function(callback)
 	{
-		var url = 'http://127.0.0.1:8888';
-		var client = this.client;
+		var text = this.text;
 		var timer = null;
 		
 		this.client.onload = function()
 		{
 			try
 			{
-				var response = client.responseText;
-				value_of(response).should_be("here is some text for you!");
+				value_of(this.responseText).should_be(text);
 			
 				clearTimeout(timer);
 				callback.passed();
@@ -191,43 +231,13 @@ describe("Network.HTTPClient",
 				callback.failed(e);
 			}
 		};
-		this.client.open("GET",url);
-		this.client.send(null);
-		
+			
 		timer = setTimeout(function()
 		{
-			callback.failed('native XHR HTTP timed out');
-		},20000);
-	},
+			callback.failed('HTTP onload test timed out');
+		},5000);
 
-	test_ondatastream_as_async: function(callback)
-	{
-		var client = Titanium.Network.createHTTPClient();
-		var timer = 0;
-		client.ondatastream = function() {
-			clearTimeout(timer);
-			callback.passed();
-		
-			/*try
-			{
-				//totalCount, totalSize, buffer, length
-				clearTimeout(timer);
-				value_of(list[3]).should_be_greater_than(0);
-				value_of(buffer.length).should_be(list[3]);
-				callback.passed();
-			}
-			catch (e)
-			{
-				callback.failed(e);
-			}*/
-		};
-		
-		timer = setTimeout(function()
-		{
-			callback.failed('ondatastream timed out');
-		},3000);
-		
-		client.open("GET", "http://api.appcelerator.net/p/v1/echo");
-		client.send(null);
-	}
+		this.client.open("GET", this.url);
+		this.client.send(null);
+	},
 });

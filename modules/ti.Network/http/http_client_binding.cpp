@@ -462,7 +462,15 @@ namespace ti
 				SharedValue sv = binding->Get("ondatastream");
 				if (sv->IsMethod())
 				{
-					streamer = sv->ToMethod()->Get("call")->ToMethod();
+					streamer = sv->ToMethod();
+
+					// Check if this is a javascript function
+					SharedValue call = streamer->Get("call");
+					if (call->IsMethod())
+					{
+						// Use call() to override "this"
+						streamer = call->ToMethod();
+					}
 				}
 
 				while(!rs.eof() && binding->Get("connected")->ToBool())
@@ -480,13 +488,14 @@ namespace ti
 								ValueList args;
 
 								binding->duplicate();
-								args.push_back(Value::NewObject(binding));
-								args.push_back(Value::NewInt(count)); // total count
+								args.push_back(Value::NewObject(binding)); // client
+								args.push_back(Value::NewInt(count)); // total read
 								args.push_back(totalValue); // total size
 								args.push_back(Value::NewObject(new Blob(buf,c))); // buffer
 								args.push_back(Value::NewInt(c)); // buffer length
 
-								binding->host->InvokeMethodOnMainThread(streamer,args,binding->shutdown || !binding->async ? false : true);
+								binding->host->InvokeMethodOnMainThread(streamer, args,
+									binding->shutdown || !binding->async ? false : true);
 							}
 							else
 							{
@@ -698,16 +707,38 @@ namespace ti
 			this->password = args.GetString(4);
 		}
 
+		// Setup callbacks
 		// assign it here (helps prevent deadlock)
 		SharedValue v = this->Get("onreadystatechange");
 		if (v->IsMethod())
 		{
 			this->readystate = v->ToMethod();
+			SharedValue call = this->readystate->Get("call");
+			if (call->IsMethod())
+			{
+				this->readystate = call->ToMethod();
+			}
 		}
-		SharedValue vc = this->Get("onload");
-		if (vc->IsMethod())
+		v = this->Get("ondatastream");
+		if (v->IsMethod())
 		{
-			this->onload = vc->ToMethod();
+			this->ondatastream = v->ToMethod();
+
+			SharedValue call = this->ondatastream->Get("call");
+			if (call->IsMethod())
+			{
+				this->ondatastream = call->ToMethod();
+			}
+		}
+		v = this->Get("onload");
+		if (v->IsMethod())
+		{
+			this->onload = v->ToMethod();
+			SharedValue call = this->onload->Get("call");
+			if (call->IsMethod())
+			{
+				this->onload = call->ToMethod();
+			}
 		}
 		this->ChangeState(1); // opened
 	}
@@ -755,10 +786,8 @@ namespace ti
 
 				this->duplicate();
 				args.push_back(Value::NewObject(this));
-
-				SharedKMethod callMethod = this->readystate->Get("call")->ToMethod();
-				
-				this->host->InvokeMethodOnMainThread(callMethod, args, true);
+		
+				this->host->InvokeMethodOnMainThread(this->readystate, args, true);
 			}
 			catch (std::exception &ex)
 			{
@@ -778,8 +807,7 @@ namespace ti
 					this->duplicate();
 					args.push_back(Value::NewObject(this));
 
-					SharedKMethod callMethod = this->onload->Get("call")->ToMethod();
-					this->host->InvokeMethodOnMainThread(callMethod, args, true);
+					this->host->InvokeMethodOnMainThread(this->onload, args, true);
 				}
 				catch(std::exception &ex)
 				{

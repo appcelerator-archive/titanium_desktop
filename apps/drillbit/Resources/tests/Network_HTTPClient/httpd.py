@@ -2,11 +2,12 @@ import BaseHTTPServer
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	def do_GET(s):
-		"""Respond to a GET request."""
+		text = "here is some text for you!"
 		s.send_response(200)
 		s.send_header("Content-type", "text/plain")
+		s.send_header("Content-Length", len(text))
 		s.end_headers()
-		s.wfile.write("here is some text for you!")
+		s.wfile.write(text)
 
 if __name__ == '__main__':
 	print 'starting.......'
