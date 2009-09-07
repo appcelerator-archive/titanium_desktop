@@ -1,18 +1,35 @@
 describe("Network.HTTPClient",
 {
+	before_all: function()
+	{
+		// Launch test http server
+		this.httpd = Titanium.Process.createProcess(
+		{
+			args: [
+				'python', Titanium.API.application.resourcesPath + "/httpd.py"
+			],
+		});
+		this.httpd.launch();
+	},
+
+	after_all: function()
+	{
+		this.httpd.kill();
+	},
+
 	before: function()
 	{
-		this.xhr = Titanium.Network.createHTTPClient();
+		this.client = Titanium.Network.createHTTPClient();
 	},
 	
 	after: function()
 	{
-		this.xhr = null;
+		this.client = null;
 	},
 	
-	xhr_properties:function()
+	client_properties:function()
 	{
-		value_of(this.xhr).should_be_object();
+		value_of(this.client).should_be_object();
 		
 		var methods = ['open','abort','setRequestHeader','send','sendFile',
 					   'sendDir','getResponseHeader','setTimeout'];
@@ -24,51 +41,51 @@ describe("Network.HTTPClient",
 		for (var c=0;c<methods.length;c++)
 		{
 			var method = methods[c];
-			value_of(this.xhr[method]).should_be_function();
+			value_of(this.client[method]).should_be_function();
 		}
 		
 		for (var c=0;c<props.length;c++)
 		{
 			var prop = props[c];
-			value_of(this.xhr[prop]).should_not_be_undefined();
+			value_of(this.client[prop]).should_not_be_undefined();
 		}
 
-		value_of(this.xhr.readyState).should_be(0);
-		value_of(this.xhr.connected).should_be_false();
+		value_of(this.client.readyState).should_be(0);
+		value_of(this.client.connected).should_be_false();
 		
-		value_of(this.xhr.UNSENT).should_be(0);
-		value_of(this.xhr.OPENED).should_be(1);
-		value_of(this.xhr.HEADERS_RECEIVED).should_be(2);
-		value_of(this.xhr.LOADING).should_be(3);
-		value_of(this.xhr.DONE).should_be(4);
+		value_of(this.client.UNSENT).should_be(0);
+		value_of(this.client.OPENED).should_be(1);
+		value_of(this.client.HEADERS_RECEIVED).should_be(2);
+		value_of(this.client.LOADING).should_be(3);
+		value_of(this.client.DONE).should_be(4);
 
 	},
 	
 	twitter_as_async:function(callback)
 	{
-		value_of(this.xhr).should_be_object();
+		value_of(this.client).should_be_object();
 	
 		var timer = null;
 		var url = 'http://twitter.com/statuses/public_timeline.json';
-		var xhr = this.xhr;
+		var client = this.client;
 		
-		this.xhr.onreadystatechange = function()
+		this.client.onreadystatechange = function()
 		{
 			try
 			{
-				if (this.readyState == xhr.HEADERS_RECEIVED)
+				if (this.readyState == client.HEADERS_RECEIVED)
 				{
 					// ah, different web servers it appears on twitter side
 					// have to compensate for space and without space separators
-					var ct = xhr.getResponseHeader('Content-Type');
+					var ct = client.getResponseHeader('Content-Type');
 					value_of(ct).should_be_string();
 					ct = ct.replace(' ','');
 					value_of(ct).should_be('application/json;charset=utf-8');
 				}
-				else if (this.readyState == xhr.DONE)
+				else if (this.readyState == client.DONE)
 				{
 					clearTimeout(timer);
-					var text = xhr.responseText;
+					var text = client.responseText;
 					value_of(text).should_be_string();
 					value_of(text.length > 0).should_be_true();
 					callback.passed();
@@ -80,13 +97,13 @@ describe("Network.HTTPClient",
 				callback.failed(e);
 			}
 		};
-		this.xhr.open("GET",url);
-		value_of(this.xhr.readyState).should_be(this.xhr.OPENED);
-		this.xhr.send(null);
+		this.client.open("GET",url);
+		value_of(this.client.readyState).should_be(this.client.OPENED);
+		this.client.send(null);
 		
 		timer = setTimeout(function()
 		{
-			callback.failed('native XHR twitter timed out');
+			callback.failed('twitter test timed out');
 		},20000);
 	},
 	
@@ -95,10 +112,10 @@ describe("Network.HTTPClient",
 		// this is a simple page that can be used (for now) to test
 		// HTTPS connectivity
 		var url = 'https://api.appcelerator.net/p/v1/app-list';
-		var xhr = this.xhr;
+		var client = this.client;
 		var timer = null;
 		
-		this.xhr.onreadystatechange = function()
+		this.client.onreadystatechange = function()
 		{
 			try
 			{
@@ -116,43 +133,15 @@ describe("Network.HTTPClient",
 				callback.failed(e);
 			}
 		};
-		this.xhr.open("GET",url);
-		this.xhr.send(null);
+		this.client.open("GET",url);
+		this.client.send(null);
 		
 		timer = setTimeout(function()
 		{
-			callback.failed('native XHR HTTPS timed out');
+			callback.failed('HTTPS test timed out');
 		},20000);
 	},
-	http_test_with_onload_as_async: function(callback)
-	{
-		var url = 'http://api.appcelerator.net/p/v1/echo';
-		var xhr = this.xhr;
-		var timer = null;
-		
-		this.xhr.onload = function()
-		{
-			try
-			{
-				// if we get here, we connected and received 
-				// HTTPS encrypted content
-				clearTimeout(timer);
-				callback.passed();
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
-		};
-		this.xhr.open("GET",url);
-		this.xhr.send(null);
-		
-		timer = setTimeout(function()
-		{
-			callback.failed('native XHR HTTP timed out');
-		},20000);
-	},
+
 	test_encode_decode: function()
 	{
 		var foo = Titanium.Network.encodeURIComponent(null);
@@ -179,6 +168,38 @@ describe("Network.HTTPClient",
 		foo = Titanium.Network.decodeURIComponent(foo);
 		value_of(foo).should_be('a b');
 	},
+
+	http_onload_as_async: function(callback)
+	{
+		var url = 'http://127.0.0.1:8888';
+		var client = this.client;
+		var timer = null;
+		
+		this.client.onload = function()
+		{
+			try
+			{
+				var response = client.responseText;
+				value_of(response).should_be("here is some text for you!");
+			
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		};
+		this.client.open("GET",url);
+		this.client.send(null);
+		
+		timer = setTimeout(function()
+		{
+			callback.failed('native XHR HTTP timed out');
+		},20000);
+	},
+
 	test_ondatastream_as_async: function(callback)
 	{
 		var client = Titanium.Network.createHTTPClient();
