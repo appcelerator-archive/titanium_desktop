@@ -132,6 +132,7 @@ describe("php tests",
 				var window = w.getDOMWindow();
 				var a = window.document.getElementById("a").innerHTML;
 				value_of(a).should_be("101");
+				callback.passed();
 			}
 			catch(e)
 			{
