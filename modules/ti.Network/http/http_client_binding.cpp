@@ -191,6 +191,141 @@ namespace ti
 		}
 	}
 
+	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
+	{
+		this->abort.set();
+	}
+
+	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("open", "ss?bss");
+
+		this->method = args.GetString(0);
+		this->url = args.GetString(1);
+
+		// Validate the scheme
+		const std::string scheme = Poco::URI(url).getScheme();
+		if (scheme != "http" && scheme != "https")
+		{
+			Logger::Get("Network.HTTPClient")->Error("%s scheme is not supported", scheme.c_str());
+			result->SetBool(false);
+		}
+
+		if (this->method.empty())
+		{
+			this->method = Poco::Net::HTTPRequest::HTTP_GET;
+		}
+
+		if (args.size() >= 3)
+		{
+			this->async = args.GetBool(2);
+		}
+
+		if (args.size() >= 4)
+		{
+			this->user = args.GetString(3);
+			this->password = args.GetString(4);
+		}
+
+		this->ChangeState(1); // opened
+		result->SetBool(true);
+	}
+
+	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
+	{
+		if (this->Get("connected")->ToBool())
+		{
+			result->SetBool(false);
+			return;
+		}
+
+		if (args.size()==1)
+		{
+			// can be a string of data or a file
+			SharedValue v = args.at(0);
+			if (v->IsObject())
+			{
+				// probably a file
+				SharedKObject obj = v->ToObject();
+				this->datastream = obj->Get("toString")->ToMethod()->Call()->ToString();
+			}
+			else if (v->IsString())
+			{
+				this->datastream = v->ToString();
+			}
+			else if (v->IsNull() || v->IsUndefined())
+			{
+				this->datastream = "";
+			}
+			else
+			{
+				result->SetBool(false);
+				Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s", v->GetType().c_str());
+			}
+		}
+
+		this->abort.reset();
+		this->thread = new Poco::Thread();
+		this->thread->start(*this);
+		if(!this->async)
+		{
+			try
+			{
+				Logger::Get("Network.HTTPClient")->Debug("Waiting on HTTP Client thread to finish (sync)");
+				this->thread->join(this->timeout);
+			}
+			catch(...)
+			{
+				result->SetBool(false);
+				Logger::Get("Network.HTTPClient")->Error("Timeout occurred");
+			}
+		}
+
+		result->SetBool(true);
+	}
+
+	void HTTPClientBinding::SetRequestHeader(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setRequestHeader", "ss");
+		std::string key = args.GetString(0);
+		std::string value = args.GetString(1);
+		this->headers[key]=value;
+	}
+
+	void HTTPClientBinding::GetResponseHeader(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("getResponseHeader", "s");
+		std::string name = args.GetString(0);
+
+		if (this->response.has(name))
+		{
+			result->SetString(this->response.get(name).c_str());
+		}
+		else
+		{
+			result->SetNull();
+		}
+	}
+
+	void HTTPClientBinding::SetTimeout(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setTimeout", "i");
+		this->timeout = args.GetInt(0);
+	}
+
+	void HTTPClientBinding::ChangeState(int readyState)
+	{
+		static Logger* logger = Logger::Get("Network.HTTPClient");
+		logger->Debug("BEFORE CHANGE STATE %d", readyState);
+		this->SetInt("readyState",readyState);
+		this->FireEvent(Event::HTTP_STATECHANGED);
+
+		if (readyState == 4)
+		{
+			this->FireEvent(Event::HTTP_ONLOAD);
+		}
+	}
+
 	void HTTPClientBinding::run()
 	{
 		// We need this binding to stay alive at least until we have
@@ -244,7 +379,7 @@ namespace ti
 			}
 
 			// set the timeout for the request
-			Poco::Timespan to((long)this->timeout,0L);
+			Poco::Timespan to(0L, (long)this->timeout * 1000);
 			session->setTimeout(to);
 
 			if (!this->dirstream.empty())
@@ -388,7 +523,7 @@ namespace ti
 			char buf[8096];
 
 			// Receive data from response
-			while(!rs.eof() && this->Get("connected")->ToBool())
+			while(!rs.eof() && !this->abort.tryWait(0))
 			{
 				try
 				{
@@ -405,7 +540,6 @@ namespace ti
 					Logger* logger = Logger::Get("Network.HTTPClient");
 					logger->Error("Exception thrown while reading response stream: %s",e.what());
 				} 
-				if (rs.eof()) break;
 			}
 			break;  // we have our response, time to call it quits
 		}
@@ -423,7 +557,6 @@ namespace ti
 			f.remove();
 		}
 
-		this->shutdown.set();
 		this->Set("connected",Value::NewBool(false));
 		this->ChangeState(4); // closed
 
@@ -432,131 +565,5 @@ namespace ti
 #endif
 		this->release();
 	}
-
-	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
-	{
-		if (this->Get("connected")->ToBool())
-		{
-			result->SetBool(false);
-		}
-
-		if (args.size()==1)
-		{
-			// can be a string of data or a file
-			SharedValue v = args.at(0);
-			if (v->IsObject())
-			{
-				// probably a file
-				SharedKObject obj = v->ToObject();
-				this->datastream = obj->Get("toString")->ToMethod()->Call()->ToString();
-			}
-			else if (v->IsString())
-			{
-				this->datastream = v->ToString();
-			}
-			else if (v->IsNull() || v->IsUndefined())
-			{
-				this->datastream = "";
-			}
-			else
-			{
-				result->SetBool(false);
-				Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s", v->GetType().c_str());
-			}
-		}
-
-		this->shutdown.reset();
-		this->abort.reset();
-		this->thread = new Poco::Thread();
-		this->thread->start(*this);
-		if (!this->async)
-		{
-			try
-			{
-				this->shutdown.wait(this->timeout);
-			}
-			catch(...)
-			{
-				result->SetBool(false);
-				Logger::Get("Network.HTTPClient")->Error("Timeout occurred");
-			}
-		}
-
-		result->SetBool(true);
-	}
-
-	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
-	{
-		this->abort.set();
-	}
-
-	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
-	{
-		args.VerifyException("open", "ss?bss");
-
-		this->method = args.GetString(0);
-		this->url = args.GetString(1);
-
-		// Validate the scheme
-		const std::string scheme = Poco::URI(url).getScheme();
-		if (scheme != "http" && scheme != "https")
-		{
-			Logger::Get("Network.HTTPClient")->Error("%s scheme is not supported", scheme.c_str());
-			result->SetBool(false);
-		}
-
-		if (this->method.empty())
-		{
-			this->method = Poco::Net::HTTPRequest::HTTP_GET;
-		}
-
-		if (args.size() >= 3)
-		{
-			this->async = args.GetBool(2);
-		}
-
-		if (args.size() >= 4)
-		{
-			this->user = args.GetString(3);
-			this->password = args.GetString(4);
-		}
-
-		this->ChangeState(1); // opened
-	}
-
-	void HTTPClientBinding::SetRequestHeader(const ValueList& args, SharedValue result)
-	{
-		const char *key = args.at(0)->ToString();
-		const char *value = args.at(1)->ToString();
-		this->headers[std::string(key)]=std::string(value);
-	}
-
-	void HTTPClientBinding::GetResponseHeader(const ValueList& args, SharedValue result)
-	{
-		std::string name = args.at(0)->ToString();
-
-		if (this->response.has(name))
-		{
-			result->SetString(this->response.get(name).c_str());
-		}
-		else
-		{
-			result->SetNull();
-		}
-	}
-
-	void HTTPClientBinding::SetTimeout(const ValueList& args, SharedValue result)
-	{
-		args.VerifyException("setTimeout", "i");
-		this->timeout = args.GetInt(0);
-	}
-
-	void HTTPClientBinding::ChangeState(int readyState)
-	{
-		static Logger* logger = Logger::Get("Network.HTTPClient");
-		logger->Debug("BEFORE CHANGE STATE %d", readyState);
-		this->SetInt("readyState",readyState);
-
-		this->FireEvent(Event::HTTP_ONLOAD);
-	}
 }
+

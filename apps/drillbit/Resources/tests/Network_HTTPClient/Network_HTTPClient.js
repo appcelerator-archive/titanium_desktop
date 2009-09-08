@@ -64,41 +64,6 @@ describe("Network.HTTPClient",
 		value_of(this.client.DONE).should_be(4);
 
 	},
-	
-	test_https_as_async: function(callback)
-	{
-		// this is a simple page that can be used (for now) to test
-		// HTTPS connectivity
-		var url = 'https://api.appcelerator.net/p/v1/app-list';
-		var client = this.client;
-		var timer = null;
-		
-		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
-		{
-			try
-			{
-				if (this.readyState == this.DONE)
-				{
-					// if we get here, we connected and received 
-					// HTTPS encrypted content
-					clearTimeout(timer);
-					callback.passed();
-				}
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
-		});
-		this.client.open("GET",url);
-		this.client.send(null);
-		
-		timer = setTimeout(function()
-		{
-			callback.failed('HTTPS test timed out');
-		},5000);
-	},
 
 	test_encode_decode: function()
 	{
@@ -125,6 +90,76 @@ describe("Network.HTTPClient",
 
 		foo = Titanium.Network.decodeURIComponent(foo);
 		value_of(foo).should_be('a b');
+	},
+
+	test_sync_get: function()
+	{
+		value_of(this.client.open("GET", this.url, false)).should_be_true();
+		value_of(this.client.send(null)).should_be_true();
+		value_of(this.client.responseText).should_be(this.text);
+	},
+
+	test_async_get_as_async: function(callback)
+	{
+		var timer = null;
+		var text = this.text;
+
+		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
+		{
+			try
+			{
+				value_of(this.responseText).should_be(text);
+
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('Async GET test timed out');
+		},5000);
+
+		this.client.open("GET", this.url);
+		this.client.send(null);
+	},
+
+	test_https_as_async: function(callback)
+	{
+		// this is a simple page that can be used (for now) to test
+		// HTTPS connectivity
+		var url = 'https://api.appcelerator.net/p/v1/app-list';
+		var client = this.client;
+		var timer = null;
+		
+		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
+		{
+			try
+			{
+				// if we get here, we connected and received 
+				// HTTPS encrypted content
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('HTTPS test timed out');
+		},5000);
+
+		value_of(this.client.open("GET",url)).should_be_true();
+		value_of(this.client.send(null)).should_be_true();
 	},
 
 	/*test_sendstring_post_as_async: function(callback)

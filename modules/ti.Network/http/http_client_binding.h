@@ -31,8 +31,8 @@ namespace ti
 
 		void Abort(const ValueList& args, SharedValue result);
 		void Open(const ValueList& args, SharedValue result);
-		void SetRequestHeader(const ValueList& args, SharedValue result);
 		void Send(const ValueList& args, SharedValue result);
+		void SetRequestHeader(const ValueList& args, SharedValue result);
 		void GetResponseHeader(const ValueList& args, SharedValue result);
 		void SetTimeout(const ValueList& args, SharedValue result);
 
@@ -54,13 +54,12 @@ namespace ti
 		int timeout;
 		static bool initialized;
 		SharedPtr<Poco::Thread> thread;
-		Poco::Event shutdown;
 		Poco::Event abort;
+
+		void ChangeState(int readyState);
 
 		// Thread main		
 		void run();
-
-		void ChangeState(int readyState);
 	};
 }
 
