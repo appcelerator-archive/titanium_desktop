@@ -16,16 +16,24 @@
 #include <Poco/Exception.h>
 #include <Poco/Thread.h>
 #include <Poco/FileStream.h>
+#include <Poco/Runnable.h>
 
 namespace ti
 {
 	class HTTPClientEvent;
 
-	class HTTPClientBinding : public KEventObject
+	class HTTPClientBinding : public KEventObject, public Poco::Runnable
 	{
 	public:
 		HTTPClientBinding(Host* host, std::string path);
 		virtual ~HTTPClientBinding();
+
+		void Abort(const ValueList& args, SharedValue result);
+		void Open(const ValueList& args, SharedValue result);
+		void SetRequestHeader(const ValueList& args, SharedValue result);
+		void Send(const ValueList& args, SharedValue result);
+		void GetResponseHeader(const ValueList& args, SharedValue result);
+		void SetTimeout(const ValueList& args, SharedValue result);
 
 	private:
 		Host* host;
@@ -46,17 +54,9 @@ namespace ti
 		int timeout;
 		bool shutdown;
 		static bool initialized;
-		
-		static void Run(void*);
 
-		void Abort(const ValueList& args, SharedValue result);
-		void Open(const ValueList& args, SharedValue result);
-		void SetRequestHeader(const ValueList& args, SharedValue result);
-		void Send(const ValueList& args, SharedValue result);
-		void SendFile(const ValueList& args, SharedValue result);
-		void SendDir(const ValueList& args, SharedValue result);
-		void GetResponseHeader(const ValueList& args, SharedValue result);
-		void SetTimeout(const ValueList& args, SharedValue result);
+		// Thread main		
+		void run();
 
 		void ChangeState(int readyState);
 	};
