@@ -376,15 +376,39 @@ namespace ti
 				if (!data.empty())
 				{
 					out << data;
+					if (!binding->onsendstream.isNull())
+					{
+						try
+						{
+							ValueList args;
+
+							binding->duplicate();
+							args.push_back(Value::NewObject(binding)); // client
+							args.push_back(Value::NewInt(data.length())); // bytes sent
+							args.push_back(Value::NewInt(data.length())); // total size
+							args.push_back(Value::NewInt(0)); // remaining
+
+							binding->host->InvokeMethodOnMainThread(binding->onsendstream,args,true);
+						}
+						catch (ValueException &e)
+						{
+							Logger* logger = Logger::Get("Network.HTTPClient");
+							logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.DisplayString()->c_str());
+						}
+						catch(std::exception &e)
+						{
+							Logger* logger = Logger::Get("Network.HTTPClient");
+							logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.what());
+						}
+						catch(...)
+						{
+							Logger* logger = Logger::Get("Network.HTTPClient");
+							logger->Error("Caught unknown exception dispatching HTTP callback");
+						}
+					}
 				}
 				else if (binding->filestream)
 				{
-					// SharedKMethod sender;
-					// SharedValue sv = binding->Get("onsendstream");
-					// if (sv->IsMethod())
-					// {
-					// 	sender = sv->ToMethod()->Get("apply")->ToMethod();
-					// }
 					std::streamsize bufferSize = 8096;
 					Poco::Buffer<char> buffer(bufferSize);
 					std::streamsize len = 0;
@@ -397,33 +421,36 @@ namespace ti
 						len += n;
 						remaining -= n;
 						out.write(buffer.begin(), n);
-// 						if (sender.get())
-// 						{
-// 							try
-// 							{
-// #ifdef DEBUG
-// 								std::cout << "ONSENDSTREAM = >> " << len <<" of " << content_len << std::endl;
-// #endif
-// 								ValueList args;
-// 								SharedKList list = new StaticBoundList();
-//
-// 								args.push_back(binding->self); // reference to us
-// 								args.push_back(Value::NewList(list));
-//
-// 								list->Append(Value::NewInt(len)); // bytes sent
-// 								list->Append(Value::NewInt(content_len)); // total size
-// 								list->Append(Value::NewInt(remaining)); // remaining
-// 								binding->host->InvokeMethodOnMainThread(sender,args,true);
-// 							}
-// 							catch(std::exception &e)
-// 							{
-// 								std::cerr << "Caught exception dispatching HTTP callback on transmit, Error: " << e.what() << std::endl;
-// 							}
-// 							catch(...)
-// 							{
-// 								std::cerr << "Caught unknown exception dispatching HTTP callback on transmit" << std::endl;
-// 							}
-//						}
+						if (!binding->onsendstream.isNull())
+						{
+ 							try
+ 							{
+								ValueList args;
+
+								binding->duplicate();
+								args.push_back(Value::NewObject(binding)); // client
+								args.push_back(Value::NewInt(len)); // bytes sent
+								args.push_back(Value::NewInt(content_len)); // total size
+								args.push_back(Value::NewInt(remaining)); // remaining
+		
+ 								binding->host->InvokeMethodOnMainThread(binding->onsendstream,args,true);
+ 							}
+ 							catch (ValueException &e)
+							{
+								Logger* logger = Logger::Get("Network.HTTPClient");
+								logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.DisplayString()->c_str());
+							}
+							catch(std::exception &e)
+							{
+								Logger* logger = Logger::Get("Network.HTTPClient");
+								logger->Error("Caught exception dispatching HTTP callback, Error: %s",e.what());
+							}
+							catch(...)
+							{
+								Logger* logger = Logger::Get("Network.HTTPClient");
+								logger->Error("Caught unknown exception dispatching HTTP callback");
+							}
+						}
 						if (istr)
 						{
 							istr.read(buffer.begin(), bufferSize);
@@ -713,6 +740,17 @@ namespace ti
 			if (call->IsMethod())
 			{
 				this->ondatastream = call->ToMethod();
+			}
+		}
+		v = this->Get("onsendstream");
+		if (v->IsMethod())
+		{
+			this->onsendstream = v->ToMethod();
+
+			SharedValue call = this->onsendstream->Get("call");
+			if (call->IsMethod())
+			{
+				this->onsendstream = call->ToMethod();
 			}
 		}
 		v = this->Get("onload");

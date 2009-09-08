@@ -45,6 +45,7 @@ namespace ti
 		bool shutdown;
 		SharedKMethod readystate;
 		SharedKMethod ondatastream;
+		SharedKMethod onsendstream;
 		SharedKMethod onload;
 		static bool initialized;
 		

@@ -12,6 +12,7 @@ describe("Network.HTTPClient",
 		this.httpd.launch();
 
 		this.text = "here is some text for you!";
+		this.reply = "I got it!";
 	},
 
 	after_all: function()
@@ -30,7 +31,7 @@ describe("Network.HTTPClient",
 		this.client = null;
 	},
 	
-	client_properties:function()
+	test_client_properties:function()
 	{
 		value_of(this.client).should_be_object();
 		
@@ -64,7 +65,7 @@ describe("Network.HTTPClient",
 
 	},
 	
-	https_test_as_async: function(callback)
+	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
 		// HTTPS connectivity
@@ -126,7 +127,38 @@ describe("Network.HTTPClient",
 		value_of(foo).should_be('a b');
 	},
 
-	http_onreadystate_as_async: function(callback)
+	test_sendstring_post_as_async: function(callback)
+	{
+		var timer = null;
+		var reply = this.reply;
+
+		this.client.onload = function()
+		{
+			try
+			{
+				value_of(this.status).should_be(200);
+				value_of(this.responseText).should_be(reply);
+
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		};
+
+		timer = setTimeout(function()
+		{
+			callback.failed('HTTP send string POST test timed out');
+		},5000);
+
+		this.client.open("POST", this.url);
+		this.client.send(this.text);
+	},
+
+	test_onreadystate_as_async: function(callback)
 	{
 		var timer = null;
 
@@ -201,17 +233,42 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 	},
 
-	/*http_onsendstream_as_async: function(callback)
+	test_onsendstream_as_async: function(callback)
 	{
 		var timer = null;
 		var text = this.text;
 
-		this.client.onsendstream = function()
+		this.client.onsendstream = function(bytesSent, totalSize, remaining)
 		{
-		},
-	},*/
+			try
+			{
+				value_of(bytesSent).should_be_number();
+				value_of(totalSize).should_be_number();
+				value_of(remaining).should_be_number();
 
-	http_onload_as_async: function(callback)
+				value_of(totalSize).should_be(text.length)
+				value_of(remaining).should_be(totalSize-bytesSent);
+
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		};
+
+		timer = setTimeout(function()
+		{
+			callback.failed('HTTP onsendstream test timed out');
+		},5000);
+
+		this.client.open("POST", this.url);
+		this.client.send(this.text);
+	},
+
+	test_onload_as_async: function(callback)
 	{
 		var text = this.text;
 		var timer = null;
