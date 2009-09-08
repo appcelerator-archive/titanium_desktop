@@ -48,11 +48,11 @@ if debug:
 		build.env.Append(CCFLAGS=['/Z7'])  # max debug
 		build.env.Append(CPPDEFINES=('WIN32_CONSOLE', 1))
 	else:
-		build.env.Append(CCFLAGS=['-g'])  # debug
+		build.env.Append(CPPFLAGS=['-g'])  # debug
 else:
 	build.env.Append(CPPDEFINES = ('NDEBUG', 1 ))
 	if not build.is_win32():
-		build.env.Append(CCFLAGS = ['-O9']) # max optimizations
+		build.env.Append(CPPFLAGS = ['-O9']) # max optimizations
 if build.is_win32():
 	build.env.Append(CCFLAGS=['/EHsc', '/GR', '/MD'])
 	build.env.Append(LINKFLAGS=['/DEBUG', '/PDB:${TARGET}.pdb'])
