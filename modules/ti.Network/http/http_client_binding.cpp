@@ -340,11 +340,6 @@ namespace ti
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
 		this->SetInt("readyState",readyState);
 		this->FireEvent(Event::HTTP_STATECHANGED);
-
-		if (readyState == 4)
-		{
-			this->FireEvent(Event::HTTP_ONLOAD);
-		}
 	}
 
 	void HTTPClientBinding::Reset()
@@ -385,7 +380,6 @@ namespace ti
 #endif
 
 		// Begin the request
-		std::ostringstream ostr;
 		try{
 			for (int x = 0; x < this->maxRedirects; x++)
 			{			
@@ -485,6 +479,7 @@ namespace ti
 
 				// Receive data from response
 				char buf[8096];
+				std::ostringstream ostr;
 				while(!in.eof() && !this->abort.tryWait(0))
 				{
 					in.read((char*)&buf, 8095);
@@ -494,7 +489,16 @@ namespace ti
 						ostr << buf;
 					}
 				}
-				break;  // quit the request loop
+
+				// Set response text
+				std::string data = ostr.str();
+				if (!data.empty())
+				{
+					this->SetString("responseText", data);
+				}
+
+				this->FireEvent(Event::HTTP_DONE);
+				break;
 			}
 		}
 		catch(...)
@@ -502,13 +506,6 @@ namespace ti
 			// Timeout or IO error occurred
 			this->FireEvent(Event::HTTP_TIMEOUT);
 			this->SetBool("timedOut", true);
-		}
-
-		// Set response text
-		std::string data = ostr.str();
-		if (!data.empty())
-		{
-			this->SetString("responseText", data);
 		}
 
 		this->Set("connected",Value::NewBool(false));

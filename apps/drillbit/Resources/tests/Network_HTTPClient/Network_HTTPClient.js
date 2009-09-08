@@ -104,7 +104,7 @@ describe("Network.HTTPClient",
 		var timer = null;
 		var text = this.text;
 
-		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
 			try
 			{
@@ -150,6 +150,28 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 	},
 
+	test_abort_as_async: function(callback)
+	{
+		var timer = null;
+
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
+		{
+			// We should not reach here since we abort
+			clearTimer(timer);
+			callback.failed('Abort failed');
+		});
+
+		timer = setTimeout(function()
+		{
+			// If our callback fails, abort worked
+			callback.passed();
+		},3000);
+
+		this.client.open("GET", this.url);
+		this.client.send(null);
+		this.client.abort();
+	},
+
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
@@ -158,7 +180,7 @@ describe("Network.HTTPClient",
 		var client = this.client;
 		var timer = null;
 		
-		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
 			try
 			{
