@@ -141,11 +141,11 @@ describe("Network.HTTPClient",
 
 		timer = setTimeout(function()
 		{
-			// We should timeout only after 5 seconds
+			// We should timeout only after 3 seconds
 			callback.failed('Timeout test timed out');
 		},10000);
 
-		this.client.setTimeout(5000);
+		this.client.setTimeout(3000);
 		this.client.open("GET", this.url + "longrequest");
 		this.client.send(null);
 	},

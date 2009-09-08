@@ -50,8 +50,10 @@ namespace ti
 		modulePath(path),
 		global(host->GetGlobalObject()),
 		async(true),
-		filestream(NULL),
-		timeout(30000)
+		timeout(30000),
+		maxRedirects(5),
+		userAgent(PRODUCT_NAME"/"STRING(PRODUCT_VERSION)),
+		dirty(false)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.abort,since=0.3) Aborts an in progress connection
@@ -163,6 +165,18 @@ namespace ti
 		this->SetNull("statusText");
 
 		/**
+		 * @tiapi(property=True,type=Boolean,name=Network.HTTPClient.timedOut,since=0.7)
+		 * @tiapi True if HTTP request timed out
+		 */
+		this->SetBool("timedOut", false);
+
+		/**
+		 * @tiapi(property=True,type=String,name=Network.HTTPClient.url,since=0.7)
+		 * @tiapi The request URL. This value will be updated on redirect events.
+		 */
+		this->SetNull("url");
+
+		/**
 		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.connected,since=0.3)
 		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
@@ -183,12 +197,6 @@ namespace ti
 				Logger::Get("Network.HTTPClient")->Error("Timeout occurred during cleanup");
 			}
 		}
-
-		if (this->filestream!=NULL)
-		{
-			delete this->filestream;
-			this->filestream = NULL;
-		}
 	}
 
 	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
@@ -202,6 +210,7 @@ namespace ti
 
 		this->method = args.GetString(0);
 		this->url = args.GetString(1);
+		this->SetString("url", this->url);
 
 		// Validate the scheme
 		const std::string scheme = Poco::URI(url).getScheme();
@@ -241,30 +250,42 @@ namespace ti
 
 		if (args.size()==1)
 		{
-			// can be a string of data or a file
+			// Determine what data type we have to send
 			SharedValue v = args.at(0);
 			if (v->IsObject())
 			{
-				// probably a file
-				SharedKObject obj = v->ToObject();
-				this->datastream = obj->Get("toString")->ToMethod()->Call()->ToString();
+				// TODO
+				result->SetBool(false);
+				Logger::Get("Network.HTTPClient")->Error("-----Not implemented object datatype");
+				return;
 			}
 			else if (v->IsString())
 			{
+				// Send a string
 				this->datastream = v->ToString();
 			}
 			else if (v->IsNull() || v->IsUndefined())
 			{
+				// Sending no data
 				this->datastream = "";
 			}
 			else
 			{
+				// We do not support this type!
 				result->SetBool(false);
 				Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s", v->GetType().c_str());
+				return;
 			}
 		}
 
-		this->abort.reset();
+		// Reset internal variables for new request
+		if (this->dirty)
+		{
+			this->Reset();
+		}
+
+		this->dirty = true;
+		this->Set("connected",Value::NewBool(true));
 		this->thread = new Poco::Thread();
 		this->thread->start(*this);
 		if(!this->async)
@@ -326,6 +347,34 @@ namespace ti
 		}
 	}
 
+	void HTTPClientBinding::Reset()
+	{
+		this->abort.reset();
+		this->datastream = "";
+		this->SetBool("timedOut", false);
+		this->SetNull("responseText");
+		this->SetNull("responseXML");
+		this->SetNull("status");
+		this->SetNull("statusText");
+	}
+
+	void HTTPClientBinding::InitHTTPS()
+	{
+		// TODO: make this configurable per a binding instance
+		HTTPClientBinding::initialized = true;
+		SharedPtr<Poco::Net::InvalidCertificateHandler> cert = 
+			new Poco::Net::AcceptCertificateHandler(false); 
+		std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
+		Poco::Net::Context::Ptr context = new Poco::Net::Context(
+			Poco::Net::Context::CLIENT_USE,
+			"", "",
+			rootpem, 
+			Poco::Net::Context::VERIFY_NONE,
+			9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
+		);
+		Poco::Net::SSLManager::instance().initializeClient(0, cert, context);
+	}
+
 	void HTTPClientBinding::run()
 	{
 		// We need this binding to stay alive at least until we have
@@ -335,35 +384,20 @@ namespace ti
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 #endif
 
-		Poco::Net::HTTPResponse& response = this->response;
+		// Begin the request
 		std::ostringstream ostr;
-		int max_redirects = 5;
-		int status;
-		std::string url = this->url;
-
-		bool deletefile = false;
-		try
-		{
-			for (int x=0;x<max_redirects;x++)
-			{
-				Poco::URI uri(url);
-				std::string path(uri.getPathAndQuery());
-				if (path.empty()) 
-					path = "/";
-				this->Set("connected",Value::NewBool(true));
-			
-				const std::string& scheme = uri.getScheme();
+		try{
+			for (int x = 0; x < this->maxRedirects; x++)
+			{			
+				// Create HTTP session
 				SharedPtr<Poco::Net::HTTPClientSession> session;
-			
+				Poco::URI uri(this->url);
+				const std::string& scheme = uri.getScheme();
 				if (scheme=="https")
 				{
 					if (HTTPClientBinding::initialized==false)
 					{
-						HTTPClientBinding::initialized = true;
-						SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert = new Poco::Net::AcceptCertificateHandler(false); 
-						std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
-						Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE,"", "", rootpem, Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-						Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
+						this->InitHTTPS();
 					}
 					session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
 				}
@@ -371,7 +405,8 @@ namespace ti
 				{
 					session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
 				}
-			
+
+				// Setup proxy settings			
 				std::string uriString = uri.toString();
 				SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
 				if (!proxy.isNull())
@@ -380,191 +415,100 @@ namespace ti
 					session->setProxyPort(proxy->info->getPort());
 				}
 
-				// set the timeout for the request
+				// Set timeout
 				Poco::Timespan to(0L, (long)this->timeout * 1000);
 				session->setTimeout(to);
 
-				if (!this->dirstream.empty())
+				// Get path
+				std::string path(uri.getPathAndQuery());
+				if (path.empty()) 
 				{
-					//method = Poco::Net::HTTPRequest::HTTP_POST;
-					this->headers["Content-Type"]="application/zip";
+					path = "/";
 				}
 
+				// Prep the request
 				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
-				const char* ua = this->global->Get("userAgent")->IsString() ? this->global->Get("userAgent")->ToString() : NULL;
-				PRINTD("HTTPClientBinding:: userAgent = " << ua);
-				if (ua)
-				{
-					req.set("User-Agent",ua);
-				}
-				else
-				{
-					// crap, this means we don't have one for some reason -- just fake it
-					req.set("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/528.7+ (KHTML, like Gecko) "PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
-				}
+				req.set("User-Agent", this->userAgent.c_str());
+
 				//FIXME: implement cookies
 				//FIXME: implement username/pass
-				//FIXME: use proxy settings of system
 
-				// set the headers
-				if (this->headers.size()>0)
+				// Set headers
+				if (this->headers.size() > 0)
 				{
 					std::map<std::string,std::string>::iterator i = this->headers.begin();
-					while(i!=this->headers.end())
+					while(i != this->headers.end())
 					{
 						req.set((*i).first, (*i).second);
 						i++;
 					}
 				}
 
-				std::string data;
-				int content_len = 0;
+				// Set content length
+				std::ostringstream l(std::stringstream::binary|std::stringstream::out);
+				l << this->datastream.length();
+				req.set("Content-Length",l.str());
 
-				if (!this->dirstream.empty())
-				{
-					std::string tmpdir = FileUtils::GetTempDirectory();
-					Poco::File tmpPath (tmpdir);
-					if (!tmpPath.exists()) {
-						tmpPath.createDirectories();
-					}
-					std::ostringstream tmpfilename;
-					tmpfilename << "ti";
-					tmpfilename << rand();
-					tmpfilename << ".zip";
-					std::string fn(FileUtils::Join(tmpdir.c_str(),tmpfilename.str().c_str(),NULL));
-					std::ofstream outfile(fn.c_str(), std::ios::binary|std::ios::out|std::ios::trunc);
-					Poco::Zip::Compress compressor(outfile,true);
-					Poco::Path path(this->dirstream);
-					compressor.addRecursive(path);
-					compressor.close();
-					outfile.close();
-					deletefile = true;
-					this->filename = std::string(fn.c_str());
-					this->filestream = new Poco::FileInputStream(this->filename);
-				}
-
-				if (!this->datastream.empty())
-				{
-					data = this->datastream;
-					content_len = data.length();
-				}
-
-				// determine the content length
-				if (!data.empty())
-				{
-					std::ostringstream l(std::stringstream::binary|std::stringstream::out);
-					l << content_len;
-					req.set("Content-Length",l.str());
-				}
-				else if (!this->filename.empty())
-				{
-					Poco::File f(this->filename);
-					std::ostringstream l;
-					l << f.getSize();
-					const char *cl = l.str().c_str();
-					content_len = atoi(cl);
-					req.set("Content-Length", l.str());
-				}
-
-				// send and stream output
+				// Send request and grab an output stream to send body
 				std::ostream& out = session->sendRequest(req);
 
-				// write out the data
-				if (!data.empty())
+				// Output request body if we have data to send
+				if (!this->datastream.empty())
 				{
-					out << data;
-				}
-				else if (this->filestream)
-				{
-					std::streamsize bufferSize = 8096;
-					Poco::Buffer<char> buffer(bufferSize);
-					std::streamsize len = 0;
-					std::istream& istr = *(this->filestream);
-					istr.read(buffer.begin(), bufferSize);
-					std::streamsize n = istr.gcount();
-					int remaining = content_len;
-					while (n > 0)
-					{
-						len += n;
-						remaining -= n;
-						out.write(buffer.begin(), n);
-						// TODO: fire event (bytes sent, total size, remaining)
-						if (istr)
-						{
-							istr.read(buffer.begin(), bufferSize);
-							n = istr.gcount();
-						}
-						else n = 0;
-					}
-					this->filestream->close();
+					out << this->datastream;
 				}
 
-				std::istream& rs = session->receiveResponse(response);
-				int total = response.getContentLength();
-				status = response.getStatus();
-				PRINTD("HTTPClientBinding:: response length received = " << total << " - " << status << " " << response.getReason());
-				this->Set("status",Value::NewInt(status));
-				this->Set("statusText",Value::NewString(response.getReason().c_str()));
+				// Get the response
+				std::istream& in = session->receiveResponse(this->response);
+				int status = this->response.getStatus();
 
 				// Handle redirects
 				if (status == 301 || status == 302)
 				{
-					if (!response.has("Location"))
+					if (!this->response.has("Location"))
 					{
 						break;
 					}
-					url = response.get("Location");
-					PRINTD("redirect to " << url);
+					this->url = this->response.get("Location");
+					PRINTD("redirect to " << this->url);
+					this->SetString("url", this->url);
+					this->FireEvent(Event::HTTP_REDIRECT);
 					continue;
 				}
 
-				SharedValue totalValue = Value::NewInt(total);
+				// Set response status code and text
+				this->Set("status",Value::NewInt(status));
+				this->Set("statusText",Value::NewString(this->response.getReason().c_str()));
+
 				this->ChangeState(2); // headers received
 				this->ChangeState(3); // loading
 
-				char buf[8096];
-
 				// Receive data from response
-				while(!rs.eof() && !this->abort.tryWait(0))
+				char buf[8096];
+				while(!in.eof() && !this->abort.tryWait(0))
 				{
-					try
+					in.read((char*)&buf, 8095);
+					int c = static_cast<int>(in.gcount());
+					if (c > 0)
 					{
-						rs.read((char*)&buf,8095);
-						int c = static_cast<int>(rs.gcount());
-						if (c > 0)
-						{
-							ostr << buf;
-							// TODO: fire event (total read, size, buffer, length)
-						}
+						ostr << buf;
 					}
-					catch(std::exception &e)
-					{
-						Logger* logger = Logger::Get("Network.HTTPClient");
-						logger->Error("Exception thrown while reading response stream: %s",e.what());
-					} 
 				}
-				break;  // we have our response, time to call it quits
+				break;  // quit the request loop
 			}
 		}
 		catch(...)
 		{
-			// If an exception is thrown, assume it is a timeout
+			// Timeout or IO error occurred
 			this->FireEvent(Event::HTTP_TIMEOUT);
-			this->Set("connected", Value::NewBool(false));
-			return;
+			this->SetBool("timedOut", true);
 		}
 
+		// Set response text
 		std::string data = ostr.str();
 		if (!data.empty())
 		{
-			this->Set("responseText",Value::NewString(data.c_str()));
-		}
-
-		// Cleanup the zip file if we made one
-		if (deletefile)
-		{
-			Poco::File f(this->filename);
-			f.remove();
+			this->SetString("responseText", data);
 		}
 
 		this->Set("connected",Value::NewBool(false));
@@ -573,7 +517,7 @@ namespace ti
 #ifdef OS_OSX
 		[pool release];
 #endif
-		this->release();
+		this->release();  // release the binding
 	}
 }
 

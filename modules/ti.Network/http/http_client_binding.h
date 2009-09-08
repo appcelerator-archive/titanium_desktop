@@ -47,16 +47,20 @@ namespace ti
 		bool async;
 		std::string user;
 		std::string password;
-		Poco::FileInputStream *filestream;
-		std::string filename;
-		std::string datastream;
-		std::string dirstream;
 		int timeout;
+		int maxRedirects;
+		std::string userAgent;
 		static bool initialized;
 		SharedPtr<Poco::Thread> thread;
+
+		// This variables must be reset on each send()
+		std::string datastream;
 		Poco::Event abort;
+		bool dirty;
 
 		void ChangeState(int readyState);
+		void Reset();
+		void InitHTTPS();
 
 		// Thread main		
 		void run();
