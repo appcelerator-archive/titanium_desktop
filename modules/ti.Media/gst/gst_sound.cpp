@@ -123,16 +123,10 @@ namespace ti
 
 	void GstSound::Complete()
 	{
-		try
-		{
-			SharedGstSound shsound = GstSound::GetRegisteredSound(this);
-			this->callback->Call(Value::NewObject(shsound));
-		}
-		catch (ValueException& e)
-		{
-			SharedString s = e.GetValue()->DisplayString();
-			std::cout << "onComplete callback failed: " << *s << std::endl;
-		}
+		// Execute this asynchronously. Exceptions will be eaten
+		// by the job queue, so don't worry about catching them here.
+		Host::GetInstance()->InvokeMethodOnMainThread(
+			callback, ValueList(Value::NewBool(true)), false);
 	}
 
 	std::vector<SharedGstSound> GstSound::active;

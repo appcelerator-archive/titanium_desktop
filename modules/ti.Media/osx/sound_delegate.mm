@@ -24,14 +24,15 @@
 
 -(void)completed:(NSNumber*)finished
 {
-	sound->OnComplete([finished boolValue]);
+	sound->Complete([finished boolValue]);
 }
 
 -(void)sound:(NSSound*)s didFinishPlaying:(BOOL)finished
 {
 	//TODO: change to Host method
 	NSNumber *result = [NSNumber numberWithBool:finished];
-    [self performSelectorOnMainThread:@selector(completed:) withObject:result waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(completed:) 
+		withObject:result waitUntilDone:NO];
 }
 
 @end
