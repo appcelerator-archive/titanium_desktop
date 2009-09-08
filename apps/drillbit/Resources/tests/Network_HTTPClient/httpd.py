@@ -16,7 +16,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	def do_GET(self):
 		if self.path == "/longrequest":
 			print "Starting long request..."
-			time.sleep(20)
+			time.sleep(5.0)
 			print "Done with long request sending response..."
 			self.send_text()
 		else:	
@@ -26,6 +26,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		if self.headers.has_key('content-length'):
 			length= int( self.headers['content-length'] )
 			data = self.rfile.read(length)
+			print "Got data: %s" % data
 			if data == text:
 				self.send_response(200)
 				self.send_header("Content-type", "text/plain")

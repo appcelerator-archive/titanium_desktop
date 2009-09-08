@@ -218,6 +218,7 @@ namespace ti
 		{
 			Logger::Get("Network.HTTPClient")->Error("%s scheme is not supported", scheme.c_str());
 			result->SetBool(false);
+			return;
 		}
 
 		if (this->method.empty())
@@ -480,8 +481,16 @@ namespace ti
 				// Receive data from response
 				char buf[8096];
 				std::ostringstream ostr;
-				while(!in.eof() && !this->abort.tryWait(0))
+				bool aborted = false;
+				while(!in.eof())
 				{
+					if (this->abort.tryWait(0))
+					{
+						aborted = true;
+						this->FireEvent(Event::HTTP_ABORT);
+						break;
+					}
+
 					in.read((char*)&buf, 8095);
 					int c = static_cast<int>(in.gcount());
 					if (c > 0)
@@ -490,22 +499,26 @@ namespace ti
 					}
 				}
 
-				// Set response text
-				std::string data = ostr.str();
-				if (!data.empty())
+				if (!aborted)
 				{
-					this->SetString("responseText", data);
+					// Set response text
+					std::string data = ostr.str();
+					if (!data.empty())
+					{
+						this->SetString("responseText", data);
+					}
+
+					this->FireEvent(Event::HTTP_DONE);
 				}
 
-				this->FireEvent(Event::HTTP_DONE);
 				break;
 			}
 		}
 		catch(...)
 		{
 			// Timeout or IO error occurred
-			this->FireEvent(Event::HTTP_TIMEOUT);
 			this->SetBool("timedOut", true);
+			this->FireEvent(Event::HTTP_TIMEOUT);
 		}
 
 		this->Set("connected",Value::NewBool(false));
