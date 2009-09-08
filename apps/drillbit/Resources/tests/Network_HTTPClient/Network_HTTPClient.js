@@ -129,6 +129,27 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 	},
 
+	test_timeout_as_async: function(callback)
+	{
+		var timer = null;
+
+		this.client.addEventListener(Titanium.HTTP_TIMEOUT, function()
+		{
+			clearTimeout(timer);
+			callback.passed();
+		});
+
+		timer = setTimeout(function()
+		{
+			// We should timeout only after 5 seconds
+			callback.failed('Timeout test timed out');
+		},10000);
+
+		this.client.setTimeout(5000);
+		this.client.open("GET", this.url + "longrequest");
+		this.client.send(null);
+	},
+
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test

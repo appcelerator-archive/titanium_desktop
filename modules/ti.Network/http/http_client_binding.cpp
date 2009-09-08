@@ -342,206 +342,216 @@ namespace ti
 		std::string url = this->url;
 
 		bool deletefile = false;
-		for (int x=0;x<max_redirects;x++)
+		try
 		{
-			Poco::URI uri(url);
-			std::string path(uri.getPathAndQuery());
-			if (path.empty()) 
-				path = "/";
-			this->Set("connected",Value::NewBool(true));
+			for (int x=0;x<max_redirects;x++)
+			{
+				Poco::URI uri(url);
+				std::string path(uri.getPathAndQuery());
+				if (path.empty()) 
+					path = "/";
+				this->Set("connected",Value::NewBool(true));
 			
-			const std::string& scheme = uri.getScheme();
-			SharedPtr<Poco::Net::HTTPClientSession> session;
+				const std::string& scheme = uri.getScheme();
+				SharedPtr<Poco::Net::HTTPClientSession> session;
 			
-			if (scheme=="https")
-			{
-				if (HTTPClientBinding::initialized==false)
+				if (scheme=="https")
 				{
-					HTTPClientBinding::initialized = true;
-					SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert = new Poco::Net::AcceptCertificateHandler(false); 
-					std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
-					Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE,"", "", rootpem, Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-					Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
-				}
-				session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
-			}
-			else if (scheme=="http")
-			{
-				session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-			}
-			
-			std::string uriString = uri.toString();
-			SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
-			if (!proxy.isNull())
-			{
-				session->setProxyHost(proxy->info->getHost());
-				session->setProxyPort(proxy->info->getPort());
-			}
-
-			// set the timeout for the request
-			Poco::Timespan to(0L, (long)this->timeout * 1000);
-			session->setTimeout(to);
-
-			if (!this->dirstream.empty())
-			{
-				//method = Poco::Net::HTTPRequest::HTTP_POST;
-				this->headers["Content-Type"]="application/zip";
-			}
-
-			Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
-			const char* ua = this->global->Get("userAgent")->IsString() ? this->global->Get("userAgent")->ToString() : NULL;
-			PRINTD("HTTPClientBinding:: userAgent = " << ua);
-			if (ua)
-			{
-				req.set("User-Agent",ua);
-			}
-			else
-			{
-				// crap, this means we don't have one for some reason -- just fake it
-				req.set("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/528.7+ (KHTML, like Gecko) "PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
-			}
-			//FIXME: implement cookies
-			//FIXME: implement username/pass
-			//FIXME: use proxy settings of system
-
-			// set the headers
-			if (this->headers.size()>0)
-			{
-				std::map<std::string,std::string>::iterator i = this->headers.begin();
-				while(i!=this->headers.end())
-				{
-					req.set((*i).first, (*i).second);
-					i++;
-				}
-			}
-
-			std::string data;
-			int content_len = 0;
-
-			if (!this->dirstream.empty())
-			{
-				std::string tmpdir = FileUtils::GetTempDirectory();
-				Poco::File tmpPath (tmpdir);
-				if (!tmpPath.exists()) {
-					tmpPath.createDirectories();
-				}
-				std::ostringstream tmpfilename;
-				tmpfilename << "ti";
-				tmpfilename << rand();
-				tmpfilename << ".zip";
-				std::string fn(FileUtils::Join(tmpdir.c_str(),tmpfilename.str().c_str(),NULL));
-				std::ofstream outfile(fn.c_str(), std::ios::binary|std::ios::out|std::ios::trunc);
-				Poco::Zip::Compress compressor(outfile,true);
-				Poco::Path path(this->dirstream);
-				compressor.addRecursive(path);
-				compressor.close();
-				outfile.close();
-				deletefile = true;
-				this->filename = std::string(fn.c_str());
-				this->filestream = new Poco::FileInputStream(this->filename);
-			}
-
-			if (!this->datastream.empty())
-			{
-				data = this->datastream;
-				content_len = data.length();
-			}
-
-			// determine the content length
-			if (!data.empty())
-			{
-				std::ostringstream l(std::stringstream::binary|std::stringstream::out);
-				l << content_len;
-				req.set("Content-Length",l.str());
-			}
-			else if (!this->filename.empty())
-			{
-				Poco::File f(this->filename);
-				std::ostringstream l;
-				l << f.getSize();
-				const char *cl = l.str().c_str();
-				content_len = atoi(cl);
-				req.set("Content-Length", l.str());
-			}
-
-			// send and stream output
-			std::ostream& out = session->sendRequest(req);
-
-			// write out the data
-			if (!data.empty())
-			{
-				out << data;
-			}
-			else if (this->filestream)
-			{
-				std::streamsize bufferSize = 8096;
-				Poco::Buffer<char> buffer(bufferSize);
-				std::streamsize len = 0;
-				std::istream& istr = *(this->filestream);
-				istr.read(buffer.begin(), bufferSize);
-				std::streamsize n = istr.gcount();
-				int remaining = content_len;
-				while (n > 0)
-				{
-					len += n;
-					remaining -= n;
-					out.write(buffer.begin(), n);
-					// TODO: fire event (bytes sent, total size, remaining)
-					if (istr)
+					if (HTTPClientBinding::initialized==false)
 					{
-						istr.read(buffer.begin(), bufferSize);
-						n = istr.gcount();
+						HTTPClientBinding::initialized = true;
+						SharedPtr<Poco::Net::InvalidCertificateHandler> ptrCert = new Poco::Net::AcceptCertificateHandler(false); 
+						std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
+						Poco::Net::Context::Ptr ptrContext = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE,"", "", rootpem, Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+						Poco::Net::SSLManager::instance().initializeClient(0, ptrCert, ptrContext);
 					}
-					else n = 0;
+					session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
 				}
-				this->filestream->close();
-			}
-
-			std::istream& rs = session->receiveResponse(response);
-			int total = response.getContentLength();
-			status = response.getStatus();
-			PRINTD("HTTPClientBinding:: response length received = " << total << " - " << status << " " << response.getReason());
-			this->Set("status",Value::NewInt(status));
-			this->Set("statusText",Value::NewString(response.getReason().c_str()));
-
-			// Handle redirects
-			if (status == 301 || status == 302)
-			{
-				if (!response.has("Location"))
+				else if (scheme=="http")
 				{
-					break;
+					session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
 				}
-				url = response.get("Location");
-				PRINTD("redirect to " << url);
-				continue;
-			}
-
-			SharedValue totalValue = Value::NewInt(total);
-			this->ChangeState(2); // headers received
-			this->ChangeState(3); // loading
-
-			char buf[8096];
-
-			// Receive data from response
-			while(!rs.eof() && !this->abort.tryWait(0))
-			{
-				try
+			
+				std::string uriString = uri.toString();
+				SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
+				if (!proxy.isNull())
 				{
-					rs.read((char*)&buf,8095);
-					int c = static_cast<int>(rs.gcount());
-					if (c > 0)
+					session->setProxyHost(proxy->info->getHost());
+					session->setProxyPort(proxy->info->getPort());
+				}
+
+				// set the timeout for the request
+				Poco::Timespan to(0L, (long)this->timeout * 1000);
+				session->setTimeout(to);
+
+				if (!this->dirstream.empty())
+				{
+					//method = Poco::Net::HTTPRequest::HTTP_POST;
+					this->headers["Content-Type"]="application/zip";
+				}
+
+				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
+				const char* ua = this->global->Get("userAgent")->IsString() ? this->global->Get("userAgent")->ToString() : NULL;
+				PRINTD("HTTPClientBinding:: userAgent = " << ua);
+				if (ua)
+				{
+					req.set("User-Agent",ua);
+				}
+				else
+				{
+					// crap, this means we don't have one for some reason -- just fake it
+					req.set("User-Agent","Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_6; en-us) AppleWebKit/528.7+ (KHTML, like Gecko) "PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
+				}
+				//FIXME: implement cookies
+				//FIXME: implement username/pass
+				//FIXME: use proxy settings of system
+
+				// set the headers
+				if (this->headers.size()>0)
+				{
+					std::map<std::string,std::string>::iterator i = this->headers.begin();
+					while(i!=this->headers.end())
 					{
-						ostr << buf;
-						// TODO: fire event (total read, size, buffer, length)
+						req.set((*i).first, (*i).second);
+						i++;
 					}
 				}
-				catch(std::exception &e)
+
+				std::string data;
+				int content_len = 0;
+
+				if (!this->dirstream.empty())
 				{
-					Logger* logger = Logger::Get("Network.HTTPClient");
-					logger->Error("Exception thrown while reading response stream: %s",e.what());
-				} 
+					std::string tmpdir = FileUtils::GetTempDirectory();
+					Poco::File tmpPath (tmpdir);
+					if (!tmpPath.exists()) {
+						tmpPath.createDirectories();
+					}
+					std::ostringstream tmpfilename;
+					tmpfilename << "ti";
+					tmpfilename << rand();
+					tmpfilename << ".zip";
+					std::string fn(FileUtils::Join(tmpdir.c_str(),tmpfilename.str().c_str(),NULL));
+					std::ofstream outfile(fn.c_str(), std::ios::binary|std::ios::out|std::ios::trunc);
+					Poco::Zip::Compress compressor(outfile,true);
+					Poco::Path path(this->dirstream);
+					compressor.addRecursive(path);
+					compressor.close();
+					outfile.close();
+					deletefile = true;
+					this->filename = std::string(fn.c_str());
+					this->filestream = new Poco::FileInputStream(this->filename);
+				}
+
+				if (!this->datastream.empty())
+				{
+					data = this->datastream;
+					content_len = data.length();
+				}
+
+				// determine the content length
+				if (!data.empty())
+				{
+					std::ostringstream l(std::stringstream::binary|std::stringstream::out);
+					l << content_len;
+					req.set("Content-Length",l.str());
+				}
+				else if (!this->filename.empty())
+				{
+					Poco::File f(this->filename);
+					std::ostringstream l;
+					l << f.getSize();
+					const char *cl = l.str().c_str();
+					content_len = atoi(cl);
+					req.set("Content-Length", l.str());
+				}
+
+				// send and stream output
+				std::ostream& out = session->sendRequest(req);
+
+				// write out the data
+				if (!data.empty())
+				{
+					out << data;
+				}
+				else if (this->filestream)
+				{
+					std::streamsize bufferSize = 8096;
+					Poco::Buffer<char> buffer(bufferSize);
+					std::streamsize len = 0;
+					std::istream& istr = *(this->filestream);
+					istr.read(buffer.begin(), bufferSize);
+					std::streamsize n = istr.gcount();
+					int remaining = content_len;
+					while (n > 0)
+					{
+						len += n;
+						remaining -= n;
+						out.write(buffer.begin(), n);
+						// TODO: fire event (bytes sent, total size, remaining)
+						if (istr)
+						{
+							istr.read(buffer.begin(), bufferSize);
+							n = istr.gcount();
+						}
+						else n = 0;
+					}
+					this->filestream->close();
+				}
+
+				std::istream& rs = session->receiveResponse(response);
+				int total = response.getContentLength();
+				status = response.getStatus();
+				PRINTD("HTTPClientBinding:: response length received = " << total << " - " << status << " " << response.getReason());
+				this->Set("status",Value::NewInt(status));
+				this->Set("statusText",Value::NewString(response.getReason().c_str()));
+
+				// Handle redirects
+				if (status == 301 || status == 302)
+				{
+					if (!response.has("Location"))
+					{
+						break;
+					}
+					url = response.get("Location");
+					PRINTD("redirect to " << url);
+					continue;
+				}
+
+				SharedValue totalValue = Value::NewInt(total);
+				this->ChangeState(2); // headers received
+				this->ChangeState(3); // loading
+
+				char buf[8096];
+
+				// Receive data from response
+				while(!rs.eof() && !this->abort.tryWait(0))
+				{
+					try
+					{
+						rs.read((char*)&buf,8095);
+						int c = static_cast<int>(rs.gcount());
+						if (c > 0)
+						{
+							ostr << buf;
+							// TODO: fire event (total read, size, buffer, length)
+						}
+					}
+					catch(std::exception &e)
+					{
+						Logger* logger = Logger::Get("Network.HTTPClient");
+						logger->Error("Exception thrown while reading response stream: %s",e.what());
+					} 
+				}
+				break;  // we have our response, time to call it quits
 			}
-			break;  // we have our response, time to call it quits
+		}
+		catch(...)
+		{
+			// If an exception is thrown, assume it is a timeout
+			this->FireEvent(Event::HTTP_TIMEOUT);
+			this->Set("connected", Value::NewBool(false));
+			return;
 		}
 
 		std::string data = ostr.str();
