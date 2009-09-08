@@ -19,7 +19,9 @@
 
 namespace ti
 {
-	class HTTPClientBinding : public StaticBoundObject
+	class HTTPClientEvent;
+
+	class HTTPClientBinding : public KEventObject
 	{
 	public:
 		HTTPClientBinding(Host* host, std::string path);
@@ -43,10 +45,6 @@ namespace ti
 		std::string dirstream;
 		int timeout;
 		bool shutdown;
-		SharedKMethod readystate;
-		SharedKMethod ondatastream;
-		SharedKMethod onsendstream;
-		SharedKMethod onload;
 		static bool initialized;
 		
 		static void Run(void*);
