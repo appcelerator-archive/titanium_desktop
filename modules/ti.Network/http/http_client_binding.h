@@ -17,6 +17,7 @@
 #include <Poco/Thread.h>
 #include <Poco/FileStream.h>
 #include <Poco/Runnable.h>
+#include <Poco/Event.h>
 
 namespace ti
 {
@@ -39,7 +40,6 @@ namespace ti
 		Host* host;
 		std::string modulePath;
 		SharedKObject global;
-		Poco::Thread *thread;
 		std::string url;
 		Poco::Net::HTTPResponse response;
 		std::map<std::string,std::string> headers;
@@ -52,8 +52,10 @@ namespace ti
 		std::string datastream;
 		std::string dirstream;
 		int timeout;
-		bool shutdown;
 		static bool initialized;
+		SharedPtr<Poco::Thread> thread;
+		Poco::Event shutdown;
+		Poco::Event abort;
 
 		// Thread main		
 		void run();

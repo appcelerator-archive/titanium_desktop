@@ -49,11 +49,9 @@ namespace ti
 		host(host),
 		modulePath(path),
 		global(host->GetGlobalObject()),
-		thread(0),
 		async(true),
 		filestream(NULL),
-		timeout(30000),
-		shutdown(false)
+		timeout(30000)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.abort,since=0.3) Aborts an in progress connection
@@ -72,21 +70,24 @@ namespace ti
 		this->SetMethod("open",&HTTPClientBinding::Open);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.setRequestHeader,since=0.3) Sets a request header for the connection
-		 * @tiarg(for=Network.HTTPClient.setRequestHeader,name=header,type=String) request header name
-		 * @tiarg(for=Network.HTTPClient.setRequestHeader,name=value,type=String) request header value
+		 * @tiapi(method=True,name=Network.HTTPClient.setRequestHeader,since=0.3)
+		 * @tiapi Sets a request header for the connection
+		 * @tiarg[String,header] request header name
+		 * @tiarg[String,value] request header value
 		 */
 		this->SetMethod("setRequestHeader",&HTTPClientBinding::SetRequestHeader);
 
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.send,since=0.3) Sends data through the HTTP connection
-		 * @tiarg(for=Network.HTTPClient.send,type=String,name=data) data to send
+		 * @tiarg[String,data] data to send
+		 * @tiresult[Boolean] returns true if request dispatched successfully
 		 */
 		this->SetMethod("send",&HTTPClientBinding::Send);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.sendFile,since=0.3,deprecated=True) Sends the contents of a file as body content
-		 * @tiarg(for=Network.HTTPClient.sendFile,type=String,name=data) path of file to send
+		 * @tiapi(method=True,name=Network.HTTPClient.sendFile,since=0.3)
+		 * @tiapi Sends the contents of a file as body content
+		 * @tiarg[Titanium.Filesystem.File,file] the File object to send
 		 */
 		this->SetMethod("sendFile",&HTTPClientBinding::Send);
 
@@ -170,19 +171,19 @@ namespace ti
 
 	HTTPClientBinding::~HTTPClientBinding()
 	{
-		this->shutdown = true;
-		if (this->thread!=NULL)
+		if (!this->thread.isNull() && this->thread->isRunning())
 		{
 			try
 			{
-				this->thread->join();
+				this->abort.set();
+				this->thread->join(this->timeout);
 			}
 			catch(...)
 			{
+				Logger::Get("Network.HTTPClient")->Error("Timeout occurred during cleanup");
 			}
-			delete this->thread;
-			this->thread = NULL;
 		}
+
 		if (this->filestream!=NULL)
 		{
 			delete this->filestream;
@@ -198,8 +199,6 @@ namespace ti
 #ifdef OS_OSX
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 #endif
-
-		PRINTD("HTTPClientBinding:: starting => " << this->url);
 
 		Poco::Net::HTTPResponse& response = this->response;
 		std::ostringstream ostr;
@@ -424,7 +423,7 @@ namespace ti
 			f.remove();
 		}
 
-		this->shutdown = true;
+		this->shutdown.set();
 		this->Set("connected",Value::NewBool(false));
 		this->ChangeState(4); // closed
 
@@ -438,8 +437,9 @@ namespace ti
 	{
 		if (this->Get("connected")->ToBool())
 		{
-			throw ValueException::FromString("already connected");
+			result->SetBool(false);
 		}
+
 		if (args.size()==1)
 		{
 			// can be a string of data or a file
@@ -460,33 +460,39 @@ namespace ti
 			}
 			else
 			{
-				throw ValueException::FromString("unknown data type");
+				result->SetBool(false);
+				Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s", v->GetType().c_str());
 			}
 		}
+
+		this->shutdown.reset();
+		this->abort.reset();
 		this->thread = new Poco::Thread();
 		this->thread->start(*this);
 		if (!this->async)
 		{
-			PRINTD("Waiting on HTTP Client thread to finish (sync)");
-			Poco::Stopwatch sw;
-			sw.start();
-			while (!this->shutdown && sw.elapsedSeconds() * 1000 < this->timeout)
+			try
 			{
-				this->thread->tryJoin(100);
+				this->shutdown.wait(this->timeout);
 			}
-			PRINTD("HTTP Client thread finished (sync)");
+			catch(...)
+			{
+				result->SetBool(false);
+				Logger::Get("Network.HTTPClient")->Error("Timeout occurred");
+			}
 		}
+
+		result->SetBool(true);
 	}
 
 	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
 	{
-		this->shutdown=true;
-		this->SetBool("connected", false);
+		this->abort.set();
 	}
 
 	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
 	{
-		args.VerifyException("open", "s s ?b s s");
+		args.VerifyException("open", "ss?bss");
 
 		this->method = args.GetString(0);
 		this->url = args.GetString(1);
@@ -541,7 +547,8 @@ namespace ti
 
 	void HTTPClientBinding::SetTimeout(const ValueList& args, SharedValue result)
 	{
-		this->timeout = args.at(0)->ToInt();
+		args.VerifyException("setTimeout", "i");
+		this->timeout = args.GetInt(0);
 	}
 
 	void HTTPClientBinding::ChangeState(int readyState)
@@ -550,13 +557,6 @@ namespace ti
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
 		this->SetInt("readyState",readyState);
 
-		// Don't call onreadystate change callbacks if we are using this
-		// symchronously. That would put us into deadlock.
-		if (!this->async)
-		{
-			return;
-		}
-
-		// TODO: fire event
+		this->FireEvent(Event::HTTP_ONLOAD);
 	}
 }

@@ -36,11 +36,11 @@ describe("Network.HTTPClient",
 		value_of(this.client).should_be_object();
 		
 		var methods = ['open','abort','setRequestHeader','send','sendFile',
-					   'sendDir','getResponseHeader','setTimeout'];
+					   'getResponseHeader','setTimeout'];
 					
 		var props = ['readyState','UNSENT','OPENED','HEADERS_RECEIVED','LOADING',
 					 'DONE','responseText','responseXML','status','statusText',
-					 'connected','onreadystatechange','ondatastream','onsendstream', 'onload'];
+					 'connected'];
 
 		for (var c=0;c<methods.length;c++)
 		{
@@ -73,7 +73,7 @@ describe("Network.HTTPClient",
 		var client = this.client;
 		var timer = null;
 		
-		this.client.onreadystatechange = function()
+		this.client.addEventListener(Titanium.HTTP_ONLOAD, function()
 		{
 			try
 			{
@@ -90,7 +90,7 @@ describe("Network.HTTPClient",
 				clearTimeout(timer);
 				callback.failed(e);
 			}
-		};
+		});
 		this.client.open("GET",url);
 		this.client.send(null);
 		
@@ -127,7 +127,7 @@ describe("Network.HTTPClient",
 		value_of(foo).should_be('a b');
 	},
 
-	test_sendstring_post_as_async: function(callback)
+	/*test_sendstring_post_as_async: function(callback)
 	{
 		var timer = null;
 		var reply = this.reply;
@@ -296,5 +296,5 @@ describe("Network.HTTPClient",
 
 		this.client.open("GET", this.url);
 		this.client.send(null);
-	},
+	},*/
 });
