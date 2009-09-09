@@ -102,9 +102,17 @@ describe("Network.HTTPClient",
 
 	test_sync_get: function()
 	{
+		done = false;
+
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
+		{
+			done = true;
+		});
+
 		this.client.open("GET", this.url, false);
 		value_of(this.client.send(null)).should_be_true();
 		value_of(this.client.responseText).should_be(this.text);
+		value_of(done).should_be_true();
 	},
 
 	test_async_get_as_async: function(callback)

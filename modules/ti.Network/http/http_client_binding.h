@@ -41,20 +41,22 @@ namespace ti
 		std::string modulePath;
 		SharedKObject global;
 		std::string url;
-		Poco::Net::HTTPResponse response;
 		std::map<std::string,std::string> headers;
+		Poco::Net::HTTPResponse response;
 		std::string method;
 		bool async;
 		std::string user;
 		std::string password;
 		int timeout;
 		int maxRedirects;
+		int bufferSize;
 		std::string userAgent;
 		static bool initialized;
-		SharedPtr<Poco::Thread> thread;
 
 		// This variables must be reset on each send()
-		std::string datastream;
+		SharedPtr<Poco::Thread> thread;
+		SharedPtr<std::istream> datastream;
+		int contentLength;
 		Poco::Event abort;
 		bool dirty;
 

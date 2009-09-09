@@ -52,7 +52,10 @@ namespace ti
 		async(true),
 		timeout(30000),
 		maxRedirects(5),
+		bufferSize(8192),
 		userAgent(PRODUCT_NAME"/"STRING(PRODUCT_VERSION)),
+		thread(0),
+		contentLength(0),
 		dirty(false)
 	{
 		/**
@@ -177,7 +180,13 @@ namespace ti
 		this->SetNull("url");
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.connected,since=0.3)
+		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.dataSent,since=0.7)
+		 * @tiapi Amount of data sent to server so far. Updated on DATASENT event.
+		 */
+		this->SetInt("dataSent", 0);
+
+		/**
+		 * @tiapi(property=True,type=Boolean,name=Network.HTTPClient.connected,since=0.3)
 		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
 		this->SetBool("connected", false);
@@ -185,18 +194,6 @@ namespace ti
 
 	HTTPClientBinding::~HTTPClientBinding()
 	{
-		if (!this->thread.isNull() && this->thread->isRunning())
-		{
-			try
-			{
-				this->abort.set();
-				this->thread->join(this->timeout);
-			}
-			catch(...)
-			{
-				Logger::Get("Network.HTTPClient")->Error("Timeout occurred during cleanup");
-			}
-		}
 	}
 
 	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
@@ -249,26 +246,43 @@ namespace ti
 			return;
 		}
 
+		// Reset internal variables for new request
+		if (this->dirty)
+		{
+			this->Reset();
+		}
+
 		if (args.size()==1)
 		{
 			// Determine what data type we have to send
 			SharedValue v = args.at(0);
 			if (v->IsObject())
 			{
-				// TODO
-				result->SetBool(false);
-				Logger::Get("Network.HTTPClient")->Error("-----Not implemented object datatype");
-				return;
+				SharedKObject dataObject = v->ToObject();
+
+				if (dataObject->GetType() == "File")
+				{
+					// TODO: send file
+				}
+				else
+				{
+					// TODO: send object properties
+				}
 			}
 			else if (v->IsString())
 			{
-				// Send a string
-				this->datastream = v->ToString();
+				std::string dataString(v->ToString());
+				if (!dataString.empty())
+				{
+					this->datastream = new std::istringstream(dataString,
+							std::ios::in | std::ios::binary);
+					this->contentLength = dataString.length();
+				}
 			}
 			else if (v->IsNull() || v->IsUndefined())
 			{
 				// Sending no data
-				this->datastream = "";
+				this->datastream = 0;
 			}
 			else
 			{
@@ -279,17 +293,14 @@ namespace ti
 			}
 		}
 
-		// Reset internal variables for new request
-		if (this->dirty)
-		{
-			this->Reset();
-		}
-
 		this->dirty = true;
 		this->Set("connected",Value::NewBool(true));
-		this->thread = new Poco::Thread();
-		this->thread->start(*this);
-		if(!this->async)
+		if (this->async)
+		{
+			this->thread = new Poco::Thread();
+			this->thread->start(*this);
+		}
+		else
 		{
 			try
 			{
@@ -345,8 +356,10 @@ namespace ti
 
 	void HTTPClientBinding::Reset()
 	{
+		this->thread = 0;
 		this->abort.reset();
-		this->datastream = "";
+		this->datastream = 0;
+		this->contentLength = 0;
 		this->SetBool("timedOut", false);
 		this->SetNull("responseText");
 		this->SetNull("responseXML");
@@ -441,16 +454,28 @@ namespace ti
 
 				// Set content length
 				std::ostringstream l(std::stringstream::binary|std::stringstream::out);
-				l << this->datastream.length();
+				l << this->contentLength;
 				req.set("Content-Length",l.str());
+
+				// Allocate buffer
+				Poco::Buffer<char> buffer(this->bufferSize);
 
 				// Send request and grab an output stream to send body
 				std::ostream& out = session->sendRequest(req);
 
 				// Output request body if we have data to send
-				if (!this->datastream.empty())
+				if (this->contentLength > 0)
 				{
-					out << this->datastream;
+					int dataSent = 0;
+					int readSize = 0;
+					while (!this->datastream->eof())
+					{
+						readSize = this->datastream->readsome(buffer.begin(), buffer.size());
+						out.write(buffer.begin(), readSize);
+						dataSent += readSize;
+						this->SetInt("dataSent", dataSent);
+						this->FireEvent(Event::HTTP_DATASENT);
+					}
 				}
 
 				// Get the response
