@@ -295,12 +295,9 @@ namespace ti
 
 		this->dirty = true;
 		this->Set("connected",Value::NewBool(true));
-		if (this->async)
-		{
-			this->thread = new Poco::Thread();
-			this->thread->start(*this);
-		}
-		else
+		this->thread = new Poco::Thread();
+		this->thread->start(*this);
+		if(!this->async)
 		{
 			try
 			{
