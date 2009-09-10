@@ -11,13 +11,9 @@
 #include <glib.h>
 #include <utils.h>
 
-using KrollUtils::BootUtils;
-using KrollUtils::FileUtils;
-using KrollUtils::EnvironmentUtils;
 using KrollUtils::Application;
 using KrollUtils::SharedApplication;
 using KrollUtils::KComponentType;
-using KrollUtils::URLUtils;
 using std::string;
 using std::vector;
 class Installer;

@@ -8,7 +8,6 @@
 #define COMPONENT_JOB 0
 #define APPLICATION_JOB 1
 
-
 class Job
 {
 	public:

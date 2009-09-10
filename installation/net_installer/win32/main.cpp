@@ -30,9 +30,7 @@ using std::vector;
 using KrollUtils::Application;
 using KrollUtils::SharedApplication;
 using KrollUtils::KComponentType;
-using KrollUtils::FileUtils;
-using KrollUtils::BootUtils;
-using KrollUtils::Win32Utils;
+using namespace KrollUtils;
 
 HINSTANCE mainInstance;
 HICON mainIcon;
@@ -52,12 +50,12 @@ ProgressDialog* progressDialog;
 
 enum IType
 {
-	RUNTIME,
-	MODULE,
-	UPDATE,
-	SDK,
-	MOBILESDK,
-	UNKNOWN
+	CRUNTIME,
+	CMODULE,
+	CUPDATE,
+	CSDK,
+	CMOBILESDK,
+	CUNKNOWN
 };
 
 class Job
@@ -272,21 +270,21 @@ void UnzipProgress(char *message, int current, int total, void *data)
 void Install(IType type, string name, string version, string path)
 {
 	string destination;
-	if (type == MODULE)
+	if (type == CMODULE)
 	{
 		destination = FileUtils::Join(
 			componentInstallPath.c_str(), "modules", OS_NAME, name.c_str(), version.c_str(), NULL);
 	}
-	else if (type == RUNTIME)
+	else if (type == CRUNTIME)
 	{
 		destination = FileUtils::Join(
 			componentInstallPath.c_str(), "runtime", OS_NAME, version.c_str(), NULL);
 	}
-	else if (type == SDK || type == MOBILESDK)
+	else if (type == CSDK || type == CMOBILESDK)
 	{
 		destination = componentInstallPath;
 	}
-	else if (type == UPDATE)
+	else if (type == CUPDATE)
 	{
 		destination = app->path;
 	}
@@ -315,7 +313,7 @@ void ProcessUpdate(HINTERNET hINet)
 	if (downloaded)
 	{
 		progressDialog->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
-		Install(UPDATE, name, version, path);
+		Install(CUPDATE, name, version, path);
 	}
 }
 
@@ -329,27 +327,27 @@ void ProcessURL(string url, HINTERNET hINet)
 	string name = KrollUtils::WideToUTF8(wname);
 	string version = KrollUtils::WideToUTF8(wversion);
 	
-	IType type = UNKNOWN;
+	IType type = CUNKNOWN;
 
 	string path = "";
 	if (string(RUNTIME_UUID) == uuid)
 	{
-		type = RUNTIME;
+		type = CRUNTIME;
 		path = "runtime-";
 	}
 	else if (string(MODULE_UUID) == uuid)
 	{
-		type = MODULE;
+		type = CMODULE;
 		path = "module-";
 	}
 	else if (string(SDK_UUID) == uuid)
 	{
-		type = SDK;
+		type = CSDK;
 		path = "sdk-";
 	}
 	else if (string(MOBILESDK_UUID) == uuid)
 	{
-		type = MOBILESDK;
+		type = CMOBILESDK;
 		path = "mobilesdk-";
 	}
 	else
@@ -379,7 +377,7 @@ void ProcessURL(string url, HINTERNET hINet)
 
 void ProcessFile(string fullPath)
 {
-	IType type = UNKNOWN;
+	IType type = CUNKNOWN;
 	string name = "";
 	string version = "";
 
@@ -390,22 +388,22 @@ void ProcessFile(string fullPath)
 	std::string partOne = path.substr(0, end);
 	if (partOne == "runtime")
 	{
-		type = RUNTIME;
+		type = CRUNTIME;
 		name = "runtime";
 	}
 	else if (partOne == "sdk")
 	{
-		type = SDK;
+		type = CSDK;
 		name = "sdk";
 	}
 	else if (partOne == "mobilesdk")
 	{
-		type = MOBILESDK;
+		type = CMOBILESDK;
 		name = "mobilesdk";
 	}
 	else if (partOne == "module")
 	{
-		type = MODULE;
+		type = CMODULE;
 		start = end + 1;
 		end = path.find("-", start);
 		name = path.substr(start, end - start);

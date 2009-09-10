@@ -2,7 +2,8 @@
 #include "api/utils/utils.h"
 #include <stdio.h>
 
-namespace ti {
+namespace ti
+{
 	static void* SetWindowUserData(HWND hwnd, void* user_data)
 	{
 		return reinterpret_cast<void*> (SetWindowLongPtr(hwnd, GWLP_USERDATA,
