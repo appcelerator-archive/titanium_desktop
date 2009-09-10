@@ -12,7 +12,6 @@ namespace ti
 		vector<InstallJob*> jobs;
 		if (filename.empty() || !FileUtils::IsWideFile(filename))
 		{
-			ShowError(string("Installation jobs file wasn't found at path: ") + KrollUtils::WideToUTF8(filename));
 			return jobs;
 		}
 		
