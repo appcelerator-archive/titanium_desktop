@@ -432,6 +432,11 @@ bool InstallApplication()
 
 bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 {
+	if (jobs.size() == 0)
+	{
+		return true;	
+	}
+
 	temporaryPath = FileUtils::GetTempDirectory();
 	
 	FileUtils::CreateDirectory(temporaryPath);
@@ -692,10 +697,9 @@ int WINAPI WinMain(
 	
 	if (jobs.size() == 0)
 	{
-		// Exit if there are no jobs -- i.e. we couldn't read the jobs file for some reason, or there's nothing to be done
-		fprintf(stderr, "Error: No jobs were defined for the installer.\n");
-		CoUninitialize();
-		return 1;
+		// Warn if there are no jobs, we still want to copy the app into
+		// it's system location though, right?
+		fprintf(stderr, "WARNING: No jobs were defined for the installer.\n");
 	}
 	
 	// Major WTF here, Redmond.
