@@ -1,4 +1,4 @@
-describe("user agent tests",
+describe("Contents of user agent",
 {
 	validate_name_and_version: function()
 	{

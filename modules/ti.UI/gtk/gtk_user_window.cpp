@@ -102,8 +102,27 @@ namespace ti
 				NULL);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
-			g_object_set(G_OBJECT(settings), "enable-developer-extras", TRUE, NULL);
+			g_object_set(G_OBJECT(settings), 
+				"enable-developer-extras", TRUE,
+				"enable-universal-access-from-file-uris", TRUE,
+				NULL);
 			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
+
+			// Get the default user agent, append the product name and version and
+			// then record the new user agent in the global object.
+			static std::string userAgent;
+			if (userAgent.empty())
+			{
+				const char* cUserAgent = 0;
+				g_object_get(G_OBJECT(settings), "user-agent", &cUserAgent, NULL);
+				userAgent.append(cUserAgent);
+				userAgent.append(" ");
+				userAgent.append(PRODUCT_NAME);
+				userAgent.append("/");
+				userAgent.append(STRING(PRODUCT_VERSION));
+				host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
+			}
+			g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
 
 			WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
 			g_signal_connect(
