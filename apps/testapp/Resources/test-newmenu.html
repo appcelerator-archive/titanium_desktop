@@ -7,6 +7,12 @@
 			}
 		</style>
 		<script>
+			Titanium.UI.currentWindow.addEventListener(Titanium.CLOSE, function(event)
+			{
+				if (!confirm("Close the window?")) {
+					event.preventDefault();
+				}
+			});
 			var menu = null;
 			var item1 = null;
 			var menu2 = null;
