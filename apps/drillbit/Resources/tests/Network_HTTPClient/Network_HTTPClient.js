@@ -30,7 +30,7 @@ describe("Network.HTTPClient",
 	{
 		this.client = null;
 	},
-
+/*
 	test_client_properties:function()
 	{
 		value_of(this.client).should_be_object();
@@ -111,8 +111,8 @@ describe("Network.HTTPClient",
 
 		this.client.open("GET", this.url, false);
 		value_of(this.client.send(null)).should_be_true();
-		value_of(this.client.responseText).should_be(this.text);
 		value_of(done).should_be_true();
+		value_of(this.client.responseText).should_be(this.text);
 	},
 
 	test_async_get_as_async: function(callback)
@@ -203,40 +203,30 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 		this.client.abort();
 	},
-
+*/
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
 		// HTTPS connectivity
 		var url = 'https://api.appcelerator.net/p/v1/app-list';
 		var client = this.client;
-		var timer = null;
+		var timer = 0;
 		
 		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
-			try
-			{
-				// if we get here, we connected and received 
-				// HTTPS encrypted content
-				clearTimeout(timer);
-				callback.passed();
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
+			clearTimeout(timer);
+			callback.passed();
 		});
 
 		timer = setTimeout(function()
 		{
 			callback.failed('HTTPS test timed out');
-		},5000);
+		},10000);
 
 		this.client.open("GET",url);
 		this.client.send(null);
 	},
-
+/*
 	test_post_as_async: function(callback)
 	{
 		var timer = null;
@@ -266,5 +256,5 @@ describe("Network.HTTPClient",
 
 		this.client.open("POST", this.url);
 		this.client.send(this.text);
-	},
+	},*/
 });

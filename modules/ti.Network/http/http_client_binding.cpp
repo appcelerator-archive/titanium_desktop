@@ -186,6 +186,12 @@ namespace ti
 		this->SetInt("dataSent", 0);
 
 		/**
+		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.dataReceived,since=0.7)
+		 * @tiapi Amount of data received from server so far. Updated on DATARECV event.
+		 */
+		this->SetInt("dataReceived", 0);
+
+		/**
 		 * @tiapi(property=True,type=Boolean,name=Network.HTTPClient.connected,since=0.3)
 		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
@@ -295,20 +301,15 @@ namespace ti
 
 		this->dirty = true;
 		this->Set("connected",Value::NewBool(true));
-		this->thread = new Poco::Thread();
-		this->thread->start(*this);
-		if(!this->async)
+
+		if (this->async)
 		{
-			try
-			{
-				Logger::Get("Network.HTTPClient")->Debug("Waiting on HTTP Client thread to finish (sync)");
-				this->thread->join(this->timeout);
-			}
-			catch(...)
-			{
-				result->SetBool(false);
-				Logger::Get("Network.HTTPClient")->Error("Timeout occurred");
-			}
+			this->thread = new Poco::Thread();
+			this->thread->start(*this);
+		}
+		else
+		{
+			this->run();
 		}
 
 		result->SetBool(true);
@@ -468,16 +469,20 @@ namespace ti
 					while (!this->datastream->eof())
 					{
 						readSize = this->datastream->readsome(buffer.begin(), buffer.size());
-						out.write(buffer.begin(), readSize);
-						dataSent += readSize;
-						this->SetInt("dataSent", dataSent);
-						this->FireEvent(Event::HTTP_DATASENT);
+						if (readSize > 0)
+						{
+							out.write(buffer.begin(), readSize);
+							dataSent += readSize;
+							this->SetInt("dataSent", dataSent);
+							this->FireEvent(Event::HTTP_DATASENT);
+						}
 					}
 				}
 
 				// Get the response
 				std::istream& in = session->receiveResponse(this->response);
 				int status = this->response.getStatus();
+				int responseLength = this->response.getContentLength();
 
 				// Handle redirects
 				if (status == 301 || status == 302)
@@ -501,36 +506,47 @@ namespace ti
 				this->ChangeState(3); // loading
 
 				// Receive data from response
-				char buf[8096];
-				std::ostringstream ostr;
-				bool aborted = false;
-				while(!in.eof())
+				if (responseLength > 0)
 				{
-					if (this->abort.tryWait(0))
+					std::ostringstream ostr(std::ios::out | std::ios::binary);
+					bool aborted = false;
+					int dataReceived = 0;
+					int readSize = 0;
+					while(dataReceived < responseLength)
 					{
-						aborted = true;
-						this->FireEvent(Event::HTTP_ABORT);
-						break;
+						/*if (this->abort.tryWait(0))
+						{
+							aborted = true;
+							this->FireEvent(Event::HTTP_ABORT);
+							break;
+						}*/
+
+						in.read(buffer.begin(), buffer.size());
+						readSize = in.gcount();
+						if (readSize > 0)
+						{
+							ostr.write(buffer.begin(), readSize);
+							dataReceived += readSize;
+							this->SetInt("dataReceived", dataReceived);
+							this->FireEvent(Event::HTTP_DATARECV);
+						}
+						else
+						{
+							break;
+						}
 					}
 
-					in.read((char*)&buf, 8095);
-					int c = static_cast<int>(in.gcount());
-					if (c > 0)
+					if (!aborted)
 					{
-						ostr << buf;
-					}
-				}
+						// Set response text
+						std::string data = ostr.str();
+						if (!data.empty())
+						{
+							this->SetString("responseText", data);
+						}
 
-				if (!aborted)
-				{
-					// Set response text
-					std::string data = ostr.str();
-					if (!data.empty())
-					{
-						this->SetString("responseText", data);
+						this->FireEvent(Event::HTTP_DONE);
 					}
-
-					this->FireEvent(Event::HTTP_DONE);
 				}
 
 				break;
@@ -539,6 +555,7 @@ namespace ti
 		catch(...)
 		{
 			// Timeout or IO error occurred
+			Logger::Get("Network.HTTPClient")->Debug("Timeout occurred");
 			this->SetBool("timedOut", true);
 			this->FireEvent(Event::HTTP_TIMEOUT);
 		}
