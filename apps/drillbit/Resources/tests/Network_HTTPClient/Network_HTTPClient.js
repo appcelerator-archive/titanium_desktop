@@ -229,7 +229,7 @@ describe("Network.HTTPClient",
 
 	test_post_as_async: function(callback)
 	{
-		var timer = null;
+		var timer = 0;
 		var reply = this.reply;
 
 		this.client.addEventListener(Titanium.HTTP_DONE, function(e)
@@ -256,5 +256,49 @@ describe("Network.HTTPClient",
 
 		this.client.open("POST", this.url);
 		this.client.send(this.text);
+	},
+
+	test_redirect_as_async: function(callback)
+	{
+		var timer = 0;
+		var text = this.text;
+		var url = this.url;
+
+		this.client.addEventListener(Titanium.HTTP_REDIRECT, function()
+		{
+			try
+			{
+				value_of(this.url).should_be(url);
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
+		{
+			try
+			{
+				value_of(this.status).should_be(200);
+				value_of(this.responseText).should_be(text);
+
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('Redirect test timed out');
+		},5000);
+
+		this.client.open("GET", this.url + "301redirect");
+		this.client.send(null);
 	},
 });

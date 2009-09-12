@@ -19,7 +19,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			time.sleep(5.0)
 			print "Done with long request sending response..."
 			self.send_text()
-		else:	
+		elif self.path == "/301redirect":
+			print "Redirecting..."
+			self.send_response(301)
+			self.send_header("Location", "http://127.0.0.1:8888/")
+			self.end_headers()
+		else:
+			print "Sending text..."	
 			self.send_text()
 
 	def do_POST(self):
