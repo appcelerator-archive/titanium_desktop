@@ -203,7 +203,7 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 		this.client.abort();
 	},
-/*
+
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
@@ -223,10 +223,10 @@ describe("Network.HTTPClient",
 			callback.failed('HTTPS test timed out');
 		},10000);
 
-		this.client.open("GET",url);
+		this.client.open("GET", url);
 		this.client.send(null);
 	},
-*/
+
 	test_post_as_async: function(callback)
 	{
 		var timer = null;

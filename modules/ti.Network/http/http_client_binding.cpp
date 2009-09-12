@@ -488,7 +488,7 @@ namespace ti
 				std::istream& in = session->receiveResponse(this->response);
 				int status = this->response.getStatus();
 				int responseLength = this->response.getContentLength();
-
+				
 				// Handle redirects
 				if (status == 301 || status == 302)
 				{
@@ -549,11 +549,10 @@ namespace ti
 						{
 							this->SetString("responseText", data);
 						}
-
-						this->FireEvent(Event::HTTP_DONE);
 					}
 				}
 
+				this->FireEvent(Event::HTTP_DONE);
 				break;
 			}
 		}
