@@ -30,7 +30,7 @@ describe("Network.HTTPClient",
 	{
 		this.client = null;
 	},
-/*
+
 	test_client_properties:function()
 	{
 		value_of(this.client).should_be_object();
@@ -203,7 +203,7 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 		this.client.abort();
 	},
-
+/*
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test

@@ -519,12 +519,12 @@ namespace ti
 					int readSize = 0;
 					while(dataReceived < responseLength)
 					{
-						/*if (this->abort.tryWait(0))
+						if (this->abort.tryWait(0))
 						{
 							aborted = true;
 							this->FireEvent(Event::HTTP_ABORT);
 							break;
-						}*/
+						}
 
 						in.read(buffer.begin(), buffer.size());
 						readSize = in.gcount();
