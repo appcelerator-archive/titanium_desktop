@@ -203,7 +203,7 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 		this.client.abort();
 	},
-*/
+
 	test_https_as_async: function(callback)
 	{
 		// this is a simple page that can be used (for now) to test
@@ -226,7 +226,7 @@ describe("Network.HTTPClient",
 		this.client.open("GET",url);
 		this.client.send(null);
 	},
-/*
+*/
 	test_post_as_async: function(callback)
 	{
 		var timer = null;
@@ -256,5 +256,5 @@ describe("Network.HTTPClient",
 
 		this.client.open("POST", this.url);
 		this.client.send(this.text);
-	},*/
+	},
 });

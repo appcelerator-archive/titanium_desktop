@@ -468,13 +468,18 @@ namespace ti
 					int readSize = 0;
 					while (!this->datastream->eof())
 					{
-						readSize = this->datastream->readsome(buffer.begin(), buffer.size());
+						this->datastream->read(buffer.begin(), buffer.size());
+						readSize = this->datastream->gcount();
 						if (readSize > 0)
 						{
 							out.write(buffer.begin(), readSize);
 							dataSent += readSize;
 							this->SetInt("dataSent", dataSent);
 							this->FireEvent(Event::HTTP_DATASENT);
+						}
+						else
+						{
+							break;
 						}
 					}
 				}
