@@ -14,7 +14,6 @@
 #include "http/http_client_binding.h"
 #include "http/http_server_binding.h"
 #include "proxy/proxy.h"
-using kroll::URLUtils;
 
 namespace ti
 {

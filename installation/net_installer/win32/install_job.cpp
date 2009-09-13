@@ -1,25 +1,22 @@
 #include "install_job.h"
 #include "api/utils/utils.h"
 #include <sstream>
-using KrollUtils::FileUtils;
+using namespace KrollUtils;
 
 extern void ShowError(string msg);
-
 namespace ti
 {
 	vector<InstallJob*> InstallJob::ReadJobs(wstring &filename)
 	{
 		vector<InstallJob*> jobs;
-		if (filename.empty() || !FileUtils::IsWideFile(filename))
+		if (filename.empty() || !FileUtils::IsFile(filename))
 		{
-			ShowError(string("Installation jobs file wasn't found at path: ") + KrollUtils::WideToUTF8(filename));
 			return jobs;
 		}
-		
-		std::string contents = FileUtils::ReadWideFile(filename);
-		
+
+		std::string contents(FileUtils::ReadFile(filename));
 		std::istringstream jobContents(contents);
-		string line;			
+		string line;
 		while (std::getline(jobContents, line))
 		{
 			int firstComma = line.find(",");

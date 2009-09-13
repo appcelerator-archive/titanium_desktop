@@ -16,7 +16,7 @@ using std::string;
 using std::wstring;
 using KrollUtils::SharedApplication;
 using KrollUtils::Application;
-using KrollUtils::FileUtils;
+using namespace KrollUtils;
 
 extern HICON mainIcon;
 
