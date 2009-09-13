@@ -17,12 +17,11 @@ namespace ti
 		}
 		
 		std::string contents = FileUtils::ReadWideFile(filename);
+		
 		std::istringstream jobContents(contents);
 		string line;			
 		while (std::getline(jobContents, line))
 		{
-			std::cout << line << std::endl;
-			
 			int firstComma = line.find(",");
 			int secondComma = line.find(",", firstComma + 1);
 
