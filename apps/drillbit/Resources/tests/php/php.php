@@ -116,3 +116,30 @@ function php_modify_array($myarray)
 	$myarray[2] = 6;
 	$myarray[3] = 7;
 }
+
+function php_get_anonymous_function()
+{
+	$anon = function()
+	{
+		return "blueberry";
+	};
+	return $anon;
+}
+
+function php_get_anonymous_function_one_arg()
+{
+	$anon = function($one)
+	{
+		return strtoupper($one);
+	};
+	return $anon;
+}
+
+function php_get_anonymous_function_two_args()
+{
+	$anon = function($one, $two)
+	{
+		return strtoupper($one) . strtoupper($two);
+	};
+	return $anon;
+}

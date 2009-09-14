@@ -185,5 +185,19 @@ describe("php tests",
 		{
 			callback.failed("Test timed out");
 		}, 2000);
+	},
+	test_anonymous_functions: function(callback)
+	{
+		var anon = php_get_anonymous_function();
+		var result = anon();
+		value_of(result).should_be("blueberry");
+
+		var anon2 = php_get_anonymous_function_one_arg();
+		result = anon2("dino");
+		value_of(result).should_be("DINO");
+
+		var anon3 = php_get_anonymous_function_two_args();
+		result = anon3("dino", "bones");
+		value_of(result).should_be("DINOBONES");
 	}
 });
