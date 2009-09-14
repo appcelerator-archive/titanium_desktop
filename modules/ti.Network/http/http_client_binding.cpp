@@ -84,7 +84,7 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.send,since=0.3) Sends data through the HTTP connection
-		 * @tiarg[String,data] data to send
+		 * @tiarg[Object,data,optional=True] data to send
 		 * @tiresult[Boolean] returns true if request dispatched successfully
 		 */
 		this->SetMethod("send",&HTTPClientBinding::Send);
@@ -95,6 +95,16 @@ namespace ti
 		 * @tiarg[Titanium.Filesystem.File,file] the File object to send
 		 */
 		this->SetMethod("sendFile",&HTTPClientBinding::Send);
+
+		/**
+		 * @tiapi(method=True,name=Network.HTTPClient.receive,since=0.7)
+		 * @tiapi Sends a request to the server and receive data with the provided handler.
+		 * @tiarg[Object, handler] A handler to receive the response data. Can either be
+		 * @tiarg Titanium.Filesystem.File or a method.
+		 * @tiarg[Object, data, optional=True] data to send
+		 * @tiresult[Boolean] returns true if request dispatched successfully
+		 */
+		this->SetMethod("receive",&HTTPClientBinding::Receive);
 
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.getResponseHeader,since=0.3) Returns the value of a response header
@@ -246,10 +256,70 @@ namespace ti
 
 	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
 	{
+		// Get send data if provided
+		SharedValue sendData = Value::NewNull();
+		if (args.size() == 1)
+		{
+			sendData = args.at(0);
+		}
+
+		// Setup output stream for data
+		this->outstream = new std::ostringstream(std::ios::binary | std::ios::out);
+
+		result->SetBool(this->ExecuteRequest(sendData));
+	}
+
+	void HTTPClientBinding::Receive(const ValueList& args, SharedValue result)
+	{
+		Logger* log = Logger::Get("Network.HTTPClient");
+		result->SetBool(false);
+		if (args.size() < 1)
+		{
+			log->Error("receive() requires an output handler!");
+			return;
+		}
+
+		// Set output handler
+		this->outstream = 0;
+		SharedValue outputHandler = args.at(0);
+		if (outputHandler->IsMethod())
+		{
+			this->outputHandler = outputHandler->ToMethod();
+		}
+		else if (outputHandler->IsObject())
+		{
+			SharedKObject handlerObject = outputHandler->ToObject();
+			if (handlerObject->GetType() == "File")
+			{
+				this->outputHandler = handlerObject->Get("write")->ToMethod();
+			}
+			else
+			{
+				log->Error("Unsupported object type as output handler!");
+				return;
+			}
+		}
+		else
+		{
+			log->Error("Invalid type as output handler!");
+			return;
+		}
+
+		// Get the send data if provided
+		SharedValue sendData = Value::NewNull();
+		if (args.size() == 2)
+		{
+			sendData = args.at(1);
+		}
+
+		result->SetBool(this->ExecuteRequest(sendData));
+	}
+
+	bool HTTPClientBinding::ExecuteRequest(SharedValue sendData)
+	{
 		if (this->Get("connected")->ToBool())
 		{
-			result->SetBool(false);
-			return;
+			return false;
 		}
 
 		// Reset internal variables for new request
@@ -258,45 +328,41 @@ namespace ti
 			this->Reset();
 		}
 
-		if (args.size()==1)
+		// Determine what data type we have to send
+		if (sendData->IsObject())
 		{
-			// Determine what data type we have to send
-			SharedValue v = args.at(0);
-			if (v->IsObject())
-			{
-				SharedKObject dataObject = v->ToObject();
+			SharedKObject dataObject = sendData->ToObject();
 
-				if (dataObject->GetType() == "File")
-				{
-					// TODO: send file
-				}
-				else
-				{
-					// TODO: send object properties
-				}
-			}
-			else if (v->IsString())
+			if (dataObject->GetType() == "File")
 			{
-				std::string dataString(v->ToString());
-				if (!dataString.empty())
-				{
-					this->datastream = new std::istringstream(dataString,
-							std::ios::in | std::ios::binary);
-					this->contentLength = dataString.length();
-				}
-			}
-			else if (v->IsNull() || v->IsUndefined())
-			{
-				// Sending no data
-				this->datastream = 0;
+				// TODO: send file
 			}
 			else
 			{
-				// We do not support this type!
-				result->SetBool(false);
-				Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s", v->GetType().c_str());
-				return;
+				// TODO: send object properties
 			}
+		}
+		else if (sendData->IsString())
+		{
+			std::string dataString(sendData->ToString());
+			if (!dataString.empty())
+			{
+				this->datastream = new std::istringstream(dataString,
+						std::ios::in | std::ios::binary);
+				this->contentLength = dataString.length();
+			}
+		}
+		else if (sendData->IsNull() || sendData->IsUndefined())
+		{
+			// Sending no data
+			this->datastream = 0;
+		}
+		else
+		{
+			// We do not support this type!
+			Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s",
+					sendData->GetType().c_str());
+			return false;
 		}
 
 		this->dirty = true;
@@ -312,7 +378,7 @@ namespace ti
 			this->run();
 		}
 
-		result->SetBool(true);
+		return true;
 	}
 
 	void HTTPClientBinding::SetRequestHeader(const ValueList& args, SharedValue result)
@@ -357,6 +423,7 @@ namespace ti
 		this->thread = 0;
 		this->abort.reset();
 		this->datastream = 0;
+		this->outstream = 0;
 		this->contentLength = 0;
 		this->SetBool("timedOut", false);
 		this->SetNull("responseText");
@@ -451,7 +518,7 @@ namespace ti
 				}
 
 				// Set content length
-				std::ostringstream l(std::stringstream::binary|std::stringstream::out);
+				std::ostringstream l(std::ios::binary | std::ios::out);
 				l << this->contentLength;
 				req.set("Content-Length",l.str());
 
@@ -510,10 +577,11 @@ namespace ti
 				this->ChangeState(2); // headers received
 				this->ChangeState(3); // loading
 
+				PRINTD("-------start read response-------\n");
+
 				// Receive data from response
 				if (responseLength > 0)
 				{
-					std::ostringstream ostr(std::ios::out | std::ios::binary);
 					bool aborted = false;
 					int dataReceived = 0;
 					int readSize = 0;
@@ -530,7 +598,20 @@ namespace ti
 						readSize = in.gcount();
 						if (readSize > 0)
 						{
-							ostr.write(buffer.begin(), readSize);
+							if (this->outstream)
+							{
+								this->outstream->write(buffer.begin(), readSize);
+							}
+							else
+							{
+								// Pass data to handler on main thread
+								std::string data(buffer.begin(), readSize);
+								this->host->InvokeMethodOnMainThread(
+									this->outputHandler,
+									ValueList(Value::NewString(data))
+								);
+							}
+
 							dataReceived += readSize;
 							this->SetInt("dataReceived", dataReceived);
 							this->FireEvent(Event::HTTP_DATARECV);
@@ -543,14 +624,19 @@ namespace ti
 
 					if (!aborted)
 					{
-						// Set response text
-						std::string data = ostr.str();
-						if (!data.empty())
+						// Set response text if no handler set
+						if (this->outstream)
 						{
-							this->SetString("responseText", data);
+							std::string data = this->outstream->str();
+							if (!data.empty())
+							{
+								this->SetString("responseText", data);
+							}
 						}
 					}
 				}
+
+				PRINTD("------------end read response-----------\n");
 
 				this->FireEvent(Event::HTTP_DONE);
 				break;

@@ -32,6 +32,7 @@ namespace ti
 		void Abort(const ValueList& args, SharedValue result);
 		void Open(const ValueList& args, SharedValue result);
 		void Send(const ValueList& args, SharedValue result);
+		void Receive(const ValueList& args, SharedValue result);
 		void SetRequestHeader(const ValueList& args, SharedValue result);
 		void GetResponseHeader(const ValueList& args, SharedValue result);
 		void SetTimeout(const ValueList& args, SharedValue result);
@@ -52,14 +53,17 @@ namespace ti
 		int bufferSize;
 		std::string userAgent;
 		static bool initialized;
+		SharedKMethod outputHandler;
 
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;
 		SharedPtr<std::istream> datastream;
+		SharedPtr<std::ostringstream> outstream;
 		int contentLength;
 		Poco::Event abort;
 		bool dirty;
 
+		bool ExecuteRequest(SharedValue sendData);
 		void ChangeState(int readyState);
 		void Reset();
 		void InitHTTPS();

@@ -13,6 +13,7 @@ describe("Network.HTTPClient",
 
 		this.text = "here is some text for you!";
 		this.reply = "I got it!";
+		this.file = Titanium.API.application.resourcesPath + "/rfc2616.txt";
 	},
 
 	after_all: function()
@@ -30,7 +31,7 @@ describe("Network.HTTPClient",
 	{
 		this.client = null;
 	},
-
+/*
 	test_client_properties:function()
 	{
 		value_of(this.client).should_be_object();
@@ -300,5 +301,63 @@ describe("Network.HTTPClient",
 
 		this.client.open("GET", this.url + "301redirect");
 		this.client.send(null);
+	},
+
+	test_receive_text_as_async: function(callback)
+	{
+		var timer = 0;
+		var text = this.text;
+
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
+		{
+			try
+			{
+				value_of(window.downloaded_data).should_be(text);
+
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('Receive text test timed out');
+		},5000);
+
+		this.client.open("GET", this.url);
+		this.client.receive(download_handler);
+	},
+*/
+	test_receive_file_as_async: function(callback)
+	{
+		var timer = 0;
+		var output_file = Titanium.Filesystem.createTempFile();
+
+		this.client.addEventListener(Titanium.HTTP_DONE, function()
+		{
+			try
+			{
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('Receive file test timed out');
+		},20000);
+
+		this.client.open("GET", "http://www.ietf.org/rfc/rfc2616.txt");
+		this.client.receive(output_file);
 	},
 });
