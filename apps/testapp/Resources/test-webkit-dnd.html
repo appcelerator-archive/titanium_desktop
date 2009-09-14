@@ -1,84 +1,114 @@
 <html>
 <head>
+<script type="text/javascript">
+	function textDragStart(event)
+	{
+		event.dataTransfer.setData("text/plain", "I'm just some plain text data");
+	}
+	
+	function fileDragStart(event)
+	{
+		var fileURL = "file://"+Titanium.App.appURLToPath("app://sound.wav");
+		
+		event.dataTransfer.setData("public.file-url", fileURL);
+		event.dataTransfer.setData("text/uri-list", fileURL);
+	}
+	
+	function onLoad()
+	{
+		var target = document.getElementById("drop-target");
+		target.addEventListener("dragenter", function(event)
+		{
+			event.preventDefault();
+			return true;
+		});
+		target.addEventListener("dragover", function(event)
+		{
+			event.preventDefault();
+			return true;
+		});
+		target.addEventListener("dragleave", function(event)
+		{
+			
+		});
+		target.addEventListener("drop", function(event)
+		{
+			var dropInfo = document.getElementById("drop-info");
+			var data = "<b>types</b>="+event.dataTransfer.types+"<br/>";
+			data += "<b>files</b>="+event.dataTransfer.files+"<br/>";
+			for (var t = 0; t < event.dataTransfer.types.length; t++)
+			{
+				var type = event.dataTransfer.types[t];
+				data +="<b>data["+type+"]</b>="+event.dataTransfer.getData(type)+"<br/>";
+			}
+			
+			dropInfo.innerHTML = data;
+		});
+		
+		var textarea = document.getElementById("textarea");
+		var dropInfo = document.getElementById("drop-info");
+		textarea.addEventListener("copy", function(event)
+		{
+			event.preventDefault();
+			var clipboardValue = ""+textarea.value;
+			clipboardValue = clipboardValue.toUpperCase();
+			event.clipboardData.setData("text/plain", clipboardValue);
+			
+			dropInfo.innerHTML = "attempted to copy text area contents:" + textarea.value + ", overrode with all caps: " + clipboardValue;
+		});
+		textarea.addEventListener("paste", function(event)
+		{
+			event.preventDefault();
+			var textValue = ""+event.clipboardData.getData("text/plain");
+			textValue = textValue.toLowerCase();
+			dropInfo.innerHTML = "attempted to paste data: " + event.clipboardData.getData("text/plain") + " overrode with lowercase: " + textValue;
+			textarea.value = textValue;
+		});
+	}
+</script>
  
-<script language="javascript" type="text/javascript"><!--
-    var dragitem = undefined;
- 
-    function setdragitem(item, evt) {
-        dragitem=item;
-        // alert('item: '+item);
-        // item is an HTML DIV element.
-        // evt is an event.
- 
-        // If the item should not be draggable, enable this next line.
-        // evt.preventDefault();
- 
-        return true;
-    }
-    function cleardragitem() {
-        dragitem=undefined;
-        // alert('item: '+item);
-    }
-    function dodrag() {
-        // alert('item: '+dragitem);
-    }
- 
-    // This is required---used to tell WebKit that the drag should
-    // be allowed.
-    function handledragenter(elt, evt) {
-        evt.preventDefault();
-        return true;
-    }
-    function handledragover(elt, evt) {
-        evt.preventDefault();
-        return true;
-    }
- 
- 
-    function handledragleave(elt, evt) {
- 
-    }
- 
-    function handledrop(elt, evt) {
-        // alert('drop');
-        dragitem.style.display="none";
-        var newid=dragitem.id + '_dest';
-        var dest = document.getElementById(newid);
-        dest.innerHTML = dragitem.innerHTML;
-    }
- 
- 
-// --></script>
- 
-<style type="text/css"><!--
- 
-    .wordbox { border: 1px solid black; text-align: center; width: 50px; float: left; -webkit-user-drag: element; -webkit-user-select: none; }
-    .spacer { clear: both; }
-    .target { margin-top: 30px; padding: 30px; width: 70px; border: 1px solid black; background: #c0c0ff; margin-bottom: 30px; -webkit-user-drop: element; }
-    .word   { margin: 30px; min-height: 30px; border-bottom: 1px solid black; width: 50px;  float: left; }
- 
---></style>
- 
+<style type="text/css">
+body {
+	font-family: Sans, Sans-serif;
+}
+.draggable {
+	border: 3px solid black;
+	background-color: #ccc;
+	text-align: center;
+	-webkit-user-drag: element;
+	-webkit-user-select: none;
+	width:100px;
+	margin-top: 5px;
+}
+
+#drop-target {
+	margin-top: 50px;
+	padding: 50px;
+	width: 70px;
+	border: 3px dashed black;
+	background-color: #ccf;
+	font-size: 18px;
+	margin-bottom: 30px;
+	-webkit-user-drop: element;
+	width: 75px;
+	height: 75px;
+}
+
+#drop-info {
+	font-size: 12pt;
+}
+</style>
 </head>
-<body>
+<body onload="onLoad()">
  
-<p>Drop words onto target area to put them in their places.</p>
- 
-<div class='wordbox' id='this' ondragstart='setdragitem(this, event);' ondrag='dodrag();' ondragend='cleardragitem();'>This</div>
-<div class='wordbox' id='is' ondragstart='setdragitem(this, event);' ondrag='dodrag();' ondragend='cleardragitem();'>is</div>
-<div class='wordbox' id='a' ondragstart='setdragitem(this, event);' ondrag='dodrag();' ondragend='cleardragitem();'>a</div>
-<div class='wordbox' id='test' ondragstart='setdragitem(this, event);' ondrag='dodrag();' ondragend='cleardragitem();'>test</div>
- 
+<div class="draggable" ondragstart="textDragStart(event);">Draggable div with plain text data</div>
+<div class="draggable" ondragstart="fileDragStart(event);">Draggable div with file</div>
+<img id="img" draggable="true" src="icon.png"/>Draggable Image
 <div class='spacer'></div>
-<div class='target' ondragenter='handledragenter(this, event);' ondragover='handledragover(this, event);' ondragleave='handledragleave(this, event);' ondrop='handledrop(this, event);'>TARGET</div>
- 
-<div class='words'>
-<div class='word' id='this_dest'></div>
-<div class='word' id='is_dest'></div>
-<div class='word' id='a_dest'></div>
-<div class='word' id='test_dest'></div>
-</div>
- 
- 
+
+<div id="drop-target">Drag Stuff Into Me</div>
+<textarea id="textarea">Copy / Paste data from me</textarea>
+<div id="drop-info"></div>
+Try dragging files from Finder / Windows Explorer / Nautlius above ^
 </body>
 </html>

@@ -80,6 +80,7 @@ std::wstring ParseQueryParam(string uri8, string key8)
 	std::wstring key = KrollUtils::UTF8ToWide(key8);
 	key+=L"=";
 	size_t pos = uri.find(key);
+	
 	if (pos!=std::wstring::npos)
 	{
 		std::wstring p = uri.substr(pos + key.length());
@@ -199,7 +200,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 
 	bool failed = false;
 	CHAR buffer[2048];
-	DWORD dwRead;
+	DWORD bytesRead;
 	DWORD total = 0;
 	wchar_t msg[255];
 	
@@ -237,27 +238,37 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	}
 	
 	std::wstring contentLengthStr = SizeString(contentLength);
-	while (InternetReadFile(hRequest, buffer, 2047, &dwRead ) )
+	
+	// Use do/while since the last call to InternetReadFile might actually read bytes
+	do
 	{
-		if (dwRead == 0)
+		if (!InternetReadFile(hRequest, buffer, 2047, &bytesRead))
 		{
-			break;
+			ostr.close();
 		}
+		
 		if (progressDialog->IsCancelled())
 		{
 			failed = true;
 			break;
 		}
-		buffer[dwRead] = '\0';
-		total+=dwRead;
-		ostr.write(buffer, dwRead);
-		progressDialog->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
-		progressDialog->Update(total, contentLength);
-	}
-	ostr.close();
+		
+		if (bytesRead == 0)
+		{
+			break;
+		}
+		else
+		{
+			buffer[bytesRead] = '\0';
+			total += bytesRead;
+			ostr.write(buffer, bytesRead);
+			progressDialog->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
+			progressDialog->Update(total, contentLength);
+		}
+	} while(true);
+	
 	InternetCloseHandle(hConnection);
 	InternetCloseHandle(hRequest);
-
 	return !failed;
 }
 
@@ -441,7 +452,7 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 
 	int count = jobs.size();
 	bool success = true;
-
+	
 	// Create our progress indicator class
 	progressDialog->SetTitle(L"Titanium Installer");
 	progressDialog->SetCancelMessage(L"Cancelling, one moment...");
@@ -753,6 +764,7 @@ int WINAPI WinMain(
 			InstallApplication() &&
 			HandleAllJobs(jobs) &&
 			FinishInstallation();
+		
 		CoUninitialize();
 		return success ? 0 : 1;
 	}

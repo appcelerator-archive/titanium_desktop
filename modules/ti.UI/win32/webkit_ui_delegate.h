@@ -153,17 +153,30 @@ class Win32WebKitUIDelegate : public IWebUIDelegate {
 	virtual HRESULT STDMETHODCALLTYPE dragDestinationActionMaskForDraggingInfo(
 		/* [in] */ IWebView *webView,
 		/* [in] */ IDataObject *draggingInfo,
-		/* [retval][out] */ WebDragDestinationAction *action) { return E_NOTIMPL; }
+		/* [retval][out] */ WebDragDestinationAction *action) {
+		
+		logger->Debug("dragDestinationActionMaskForDraggingInfo");
+		*action = WebDragDestinationActionAny;
+		return S_OK;
+	}
 
 	virtual HRESULT STDMETHODCALLTYPE willPerformDragDestinationAction(
 		/* [in] */ IWebView *webView,
 		/* [in] */ WebDragDestinationAction action,
-		/* [in] */ IDataObject *draggingInfo) { return E_NOTIMPL; }
+		/* [in] */ IDataObject *draggingInfo) {
+		
+		logger->Debug("willPerformDragDestinationAction");
+		return S_OK;
+	}
 
 	virtual HRESULT STDMETHODCALLTYPE dragSourceActionMaskForPoint(
 		/* [in] */ IWebView *webView,
 		/* [in] */ LPPOINT point,
-		/* [retval][out] */ WebDragSourceAction *action) { return E_NOTIMPL; }
+		/* [retval][out] */ WebDragSourceAction *action) {
+		logger->Debug("dragSourceActionMaskForPoint");
+		*action = WebDragSourceActionAny;
+		return S_OK;
+	}
 
 	virtual HRESULT STDMETHODCALLTYPE  willPerformDragSourceAction( 
 		/* [in] */ IWebView *webView,
