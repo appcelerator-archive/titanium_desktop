@@ -36,11 +36,32 @@
 		{
 			return 24;
 		}
+		$substance = "donkey poop";
 	</script>
+
+	<script>
+		function make_substance_ninja_food()
+		{
+			substance = "ninja food";
+		}
+	</script>
+
 	<script type="text/php">
 		function across_script_tags()
 		{
 			return across_script_tags2();
+		}
+		function get_substance()
+		{
+			global $substance;
+			return $substance;
+		}
+		function modify_substance()
+		{
+			global $substance;
+			global $make_substance_ninja_food;
+			$substance = "dinosaur bones";
+			$make_substance_ninja_food();
 		}
 	</script>
 

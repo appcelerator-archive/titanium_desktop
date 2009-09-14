@@ -148,5 +148,42 @@ describe("php tests",
 	{
 		var result = across_script_tags();
 		value_of(result).should_be(24);
+	},
+	test_global_variable_persistence: function()
+	{
+		var result = get_substance();
+		value_of(result).should_be("donkey poop");
+	},
+	test_deep_global_variable_persistence: function()
+	{
+		modify_substance();
+		var result = get_substance();
+		value_of(result).should_be("ninja food");
+	},
+	test_deep_global_variable_isolation_as_async: function(callback)
+	{
+		Titanium.page_two_loaded = function()
+		{
+			// Modify the main page version of '$substance'
+			modify_substance();
+			var result = Titanium.get_page_two_substance();
+			if (result == "page two")
+			{
+				callback.passed();
+			}
+			else
+			{
+				callback.failed('$substance should have been "page two" was: ' 
+					+ result);
+			}
+		}
+
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://another.html');
+		w.open();
+
+		setTimeout(function()
+		{
+			callback.failed("Test timed out");
+		}, 2000);
 	}
 });
