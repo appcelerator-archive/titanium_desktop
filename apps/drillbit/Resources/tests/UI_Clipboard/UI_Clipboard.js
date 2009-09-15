@@ -15,7 +15,8 @@ describe("UI.Clipboard",{
 		value_of(data).should_be("blahblah");
 
 		Titanium.UI.Clipboard.setData("text/plain", "");
-		data = Titanium.UI.Clipboard.getData("text/plain");
+		value_of(Titanium.UI.Clipboard.hasText()).should_be_false();
+		var data = Titanium.UI.Clipboard.getData("text/plain");
 		value_of(data).should_be("");
 
 		Titanium.UI.Clipboard.setData("text/plain", "crazy utf8 ‽‽‽ ⸮⸮⸮ woohoo");
@@ -28,12 +29,10 @@ describe("UI.Clipboard",{
 		var data = Titanium.UI.Clipboard.getText();
 		value_of(data).should_be("blahblah");
 
-		try {
 		Titanium.UI.Clipboard.setText("");
+		value_of(Titanium.UI.Clipboard.hasText()).should_be_false();
 		data = Titanium.UI.Clipboard.getText();
 		value_of(data).should_be("");
-		} catch (e)
-		{ alert(e); }
 
 		Titanium.UI.Clipboard.setText("crazy utf8 ‽‽‽ ⸮⸮⸮ woohoo");
 		data = Titanium.UI.Clipboard.getText();
@@ -82,9 +81,6 @@ describe("UI.Clipboard",{
 		value_of(Titanium.UI.Clipboard.hasText()).should_be_false();
 
 		Titanium.UI.Clipboard.setText("");
-		value_of(Titanium.UI.Clipboard.hasText()).should_be_true();
-
-		Titanium.UI.Clipboard.setText("");
-		value_of(Titanium.UI.Clipboard.hasText()).should_be_true();
+		value_of(Titanium.UI.Clipboard.hasText()).should_be_false();
 	},
 });
