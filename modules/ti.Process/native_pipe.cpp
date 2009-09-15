@@ -5,7 +5,9 @@
  */
  
 #include "native_pipe.h"
-#define READ_LOOP_BUFFER_SIZE 1024
+#include <Poco/Timestamp.h>
+#define MILLISECONDS_BETWEEN_READ_FLUSHES 100
+#define MAX_BUFFER_SIZE 512
 
 namespace ti
 {
@@ -108,7 +110,7 @@ namespace ti
 		// keep a local buffer which we'll periodically glob and
 		// push out.
 		std::vector<AutoBlob> buffers;
-		unsigned int currentBuffersLength = 0;
+		Poco::Timestamp lastFlush;
 
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
@@ -118,13 +120,12 @@ namespace ti
 			AutoBlob blob = new Blob(buffer, bytesRead);
 
 			buffers.push_back(blob);
-			currentBuffersLength += blob->Length();
-			if (currentBuffersLength >= READ_LOOP_BUFFER_SIZE)
+			if (lastFlush.elapsed() > MILLISECONDS_BETWEEN_READ_FLUSHES)
 			{
-				AutoBlob glob = Blob::GlobBlobs(buffers);
+				AutoBlob glob(Blob::GlobBlobs(buffers));
 				this->Write(glob);
 				buffers.clear();
-				currentBuffersLength = 0;
+				lastFlush.update();
 			}
 
 			bytesRead = this->RawRead(buffer, length);

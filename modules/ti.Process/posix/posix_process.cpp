@@ -97,7 +97,7 @@ namespace ti
 			for (i = 0; i < envNames->size(); i++)
 			{
 				const char* key = envNames->at(i)->c_str();
-				std::string value = environment->Get(key)->ToString();
+				std::string value(environment->Get(key)->ToString());
 				setenv(key, value.c_str(), 1);
 			}
 

@@ -7,8 +7,6 @@
 #ifndef _NATIVE_PIPE_H_
 #define _NATIVE_PIPE_H_
 
-#define MAX_BUFFER_SIZE 4096
-
 #include "pipe.h"
 #include <kroll/kroll.h>
 #include <Poco/Thread.h>

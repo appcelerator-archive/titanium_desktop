@@ -22,6 +22,7 @@ cwd = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 def log(options,msg):
 	if options.verbose:
 		print msg
+		sys.stdout.flush()
 
 def get_from_tiapp(appdir,name,defv):
 	f = os.path.join(appdir,'tiapp.xml')
