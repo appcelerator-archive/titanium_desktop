@@ -151,6 +151,8 @@ namespace ti
 		 */
 		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
 
+		this->Set("Clipboard", Value::NewObject(new Clipboard()));
+
 		SharedKObject global = host->GetGlobalObject();
 		SharedValue ui_binding_val = Value::NewObject(this);
 		global->Set("UI", ui_binding_val);
