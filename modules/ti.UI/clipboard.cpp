@@ -41,7 +41,8 @@ namespace ti
 		 * @tiapi(method=True,name=UI.Clipboard.setText,since=0.7)
 		 * @tiapi Set the text on the clipboard. This will overwrite
 		 * @tiapi the current contents of the clipboard.
-		 * @tiarg[String, newText] The new clipboard text.
+		 * @tiarg[String, newText] The new clipboard text. If the text is an empty string,
+		 * @tiarg the text portion of the clipboard will be cleared.
 		 */
 		this->SetMethod("setText", &Clipboard::_SetText);
 
@@ -111,7 +112,10 @@ namespace ti
 
 	void Clipboard::SetText(std::string& newText)
 	{
-		this->SetTextImpl(newText);
+		if (newText.empty())
+			this->ClearText();
+		else
+			this->SetTextImpl(newText);
 	}
 
 	std::string& Clipboard::GetText()
