@@ -1566,7 +1566,7 @@ void UserWindow::ReadChooserDialogObject(
 
 void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFileChooserDialog", "m,o?");
+	args.VerifyException("openFileChooserDialog", "m ?o");
 
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
@@ -1601,7 +1601,7 @@ void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue resul
 
 void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFolderChooserDialog", "m,o?");
+	args.VerifyException("openFolderChooserDialog", "m ?o");
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
 	std::string path;
@@ -1635,7 +1635,7 @@ void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue res
 
 void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFolderChooserDialog", "m,o?");
+	args.VerifyException("openFolderChooserDialog", "m ?o");
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
 	std::string path;

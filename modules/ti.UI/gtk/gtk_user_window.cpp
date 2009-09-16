@@ -13,19 +13,6 @@
 extern const guint gtk_major_version;
 extern const guint gtk_minor_version;
 
-namespace
-{
-	/*static*/
-	inline bool GtkVersionSupportsWebViewTransparency()
-	{
-		// This is disabled until issues with
-		// WebKit and RGBA colormaps are solved.
-		return false;
-
-		//return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
-		//	gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
-	}
-}
 namespace ti
 {
 	static gboolean DestroyCallback(GtkWidget*, GdkEvent*, gpointer);
@@ -47,6 +34,7 @@ namespace ti
 	static WebKitWebView* InspectWebViewCallback(WebKitWebInspector*,
 		WebKitWebView*, gpointer);
 	static gboolean InspectorShowWindowCallback(WebKitWebInspector*, gpointer);
+	static inline bool GtkVersionSupportsWebViewTransparency();
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
@@ -85,7 +73,7 @@ namespace ti
 			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
 
 			g_object_connect(G_OBJECT(webView),
-				"signal::window-object-cleared", 
+				"signal::window-object-cleared",
 				G_CALLBACK(WindowObjectClearedCallback), this,
 				"signal::new-window-policy-decision-requested",
 				G_CALLBACK(NewWindowPolicyDecisionCallback), this,
@@ -716,6 +704,16 @@ namespace ti
 		}
 	}
 
+	static inline bool GtkVersionSupportsWebViewTransparency()
+	{
+		// This is disabled until issues with
+		// WebKit and RGBA colormaps are solved.
+		return false;
+
+		//return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
+		//	gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
+	}
+
 	void GtkUserWindow::SetInspectorWindow(GtkWidget* inspectorWindow)
 	{
 		this->inspectorWindow = inspectorWindow;
@@ -1149,42 +1147,61 @@ namespace ti
 		}
 	
 		// Only do this if the menu is actually changing.
-		if (menu.get() != this->activeMenu.get()) {
-			this->RemoveOldMenu();
+		if (menu.get() == this->activeMenu.get())
+			return
 
-			if (!menu.isNull() && this->gtkWindow) {
-				GtkMenuBar* newNativeMenu = GTK_MENU_BAR(menu->CreateNativeBar(true));
-				gtk_box_pack_start(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), FALSE, FALSE, 2);
-				gtk_box_reorder_child(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), 0);
-				gtk_widget_show_all(GTK_WIDGET(newNativeMenu));
-				this->nativeMenu = newNativeMenu;
-			}
-			this->activeMenu = menu;
+		this->RemoveOldMenu();
+		if (!menu.isNull() && this->gtkWindow)
+		{
+			GtkMenuBar* newNativeMenu = GTK_MENU_BAR(menu->CreateNativeBar(true));
+			gtk_box_pack_start(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), FALSE, FALSE, 2);
+			gtk_box_reorder_child(GTK_BOX(this->vbox), GTK_WIDGET(newNativeMenu), 0);
+			gtk_widget_show_all(GTK_WIDGET(newNativeMenu));
+			this->nativeMenu = newNativeMenu;
 		}
+		this->activeMenu = menu;
 	}
 
 	void GtkUserWindow::AppMenuChanged()
 	{
-		if (this->menu.isNull()) {
+		if (this->menu.isNull())
 			this->SetupMenu();
-		}
 	}
 
 	void GtkUserWindow::AppIconChanged()
 	{
-		if (this->iconPath.empty()) {
+		if (this->iconPath.empty())
 			this->SetupIcon();
-		}
 	}
 
-	namespace GtkUserWindowNS
+	namespace
 	{
-		std::string openFilesDirectory = "";
-		SharedValue FileChooserWork(const ValueList& args)
+		enum FileChooserMode
+		{
+			SELECT_FILE,
+			SELECT_FOLDER,
+			SAVE_FILE
+		};
+
+		struct FileChooserJob
+		{
+			GtkWindow* window;
+			SharedKMethod callback;
+			FileChooserMode mode;
+			bool multiple;
+			std::string title;
+			std::string path;
+			std::string defaultName;
+			std::vector<std::string> types;
+			std::string typesDescription;
+		};
+
+		static SharedValue FileChooserWork(const ValueList& args)
 		{
 			void* data = args.at(0)->ToVoidPtr();
 			FileChooserJob* job = static_cast<FileChooserJob*>(data);
 			SharedKList results = new StaticBoundList();
+			static std::string openFilesDirectory("");
 	
 			GtkFileChooserAction action;
 			gchar* actionButton;
@@ -1212,7 +1229,7 @@ namespace ti
 				actionButton, GTK_RESPONSE_ACCEPT,
 				NULL);
 		
-			std::string path = openFilesDirectory;
+			std::string path(openFilesDirectory);
 			if (!job->path.empty())
 			{
 				path = job->path;
@@ -1269,87 +1286,79 @@ namespace ti
 			}
 			catch (ValueException &e)
 			{
-				SharedString ss = e.GetValue()->DisplayString();
-				std::cerr << "openFiles callback failed: " << *ss << std::endl;
+				Logger* logger = Logger::Get("UI.GtkUserWindow");
+				logger->Error("openFiles callback failed: %s", e.ToString().c_str());
 			}
+
+			delete job;
 			return Value::Undefined;
 		}
 	}
-	
-	using GtkUserWindowNS::FileChooserJob;
-	using GtkUserWindowNS::FileChooserMode;
-	void GtkUserWindow::ShowFileChooser(
-		FileChooserMode mode,
-		SharedKMethod callback,
-		bool multiple,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName,
-		std::vector<std::string>& types,
+
+	void GtkUserWindow::OpenFileChooserDialog(SharedKMethod callback,
+		bool multiple, std::string& title, std::string& path,
+		std::string& defaultName, std::vector<std::string>& types,
 		std::string& typesDescription)
 	{
 		FileChooserJob* job = new FileChooserJob;
 		job->window = this->gtkWindow;
 		job->callback = callback;
 		job->title = title;
-		job->host = host;
 		job->multiple = multiple;
 		job->path = path;
 		job->defaultName = defaultName;
 		job->types = types;
 		job->typesDescription = typesDescription;
-		job->mode = mode;
-	
-		// Call this on the main thread -- so that it happens
-		// at the appropriate time in the event loop.
-		SharedKMethod meth =
-			new kroll::KFunctionPtrMethod(&GtkUserWindowNS::FileChooserWork);
+		job->mode = SELECT_FILE;
+
+		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
-		job->host->InvokeMethodOnMainThread(meth, args, false);
-	
+		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenFileChooserDialog(
-		SharedKMethod callback,
-		bool multiple,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName,
-		std::vector<std::string>& types,
-		std::string& typesDescription)
-	{
-		this->ShowFileChooser(
-			GtkUserWindowNS::SELECT_FILE,
-			callback, multiple, title, path, defaultName, types, typesDescription);
-	}
-	
-	void GtkUserWindow::OpenFolderChooserDialog(
-		SharedKMethod callback,
-		bool multiple,
-		std::string& title,
-		std::string& path,
+	void GtkUserWindow::OpenFolderChooserDialog(SharedKMethod callback,
+		bool multiple, std::string& title, std::string& path,
 		std::string& defaultName)
 	{
 		std::vector<std::string> types;
 		std::string typesDescription;
-		this->ShowFileChooser(
-			GtkUserWindowNS::SELECT_FOLDER,
-			callback, multiple, title, path, defaultName, types, typesDescription);
+
+		FileChooserJob* job = new FileChooserJob;
+		job->window = this->gtkWindow;
+		job->callback = callback;
+		job->title = title;
+		job->multiple = multiple;
+		job->path = path;
+		job->defaultName = defaultName;
+		job->types = types;
+		job->typesDescription = typesDescription;
+		job->mode = SELECT_FOLDER;
+
+		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		ValueList args(Value::NewVoidPtr(job));
+		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenSaveAsDialog(
-		SharedKMethod callback,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName,
-		std::vector<std::string>& types,
-		std::string& typesDescription)
+	void GtkUserWindow::OpenSaveAsDialog(SharedKMethod callback,
+		std::string& title, std::string& path, std::string& defaultName,
+		std::vector<std::string>& types, std::string& typesDescription)
 	{
-		this->ShowFileChooser(
-			GtkUserWindowNS::SAVE_FILE,
-			callback, false, title, path, defaultName, types, typesDescription);
+		FileChooserJob* job = new FileChooserJob;
+		job->window = this->gtkWindow;
+		job->callback = callback;
+		job->title = title;
+		job->multiple = false;
+		job->path = path;
+		job->defaultName = defaultName;
+		job->types = types;
+		job->typesDescription = typesDescription;
+		job->mode = SAVE_FILE;
+
+		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		ValueList args(Value::NewVoidPtr(job));
+		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}
-	
+
 	void GtkUserWindow::ShowInspector(bool console)
 	{
 		WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
