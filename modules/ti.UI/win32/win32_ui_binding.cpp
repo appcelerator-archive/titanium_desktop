@@ -344,7 +344,6 @@ namespace ti
 		SharedPtr<Proxy> proxy = ProxyConfig::GetProxyForURL(url);
 		if (!proxy.isNull())
 		{
-			printf("setting proxy\n");
 			// We make a copy of the URI here so that we can  modify it 
 			// without worrying about changing a potentially global one.
 			Poco::URI proxyURI(*proxy->info);
@@ -354,7 +353,6 @@ namespace ti
 			std::string proxyEnv;
 			if (proxyURI.getScheme() == "http")
 			{
-				printf("setting http_proxy=%s\n", proxyURI.toString().c_str());
 				proxyEnv.append("http_proxy=");
 			}
 			else if (proxyURI.getScheme() == "https")
