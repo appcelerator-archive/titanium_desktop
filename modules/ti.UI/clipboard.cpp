@@ -4,6 +4,8 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #include "ui_module.h"
+#include <Poco/StringTokenizer.h>
+using Poco::StringTokenizer;
 
 namespace ti
 {
@@ -68,24 +70,134 @@ namespace ti
 		this->SetMethod("hasText", &Clipboard::_HasText);
 	}
 
+	static Clipboard::DataType MimeTypeToDataType(std::string& mimeType)
+	{
+		transform(mimeType.begin(), mimeType.end(), mimeType.begin(), tolower);
+
+		// Types "URL" and "Text" are for IE compatibility. We want to have
+		// a consistent interface with WebKit's HTML 5 DataTransfer.
+		if (mimeType == "text" || mimeType.find("text/plain") == 0)
+		{
+			return Clipboard::TEXT;
+		}
+		else if (mimeType == "url" || mimeType.find("text/uri-list") == 0)
+		{
+			return Clipboard::URI_LIST;
+		}
+		else if (mimeType.find("image") == 0)
+		{
+			return Clipboard::IMAGE;
+		}
+		else
+		{
+			return Clipboard::UNKNOWN;
+		}
+	}
+
+	static AutoBlob ValueToBlob(SharedValue value)
+	{
+		if (value->IsObject())
+		{
+			AutoBlob blob = value->ToObject().cast<Blob>();
+			if (blob.isNull())
+				blob = new Blob("", 0);
+			return blob;
+		}
+		else if (value->IsString())
+		{
+			const char* data = value->ToString();
+			return new Blob(data, strlen(data));
+		}
+		else
+		{
+			throw ValueException::FromString("Need a Blob or a String");
+		}
+	}
+
+	static std::vector<std::string> ValueToURIList(SharedValue value)
+	{
+		std::vector<std::string> uriList;
+		if (value->IsList())
+		{
+			SharedKList list(value->ToList());
+			for (unsigned int i = 0; i < list->Size(); i++)
+			{
+				SharedValue element(list->At(i));
+				if (element->IsString())
+					uriList.push_back(element->ToString());
+			}
+		}
+		else if (value->IsString())
+		{
+			StringTokenizer tokenizer(value->ToString(), "\n", 
+				StringTokenizer::TOK_TRIM | StringTokenizer::TOK_IGNORE_EMPTY);
+			for (size_t i = 0; i < tokenizer.count(); i++)
+			{
+				uriList.push_back(tokenizer[i]);
+			}
+		}
+		else
+		{
+			throw ValueException::FromString("Need an Array or a newline-delimited String");
+		}
+		return uriList;
+	}
+
 	void Clipboard::_GetData(const ValueList& args, SharedValue result)
 	{
-		// TODO: Support the mime-type parameter.
-		result->SetString(this->GetText());
+		args.VerifyException("getData", "s");
+
+		std::string mimeType(args.GetString(0));
+		DataType type = MimeTypeToDataType(mimeType);
+		if (type == URI_LIST)
+		{
+			result->SetList(StaticBoundList::FromStringVector(this->GetURIList()));
+		}
+		else if (type == IMAGE)
+		{
+			result->SetObject(this->GetImage(mimeType));
+		}
+		else 
+		{
+			result->SetString(this->GetText());
+		}
 	}
 
 	void Clipboard::_SetData(const ValueList& args, SharedValue result)
 	{
-		// TODO: Support the mime-type parameter.
-		args.VerifyException("setData", "s s");
-		std::string newText(args.GetString(1, ""));
-		this->SetText(newText);
+		args.VerifyException("setData", "s s|o|a");
+
+		std::string mimeType(args.GetString(0));
+		DataType type = MimeTypeToDataType(mimeType);
+		if (type == URI_LIST)
+		{
+			std::vector<std::string> uriList(ValueToURIList(args.at(0)));
+			this->SetURIList(uriList);
+		}
+		else if (type == IMAGE)
+		{
+			AutoBlob imageBlob(ValueToBlob(args.at(0)));
+			this->SetImage(mimeType, imageBlob);
+		}
+		else
+		{
+			std::string newText(args.GetString(1, ""));
+			this->SetText(newText);
+		}
 	}
 
 	void Clipboard::_ClearData(const ValueList& args, SharedValue result)
 	{
-		// TODO: Support the mime-type parameter.
-		this->ClearData();
+		args.VerifyException("setData", "?s");
+
+		DataType type = UNKNOWN;
+		if (args.size() > 0)
+		{
+			std::string mimeType(args.GetString(0));
+			type = MimeTypeToDataType(mimeType);
+		}
+
+		this->ClearData(type);
 	}
 
 	void Clipboard::_SetText(const ValueList& args, SharedValue result)
@@ -110,6 +222,28 @@ namespace ti
 		result->SetBool(this->HasText());
 	}
 
+	void Clipboard::ClearData(DataType type)
+	{
+		if (type == TEXT)
+		{
+			this->ClearText();
+		}
+		else if (type == URI_LIST)
+		{
+			this->ClearURIList();
+		}
+		else if (type == IMAGE)
+		{
+			this->ClearImage();
+		}
+		else
+		{
+			this->ClearText();
+			this->ClearURIList();
+			this->ClearImage();
+		}
+	}
+
 	void Clipboard::SetText(std::string& newText)
 	{
 		if (newText.empty())
@@ -125,7 +259,7 @@ namespace ti
 
 	void Clipboard::ClearText()
 	{
-		this->ClearData();
+		this->ClearTextImpl();
 	}
 
 	bool Clipboard::HasText()
@@ -133,10 +267,44 @@ namespace ti
 		return this->HasTextImpl();
 	}
 
-	void Clipboard::ClearData()
+	AutoBlob Clipboard::GetImage(std::string& mimeType)
 	{
-		// TODO: Eventually this should allow clearing based on mime-type.
-		this->ClearDataImpl();
+		return this->GetImageImpl(mimeType);
+	}
+
+	void Clipboard::SetImage(std::string& mimeType, AutoBlob newImage)
+	{
+		this->SetImageImpl(mimeType, newImage);
+	}
+
+	bool Clipboard::HasImage()
+	{
+		return this->HasImageImpl();
+	}
+
+	void Clipboard::ClearImage()
+	{
+		return this->ClearImage();
+	}
+
+	std::vector<std::string>& Clipboard::GetURIList()
+	{
+		return this->GetURIListImpl();
+	}
+
+	void Clipboard::SetURIList(std::vector<std::string>& newURIList)
+	{
+		this->SetURIListImpl(newURIList);
+	}
+
+	bool Clipboard::HasURIList()
+	{
+		return this->HasURIListImpl();
+	}
+
+	void Clipboard::ClearURIList()
+	{
+		this->ClearURIListImpl();
 	}
 }
 

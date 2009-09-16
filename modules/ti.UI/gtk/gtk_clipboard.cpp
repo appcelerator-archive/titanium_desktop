@@ -58,8 +58,46 @@ namespace ti
 		return gtk_clipboard_wait_is_text_available(GetClipboard());
 	}
 
-	void Clipboard::ClearDataImpl()
+	void Clipboard::ClearTextImpl()
 	{
 		gtk_clipboard_clear(GetClipboard());
+	}
+
+	AutoBlob Clipboard::GetImageImpl(std::string& mimeType)
+	{
+		AutoBlob image(0);
+		return image;
+	}
+
+	void Clipboard::SetImageImpl(std::string& mimeType, AutoBlob image)
+	{
+	}
+
+	bool Clipboard::HasImageImpl()
+	{
+		return false;
+	}
+
+	void Clipboard::ClearImageImpl()
+	{
+	}
+
+	std::vector<std::string>& Clipboard::GetURIListImpl()
+	{
+		static std::vector<std::string> uriList;
+		return uriList;
+	}
+
+	void Clipboard::SetURIListImpl(std::vector<std::string>& uriList)
+	{
+	}
+
+	bool Clipboard::HasURIListImpl()
+	{
+		return false;
+	}
+
+	void Clipboard::ClearURIListImpl()
+	{
 	}
 }
