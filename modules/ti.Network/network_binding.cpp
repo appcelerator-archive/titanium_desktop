@@ -415,7 +415,7 @@ namespace ti
 		if (proxy.isNull())
 			result->SetNull();
 		else
-			result->SetString(proxy->info->toString());
+			result->SetString(proxy->info->toString().c_str());
 	}
 
 	void NetworkBinding::SetHTTPSProxy(const ValueList& args, SharedValue result)
@@ -432,7 +432,7 @@ namespace ti
 		if (proxy.isNull())
 			result->SetNull();
 		else
-			result->SetString(proxy->info->toString());
+			result->SetString(proxy->info->toString().c_str());
 	}
 
 	Host* NetworkBinding::GetHost()
