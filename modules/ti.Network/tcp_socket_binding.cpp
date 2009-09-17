@@ -186,17 +186,22 @@ namespace ti
 	}
 	void TCPSocketBinding::OnWrite(const Poco::AutoPtr<WritableNotification>& n)
 	{
-		Poco::Mutex::ScopedLock lock(bufferMutex);
-		if (buffer != "")
+		int count = 0;
+
 		{
-			int count = this->socket.sendBytes(buffer.c_str(),buffer.length());
-			buffer = "";
-			if (!this->onWrite.isNull())
+			Poco::Mutex::ScopedLock lock(bufferMutex);
+			if (!buffer.empty())
 			{
-				ValueList args;
-				args.push_back(Value::NewInt(count));
-				ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
+				count = this->socket.sendBytes(buffer.c_str(), buffer.length());
+				buffer.clear();
 			}
+		}
+
+		if (!this->onWrite.isNull())
+		{
+			ValueList args;
+			args.push_back(Value::NewInt(count));
+			ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
 		}
 		else
 		{
