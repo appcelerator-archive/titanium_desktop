@@ -219,24 +219,25 @@ namespace ti
 		return this->config->GetID();
 	}
 
-	void OSXUserWindow::Close()
+	bool OSXUserWindow::Close()
 	{
 		// Guard against re-closing a window
-		if (active && nativeWindow)
+		if (!this->active || !this->nativeWindow)
+			return false;
+
+		UserWindow::Close();
+
+		// If the window is still active at this point, it  indicates
+		// an event listener has cancelled this close event.
+		if (!this->active)
 		{
-			UserWindow::Close();
-
-			// If the window is still active at this point, it
-			// indicates an event listener has cancelled this close event.
-			if (this->active)
-				return;
-
+			// Actually close the native window and
+			// mark this UserWindow as invalid.
 			this->Closed();
-
-			// Actually close the native window and mark
-			// this UserWindow as invalid.
 			[nativeWindow finishClose];
 		}
+
+		return !this->active;
 	}
 
 	NSScreen* OSXUserWindow::GetWindowScreen()

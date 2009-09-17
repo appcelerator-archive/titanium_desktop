@@ -13,15 +13,12 @@
 #include "irc/irc_client_binding.h"
 #include "http/http_client_binding.h"
 #include "http/http_server_binding.h"
-#include "proxy/proxy.h"
-using kroll::URLUtils;
 
 namespace ti
 {
 	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
 		host(host),modulePath(modulePath),
 		global(host->GetGlobalObject()),
-		proxy(NULL),
 		next_listener_id(0)
 	{
 		SharedValue online = Value::NewBool(true);
@@ -101,20 +98,44 @@ namespace ti
 		this->SetMethod("removeConnectivityListener",&NetworkBinding::RemoveConnectivityListener);
 
 		/**
-		 * @tiapi(method=True,name=Network.setProxy,since=0.2) Sets the proxy parameters of the system
-		 * @tiarg(for=Network.setProxy,name=hostname,type=Number) the proxy hostname
-		 * @tiarg(for=Network.setProxy,name=port,type=String) the proxy port
-		 * @tiarg(for=Network.setProxy,name=username,type=String) the proxy username
-		 * @tiarg(for=Network.setProxy,name=password,type=String) the proxy password
-		 * @tiresult(for=Network.setProxy,type=Boolean) returns true if the new values are accepted, false on error.
+		 * @tiapi(method=True,name=Network.setHTTPProxy,since=0.7)
+		 * @tiapi Override application proxy autodetection with a proxy URL.
+		 * @tiarg[String, hostname] The full proxy hostname.
 		 */
-		this->SetMethod("setProxy",&NetworkBinding::SetProxy);
+		/**
+		 * @tiapi(method=True,name=Network.setProxy,since=0.2, deprecated=True)
+		 * @tiapi Override HTTP application proxy autodetection with a proxy URL.
+		 * @tiarg[String, hostname] The full proxy hostname.
+		 */
+		this->SetMethod("setHTTPProxy", &NetworkBinding::SetHTTPProxy);
+		this->SetMethod("setProxy", &NetworkBinding::SetHTTPProxy);
 
 		/**
-		 * @tiapi(method=True,name=Network.getProxy,since=0.2) Returns the proxy parameters of the system
-		 * @tiresult(for=Network.getProxy,type=Network.Proxy,name=id) a Proxy object
+		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.7) 
+		 * @tiapi Return the proxy override, if one is set.
+		 * @tiresult[String|null] The full proxy override URL or null if none is set.
 		 */
-		this->SetMethod("getProxy",&NetworkBinding::GetProxy);
+		/**
+		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.2,deprecated=True) 
+		 * @tiapi Return the HTTP proxy override, if one is set.
+		 * @tiresult[String|null] The full proxy override URL or null if none is set.
+		 */
+		this->SetMethod("getHTTPProxy", &NetworkBinding::GetHTTPProxy);
+		this->SetMethod("getProxy", &NetworkBinding::GetHTTPProxy);
+
+		/**
+		 * @tiapi(method=True,name=Network.setHTTPSProxy,since=0.7)
+		 * @tiapi Override application proxy autodetection with a proxy URL.
+		 * @tiarg[String, hostname] The full proxy hostname.
+		 */
+		this->SetMethod("setHTTPSProxy", &NetworkBinding::SetHTTPSProxy);
+
+		/**
+		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.7)
+		 * @tiapi Return the proxy override, if one is set.
+		 * @tiresult[String|null] The full proxy override URL or null if none is set.
+		 */
+		this->SetMethod("getHTTPSProxy", &NetworkBinding::GetHTTPSProxy);
 
 		// NOTE: this is only used internally and shouldn't be published
 		this->SetMethod("FireOnlineStatusChange",&NetworkBinding::FireOnlineStatusChange);
@@ -354,35 +375,64 @@ namespace ti
 			throw ValueException::FromString("Could not decodeURIComponent with type passed");
 		}
 	}
-	
-	void NetworkBinding::SetProxy(const ValueList& args, SharedValue result)
-	{
-		std::string hostname = args.at(0)->ToString();
-		std::string port = args.at(1)->ToString();
-		std::string username = args.at(2)->ToString();
-		std::string password = args.at(3)->ToString();
 
-#if defined(OS_WIN32)
-		std::string http_proxy = "http://";
-		http_proxy += username + ":" + password + "@";
-		http_proxy += hostname + ":" + port;
-		int i = ::_putenv_s("HTTP_PROXY", http_proxy.c_str());
-		if(i != 0)
+	static SharedProxy ArgumentsToProxy(const ValueList& args, const std::string& defaultPrefix)
+	{
+		if (args.at(0)->IsNull())
+			return 0;
+
+		std::string host(args.GetString(0));
+		if (host.empty())
+			return 0;
+
+		if (host.find("://") == std::string::npos)
+			host = defaultPrefix + host;
+
+		SharedProxy proxy = new Proxy;
+		try
 		{
-			result->SetBool(false);
+			proxy->info = new Poco::URI(host);
 		}
-#endif
-		
-		// this handles the updating of the reference count for the proxy shared ptr.
-		proxy = new ti::Proxy(hostname, port, username,password);
-		result->SetBool(true);
-  	}
+		catch (...)
+		{
+			throw ValueException::FromFormat("Could not parse proxy URL: %s", host.c_str());
+		}
 
-	void NetworkBinding::GetProxy(const ValueList& args, SharedValue result)
+		return proxy;
+	}
+
+	void NetworkBinding::SetHTTPProxy(const ValueList& args, SharedValue result)
 	{
-		// setObject will return null if the proxy hasn't been configured, so we
-		// don't need a null check here.
-		result->SetObject(this->proxy);
+		args.VerifyException("setHTTPProxy", "s|0 ?s s s");
+		SharedProxy proxy = ArgumentsToProxy(args, "http://");
+		ProxyConfig::SetHTTPProxyOverride(proxy);
+	}
+
+	void NetworkBinding::GetHTTPProxy(const ValueList& args, SharedValue result)
+	{
+		SharedProxy proxy = ProxyConfig::GetHTTPProxyOverride();
+
+		if (proxy.isNull())
+			result->SetNull();
+		else
+			result->SetString(proxy->info->toString().c_str());
+	}
+
+	void NetworkBinding::SetHTTPSProxy(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setHTTPSProxy", "s|0 ?s s s");
+		SharedProxy proxy = ArgumentsToProxy(args, "https://");
+		ProxyConfig::SetHTTPSProxyOverride(proxy);
+	}
+
+	void NetworkBinding::GetHTTPSProxy(const ValueList& args, SharedValue result)
+	{
+		SharedProxy proxy = ProxyConfig::GetHTTPSProxyOverride();
+
+		if (proxy.isNull())
+			result->SetNull();
+		else
+			result->SetString(proxy->info->toString().c_str());
 	}
 
 	Host* NetworkBinding::GetHost()

@@ -8,7 +8,6 @@
 #define _NETWORK_BINDING_H_
 
 #include <kroll/kroll.h>
-#include "proxy/proxy.h"
 
 
 namespace ti
@@ -44,9 +43,9 @@ namespace ti
 		Host* host;
 		std::string modulePath;
 		SharedKObject global;
-		AutoPtr<Proxy> proxy;
 
-		struct Listener {
+		struct Listener
+		{
 			SharedKMethod callback;
 			long id;
 		};
@@ -72,8 +71,10 @@ namespace ti
 		void AddConnectivityListener(const ValueList& args, SharedValue result);
 		void RemoveConnectivityListener(const ValueList& args, SharedValue result);
 		void FireOnlineStatusChange(const ValueList& args, SharedValue result);
-		void SetProxy(const ValueList& args, SharedValue result);
-		void GetProxy(const ValueList& args, SharedValue result);	
+		void SetHTTPProxy(const ValueList& args, SharedValue result);
+		void SetHTTPSProxy(const ValueList& args, SharedValue result);
+		void GetHTTPProxy(const ValueList& args, SharedValue result);
+		void GetHTTPSProxy(const ValueList& args, SharedValue result);
 	};
 }
 

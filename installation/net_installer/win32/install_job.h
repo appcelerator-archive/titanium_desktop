@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 
+using std::string;
+using std::wstring;
+using std::vector;
+
 namespace ti
 {
 	class InstallJob
@@ -11,12 +15,12 @@ namespace ti
 			public:
 			InstallJob(bool isUpdate = false) :
 				isUpdate(isUpdate) {}
-			std::string name;
-			std::string version;
-			std::string url;
+			string name;
+			string version;
+			string url;
 			bool isUpdate;
 
-			static std::vector<InstallJob*> ReadJobs(std::string &filename);
+			static vector<InstallJob*> ReadJobs(wstring &filename);
 	};
 }
 

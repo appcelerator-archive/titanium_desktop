@@ -6,8 +6,7 @@
 #import <Cocoa/Cocoa.h>
 #import "Downloader.h"
 #import <utils.h>
-using KrollUtils::BootUtils;
-using KrollUtils::FileUtils;
+using namespace KrollUtils;
 using KrollUtils::Application;
 using KrollUtils::SharedApplication;
 using KrollUtils::KComponentType;

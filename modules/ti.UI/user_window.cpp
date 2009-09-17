@@ -313,6 +313,13 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("isVisible", &UserWindow::_IsVisible);
 
 	/**
+	 * @tiapi(method=True,name=UI.UserWindow.isActive,since=0.7)
+	 * A UserWindow is active if it has been opened and has not yet been closed.
+	 * @tiresult[Boolean] True if the window is active, false otherwise.
+	 */
+	this->SetMethod("isActive", &UserWindow::_IsActive);
+
+	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setVisible,since=0.2) Sets the visibility of the window
 	 * @tiarg(for=UI.UserWindow.setVisible,type=Boolean,name=visible) true if the window should be visible, false if otherwise
 	 */
@@ -447,7 +454,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 * @tiarg[Boolean, console, optional=True] Open the console along with the inspector (defaults to false).
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
-	
+
 	this->FireEvent(Event::CREATED);
 }
 
@@ -487,19 +494,23 @@ void UserWindow::Open()
 	this->active = true;
 }
 
-void UserWindow::Close()
+bool UserWindow::Close()
 {
 	// If FireEvent returns true, stopPropagation or preventDefault
 	// was not called on the event -- and we should continue closing
 	// the window. Otherwise, we want to cancel the close.
-	if (this->FireEvent(Event::CLOSE))
+	bool shouldProcess = this->FireEvent(Event::CLOSE);
+	if (shouldProcess)
 	{
 		this->active = false; // Prevent further modification.
 	}
+
+	return !this->active;
 }
 
 void UserWindow::Closed()
 {
+	this->config->SetVisible(false);
 	this->FireEvent(Event::CLOSED);
 
 	// Close all children and cleanup
@@ -1288,6 +1299,11 @@ void UserWindow::_IsVisible(const kroll::ValueList& args, kroll::SharedValue res
 	}
 }
 
+void UserWindow::_IsActive(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	result->SetBool(this->active);
+}
+
 void UserWindow::_SetVisible(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	args.VerifyException("setVisible", "b");
@@ -1550,7 +1566,7 @@ void UserWindow::ReadChooserDialogObject(
 
 void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFileChooserDialog", "m,o?");
+	args.VerifyException("openFileChooserDialog", "m ?o");
 
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
@@ -1585,7 +1601,7 @@ void UserWindow::_OpenFileChooserDialog(const ValueList& args, SharedValue resul
 
 void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFolderChooserDialog", "m,o?");
+	args.VerifyException("openFolderChooserDialog", "m ?o");
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
 	std::string path;
@@ -1619,7 +1635,7 @@ void UserWindow::_OpenFolderChooserDialog(const ValueList& args, SharedValue res
 
 void UserWindow::_OpenSaveAsDialog(const ValueList& args, SharedValue result)
 {
-	args.VerifyException("openFolderChooserDialog", "m,o?");
+	args.VerifyException("openFolderChooserDialog", "m ?o");
 	SharedKMethod callback = args.at(0)->ToMethod();
 	bool multiple = false;
 	std::string path;
@@ -1729,15 +1745,11 @@ bool UserWindow::ShouldHaveTitaniumObject(
 		return false;
 	}
 
-	char* cStringURL = KJSUtil::ToChars(locString);
-	string url = cStringURL;
-	free(cStringURL);
-
+	string url(KJSUtil::ToChars(locString));
 	transform(url.begin(), url.end(), url.begin(), tolower);
 	return url.find("app://") == 0 || 
 		url.find("ti://") == 0 ||
 		url.find("file://") == 0;
-
 }
 
 bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)

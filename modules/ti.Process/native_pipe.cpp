@@ -5,9 +5,7 @@
  */
  
 #include "native_pipe.h"
-#define READ_LOOP_BUFFER_SIZE 1024
-//#define READ_LOOP_BUFFER_SIZE 10
-#include <Poco/Stopwatch.h>
+#define MAX_BUFFER_SIZE 512
 
 namespace ti
 {

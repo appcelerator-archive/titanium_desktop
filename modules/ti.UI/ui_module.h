@@ -35,6 +35,7 @@ namespace ti {
 #include "tray_item.h"
 #include "ui_binding.h"
 #include "script_evaluator.h"
+#include "clipboard.h"
 
 #ifdef OS_LINUX
 #include "gtk/ui_module_gtk.h"

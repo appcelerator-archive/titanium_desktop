@@ -518,7 +518,9 @@ void Installer::StartDownloading()
 		this->CreateProgressView();
 		this->SetStage(DOWNLOADING);
 
-		g_thread_init(NULL);
+		if (!g_thread_supported())
+			g_thread_init(NULL);
+
 		this->download_thread =
 			g_thread_create(&download_thread_f, this, TRUE, NULL);
 

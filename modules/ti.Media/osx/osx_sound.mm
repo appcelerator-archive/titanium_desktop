@@ -18,33 +18,33 @@
 namespace ti
 {
 	OSXSound::OSXSound(std::string &url) : 
-		Sound(url), callback(0), sound(0), playing(false), paused(false)
+		Sound(url),
+		callback(0),
+		sound(0),
+		playing(false),
+		paused(false),
+		looping(false)
 	{
-		theurl = [NSURL URLWithString:[NSString stringWithCString:url.c_str() encoding:NSUTF8StringEncoding]];
-		[theurl retain];
+		this->url = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+		[this->url retain];
 		delegate = [[SoundDelegate alloc] initWithSound:this];
 		this->Load();
 	}
+
 	OSXSound::~OSXSound()
 	{
 		this->Unload();
 		[delegate release];
-		[theurl release];
-		
-		if (callback)
-		{
-			delete callback;
-			callback = NULL;
-		}
+		[url release];
 	}
+
 	void OSXSound::Unload()
 	{
 		if (sound)
 		{
 			if (playing)
-			{
-				[sound stop];	
-			}
+				[sound stop];
+
 			[sound setDelegate:nil];
 			[sound release];
 			sound = NULL;
@@ -52,23 +52,27 @@ namespace ti
 			paused = false;
 		}
 	}
+
 	void OSXSound::Load()
 	{
 		this->Unload();
 		@try
 		{
-			sound = [[NSSound alloc] initWithContentsOfURL:theurl byReference:NO];
+			sound = [[NSSound alloc] initWithContentsOfURL:url byReference:NO];
 			[sound setDelegate:delegate];
 		}
 		@catch(NSException *ex)
 		{
-			throw [[ex reason] UTF8String];
+			throw ValueException::FromFormat("Error loading (%s): %s",
+				[[url absoluteString] UTF8String], [[ex reason] UTF8String]);
 		}
 		@catch(...)
 		{
-			throw "error loading media";
+			throw ValueException::FromFormat("Unknown error loading (%s): %s",
+				[[url absoluteString] UTF8String]);
 		}
 	}
+
 	void OSXSound::Play()
 	{
 		if (paused)
@@ -79,12 +83,14 @@ namespace ti
 		playing = true;
 		paused = false;
 	}
+
 	void OSXSound::Pause()
 	{
 		[sound pause];
 		paused = true;
 		playing = false;
 	}
+
 	void OSXSound::Stop()
 	{
 		if (sound && playing)
@@ -94,64 +100,75 @@ namespace ti
 		paused = false;
 		playing = false;
 	}
+
 	void OSXSound::Reload()
 	{
 		this->Load();
 	}
+
 	void OSXSound::SetVolume(double volume)
 	{
-		if ([sound respondsToSelector:@selector(setVolume:)]){
+		// TODO: 10.4 doesn't have setVolume on NSSound.
+		if ([sound respondsToSelector:@selector(setVolume:)])
 			[sound setVolume:volume];
-		}	//TODO: 10.4 doesn't have setVolume on NSSound.
 	}
+
 	double OSXSound::GetVolume()
 	{
-		if ([sound respondsToSelector:@selector(volume)]){
+		// TODO: 10.4 doesn't have volume on NSSound.
+		if ([sound respondsToSelector:@selector(volume)])
 			return [sound volume];
-		}	//TODO: 10.4 doesn't have volume on NSSound.
-		return 0.0;
+		else
+			return 0.0;
 	}
+
 	void OSXSound::SetLooping(bool loop)
 	{
-		if ([sound respondsToSelector:@selector(setLoops:)]){
-			[sound setLoops:loop];
-		}	//TODO: 10.4 doesn't have setLoops on NSSound.
+		this->looping = loop;
 	}
+
 	bool OSXSound::IsLooping()
 	{
-		if ([sound respondsToSelector:@selector(loops)]){
-			return [sound loops];
-		}	//TODO: 10.4 doesn't have loops on NSSound.
-		return false;
+		return looping;
 	}
+
 	bool OSXSound::IsPlaying()
 	{
 		return playing;
 	}
+
 	bool OSXSound::IsPaused()
 	{
 		return paused;
 	}
-	void OSXSound::OnComplete(bool finished)
+
+	void OSXSound::Complete(bool finished)
 	{
-		// this is called from SoundDelegate and it will be 
-		// on the main thread already
+		// this is called from SoundDelegate and it
+		// will be on the main thread already.
 		this->playing = false;
 		this->paused = false;
-		if (this->callback)
+
+		if (!this->callback.isNull())
 		{
-			ValueList args;
-			SharedValue arg = Value::NewBool(finished);
-			args.push_back(arg);
-			(*this->callback)->Call(args);
+			try
+			{
+				this->callback->Call(Value::NewBool(finished));
+			}
+			catch (ValueException& e)
+			{
+				SharedString s = e.GetValue()->DisplayString();
+				Logger::Get("Media.Sound")->Error("onComplete callback failed: %s",
+					s->c_str());
+			}
 		}
+
+		if (this->IsLooping())
+			this->Play();
 	}
+
 	void OSXSound::OnComplete(SharedKMethod callback)
 	{
-		if (this->callback)
-		{
-			delete this->callback;
-		}
-		this->callback = new SharedKMethod(callback);
+		this->callback = callback;
 	}
 }

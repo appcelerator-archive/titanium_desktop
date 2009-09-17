@@ -67,7 +67,7 @@ namespace ti
 			bool IsFullscreen();
 			std::string GetId();
 			void Open();
-			void Close();
+			bool Close();
 			double GetX();
 			void SetX(double x);
 			double GetY();

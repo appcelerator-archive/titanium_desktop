@@ -1,0 +1,18 @@
+<html>
+<head>
+	<title>Another PHP Page</title>
+</head>
+<body>
+	<script type="text/php">
+		$substance = "page two";
+	</script>
+	<script type="text/php">
+		$Titanium->get_page_two_substance = function()
+		{
+			global $substance;
+			return $substance;
+		};
+		$Titanium->page_two_loaded();
+	</script>
+</body>
+</html>

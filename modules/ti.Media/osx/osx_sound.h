@@ -18,13 +18,13 @@ namespace ti
 {
 	class OSXSound : public Sound
 	{
-	public:
+		public:
 		OSXSound(std::string& url);
 		virtual ~OSXSound();
-		
+
 		// called from SoundDelegate callback
-		virtual void OnComplete(bool finished);
-		
+		virtual void Complete(bool finished);
+
 		// API delegates
 		virtual void Play();
 		virtual void Pause();
@@ -38,15 +38,15 @@ namespace ti
 		virtual bool IsPaused();
 		virtual void OnComplete(SharedKMethod callback);
 
-		
-	private:
-		SharedKMethod* callback;
-		NSURL *theurl;
-		NSSound *sound;
+		private:
+		SharedKMethod callback;
+		NSURL* url;
+		NSSound* sound;
 		id delegate;
 		bool playing;
 		bool paused;
-		
+		bool looping;
+
 		void Load();
 		void Unload();
 	};

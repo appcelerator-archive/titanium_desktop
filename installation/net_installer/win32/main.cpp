@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <fcntl.h>
 #include <io.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,9 +30,7 @@ using std::vector;
 using KrollUtils::Application;
 using KrollUtils::SharedApplication;
 using KrollUtils::KComponentType;
-using KrollUtils::FileUtils;
-using KrollUtils::BootUtils;
-using KrollUtils::Win32Utils;
+using namespace KrollUtils;
 
 HINSTANCE mainInstance;
 HICON mainIcon;
@@ -51,12 +50,12 @@ ProgressDialog* progressDialog;
 
 enum IType
 {
-	RUNTIME,
-	MODULE,
-	UPDATE,
-	SDK,
-	MOBILESDK,
-	UNKNOWN
+	CRUNTIME,
+	CMODULE,
+	CUPDATE,
+	CSDK,
+	CMOBILESDK,
+	CUNKNOWN
 };
 
 class Job
@@ -81,6 +80,7 @@ std::wstring ParseQueryParam(string uri8, string key8)
 	std::wstring key = KrollUtils::UTF8ToWide(key8);
 	key+=L"=";
 	size_t pos = uri.find(key);
+	
 	if (pos!=std::wstring::npos)
 	{
 		std::wstring p = uri.substr(pos + key.length());
@@ -200,7 +200,7 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 
 	bool failed = false;
 	CHAR buffer[2048];
-	DWORD dwRead;
+	DWORD bytesRead;
 	DWORD total = 0;
 	wchar_t msg[255];
 	
@@ -238,27 +238,37 @@ bool DownloadURL(HINTERNET hINet, std::string urlA, std::string outFilenameA, st
 	}
 	
 	std::wstring contentLengthStr = SizeString(contentLength);
-	while (InternetReadFile(hRequest, buffer, 2047, &dwRead ) )
+	
+	// Use do/while since the last call to InternetReadFile might actually read bytes
+	do
 	{
-		if (dwRead == 0)
+		if (!InternetReadFile(hRequest, buffer, 2047, &bytesRead))
 		{
-			break;
+			ostr.close();
 		}
+		
 		if (progressDialog->IsCancelled())
 		{
 			failed = true;
 			break;
 		}
-		buffer[dwRead] = '\0';
-		total+=dwRead;
-		ostr.write(buffer, dwRead);
-		progressDialog->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
-		progressDialog->Update(total, contentLength);
-	}
-	ostr.close();
+		
+		if (bytesRead == 0)
+		{
+			break;
+		}
+		else
+		{
+			buffer[bytesRead] = '\0';
+			total += bytesRead;
+			ostr.write(buffer, bytesRead);
+			progressDialog->SetLineText(2,intro + L": " + SizeString(total) + L" of " + contentLengthStr,true);
+			progressDialog->Update(total, contentLength);
+		}
+	} while(true);
+	
 	InternetCloseHandle(hConnection);
 	InternetCloseHandle(hRequest);
-
 	return !failed;
 }
 
@@ -271,21 +281,21 @@ void UnzipProgress(char *message, int current, int total, void *data)
 void Install(IType type, string name, string version, string path)
 {
 	string destination;
-	if (type == MODULE)
+	if (type == CMODULE)
 	{
 		destination = FileUtils::Join(
 			componentInstallPath.c_str(), "modules", OS_NAME, name.c_str(), version.c_str(), NULL);
 	}
-	else if (type == RUNTIME)
+	else if (type == CRUNTIME)
 	{
 		destination = FileUtils::Join(
 			componentInstallPath.c_str(), "runtime", OS_NAME, version.c_str(), NULL);
 	}
-	else if (type == SDK || type == MOBILESDK)
+	else if (type == CSDK || type == CMOBILESDK)
 	{
 		destination = componentInstallPath;
 	}
-	else if (type == UPDATE)
+	else if (type == CUPDATE)
 	{
 		destination = app->path;
 	}
@@ -314,7 +324,7 @@ void ProcessUpdate(HINTERNET hINet)
 	if (downloaded)
 	{
 		progressDialog->SetLineText(2, string("Installing ") + name + "-" + version + "...", true);
-		Install(UPDATE, name, version, path);
+		Install(CUPDATE, name, version, path);
 	}
 }
 
@@ -323,30 +333,32 @@ void ProcessURL(string url, HINTERNET hINet)
 	std::wstring wuuid = ParseQueryParam(url, "uuid");
 	std::wstring wname = ParseQueryParam(url, "name");
 	std::wstring wversion = ParseQueryParam(url, "version");
+	
 	string uuid = KrollUtils::WideToUTF8(wuuid);
 	string name = KrollUtils::WideToUTF8(wname);
 	string version = KrollUtils::WideToUTF8(wversion);
-	IType type = UNKNOWN;
+	
+	IType type = CUNKNOWN;
 
 	string path = "";
 	if (string(RUNTIME_UUID) == uuid)
 	{
-		type = RUNTIME;
+		type = CRUNTIME;
 		path = "runtime-";
 	}
 	else if (string(MODULE_UUID) == uuid)
 	{
-		type = MODULE;
+		type = CMODULE;
 		path = "module-";
 	}
 	else if (string(SDK_UUID) == uuid)
 	{
-		type = SDK;
+		type = CSDK;
 		path = "sdk-";
 	}
 	else if (string(MOBILESDK_UUID) == uuid)
 	{
-		type = MOBILESDK;
+		type = CMOBILESDK;
 		path = "mobilesdk-";
 	}
 	else
@@ -376,7 +388,7 @@ void ProcessURL(string url, HINTERNET hINet)
 
 void ProcessFile(string fullPath)
 {
-	IType type = UNKNOWN;
+	IType type = CUNKNOWN;
 	string name = "";
 	string version = "";
 
@@ -387,22 +399,22 @@ void ProcessFile(string fullPath)
 	std::string partOne = path.substr(0, end);
 	if (partOne == "runtime")
 	{
-		type = RUNTIME;
+		type = CRUNTIME;
 		name = "runtime";
 	}
 	else if (partOne == "sdk")
 	{
-		type = SDK;
+		type = CSDK;
 		name = "sdk";
 	}
 	else if (partOne == "mobilesdk")
 	{
-		type = MOBILESDK;
+		type = CMOBILESDK;
 		name = "mobilesdk";
 	}
 	else if (partOne == "module")
 	{
-		type = MODULE;
+		type = CMODULE;
 		start = end + 1;
 		end = path.find("-", start);
 		name = path.substr(start, end - start);
@@ -429,12 +441,18 @@ bool InstallApplication()
 
 bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 {
+	if (jobs.size() == 0)
+	{
+		return true;	
+	}
+
 	temporaryPath = FileUtils::GetTempDirectory();
+	
 	FileUtils::CreateDirectory(temporaryPath);
 
 	int count = jobs.size();
 	bool success = true;
-
+	
 	// Create our progress indicator class
 	progressDialog->SetTitle(L"Titanium Installer");
 	progressDialog->SetCancelMessage(L"Cancelling, one moment...");
@@ -457,7 +475,6 @@ bool HandleAllJobs(vector<ti::InstallJob*> jobs)
 	{
 		progressDialog->Update(x++, count);
 		ti::InstallJob *job = jobs[i];
-		
 		progressDialog->SetLineText(3, "Downloading: " + job->url, true);
 		if (job->isUpdate)
 		{
@@ -580,6 +597,8 @@ string GetDefaultInstallationDirectory()
 	}
 }
 
+void RedirectIOToConsole();
+
 int WINAPI WinMain(
 	HINSTANCE hInstance,
 	HINSTANCE hPrevInstance,
@@ -595,10 +614,10 @@ int WINAPI WinMain(
 	string jobsFile;
 	bool quiet = false;
 	
-	//DebugBreak();
 	for (int i = 1; i < argc; i++)
 	{
 		string arg = argv[i];
+		
 		if (arg == "-appPath" && argc > i+1)
 		{
 			i++;
@@ -622,12 +641,16 @@ int WINAPI WinMain(
 		{
 			forceInstall = true;
 		}
+		else if (arg == "-debug")
+		{
+			RedirectIOToConsole();
+		}
 		else
 		{
 			jobsFile = arg;
 		}
 	}
-
+	
 	if (appPath.empty() || exePath.empty())
 	{
 		ShowError("The installer was not given enough information to continue.");
@@ -665,16 +688,27 @@ int WINAPI WinMain(
 	{
 		appInstallPath = GetDefaultInstallationDirectory();
 	}
-
+	
+	
 	componentInstallPath = FileUtils::GetSystemRuntimeHomeDirectory();
-
-	jobs = ti::InstallJob::ReadJobs(jobsFile);
+	
+	// Command line arguments from kboot.exe are ANSI encoded, not 100% sure why yet
+	// .. could be ShellExecute
+	std::wstring wideJobsFile = UTILS_NS::MBToWide(jobsFile, jobsFile.length(), CP_ACP);
+	jobs = ti::InstallJob::ReadJobs(wideJobsFile);
 	if (!updateFile.empty())
 	{
 		ti::InstallJob* updateJob = new ti::InstallJob(true);
 		updateJob->name = app->name;
 		updateJob->version = app->version;
 		jobs.push_back(updateJob);
+	}
+	
+	if (jobs.size() == 0)
+	{
+		// Warn if there are no jobs, we still want to copy the app into
+		// it's system location though, right?
+		fprintf(stderr, "WARNING: No jobs were defined for the installer.\n");
 	}
 	
 	// Major WTF here, Redmond.
@@ -720,7 +754,7 @@ int WINAPI WinMain(
 	{
 		doInstall = true;
 	}
-
+	
 	if (doInstall)
 	{
 		progressDialog = new ProgressDialog;
@@ -730,6 +764,7 @@ int WINAPI WinMain(
 			InstallApplication() &&
 			HandleAllJobs(jobs) &&
 			FinishInstallation();
+		
 		CoUninitialize();
 		return success ? 0 : 1;
 	}
@@ -739,3 +774,50 @@ int WINAPI WinMain(
 		return 1;
 	}
 }
+
+static const WORD MAX_CONSOLE_LINES = 500;
+
+void RedirectIOToConsole()
+{
+	int hConHandle;
+	long lStdHandle;
+	CONSOLE_SCREEN_BUFFER_INFO coninfo;
+	FILE *fp;
+
+	// allocate a console for this app
+	AllocConsole();
+
+	// set the screen buffer to be big enough to let us scroll text
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
+	coninfo.dwSize.Y = MAX_CONSOLE_LINES;
+
+	SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
+
+	// redirect unbuffered STDOUT to the console
+	lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+
+	*stdout = *fp;
+	setvbuf( stdout, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDIN to the console
+	lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+
+	fp = _fdopen( hConHandle, "r" );
+	*stdin = *fp;
+	setvbuf( stdin, NULL, _IONBF, 0 );
+
+	// redirect unbuffered STDERR to the console
+	lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
+	hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
+	fp = _fdopen( hConHandle, "w" );
+	*stderr = *fp;
+	setvbuf( stderr, NULL, _IONBF, 0 );
+
+	// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
+	// point to console as well
+	std::ios::sync_with_stdio();
+}
+

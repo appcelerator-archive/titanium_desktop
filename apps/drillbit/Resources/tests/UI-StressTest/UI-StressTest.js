@@ -307,5 +307,75 @@ describe("UI Module Tests",{
 			if (w.height != 400) { callback.failed("height property was not correct"); }
 			callback.passed();
 		}, 250);
+	},
+	test_cancel_close_with_stop_propagation_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var cancel = true;
+		var sawEvent = false;
+		w.addEventListener(Titanium.CLOSE, function(event) {
+			sawEvent = true;
+			if (cancel)
+			{
+				event.stopPropagation();
+			}
+		});
+
+		// Ensure this is after the window is open.
+		w.open();
+		setTimeout(function() {
+			w.close();
+			setTimeout(function () {
+				Titanium.API.debug("here1");
+				if (!sawEvent)
+				{
+					callback.failed("Did not see CLOSE event.");
+				}
+
+				Titanium.API.debug("did see the event");
+				if (w.isActive()) {
+					Titanium.API.debug("window is active");
+					callback.passed();
+				} else {
+					Titanium.API.debug("window is not active");
+					callback.failed("Window close event was not cancelled.");
+				}
+				cancel = false;
+				w.close();
+			}, 250);
+		}, 150);
+	},
+	test_cancel_close_with_prevent_default_as_async: function(callback)
+	{
+		var w = Titanium.UI.getCurrentWindow().createWindow({width: 500, height: 300});
+		var cancel = true;
+		var sawEvent = false;
+		w.addEventListener(Titanium.CLOSE, function(event) {
+			sawEvent = true;
+			if (cancel)
+			{
+				event.preventDefault();
+			}
+		});
+
+		// Ensure this is after the window is open.
+		w.open();
+		setTimeout(function() {
+			w.close();
+			setTimeout(function () {
+				if (!sawEvent)
+				{
+					callback.failed("Did not see CLOSE event.");
+				}
+
+				if (w.isActive()) {
+					callback.passed();
+				} else {
+					callback.failed("Window close event was not cancelled.");
+				}
+				cancel = false;
+				w.close();
+			}, 250);
+		}, 150);
 	}
 });

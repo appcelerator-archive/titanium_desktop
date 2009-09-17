@@ -47,7 +47,7 @@ namespace ti
 		void Focus();
 		void Unfocus();
 		void Open();
-		void Close();
+		bool Close();
 		double GetX();
 		void SetX(double x);
 		double GetY();
@@ -103,7 +103,6 @@ namespace ti
 		Win32WebKitFrameLoadDelegate *frameLoadDelegate;
 		Win32WebKitUIDelegate *uiDelegate;
 		Win32WebKitPolicyDelegate *policyDelegate;
-		Win32WebKitResourceLoadDelegate *resourceLoadDelegate;
 		
 		Bounds restoreBounds;
 		long restoreStyles;

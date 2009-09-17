@@ -96,6 +96,7 @@ namespace ti
 			void _IsCloseable(const kroll::ValueList&, kroll::SharedValue);
 			void _SetCloseable(const kroll::ValueList&, kroll::SharedValue);
 			void _IsVisible(const kroll::ValueList&, kroll::SharedValue);
+			void _IsActive(const kroll::ValueList&, kroll::SharedValue);
 			void _SetVisible(const kroll::ValueList&, kroll::SharedValue);
 			void _GetTransparency(const kroll::ValueList&, kroll::SharedValue);
 			void _SetTransparency(const kroll::ValueList&, kroll::SharedValue);
@@ -155,7 +156,7 @@ namespace ti
 			virtual bool IsFullscreen() = 0;
 			virtual std::string GetId() = 0;
 			virtual void Open();
-			virtual void Close();
+			virtual bool Close();
 			void Closed();
 	
 			virtual double GetX() = 0;

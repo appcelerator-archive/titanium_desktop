@@ -33,18 +33,9 @@ namespace ti
 		SoupSession* session = webkit_get_default_session();
 		soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 
-		char buf[256];
-		snprintf(buf, 256, "%s/%s", PRODUCT_NAME, STRING(PRODUCT_VERSION));
-		g_set_prgname(buf);
-
 		std::string webInspectorPath = host->GetRuntimePath();
 		webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
 		webkit_titanium_set_inspector_url(webInspectorPath.c_str());
-
-		// Tell Titanium what WebKit is using for a user-agent
-		SharedKObject global = host->GetGlobalObject();
-		const gchar* user_agent = webkit_titanium_get_user_agent();
-		global->Set("userAgent", Value::NewString(user_agent));
 	}
 
 	AutoUserWindow GtkUIBinding::CreateWindow(
