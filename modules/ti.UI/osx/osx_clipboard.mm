@@ -3,21 +3,27 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-
 #include "../ui_module.h"
 
 namespace ti
 {
+	NSArray* textTypes = [NSArray arrayWithObjects:
+			NSStringPboardType, NSRTFDPboardType, NSRTFPboardType, nil];
+	NSArray *uriListTypes = [NSArray arrayWithObjects:NSFilenamesPboardType,
+			NSURLPboardType, nil];
+
 	static NSString* GetBestPasteboardTextType()
 	{
-		NSArray *types = [NSArray arrayWithObjects:
-			NSStringPboardType, NSRTFDPboardType, NSRTFPboardType, nil];
-		return [[NSPasteboard generalPasteboard] availableTypeFromArray:types];
+		return [[NSPasteboard generalPasteboard] availableTypeFromArray:textTypes];
+	}
+
+	static NSString* GetBestPasteboardURIListType()
+	{
+		return [[NSPasteboard generalPasteboard] availableTypeFromArray:uriListTypes];
 	}
 
 	Clipboard::~Clipboard()
 	{
-
 	}
 
 	void Clipboard::SetTextImpl(std::string& newText)
@@ -33,8 +39,8 @@ namespace ti
 		// just doing this to do be safe. -- Martin
 		NSAttributedString* attributedString = [[NSAttributedString alloc]
 			initWithString:nsstring];
-		NSData* attributedStringData = [attributedString 
-			RTFFromRange:NSMakeRange(0, [attributedString length]) 
+		NSData* attributedStringData = [attributedString
+			RTFFromRange:NSMakeRange(0, [attributedString length])
 			documentAttributes:nil];
 		[pasteboard setData:attributedStringData forType:NSRTFPboardType];
 	}
@@ -44,6 +50,12 @@ namespace ti
 		static std::string clipboardText;
 		NSString* type = GetBestPasteboardTextType();
 		NSData* data = nil;
+
+		if (!type)
+		{
+			clipboardText = "";
+			return clipboardText;
+		}
 
 		@try
 		{
@@ -88,7 +100,20 @@ namespace ti
 
 	void Clipboard::ClearTextImpl()
 	{
-		[[NSPasteboard generalPasteboard] declareTypes:[NSArray array] owner:nil];
+		NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+		NSArray* types = [pasteboard types];
+
+		// Need to remove all types from the pasteboard, except for
+		// non-text types that we could be potentially leaving there.
+		NSMutableArray* newTypes = [[NSMutableArray alloc] init];
+		for (unsigned int i = 0; i < [types count]; i++)
+		{
+			NSString* type = [types objectAtIndex:i];
+			if ([uriListTypes containsObject:type])
+				[newTypes addObject:type];
+		}
+
+		[pasteboard declareTypes:newTypes owner:nil];
 	}
 
 	AutoBlob Clipboard::GetImageImpl(std::string& mimeType)
@@ -113,19 +138,91 @@ namespace ti
 	std::vector<std::string>& Clipboard::GetURIListImpl()
 	{
 		static std::vector<std::string> uriList;
+		uriList.clear();
+
+		NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+		NSString* type = GetBestPasteboardURIListType();
+		if (type == NSURLPboardType)
+		{
+			NSURL* url = [NSURL URLFromPasteboard:pasteboard];
+			if (url)
+				uriList.push_back([[url absoluteString] UTF8String]);
+		}
+		else
+		{
+			NSArray* filenamesArray = [pasteboard 
+				propertyListForType:NSFilenamesPboardType];
+			if (filenamesArray)
+			{
+				for (unsigned int i = 0; i < [filenamesArray count]; i++)
+				{
+					NSString* filename = [filenamesArray objectAtIndex:i];
+					NSURL* url = [NSURL fileURLWithPath:filename];
+					uriList.push_back([[url absoluteString] UTF8String]);
+				}
+			}
+		}
+
 		return uriList;
 	}
 
 	void Clipboard::SetURIListImpl(std::vector<std::string>& uriList)
 	{
+		bool wroteToURLSlot = false;
+		NSMutableArray* filenamesArray = [[NSMutableArray alloc] init];
+		NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+
+		for (unsigned int i = 0; i < uriList.size(); i++)
+		{
+			NSURL *url = [[NSURL alloc] initWithString:
+				[NSString stringWithUTF8String:uriList[i].c_str()]];
+
+			if (!url)
+				continue;
+
+			// Only write the first available URL to the pasteboard.
+			if (!wroteToURLSlot)
+			{
+				[pasteboard addTypes:[NSArray arrayWithObject:NSURLPboardType] owner:nil];
+				[url writeToPasteboard:pasteboard];
+				wroteToURLSlot = true;
+			}
+
+			if ([url isFileURL])
+			{
+				[filenamesArray addObject:[url path]];
+			}
+		}
+
+		if ([filenamesArray count] > 0)
+		{
+			[pasteboard addTypes:[NSArray arrayWithObject:NSFilenamesPboardType] owner:nil];
+			[pasteboard setPropertyList:filenamesArray forType:NSFilenamesPboardType];
+		}
 	}
 
 	bool Clipboard::HasURIListImpl()
 	{
-		return false;
+		return GetBestPasteboardURIListType() != nil;
 	}
 
 	void Clipboard::ClearURIListImpl()
 	{
+		NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+		NSArray* types = [pasteboard types];
+
+		// Need to remove all types from the pasteboard, except for
+		// non-URI-list types that we could be potentially leaving there.
+		NSMutableArray* newTypes = [[NSMutableArray alloc] init];
+		for (unsigned int i = 0; i < [types count]; i++)
+		{
+			NSString* type = [types objectAtIndex:i];
+			if ([textTypes containsObject:type])
+			{
+				[newTypes addObject:type];
+			}
+		}
+
+		[pasteboard declareTypes:newTypes owner:nil];
 	}
 }
