@@ -5,8 +5,6 @@
  */
  
 #include "native_pipe.h"
-#include <Poco/Timestamp.h>
-#define MILLISECONDS_BETWEEN_READ_FLUSHES 100
 #define MAX_BUFFER_SIZE 512
 
 namespace ti
@@ -104,37 +102,16 @@ namespace ti
 	{
 		this->duplicate();
 
-		// We want to be somewhat conservative here about when
-		// we call this->Write since event handling is inherently
-		// slow (it's synchronous and on the main thread). We'll
-		// keep a local buffer which we'll periodically glob and
-		// push out.
-		std::vector<AutoBlob> buffers;
-		Poco::Timestamp lastFlush;
-
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
+
 		int bytesRead = this->RawRead(buffer, length);
-		while (bytesRead > 0)
+		
+		while(bytesRead > 0)
 		{
 			AutoBlob blob = new Blob(buffer, bytesRead);
-
-			buffers.push_back(blob);
-			if (lastFlush.elapsed() > MILLISECONDS_BETWEEN_READ_FLUSHES)
-			{
-				AutoBlob glob(Blob::GlobBlobs(buffers));
-				this->Write(glob);
-				buffers.clear();
-				lastFlush.update();
-			}
-
+			this->Write(blob);
 			bytesRead = this->RawRead(buffer, length);
-		}
-
-		if (!buffers.empty())
-		{
-			AutoBlob glob = Blob::GlobBlobs(buffers);
-			this->Write(glob);
 		}
 
 		this->CloseNativeRead();
