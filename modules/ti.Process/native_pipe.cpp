@@ -5,6 +5,7 @@
  */
  
 #include "native_pipe.h"
+#define MILLISECONDS_BETWEEN_READ_FLUSHES 2500
 #define MAX_BUFFER_SIZE 512
 
 namespace ti
@@ -106,8 +107,8 @@ namespace ti
 		int length = MAX_BUFFER_SIZE;
 
 		int bytesRead = this->RawRead(buffer, length);
-		
-		while(bytesRead > 0)
+
+		while (bytesRead > 0)
 		{
 			AutoBlob blob = new Blob(buffer, bytesRead);
 			this->Write(blob);

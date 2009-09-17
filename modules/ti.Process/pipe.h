@@ -19,7 +19,7 @@ namespace ti
 
 	class Pipe : public KEventObject
 	{
-	public:
+		public:
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
 		virtual int Write(AutoBlob data);
@@ -31,10 +31,10 @@ namespace ti
 		void Detach(SharedKObject object);
 		bool IsAttached();
 		AutoPipe Clone();
-		static Poco::Mutex eventsMutex;
-		static std::queue<AutoPtr<Event> > events;
+		std::vector<AutoBlob> readData;
+		static void FireEventAsynchronously(AutoPtr<Event> event);
 
-	protected:
+		protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
 		void _Close(const ValueList& args, SharedValue result);
 		void _SetOnClose(const ValueList& args, SharedValue result);
@@ -46,10 +46,6 @@ namespace ti
 		Poco::Mutex attachedMutex;
 		std::vector<SharedKObject> attachedObjects;
 		Logger *logger;
-
-		static void FireEvents();
-		static Poco::ThreadTarget eventsThreadTarget;
-		static Poco::Thread eventsThread;
 	};
 }
 

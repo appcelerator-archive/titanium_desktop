@@ -168,8 +168,7 @@ namespace ti
 		{
 			this->duplicate();
 			AutoPtr<Event> event = new Event(this, Event::EXIT);
-			Poco::Mutex::ScopedLock lock(Pipe::eventsMutex);
-			Pipe::events.push(event);
+			Pipe::FireEventAsynchronously(event);
 		}
 		else
 		{

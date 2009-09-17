@@ -473,7 +473,11 @@ describe("process tests",
 		value_of(p).should_not_be_null();
 		p.setOnRead(function(event)
 		{
-			value_of(p.getExitCode()).should_be(-1);
+			try {
+				value_of(p.getExitCode()).should_be_null();
+			} catch (e) {
+				callback.failed("Exit code was not -1 during an onRead");
+			}
 		});
 		p.setOnExit(function(event)
 		{
