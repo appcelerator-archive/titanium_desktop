@@ -50,6 +50,12 @@ namespace ti
 		 */
 		this->SetMethod("toString",&File::ToString);
 		/**
+		 * @tiapi(method=True,name=Filesystem.File.toString,since=0.7)
+		 * @tiapi Return a string representation of the File object's URL
+		 * @tiresult[String] A string containing the file:// URL to this file.
+		 */
+		this->SetMethod("toURL", &File::ToURL);
+		/**
 		 * @tiapi(method=True,name=Filesystem.File.isFile,since=0.2) Checks whether a File object references a file
 		 * @tiresult(for=Filesystem.File.isFile,type=Boolean) true if the File object references a file, false if otherwise
 		 */
@@ -227,10 +233,17 @@ namespace ti
 		}
 	}
 
+	void File::ToURL(const ValueList& args, SharedValue result)
+	{
+		std::string url(URLUtils::PathToFileURL(this->filename));
+		result->SetString(url.c_str());
+	}
+
 	void File::ToString(const ValueList& args, SharedValue result)
 	{
 		result->SetString(this->filename.c_str());
 	}
+
 	void File::IsFile(const ValueList& args, SharedValue result)
 	{
 		try
