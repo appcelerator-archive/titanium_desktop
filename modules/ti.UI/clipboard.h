@@ -21,10 +21,12 @@ namespace ti
 		void _GetData(const ValueList& args, SharedValue result);
 		void _SetData(const ValueList& args, SharedValue result);
 		void _ClearData(const ValueList& args, SharedValue result);
+		void _HasData(const ValueList& args, SharedValue result);
 		void _GetText(const ValueList& args, SharedValue result);
 		void _SetText(const ValueList& args, SharedValue result);
 		void _ClearText(const ValueList& args, SharedValue result);
 		void _HasText(const ValueList& args, SharedValue result);
+		bool HasData(DataType type);
 		void ClearData(DataType type);
 
 		std::string& GetText();
