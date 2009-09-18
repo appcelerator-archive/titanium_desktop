@@ -31,7 +31,7 @@ describe("Network.HTTPClient",
 	{
 		this.client = null;
 	},
-/*
+
 	test_client_properties:function()
 	{
 		value_of(this.client).should_be_object();
@@ -332,7 +332,9 @@ describe("Network.HTTPClient",
 		this.client.open("GET", this.url);
 		this.client.receive(download_handler);
 	},
-*/
+
+/* TODO: test passes but is very, very slow. Speed it up by pulling file
+         from the local test http server.
 	test_receive_file_as_async: function(callback)
 	{
 		var timer = 0;
@@ -359,5 +361,5 @@ describe("Network.HTTPClient",
 
 		this.client.open("GET", "http://www.ietf.org/rfc/rfc2616.txt");
 		this.client.receive(output_file);
-	},
+	},*/
 });
