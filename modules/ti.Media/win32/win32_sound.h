@@ -34,6 +34,7 @@ namespace ti
 		static bool StaticGraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		private:
+		std::wstring path;
 		IGraphBuilder* graphBuilder;
 		IMediaControl* mediaControl;
 		IMediaEventEx* mediaEventEx;

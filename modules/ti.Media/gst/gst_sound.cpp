@@ -14,6 +14,7 @@ namespace ti
 		Sound(path),
 		pipeline(NULL)
 	{
+		this->Load();
 	}
 
 	void GstSound::LoadImpl()

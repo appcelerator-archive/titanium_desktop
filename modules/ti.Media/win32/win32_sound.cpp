@@ -13,7 +13,7 @@
 namespace ti
 {
 	UINT Win32Sound::graphNotifyMessage = 
-		::RegisterWindowMessage(PRODUCT_NAME"GraphNotify");
+		::RegisterWindowMessage(L"GraphNotifyMediaModule");
 
 	Win32Sound::Win32Sound(std::string &url) :
 		Sound(url),
@@ -50,6 +50,8 @@ namespace ti
 			&Win32Sound::StaticGraphCallback);
 		mediaEventEx->SetNotifyWindow((OAHWND) hwnd, graphNotifyMessage,
 			reinterpret_cast<LONG_PTR>(this));
+
+		this->Load();
 	}
 
 	Win32Sound::~Win32Sound()
@@ -64,7 +66,7 @@ namespace ti
 			mediaSeeking->Release();
 	}
 
-	void Win32Sound::LoadLoadImpl()
+	void Win32Sound::LoadImpl()
 	{
 		if (!graphBuilder)
 			return;
@@ -73,7 +75,7 @@ namespace ti
 		graphBuilder->RenderFile(pathBstr, NULL);
 	}
 
-	void GstSound::UnloadImpl()
+	void Win32Sound::UnloadImpl()
 	{
 	}
 
@@ -85,12 +87,12 @@ namespace ti
 		mediaControl->Run();
 	}
 
-	void Win32Sound::Pause()
+	void Win32Sound::PauseImpl()
 	{
 		if (!mediaControl)
 			return;
 
-		mediaControl->Stop;
+		mediaControl->Stop();
 	}
 
 	void Win32Sound::StopImpl()
@@ -127,7 +129,7 @@ namespace ti
 			if (wvolume < -4000.0)
 				wvolume = -4000.0;
 
-			return 1.0 - (abs(volume) / 4000.0);
+			return 1.0 - (abs(wvolume) / 4000.0);
 		}
 		else
 		{
@@ -147,7 +149,7 @@ namespace ti
 			mediaEventEx->FreeEventParams(code, param1, param2);
 			if ((EC_COMPLETE == code) || (EC_USERABORT == code))
 			{
-				sound->SoundCompletedIteration();
+				this->SoundCompletedIteration();
 			}
 
 			hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0);
