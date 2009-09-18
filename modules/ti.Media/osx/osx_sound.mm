@@ -27,12 +27,15 @@ namespace ti
 	{
 		this->url = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
 		[this->url retain];
-		delegate = [[SoundDelegate alloc] initWithSound:this];
+		delegate = [[SoundDelegate alloc] init];
+		[delegate setOSXSound:this];
 		this->Load();
 	}
 
 	OSXSound::~OSXSound()
 	{
+		[delegate setOSXSound:nil];
+
 		this->Unload();
 		[delegate release];
 		[url release];
