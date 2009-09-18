@@ -134,4 +134,40 @@ describe("UI.Clipboard",{
 		Titanium.UI.Clipboard.clearData("text/uri-list");
 		value_of(Titanium.UI.Clipboard.hasData("text/uri-list")).should_be(false);
 	},
+	test_clipboard_url_data: function()
+	{
+		Titanium.UI.Clipboard.setData("url", "http://www.google.com");
+		var data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("http://www.google.com");
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be(true);
+
+		Titanium.UI.Clipboard.setData("url", "http://www.yahoo.com");
+		data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("http://www.yahoo.com");
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be(true);
+
+		Titanium.UI.Clipboard.setData("url", null);
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be_false();
+		data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("");
+
+		Titanium.UI.Clipboard.setData("url", ["http://www.google.com", "http://www.yahoo.com"]);
+		data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("http://www.google.com");
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be_true();
+
+		Titanium.UI.Clipboard.setData("url", "");
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be_false();
+		data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("");
+	},
+	text_clipboard_clear_url_list: function()
+	{
+		Titanium.UI.Clipboard.setData("url", "http://www.yahoo.com");
+		var data = Titanium.UI.Clipboard.getData("url");
+		value_of(data).should_be("http://www.yahoo.com");
+
+		Titanium.UI.Clipboard.clearData("url");
+		value_of(Titanium.UI.Clipboard.hasData("url")).should_be(false);
+	},
 });
