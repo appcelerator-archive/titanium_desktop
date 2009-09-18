@@ -33,9 +33,6 @@ namespace ti
 		{
 			myurl = URLUtils::PathToFileURL(path);
 		}
-
-		SharedGstSound sound = new GstSound(myurl);
-		GstSound::RegisterSound(sound);
-		return sound;
+		return new GstSound(myurl);
 	}
 }

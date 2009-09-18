@@ -203,7 +203,6 @@ namespace ti
 	void Sound::SetLooping(bool newLooping)
 	{
 		this->looping = newLooping;
-		printf("setting: %i\n", this->looping);
 	}
 
 	bool Sound::IsLooping()
@@ -242,10 +241,8 @@ namespace ti
 	{
 		this->state = END_OF_ITERATION;
 
-		printf("finished an iteration\n");
 		if (!this->callback.isNull())
 		{
-			printf("callback not null\n");
 			try
 			{
 				ValueList args(Value::NewBool(this->IsLooping()));
@@ -259,9 +256,9 @@ namespace ti
 			}
 		}
 
-		printf("looping: %i %i (%i)\n", this->looping, this->state, STOPPED);
 		if (this->IsLooping() && this->state != STOPPED)
 		{
+			this->Stop();
 			this->Play();
 
 			if (this->state == PAUSED)

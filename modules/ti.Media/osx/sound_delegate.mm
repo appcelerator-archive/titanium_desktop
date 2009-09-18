@@ -28,7 +28,6 @@
 
 -(void)sound:(NSSound*)s didFinishPlaying:(BOOL)finished
 {
-	printf("DID FINISH PLAYING\n");
 	//TODO: change to Host method
 	NSNumber *result = [NSNumber numberWithBool:finished];
 	[self performSelectorOnMainThread:@selector(completed:) 
