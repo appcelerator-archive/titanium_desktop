@@ -18,46 +18,27 @@ namespace ti
 {
 	class Win32Sound : public Sound
 	{
-	public:
+		public:
 		Win32Sound(std::string& url);
 		virtual ~Win32Sound();
+		virtual void LoadImpl();
+		virtual void UnloadImpl();
+		virtual void PlayImpl();
+		virtual void PauseImpl();
+		virtual void StopImpl();
+		virtual void SetVolumeImpl(double volume);
+		virtual double GetVolumeImpl();
 
-		virtual void Play();
-		virtual void Pause();
-		virtual void Stop();
-		virtual void Reload();
-		virtual void SetVolume(double volume);
-		virtual double GetVolume();
-		virtual void SetLooping(bool loop);
-		virtual bool IsLooping();
-		virtual bool IsPlaying();
-		virtual bool IsPaused();
-		virtual void OnComplete(SharedKMethod callback);
-
-		void LoadFile();
 		static UINT graphNotifyMessage;
 		bool GraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 		static bool StaticGraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	private:
-		bool looping;
-		SharedKMethod callback;
-		std::string path;
-		enum PlayState {
-			PLAYING,
-			STOPPED,
-			PAUSED
-		} state;
-
+		private:
 		IGraphBuilder* graphBuilder;
 		IMediaControl* mediaControl;
 		IMediaEventEx* mediaEventEx;
 		IMediaSeeking* mediaSeeking;
 		IBasicAudio* basicAudio;
-
-			
-		void Completed();
-		void InitGraphBuilder();
 	};
 }
 

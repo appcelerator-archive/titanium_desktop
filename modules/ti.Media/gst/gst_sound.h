@@ -19,42 +19,19 @@ namespace ti
 
 	class GstSound : public Sound
 	{
-	public:
+		public:
 		GstSound(std::string& url);
-		virtual ~GstSound();
-		
-		virtual void Play();
-		virtual void Load();
-		virtual void Pause();
-		virtual void Stop();
-		virtual void Reload();
-		virtual void SetVolume(double volume);
-		virtual double GetVolume();
-		virtual void SetLooping(bool looping);
-		virtual bool IsLooping();
-		virtual bool IsPlaying();
-		virtual bool IsPaused();
-		virtual void OnComplete(SharedKMethod callback);
-		virtual void Complete();
+		virtual void LoadImpl();
+		virtual void UnloadImpl();
+		virtual void PlayImpl();
+		virtual void PauseImpl();
+		virtual void StopImpl();
+		virtual void SetVolumeImpl(double volume);
+		virtual double GetVolumeImpl();
 
-		static void RegisterSound(SharedGstSound);
-		static void UnregisterSound(GstSound*);
-		static SharedGstSound GetRegisteredSound(GstSound* sound);
-
-	private:
-		SharedKMethod callback;
-		GstElement *pipeline;
-		bool looping;
-
-		enum PlayState {
-			PLAYING,
-			STOPPED,
-			PAUSED
-		} state;
-
-		static std::vector<SharedGstSound> active;
-		static Mutex active_mutex;
-
+		private:
+		GstElement* pipeline;
+		guint watchEventSourceId;
 	};
 }
 

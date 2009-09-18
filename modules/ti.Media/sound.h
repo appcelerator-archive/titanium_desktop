@@ -14,11 +14,10 @@ namespace ti
 {
 	class Sound : public StaticBoundObject
 	{
-	public:
+		public:
 		Sound(std::string& url);
 		virtual ~Sound();
 
-		// bound object API
 		void Play(const ValueList& args, SharedValue result);
 		void Pause(const ValueList& args, SharedValue result);
 		void Stop(const ValueList& args, SharedValue result);
@@ -29,23 +28,37 @@ namespace ti
 		void IsLooping(const ValueList& args, SharedValue result);
 		void IsPlaying(const ValueList& args, SharedValue result);
 		void IsPaused(const ValueList& args, SharedValue result);
-		void OnComplete(const ValueList& args, SharedValue result);
+		void SetOnComplete(const ValueList& args, SharedValue result);
 
-		// main API
-		virtual void Play() = 0;
-		virtual void Pause() = 0;
-		virtual void Stop() = 0;
-		virtual void Reload() = 0;
-		virtual void SetVolume(double volume) = 0;
-		virtual double GetVolume() = 0;
-		virtual void SetLooping(bool loop) = 0;
-		virtual bool IsLooping() = 0;
-		virtual bool IsPlaying() = 0;
-		virtual bool IsPaused() = 0;
-		virtual void OnComplete(SharedKMethod callback) = 0;
-		
-	protected:
+		void Play();
+		void Pause();
+		void Stop();
+		void Reload();
+		void SetVolume(double newVolume);
+		double GetVolume();
+		void SetLooping(bool newLooping);
+		bool IsLooping();
+		bool IsPlaying();
+		bool IsPaused();
+		void SetOnComplete(SharedKMethod newCallback);
+		void Load();
+		void Unload();
+		void SoundCompletedIteration();
+
+		virtual void LoadImpl() = 0;
+		virtual void UnloadImpl() = 0;
+		virtual void PlayImpl() = 0;
+		virtual void PauseImpl() = 0;
+		virtual void StopImpl() = 0;
+		virtual void SetVolumeImpl(double volume) = 0;
+		virtual double GetVolumeImpl() = 0;;
+
+		protected:
+		enum SoundState { PLAYING, PAUSED, STOPPED, END_OF_ITERATION };
+		SoundState state;
 		std::string url;
+		SharedKMethod callback;
+		bool looping;
 	};
 }
 

@@ -17,17 +17,12 @@
 
 namespace ti
 {
-	OSXSound::OSXSound(std::string &url) : 
+	OSXSound::OSXSound(std::string &url) :
 		Sound(url),
-		callback(0),
-		sound(0),
-		playing(false),
-		paused(false),
-		looping(false)
+		sound(nil),
+		delegate([[SoundDelegate alloc] init]),
+		nsurl([[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]] retain])
 	{
-		this->url = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
-		[this->url retain];
-		delegate = [[SoundDelegate alloc] init];
 		[delegate setOSXSound:this];
 		this->Load();
 	}
@@ -35,143 +30,79 @@ namespace ti
 	OSXSound::~OSXSound()
 	{
 		[delegate setOSXSound:nil];
-
-		this->Unload();
+		[sound setDelegate:nil];
 		[delegate release];
-		[url release];
+		[nsurl release];
 	}
 
-	void OSXSound::Unload()
+	void OSXSound::LoadImpl()
 	{
-		if (sound)
-		{
-			if (playing)
-				[sound stop];
-
-			[sound setDelegate:nil];
-			[sound release];
-			sound = NULL;
-			playing = false;
-			paused = false;
-		}
-	}
-
-	void OSXSound::Load()
-	{
-		this->Unload();
 		@try
 		{
-			sound = [[NSSound alloc] initWithContentsOfURL:url byReference:NO];
+			sound = [[NSSound alloc] initWithContentsOfURL:nsurl byReference:NO];
 			[sound setDelegate:delegate];
 		}
 		@catch(NSException *ex)
 		{
 			throw ValueException::FromFormat("Error loading (%s): %s",
-				[[url absoluteString] UTF8String], [[ex reason] UTF8String]);
+				[[nsurl absoluteString] UTF8String], [[ex reason] UTF8String]);
 		}
 		@catch(...)
 		{
 			throw ValueException::FromFormat("Unknown error loading (%s): %s",
-				[[url absoluteString] UTF8String]);
+				[[nsurl absoluteString] UTF8String]);
 		}
 	}
 
-	void OSXSound::Play()
+	void OSXSound::UnloadImpl()
 	{
-		if (paused)
+		if (!sound)
+			return;
+
+		[sound release];
+		sound = nil;
+	}
+
+	void OSXSound::PlayImpl()
+	{
+		if (!sound)
+			return;
+
+		if (this->state == PAUSED)
 			[sound resume];
 		else
 			[sound play];
-
-		playing = true;
-		paused = false;
 	}
 
-	void OSXSound::Pause()
+	void OSXSound::PauseImpl()
 	{
 		[sound pause];
-		paused = true;
-		playing = false;
 	}
 
-	void OSXSound::Stop()
+	void OSXSound::StopImpl()
 	{
-		if (sound && playing)
-		{
-			[sound stop];
-		}
-		paused = false;
-		playing = false;
+		if (!sound)
+			return;
+
+		[sound stop];
 	}
 
-	void OSXSound::Reload()
+	void OSXSound::SetVolumeImpl(double volume)
 	{
-		this->Load();
-	}
+		if (!sound)
+			return;
 
-	void OSXSound::SetVolume(double volume)
-	{
 		// TODO: 10.4 doesn't have setVolume on NSSound.
 		if ([sound respondsToSelector:@selector(setVolume:)])
 			[sound setVolume:volume];
 	}
 
-	double OSXSound::GetVolume()
+	double OSXSound::GetVolumeImpl()
 	{
-		// TODO: 10.4 doesn't have volume on NSSound.
+		// Initialize the sound volume apropriately.
 		if ([sound respondsToSelector:@selector(volume)])
 			return [sound volume];
 		else
-			return 0.0;
-	}
-
-	void OSXSound::SetLooping(bool loop)
-	{
-		this->looping = loop;
-	}
-
-	bool OSXSound::IsLooping()
-	{
-		return looping;
-	}
-
-	bool OSXSound::IsPlaying()
-	{
-		return playing;
-	}
-
-	bool OSXSound::IsPaused()
-	{
-		return paused;
-	}
-
-	void OSXSound::Complete(bool finished)
-	{
-		// this is called from SoundDelegate and it
-		// will be on the main thread already.
-		this->playing = false;
-		this->paused = false;
-
-		if (!this->callback.isNull())
-		{
-			try
-			{
-				this->callback->Call(Value::NewBool(finished));
-			}
-			catch (ValueException& e)
-			{
-				SharedString s = e.GetValue()->DisplayString();
-				Logger::Get("Media.Sound")->Error("onComplete callback failed: %s",
-					s->c_str());
-			}
-		}
-
-		if (this->IsLooping())
-			this->Play();
-	}
-
-	void OSXSound::OnComplete(SharedKMethod callback)
-	{
-		this->callback = callback;
+			return 0;
 	}
 }

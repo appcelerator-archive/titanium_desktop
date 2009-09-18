@@ -38,7 +38,6 @@ describe("ti.Media tests", {
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
 		sound.onComplete(function(){
-			clearTimeout(timer);
 			value_of(sound.isPlaying()).should_be_false();
 			callback.passed();
 		});
@@ -60,13 +59,11 @@ describe("ti.Media tests", {
 			}
 			callback.passed();
 		}, 1000);
-		
+
 		setTimeout(function(){
 			callback.failed("sound onComplete timed out");
 		}, 10000);
 	},
-
-	// We can re-enable this test when looping is implemented on  Win32.
 	test_play_sound_looping_as_async: function(callback)
 	{
 		var timesPlayed = 0;
@@ -78,6 +75,7 @@ describe("ti.Media tests", {
 			timesPlayed = timesPlayed + 1;
 			if (timesPlayed > 1)
 			{
+				sound.stop();
 				callback.passed();
 			}
 		});
@@ -88,11 +86,9 @@ describe("ti.Media tests", {
 			callback.failed("Timeout waiting for sound to loop");
 		}, 4000);
 	},
-
 	test_play_sound_volume_as_async: function(callback)
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
-		var timer = 0;
 		sound.play();
 
 		steps = [
@@ -103,26 +99,30 @@ describe("ti.Media tests", {
 				sound.setVolume(0.5);
 			},
 			function() {
-				if (sound.getVolume() != 0.5) {
-					callback.failed("Could not set volume to 0.5");
+				var volume = sound.getVolume();
+				if (volume != 0.5) {
+					callback.failed("Volume should have been 0.5, but was " + volume);
 				}
 				sound.setVolume(0.25);
 			},
 			function() {
-				if (sound.getVolume() != 0.25) {
-					callback.failed("Could not set volume to 0.5");
+				var volume = sound.getVolume();
+				if (volume != 0.25) {
+					callback.failed("Volume should have been 0.25, but was " + volume);
 				}
 				sound.setVolume(-0.25);
 			},
 			function() {
-				if (sound.getVolume() != 0) {
-					callback.failed("Volume should be 0 was " + sound.getVolume());
+				var volume = sound.getVolume();
+				if (volume != 0) {
+					callback.failed("Volume should have been 0, but was " + volume);
 				}
 				sound.setVolume(100);
 			},
 			function() {
-				if (sound.getVolume() != 1) {
-					callback.failed("Volume should be 1 was " + sound.getVolume());
+				var volume = sound.getVolume();
+				if (volume != 1) {
+					callback.failed("Volume should have been 1, but was " + volume);
 				}
 				sound.stop();
 				callback.passed();
@@ -134,5 +134,45 @@ describe("ti.Media tests", {
 			setTimeout(run_next_test, 250);
 		};
 		setTimeout(run_next_test, 250);
-	}
+	},
+	test_sound_destruction_as_async : function(callback)
+	{
+		// This code at some point caused a crash on OS X because
+		// the intro object would be garbage collected before the
+		// sound was finished.
+		var w = Titanium.UI.createWindow("app://destruction-test.html");
+		w.open();
+		setTimeout(function() { w.close(); callback.passed() }, 1000);
+	},
+	test_looping_stop_as_async: function(callback)
+	{
+		var timesPlayed = 0;
+		var sound = Titanium.Media.createSound("app://short_sound.wav");
+
+		sound.setLooping(true);
+		sound.onComplete(function()
+		{
+			timesPlayed = timesPlayed + 1;
+			if (timesPlayed > 1)
+			{
+				sound.stop();
+				setTimeout(function() {
+					if (sound.isPlaying())
+					{
+						callback.failed("Sound did not stop playing.");
+					}
+					else
+					{
+						callback.passed();
+					}
+				}, 1000);
+			}
+		});
+		sound.play();
+
+		setTimeout(function()
+		{
+			callback.failed("Timeout waiting for sound to loop");
+		}, 4000);
+	},
 });
