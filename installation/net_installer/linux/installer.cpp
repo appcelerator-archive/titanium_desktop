@@ -479,11 +479,13 @@ GtkWidget* Installer::GetApplicationIcon()
 
 void Installer::StartInstallProcess()
 {
-	int choice = gtk_combo_box_get_active(GTK_COMBO_BOX(this->installCombo));
-	if (choice == 0)
-		this->installType = HOMEDIR_INSTALL;
-	else
-		this->installType = SYSTEM_INSTALL;
+	this->installType = HOMEDIR_INSTALL;
+	if (this->installCombo)
+	{
+		int choice = gtk_combo_box_get_active(GTK_COMBO_BOX(this->installCombo));
+		if (choice != 0)
+			this->installType = SYSTEM_INSTALL;
+	}
 
 	// Home directory install or we already have a root-level effective userid
 	if (this->installType == HOMEDIR_INSTALL || geteuid() == 0)
