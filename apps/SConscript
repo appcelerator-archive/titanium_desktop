@@ -66,5 +66,6 @@ build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 
 SConscript('testapp/SConscript')
 SConscript('drillbit/SConscript')
+SConscript('alloy/SConscript')
 
 
