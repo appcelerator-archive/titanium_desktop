@@ -4,9 +4,17 @@
 	var stdout = Titanium.App.stdout;
 	var stdin = Titanium.App.stdin;
 
+	String.prototype.rtrim=function(){return this.replace(/\s+$/,'');}
+	String.prototype.endsWith = function endsWith(pattern)
+	{
+    	var d = this.length - pattern.length;
+    	return d >= 0 && this.lastIndexOf(pattern) === d;
+  	}
+
 	stdout("~~~~~Alloy~~~~~");
 	stdout("Type /<language name> to switch languages");
 	stdout("Supported languages: javascript, python, ruby");
+	stdout("For multi-line blocks of code, use a \\ to continue on a newline");
 	stdout("Type /exit to quit");
 	stdout("");
 
@@ -26,13 +34,12 @@
 		ruby: Titanium.Ruby.evaluate,
 	};
 
-	var running = true;
 	var activeEval = langEvals["javascript"];
 	var activeMime = "text/javascript";
-	var command;
-	while (running)
+	var command = "";
+	while (true)
 	{
-		command = stdin(">>> ");
+		command += stdin(">>> ").rtrim();
 		if (command == "/exit")
 		{
 			break;
@@ -52,6 +59,12 @@
 				stdout("Invalid language: " + lang);
 			}
 		}
+		else if (command.endsWith("\\"))
+		{
+			// multi-line code
+			command = command.substring(0, command.length - 1) + "\n";
+			continue;
+		}
 		else
 		{
 			// evalute it as code
@@ -61,6 +74,7 @@
 				stdout(result);
 			}
 		}
+		command = "";
 	}
 
 	Titanium.App.exit();
