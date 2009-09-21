@@ -99,8 +99,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.receive,since=0.7)
 		 * @tiapi Sends a request to the server and receive data with the provided handler.
-		 * @tiarg[Object, handler] A handler to receive the response data. Can either be
-		 * @tiarg Titanium.Filesystem.File or a method.
+		 * @tiarg[Object, handler] A handler to receive the response data. Can either be Titanium.Filesystem.File or a method.
 		 * @tiarg[Object, data, optional=True] data to send
 		 * @tiresult[Boolean] returns true if request dispatched successfully
 		 */
@@ -339,7 +338,8 @@ namespace ti
 			}
 			else
 			{
-				// TODO: send object properties
+				Logger::Get("Network.HTTPClient")->Error("Unsupported object type");
+                return false;
 			}
 		}
 		else if (sendData->IsString())

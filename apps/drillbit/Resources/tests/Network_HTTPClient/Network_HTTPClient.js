@@ -307,12 +307,13 @@ describe("Network.HTTPClient",
 	{
 		var timer = 0;
 		var text = this.text;
+        var data = "";
 
 		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
 			try
 			{
-				value_of(window.downloaded_data).should_be(text);
+				value_of(data).should_be(text);
 
 				clearTimeout(timer);
 				callback.passed();
@@ -330,36 +331,9 @@ describe("Network.HTTPClient",
 		},5000);
 
 		this.client.open("GET", this.url);
-		this.client.receive(download_handler);
+		this.client.receive(function (payload)
+        {
+	        data += payload;
+        });
 	},
-
-/* TODO: test passes but is very, very slow. Speed it up by pulling file
-         from the local test http server.
-	test_receive_file_as_async: function(callback)
-	{
-		var timer = 0;
-		var output_file = Titanium.Filesystem.createTempFile();
-
-		this.client.addEventListener(Titanium.HTTP_DONE, function()
-		{
-			try
-			{
-				clearTimeout(timer);
-				callback.passed();
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
-		});
-
-		timer = setTimeout(function()
-		{
-			callback.failed('Receive file test timed out');
-		},20000);
-
-		this.client.open("GET", "http://www.ietf.org/rfc/rfc2616.txt");
-		this.client.receive(output_file);
-	},*/
 });
