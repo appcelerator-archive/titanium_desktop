@@ -267,7 +267,7 @@ namespace ti
 
 	void AppBinding::StdErr(const ValueList& args, SharedValue result)
 	{
-		for (size_t c=0; c < args.size(); c++)
+		for (size_t c = 0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
 			if (arg->IsString())
@@ -306,9 +306,10 @@ namespace ti
 
 	void AppBinding::GetStreamURL(const ValueList& args, SharedValue result)
 	{
-		const SharedApplication app = this->host->GetApplication();
+		SharedApplication app = this->host->GetApplication();
+		//std::string url(app->GetStreamURL("https"));
 		std::string stream = app->stream;
-		
+
 		// environment should always override stream setting
 		if (EnvironmentUtils::Has("TITANIUM_STREAM"))
 		{
@@ -338,21 +339,22 @@ namespace ti
 			url+=stream;
 			url+="/v1";
 		}
+
 		for (size_t c = 0; c < args.size(); c++)
 		{
 			SharedValue arg = args.at(c);
 			if (arg->IsString())
 			{
-				url+="/";
-				url+=arg->ToString();
+				url.append("/");
+				url.append(arg->ToString());
 			}
 		}
 		result->SetString(url);
 	}
-	
+
 	void AppBinding::GetIcon(const ValueList& args, SharedValue result)
 	{
-		const SharedApplication app = this->host->GetApplication();
+		SharedApplication app = this->host->GetApplication();
 		result->SetNull();	
 
 		if (app && !app->image.empty())
