@@ -1,12 +1,12 @@
 import BaseHTTPServer
+from Cookie import SimpleCookie
 import time
 
-text = "here is some text for you!"
 reply = "I got it!"
 error = "bad data!"
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-	def send_text(self):
+	def send_text(self, text='here is some text for you!'):
 		self.send_response(200)
 		self.send_header("Content-type", "text/plain")
 		self.send_header("Content-Length", len(text))
@@ -23,6 +23,23 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			print "Redirecting..."
 			self.send_response(301)
 			self.send_header("Location", "http://127.0.0.1:8888/")
+			self.end_headers()
+		elif self.path == "/sendcookie":
+			print "Receiving a cookie..."
+			try:
+				cookies = SimpleCookie(self.headers['Cookie'])
+				value = cookies['peanutbutter'].value
+				if value == 'yummy':
+					self.send_text('got the cookie!')
+				else:
+					raise Exception('Bad cookie! value = %s' % value)
+			except Exception, e:
+				print 'Error! %s' % e
+				self.send_response(400)
+		elif self.path == "/recvcookie":
+			print "Sending a cookie..."
+			self.send_response(200)
+			self.send_header('Set-Cookie', 'chocolatechip=tasty')
 			self.end_headers()
 		else:
 			print "Sending text..."	

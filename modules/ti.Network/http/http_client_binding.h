@@ -11,6 +11,7 @@
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/NameValueCollection.h>
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/Exception.h>
@@ -18,6 +19,7 @@
 #include <Poco/FileStream.h>
 #include <Poco/Runnable.h>
 #include <Poco/Event.h>
+#include "http_cookie.h"
 
 namespace ti
 {
@@ -35,6 +37,8 @@ namespace ti
 		void Receive(const ValueList& args, SharedValue result);
 		void SetRequestHeader(const ValueList& args, SharedValue result);
 		void GetResponseHeader(const ValueList& args, SharedValue result);
+		void SetCookie(const ValueList& args, SharedValue result);
+		void GetCookie(const ValueList& args, SharedValue result);
 		void SetTimeout(const ValueList& args, SharedValue result);
 
 	private:
@@ -54,6 +58,8 @@ namespace ti
 		std::string userAgent;
 		static bool initialized;
 		SharedKMethod outputHandler;
+		Poco::Net::NameValueCollection requestCookies;
+		std::map<std::string, Poco::Net::HTTPCookie> responseCookies;
 
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;

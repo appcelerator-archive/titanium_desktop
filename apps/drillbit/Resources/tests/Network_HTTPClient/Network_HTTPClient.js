@@ -332,8 +332,27 @@ describe("Network.HTTPClient",
 
 		this.client.open("GET", this.url);
 		this.client.receive(function (payload)
-        {
-	        data += payload;
-        });
+		{
+			data += payload;
+		});
+	},
+
+	test_send_cookie: function()
+	{
+		this.client.setCookie("peanutbutter", "yummy");
+		this.client.open("GET", this.url + "sendcookie", false);
+		this.client.send(null);
+		value_of(this.client.status).should_be("200");
+		value_of(this.client.responseText).should_be("got the cookie!");
+	},
+
+	test_recv_cookie: function()
+	{
+		this.client.open("GET", this.url + "recvcookie", false);
+		this.client.send(null);
+		value_of(this.client.status).should_be("200");
+		var cookie = this.client.getCookie("chocolatechip");
+		value_of(cookie).should_be_object();
+		value_of(cookie.value).should_be("tasty")
 	},
 });

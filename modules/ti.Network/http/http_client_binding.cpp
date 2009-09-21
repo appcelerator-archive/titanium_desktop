@@ -113,6 +113,22 @@ namespace ti
 		this->SetMethod("getResponseHeader",&HTTPClientBinding::GetResponseHeader);
 
 		/**
+		 * @tiapi(method=True,name=Network.HTTPClient.setCookie,since=0.7) 
+		 * @tiapi Set a HTTP cookie in the request.
+		 * @tiarg[String,name] the cookie name
+		 * @tiarg[String,value] the cookie value
+		 */
+		this->SetMethod("setCookie",&HTTPClientBinding::SetCookie);
+
+		/**
+		 * @tiapi(method=True,name=Network.HTTPClient.getCookie,since=0.7)
+		 * @tiapi Get a HTTP cookie from the response.
+		 * @tiarg[String,name] name of the cookie to get
+		 * @tiresult[Network.HTTPCookie] a cookie or null if not found
+		 */
+		this->SetMethod("getCookie",&HTTPClientBinding::GetCookie);
+
+		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.setTimeout,since=0.4) Sets the timeout for the request
 		 * @tiarg(for=Network.HTTPClient.setTimeout,type=Number,name=timeout) timeout value in milliseconds
 		 */
@@ -339,7 +355,7 @@ namespace ti
 			else
 			{
 				Logger::Get("Network.HTTPClient")->Error("Unsupported object type");
-                return false;
+				return false;
 			}
 		}
 		else if (sendData->IsString())
@@ -400,6 +416,29 @@ namespace ti
 		}
 		else
 		{
+			result->SetNull();
+		}
+	}
+
+	void HTTPClientBinding::SetCookie(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setCookie", "ss");
+		this->requestCookies.add(args.GetString(0), args.GetString(1));
+	}
+
+	void HTTPClientBinding::GetCookie(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("getCookie", "s");
+		std::string cookieName = args.GetString(0);
+
+		if (this->responseCookies.find(cookieName) != this->responseCookies.end())
+		{
+			SharedKObject cookie = new HTTPCookie(this->responseCookies[cookieName]);
+			result->SetObject(cookie);
+		}
+		else
+		{
+			// No cookie found with that name.
 			result->SetNull();
 		}
 	}
@@ -503,7 +542,9 @@ namespace ti
 				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
 				req.set("User-Agent", this->userAgent.c_str());
 
-				//FIXME: implement cookies
+				// Set cookies
+				req.setCookies(this->requestCookies);
+
 				//FIXME: implement username/pass
 
 				// Set headers
@@ -569,6 +610,25 @@ namespace ti
 					this->FireEvent(Event::HTTP_REDIRECT);
 					continue;
 				}
+
+				// Get cookies
+				this->responseCookies.clear();
+				try
+				{
+					std::vector<Poco::Net::HTTPCookie> cookies;
+					this->response.getCookies(cookies);
+					std::vector<Poco::Net::HTTPCookie>::iterator i;
+					for (i = cookies.begin(); i != cookies.end(); i++)
+					{
+						Poco::Net::HTTPCookie& cookie = *i;
+						this->responseCookies[cookie.getName()] = cookie;
+					}
+				}
+				catch(Poco::Exception& e)
+				{
+					// Probably a bad Set-Cookie header
+					Logger::Get("Network.HTTPClient")->Error("Failed to read cookies");
+				}				
 
 				// Set response status code and text
 				this->Set("status",Value::NewInt(status));
