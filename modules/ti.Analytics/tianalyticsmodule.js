@@ -377,7 +377,7 @@
 	{
 		try
 		{
-			if (initialized === true)
+			if (initialized === true || !event.sameDomain)
 			{
 				return;
 			}

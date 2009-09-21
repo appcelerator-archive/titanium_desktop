@@ -1821,12 +1821,15 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// that loads on a page will follow this same code path.
 	if (IsMainFrame(context, globalObject))
 		this->domWindow = frameGlobal->GetObject("window", 0);
+		
+	bool sameDomain = false;
 
 	// Only certain pages should get the Titanium object. This is to prevent
 	// malicious sites from always getting access to the user's system. This
 	// can be overridden by any other API that calls InsertAPI on this DOM window.
 	if (this->ShouldHaveTitaniumObject(context, globalObject))
 	{
+		sameDomain = true;
 		this->InsertAPI(frameGlobal);
 		UserWindow::LoadUIJavaScript(context);
 	}
@@ -1834,6 +1837,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
 	event->SetObject("scope", frameGlobal);
 	event->SetString("url", config->GetURL());
+	event->SetBool("sameDomain",sameDomain);
 	this->FireEvent(event);
 }
 

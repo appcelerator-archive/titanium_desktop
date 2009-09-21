@@ -18,7 +18,7 @@
 	{
 		try
 		{
-			if (created || Titanium.Database == undefined)
+			if (created || Titanium.Database == undefined || !event.sameDomain)
 			{
 				return;
 			}
