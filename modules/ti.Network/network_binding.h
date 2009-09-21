@@ -63,6 +63,7 @@ namespace ti
 		void CreateIRCClient(const ValueList& args, SharedValue result);
 		void CreateHTTPClient(const ValueList& args, SharedValue result);
 		void CreateHTTPServer(const ValueList& args, SharedValue result);
+		void CreateHTTPCookie(const ValueList& args, SharedValue result);
 		void EncodeURIComponent(const ValueList &args, SharedValue result);
 		void DecodeURIComponent(const ValueList &args, SharedValue result);
 		void _GetByHost(std::string host, SharedValue result);
