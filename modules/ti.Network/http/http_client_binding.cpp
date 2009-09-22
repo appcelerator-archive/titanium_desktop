@@ -250,7 +250,7 @@ namespace ti
 		 
 		/**
 		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onsendstream,since=0.3)
-		 * @tiapi The handler function that will be fired as the stream data is sent
+		 * @tiapi The handler function that will be fired as the stream data is sent.
 		 */
 		this->SetNull("onsendstream");
 		 
@@ -302,6 +302,12 @@ namespace ti
 			this->basicCredentials.setUsername(args.GetString(3));
 			this->basicCredentials.setPassword(args.GetString(4));
 		}
+
+		// Get on*** handler functions
+		this->ondatastream = this->GetMethod("ondatastream");
+		this->onreadystate = this->GetMethod("onreadystatechange");
+		this->onsendstream = this->GetMethod("onsendstream");
+		this->onload = this->GetMethod("onload");
 
 		this->ChangeState(1); // opened
 		result->SetBool(true);
@@ -497,6 +503,34 @@ namespace ti
 	{
 		args.VerifyException("setTimeout", "i");
 		this->timeout = args.GetInt(0);
+	}
+
+	bool HTTPClientBinding::FireEvent(std::string& eventName)
+	{
+		// Must invoke the on*** handler functions
+		if (eventName == Event::HTTP_STATECHANGED && !this->onreadystate.isNull())
+		{
+			ValueList args(Value::NewObject(this));
+			this->host->InvokeMethodOnMainThread(this->onreadystate, args, true);
+
+			if (this->Get("readyState")->ToInt() == 4 && !this->onload.isNull())
+			{
+				args = ValueList(Value::NewObject(this));
+				this->host->InvokeMethodOnMainThread(this->onload, args, true);
+			}
+		}
+		else if (eventName == Event::HTTP_DATASENT && !this->onsendstream.isNull())
+		{
+			ValueList args(Value::NewObject(this));
+			this->host->InvokeMethodOnMainThread(this->onsendstream, args, true);
+		}
+		else if (eventName == Event::HTTP_DATARECV && !this->ondatastream.isNull())
+		{
+			ValueList args(Value::NewObject(this));
+			this->host->InvokeMethodOnMainThread(this->ondatastream, args, true);
+		}
+
+		return KEventObject::FireEvent(eventName);
 	}
 
 	void HTTPClientBinding::ChangeState(int readyState)

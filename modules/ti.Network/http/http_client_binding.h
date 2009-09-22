@@ -44,6 +44,8 @@ namespace ti
 		void GetCookie(const ValueList& args, SharedValue result);
 		void SetTimeout(const ValueList& args, SharedValue result);
 
+		bool FireEvent(std::string& eventName);
+
 	private:
 		Host* host;
 		std::string modulePath;
@@ -62,6 +64,11 @@ namespace ti
 		Poco::Net::NameValueCollection requestCookies;
 		std::map<std::string, Poco::Net::HTTPCookie> responseCookies;
 		Poco::Net::HTTPBasicCredentials basicCredentials;
+
+		SharedKMethod ondatastream;
+		SharedKMethod onreadystate;
+		SharedKMethod onsendstream;
+		SharedKMethod onload;
 
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;
