@@ -75,6 +75,14 @@ namespace ti
 		this->SetMethod("open",&HTTPClientBinding::Open);
 
 		/**
+		 * @tiapi(method=True,name=Network.HTTPClient.setBasicCredentials,since=0.7)
+		 * @tiapi Set the basic authentication credentials
+		 * @tiarg[String,username] username
+ 		 * @tiarg[String,password] password
+		 */
+		this->SetMethod("setBasicCredentials",&HTTPClientBinding::SetBasicCredentials);
+
+		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.setRequestHeader,since=0.3)
 		 * @tiapi Sets a request header for the connection
 		 * @tiarg[String,header] request header name
@@ -119,6 +127,12 @@ namespace ti
 		 * @tiarg[String,value] the cookie value
 		 */
 		this->SetMethod("setCookie",&HTTPClientBinding::SetCookie);
+
+		/**
+		 * @tiapi(method=True,name=Network.HTTPClient.clearCookies,since=0.7)
+		 * @tiapi Clear any cookies set on the request
+		 */
+		this->SetMethod("clearCookies",&HTTPClientBinding::ClearCookies);
 
 		/**
 		 * @tiapi(method=True,name=Network.HTTPClient.getCookie,since=0.7)
@@ -267,6 +281,13 @@ namespace ti
 
 		this->ChangeState(1); // opened
 		result->SetBool(true);
+	}
+
+	void HTTPClientBinding::SetBasicCredentials(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("setBasicCredentials", "ss");
+		this->basicCredentials.setUsername(args.GetString(0));
+		this->basicCredentials.setPassword(args.GetString(1));
 	}
 
 	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
@@ -426,6 +447,11 @@ namespace ti
 		this->requestCookies.add(args.GetString(0), args.GetString(1));
 	}
 
+	void HTTPClientBinding::ClearCookies(const ValueList& args, SharedValue result)
+	{
+		this->requestCookies.clear();
+	}
+
 	void HTTPClientBinding::GetCookie(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("getCookie", "s");
@@ -545,7 +571,8 @@ namespace ti
 				// Set cookies
 				req.setCookies(this->requestCookies);
 
-				//FIXME: implement username/pass
+				// Apply basic auth credentials
+				basicCredentials.authenticate(req);
 
 				// Set headers
 				if (this->headers.size() > 0)

@@ -1,5 +1,6 @@
 import BaseHTTPServer
 from Cookie import SimpleCookie
+import base64
 import time
 
 reply = "I got it!"
@@ -41,6 +42,18 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.send_response(200)
 			self.send_header('Set-Cookie', 'chocolatechip=tasty')
 			self.end_headers()
+		elif self.path == "/basicauth":
+			print "Basic auth..."
+			basic_auth = self.headers['Authorization']
+			if basic_auth.startswith('Basic') is False:
+				raise Exception('Not basic auth!')
+			up = base64.decodestring(basic_auth.replace('Basic', '').strip())
+			username, password = up.split(':')
+			if username == 'test' and password == 'password':
+				print 'Valid: username=%s password=%s' % (username, password)
+				self.send_text('authorized')
+			else:
+				raise Exception('Invalid username/password: %s:%s' % (username, password))
 		else:
 			print "Sending text..."	
 			self.send_text()

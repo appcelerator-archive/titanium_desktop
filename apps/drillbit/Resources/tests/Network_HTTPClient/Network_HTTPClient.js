@@ -355,4 +355,13 @@ describe("Network.HTTPClient",
 		value_of(cookie).should_be_object();
 		value_of(cookie.value).should_be("tasty")
 	},
+
+	test_basic_auth: function()
+	{
+		this.client.setBasicCredentials("test", "password");
+		this.client.open("GET", this.url + "basicauth", false);
+		this.client.send(null);
+		value_of(this.client.status).should_be("200");
+		value_of(this.client.responseText).should_be("authorized");
+	},
 });
