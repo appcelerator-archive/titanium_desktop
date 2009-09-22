@@ -53,8 +53,6 @@ namespace ti
 		Poco::Net::HTTPResponse response;
 		std::string method;
 		bool async;
-		std::string user;
-		std::string password;
 		int timeout;
 		int maxRedirects;
 		int bufferSize;

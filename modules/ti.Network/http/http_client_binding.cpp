@@ -275,8 +275,8 @@ namespace ti
 
 		if (args.size() >= 4)
 		{
-			this->user = args.GetString(3);
-			this->password = args.GetString(4);
+			this->basicCredentials.setUsername(args.GetString(3));
+			this->basicCredentials.setPassword(args.GetString(4));
 		}
 
 		this->ChangeState(1); // opened
