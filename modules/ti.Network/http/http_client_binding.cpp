@@ -235,6 +235,30 @@ namespace ti
 		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
 		this->SetBool("connected", false);
+
+		/**
+		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onreadystatechange,since=0.3)
+		 * @tiapi The handler function that will be fired when the ready-state code of an HTTPClient object changes.
+		 */
+		this->SetNull("onreadystatechange");
+		 
+		/**
+		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.ondatastream,since=0.3)
+		 * @tiapi The handler function that will be fired as stream data is received from an HTTP request
+		 */
+		this->SetNull("ondatastream");
+		 
+		/**
+		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onsendstream,since=0.3)
+		 * @tiapi The handler function that will be fired as the stream data is sent
+		 */
+		this->SetNull("onsendstream");
+		 
+		/**
+		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onload,since=0.7)
+		 * @tiapi The handler function that will be fired when request is completed
+		*/
+		this->SetNull("onload");
 	}
 
 	HTTPClientBinding::~HTTPClientBinding()
