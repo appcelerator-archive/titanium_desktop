@@ -140,7 +140,7 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			callback.failed('Async GET test timed out');
-		},5000);
+		},10000);
 
 		this.client.open("GET", this.url);
 		this.client.send(null);
@@ -170,7 +170,7 @@ describe("Network.HTTPClient",
 		{
 			// We should timeout only after 1 second
 			callback.failed('Timeout test did not timed out');
-		},5000);
+		},10000);
 
 		this.client.setTimeout(1000);
 		this.client.open("GET", this.url + "longrequest");
@@ -253,9 +253,9 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			callback.failed('POST test timed out');
-		},5000);
+		},10000);
 
-		this.client.open("POST", this.url);
+		this.client.open("POST", this.url + "recvpostdata");
 		this.client.send(this.text);
 	},
 
@@ -297,7 +297,7 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			callback.failed('Redirect test timed out');
-		},5000);
+		},10000);
 
 		this.client.open("GET", this.url + "301redirect");
 		this.client.send(null);
@@ -328,7 +328,7 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			callback.failed('Receive text test timed out');
-		},5000);
+		},10000);
 
 		this.client.open("GET", this.url);
 		this.client.receive(function (payload)

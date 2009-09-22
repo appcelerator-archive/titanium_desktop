@@ -7,6 +7,13 @@ reply = "I got it!"
 error = "bad data!"
 
 class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+
+	def error(self, message, status=400):
+		self.send_response(status)
+		self.wfile.write(message)
+		raise Exception('Error %s: %s' % (status, message))
+
+	# Send some text as the response
 	def send_text(self, text='here is some text for you!'):
 		self.send_response(200)
 		self.send_header("Content-type", "text/plain")
@@ -14,67 +21,83 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.end_headers()
 		self.wfile.write(text)
 
-	def do_GET(self):
-		if self.path == "/longrequest":
-			print "Starting long request..."
-			time.sleep(5.0)
-			print "Done with long request sending response..."
-			self.send_text()
-		elif self.path == "/301redirect":
-			print "Redirecting..."
-			self.send_response(301)
-			self.send_header("Location", "http://127.0.0.1:8888/")
-			self.end_headers()
-		elif self.path == "/sendcookie":
-			print "Receiving a cookie..."
-			try:
-				cookies = SimpleCookie(self.headers['Cookie'])
-				value = cookies['peanutbutter'].value
-				if value == 'yummy':
-					self.send_text('got the cookie!')
-				else:
-					raise Exception('Bad cookie! value = %s' % value)
-			except Exception, e:
-				print 'Error! %s' % e
-				self.send_response(400)
-		elif self.path == "/recvcookie":
-			print "Sending a cookie..."
-			self.send_response(200)
-			self.send_header('Set-Cookie', 'chocolatechip=tasty')
-			self.end_headers()
-		elif self.path == "/basicauth":
-			print "Basic auth..."
-			basic_auth = self.headers['Authorization']
-			if basic_auth.startswith('Basic') is False:
-				raise Exception('Not basic auth!')
-			up = base64.decodestring(basic_auth.replace('Basic', '').strip())
-			username, password = up.split(':')
-			if username == 'test' and password == 'password':
-				print 'Valid: username=%s password=%s' % (username, password)
-				self.send_text('authorized')
+	# Long request -- delay the response
+	def long_request(self):
+		print "Starting long request..."
+		time.sleep(5.0)
+		print "Done with long request sending response..."
+		self.send_text()
+
+	# Issue a 301 redirect
+	def redirect_301(self):
+		print "Redirecting..."
+		self.send_response(301)
+		self.send_header("Location", "http://127.0.0.1:8888/")
+		self.end_headers()
+
+	# Send a cookie
+	def send_cookie(self):
+		print "Receiving a cookie..."
+		try:
+			cookies = SimpleCookie(self.headers['Cookie'])
+			value = cookies['peanutbutter'].value
+			if value == 'yummy':
+				self.send_text('got the cookie!')
 			else:
-				raise Exception('Invalid username/password: %s:%s' % (username, password))
+				self.error('Invalid cookie: value=%s' % value)
+		except Exception, e:
+			self.error('Error while parsing cookie header: %s' % e)
+
+	# Receive a cookie from client
+	def recv_cookie(self):
+		print "Sending a cookie..."
+		self.send_response(200)
+		self.send_header('Set-Cookie', 'chocolatechip=tasty')
+		self.end_headers()
+
+	# Verify basic auth credentials
+	def basic_auth(self):
+		print "Basic auth..."
+		basic_auth = self.headers['Authorization']
+		if basic_auth.startswith('Basic') is False:
+			self.error('Not basic auth header')
+		up = base64.decodestring(basic_auth.replace('Basic', '').strip())
+		username, password = up.split(':')
+		if username == 'test' and password == 'password':
+			print 'Valid: username=%s password=%s' % (username, password)
+			self.send_text('authorized')
 		else:
-			print "Sending text..."	
-			self.send_text()
+			self.error('Invalid username/password: %s:%s' % (username, password))
+
+	def recv_post_data(self):
+		print 'Receiving post data...'
+		if self.command != 'POST':
+			self.error('Not a POST request')
+		if self.headers.has_key('content-length') is False:
+			self.error('Missing content length')
+		length= int( self.headers['content-length'] )
+		data = self.rfile.read(length)
+		print "Got data: %s" % data
+		if data == 'here is some text for you!':
+			self.send_text('I got it!')
+		else:
+			self.error('Invalid data: %s' % data)
+
+	def do_GET(self):
+		self.urls[self.path](self)
 
 	def do_POST(self):
-		if self.headers.has_key('content-length'):
-			length= int( self.headers['content-length'] )
-			data = self.rfile.read(length)
-			print "Got data: %s" % data
-			if data == text:
-				self.send_response(200)
-				self.send_header("Content-type", "text/plain")
-				self.send_header("Content-Length", len(reply))
-				self.end_headers()
-				self.wfile.write(reply)
-				return
-		self.send_response(400)
-		self.send_header("Content-type", "text/plain")
-		self.send_header("Content-Length", len(error))
-		self.end_headers()
-		self.wfile.write(error)
+		self.urls[self.path](self)
+
+	urls = {
+		'/': send_text,
+		'/longrequest': long_request,
+		'/301redirect': redirect_301,
+		'/sendcookie': send_cookie,
+		'/recvcookie': recv_cookie,
+		'/basicauth': basic_auth,
+		'/recvpostdata': recv_post_data,
+	}
 
 if __name__ == '__main__':
 	print 'starting.......'
