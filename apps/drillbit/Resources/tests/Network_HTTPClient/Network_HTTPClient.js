@@ -374,4 +374,60 @@ describe("Network.HTTPClient",
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("Got the file!");
 	},
+
+	test_handlers_as_async: function(callback)
+	{
+		var text = this.text;
+
+		var onreadystatechange = false;
+		var ondatastream = false;
+
+		this.client.onreadystatechange = function()
+		{
+			try
+			{
+				onreadystatechange = true;
+				value_of(this.readyState).should_be_number();
+				value_of(this.readyState >= 1 && this.readyState <= 4).should_be_true();
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+		}
+		this.client.ondatastream = function()
+		{
+			try
+			{
+				ondatastream = true;
+				value_of(this.dataReceived).should_be(text.length);
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+		}
+		this.client.onload = function()
+		{
+			try
+			{
+				onload = true;
+				value_of(this.readyState).should_be("4");
+				value_of(this.status).should_be("200");
+				value_of(this.responseText).should_be(text);
+
+				value_of(onreadystatechange).should_be_true();
+				value_of(ondatastream).should_be_true();
+
+				callback.passed();
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+		}
+
+		this.client.open("GET", this.url);
+		this.client.send();
+	},
 });
