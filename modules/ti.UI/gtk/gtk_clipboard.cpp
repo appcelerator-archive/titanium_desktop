@@ -77,9 +77,7 @@ namespace ti
 				return;
 
 			if (this->text)
-			{
 				gtk_target_list_add_text_targets(list, ClipboardPrivate::TEXT_DATA);
-			}
 
 			if (this->uris)
 				gtk_target_list_add_uri_targets(list, ClipboardPrivate::URI_LIST_DATA);
@@ -170,11 +168,8 @@ namespace ti
 	{
 		static std::string clipboardText;
 
-		printf("getting text\n");
 		if (this->HasText())
 		{
-			printf("has text passed\n");
-			// TODO: It might make sense to do this asynchronously.
 			gchar* clipboardChars = gtk_clipboard_wait_for_text(GetClipboard());
 			if (!clipboardChars)
 			{
