@@ -8,11 +8,13 @@
 #define _HTTP_CLIENT_BINDING_H_
 
 #include <kroll/kroll.h>
+
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/Net/HTTPBasicCredentials.h>
+#include <Poco/Buffer.h>
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/Exception.h>
@@ -20,6 +22,7 @@
 #include <Poco/FileStream.h>
 #include <Poco/Runnable.h>
 #include <Poco/Event.h>
+
 #include "http_cookie.h"
 
 namespace ti
@@ -50,6 +53,7 @@ namespace ti
 		Host* host;
 		std::string modulePath;
 		SharedKObject global;
+		Poco::Buffer<char> buffer;
 		std::string url;
 		std::map<std::string,std::string> headers;
 		Poco::Net::HTTPResponse response;
@@ -57,10 +61,10 @@ namespace ti
 		bool async;
 		int timeout;
 		int maxRedirects;
-		int bufferSize;
 		std::string userAgent;
 		static bool initialized;
 		SharedKMethod outputHandler;
+		SharedPtr<Poco::Net::HTTPClientSession> session;
 		Poco::Net::NameValueCollection requestCookies;
 		std::map<std::string, Poco::Net::HTTPCookie> responseCookies;
 		Poco::Net::HTTPBasicCredentials basicCredentials;
@@ -86,6 +90,10 @@ namespace ti
 		void ChangeState(int readyState);
 		void Reset();
 		void InitHTTPS();
+		void PrepareSession(Poco::URI uri);
+		void SendRequestBody(std::ostream& out);
+		void ReceiveResponseBody(std::istream& in, int responseLength);
+		void GetCookies();
 	};
 }
 

@@ -14,7 +14,6 @@
 #include <sstream>
 #include <fstream>
 #include "../network_binding.h"
-#include <Poco/Buffer.h>
 #include <Poco/Net/MultipartWriter.h>
 #include <Poco/Net/MessageHeader.h>
 #include <Poco/Net/FilePartSource.h>
@@ -49,10 +48,10 @@ namespace ti
 		host(host),
 		modulePath(path),
 		global(host->GetGlobalObject()),
+		buffer(8192),
 		async(true),
 		timeout(30000),
 		maxRedirects(5),
-		bufferSize(8192),
 		userAgent(PRODUCT_NAME"/"STRING(PRODUCT_VERSION)),
 		thread(0),
 		contentLength(0),
@@ -466,6 +465,15 @@ namespace ti
 		return KEventObject::FireEvent(eventName);
 	}
 
+	void HTTPClientBinding::run()
+	{
+		// We need this binding to stay alive at least until we have
+		// finished this thread.
+		this->duplicate();
+		this->ExecuteRequest();
+		this->release();
+	}
+
 	bool HTTPClientBinding::BeginRequest(SharedValue sendData)
 	{
 		Logger* log = Logger::Get("Network.HTTPClient");
@@ -568,7 +576,10 @@ namespace ti
 
 	void HTTPClientBinding::InitHTTPS()
 	{
-		HTTPClientBinding::initialized = true;
+		static bool initialized = false;
+		if (initialized)
+			return;
+
 		SharedPtr<Poco::Net::InvalidCertificateHandler> cert = 
 			new Poco::Net::AcceptCertificateHandler(false); 
 		std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
@@ -580,15 +591,125 @@ namespace ti
 			9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 		);
 		Poco::Net::SSLManager::instance().initializeClient(0, cert, context);
+		initialized = true;
 	}
 
-	void HTTPClientBinding::run()
+	void HTTPClientBinding::PrepareSession(Poco::URI uri)
 	{
-		// We need this binding to stay alive at least until we have
-		// finished this thread.
-		this->duplicate();
-		this->ExecuteRequest();
-		this->release();
+		// Create the session
+		const std::string& scheme = uri.getScheme();
+		if (scheme=="https")
+		{
+			this->InitHTTPS();
+			this->session = new Poco::Net::HTTPSClientSession(
+					uri.getHost(), uri.getPort());
+		}
+		else if (scheme=="http")
+		{
+			this->session = new Poco::Net::HTTPClientSession(
+					uri.getHost(), uri.getPort());
+		}
+
+		// Setup proxy settings			
+		std::string uriString = uri.toString();
+		SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
+		if (!proxy.isNull())
+		{
+			session->setProxyHost(proxy->info->getHost());
+			session->setProxyPort(proxy->info->getPort());
+		}
+
+		// Set timeout
+		Poco::Timespan to(0L, (long)this->timeout * 1000);
+		session->setTimeout(to);
+	}
+
+	void HTTPClientBinding::SendRequestBody(std::ostream& out)
+	{
+		int dataSent = 0;
+		int readSize = 0;
+
+		while (!this->datastream->eof())
+		{
+			this->datastream->read(this->buffer.begin(), this->buffer.size());
+			readSize = this->datastream->gcount();
+			if (readSize <= 0)
+				break;
+
+			out.write(this->buffer.begin(), readSize);
+			dataSent += readSize;
+			this->SetInt("dataSent", dataSent);
+			this->FireEvent(Event::HTTP_DATASENT);
+		}
+	}
+
+	void HTTPClientBinding::ReceiveResponseBody(std::istream& in, int responseLength)
+	{
+		int dataReceived = 0;
+		int readSize = 0;
+
+		while(dataReceived < responseLength)
+		{
+			if (this->abort.tryWait(0))
+			{
+				this->FireEvent(Event::HTTP_ABORT);
+				return;
+			}
+
+			in.read(buffer.begin(), buffer.size());
+			readSize = in.gcount();
+			if (readSize <= 0)
+				break;
+
+			if (this->outstream)
+			{
+				this->outstream->write(buffer.begin(), readSize);
+			}
+			else
+			{
+				// Pass data to handler on main thread
+				std::string data(buffer.begin(), readSize);
+				this->host->InvokeMethodOnMainThread(
+					this->outputHandler,
+					ValueList(Value::NewString(data))
+				);
+			}
+
+			dataReceived += readSize;
+			this->SetInt("dataReceived", dataReceived);
+			this->FireEvent(Event::HTTP_DATARECV);
+		}
+
+		// Set response text if no handler is set
+		if (this->outstream)
+		{
+			std::string data = this->outstream->str();
+			if (!data.empty())
+			{
+				this->SetString("responseText", data);
+			}
+		}
+	}
+
+	void HTTPClientBinding::GetCookies()
+	{
+		this->responseCookies.clear();
+		try
+		{
+			std::vector<Poco::Net::HTTPCookie> cookies;
+			this->response.getCookies(cookies);
+			std::vector<Poco::Net::HTTPCookie>::iterator i;
+			for (i = cookies.begin(); i != cookies.end(); i++)
+			{
+				Poco::Net::HTTPCookie& cookie = *i;
+				this->responseCookies[cookie.getName()] = cookie;
+			}
+		}
+		catch(Poco::Exception& e)
+		{
+			// Probably a bad Set-Cookie header
+			Logger::Get("Network.HTTPClient")->Error("Failed to read cookies");
+		}	
 	}
 
 	void HTTPClientBinding::ExecuteRequest()
@@ -601,52 +722,25 @@ namespace ti
 		try
 		{
 			for (int x = 0; x < this->maxRedirects; x++)
-			{			
-				// Create HTTP session
-				SharedPtr<Poco::Net::HTTPClientSession> session;
+			{
 				Poco::URI uri(this->url);
-				const std::string& scheme = uri.getScheme();
-				if (scheme=="https")
-				{
-					if (HTTPClientBinding::initialized==false)
-					{
-						this->InitHTTPS();
-					}
-					session = new Poco::Net::HTTPSClientSession(uri.getHost(), uri.getPort());
-				}
-				else if (scheme=="http")
-				{
-					session = new Poco::Net::HTTPClientSession(uri.getHost(), uri.getPort());
-				}
 
-				// Setup proxy settings			
-				std::string uriString = uri.toString();
-				SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
-				if (!proxy.isNull())
-				{
-					session->setProxyHost(proxy->info->getHost());
-					session->setProxyPort(proxy->info->getPort());
-				}
-
-				// Set timeout
-				Poco::Timespan to(0L, (long)this->timeout * 1000);
-				session->setTimeout(to);
-
-				// Get path
+				// Prepare the HTTP session
+				this->PrepareSession(uri);
+				
+				// Get request path
 				std::string path(uri.getPathAndQuery());
 				if (path.empty()) 
-				{
 					path = "/";
-				}
 
-				// Prep the request
+				// Prepare the request
 				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
 				req.set("User-Agent", this->userAgent.c_str());
 
 				// Set cookies
 				req.setCookies(this->requestCookies);
 
-				// Apply basic auth credentials
+				// Apply basic authentication credentials
 				basicCredentials.authenticate(req);
 
 				// Set headers
@@ -661,38 +755,18 @@ namespace ti
 				}
 
 				// Set content length
-				std::ostringstream l(std::ios::binary | std::ios::out);
-				l << this->contentLength;
-				req.set("Content-Length",l.str());
-
-				// Allocate buffer
-				Poco::Buffer<char> buffer(this->bufferSize);
+				// FIXME: we should almost have a standard int -> string conversion
+				// method that is re-useable else where in the code base.
+				std::ostringstream contentLengthStr(std::ios::binary | std::ios::out);
+				contentLengthStr << this->contentLength;
+				req.set("Content-Length", contentLengthStr.str());
 
 				// Send request and grab an output stream to send body
 				std::ostream& out = session->sendRequest(req);
 
 				// Output request body if we have data to send
 				if (this->contentLength > 0)
-				{
-					int dataSent = 0;
-					int readSize = 0;
-					while (!this->datastream->eof())
-					{
-						this->datastream->read(buffer.begin(), buffer.size());
-						readSize = this->datastream->gcount();
-						if (readSize > 0)
-						{
-							out.write(buffer.begin(), readSize);
-							dataSent += readSize;
-							this->SetInt("dataSent", dataSent);
-							this->FireEvent(Event::HTTP_DATASENT);
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
+					this->SendRequestBody(out);
 
 				// Get the response
 				std::istream& in = session->receiveResponse(this->response);
@@ -713,24 +787,8 @@ namespace ti
 					continue;
 				}
 
-				// Get cookies
-				this->responseCookies.clear();
-				try
-				{
-					std::vector<Poco::Net::HTTPCookie> cookies;
-					this->response.getCookies(cookies);
-					std::vector<Poco::Net::HTTPCookie>::iterator i;
-					for (i = cookies.begin(); i != cookies.end(); i++)
-					{
-						Poco::Net::HTTPCookie& cookie = *i;
-						this->responseCookies[cookie.getName()] = cookie;
-					}
-				}
-				catch(Poco::Exception& e)
-				{
-					// Probably a bad Set-Cookie header
-					Logger::Get("Network.HTTPClient")->Error("Failed to read cookies");
-				}				
+				// Get cookies from response
+				this->GetCookies();			
 
 				// Set response status code and text
 				this->Set("status",Value::NewInt(status));
@@ -741,60 +799,7 @@ namespace ti
 
 				// Receive data from response
 				if (responseLength > 0)
-				{
-					bool aborted = false;
-					int dataReceived = 0;
-					int readSize = 0;
-					while(dataReceived < responseLength)
-					{
-						if (this->abort.tryWait(0))
-						{
-							aborted = true;
-							this->FireEvent(Event::HTTP_ABORT);
-							break;
-						}
-
-						in.read(buffer.begin(), buffer.size());
-						readSize = in.gcount();
-						if (readSize > 0)
-						{
-							if (this->outstream)
-							{
-								this->outstream->write(buffer.begin(), readSize);
-							}
-							else
-							{
-								// Pass data to handler on main thread
-								std::string data(buffer.begin(), readSize);
-								this->host->InvokeMethodOnMainThread(
-									this->outputHandler,
-									ValueList(Value::NewString(data))
-								);
-							}
-
-							dataReceived += readSize;
-							this->SetInt("dataReceived", dataReceived);
-							this->FireEvent(Event::HTTP_DATARECV);
-						}
-						else
-						{
-							break;
-						}
-					}
-
-					if (!aborted)
-					{
-						// Set response text if no handler set
-						if (this->outstream)
-						{
-							std::string data = this->outstream->str();
-							if (!data.empty())
-							{
-								this->SetString("responseText", data);
-							}
-						}
-					}
-				}
+					this->ReceiveResponseBody(in, responseLength);
 
 				this->FireEvent(Event::HTTP_DONE);
 				break;
