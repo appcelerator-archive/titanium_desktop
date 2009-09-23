@@ -568,7 +568,6 @@ namespace ti
 
 	void HTTPClientBinding::InitHTTPS()
 	{
-		// TODO: make this configurable per a binding instance
 		HTTPClientBinding::initialized = true;
 		SharedPtr<Poco::Net::InvalidCertificateHandler> cert = 
 			new Poco::Net::AcceptCertificateHandler(false); 
@@ -733,8 +732,6 @@ namespace ti
 				this->ChangeState(2); // headers received
 				this->ChangeState(3); // loading
 
-				PRINTD("-------start read response-------\n");
-
 				// Receive data from response
 				if (responseLength > 0)
 				{
@@ -791,8 +788,6 @@ namespace ti
 						}
 					}
 				}
-
-				PRINTD("------------end read response-----------\n");
 
 				this->FireEvent(Event::HTTP_DONE);
 				break;
