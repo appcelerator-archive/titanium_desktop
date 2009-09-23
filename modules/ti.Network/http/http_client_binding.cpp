@@ -7,37 +7,7 @@
 #import <Cocoa/Cocoa.h>
 #endif
 
-#include <kroll/kroll.h>
 #include "http_client_binding.h"
-#include <cstring>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include "../network_binding.h"
-#include <Poco/Net/MultipartWriter.h>
-#include <Poco/Net/MessageHeader.h>
-#include <Poco/Net/FilePartSource.h>
-#include <Poco/File.h>
-#include <Poco/Timespan.h>
-#include <Poco/Stopwatch.h>
-#include <Poco/Net/HTMLForm.h>
-#include <Poco/Zip/Compress.h>
-#include <Poco/Zip/ZipCommon.h>
-
-#ifdef verify
-#define __verify verify
-#undef verify
-#endif
-
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/SSLManager.h>
-#include <Poco/Net/KeyConsoleHandler.h>
-#include <Poco/Net/AcceptCertificateHandler.h>
-
-#ifdef __verify
-#define verify __verify
-#undef __verify
-#endif
 
 namespace ti
 {

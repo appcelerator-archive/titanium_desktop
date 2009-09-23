@@ -10,6 +10,7 @@
 #include <kroll/kroll.h>
 
 #include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NameValueCollection.h>
@@ -22,6 +23,9 @@
 #include <Poco/FileStream.h>
 #include <Poco/Runnable.h>
 #include <Poco/Event.h>
+#include <Poco/Net/SSLManager.h>
+#include <Poco/Net/KeyConsoleHandler.h>
+#include <Poco/Net/AcceptCertificateHandler.h>
 
 #include "http_cookie.h"
 
