@@ -17,12 +17,9 @@ namespace ti
 		KEventObject("HTTPClient"),
 		host(host),
 		modulePath(path),
-		global(host->GetGlobalObject()),
 		buffer(8192),
 		async(true),
 		timeout(30000),
-		maxRedirects(5),
-		userAgent(PRODUCT_NAME"/"STRING(PRODUCT_VERSION)),
 		thread(0),
 		contentLength(0),
 		dirty(false)
@@ -228,6 +225,18 @@ namespace ti
 		 * @tiapi The handler function that will be fired when request is completed
 		*/
 		this->SetNull("onload");
+
+		/**
+		 * @tiapi(property=True,name=Network.HTTPClient.maxRedirects,since=0.7)
+		 * @tiapi Maxium number of redirects to follow. (Default: 5)
+		 */
+		this->SetInt("maxRedirects", 5);
+
+		/**
+		 * @tiapi(property=True,name=Network.HTTPClient.userAgent,since=0.7)
+		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCTVERSION)
+		 */
+		this->SetString("userAgent", PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
 	}
 
 	HTTPClientBinding::~HTTPClientBinding()
@@ -691,7 +700,7 @@ namespace ti
 		// Begin the request
 		try
 		{
-			for (int x = 0; x < this->maxRedirects; x++)
+			for (int x = 0; x < this->GetInt("maxRedirects"); x++)
 			{
 				Poco::URI uri(this->url);
 
@@ -705,7 +714,7 @@ namespace ti
 
 				// Prepare the request
 				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
-				req.set("User-Agent", this->userAgent.c_str());
+				req.set("User-Agent", this->GetString("userAgent").c_str());
 
 				// Set cookies
 				req.setCookies(this->requestCookies);

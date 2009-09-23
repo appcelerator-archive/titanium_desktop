@@ -56,7 +56,6 @@ namespace ti
 	private:
 		Host* host;
 		std::string modulePath;
-		SharedKObject global;
 		Poco::Buffer<char> buffer;
 		std::string url;
 		std::map<std::string,std::string> headers;
@@ -64,8 +63,6 @@ namespace ti
 		std::string method;
 		bool async;
 		int timeout;
-		int maxRedirects;
-		std::string userAgent;
 		static bool initialized;
 		SharedKMethod outputHandler;
 		SharedPtr<Poco::Net::HTTPClientSession> session;
