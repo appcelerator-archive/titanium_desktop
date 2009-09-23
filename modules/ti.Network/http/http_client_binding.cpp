@@ -11,10 +11,10 @@
 
 namespace ti
 {
-	bool HTTPClientBinding::initialized = false;
+	kroll::Logger* HTTPClientBinding::logger = 0;
 	
 	HTTPClientBinding::HTTPClientBinding(Host* host, std::string path) :
-		KEventObject("HTTPClient"),
+		KEventObject("Network.HTTPClient"),
 		host(host),
 		modulePath(path),
 		buffer(8192),
@@ -237,6 +237,9 @@ namespace ti
 		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCTVERSION)
 		 */
 		this->SetString("userAgent", PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
+
+		if (!HTTPClientBinding::logger)
+			HTTPClientBinding::logger = Logger::Get(this->type);
 	}
 
 	HTTPClientBinding::~HTTPClientBinding()
@@ -260,7 +263,7 @@ namespace ti
 		const std::string scheme = Poco::URI(url).getScheme();
 		if (scheme != "http" && scheme != "https")
 		{
-			Logger::Get("Network.HTTPClient")->Error("%s scheme is not supported", scheme.c_str());
+			logger->Error("%s scheme is not supported", scheme.c_str());
 			result->SetBool(false);
 			return;
 		}
@@ -315,11 +318,10 @@ namespace ti
 
 	void HTTPClientBinding::Receive(const ValueList& args, SharedValue result)
 	{
-		Logger* log = Logger::Get("Network.HTTPClient");
 		result->SetBool(false);
 		if (args.size() < 1)
 		{
-			log->Error("receive() requires an output handler!");
+			logger->Error("receive() requires an output handler!");
 			return;
 		}
 
@@ -339,13 +341,13 @@ namespace ti
 			}
 			else
 			{
-				log->Error("Unsupported object type as output handler!");
+				logger->Error("Unsupported object type as output handler!");
 				return;
 			}
 		}
 		else
 		{
-			log->Error("Invalid type as output handler!");
+			logger->Error("Invalid type as output handler!");
 			return;
 		}
 
@@ -455,7 +457,6 @@ namespace ti
 
 	bool HTTPClientBinding::BeginRequest(SharedValue sendData)
 	{
-		Logger* log = Logger::Get("Network.HTTPClient");
 		if (this->Get("connected")->ToBool())
 		{
 			return false;
@@ -482,13 +483,13 @@ namespace ti
 				this->contentLength = dataObject->GetMethod("size")->Call()->ToInt();
 				if (this->datastream->fail())
 				{
-					log->Error("Failed to open file: %s", filename);
+					logger->Error("Failed to open file: %s", filename);
 					return false;
 				}
 			}
 			else
 			{
-				log->Error("Unsupported object type");
+				logger->Error("Unsupported object type");
 				return false;
 			}
 		}
@@ -510,7 +511,7 @@ namespace ti
 		else
 		{
 			// We do not support this type!
-			log->Error("Unsupported datatype: %s",
+			logger->Error("Unsupported datatype: %s",
 					sendData->GetType().c_str());
 			return false;
 		}
@@ -533,7 +534,6 @@ namespace ti
 
 	void HTTPClientBinding::ChangeState(int readyState)
 	{
-		static Logger* logger = Logger::Get("Network.HTTPClient");
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
 		this->SetInt("readyState",readyState);
 		this->FireEvent(Event::HTTP_STATECHANGED);
@@ -687,7 +687,7 @@ namespace ti
 		catch(Poco::Exception& e)
 		{
 			// Probably a bad Set-Cookie header
-			Logger::Get("Network.HTTPClient")->Error("Failed to read cookies");
+			logger->Error("Failed to read cookies");
 		}	
 	}
 
@@ -760,7 +760,7 @@ namespace ti
 						break;
 					}
 					this->url = this->response.get("Location");
-					PRINTD("redirect to " << this->url);
+					logger->Debug("redirect to %s", this->url.c_str());
 					this->SetString("url", this->url);
 					this->FireEvent(Event::HTTP_REDIRECT);
 					continue;
@@ -787,7 +787,7 @@ namespace ti
 		catch(...)
 		{
 			// Timeout or IO error occurred
-			Logger::Get("Network.HTTPClient")->Debug("Timeout occurred");
+			logger->Debug("Timeout occurred");
 			this->SetBool("timedOut", true);
 			this->FireEvent(Event::HTTP_TIMEOUT);
 		}

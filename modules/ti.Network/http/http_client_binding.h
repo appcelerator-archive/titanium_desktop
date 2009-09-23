@@ -54,6 +54,7 @@ namespace ti
 		bool FireEvent(std::string& eventName);
 
 	private:
+		static kroll::Logger* logger;
 		Host* host;
 		std::string modulePath;
 		Poco::Buffer<char> buffer;
@@ -63,7 +64,6 @@ namespace ti
 		std::string method;
 		bool async;
 		int timeout;
-		static bool initialized;
 		SharedKMethod outputHandler;
 		SharedPtr<Poco::Net::HTTPClientSession> session;
 		Poco::Net::NameValueCollection requestCookies;
