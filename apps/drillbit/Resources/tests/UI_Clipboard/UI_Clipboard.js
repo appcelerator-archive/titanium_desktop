@@ -1,4 +1,14 @@
 describe("UI.Clipboard",{
+	test_clipboard_text_data_set_twice: function()
+	{
+		Titanium.UI.Clipboard.setData("text/plain", "blahblah");
+		var data = Titanium.UI.Clipboard.getData("text/plain");
+		value_of(data).should_be("blahblah");
+
+		Titanium.UI.Clipboard.setData("text/plain", "blahblah");
+		var data = Titanium.UI.Clipboard.getData("text/plain");
+		value_of(data).should_be("blahblah");
+	},
 	test_clipboard_methods: function()
 	{
 		value_of(Titanium.UI.Clipboard).should_be_object();

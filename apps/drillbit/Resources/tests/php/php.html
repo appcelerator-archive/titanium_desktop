@@ -63,6 +63,11 @@
 			$substance = "dinosaur bones";
 			$make_substance_ninja_food();
 		}
+		function get_resources_directory_via_php()
+		{
+			global $window, $Titanium;
+			return $Titanium->Filesystem->getResourcesDirectory();
+		}
 	</script>
 
 	<script>

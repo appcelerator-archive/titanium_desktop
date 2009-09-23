@@ -199,5 +199,11 @@ describe("php tests",
 		var anon3 = php_get_anonymous_function_two_args();
 		result = anon3("dino", "bones");
 		value_of(result).should_be("DINOBONES");
-	}
+	},
+	test_titanium_object_access: function(callback)
+	{
+		var result = get_resources_directory_via_php().toString();
+		value_of(result).should_be_string();
+		value_of(result.length).should_be_number();
+	},
 });
