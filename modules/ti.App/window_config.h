@@ -42,6 +42,9 @@ class TITANIUM_APP_API WindowConfig
 	bool usingChrome;
 	bool usingScrollbars;
 	bool topMost;
+#ifdef OS_OSX
+	bool texturedBackground;
+#endif
 
 	void SetDefaults();
 
@@ -108,6 +111,13 @@ class TITANIUM_APP_API WindowConfig
 	void SetUsingScrollbars(bool usingScrollbars_) { usingScrollbars = usingScrollbars_; }
 	bool IsTopMost() { return topMost; }
 	void SetTopMost(bool topmost_) { topMost = topmost_; }
+
+// probably long term a better way of doing this, but we need a quick way to disable these
+#ifdef OS_OSX
+	void SetTexturedBackground(bool texturedBackground_) { texturedBackground = texturedBackground_; }
+	bool IsTexturedBackground() { return texturedBackground; }
+#endif
+
 };
 
 }

@@ -1749,7 +1749,9 @@ bool UserWindow::ShouldHaveTitaniumObject(
 	transform(url.begin(), url.end(), url.begin(), tolower);
 	return url.find("app://") == 0 || 
 		url.find("ti://") == 0 ||
-		url.find("file://") == 0;
+		url.find("file://") == 0 || 
+		url == "about:blank" ||       // about blank is local and we should be able to open a write to document object w/ Titanium
+		url.find("data:text/html;") == 0;  // data uris can be considered local
 }
 
 bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
