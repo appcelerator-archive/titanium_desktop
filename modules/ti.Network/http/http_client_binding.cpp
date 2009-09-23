@@ -332,7 +332,7 @@ namespace ti
 		// Setup output stream for data
 		this->outstream = new std::ostringstream(std::ios::binary | std::ios::out);
 
-		result->SetBool(this->ExecuteRequest(sendData));
+		result->SetBool(this->BeginRequest(sendData));
 	}
 
 	void HTTPClientBinding::Receive(const ValueList& args, SharedValue result)
@@ -378,85 +378,7 @@ namespace ti
 			sendData = args.at(1);
 		}
 
-		result->SetBool(this->ExecuteRequest(sendData));
-	}
-
-	bool HTTPClientBinding::ExecuteRequest(SharedValue sendData)
-	{
-		Logger* log = Logger::Get("Network.HTTPClient");
-		if (this->Get("connected")->ToBool())
-		{
-			return false;
-		}
-
-		// Reset internal variables for new request
-		if (this->dirty)
-		{
-			this->Reset();
-		}
-
-		// Determine what data type we have to send
-		if (sendData->IsObject())
-		{
-			SharedKObject dataObject = sendData->ToObject();
-
-			if (dataObject->GetType() == "File")
-			{
-				SharedValue result;
-				result = dataObject->GetMethod("nativePath")->Call();
-				const char* filename = result->ToString();
-				this->datastream = new std::ifstream(filename,
-						std::ios::in | std::ios::binary);
-				this->contentLength = dataObject->GetMethod("size")->Call()->ToInt();
-				if (this->datastream->fail())
-				{
-					log->Error("Failed to open file: %s", filename);
-					return false;
-				}
-			}
-			else
-			{
-				log->Error("Unsupported object type");
-				return false;
-			}
-		}
-		else if (sendData->IsString())
-		{
-			std::string dataString(sendData->ToString());
-			if (!dataString.empty())
-			{
-				this->datastream = new std::istringstream(dataString,
-						std::ios::in | std::ios::binary);
-				this->contentLength = dataString.length();
-			}
-		}
-		else if (sendData->IsNull() || sendData->IsUndefined())
-		{
-			// Sending no data
-			this->datastream = 0;
-		}
-		else
-		{
-			// We do not support this type!
-			log->Error("Unsupported datatype: %s",
-					sendData->GetType().c_str());
-			return false;
-		}
-
-		this->dirty = true;
-		this->Set("connected",Value::NewBool(true));
-
-		if (this->async)
-		{
-			this->thread = new Poco::Thread();
-			this->thread->start(*this);
-		}
-		else
-		{
-			this->run();
-		}
-
-		return true;
+		result->SetBool(this->BeginRequest(sendData));
 	}
 
 	void HTTPClientBinding::SetRequestHeader(const ValueList& args, SharedValue result)
@@ -544,6 +466,84 @@ namespace ti
 		return KEventObject::FireEvent(eventName);
 	}
 
+	bool HTTPClientBinding::BeginRequest(SharedValue sendData)
+	{
+		Logger* log = Logger::Get("Network.HTTPClient");
+		if (this->Get("connected")->ToBool())
+		{
+			return false;
+		}
+
+		// Reset internal variables for new request
+		if (this->dirty)
+		{
+			this->Reset();
+		}
+
+		// Determine what data type we have to send
+		if (sendData->IsObject())
+		{
+			SharedKObject dataObject = sendData->ToObject();
+
+			if (dataObject->GetType() == "File")
+			{
+				SharedValue result;
+				result = dataObject->GetMethod("nativePath")->Call();
+				const char* filename = result->ToString();
+				this->datastream = new std::ifstream(filename,
+						std::ios::in | std::ios::binary);
+				this->contentLength = dataObject->GetMethod("size")->Call()->ToInt();
+				if (this->datastream->fail())
+				{
+					log->Error("Failed to open file: %s", filename);
+					return false;
+				}
+			}
+			else
+			{
+				log->Error("Unsupported object type");
+				return false;
+			}
+		}
+		else if (sendData->IsString())
+		{
+			std::string dataString(sendData->ToString());
+			if (!dataString.empty())
+			{
+				this->datastream = new std::istringstream(dataString,
+						std::ios::in | std::ios::binary);
+				this->contentLength = dataString.length();
+			}
+		}
+		else if (sendData->IsNull() || sendData->IsUndefined())
+		{
+			// Sending no data
+			this->datastream = 0;
+		}
+		else
+		{
+			// We do not support this type!
+			log->Error("Unsupported datatype: %s",
+					sendData->GetType().c_str());
+			return false;
+		}
+
+		this->dirty = true;
+		this->Set("connected",Value::NewBool(true));
+
+		if (this->async)
+		{
+			this->thread = new Poco::Thread();
+			this->thread->start(*this);
+		}
+		else
+		{
+			this->ExecuteRequest();
+		}
+
+		return true;
+	}
+
 	void HTTPClientBinding::ChangeState(int readyState)
 	{
 		static Logger* logger = Logger::Get("Network.HTTPClient");
@@ -587,6 +587,12 @@ namespace ti
 		// We need this binding to stay alive at least until we have
 		// finished this thread.
 		this->duplicate();
+		this->ExecuteRequest();
+		this->release();
+	}
+
+	void HTTPClientBinding::ExecuteRequest()
+	{
 #ifdef OS_OSX
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 #endif
@@ -808,7 +814,6 @@ namespace ti
 #ifdef OS_OSX
 		[pool release];
 #endif
-		this->release();  // release the binding
 	}
 }
 

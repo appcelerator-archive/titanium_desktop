@@ -78,13 +78,14 @@ namespace ti
 		Poco::Event abort;
 		bool dirty;
 
-		bool ExecuteRequest(SharedValue sendData);
+		// Thread main		
+		void run();
+
+		bool BeginRequest(SharedValue sendData);
+		void ExecuteRequest();
 		void ChangeState(int readyState);
 		void Reset();
 		void InitHTTPS();
-
-		// Thread main		
-		void run();
 	};
 }
 
