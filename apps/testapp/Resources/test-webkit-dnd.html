@@ -9,6 +9,8 @@
 	function fileDragStart(event)
 	{
 		var fileURL = "file://"+Titanium.App.appURLToPath("app://sound.wav");
+		fileURL = fileURL.replaceAll("\\", "/");
+		//var fileURL = "file:///C:/Users/marshall/Code/titanium_desktop/apps/testapp/Resources/sound.wav";
 		
 		event.dataTransfer.setData("public.file-url", fileURL);
 		event.dataTransfer.setData("text/uri-list", fileURL);
@@ -34,12 +36,25 @@
 		target.addEventListener("drop", function(event)
 		{
 			var dropInfo = document.getElementById("drop-info");
+			
 			var data = "<b>types</b>="+event.dataTransfer.types+"<br/>";
 			data += "<b>files</b>="+event.dataTransfer.files+"<br/>";
-			for (var t = 0; t < event.dataTransfer.types.length; t++)
+			data += "<b>dataTransfer</b>="+event.dataTransfer+"<br/>";
+			if (event.dataTransfer.types != null)
 			{
-				var type = event.dataTransfer.types[t];
-				data +="<b>data["+type+"]</b>="+event.dataTransfer.getData(type)+"<br/>";
+				for (var t = 0; t < event.dataTransfer.types.length; t++)
+				{
+					var type = event.dataTransfer.types[t];
+					data +="<b>data["+type+"]</b>="+event.dataTransfer.getData(type)+"<br/>";
+				}
+			}
+			if (event.dataTransfer.files != null)
+			{
+				for (var f = 0; f < event.dataTransfer.files.length; f++)
+				{
+					var file = event.dataTransfer.files[f].path;
+					data +="<b>file</b>="+file+"<br/>";
+				}
 			}
 			
 			dropInfo.innerHTML = data;
