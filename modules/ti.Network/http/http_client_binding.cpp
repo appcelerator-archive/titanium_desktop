@@ -592,7 +592,8 @@ namespace ti
 #endif
 
 		// Begin the request
-		try{
+		try
+		{
 			for (int x = 0; x < this->maxRedirects; x++)
 			{			
 				// Create HTTP session
