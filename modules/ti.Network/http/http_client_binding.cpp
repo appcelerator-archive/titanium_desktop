@@ -383,6 +383,7 @@ namespace ti
 
 	bool HTTPClientBinding::ExecuteRequest(SharedValue sendData)
 	{
+		Logger* log = Logger::Get("Network.HTTPClient");
 		if (this->Get("connected")->ToBool())
 		{
 			return false;
@@ -401,11 +402,21 @@ namespace ti
 
 			if (dataObject->GetType() == "File")
 			{
-				// TODO: send file
+				SharedValue result;
+				result = dataObject->GetMethod("nativePath")->Call();
+				const char* filename = result->ToString();
+				this->datastream = new std::ifstream(filename,
+						std::ios::in | std::ios::binary);
+				this->contentLength = dataObject->GetMethod("size")->Call()->ToInt();
+				if (this->datastream->fail())
+				{
+					log->Error("Failed to open file: %s", filename);
+					return false;
+				}
 			}
 			else
 			{
-				Logger::Get("Network.HTTPClient")->Error("Unsupported object type");
+				log->Error("Unsupported object type");
 				return false;
 			}
 		}
@@ -427,7 +438,7 @@ namespace ti
 		else
 		{
 			// We do not support this type!
-			Logger::Get("Network.HTTPClient")->Error("Unsupported datatype: %s",
+			log->Error("Unsupported datatype: %s",
 					sendData->GetType().c_str());
 			return false;
 		}

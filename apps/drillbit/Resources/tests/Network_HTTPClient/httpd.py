@@ -75,13 +75,28 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.error('Not a POST request')
 		if self.headers.has_key('content-length') is False:
 			self.error('Missing content length')
-		length= int( self.headers['content-length'] )
+		length = int( self.headers['content-length'] )
 		data = self.rfile.read(length)
 		print "Got data: %s" % data
 		if data == 'here is some text for you!':
 			self.send_text('I got it!')
 		else:
 			self.error('Invalid data: %s' % data)
+
+	def recv_file(self):
+		correct_text = """Just some test text that will be sent
+to the http server to verify file sending works
+with the http client.
+"""
+
+		if self.headers.has_key('content-length') is False:
+			self.error('Missing content length')
+		length = int( self.headers['content-length'] )
+		file_data = self.rfile.read(length)
+		if file_data == correct_text:
+			self.send_text('Got the file!')
+		else:
+			self.error('File text corrupted!: %s' % file_data)
 
 	def do_GET(self):
 		self.urls[self.path](self)
@@ -97,6 +112,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		'/recvcookie': recv_cookie,
 		'/basicauth': basic_auth,
 		'/recvpostdata': recv_post_data,
+		'/recvfile': recv_file,
 	}
 
 if __name__ == '__main__':

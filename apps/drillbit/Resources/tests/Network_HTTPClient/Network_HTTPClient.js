@@ -13,7 +13,7 @@ describe("Network.HTTPClient",
 
 		this.text = "here is some text for you!";
 		this.reply = "I got it!";
-		this.file = Titanium.API.application.resourcesPath + "/rfc2616.txt";
+		this.filepath = Titanium.API.application.resourcesPath + "/test.txt";
 	},
 
 	after_all: function()
@@ -363,5 +363,15 @@ describe("Network.HTTPClient",
 		this.client.send(null);
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("authorized");
+	},
+
+	test_send_file: function()
+	{
+		var file = Titanium.Filesystem.getFile(this.filepath);
+		value_of(file).should_be_object();
+		this.client.open("POST", this.url + "recvfile", false);
+		this.client.send(file);
+		value_of(this.client.status).should_be("200");
+		value_of(this.client.responseText).should_be("Got the file!");
 	},
 });

@@ -1,0 +1,3 @@
+Just some test text that will be sent
+to the http server to verify file sending works
+with the http client.
