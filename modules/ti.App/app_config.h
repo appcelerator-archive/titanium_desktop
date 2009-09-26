@@ -50,11 +50,7 @@ public:
 	std::string& GetURL() { return url; }
 	std::string& GetVersion() { return version; }
 	std::string& GetPublisher() { return publisher; }
-
 	AutoPtr<PropertiesBinding> GetSystemProperties() { return systemProperties; }
-	
-	std::string InsertAppIDIntoURL(std::string url);
-
 	WindowConfigList& GetWindows() { return windows; }
 	WindowConfig* GetWindow(std::string &id);
 	WindowConfig* GetWindowByURL(std::string url);

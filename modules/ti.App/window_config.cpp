@@ -201,7 +201,6 @@ WindowConfig::WindowConfig(void* data)
 		else if (nodeNameEquals(child, "url"))
 		{
 			url = ConfigUtils::GetNodeValue(child);
-			url = AppConfig::Instance()->InsertAppIDIntoURL(url);
 		}
 		else if (nodeNameEquals(child, "url-regex"))
 		{
