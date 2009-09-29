@@ -186,18 +186,3 @@ WindowConfig* AppConfig::GetMainWindow()
 	else
 		return NULL;
 }
-
-std::string AppConfig::InsertAppIDIntoURL(std::string url)
-{
-	SharedApplication application = Host::GetInstance()->GetApplication();
-	std::string appid = application->id;
-	std::transform(appid.begin(), appid.end(), appid.begin(), tolower);
-
-	std::string lcurl = url;
-	std::transform(lcurl.begin(), lcurl.end(), lcurl.begin(), tolower);
-	if (lcurl.find("app://") == 0 && lcurl.find(appid, 6) == std::string::npos)
-	{
-		url = std::string("app://") + appid + "/" + (url.c_str() + 6);
-	}
-	return url;
-}
