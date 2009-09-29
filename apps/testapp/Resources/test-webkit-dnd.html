@@ -9,9 +9,8 @@
 	function fileDragStart(event)
 	{
 		var fileURL = "file://"+Titanium.App.appURLToPath("app://sound.wav");
-		fileURL = fileURL.replaceAll("\\", "/");
+		fileURL = fileURL.replace("\\", "/");
 		//var fileURL = "file:///C:/Users/marshall/Code/titanium_desktop/apps/testapp/Resources/sound.wav";
-		
 		event.dataTransfer.setData("public.file-url", fileURL);
 		event.dataTransfer.setData("text/uri-list", fileURL);
 	}
