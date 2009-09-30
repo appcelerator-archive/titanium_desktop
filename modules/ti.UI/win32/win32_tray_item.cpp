@@ -8,6 +8,9 @@
 namespace ti
 {
 	std::vector<AutoPtr<Win32TrayItem> > Win32TrayItem::trayItems;
+	UINT Win32TrayItem::trayClickedMessage =
+		::RegisterWindowMessageA(PRODUCT_NAME"TrayClicked");
+
 	Win32TrayItem::Win32TrayItem(std::string& iconURL, SharedKMethod cbSingleClick) :
 		TrayItem(iconURL),
 		oldNativeMenu(0),
@@ -23,7 +26,7 @@ namespace ti
 		notifyIconData->hWnd = hwnd;
 		notifyIconData->uID = ++Win32UIBinding::nextItemId;
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-		notifyIconData->uCallbackMessage = TI_TRAY_CLICKED;
+		notifyIconData->uCallbackMessage = trayClickedMessage;
 
 		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
 		notifyIconData->hIcon = icon;
@@ -138,7 +141,7 @@ namespace ti
 	bool Win32TrayItem::MessageHandler(
 		HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		if (message == TI_TRAY_CLICKED)
+		if (message == trayClickedMessage)
 		{
 			UINT button = (UINT) lParam;
 			int id = LOWORD(wParam);
@@ -202,5 +205,3 @@ namespace ti
 		return 0;
 	}
 }
-
-

@@ -7,7 +7,6 @@
 #define _WIN32_UI_BINDING_H_
 #include "../ui_module.h"
 
-#define TI_TRAY_CLICKED 7499
 #define WEB_INSPECTOR_MENU_ITEM_ID 7500
 #define NEXT_ITEM_ID_BEGIN 7501
 

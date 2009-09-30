@@ -92,6 +92,10 @@ void WindowConfig::SetDefaults ()
 	this->visible = true;
 	this->topMost = false;
 
+#ifdef OS_OSX
+	this->texturedBackground = true;
+#endif
+
 	this->transparency = 1.0;
 	this->width = 800;
 	this->height = 600;
@@ -136,6 +140,10 @@ void WindowConfig::UseProperties(SharedKObject properties)
 	SET_BOOL(usingScrollbars, usingScrollbars);
 	SET_BOOL(topMost, topMost);
 	SET_DOUBLE(transparency, transparency);
+	
+#ifdef OS_OSX
+	SET_BOOL(texturedBackground,texturedBackground);
+#endif
 }
 
 WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
@@ -169,6 +177,9 @@ WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
 	this->topMost = config->IsTopMost();
 	this->transparency = config->GetTransparency();
 
+#ifdef OS_OSX
+	this->texturedBackground = config->IsTexturedBackground();
+#endif
 }
 
 WindowConfig::WindowConfig(void* data)
@@ -190,7 +201,6 @@ WindowConfig::WindowConfig(void* data)
 		else if (nodeNameEquals(child, "url"))
 		{
 			url = ConfigUtils::GetNodeValue(child);
-			url = AppConfig::Instance()->InsertAppIDIntoURL(url);
 		}
 		else if (nodeNameEquals(child, "url-regex"))
 		{
@@ -286,6 +296,12 @@ WindowConfig::WindowConfig(void* data)
 		{
 			topMost = ConfigUtils::GetNodeValueAsBool(child);
 		}
+#ifdef OS_OSX
+		else if (nodeNameEquals(child, "texturedBackground"))
+		{
+		 	texturedBackground = ConfigUtils::GetNodeValueAsBool(child);
+		}
+#endif
 		child = child->next;
 	}
 
