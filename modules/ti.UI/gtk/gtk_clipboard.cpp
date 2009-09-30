@@ -82,45 +82,27 @@ namespace ti
 			if (this->uris)
 				gtk_target_list_add_uri_targets(list, ClipboardPrivate::URI_LIST_DATA);
 
-			// TODO: Add image data here.
-
-			// One would think that gtk_clipboard_set_with_data would simply take a
-			// GtkTargetList, but it doesn't, so we need to convert it to an array here.
-			int size = g_list_length(list->list);
-			GtkClipboard* clipboard = GetClipboard();
-			GtkTargetEntry* targets = g_new(GtkTargetEntry, size);
-			GList* current = list->list;
-			int n = 0;
-			while (current)
+			int size = 0;
+			GtkTargetEntry* table = gtk_target_table_new_from_list(list, &size);
+			if (table)
 			{
-				GtkTargetPair* pair = (GtkTargetPair*) current->data;
-				targets[n].target = gdk_atom_name(pair->target);
-				targets[n].flags = pair->flags;
-				targets[n].info = pair->info;
-				current = current->next;
-				n++;
+				// gtk_clipboard_set_with_data may try to clear our clipboard when we
+				// call it, so we turn on a flag here which prevents our clipboard data
+				// from being freed during this call.
+				this->preserve = true;
+				GtkClipboard* clipboard = GetClipboard();
+				if (gtk_clipboard_set_with_data(clipboard, table, size, GetClipboardData,
+					ClearClipboardData, NULL))
+				{
+					this->ownClipboard = true;
+					gtk_clipboard_set_can_store(clipboard, NULL, 0);
+				}
+				this->preserve = false;
+
+				gtk_target_table_free(table, size);
 			}
 
-			// gtk_clipboard_set_with_data may try to clear our clipboard when we
-			// call it, so we turn on a flag here which prevents our clipboard data
-			// from being freed during this call.
-			this->preserve = true;
-			gtk_clipboard_clear(clipboard);
-			if (gtk_clipboard_set_with_data(clipboard, targets, size, GetClipboardData,
-				ClearClipboardData, NULL))
-			{
-				this->ownClipboard = true;
-				gtk_clipboard_set_can_store(clipboard, NULL, 0);
-			}
-
-			// Anytime that clear is called after this point we actually want to
-			// free our data.
-			this->preserve = false;
-
-			for (int i = 0; i < size; i++)
-				g_free(targets[i].target);
-			g_free(targets);
-
+			gtk_target_list_unref(list);
 		}
 
 	} priv;
