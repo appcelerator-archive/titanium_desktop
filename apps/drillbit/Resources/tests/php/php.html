@@ -68,6 +68,11 @@
 			global $window, $Titanium;
 			return $Titanium->Filesystem->getResourcesDirectory();
 		}
+
+		function get_include_path()
+		{
+			return ini_get("include_path");
+		}
 	</script>
 
 	<script type="text/php">
