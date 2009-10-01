@@ -206,4 +206,9 @@ describe("php tests",
 		value_of(result).should_be_string();
 		value_of(result.length).should_be_number();
 	},
+	test_titanium_include_directory: function(callback)
+	{
+		// Test that files in the Resources directory are on the include path.
+		value_of(test_include()).should_be("yes");
+	}
 });
