@@ -12,6 +12,7 @@ namespace ti
 		guint info, gpointer data);
 	static void ClearClipboardData(GtkClipboard* clipboard, gpointer data);
 	static void OwnerChangeCallback(GtkClipboard*, GdkEvent*, gpointer);
+	static GdkAtom uriListAtom = gdk_atom_intern("text/uri-list", FALSE);
 
 	static inline GtkClipboard* GetClipboard()
 	{
@@ -205,16 +206,19 @@ namespace ti
 		static std::vector<std::string> uriList;
 		uriList.clear();
 
-		gchar** uris = gtk_clipboard_wait_for_uris(GetClipboard());
-		if (!uris)
+		GtkSelectionData* data = gtk_clipboard_wait_for_contents(GetClipboard(), uriListAtom);
+		if (!data)
 			return uriList;
 
-		gchar** current = uris;
-		while (*current)
-			uriList.push_back(*current++);
-
-		g_strfreev(uris);
-
+		gchar** uris = gtk_selection_data_get_uris(data);
+		if (uris)
+		{
+			gchar** current = uris;
+			while (*current)
+				uriList.push_back(*current++);
+			g_strfreev(uris);
+		}
+		gtk_selection_data_free(data);
 		return uriList;
 	}
 
@@ -226,8 +230,10 @@ namespace ti
 
 	bool Clipboard::HasURIListImpl()
 	{
-		return (priv.ownClipboard && priv.uris) ||
-			(!priv.ownClipboard && gtk_clipboard_wait_is_uris_available(GetClipboard()));
+		if (priv.ownClipboard)
+			return priv.uris;
+		else
+			return gtk_clipboard_wait_is_target_available(GetClipboard(), uriListAtom);
 	}
 
 	void Clipboard::ClearURIListImpl()
