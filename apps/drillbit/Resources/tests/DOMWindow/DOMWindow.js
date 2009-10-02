@@ -6,8 +6,11 @@ describe("UI Window Tests",{
 		{
 			var w = window.open.apply(window, args);
 			value_of(w).should_be_object();
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function()
+			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 			{
+				if (!event.hasTitaniumObject)
+					return;
+
 				w.callback = function()
 				{
 					clearTimeout(timer);
@@ -28,7 +31,6 @@ describe("UI Window Tests",{
 			}, 3000);
 		};
 	},
-	
 	test_open_no_url: function()
 	{
 		var w = window.open()
