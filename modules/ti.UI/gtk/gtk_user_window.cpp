@@ -124,6 +124,7 @@ namespace ti
 			g_object_set(G_OBJECT(settings), 
 				"enable-developer-extras", TRUE,
 				"enable-universal-access-from-file-uris", TRUE,
+				"javascript-can-open-windows-automatically", TRUE,
 				NULL);
 			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
 
