@@ -51,7 +51,6 @@ class TITANIUM_APP_API WindowConfig
 	public:
 	static int DEFAULT_POSITION;
 	static int windowCount;
-	static std::string blankPageURL;
 
 	WindowConfig() { SetDefaults(); }
 	WindowConfig(void* data);

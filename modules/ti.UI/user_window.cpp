@@ -472,6 +472,16 @@ AutoUserWindow UserWindow::GetAutoPtr()
 	return this;
 }
 
+SharedString UserWindow::DisplayString(int level)
+{
+	std::string* displayString = new std::string();
+	displayString->append("URL=");
+	displayString->append(this->GetURL());
+	displayString->append(" window id=");
+	displayString->append(this->GetId());
+	return displayString;
+}
+
 Host* UserWindow::GetHost()
 {
 	return this->host;
@@ -1184,7 +1194,7 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 
 	std::string url = args.at(0)->ToString();
 	if (url.empty())
-		url = WindowConfig::blankPageURL;
+		url = URLUtils::BlankPageURL();
 	else
 		url = URLUtils::NormalizeURL(url);
 
@@ -1747,11 +1757,8 @@ bool UserWindow::ShouldHaveTitaniumObject(
 
 	string url(KJSUtil::ToChars(locString));
 	transform(url.begin(), url.end(), url.begin(), tolower);
-	return url.find("app://") == 0 || 
-		url.find("ti://") == 0 ||
-		url.find("file://") == 0 || 
-		url == "about:blank" ||       // about blank is local and we should be able to open a write to document object w/ Titanium
-		url.find("data:text/html;") == 0;  // data uris can be considered local
+	return url.find("app://") == 0 || url.find("ti://") == 0 ||
+		url.find("file://") == 0 || url.find("data:text/html;") == 0;
 }
 
 bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)

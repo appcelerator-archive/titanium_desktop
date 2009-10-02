@@ -31,6 +31,7 @@ namespace ti
 	class UserWindow : public KEventObject {
 		public:
 			UserWindow(WindowConfig *config, AutoUserWindow& parent);
+			virtual SharedString DisplayString(int levels=3);
 			virtual ~UserWindow();
 			void UpdateWindowForURL(std::string url);
 			Host* GetHost();
