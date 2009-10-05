@@ -15,6 +15,7 @@ function TitaniumNotification(window)
 		height:height,
 		transparency:transparency,
 		usingChrome:false,
+		toolWindow:true,
 		id:myid,
 		visible:false,
 		topMost:true,

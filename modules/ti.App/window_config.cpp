@@ -84,6 +84,7 @@ void WindowConfig::SetDefaults ()
 	this->resizable = true;
 
 	this->usingChrome = true;
+	this->toolWindow = false;
 	this->usingScrollbars = true;
 	this->fullscreen = false;
 	this->maximized = false;
@@ -136,6 +137,7 @@ void WindowConfig::UseProperties(SharedKObject properties)
 	SET_BOOL(maximized, maximized);
 	SET_BOOL(minimized, minimized);
 	SET_BOOL(usingChrome, usingChrome);
+	SET_BOOL(toolWindow, toolWindow);
 	SET_BOOL(usingScrollbars, usingScrollbars);
 	SET_BOOL(topMost, topMost);
 	SET_DOUBLE(transparency, transparency);
@@ -241,6 +243,10 @@ WindowConfig::WindowConfig(void* data)
 			{
 				usingScrollbars = ConfigUtils::StringToBool(scrollbars);
 			}
+		}
+		else if (nodeNameEquals(child, "tool-window"))
+		{
+			toolWindow = ConfigUtils::GetNodeValueAsBool(child);
 		}
 		else if (nodeNameEquals(child, "transparency"))
 		{
