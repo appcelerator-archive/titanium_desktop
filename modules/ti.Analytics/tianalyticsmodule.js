@@ -79,53 +79,6 @@
 		}
 	}
 	
-	// --- JSON, a stripped-down version of swiss' toJSON function
-	function toJSON(value)
-	{
-		var object = value 
-		var type = typeof object;
-		switch (type)
-		{
-		  case 'undefined':
-		  case 'function':
-		  case 'unknown': return 'null';
-		  case 'number':
-		  case 'boolean': return value;
-		  case 'string': return "\""+value+"\"";
-		}
-
-		if (object === null) return 'null';
-		if (object.toJSON) return object.toJSON();
-		if (object.nodeType == 1) return 'null';
-		if (object.constructor.toString().indexOf("Array") != -1)
-		{
-			var arrayString = "[";
-			for (var i=0;i<object.length;i++)
-			{
-				arrayString = arrayString+this.toJSON(object[i]);
-				if ((i+1) != object.length)
-				{
-					arrayString = arrayString+", "
-				}
-			}
-			arrayString = arrayString + "]"
-			return arrayString;
-		}
-
-		var objects = [];
-
-		for (var property in object) 
-		{
-		   var value = object[property];
-		   if (value !== undefined)
-		   {
-		   	  objects.push(toJSON(property) + ': ' + toJSON(value));
-		   }
-		}
-		return '{' + objects.join(', ') + '}';
-	}
-	
-	
 	/**
 	 * @tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application
 	 * @tiarg(for=Analytics.addEvent,type=String,name=event) event name
@@ -145,7 +98,9 @@
 	 */
 	Titanium.API.set("Analytics.navEvent", function(from,to,name,data)
 	{
-		send({'class':'app.nav','from':from,'to':to,'event':name,'data':((typeof(data)!='undefined') ? swiss.toJSON(data) : null)});
+		data = ((typeof(data)!='undefined') ? Titanium.JSON.stringify(data) : 'from:'+from+':to:'+to);
+		var event = ((typeof(name)!='undefined')?name:'app.nav');
+		send({'class':'app.nav','from':from,'to':to,'event':event,'data':data});
 	});
 	
 	/**
@@ -155,7 +110,7 @@
 	 */
 	Titanium.API.set("Analytics.featureEvent", function(name,data)
 	{
-		data = ((typeof(data)!='undefined') ? toJSON(data) : null);
+		data = ((typeof(data)!='undefined') ? Titanium.JSON.stringify(data) : null);
 		send({'class':'app.feature','event':name,'data':data});			
 	});
 
@@ -166,7 +121,7 @@
 	 */
 	Titanium.API.set("Analytics.settingsEvent", function(name,data)
 	{
-		data = ((typeof(data)!='undefined') ? toJSON(data) : null);
+		data = ((typeof(data)!='undefined') ? Titanium.JSON.stringify(data) : null);
 		send({'class':'app.settings','event':name,'data':data});			
 	});
 
