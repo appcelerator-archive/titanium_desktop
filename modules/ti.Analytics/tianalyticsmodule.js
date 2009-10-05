@@ -14,6 +14,9 @@
 	var window = null;
 	var refresh_components = true;
 	var update_check_timer = null;
+	var analytics_spec_version = 2;
+	var tz_offset_mins = - (new Date().getTimezoneOffset()); // js returns minutes to add to local to get UTC,
+	                                                         // Java returns ms to add to UTC to get local
 	
 	function send(qsv,async,timeout)
 	{
@@ -41,6 +44,8 @@
 			qsv.oscpu = Titanium.Platform.processorCount;
 			qsv.un = Titanium.Platform.username;
 			qsv.ip = Titanium.Platform.address;
+			qsv.ver = analytics_spec_version;
+			qsv.tz = tz_offset_mins;
 			
 			var qs = '';
 			for (var p in qsv)
@@ -74,6 +79,53 @@
 		}
 	}
 	
+	// --- JSON, a stripped-down version of swiss' toJSON function
+	function toJSON(value)
+	{
+		var object = value 
+		var type = typeof object;
+		switch (type)
+		{
+		  case 'undefined':
+		  case 'function':
+		  case 'unknown': return 'null';
+		  case 'number':
+		  case 'boolean': return value;
+		  case 'string': return "\""+value+"\"";
+		}
+
+		if (object === null) return 'null';
+		if (object.toJSON) return object.toJSON();
+		if (object.nodeType == 1) return 'null';
+		if (object.constructor.toString().indexOf("Array") != -1)
+		{
+			var arrayString = "[";
+			for (var i=0;i<object.length;i++)
+			{
+				arrayString = arrayString+this.toJSON(object[i]);
+				if ((i+1) != object.length)
+				{
+					arrayString = arrayString+", "
+				}
+			}
+			arrayString = arrayString + "]"
+			return arrayString;
+		}
+
+		var objects = [];
+
+		for (var property in object) 
+		{
+		   var value = object[property];
+		   if (value !== undefined)
+		   {
+		   	  objects.push(toJSON(property) + ': ' + toJSON(value));
+		   }
+		}
+		return '{' + objects.join(', ') + '}';
+	}
+	
+	
 	/**
 	 * @tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application
 	 * @tiarg(for=Analytics.addEvent,type=String,name=event) event name
@@ -81,9 +133,43 @@
 	 */
 	Titanium.API.set("Analytics.addEvent", function(event,data)
 	{
-		send({'event':event,'data':data});
+		send({'class':'app.user','event':event,'data':data});
+	});
+
+	/**
+	 * @tiapi(method=True,name=Analytics.navEvent,since=0.7) Sends an analytics event associated with application navigation
+	 * @tiarg(for=Analytics.navEvent,type=String,name=from) navigation starting point, the context we're leaving
+	 * @tiarg(for=Analytics.navEvent,type=String,name=to) navigation ending point, the context to which we're going
+	 * @tiarg(for=Analytics.navEvent,type=String,name=name,optional=True) event name
+	 * @tiarg(for=Analytics.navEvent,type=Object,name=data,optional=True) event data
+	 */
+	Titanium.API.set("Analytics.navEvent", function(from,to,name,data)
+	{
+		send({'class':'app.nav','from':from,'to':to,'event':name,'data':((typeof(data)!='undefined') ? swiss.toJSON(data) : null)});
 	});
 	
+	/**
+	 * @tiapi(method=True,name=Analytics.featureEvent,since=0.7) Sends an analytics event associated with application feature functionality
+	 * @tiarg(for=Analytics.featureEvent,type=String,name=name) event feature
+	 * @tiarg(for=Analytics.featureEvent,type=Object,name=data,optional=True) event data
+	 */
+	Titanium.API.set("Analytics.featureEvent", function(name,data)
+	{
+		data = ((typeof(data)!='undefined') ? toJSON(data) : null);
+		send({'class':'app.feature','event':name,'data':data});			
+	});
+
+	/**
+	 * @tiapi(method=True,name=Analytics.settingsEvent,since=0.7) Sends an analytics event associated with application settings or configuration
+	 * @tiarg(for=Analytics.settingsEvent,type=String,name=name) event feature
+	 * @tiarg(for=Analytics.settingsEvent,type=Object,name=data,optional=True) event data
+	 */
+	Titanium.API.set("Analytics.settingsEvent", function(name,data)
+	{
+		data = ((typeof(data)!='undefined') ? toJSON(data) : null);
+		send({'class':'app.settings','event':name,'data':data});			
+	});
+
 	/**
 	 * @tiapi(method=True,name=UpdateManager.startMonitor,since=0.4) Check the update service for a new version
 	 * @tiarg(for=UpdateManager.startMonitor,name=component,type=String) Name of the component
