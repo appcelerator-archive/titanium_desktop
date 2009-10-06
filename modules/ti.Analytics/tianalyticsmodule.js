@@ -80,7 +80,7 @@
 	}
 	
 	/**
-	 * @tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application
+	 * @tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application, likely to be deprecated in favor of userEvent
 	 * @tiarg(for=Analytics.addEvent,type=String,name=event) event name
 	 * @tiarg(for=Analytics.addEvent,type=Object,name=data,optional=True) event data
 	 */
@@ -123,6 +123,65 @@
 	{
 		data = ((typeof(data)!='undefined') ? Titanium.JSON.stringify(data) : null);
 		send({'class':'app.settings','event':name,'data':data});			
+	});
+	
+	/**
+	 * @tiapi(method=True,name=Analytics.timedEvent,since=0.3) Sends an analytics event tracking the duration of an application action
+	 * @tiarg(for=Analytics.timedEvent,type=String,name=event) event name
+	 * @tiarg(for=Analytics.timedEvent,type=Date,name=start,optional=True) event start time
+	 * @tiarg(for=Analytics.timedEvent,type=Date,name=stop,optional=True) event stop time
+	 * @tiarg(for=Analytics.timedEvent,type=String,name=duration,optional=True) event duration in seconds
+	 * @tiarg(for=Analytics.timedEvent,type=Object,name=data,optional=True) event data
+	 */
+	Titanium.API.set("Analytics.timedEvent", function(name,start,stop,duration,data)
+	{
+		zeropad = function(maybe_small_number)
+		{
+			/* number in, two-digit (or more) string out */
+			return ((maybe_small_number < 10) ? '0' : '') + maybe_small_number;
+		}
+		formatUTCstring = function(date)
+		{
+			/* format to yyyy-MM-dd'T'HH:mm:ss.SSSZ to be consistent with mobile's UTC timestamp strings */
+			return date.getUTCFullYear().toString() + '-' +
+			            zeropad(1 + start.getUTCMonth()) + '-' +
+						zeropad(start.getUTCDate()) + 'T' +
+						zeropad(start.getUTCHours()) + ':' +
+						zeropad(start.getUTCMinutes()) + ':' +
+						zeropad(start.getUTCSeconds()) + '+0000';
+		}
+		payload = {};
+		payload['class'] = 'app.timed_event';
+		payload['event'] = name;
+		if (typeof(start)!='undefined')
+		{
+			payload.start = formatUTCstring(start);
+		}
+		if (typeof(stop)!='undefined')
+		{
+			payload.stop = formatUTCstring(stop);
+		}
+		if (typeof(duration)!='undefined')
+		{
+			payload.duration = duration;
+		}
+		if (typeof(data)!='undefined')
+		{
+			payload.data = data;
+		}
+		send(payload);
+	});
+
+	
+
+	/**
+	 * @tiapi(method=True,name=Analytics.userEvent,since=0.7) Sends an analytics event not covered by the other interfaces
+	 * @tiarg(for=Analytics.userEvent,type=String,name=event) event name
+	 * @tiarg(for=Analytics.userEvent,type=Object,name=data,optional=True) event data
+	 */
+	Titanium.API.set("Analytics.userEvent", function(event,data)
+	{
+		send({'class':'app.user','event':event,'data':data});
 	});
 
 	/**
