@@ -155,13 +155,13 @@ void Win32UserWindow::InitWindow()
 	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
 	std::wstring titleW = UTF8ToWide(config->GetTitle());
-	this->windowHandle = CreateWindowExW(
-		WS_EX_APPWINDOW /*WS_EX_LAYERED*/, 
-		USERWINDOW_WINDOW_CLASS,
-		titleW.c_str(),
-		WS_CLIPCHILDREN, CW_USEDEFAULT,
-		0, CW_USEDEFAULT, 0, NULL, NULL,
-		win32Host->GetInstanceHandle(), NULL);
+	DWORD windowStyle = WS_EX_APPWINDOW;
+	if (this->IsToolWindow())
+		windowStyle = WS_EX_TOOLWINDOW;
+
+	this->windowHandle = CreateWindowExW(windowStyle, USERWINDOW_WINDOW_CLASS,
+		titleW.c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+		NULL, NULL, win32Host->GetInstanceHandle(), NULL);
 
 	if (this->windowHandle == NULL)
 	{

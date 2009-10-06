@@ -175,6 +175,13 @@ namespace ti
 
 			/* main window */
 			GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+			if (this->IsToolWindow())
+			{
+				gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
+				gtk_window_set_skip_pager_hint(GTK_WINDOW(window), TRUE);
+			}
+
 			gtk_widget_set_name(window, this->config->GetTitle().c_str());
 			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
 

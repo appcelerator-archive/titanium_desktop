@@ -9,6 +9,10 @@
 
 #include <kroll/kroll.h>
 
+#include <Poco/Zip/Zip.h>
+#include <Poco/Zip/Compress.h>
+#include <Poco/Path.h>
+
 namespace ti
 {
 	class CodecBinding : public StaticBoundObject
@@ -19,14 +23,18 @@ namespace ti
 		virtual ~CodecBinding();
 	private:
 		SharedKObject global;
+		AsyncJob *zipJob;
 		
-		void Base64Encode(const ValueList& args, SharedValue result);
-		void Base64Decode(const ValueList& args, SharedValue result);
+		void EncodeBase64(const ValueList& args, SharedValue result);
+		void DecodeBase64(const ValueList& args, SharedValue result);
 		void DigestToHex(const ValueList& args, SharedValue result);
 		void DigestHMACToHex(const ValueList& args, SharedValue result);
 		void EncodeHexBinary(const ValueList& args, SharedValue result);
 		void DecodeHexBinary(const ValueList& args, SharedValue result);
 		void Checksum(const ValueList& args, SharedValue result);
+		void CreateZip(const ValueList& args, SharedValue result);
+		
+		static SharedValue CreateZipAsync(const ValueList& args);
 	};
 }
 

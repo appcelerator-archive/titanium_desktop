@@ -65,6 +65,40 @@ describe("Codec Tests",{
 
 		var blob = Titanium.API.createBlob("abc");
 		value_of(Titanium.Codec.checksum(blob,Titanium.Codec.ADLER32)).should_be(38600999);
-	}
+	},
 	
+	test_createZip_as_async: function(callback)
+	{
+		var dir = Titanium.Filesystem.getFile(Titanium.App.appURLToPath("app://zipdir"));
+		var zipFile = Titanium.Filesystem.createTempFile();
+		
+		Titanium.API.debug("zipfile="+zipFile);
+		value_of(dir.isDirectory()).should_be_true();
+		
+		var timer = 0;
+		Titanium.Codec.createZip(dir, zipFile, function(destFile)
+		{
+			try
+			{
+				clearTimeout(timer);
+				value_of(destFile).should_be(zipFile);
+				var file = Titanium.Filesystem.getFile(destFile);
+				value_of(file.size()).should_be(5791);
+				var blob = file.read();
+				value_of(blob.length).should_be(5791);
+				value_of(Titanium.Codec.digestToHex(Titanium.Codec.SHA1, blob)).should_be("96421d191686cc4e5c55a5e56463172c3f15db20");
+				
+				callback.passed();
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}
+		});
+		
+		timer = setTimeout(function()
+		{
+			callback.failed("timed out waiting for zip callback");
+		}, 5000);
+	}
 });
