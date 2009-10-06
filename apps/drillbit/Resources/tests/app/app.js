@@ -14,9 +14,9 @@ describe("ti.App tests",
 		value_of(Titanium.App.getDescription()).should_be('cool like dat');
 		value_of(Titanium.App.getGUID()).should_be('CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4');
 
+		// No default icon set for the application.
 		var icon = Titanium.App.getIcon();
-		value_of(icon.indexOf('default_app_logo.png') >= 0).should_be_true();
-		
+		value_of(icon).should_be_null();
 
 		value_of(Titanium.App.exit).should_be_function();
 		value_of(Titanium.App.loadProperties).should_be_function();
