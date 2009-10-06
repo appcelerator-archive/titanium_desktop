@@ -20,8 +20,8 @@ namespace ti
 	private:
 		SharedKObject global;
 		
-		void Base64Encode(const ValueList& args, SharedValue result);
-		void Base64Decode(const ValueList& args, SharedValue result);
+		void EncodeBase64(const ValueList& args, SharedValue result);
+		void DecodeBase64(const ValueList& args, SharedValue result);
 		void DigestToHex(const ValueList& args, SharedValue result);
 		void DigestHMACToHex(const ValueList& args, SharedValue result);
 		void EncodeHexBinary(const ValueList& args, SharedValue result);

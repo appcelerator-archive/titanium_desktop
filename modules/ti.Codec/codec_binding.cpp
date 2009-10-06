@@ -35,14 +35,14 @@ namespace ti
 		 * @tiarg(for=Codec.encodeBase64,name=data,type=String) data to encode
 		 * @tiresult(for=Codec.encodeBase64,type=string) returns base64 encoded string
 		 */
-		this->SetMethod("encodeBase64",&CodecBinding::Base64Encode);
+		this->SetMethod("encodeBase64",&CodecBinding::EncodeBase64);
 
 		/**
 		 * @tiapi(method=True,name=Codec.decodeBase64,since=0.7) decode a string from base64
 		 * @tiarg(for=Codec.decodeBase64,name=data,type=String) data to decode
 		 * @tiresult(for=Codec.decodeBase64,type=string) returns base64 decoded string
 		 */
-		this->SetMethod("decodeBase64",&CodecBinding::Base64Decode);
+		this->SetMethod("decodeBase64",&CodecBinding::DecodeBase64);
 
 		/**
 		 * @tiapi(method=True,name=Codec.digestToHex,since=0.7) encode a string using a digest algorithm
@@ -108,11 +108,14 @@ namespace ti
 		 */
 		this->SetInt("ADLER32", CODEC_ADLER32);
 	}
+
 	CodecBinding::~CodecBinding()
 	{
 	}
-	void CodecBinding::Base64Encode(const ValueList& args, SharedValue result)
+
+	void CodecBinding::EncodeBase64(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("encodeBase64", "s");
 		std::string unencoded = args.at(0)->ToString();
 		std::ostringstream str;
 		Poco::Base64Encoder encoder(str);
@@ -121,8 +124,10 @@ namespace ti
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
-	void CodecBinding::Base64Decode(const ValueList& args, SharedValue result)
+
+	void CodecBinding::DecodeBase64(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("decodeBase64", "s");
 		std::string encoded = args.at(0)->ToString();
 		std::stringstream str;
 		str << encoded;
@@ -131,6 +136,7 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
+
 	void CodecBinding::DigestToHex(const ValueList& args, SharedValue result)
 	{
 		int type = args.at(0)->ToInt();
@@ -173,7 +179,7 @@ namespace ti
 		result->SetString(data);
 		delete engine;
 	}
-	
+
 	void CodecBinding::DigestHMACToHex(const ValueList& args, SharedValue result)
 	{
 		int type = args.at(0)->ToInt();
@@ -221,8 +227,8 @@ namespace ti
 				throw ValueException::FromString(msg.str());
 			}
 		}
-
 	}
+
 	void CodecBinding::EncodeHexBinary(const ValueList& args, SharedValue result)
 	{
 		std::string unencoded = args.at(0)->ToString();
@@ -233,6 +239,7 @@ namespace ti
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
+
 	void CodecBinding::DecodeHexBinary(const ValueList& args, SharedValue result)
 	{
 		std::string encoded = args.at(0)->ToString();
@@ -243,6 +250,7 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
+
 	void CodecBinding::Checksum(const ValueList& args, SharedValue result)
 	{
 		int type = CODEC_CRC32;
