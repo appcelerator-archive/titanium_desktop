@@ -241,6 +241,7 @@ namespace ti
 
 	void File::ToString(const ValueList& args, SharedValue result)
 	{
+		Logger::Get("File")->Debug("ToString: %s", filename.c_str());
 		result->SetString(this->filename.c_str());
 	}
 

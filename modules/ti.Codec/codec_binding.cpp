@@ -18,9 +18,12 @@
 #include <Poco/HexBinaryEncoder.h>
 #include <Poco/HexBinaryDecoder.h>
 #include <Poco/Checksum.h>
+#include <Poco/Data/BLOB.h>
+#include <Poco/Data/BLOBStream.h>
+#include <Poco/File.h>
 
 #define CODEC_MD2 		1
-#define CODEC_MD4	 		2
+#define CODEC_MD4	 	2
 #define CODEC_MD5 		3
 #define CODEC_SHA1 		4
 #define CODEC_CRC32		1
@@ -31,26 +34,26 @@ namespace ti
 	CodecBinding::CodecBinding(SharedKObject global) : global(global)
 	{
 		/**
-		 * @tiapi(method=True,name=Codec.encodeBase64,since=0.7) encode a string into base64
-		 * @tiarg(for=Codec.encodeBase64,name=data,type=String) data to encode
+		 * @tiapi(method=True,name=Codec.encodeBase64,since=0.7) encode a string or blob into base64
+		 * @tiarg(for=Codec.encodeBase64,name=data,type=String|Blob) data to encode
 		 * @tiresult(for=Codec.encodeBase64,type=string) returns base64 encoded string
 		 */
-		this->SetMethod("encodeBase64",&CodecBinding::Base64Encode);
+		this->SetMethod("encodeBase64", &CodecBinding::EncodeBase64);
 
 		/**
 		 * @tiapi(method=True,name=Codec.decodeBase64,since=0.7) decode a string from base64
 		 * @tiarg(for=Codec.decodeBase64,name=data,type=String) data to decode
 		 * @tiresult(for=Codec.decodeBase64,type=string) returns base64 decoded string
 		 */
-		this->SetMethod("decodeBase64",&CodecBinding::Base64Decode);
+		this->SetMethod("decodeBase64", &CodecBinding::DecodeBase64);
 
 		/**
-		 * @tiapi(method=True,name=Codec.digestToHex,since=0.7) encode a string using a digest algorithm
+		 * @tiapi(method=True,name=Codec.digestToHex,since=0.7) encode a string or blob using a digest algorithm
 		 * @tiarg(for=Codec.digestToHex,name=type,type=int) encoding type: currently supports MD2, MD4, MD5, SHA1
-		 * @tiarg(for=Codec.digestToHex,name=data,type=String) data to encode
+		 * @tiarg(for=Codec.digestToHex,name=data,type=String|Blob) data to encode
 		 * @tiresult(for=Codec.digestToHex,type=string) returns encoded string
 		 */
-		this->SetMethod("digestToHex",&CodecBinding::DigestToHex);
+		this->SetMethod("digestToHex", &CodecBinding::DigestToHex);
 
 		/**
 		 * @tiapi(method=True,name=Codec.digestHMACToHex,since=0.7) digest a encoded string in HMAC
@@ -59,21 +62,21 @@ namespace ti
 		 * @tiarg(for=Codec.digestHMACToHex,name=data,type=String) key to us for HMAC
 		 * @tiresult(for=Codec.digestHMACToHex,type=string) returns base64 decoded string
 		 */
-		this->SetMethod("digestHMACToHex",&CodecBinding::DigestHMACToHex);
+		this->SetMethod("digestHMACToHex", &CodecBinding::DigestHMACToHex);
 
 		/**
-		 * @tiapi(method=True,name=Codec.encodeHexBinary,since=0.7) encode a string into hex binary
-		 * @tiarg(for=Codec.encodeHexBinary,name=data,type=String) data to encode
+		 * @tiapi(method=True,name=Codec.encodeHexBinary,since=0.7) encode a string or blob into hex binary
+		 * @tiarg(for=Codec.encodeHexBinary,name=data,type=String|Blob) data to encode
 		 * @tiresult(for=Codec.encodeHexBinary,type=string) returns hex binary encoded string
 		 */
-		this->SetMethod("encodeHexBinary",&CodecBinding::EncodeHexBinary);
+		this->SetMethod("encodeHexBinary", &CodecBinding::EncodeHexBinary);
 
 		/**
 		 * @tiapi(method=True,name=Codec.decodeHexBinary,since=0.7) decode a string from hex binary
 		 * @tiarg(for=Codec.decodeHexBinary,name=data,type=String) data to decode
 		 * @tiresult(for=Codec.decodeHexBinary,type=string) returns unencoded hex binary string
 		 */
-		this->SetMethod("decodeHexBinary",&CodecBinding::DecodeHexBinary);
+		this->SetMethod("decodeHexBinary", &CodecBinding::DecodeHexBinary);
 
 		/**
 		 * @tiapi(method=True,name=Codec.checksum,since=0.7) compute checksum
@@ -81,7 +84,16 @@ namespace ti
 		 * @tiarg(for=Codec.checksum,name=type,type=int,optional=True) checksum type: currently supports CRC32 (default) and ADLER32
 		 * @tiresult(for=Codec.checksum,type=int) return checksum value
 		 */
-		this->SetMethod("checksum",&CodecBinding::Checksum);
+		this->SetMethod("checksum", &CodecBinding::Checksum);
+		
+		/**
+		 * @tiapi(method=True,name=Codec.createZip,since=0.7) Asynchronously write the contents of a directory to a zip blob
+		 * All files will be recursively added from the directory, and the directory will be considered the logical "root" of the zip.
+		 * @tiarg[Filesystem.File|String, directory] A directory root to write to the zip stream
+		 * @tiarg[Function, onComplete] A function callback that receives the zip blob when writing is finished: function onComplete(blob) {}
+		 * @tiresult[Blob] A blob with the binary content of the zip
+		 */
+		this->SetMethod("createZip", &CodecBinding::CreateZip);
 		
 		/**
 		 * @tiapi(property=True,name=Codec.MD2,since=0.7) MD2 property
@@ -108,21 +120,49 @@ namespace ti
 		 */
 		this->SetInt("ADLER32", CODEC_ADLER32);
 	}
+	
 	CodecBinding::~CodecBinding()
 	{
 	}
-	void CodecBinding::Base64Encode(const ValueList& args, SharedValue result)
+	
+	static std::string& GetStringFromValue(SharedValue value)
 	{
-		std::string unencoded = args.at(0)->ToString();
+		static std::string data;
+		if (value->IsString())
+		{
+			data = value->ToString();
+		}
+		else
+		{
+			AutoPtr<Blob> blob(value->ToObject().cast<Blob>());
+			if (!blob.isNull())
+			{
+				data = std::string(blob->Get(), blob->Length());
+			}
+			else
+			{
+				data = "";
+			}
+		}
+		return data;
+	}
+	
+	void CodecBinding::EncodeBase64(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("encodeBase64", "s|o");
+		
 		std::ostringstream str;
 		Poco::Base64Encoder encoder(str);
-		encoder << unencoded;
+		encoder << GetStringFromValue(args.at(0));
 		encoder.close();
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
-	void CodecBinding::Base64Decode(const ValueList& args, SharedValue result)
+	
+	void CodecBinding::DecodeBase64(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("decodeBase64", "s");
+		
 		std::string encoded = args.at(0)->ToString();
 		std::stringstream str;
 		str << encoded;
@@ -131,10 +171,12 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
+	
 	void CodecBinding::DigestToHex(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("digestToHex", "i s|o");
+		
 		int type = args.at(0)->ToInt();
-		std::string encoded = args.at(1)->ToString();
 		
 		Poco::DigestEngine *engine = NULL;
 		
@@ -167,8 +209,19 @@ namespace ti
 				throw ValueException::FromString(msg.str());
 			}
 		}
-
-		engine->update(encoded); 
+		
+		if (args.at(1)->IsString())
+		{
+			engine->update(args.GetString(1));
+		}
+		else
+		{
+			AutoPtr<Blob> blob(args.GetObject(1).cast<Blob>());
+			if (!blob.isNull())
+			{
+				engine->update(blob->Get(), blob->Length());
+			}
+		}
 		std::string data = Poco::DigestEngine::digestToHex(engine->digest()); 
 		result->SetString(data);
 		delete engine;
@@ -176,6 +229,8 @@ namespace ti
 	
 	void CodecBinding::DigestHMACToHex(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("digestHMACToHex", "i s s");
+		
 		int type = args.at(0)->ToInt();
 		std::string encoded = args.at(1)->ToString();
 		std::string key = args.at(2)->ToString();
@@ -223,18 +278,23 @@ namespace ti
 		}
 
 	}
+	
 	void CodecBinding::EncodeHexBinary(const ValueList& args, SharedValue result)
 	{
-		std::string unencoded = args.at(0)->ToString();
+		args.VerifyException("encodeHexBinary", "s|o");
+		
 		std::stringstream str;
 		Poco::HexBinaryEncoder encoder(str);
-		encoder << unencoded;
+		encoder << GetStringFromValue(args.at(0));
 		encoder.close();
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
+	
 	void CodecBinding::DecodeHexBinary(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("decodeHexBinary", "s");
+		
 		std::string encoded = args.at(0)->ToString();
 		std::stringstream str;
 		str << encoded;
@@ -243,8 +303,11 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
+	
 	void CodecBinding::Checksum(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("checksum", "s|o ?i");
+
 		int type = CODEC_CRC32;
 		
 		if (args.size() == 2)
@@ -299,5 +362,97 @@ namespace ti
 		}
 		
 		delete checksum;
+	}
+	
+	static std::string GetPathFromValue(SharedValue value)
+	{
+		if (value->IsObject())
+		{
+			return value->ToObject()->DisplayString()->c_str();
+		}
+		else
+		{
+			return value->ToString();
+		}
+	}
+	
+	void CodecBinding::CreateZip(const ValueList& args, SharedValue result)
+	{
+		args.VerifyException("createZip", "s|o s|o ?m");
+		
+		std::string directory = GetPathFromValue(args.at(0));
+		std::string zipFile = GetPathFromValue(args.at(1));
+		
+		if (directory.size() <= 0)
+		{
+			throw ValueException::FromString("Error: Directory name in createZip is empty");
+		}
+		if (zipFile.size() <= 0)
+		{
+			throw ValueException::FromString("Error: Destination file name in createZip is empty");
+		}
+		
+		Poco::Path path(directory);
+		path.makeDirectory();
+		if (!Poco::File(path).exists())
+		{
+			throw ValueException::FromFormat("Error: Directory %s doesn't exist in createZip", directory.c_str());
+		}
+		
+		SharedKMethod zipAsyncMethod = new KFunctionPtrMethod(&CodecBinding::CreateZipAsync);
+		ValueList zipArgs;
+		zipArgs.push_back(Value::NewString(directory));
+		zipArgs.push_back(Value::NewString(zipFile));
+		
+		zipJob = new AsyncJob(zipAsyncMethod);
+		zipArgs.push_back(Value::NewObject(zipJob->GetAutoPtr()));
+		if (args.size() > 2 && args.at(2)->IsMethod())
+		{
+			zipArgs.push_back(args.at(2));
+		}
+
+		zipJob->SetArguments(zipArgs);
+		zipJob->RunAsynchronously();
+		result->SetObject(zipJob);
+	}
+
+	/*static*/
+	SharedValue CodecBinding::CreateZipAsync(const ValueList& args)
+	{
+		std::string directory = args.GetString(0);
+		std::string zipFile = args.GetString(1);
+		AutoPtr<AsyncJob> job = args.GetObject(2).cast<AsyncJob>();
+		SharedKMethod callback = 0;
+		if (args.size() > 3)
+		{
+			callback = args.GetMethod(3);
+		}
+		
+		Poco::Path path(directory);
+		path.makeDirectory();
+		
+		std::ofstream stream(zipFile.c_str(), std::ios::binary | std::ios::trunc);
+		Poco::Zip::Compress compressor(stream, true);
+		try
+		{
+			compressor.addRecursive(path);
+		}
+		catch (std::exception& e)
+		{
+			Logger::Get("Codec")->Error("exception compressing: %s", e.what());
+			throw ValueException::FromFormat("Exception during zip: %s", e.what());
+		}
+		
+		compressor.close();
+		stream.close();
+		
+		if (!callback.isNull())
+		{
+			ValueList args;
+			args.push_back(Value::NewString(zipFile));
+			Host::GetInstance()->InvokeMethodOnMainThread(callback, args, true);
+		}
+		
+		return Value::Undefined;
 	}
 }

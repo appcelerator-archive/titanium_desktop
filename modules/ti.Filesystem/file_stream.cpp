@@ -248,7 +248,7 @@ namespace ti
 	}
 	void FileStream::Read(const ValueList& args, SharedValue result)
 	{
-		if(!this->stream)
+		if (!this->stream)
 		{
 			Logger* logger = Logger::Get("Filesystem.FileStream");
 			logger->Error("Error in read. FileStream must be opened before calling read");
@@ -257,33 +257,29 @@ namespace ti
 
 		try
 		{
-			std::stringstream ostr;
-
-			Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
-			if(!fis)
+			Poco::FileInputStream* fileStream = dynamic_cast<Poco::FileInputStream*>(this->stream);
+			if (!fileStream)
 			{
 				Logger* logger = Logger::Get("Filesystem.FileStream");
 				logger->Error("Error in read. FileInputStream is null");
 				throw ValueException::FromString("FileStream must be opened for reading before calling read");
 			}
 			
-			char buf[4096];
-			int count = 0;
+			std::vector<char> buffer;
+			char data[4096];
 
-			while(!fis->eof())
+			while (!fileStream->eof())
 			{
-				fis->read((char*)&buf,4095);
-				std::streamsize len = fis->gcount();
-				if (len>0)
+				fileStream->read((char*)&data, 4095);
+				int length = fileStream->gcount();
+				if (length > 0)
 				{
-					buf[len]='\0';
-					count+=len;
-					ostr << buf;
+					buffer.insert(buffer.end(), data, data+length);
 				}
 				else break;
 			}
 
-			result->SetObject(new Blob(ostr.str().c_str(),count));
+			result->SetObject(new Blob(&(buffer[0]), buffer.size()));
 		}
 		catch (Poco::Exception& exc)
 		{
