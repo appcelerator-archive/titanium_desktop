@@ -27,5 +27,4 @@ namespace ti
 	void CodecModule::Stop()
 	{
 	}
-	
 }

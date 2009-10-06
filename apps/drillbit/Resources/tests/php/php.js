@@ -206,4 +206,16 @@ describe("php tests",
 		value_of(result).should_be_string();
 		value_of(result.length).should_be_number();
 	},
+	test_include_contains_resources_directory: function()
+	{
+		// Test that files in the Resources directory
+		//  are on the include path.
+		var include_path = get_include_path();
+		var res_dir = Titanium.API.getApplication().getResourcesPath();
+		value_of(include_path.indexOf(res_dir) != -1).should_be_true();
+	},
+	test_include_access: function()
+	{
+		value_of(test_include()).should_be("yes");
+	},
 });

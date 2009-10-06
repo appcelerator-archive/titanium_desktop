@@ -18,7 +18,7 @@
 	{
 		try
 		{
-			if (created || Titanium.Database == undefined || !event.sameDomain)
+			if (created || Titanium.Database == undefined || !event.hasTitaniumObject)
 			{
 				return;
 			}

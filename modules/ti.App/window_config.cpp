@@ -69,7 +69,6 @@ using namespace ti;
 
 int WindowConfig::DEFAULT_POSITION = -404404404;
 int WindowConfig::windowCount = 0;
-std::string WindowConfig::blankPageURL("about:blank");
 
 void WindowConfig::SetDefaults ()
 {
@@ -85,6 +84,7 @@ void WindowConfig::SetDefaults ()
 	this->resizable = true;
 
 	this->usingChrome = true;
+	this->toolWindow = false;
 	this->usingScrollbars = true;
 	this->fullscreen = false;
 	this->maximized = false;
@@ -108,7 +108,7 @@ void WindowConfig::SetDefaults ()
 	this->maxWidth = -1;
 	this->maxHeight = -1;
 
-	this->url = WindowConfig::blankPageURL;
+	this->url = URLUtils::BlankPageURL();
 	this->title = Host::GetInstance()->GetApplication()->name;
 }
 
@@ -137,6 +137,7 @@ void WindowConfig::UseProperties(SharedKObject properties)
 	SET_BOOL(maximized, maximized);
 	SET_BOOL(minimized, minimized);
 	SET_BOOL(usingChrome, usingChrome);
+	SET_BOOL(toolWindow, toolWindow);
 	SET_BOOL(usingScrollbars, usingScrollbars);
 	SET_BOOL(topMost, topMost);
 	SET_DOUBLE(transparency, transparency);
@@ -242,6 +243,10 @@ WindowConfig::WindowConfig(void* data)
 			{
 				usingScrollbars = ConfigUtils::StringToBool(scrollbars);
 			}
+		}
+		else if (nodeNameEquals(child, "tool-window"))
+		{
+			toolWindow = ConfigUtils::GetNodeValueAsBool(child);
 		}
 		else if (nodeNameEquals(child, "transparency"))
 		{

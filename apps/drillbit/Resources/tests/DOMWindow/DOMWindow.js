@@ -6,8 +6,11 @@ describe("UI Window Tests",{
 		{
 			var w = window.open.apply(window, args);
 			value_of(w).should_be_object();
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function()
+			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 			{
+				if (!event.hasTitaniumObject)
+					return;
+
 				w.callback = function()
 				{
 					clearTimeout(timer);
@@ -28,13 +31,17 @@ describe("UI Window Tests",{
 			}, 3000);
 		};
 	},
-	
-	test_open_no_url: function()
+	test_open_no_url_as_async: function(callback)
 	{
 		var w = window.open()
-		value_of(w).should_be_object();
-		value_of(w.Titanium).should_be_object();
-		w.close();
+		setTimeout(function() {
+			Titanium.API.debug(w.Titanium);
+			if (typeof(w) != "object" || typeof(w.Titanium) != 'object')
+				callback.failed("Could not find Titanium object in window");
+			else
+				callback.passed();
+			w.close();
+		}, 200);
 	},
 	test_open_with_url_as_async: function(test)
 	{

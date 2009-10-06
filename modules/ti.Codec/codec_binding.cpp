@@ -158,11 +158,11 @@ namespace ti
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
-	
+
 	void CodecBinding::DecodeBase64(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("decodeBase64", "s");
-		
+
 		std::string encoded = args.at(0)->ToString();
 		std::stringstream str;
 		str << encoded;
@@ -171,7 +171,7 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
-	
+
 	void CodecBinding::DigestToHex(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("digestToHex", "i s|o");
@@ -226,7 +226,7 @@ namespace ti
 		result->SetString(data);
 		delete engine;
 	}
-	
+
 	void CodecBinding::DigestHMACToHex(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("digestHMACToHex", "i s s");
@@ -276,9 +276,8 @@ namespace ti
 				throw ValueException::FromString(msg.str());
 			}
 		}
-
 	}
-	
+
 	void CodecBinding::EncodeHexBinary(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("encodeHexBinary", "s|o");
@@ -290,7 +289,7 @@ namespace ti
 		std::string encoded = str.str();
 		result->SetString(encoded);
 	}
-	
+
 	void CodecBinding::DecodeHexBinary(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("decodeHexBinary", "s");
@@ -303,7 +302,7 @@ namespace ti
 		decoder >> decoded;
 		result->SetString(decoded);
 	}
-	
+
 	void CodecBinding::Checksum(const ValueList& args, SharedValue result)
 	{
 		args.VerifyException("checksum", "s|o ?i");

@@ -4,8 +4,10 @@
 	
 	Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 	{
+		if (!event.hasTitaniumObject)
+			return;
+
 		var window = event.scope;
-		
 		// hook into the createWorker and make sure we pass in the window
 		// object as the first parameter
 

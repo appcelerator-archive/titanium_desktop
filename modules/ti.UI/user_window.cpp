@@ -85,6 +85,22 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
+	 * @tiapi(method=True,name=UI.UserWindow.isToolWindow,since=0.7)
+	 * @tiapi Checks whether a window is a tool window or not.
+	 * @tiresult[bool] True if this window is a tool window, false otherwise.
+	 */
+	this->SetMethod("isToolWindow", &UserWindow::_IsToolWindow);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.setToolWindow,since=0.7)
+	 * @tiapi Set whether or not this window is a tool window. The behavior of
+	 * @tiapi changing this setting after a window has been opened is undefined
+	 * @tiapi and likely will have no effect.
+	 * @tiarg[bool, toolWindow] Whether or not this window should be a tool window.
+	 */
+	this->SetMethod("setToolWindow", &UserWindow::_SetToolWindow);
+
+	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.5) Checks whether a window is in fullscreen
 	 * @tiarg(for=UI.UserWindow.isFullscreen,name=chrome,type=Boolean) true if the window is in fullscreen, false if otherwise
 	 */
@@ -472,9 +488,27 @@ AutoUserWindow UserWindow::GetAutoPtr()
 	return this;
 }
 
-Host* UserWindow::GetHost()
+SharedString UserWindow::DisplayString(int level)
 {
-	return this->host;
+	std::string* displayString = new std::string();
+	displayString->append("URL=");
+	displayString->append(this->GetURL());
+	displayString->append(" window id=");
+	displayString->append(this->GetId());
+	return displayString;
+}
+
+static double Constrain(double value, double min, double max)
+{
+	if (min >= 0.0 && value < min)
+	{
+		value = min;
+	}
+	if (max >= 0.0 && value > max)
+	{
+		value = max;
+	}
+	return value;
 }
 
 void UserWindow::Open()
@@ -671,6 +705,29 @@ void UserWindow::_IsUsingChrome(const kroll::ValueList& args, kroll::SharedValue
 	}
 }
 
+void UserWindow::_SetUsingChrome(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	args.VerifyException("setUsingChrome", "b");
+	bool b = args.at(0)->ToBool();
+	this->config->SetUsingChrome(b);
+	if (this->active)
+	{
+		this->SetUsingChrome(b);
+	}
+}
+
+
+void UserWindow::_IsToolWindow(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	result->SetBool(this->IsToolWindow());
+}
+
+void UserWindow::_SetToolWindow(const kroll::ValueList& args, kroll::SharedValue result)
+{
+	args.VerifyException("setToolWindow", "b");
+	config->SetToolWindow(args.GetBool(0));
+}
+
 void UserWindow::_SetTopMost(const kroll::ValueList& args, kroll::SharedValue result)
 {
 	args.VerifyException("setTopMost", "b");
@@ -694,16 +751,6 @@ void UserWindow::_IsTopMost(const kroll::ValueList& args, kroll::SharedValue res
 	}
 }
 
-void UserWindow::_SetUsingChrome(const kroll::ValueList& args, kroll::SharedValue result)
-{
-	args.VerifyException("setUsingChrome", "b");
-	bool b = args.at(0)->ToBool();
-	this->config->SetUsingChrome(b);
-	if (this->active)
-	{
-		this->SetUsingChrome(b);
-	}
-}
 
 void UserWindow::_IsUsingScrollbars(const kroll::ValueList& args, kroll::SharedValue result)
 {
@@ -871,7 +918,7 @@ void UserWindow::_SetWidth(double w)
 {
 	if (w > 0)
 	{
-		w = UserWindow::Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
+		w = Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
 		this->config->SetWidth(w);
 		if (this->active)
 		{
@@ -987,7 +1034,7 @@ void UserWindow::_SetHeight(double h)
 {
 	if (h > 0)
 	{
-		h = UserWindow::Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
+		h = Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
 		this->config->SetHeight(h);
 		if (this->active)
 		{
@@ -1115,8 +1162,8 @@ void UserWindow::_SetBounds(const kroll::ValueList& args, kroll::SharedValue res
 	double y = o->Get("y")->ToNumber();
 	double w = o->Get("width")->ToNumber();
 	double h = o->Get("height")->ToNumber();
-	w = UserWindow::Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
-	h = UserWindow::Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
+	w = Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
+	h = Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
 
 	this->config->SetX(x);
 	this->config->SetY(y);
@@ -1184,7 +1231,7 @@ void UserWindow::_SetURL(const kroll::ValueList& args, kroll::SharedValue result
 
 	std::string url = args.at(0)->ToString();
 	if (url.empty())
-		url = WindowConfig::blankPageURL;
+		url = URLUtils::BlankPageURL();
 	else
 		url = URLUtils::NormalizeURL(url);
 
@@ -1339,7 +1386,7 @@ void UserWindow::_SetTransparency(const kroll::ValueList& args, kroll::SharedVal
 {
 	args.VerifyException("setTransparency", "n");
 	double t = args.at(0)->ToNumber();
-	t = UserWindow::Constrain(t, 0.0, 1.0);
+	t = Constrain(t, 0.0, 1.0);
 
 	this->config->SetTransparency(t);
 	if (this->active)
@@ -1709,8 +1756,7 @@ void UserWindow::RemoveChild(AutoUserWindow child)
 	}
 }
 
-bool UserWindow::ShouldHaveTitaniumObject(
-	JSGlobalContextRef ctx, JSObjectRef global)
+static bool ShouldHaveTitaniumObject(JSGlobalContextRef ctx, JSObjectRef global)
 {
 	// We really only want URLs that are loaded via the
 	// app, ti or file protocol to have the Titanium object.
@@ -1747,14 +1793,11 @@ bool UserWindow::ShouldHaveTitaniumObject(
 
 	string url(KJSUtil::ToChars(locString));
 	transform(url.begin(), url.end(), url.begin(), tolower);
-	return url.find("app://") == 0 || 
-		url.find("ti://") == 0 ||
-		url.find("file://") == 0 || 
-		url == "about:blank" ||       // about blank is local and we should be able to open a write to document object w/ Titanium
-		url.find("data:text/html;") == 0;  // data uris can be considered local
+	return url.find("app://") == 0 || url.find("ti://") == 0 ||
+		url.find("file://") == 0 || url.find("data:text/html;") == 0;
 }
 
-bool UserWindow::IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
+static bool IsMainFrame(JSGlobalContextRef ctx, JSObjectRef global)
 {
 	// If this global objects 'parent' property is equal to the object
 	// itself, it is likely the main frame. There might be a better way
@@ -1823,15 +1866,14 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// that loads on a page will follow this same code path.
 	if (IsMainFrame(context, globalObject))
 		this->domWindow = frameGlobal->GetObject("window", 0);
-		
-	bool sameDomain = false;
+
 
 	// Only certain pages should get the Titanium object. This is to prevent
 	// malicious sites from always getting access to the user's system. This
 	// can be overridden by any other API that calls InsertAPI on this DOM window.
-	if (this->ShouldHaveTitaniumObject(context, globalObject))
+	bool hasTitaniumObject = ShouldHaveTitaniumObject(context, globalObject);
+	if (hasTitaniumObject)
 	{
-		sameDomain = true;
 		this->InsertAPI(frameGlobal);
 		UserWindow::LoadUIJavaScript(context);
 	}
@@ -1839,7 +1881,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
 	event->SetObject("scope", frameGlobal);
 	event->SetString("url", config->GetURL());
-	event->SetBool("sameDomain",sameDomain);
+	event->SetBool("hasTitaniumObject", hasTitaniumObject);
 	this->FireEvent(event);
 }
 
@@ -1871,17 +1913,4 @@ void UserWindow::PageLoaded(
 	event->SetObject("scope", globalObject);
 	event->SetString("url", url);
 	this->FireEvent(event);
-}
-
-double UserWindow::Constrain(double value, double min, double max)
-{
-	if (min >= 0.0 && value < min)
-	{
-		value = min;
-	}
-	if (max >= 0.0 && value > max)
-	{
-		value = max;
-	}
-	return value;
 }

@@ -121,7 +121,30 @@
 	replaceMethod(console, "info", function(msg) { Titanium.API.info(msg); });
 	replaceMethod(console, "warn", function(msg) { Titanium.API.warn(msg); });
 	replaceMethod(console, "error", function(msg) { Titanium.API.error(msg); });
-	
+
+	// Exchange the open() method for a version which ensures that a blank
+	// URL maps to app://__blank__ rather than about:blank.
+	var _oldOpenFunction = window.open;
+	window.open = function()
+	{
+		var newArgs = Array();
+		if (arguments.length < 1 || arguments[0] == "about:blank")
+		{
+			newArgs[0] = "app://__blank__.html";
+		}
+		else
+		{
+			newArgs[0] = arguments[0];
+		}
+
+		for (var i = 1; i < arguments.length; i++)
+		{
+			newArgs[i] = arguments[i];
+		}
+
+		return _oldOpenFunction.apply(window, newArgs);
+	}
+
 	/**
 	 * convenience for opening windows from code that reference inline HTML instead of forcing the use of URLs. this
 	 * is useful when you need to create programmatic windows from within code. uses data URIs feature of WebKit.

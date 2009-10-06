@@ -2,7 +2,6 @@
 #version:0.5.0
 #appid:com.titaniumapp.unittest
 #publisher:Appcelerator
-#image:default_app_logo.png
 #url:http://titaniumapp.com
 #guid:CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4
 #desc:Unit Test Harness

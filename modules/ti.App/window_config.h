@@ -40,6 +40,7 @@ class TITANIUM_APP_API WindowConfig
 	bool maximized;
 	bool minimized;
 	bool usingChrome;
+	bool toolWindow;
 	bool usingScrollbars;
 	bool topMost;
 #ifdef OS_OSX
@@ -51,7 +52,6 @@ class TITANIUM_APP_API WindowConfig
 	public:
 	static int DEFAULT_POSITION;
 	static int windowCount;
-	static std::string blankPageURL;
 
 	WindowConfig() { SetDefaults(); }
 	WindowConfig(void* data);
@@ -107,6 +107,8 @@ class TITANIUM_APP_API WindowConfig
 	void SetMinimized(bool minimized_) { minimized = minimized_; }
 	bool IsUsingChrome() { return usingChrome; }
 	void SetUsingChrome(bool usingChrome_) { usingChrome = usingChrome_; }
+	bool IsToolWindow() { return toolWindow; }
+	void SetToolWindow(bool toolWindow_) { toolWindow = toolWindow_; }
 	bool IsUsingScrollbars() { return usingScrollbars; }
 	void SetUsingScrollbars(bool usingScrollbars_) { usingScrollbars = usingScrollbars_; }
 	bool IsTopMost() { return topMost; }
