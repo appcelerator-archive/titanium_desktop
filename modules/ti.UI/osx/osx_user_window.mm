@@ -98,6 +98,8 @@ namespace ti
 			[nativeWindow miniaturize:nativeWindow];
 		}
 
+		[nativeWindow setExcludedFromWindowsMenu:config->IsToolWindow()];
+
 		[nativeWindow open];
 		UserWindow::Open();
 		this->FireEvent(Event::OPENED);
