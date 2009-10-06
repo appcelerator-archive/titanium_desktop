@@ -17,7 +17,7 @@ describe("Network.HTTPServer",
 				value_of(request.hasHeader('Foo')).should_be_false();
 				value_of(request.getHeader('Foo')).should_be_null();
 				value_of(request.getContentType()).should_be('');
-				value_of(request.getContentLength()).should_be(-1);
+				value_of(request.getContentLength()).should_be(0);
 				value_of(request.read()).should_be_null();
 				value_of(server.isClosed()).should_be_false();
 				server.close();

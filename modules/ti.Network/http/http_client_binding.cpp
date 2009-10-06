@@ -3,12 +3,8 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
-#ifdef OS_OSX	//For some reason, 10.5 was fine with Cocoa headers being last, but 10.4 balks.
-#import <Cocoa/Cocoa.h>
-#endif
 
 #include "http_client_binding.h"
-
 namespace ti
 {
 	kroll::Logger* HTTPClientBinding::logger = 0;
@@ -25,12 +21,13 @@ namespace ti
 		dirty(false)
 	{
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.abort,since=0.3) Aborts an in progress connection
+		 * @tiapi(method=True, name=Network.HTTPClient.abort, since=0.3)
+		 * @tiapi Aborts an in progress connection
 		 */
-		this->SetMethod("abort",&HTTPClientBinding::Abort);
+		this->SetMethod("abort", &HTTPClientBinding::Abort);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.open,since=0.3) Opens an HTTP connection
+		 * @tiapi(method=True, name=Network.HTTPClient.open, since=0.3) Opens an HTTP connection
 		 * @tiarg[String, method] The HTTP method to use e.g. POST
 		 * @tiarg[String, url] The url to connect to
 		 * @tiarg[Boolean, asynchronous, optional=True] Whether or not the request should be asynchronous (default: True)
@@ -38,202 +35,206 @@ namespace ti
 		 * @tiarg[String, password, optional=True] The HTTP password to use
 		 * @tiresult[Boolean] return true if supplied arguments are valid
 		 */
-		this->SetMethod("open",&HTTPClientBinding::Open);
+		this->SetMethod("open", &HTTPClientBinding::Open);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.setBasicCredentials,since=0.7)
+		 * @tiapi(method=True, name=Network.HTTPClient.setBasicCredentials, since=0.7)
 		 * @tiapi Set the basic authentication credentials
-		 * @tiarg[String,username] username
- 		 * @tiarg[String,password] password
+		 * @tiarg[String, username] username
+ 		 * @tiarg[String, password] password
 		 */
-		this->SetMethod("setBasicCredentials",&HTTPClientBinding::SetBasicCredentials);
+		this->SetMethod("setBasicCredentials", &HTTPClientBinding::SetBasicCredentials);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.setRequestHeader,since=0.3)
+		 * @tiapi(method=True, name=Network.HTTPClient.setRequestHeader, since=0.3)
 		 * @tiapi Sets a request header for the connection
-		 * @tiarg[String,header] request header name
-		 * @tiarg[String,value] request header value
+		 * @tiarg[String, header] request header name
+		 * @tiarg[String, value] request header value
 		 */
-		this->SetMethod("setRequestHeader",&HTTPClientBinding::SetRequestHeader);
+		this->SetMethod("setRequestHeader", &HTTPClientBinding::SetRequestHeader);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.send,since=0.3) Sends data through the HTTP connection
-		 * @tiarg[Object,data,optional=True] data to send
+		 * @tiapi(method=True, name=Network.HTTPClient.send, since=0.3)
+		 * @tiapi Sends data through the HTTP connection
+		 * @tiarg[Object, data, optional=True] data to send
 		 * @tiresult[Boolean] returns true if request dispatched successfully
 		 */
-		this->SetMethod("send",&HTTPClientBinding::Send);
+		this->SetMethod("send", &HTTPClientBinding::Send);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.sendFile,since=0.3)
+		 * @tiapi(method=True, name=Network.HTTPClient.sendFile, since=0.3)
 		 * @tiapi Sends the contents of a file as body content
-		 * @tiarg[Titanium.Filesystem.File,file] the File object to send
+		 * @tiarg[Titanium.Filesystem.File, file] the File object to send
 		 */
-		this->SetMethod("sendFile",&HTTPClientBinding::Send);
+		this->SetMethod("sendFile", &HTTPClientBinding::Send);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.receive,since=0.7)
+		 * @tiapi(method=True, name=Network.HTTPClient.receive, since=0.7)
 		 * @tiapi Sends a request to the server and receive data with the provided handler.
 		 * @tiarg[Object, handler] A handler to receive the response data. Can either be Titanium.Filesystem.File or a method.
 		 * @tiarg[Object, data, optional=True] data to send
 		 * @tiresult[Boolean] returns true if request dispatched successfully
 		 */
-		this->SetMethod("receive",&HTTPClientBinding::Receive);
+		this->SetMethod("receive", &HTTPClientBinding::Receive);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.getResponseHeader,since=0.3) Returns the value of a response header
-		 * @tiarg(for=Network.HTTPClient.getResponseHeader,type=String,name=name) the response header name
-		 * @tiresult(for=Network.HTTPClient.getResponseHeader,type=String) the value of the response header
+		 * @tiapi(method=True, name=Network.HTTPClient.getResponseHeader, since=0.3)
+		 * @tiapi Returns the value of a response header
+		 * @tiarg[String, name] the response header name
+		 * @tiresult[String] the value of the response header
 		 */
 		this->SetMethod("getResponseHeader",&HTTPClientBinding::GetResponseHeader);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.setCookie,since=0.7) 
+		 * @tiapi(method=True, name=Network.HTTPClient.setCookie, since=0.7) 
 		 * @tiapi Set a HTTP cookie in the request.
-		 * @tiarg[String,name] the cookie name
-		 * @tiarg[String,value] the cookie value
+		 * @tiarg[String, name] the cookie name
+		 * @tiarg[String, value] the cookie value
 		 */
 		this->SetMethod("setCookie",&HTTPClientBinding::SetCookie);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.clearCookies,since=0.7)
+		 * @tiapi(method=True, name=Network.HTTPClient.clearCookies, since=0.7)
 		 * @tiapi Clear any cookies set on the request
 		 */
 		this->SetMethod("clearCookies",&HTTPClientBinding::ClearCookies);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.getCookie,since=0.7)
+		 * @tiapi(method=True, name=Network.HTTPClient.getCookie, since=0.7)
 		 * @tiapi Get a HTTP cookie from the response.
-		 * @tiarg[String,name] name of the cookie to get
+		 * @tiarg[String, name] name of the cookie to get
 		 * @tiresult[Network.HTTPCookie] a cookie or null if not found
 		 */
 		this->SetMethod("getCookie",&HTTPClientBinding::GetCookie);
 
 		/**
-		 * @tiapi(method=True,name=Network.HTTPClient.setTimeout,since=0.4) Sets the timeout for the request
-		 * @tiarg(for=Network.HTTPClient.setTimeout,type=Number,name=timeout) timeout value in milliseconds
+		 * @tiapi(method=True, name=Network.HTTPClient.setTimeout, since=0.4) Sets the timeout for the request
+		 * @tiarg[Number, timeout] timeout value in milliseconds
 		 */
 		this->SetMethod("setTimeout",&HTTPClientBinding::SetTimeout);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.readyState,since=0.3) The ready-state status for the connection
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.readyState, since=0.3)
+		 * @tiapi The ready-state status for the connection
 		 */
-		this->SetInt("readyState",0);
+		this->SetInt("readyState", 0);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.UNSENT,since=0.3) The UNSENT readyState property
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.UNSENT, since=0.3)
+		 * @tiai The UNSENT readyState property
 		 */
-		this->SetInt("UNSENT",0);
+		this->SetInt("UNSENT", 0);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.OPENED,since=0.3)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.OPENED, since=0.3)
 		 * @tiapi The OPENED readyState property
 		 */
-		this->SetInt("OPENED",1);
+		this->SetInt("OPENED", 1);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.HEADERS_RECEIVED,since=0.3)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.HEADERS_RECEIVED, since=0.3)
 		 * @tiapi The HEADERS_RECEIVED readyState property
 		 */
-		this->SetInt("HEADERS_RECEIVED",2);
+		this->SetInt("HEADERS_RECEIVED", 2);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.LOADING,since=0.3)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.LOADING, since=0.3)
 		 * @tiapi The LOADING readyState property
 		 */
-		this->SetInt("LOADING",3);
+		this->SetInt("LOADING", 3);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.DONE,since=0.3)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.DONE, since=0.3)
 		 * @tiapi The DONE readyState property
 		 */
-		this->SetInt("DONE",4);
+		this->SetInt("DONE", 4);
 
 		/**
-		 * @tiapi(property=True,type=String,name=Network.HTTPClient.responseText,since=0.3)
+		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseText, since=0.3)
 		 * @tiapi The response of an HTTP request as text
 		 */
 		this->SetNull("responseText");
 
 		/**
-		 * @tiapi(property=True,type=String,name=Network.HTTPClient.responseXML,since=0.3)
+		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseXML, since=0.3)
 		 * @tiapi The response of an HTTP request as parsable XML
 		 */
 		this->SetNull("responseXML");
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.status,since=0.3)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.status, since=0.3)
 		 * @tiapi The response status code of an HTTP request
 		 */
 		this->SetNull("status");
 
 		/**
-		 * @tiapi(property=True,type=String,name=Network.HTTPClient.statusText,since=0.3)
+		 * @tiapi(property=True, type=String, name=Network.HTTPClient.statusText, since=0.3)
 		 * @tiapi The response status text of an HTTP Request
 		 */
 		this->SetNull("statusText");
 
 		/**
-		 * @tiapi(property=True,type=Boolean,name=Network.HTTPClient.timedOut,since=0.7)
+		 * @tiapi(property=True, type=Boolean, name=Network.HTTPClient.timedOut, since=0.7)
 		 * @tiapi True if HTTP request timed out
 		 */
 		this->SetBool("timedOut", false);
 
 		/**
-		 * @tiapi(property=True,type=String,name=Network.HTTPClient.url,since=0.7)
+		 * @tiapi(property=True, type=String, name=Network.HTTPClient.url, since=0.7)
 		 * @tiapi The request URL. This value will be updated on redirect events.
 		 */
 		this->SetNull("url");
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.dataSent,since=0.7)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataSent, since=0.7)
 		 * @tiapi Amount of data sent to server so far. Updated on DATASENT event.
 		 */
 		this->SetInt("dataSent", 0);
 
 		/**
-		 * @tiapi(property=True,type=Number,name=Network.HTTPClient.dataReceived,since=0.7)
+		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataReceived, since=0.7)
 		 * @tiapi Amount of data received from server so far. Updated on DATARECV event.
 		 */
 		this->SetInt("dataReceived", 0);
 
 		/**
-		 * @tiapi(property=True,type=Boolean,name=Network.HTTPClient.connected,since=0.3)
+		 * @tiapi(property=True, type=Boolean, name=Network.HTTPClient.connected, since=0.3)
 		 * @tiapi Whether an HTTPClient object is connected or not
 		 */
 		this->SetBool("connected", false);
 
 		/**
-		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onreadystatechange,since=0.3)
+		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onreadystatechange, since=0.3)
 		 * @tiapi The handler function that will be fired when the ready-state code of an HTTPClient object changes.
 		 */
 		this->SetNull("onreadystatechange");
 		 
 		/**
-		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.ondatastream,since=0.3)
+		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.ondatastream, since=0.3)
 		 * @tiapi The handler function that will be fired as stream data is received from an HTTP request
 		 */
 		this->SetNull("ondatastream");
 		 
 		/**
-		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onsendstream,since=0.3)
+		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onsendstream, since=0.3)
 		 * @tiapi The handler function that will be fired as the stream data is sent.
 		 */
 		this->SetNull("onsendstream");
 		 
 		/**
-		 * @tiapi(property=True,type=Function,name=Network.HTTPClient.onload,since=0.7)
+		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onload, since=0.7)
 		 * @tiapi The handler function that will be fired when request is completed
 		*/
 		this->SetNull("onload");
 
 		/**
-		 * @tiapi(property=True,name=Network.HTTPClient.maxRedirects,since=0.7)
+		 * @tiapi(property=True, name=Network.HTTPClient.maxRedirects, since=0.7)
 		 * @tiapi Maxium number of redirects to follow. (Default: 5)
 		 */
 		this->SetInt("maxRedirects", 5);
 
 		/**
-		 * @tiapi(property=True,name=Network.HTTPClient.userAgent,since=0.7)
+		 * @tiapi(property=True, name=Network.HTTPClient.userAgent, since=0.7)
 		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCTVERSION)
 		 */
 		this->SetString("userAgent", PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
@@ -366,7 +367,7 @@ namespace ti
 		args.VerifyException("setRequestHeader", "ss");
 		std::string key = args.GetString(0);
 		std::string value = args.GetString(1);
-		this->headers[key]=value;
+		this->headers[key] = value;
 	}
 
 	void HTTPClientBinding::GetResponseHeader(const ValueList& args, SharedValue result)
@@ -517,7 +518,7 @@ namespace ti
 		}
 
 		this->dirty = true;
-		this->Set("connected",Value::NewBool(true));
+		this->Set("connected", Value::NewBool(true));
 
 		if (this->async)
 		{
@@ -535,7 +536,7 @@ namespace ti
 	void HTTPClientBinding::ChangeState(int readyState)
 	{
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
-		this->SetInt("readyState",readyState);
+		this->SetInt("readyState", readyState);
 		this->FireEvent(Event::HTTP_STATECHANGED);
 	}
 
@@ -561,7 +562,7 @@ namespace ti
 
 		SharedPtr<Poco::Net::InvalidCertificateHandler> cert = 
 			new Poco::Net::AcceptCertificateHandler(false); 
-		std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem",NULL);
+		std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem", NULL);
 		Poco::Net::Context::Ptr context = new Poco::Net::Context(
 			Poco::Net::Context::CLIENT_USE,
 			"", "",
@@ -627,7 +628,7 @@ namespace ti
 		int dataReceived = 0;
 		int readSize = 0;
 
-		while(dataReceived < responseLength)
+		while (dataReceived < responseLength)
 		{
 			if (this->abort.tryWait(0))
 			{
@@ -684,7 +685,7 @@ namespace ti
 				this->responseCookies[cookie.getName()] = cookie;
 			}
 		}
-		catch(Poco::Exception& e)
+		catch (Poco::Exception& e)
 		{
 			// Probably a bad Set-Cookie header
 			logger->Error("Failed to read cookies");
@@ -713,22 +714,25 @@ namespace ti
 					path = "/";
 
 				// Prepare the request
-				Poco::Net::HTTPRequest req(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
-				req.set("User-Agent", this->GetString("userAgent").c_str());
+				Poco::Net::HTTPRequest request(this->method, path, Poco::Net::HTTPMessage::HTTP_1_1);
+				request.set("User-Agent", this->GetString("userAgent").c_str());
 
 				// Set cookies
-				req.setCookies(this->requestCookies);
+				if (!this->requestCookies.empty())
+					request.setCookies(this->requestCookies);
 
 				// Apply basic authentication credentials
-				basicCredentials.authenticate(req);
+				basicCredentials.authenticate(request);
 
 				// Set headers
 				if (this->headers.size() > 0)
 				{
-					std::map<std::string,std::string>::iterator i = this->headers.begin();
-					while(i != this->headers.end())
+					std::map<std::string, std::string>::iterator i = this->headers.begin();
+					while (i != this->headers.end())
 					{
-						req.set((*i).first, (*i).second);
+						if (i->first.empty() || i->second.empty())
+							continue;
+						request.set(i->first, i->second);
 						i++;
 					}
 				}
@@ -738,10 +742,10 @@ namespace ti
 				// method that is re-useable else where in the code base.
 				std::ostringstream contentLengthStr(std::ios::binary | std::ios::out);
 				contentLengthStr << this->contentLength;
-				req.set("Content-Length", contentLengthStr.str());
+				request.set("Content-Length", contentLengthStr.str());
 
 				// Send request and grab an output stream to send body
-				std::ostream& out = session->sendRequest(req);
+				std::ostream& out = session->sendRequest(request);
 
 				// Output request body if we have data to send
 				if (this->contentLength > 0)
@@ -770,8 +774,8 @@ namespace ti
 				this->GetCookies();			
 
 				// Set response status code and text
-				this->Set("status",Value::NewInt(status));
-				this->Set("statusText",Value::NewString(this->response.getReason().c_str()));
+				this->Set("status", Value::NewInt(status));
+				this->Set("statusText", Value::NewString(this->response.getReason().c_str()));
 
 				this->ChangeState(2); // headers received
 				this->ChangeState(3); // loading
@@ -784,7 +788,7 @@ namespace ti
 				break;
 			}
 		}
-		catch(...)
+		catch (...)
 		{
 			// Timeout or IO error occurred
 			logger->Debug("Timeout occurred");
@@ -792,7 +796,7 @@ namespace ti
 			this->FireEvent(Event::HTTP_TIMEOUT);
 		}
 
-		this->Set("connected",Value::NewBool(false));
+		this->Set("connected", Value::NewBool(false));
 		this->ChangeState(4); // closed
 
 #ifdef OS_OSX

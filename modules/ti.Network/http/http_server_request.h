@@ -17,10 +17,10 @@ namespace ti
 	class HttpServerRequest : public Poco::Net::HTTPRequestHandler, public StaticBoundObject
 	{
 	public:
-		HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest &request);
+		HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest& request);
 		virtual ~HttpServerRequest();
-		
-		void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response);
+
+		void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse& response);
 
 	private:
 		Host *host;
