@@ -5,6 +5,8 @@
  */
 
 #include "http_client_binding.h"
+#include <sstream>
+
 namespace ti
 {
 	kroll::Logger* HTTPClientBinding::logger = 0;
