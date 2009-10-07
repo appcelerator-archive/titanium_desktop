@@ -55,6 +55,23 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.send_header('Set-Cookie', 'chocolatechip=tasty')
 		self.end_headers()
 
+	# Receive headers from client
+	def recv_headers(self):
+		print 'Receiving headers...'
+		if self.headers.get("Foo") != "Bar" or \
+				self.headers.get("Hello") != "World" or \
+				self.headers.get("Head") != "Tail":
+			self.error('Invalid headers: %s' % self.headers)
+		self.send_text('Got the headers!')
+
+	# Send headers to client
+	def send_headers(self):
+		print 'Sending headers...'
+		self.send_response(200)
+		self.send_header('Foo', 'Bar')
+		self.send_header('Head', 'Tail')
+		self.end_headers()
+
 	# Verify basic auth credentials
 	def basic_auth(self):
 		print "Basic auth..."
@@ -113,6 +130,8 @@ with the http client.
 		'/basicauth': basic_auth,
 		'/recvpostdata': recv_post_data,
 		'/recvfile': recv_file,
+		'/requestheaders': recv_headers,
+		'/responseheaders': send_headers,
 	}
 
 if __name__ == '__main__':

@@ -430,4 +430,24 @@ describe("Network.HTTPClient",
 		this.client.open("GET", this.url);
 		this.client.send();
 	},
+
+	test_request_headers: function()
+	{
+		this.client.setRequestHeader("Foo", "Bar");
+		this.client.setRequestHeader("Hello", "World");
+        this.client.setRequestHeader("Head", "Tail");
+		this.client.open("GET", this.url + "requestheaders", false);
+		this.client.send();
+		value_of(this.client.status).should_be("200");
+		value_of(this.client.responseText).should_be("Got the headers!");
+	},
+
+    test_response_headers: function()
+    {
+		this.client.open("GET", this.url + "responseheaders", false);
+		this.client.send();
+		value_of(this.client.status).should_be("200");
+		value_of(this.client.getResponseHeader("Foo")).should_be("Bar");
+		value_of(this.client.getResponseHeader("Head")).should_be("Tail");
+    },
 });
