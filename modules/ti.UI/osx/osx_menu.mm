@@ -361,4 +361,25 @@ namespace ti
 				[windowMenu removeItem:showInspectorSeparator];
 		}
 	}
+
+	/*static*/
+	void OSXMenu::ReplaceAppNameStandinInMenu(NSMenu* menu, NSString* appName)
+	{
+		static NSString* appNameStandin = @"APPNAME";
+
+		for (int i = 0; i < [menu numberOfItems]; i++)
+		{
+			NSMenuItem* item = [menu itemAtIndex:i];
+			NSString* title = [item title];
+			if ([title rangeOfString:appNameStandin].location != NSNotFound)
+			{
+				title = [title stringByReplacingOccurrencesOfString:appNameStandin
+					withString:appName];
+				[item setTitle:title];
+			}
+
+			if ([item submenu])
+				ReplaceAppNameStandinInMenu([item submenu], appName);
+		}
+	}
 }

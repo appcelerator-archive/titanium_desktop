@@ -38,6 +38,7 @@ namespace ti
 		static void FixWindowMenu(NSMenu* menu);
 		static bool IsNativeMenuAMainMenu(NSMenu* menu);
 		static void SetupInspectorItem(NSMenu* menu);
+		static void ReplaceAppNameStandinInMenu(NSMenu* menu, NSString* appName);
 
 	private:
 		void Clear();

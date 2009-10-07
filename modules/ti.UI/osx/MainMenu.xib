@@ -35,12 +35,12 @@
 				<string key="NSClassName">NSApplication</string>
 			</object>
 			<object class="NSMenu" id="908798499">
-				<string key="NSTitle">Titanium</string>
+				<string key="NSTitle">APPNAME</string>
 				<object class="NSMutableArray" key="NSMenuItems">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="NSMenuItem" id="556791040">
 						<reference key="NSMenu" ref="908798499"/>
-						<string key="NSTitle">Titanium</string>
+						<string key="NSTitle">APPNAME</string>
 						<string key="NSKeyEquiv"/>
 						<int key="NSKeyEquivModMask">1048576</int>
 						<int key="NSMnemonicLoc">2147483647</int>
@@ -54,12 +54,12 @@
 						</object>
 						<string key="NSAction">submenuAction:</string>
 						<object class="NSMenu" key="NSSubmenu" id="129150960">
-							<string key="NSTitle">Titanium</string>
+							<string key="NSTitle">APPNAME</string>
 							<object class="NSMutableArray" key="NSMenuItems">
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="601150990">
 									<reference key="NSMenu" ref="129150960"/>
-									<string key="NSTitle">About Titanium</string>
+									<string key="NSTitle">About APPNAME</string>
 									<string key="NSKeyEquiv"/>
 									<int key="NSMnemonicLoc">2147483647</int>
 									<reference key="NSOnImage" ref="454461159"/>
@@ -108,7 +108,7 @@
 								</object>
 								<object class="NSMenuItem" id="462838865">
 									<reference key="NSMenu" ref="129150960"/>
-									<string key="NSTitle">Hide Titanium</string>
+									<string key="NSTitle">Hide APPNAME</string>
 									<string key="NSKeyEquiv">h</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -137,7 +137,7 @@
 								</object>
 								<object class="NSMenuItem" id="612034741">
 									<reference key="NSMenu" ref="129150960"/>
-									<string key="NSTitle">Quit Titanium</string>
+									<string key="NSTitle">Quit APPNAME</string>
 									<string key="NSKeyEquiv">q</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
@@ -457,7 +457,7 @@
 								<bool key="EncodedWithXMLCoder">YES</bool>
 								<object class="NSMenuItem" id="1037396982">
 									<reference key="NSMenu" ref="525111604"/>
-									<string key="NSTitle">Titanium Help</string>
+									<string key="NSTitle">APPNAME Help</string>
 									<string key="NSKeyEquiv">?</string>
 									<int key="NSKeyEquivModMask">1048576</int>
 									<int key="NSMnemonicLoc">2147483647</int>
