@@ -23,7 +23,7 @@
 		try
 		{
 			// if we're offline we don't even attempt these
-			if (qsv.event!='ti.start' && qsv.event!='ti.end' && Titanium.Network.online===false)
+			if (qsv.type!='ti.start' && qsv.type!='ti.end' && Titanium.Network.online===false)
 			{
 				//TODO: we need to place these in DB and re-send later
 				Titanium.API.debug("we're not online - skipping analytics");
@@ -485,7 +485,7 @@
 		{
 			window = null;
 			initialized = false;
-			send({'event':'ti.end'},false,5000);
+			send({'event':'ti.end',type:'ti.end'},false,5000);
 		}
 	});
 
@@ -512,7 +512,7 @@
 			guid = Titanium.App.getGUID();
 			sid = Titanium.Platform.createUUID();
 			
-			send({'event':'ti.start'});
+			send({'event':'ti.start',type:'ti.start'});
 			
 			// schedule the update check
 			update_check_timer = window.setTimeout(function(){
