@@ -9,6 +9,10 @@
 
 #include <kroll/kroll.h>
 
+#ifdef OS_OSX
+#undef verify
+#endif
+
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
