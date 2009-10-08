@@ -87,11 +87,11 @@ namespace ti
 		this->SetMethod("checksum", &CodecBinding::Checksum);
 		
 		/**
-		 * @tiapi(method=True,name=Codec.createZip,since=0.7) Asynchronously write the contents of a directory to a zip blob
+		 * @tiapi(method=True,name=Codec.createZip,since=0.7) Asynchronously write the contents of a directory to a zip file
 		 * All files will be recursively added from the directory, and the directory will be considered the logical "root" of the zip.
 		 * @tiarg[Filesystem.File|String, directory] A directory root to write to the zip stream
-		 * @tiarg[Function, onComplete] A function callback that receives the zip blob when writing is finished: function onComplete(blob) {}
-		 * @tiresult[Blob] A blob with the binary content of the zip
+		 * @tiarg[Filesystem.File|String, zipFile] The destination zip file
+		 * @tiarg[Function, onComplete] A function callback that receives the zip file when writing is finished: function onComplete(destFile) {}
 		 */
 		this->SetMethod("createZip", &CodecBinding::CreateZip);
 		
