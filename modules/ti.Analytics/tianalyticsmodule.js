@@ -474,7 +474,7 @@
 		db.close();
 	}
 	
-	Titanium.API.addEventListener(Titanium.EXIT, function(event)
+	Titanium.API.addEventListener(Titanium.APP_EXIT, function(event)
 	{
 		if (update_check_timer)
 		{

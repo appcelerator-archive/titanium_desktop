@@ -4,7 +4,7 @@
 	var created = false;
 	var db = null;
 
-	Titanium.API.addEventListener(Titanium.EXIT, function(event)
+	Titanium.API.addEventListener(Titanium.APP_EXIT, function(event)
 	{
 		if (initialized && db)
 		{
