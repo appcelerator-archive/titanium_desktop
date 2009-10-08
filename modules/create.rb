@@ -167,10 +167,9 @@ Import('build')
 
 env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_#{header_define}_API_EXPORT', 1))
-env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
-m = build.add_module('ti.#{name}')
+m = build.add_module('ti.#{name}', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/ti#{name}module', source = Glob('*.cpp'))
 build.mark_build_target(t)
 END
