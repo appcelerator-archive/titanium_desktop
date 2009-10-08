@@ -1,4 +1,5 @@
 require 'foo'
+$orig_include_path = $LOAD_PATH
 builder_path = Titanium.API.getApplication().getResourcesPath() + '/builder/lib'
 $LOAD_PATH << builder_path
 require 'builder/lib/builder'
@@ -268,4 +269,8 @@ end
 def get_empty_ruby_hash()
 	#return {} 
 	return Object.new
+end
+
+def get_include_path()
+	return $orig_include_path.join(" : ")
 end

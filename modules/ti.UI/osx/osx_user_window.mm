@@ -11,13 +11,18 @@ namespace ti
 	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
+		unsigned int mask = 0;
+		if (config->IsTexturedBackground())
+		{
+			mask |= NSTexturedBackgroundWindowMask;
+		}
 		if (!config->IsUsingChrome() || config->IsFullscreen())
 		{
-			return NSBorderlessWindowMask | NSTexturedBackgroundWindowMask ;
+			return mask | NSBorderlessWindowMask;
 		}
 		else
 		{
-			return NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask | NSTexturedBackgroundWindowMask;
+			return mask | NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask;
 		}
 	}
 
@@ -92,6 +97,8 @@ namespace ti
 		{
 			[nativeWindow miniaturize:nativeWindow];
 		}
+
+		[nativeWindow setExcludedFromWindowsMenu:config->IsToolWindow()];
 
 		[nativeWindow open];
 		UserWindow::Open();

@@ -17,7 +17,7 @@
 	{
 		var d = Titanium.UI.getCurrentWindow().getParent().window.document;
 		// make sure in the same domain
-		if (d.domain == document.domain)
+		if (typeof(d)!='undefined' && d.domain == document.domain)
 		{
 			window.opener = Titanium.UI.getCurrentWindow().getParent().window;
 		}
@@ -122,6 +122,45 @@
 	replaceMethod(console, "warn", function(msg) { Titanium.API.warn(msg); });
 	replaceMethod(console, "error", function(msg) { Titanium.API.error(msg); });
 
+	// Exchange the open() method for a version which ensures that a blank
+	// URL maps to app://__blank__ rather than about:blank.
+	var _oldOpenFunction = window.open;
+	window.open = function()
+	{
+		var newArgs = Array();
+		if (arguments.length < 1 || arguments[0] == "about:blank")
+		{
+			newArgs[0] = "app://__blank__.html";
+		}
+		else
+		{
+			newArgs[0] = arguments[0];
+		}
+
+		for (var i = 1; i < arguments.length; i++)
+		{
+			newArgs[i] = arguments[i];
+		}
+
+		return _oldOpenFunction.apply(window, newArgs);
+	}
+
+	/**
+	 * convenience for opening windows from code that reference inline HTML instead of forcing the use of URLs. this
+	 * is useful when you need to create programmatic windows from within code. uses data URIs feature of WebKit.
+	 */
+	var _oldCreateWindow = Titanium.UI.createWindow;
+	Titanium.UI.createWindow = function(properties)
+	{
+		var p = typeof(properties)=='undefined' ? {} : properties;
+		var w = _oldCreateWindow(p);
+		if (typeof(p)=='object' && typeof(p.html)=='string')
+		{
+			w.setURL('data:text/html;charset=utf-8,'+encodeURIComponent(p.html));
+		}
+		return w;
+	};
+	
 	//
 	// UI Dialog class
 	//
@@ -183,7 +222,6 @@
 			}
 		}
 
-		//var get_result_text = function(result) { var text = "\n"; for (var x in result) { text += x + ": " + result[x] + "\n"; } return text; }
 		dialogWindow.open();
 		dialogWindow.show();
 		return dialogWindow;

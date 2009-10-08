@@ -14,23 +14,34 @@ namespace ti
 
 	void Clipboard::SetTextImpl(std::string& newText)
 	{
-		if (OpenClipboard(NULL))
+		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		if (OpenClipboard(eventWindow))
 		{
 			EmptyClipboard();
 			std::wstring wideString = UTF8ToWide(newText);
-			HGLOBAL clipboardData = ::GlobalAlloc(GMEM_DDESHARE, newText.size()+1);
-			HGLOBAL wideClipboardData = ::GlobalAlloc(GMEM_DDESHARE, wideString.size()+1);
+			HGLOBAL clipboardData = ::GlobalAlloc(GMEM_MOVEABLE, (newText.size()+1 * sizeof(char)));
+			if (clipboardData == NULL)
+			{
+				CloseClipboard();
+				return;
+			}
+			
+			HGLOBAL wideClipboardData = ::GlobalAlloc(GMEM_MOVEABLE, (wideString.size()+1 * sizeof(wchar_t)));
+			if (wideClipboardData == NULL)
+			{
+				CloseClipboard();
+				return;
+			}
 
 			char *data = (char*) ::GlobalLock(clipboardData);
-			wchar_t *wideData = (wchar_t*) ::GlobalLock(wideClipboardData);
-
 			strcpy(data, newText.c_str());
-			wcscpy(wideData, wideString.c_str());
-
 			::GlobalUnlock(clipboardData);
+			SetClipboardData(CF_TEXT, clipboardData);
+			
+			wchar_t *wideData = (wchar_t*) ::GlobalLock(wideClipboardData);
+			wcscpy(wideData, wideString.c_str());
 			::GlobalUnlock(wideClipboardData);
 
-			SetClipboardData(CF_TEXT, clipboardData);
 			SetClipboardData(CF_UNICODETEXT, wideClipboardData);
 			CloseClipboard();
 		}
@@ -45,21 +56,31 @@ namespace ti
 		static std::string clipboardText;
 		if (HasText())
 		{
-			if (OpenClipboard(NULL))
+			HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+			if (OpenClipboard(eventWindow))
 			{
 				HANDLE clipboardData = GetClipboardData(CF_TEXT);
-				HANDLE wideClipboardData = GetClipboardData(CF_UNICODETEXT);
 				if (clipboardData != NULL)
 				{
 					char *data = (char*) ::GlobalLock(clipboardData);
-					clipboardText.assign(data);
-					::GlobalUnlock(clipboardData);
+					if (data != NULL)
+					{
+						clipboardText.assign(data);
+						::GlobalUnlock(clipboardData);
+					}
 				}
-				else if (wideClipboardData != NULL)
+				else
 				{
-					wchar_t *data = (wchar_t*) ::GlobalLock(wideClipboardData);
-					clipboardText.assign(WideToUTF8(data));
-					::GlobalUnlock(wideClipboardData);
+					HANDLE wideClipboardData = GetClipboardData(CF_UNICODETEXT);
+					if (wideClipboardData != NULL)
+					{
+						wchar_t *data = (wchar_t*) ::GlobalLock(wideClipboardData);
+						if (data != NULL)
+						{
+							clipboardText.assign(WideToUTF8(data));
+							::GlobalUnlock(wideClipboardData);
+						}
+					}
 				}
 				CloseClipboard();
 			}
@@ -78,24 +99,14 @@ namespace ti
 
 	bool Clipboard::HasTextImpl()
 	{
-		if (OpenClipboard(NULL))
-		{
-			bool hasText = IsClipboardFormatAvailable(CF_TEXT) != 0
-				|| IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
-
-			CloseClipboard();
-			return hasText;
-		}
-		else
-		{
-			throw ValueException::FromString("Couldn't open clipboard in hasText");
-		}
-		return false;
+		return IsClipboardFormatAvailable(CF_TEXT) != 0
+			|| IsClipboardFormatAvailable(CF_UNICODETEXT) != 0;
 	}
 
 	void Clipboard::ClearTextImpl()
 	{
-		if (OpenClipboard(NULL))
+		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		if (OpenClipboard(eventWindow))
 		{
 			EmptyClipboard();
 			CloseClipboard();
@@ -128,6 +139,8 @@ namespace ti
 	std::vector<std::string>& Clipboard::GetURIListImpl()
 	{
 		static std::vector<std::string> uriList;
+		uriList.clear();
+		
 		return uriList;
 	}
 

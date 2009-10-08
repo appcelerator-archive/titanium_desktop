@@ -172,6 +172,11 @@ def run(options):
 	signal.signal(signal.SIGTERM, handler)
 	
 	try:
+		# this seems to be necessary in some Windows systems
+		# could be COM / manifest / CRT related?
+		dir = os.path.dirname(options.executable)
+		os.chdir(dir)
+
 		p = subprocess.Popen([options.executable,'--debug'])
 		os.waitpid(p.pid,0)
 	except OSError:

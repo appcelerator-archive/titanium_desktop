@@ -13,11 +13,13 @@ namespace ti
 		host(host),callback(callback)
 	{
 	}
+
 	HttpServerRequestFactory::~HttpServerRequestFactory()
 	{
 	}
-	Poco::Net::HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest &request)
+
+	Poco::Net::HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 	{
-		return new HttpServerRequest(host,callback,(Poco::Net::HTTPServerRequest &)request);
+		return new HttpServerRequest(host, callback, const_cast<Poco::Net::HTTPServerRequest&>(request));
 	}
 }

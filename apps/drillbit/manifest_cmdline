@@ -6,7 +6,6 @@
 #publisher: Appcelerator
 #url: http://appcelerator.org
 #loglevel: ERROR
-#image:default_app_logo.png
 runtime: 0.4.4
 api:0.4.4
 javascript:0.4.4

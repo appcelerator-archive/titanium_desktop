@@ -6,8 +6,11 @@ describe("UI Window Tests",{
 		{
 			var w = window.open.apply(window, args);
 			value_of(w).should_be_object();
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function()
+			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
 			{
+				if (!event.hasTitaniumObject)
+					return;
+
 				w.callback = function()
 				{
 					clearTimeout(timer);
@@ -28,13 +31,17 @@ describe("UI Window Tests",{
 			}, 3000);
 		};
 	},
-	
-	test_open_no_url: function()
+	test_open_no_url_as_async: function(callback)
 	{
 		var w = window.open()
-		value_of(w).should_be_object();
-		value_of(w.Titanium).should_be_undefined();
-		w.close();
+		setTimeout(function() {
+			Titanium.API.debug(w.Titanium);
+			if (typeof(w) != "object" || typeof(w.Titanium) != 'object')
+				callback.failed("Could not find Titanium object in window");
+			else
+				callback.passed();
+			w.close();
+		}, 200);
 	},
 	test_open_with_url_as_async: function(test)
 	{
@@ -194,5 +201,44 @@ describe("UI Window Tests",{
 			value_of(w.result).should_be('Hello');
 			value_of(w.a_value).should_be(42);
 		}, ["app://rel.html"]);
+	},
+	test_data_uri_non_base64_encoded_as_async: function(test)
+	{
+		var path = Titanium.App.appURLToPath("app://rel.html");
+		var html = Titanium.Filesystem.getFile(path).read();
+
+		this.async_window_open(test, function(w)
+		{
+			value_of(w).should_be_object();
+			value_of(w.Titanium).should_be_object();
+			value_of(w.document.title).should_be("Hello");
+			value_of(w.result).should_be('Hello');
+		}, ["data:text/html;charset=utf-8,"+html]);
+	},
+	test_data_uri_base64_encoded_as_async: function(test)
+	{
+		var path = Titanium.App.appURLToPath("app://rel.html");
+		var html = Titanium.Filesystem.getFile(path).read();
+
+		this.async_window_open(test, function(w)
+		{
+			value_of(w).should_be_object();
+			value_of(w.Titanium).should_be_object();
+			value_of(w.document.title).should_be("Hello");
+			value_of(w.result).should_be('Hello');
+		}, ["data:text/html;charset=utf-8;base64,"+Titanium.Codec.encodeBase64(html)]);
+	},
+	test_data_uri_with_html_parameter_as_async: function(test)
+	{
+		var path = Titanium.App.appURLToPath("app://rel.html");
+		var html = Titanium.Filesystem.getFile(path).read();
+
+		this.async_window_open(test, function(w)
+		{
+			value_of(w).should_be_object();
+			value_of(w.Titanium).should_be_object();
+			value_of(w.document.title).should_be("Hello");
+			value_of(w.result).should_be('Hello');
+		}, [{html:html}]);
 	}
 });

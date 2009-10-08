@@ -36,7 +36,7 @@ elif build.is_win32():
 		'ole32', 'comdlg32', 'comctl32', 'gdi32', 'shlwapi', 'oleaut32',
 		'icuuc', 'pthreadVC2', 'libcurl_imp', 'khost', 'comsuppw', 'cairo'])
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
-	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
+	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO', '/OPT:REF'])
 
 elif build.is_osx():
 	env.Append(FRAMEWORKPATH=[build.tp('webkit')])

@@ -1,0 +1,5 @@
+#name: ti.Codec
+#version: 0.1
+#description: ti.Codec
+#os: win32, linux, osx
+#depends:

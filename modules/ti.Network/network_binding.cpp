@@ -58,6 +58,11 @@ namespace ti
 		 */
 		this->SetMethod("createHTTPServer",&NetworkBinding::CreateHTTPServer);
 		/**
+		 * @tiapi(method=True,name=Network.createHTTPCookie,since=0.7) Creates a new HTTPCookie object
+		 * @tiresult(for=Network.createHTTPCookie,type=Network.HTTPCookie) a HTTPCookie object
+		 */
+		this->SetMethod("createHTTPCookie",&NetworkBinding::CreateHTTPCookie);
+		/**
 		 * @tiapi(method=True,name=Network.getHostByName,since=0.2) Returns a Host object using a hostname
 		 * @tiarg(for=Network.getHostByName,name=name,type=String) the hostname
 		 * @tiresult(for=Network.getHostByName,type=Network.Host) a Host object referencing the hostname
@@ -251,6 +256,11 @@ namespace ti
 		// which happense when the binding impl calls remove
 		SharedKObject http = new HTTPServerBinding(host);
 		result->SetObject(http);
+	}
+	void NetworkBinding::CreateHTTPCookie(const ValueList& args, SharedValue result)
+	{
+		SharedKObject cookie = new HTTPCookie();
+		result->SetObject(cookie);
 	}
 	void NetworkBinding::AddConnectivityListener(const ValueList& args, SharedValue result)
 	{

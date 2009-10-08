@@ -83,32 +83,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case WM_GETMINMAXINFO:
 			if (window)
 			{
-				MINMAXINFO *mmi = (MINMAXINFO*) lParam;
-				static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
-				static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
-				int maxWidth = (int) window->GetMaxWidth();
-				int minWidth = (int) window->GetMinWidth();
-				int maxHeight = (int) window->GetMaxHeight();
-				int minHeight = (int) window->GetMinHeight();
-
-				// offset the size of the window chrome
-				if (window->IsUsingChrome()) 
-				{
-					if (maxWidth > -1)
-						maxWidth += window->chromeWidth;
-					if (minWidth > -1)
-						minWidth += window->chromeWidth;
-					
-					if (maxHeight > -1)
-						maxHeight += window->chromeHeight;
-					if (minHeight > -1)
-						minHeight += window->chromeHeight;
-				}
-
-				mmi->ptMaxTrackSize.x = maxWidth == -1 ? INT_MAX : maxWidth;
-				mmi->ptMinTrackSize.x = minWidth == -1 ? minXTrackSize : minWidth;
-				mmi->ptMaxTrackSize.y = maxHeight == -1 ? INT_MAX : maxHeight;
-				mmi->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
+				window->GetMinMaxInfo((MINMAXINFO*) lParam);
 			}
 			break;
 
@@ -150,15 +125,20 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			UINT position = (UINT) wParam;
 			UINT itemId = GetMenuItemID(nativeMenu, position);
 
-			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID) {
-				Win32UserWindow* wuw = Win32UserWindow::FromWindow(hWnd);
-				if (wuw)
-					wuw->ShowInspector(false);
+			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID)
+			{
+				Win32UserWindow* inspectorWindow = Win32UserWindow::FromWindow(hWnd);
+				if (inspectorWindow)
+					inspectorWindow->ShowInspector(false);
 				break;
 
-			} else if (Win32MenuItem::HandleClickEvent(nativeMenu, position)) {
+			}
+			else if (Win32MenuItem::HandleClickEvent(nativeMenu, position))
+			{
 				break;
-			} else {
+			}
+			else
+			{
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
 		}
@@ -175,13 +155,13 @@ void Win32UserWindow::InitWindow()
 	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
 	std::wstring titleW = UTF8ToWide(config->GetTitle());
-	this->windowHandle = CreateWindowExW(
-		WS_EX_APPWINDOW /*WS_EX_LAYERED*/, 
-		USERWINDOW_WINDOW_CLASS,
-		titleW.c_str(),
-		WS_CLIPCHILDREN, CW_USEDEFAULT,
-		0, CW_USEDEFAULT, 0, NULL, NULL,
-		win32Host->GetInstanceHandle(), NULL);
+	DWORD windowStyle = WS_EX_APPWINDOW;
+	if (this->IsToolWindow())
+		windowStyle = WS_EX_TOOLWINDOW;
+
+	this->windowHandle = CreateWindowExW(windowStyle, USERWINDOW_WINDOW_CLASS,
+		titleW.c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+		NULL, NULL, win32Host->GetInstanceHandle(), NULL);
 
 	if (this->windowHandle == NULL)
 	{
@@ -1265,6 +1245,35 @@ SharedKList Win32UserWindow::SelectDirectory(
 		}
 	}
 	return results;
+}
+
+void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
+{
+	static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
+	static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
+	int maxWidth = (int) GetMaxWidth();
+	int minWidth = (int) GetMinWidth();
+	int maxHeight = (int) GetMaxHeight();
+	int minHeight = (int) GetMinHeight();
+
+	// offset the size of the window chrome
+	if (IsUsingChrome()) 
+	{
+		if (maxWidth > -1)
+			maxWidth += chromeWidth;
+		if (minWidth > -1)
+			minWidth += chromeWidth;
+		
+		if (maxHeight > -1)
+			maxHeight += chromeHeight;
+		if (minHeight > -1)
+			minHeight += chromeHeight;
+	}
+
+	minMaxInfo->ptMaxTrackSize.x = maxWidth == -1 ? INT_MAX : maxWidth;
+	minMaxInfo->ptMinTrackSize.x = minWidth == -1 ? minXTrackSize : minWidth;
+	minMaxInfo->ptMaxTrackSize.y = maxHeight == -1 ? INT_MAX : maxHeight;
+	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
 }
 
 void Win32UserWindow::ParseStringNullSeparated(

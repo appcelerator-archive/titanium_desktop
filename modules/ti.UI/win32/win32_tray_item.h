@@ -31,6 +31,7 @@ namespace ti
 		HMENU oldNativeMenu;
 		NOTIFYICONDATA* trayIconData;
 		static std::vector<AutoPtr<Win32TrayItem> > trayItems;
+		static UINT trayClickedMessage;
 		bool is_double_clicked;
 	};
 }

@@ -306,39 +306,9 @@ namespace ti
 
 	void AppBinding::GetStreamURL(const ValueList& args, SharedValue result)
 	{
-		SharedApplication app = this->host->GetApplication();
-		//std::string url(app->GetStreamURL("https"));
-		std::string stream = app->stream;
-
-		// environment should always override stream setting
-		if (EnvironmentUtils::Has("TITANIUM_STREAM"))
-		{
-			stream = EnvironmentUtils::Get("TITANIUM_STREAM");
-		}
 		
-		std::string url = "https://api.appcelerator.net/";
-		if (stream == "production" || stream == "p")
-		{
-			url+="p/v1";
-		}
-		else if (stream == "dev" || stream == "d")
-		{
-			url+="d/v1";
-		}
-		else if (stream == "test" || stream == "t")
-		{
-			url+="t/v1";
-		}
-		else if (stream == "local" || stream == "l")
-		{
-			// allow localhost testing
-			url = "http://localhost/v1";
-		}
-		else
-		{
-			url+=stream;
-			url+="/v1";
-		}
+		SharedApplication app = this->host->GetApplication();
+		std::string url(app->GetStreamURL("https"));
 
 		for (size_t c = 0; c < args.size(); c++)
 		{

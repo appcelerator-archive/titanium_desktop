@@ -10,7 +10,7 @@
 
 namespace ti
 {
-	HttpServerRequest::HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest &request) :
+	HttpServerRequest::HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest& request) :
 		StaticBoundObject("HttpServerRequest"),
 		host(host),
 		callback(callback),
@@ -92,32 +92,39 @@ namespace ti
 		args.push_back(Value::NewObject(new HttpServerResponse(response)));
 		host->InvokeMethodOnMainThread(callback, args);
 	}
+
 	void HttpServerRequest::GetMethod(const ValueList& args, SharedValue result)
 	{
 		std::string method = request.getMethod();
 		result->SetString(method);
 	}
+
 	void HttpServerRequest::GetVersion(const ValueList& args, SharedValue result)
 	{
 		std::string version = request.getVersion();
 		result->SetString(version);
 	}
+
 	void HttpServerRequest::GetURI(const ValueList& args, SharedValue result)
 	{
 		std::string uri = request.getURI();
 		result->SetString(uri);
 	}
+
 	void HttpServerRequest::GetContentType(const ValueList& args, SharedValue result)
 	{
 		std::string ct = request.getContentType();
 		result->SetString(ct);
 	}
+
 	void HttpServerRequest::GetContentLength(const ValueList& args, SharedValue result)
 	{
 		result->SetInt(request.getContentLength());
 	}
+
 	void HttpServerRequest::GetHeader(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("getHeader", "s");
 		std::string name = args.at(0)->ToString();
 		if (request.has(name))
 		{
@@ -143,27 +150,28 @@ namespace ti
 		}
 		result->SetObject(headers);
 	}
-	
+
 	void HttpServerRequest::HasHeader(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("hasHeader", "s");
 		std::string name = args.at(0)->ToString();
 		result->SetBool(request.has(name));
 	}
+
 	void HttpServerRequest::Read(const ValueList& args, SharedValue result)
 	{
+		args.VerifyException("read", "?i");
+
 		std::istream &in = request.stream();
 		if (in.eof() || in.fail())
 		{
 			result->SetNull();
 			return;
 		}
-		int max_size = 8096;
-		if (args.size()==1)
-		{
-			max_size = args.at(0)->ToInt();
-		}
-		char *buf = new char[max_size];
-		in.read(buf,max_size);
+
+		int maxSize = args.GetInt(0, 8096);
+		char *buf = new char[maxSize];
+		in.read(buf, maxSize);
 		int count = static_cast<int>(in.gcount());
 		if (count == 0)
 		{

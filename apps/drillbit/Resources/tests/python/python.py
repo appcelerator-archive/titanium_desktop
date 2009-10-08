@@ -1,5 +1,6 @@
 from foo import Foo
 import types
+import sys
 
 def external_document():
 	return document.getElementById('a')
@@ -123,3 +124,6 @@ def get_empty_python_dict():
 
 def get_empty_python_list():
 	return []
+
+def get_include_path():
+	return " : ".join(sys.path)

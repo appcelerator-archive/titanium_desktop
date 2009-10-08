@@ -69,7 +69,6 @@ using namespace ti;
 
 int WindowConfig::DEFAULT_POSITION = -404404404;
 int WindowConfig::windowCount = 0;
-std::string WindowConfig::blankPageURL("about:blank");
 
 void WindowConfig::SetDefaults ()
 {
@@ -85,12 +84,17 @@ void WindowConfig::SetDefaults ()
 	this->resizable = true;
 
 	this->usingChrome = true;
+	this->toolWindow = false;
 	this->usingScrollbars = true;
 	this->fullscreen = false;
 	this->maximized = false;
 	this->minimized = false;
 	this->visible = true;
 	this->topMost = false;
+
+#ifdef OS_OSX
+	this->texturedBackground = true;
+#endif
 
 	this->transparency = 1.0;
 	this->width = 800;
@@ -104,7 +108,7 @@ void WindowConfig::SetDefaults ()
 	this->maxWidth = -1;
 	this->maxHeight = -1;
 
-	this->url = WindowConfig::blankPageURL;
+	this->url = URLUtils::BlankPageURL();
 	this->title = Host::GetInstance()->GetApplication()->name;
 }
 
@@ -133,9 +137,14 @@ void WindowConfig::UseProperties(SharedKObject properties)
 	SET_BOOL(maximized, maximized);
 	SET_BOOL(minimized, minimized);
 	SET_BOOL(usingChrome, usingChrome);
+	SET_BOOL(toolWindow, toolWindow);
 	SET_BOOL(usingScrollbars, usingScrollbars);
 	SET_BOOL(topMost, topMost);
 	SET_DOUBLE(transparency, transparency);
+	
+#ifdef OS_OSX
+	SET_BOOL(texturedBackground,texturedBackground);
+#endif
 }
 
 WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
@@ -169,6 +178,9 @@ WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
 	this->topMost = config->IsTopMost();
 	this->transparency = config->GetTransparency();
 
+#ifdef OS_OSX
+	this->texturedBackground = config->IsTexturedBackground();
+#endif
 }
 
 WindowConfig::WindowConfig(void* data)
@@ -190,7 +202,6 @@ WindowConfig::WindowConfig(void* data)
 		else if (nodeNameEquals(child, "url"))
 		{
 			url = ConfigUtils::GetNodeValue(child);
-			url = AppConfig::Instance()->InsertAppIDIntoURL(url);
 		}
 		else if (nodeNameEquals(child, "url-regex"))
 		{
@@ -232,6 +243,10 @@ WindowConfig::WindowConfig(void* data)
 			{
 				usingScrollbars = ConfigUtils::StringToBool(scrollbars);
 			}
+		}
+		else if (nodeNameEquals(child, "tool-window"))
+		{
+			toolWindow = ConfigUtils::GetNodeValueAsBool(child);
 		}
 		else if (nodeNameEquals(child, "transparency"))
 		{
@@ -286,6 +301,12 @@ WindowConfig::WindowConfig(void* data)
 		{
 			topMost = ConfigUtils::GetNodeValueAsBool(child);
 		}
+#ifdef OS_OSX
+		else if (nodeNameEquals(child, "texturedBackground"))
+		{
+		 	texturedBackground = ConfigUtils::GetNodeValueAsBool(child);
+		}
+#endif
 		child = child->next;
 	}
 
