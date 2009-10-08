@@ -10,7 +10,7 @@
 namespace ti
 {
 	kroll::Logger* HTTPClientBinding::logger = 0;
-	
+
 	HTTPClientBinding::HTTPClientBinding(Host* host, std::string path) :
 		KEventObject("Network.HTTPClient"),
 		host(host),
@@ -88,7 +88,7 @@ namespace ti
 		this->SetMethod("getResponseHeader",&HTTPClientBinding::GetResponseHeader);
 
 		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setCookie, since=0.7) 
+		 * @tiapi(method=True, name=Network.HTTPClient.setCookie, since=0.7)
 		 * @tiapi Set a HTTP cookie in the request.
 		 * @tiarg[String, name] the cookie name
 		 * @tiarg[String, value] the cookie value
@@ -189,13 +189,13 @@ namespace ti
 
 		/**
 		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataSent, since=0.7)
-		 * @tiapi Amount of data sent to server so far. Updated on DATASENT event.
+		 * @tiapi Amount of data sent to server so far. Updated on HTTP_DATA_SENT event.
 		 */
 		this->SetInt("dataSent", 0);
 
 		/**
 		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataReceived, since=0.7)
-		 * @tiapi Amount of data received from server so far. Updated on DATARECV event.
+		 * @tiapi Amount of data received from server so far. Updated on HTTP_DATA_RECEIVED event.
 		 */
 		this->SetInt("dataReceived", 0);
 
@@ -210,19 +210,19 @@ namespace ti
 		 * @tiapi The handler function that will be fired when the ready-state code of an HTTPClient object changes.
 		 */
 		this->SetNull("onreadystatechange");
-		 
+
 		/**
 		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.ondatastream, since=0.3)
 		 * @tiapi The handler function that will be fired as stream data is received from an HTTP request
 		 */
 		this->SetNull("ondatastream");
-		 
+
 		/**
 		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onsendstream, since=0.3)
 		 * @tiapi The handler function that will be fired as the stream data is sent.
 		 */
 		this->SetNull("onsendstream");
-		 
+
 		/**
 		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onload, since=0.7)
 		 * @tiapi The handler function that will be fired when request is completed
@@ -424,7 +424,7 @@ namespace ti
 	bool HTTPClientBinding::FireEvent(std::string& eventName)
 	{
 		// Must invoke the on*** handler functions
-		if (eventName == Event::HTTP_STATECHANGED && !this->onreadystate.isNull())
+		if (eventName == Event::HTTP_STATE_CHANGED && !this->onreadystate.isNull())
 		{
 			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->onreadystate, args, true);
@@ -435,12 +435,12 @@ namespace ti
 				this->host->InvokeMethodOnMainThread(this->onload, args, true);
 			}
 		}
-		else if (eventName == Event::HTTP_DATASENT && !this->onsendstream.isNull())
+		else if (eventName == Event::HTTP_DATA_SENT && !this->onsendstream.isNull())
 		{
 			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->onsendstream, args, true);
 		}
-		else if (eventName == Event::HTTP_DATARECV && !this->ondatastream.isNull())
+		else if (eventName == Event::HTTP_DATA_RECEIVED && !this->ondatastream.isNull())
 		{
 			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->ondatastream, args, true);
@@ -539,7 +539,7 @@ namespace ti
 	{
 		logger->Debug("BEFORE CHANGE STATE %d", readyState);
 		this->SetInt("readyState", readyState);
-		this->FireEvent(Event::HTTP_STATECHANGED);
+		this->FireEvent(Event::HTTP_STATE_CHANGED);
 	}
 
 	void HTTPClientBinding::Reset()
@@ -562,13 +562,13 @@ namespace ti
 		if (initialized)
 			return;
 
-		SharedPtr<Poco::Net::InvalidCertificateHandler> cert = 
-			new Poco::Net::AcceptCertificateHandler(false); 
+		SharedPtr<Poco::Net::InvalidCertificateHandler> cert =
+			new Poco::Net::AcceptCertificateHandler(false);
 		std::string rootpem = FileUtils::Join(this->modulePath.c_str(),"rootcert.pem", NULL);
 		Poco::Net::Context::Ptr context = new Poco::Net::Context(
 			Poco::Net::Context::CLIENT_USE,
 			"", "",
-			rootpem, 
+			rootpem,
 			Poco::Net::Context::VERIFY_NONE,
 			9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 		);
@@ -592,7 +592,7 @@ namespace ti
 					uri.getHost(), uri.getPort());
 		}
 
-		// Setup proxy settings			
+		// Setup proxy settings
 		std::string uriString = uri.toString();
 		SharedPtr<kroll::Proxy> proxy = kroll::ProxyConfig::GetProxyForURL(uriString);
 		if (!proxy.isNull())
@@ -621,7 +621,7 @@ namespace ti
 			out.write(this->buffer.begin(), readSize);
 			dataSent += readSize;
 			this->SetInt("dataSent", dataSent);
-			this->FireEvent(Event::HTTP_DATASENT);
+			this->FireEvent(Event::HTTP_DATA_SENT);
 		}
 	}
 
@@ -659,7 +659,7 @@ namespace ti
 
 			dataReceived += readSize;
 			this->SetInt("dataReceived", dataReceived);
-			this->FireEvent(Event::HTTP_DATARECV);
+			this->FireEvent(Event::HTTP_DATA_RECEIVED);
 		}
 
 		// Set response text if no handler is set
@@ -691,7 +691,7 @@ namespace ti
 		{
 			// Probably a bad Set-Cookie header
 			logger->Error("Failed to read cookies");
-		}	
+		}
 	}
 
 	void HTTPClientBinding::ExecuteRequest()
@@ -709,10 +709,10 @@ namespace ti
 
 				// Prepare the HTTP session
 				this->PrepareSession(uri);
-				
+
 				// Get request path
 				std::string path(uri.getPathAndQuery());
-				if (path.empty()) 
+				if (path.empty())
 					path = "/";
 
 				// Prepare the request
@@ -757,7 +757,7 @@ namespace ti
 				std::istream& in = session->receiveResponse(this->response);
 				int status = this->response.getStatus();
 				int responseLength = this->response.getContentLength();
-				
+
 				// Handle redirects
 				if (status == 301 || status == 302)
 				{
@@ -773,7 +773,7 @@ namespace ti
 				}
 
 				// Get cookies from response
-				this->GetCookies();			
+				this->GetCookies();
 
 				// Set response status code and text
 				this->Set("status", Value::NewInt(status));

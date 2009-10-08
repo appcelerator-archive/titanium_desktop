@@ -123,7 +123,7 @@ namespace ti
 		GtkWidget* vbox;
 		WebKitWebView* webView;
 		bool topmost;
-		gulong destroyCallbackId;
+		gulong deleteCallbackId;
 
 		AutoPtr<GtkMenu> menu; // The window-specific menu.
 		AutoPtr<GtkMenu> activeMenu; // This window's active menu 
