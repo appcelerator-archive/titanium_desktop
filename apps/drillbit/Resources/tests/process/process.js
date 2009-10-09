@@ -471,14 +471,7 @@ describe("process tests",
 		var p = Titanium.Process.createProcess(this.dirCmd);
 		var timer = null;
 		value_of(p).should_not_be_null();
-		p.setOnRead(function(event)
-		{
-			try {
-				value_of(p.getExitCode()).should_be_null();
-			} catch (e) {
-				callback.failed("Exit code was not -1 during an onRead");
-			}
-		});
+		value_of(p.getExitCode()).should_be_null();
 		p.setOnExit(function(event)
 		{
 			try 
@@ -495,9 +488,10 @@ describe("process tests",
 			}
 			clearTimeout(timer);
 		});
-		
+
 		p.launch();
-		
+		value_of(p.getExitCode()).should_be_null();
+
 		timer = setTimeout(function()
 		{
 			test.failed('timed out');
