@@ -131,6 +131,7 @@ namespace ti
 		 */
 		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
 	}
+
 	FilesystemBinding::~FilesystemBinding()
 	{
 		if (this->timer!=NULL)
@@ -140,6 +141,7 @@ namespace ti
 			this->timer = NULL;
 		}
 	}
+
 	void FilesystemBinding::CreateTempFile(const ValueList& args, SharedValue result)
 	{
 		try
@@ -156,6 +158,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::CreateTempDirectory(const ValueList& args, SharedValue result)
 	{
 		try
@@ -172,6 +175,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::ResolveFileName(const ValueList& args, std::string& filename)
 	{
 		if (args.at(0)->IsList())
@@ -198,6 +202,7 @@ namespace ti
 			throw ValueException::FromString("invalid file type");
 		}
 	}
+
 	void FilesystemBinding::GetFile(const ValueList& args, SharedValue result)
 	{
 		std::string filename;
@@ -205,6 +210,7 @@ namespace ti
 		ti::File* file = new ti::File(filename);
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetFileStream(const ValueList& args, SharedValue result)
 	{
 		std::string filename;
@@ -212,11 +218,13 @@ namespace ti
 		ti::FileStream* fs = new ti::FileStream(filename);
 		result->SetObject(fs);
 	}
+
 	void FilesystemBinding::GetApplicationDirectory(const ValueList& args, SharedValue result)
 	{
 		ti::File* file = new ti::File(host->GetApplication()->path);
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetApplicationDataDirectory(const ValueList& args, SharedValue result)
 	{
 		std::string appid = AppConfig::Instance()->GetAppID();
@@ -224,31 +232,37 @@ namespace ti
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetRuntimeHomeDirectory(const ValueList& args, SharedValue result)
 	{
 		std::string dir = FileUtils::GetSystemRuntimeHomeDirectory();
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetResourcesDirectory(const ValueList& args, SharedValue result)
 	{
 		ti::File* file = new ti::File(host->GetApplication()->GetResourcesPath());
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetProgramsDirectory(const ValueList &args, SharedValue result)
 	{
 #ifdef OS_WIN32
-		std::string dir;
 		char path[MAX_PATH];
-		if(SHGetSpecialFolderPath(NULL,path,CSIDL_PROGRAM_FILES,FALSE))
-		{
-			dir.append(path);
-		}
+		if (!SHGetSpecialFolderPath(NULL, path, CSIDL_PROGRAM_FILES, FALSE))
+			throw ValueException::FromString("Could not get Program Files path.");
+		std::string dir(path);
+
 #elif OS_OSX
-		NSString *fullPath = @"/Applications";
-		std::string dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSApplicationDirectory, NSLocalDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+		printf("%s\n", dir.c_str());
+
 #elif OS_LINUX
-		std::string dir = "/usr/local/bin"; //TODO: this might need to be configurable
+		// TODO: this might need to be configurable
+		std::string dir("/usr/local/bin");
 #endif
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
@@ -256,18 +270,17 @@ namespace ti
 
 	void FilesystemBinding::GetDesktopDirectory(const ValueList& args, SharedValue result)
 	{
-		std::string dir;
-
 #ifdef OS_WIN32
 		char path[MAX_PATH];
+		if (!SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE))
+			throw ValueException::FromString("Could not get Desktop path.");
+		std::string dir(path);
 
-		if(SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE))
-		{
-			dir.append(path);
-		}
 #elif OS_OSX
-		NSString *fullPath = [@"~/Desktop" stringByExpandingTildeInPath];
-		dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSDesktopDirectory, NSUserDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+
 #elif OS_LINUX
 		passwd *user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
@@ -277,27 +290,25 @@ namespace ti
 			dir = homeDirectory;
 		}
 #endif
-		if (!dir.empty())
-		{
-			ti::File* file = new ti::File(dir);
-			result->SetObject(file);
-		}
+		ti::File* file = new ti::File(dir);
+		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetDocumentsDirectory(const ValueList& args, SharedValue result)
 	{
-		std::string dir;
-
 #ifdef OS_WIN32
 		char path[MAX_PATH];
-		if(SHGetSpecialFolderPath(NULL,path,CSIDL_PERSONAL,FALSE))
-		{
-			dir.append(path);
-		}
+		if (!SHGetSpecialFolderPath(NULL,path,CSIDL_PERSONAL,FALSE))
+			throw ValueException::FromString("Could not get Documents path.");
+		std::string dir(path);
+
 #elif OS_OSX
-		NSString *fullPath = [@"~/Documents" stringByExpandingTildeInPath];
-		dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSDocumentDirectory, NSUserDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+
 #elif OS_LINUX
-		passwd *user = getpwuid(getuid());
+		passwd* user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
 		dir = FileUtils::Join(homeDirectory.c_str(), "Documents", NULL);
 		if (!FileUtils::IsDirectory(dir))
@@ -305,12 +316,10 @@ namespace ti
 			dir = homeDirectory;
 		}
 #endif
-		if (dir.empty())
-		{
-			ti::File* file = new ti::File(dir);
-			result->SetObject(file);
-		}
+		ti::File* file = new ti::File(dir);
+		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetUserDirectory(const ValueList& args, SharedValue result)
 	{
 		std::string dir;
@@ -320,16 +329,18 @@ namespace ti
 		}
 		catch (Poco::Exception& exc)
 		{
-			std::string error = "Couldn't determine home directory: ";
+			std::string error = "Could not determine home directory: ";
 			error.append(exc.displayText());
 			throw ValueException::FromString(error);
 		}
 
-
 #ifdef OS_WIN32
-		if (dir.size() == 3) // C:\ -- %%HOMEPATH%% might be borked
+		// If dir is equal to C:\ get the diretory in a different way.
+		// Poco uses %%HOMEPATH%% to get this directory which might be borked
+		// e.g. while running in Cygwin.
+		if (dir.size() == 3)
 		{
-			std::string odir = EnvironmentUtils::Get("USERPROFILE");	
+			std::string odir = EnvironmentUtils::Get("USERPROFILE");
 			if (!odir.empty())
 			{
 				dir = odir;
