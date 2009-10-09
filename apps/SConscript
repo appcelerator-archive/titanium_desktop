@@ -70,9 +70,6 @@ SConscript('drillbit/SConscript')
 developer_dir = path.normpath("%s/../../titanium_developer" % build.cwd())
 resources_dir = "%s/Resources" % developer_dir
 tiapp_xml = "%s/tiapp.xml" % developer_dir
-print developer_dir
-print resources_dir
-print tiapp_xml
 t = build.env.PackageApp('#titanium-developer-target',
 	[Dir(resources_dir), tiapp_xml],
 	FULLNAME='Titanium Developer',
