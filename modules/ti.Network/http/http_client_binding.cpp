@@ -423,26 +423,27 @@ namespace ti
 
 	bool HTTPClientBinding::FireEvent(std::string& eventName)
 	{
+		// We're already exposed as an AutoPtr somewhere else, so we must create
+		// an AutoPtr version of ourselves with the 'shared' argument set to true.
+		AutoPtr<KObject> autoThis(this, true);
+		ValueList args(Value::NewObject(autoThis));
+
 		// Must invoke the on*** handler functions
 		if (eventName == Event::HTTP_STATE_CHANGED && !this->onreadystate.isNull())
 		{
-			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->onreadystate, args, true);
 
 			if (this->Get("readyState")->ToInt() == 4 && !this->onload.isNull())
 			{
-				args = ValueList(Value::NewObject(this));
 				this->host->InvokeMethodOnMainThread(this->onload, args, true);
 			}
 		}
 		else if (eventName == Event::HTTP_DATA_SENT && !this->onsendstream.isNull())
 		{
-			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->onsendstream, args, true);
 		}
 		else if (eventName == Event::HTTP_DATA_RECEIVED && !this->ondatastream.isNull())
 		{
-			ValueList args(Value::NewObject(this));
 			this->host->InvokeMethodOnMainThread(this->ondatastream, args, true);
 		}
 
