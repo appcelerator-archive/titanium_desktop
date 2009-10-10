@@ -122,7 +122,7 @@ namespace ti
 	}
 	void IRCClientBinding::Run (void* p)
 	{
-		ThreadManager manager;
+		ThreadManager manager();
 		IRC *irc = (IRC*)p;
 		irc->message_loop();
 	}

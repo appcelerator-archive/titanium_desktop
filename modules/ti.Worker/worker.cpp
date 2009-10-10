@@ -60,7 +60,7 @@ namespace ti
 
 	void Worker::Run()
 	{
-		ThreadManager manager;
+		ThreadManager manager();
 		Logger *logger = Logger::Get("Worker");
 
 		bool error = false;

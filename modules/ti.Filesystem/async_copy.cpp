@@ -105,7 +105,7 @@ namespace ti
 	}
 	void AsyncCopy::Run(void* data)
 	{
-		ThreadManager manager;
+		ThreadManager manager();
 		Logger* logger = Logger::Get("Filesystem.AsyncCopy");
 
 		AsyncCopy* ac = static_cast<AsyncCopy*>(data);

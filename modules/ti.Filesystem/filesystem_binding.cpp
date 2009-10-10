@@ -469,7 +469,7 @@ namespace ti
 	}
 	void FilesystemBinding::OnAsyncOperationTimer(Poco::Timer &timer)
 	{
-		ThreadManager manager;
+		ThreadManager manager();
 		ValueList args = ValueList();
 		SharedKMethod m = this->Get("_invoke")->ToMethod();
 		SharedValue result = host->InvokeMethodOnMainThread(m, args);

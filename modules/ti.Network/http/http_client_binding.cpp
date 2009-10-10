@@ -453,7 +453,7 @@ namespace ti
 	{
 		// We need this binding to stay alive at least until we have
 		// finished this thread. So save 'this' in an AutoPtr.
-		ThreadManager manager;
+		ThreadManager manager();
 		SharedKObject save(this, true);
 
 		this->ExecuteRequest();
