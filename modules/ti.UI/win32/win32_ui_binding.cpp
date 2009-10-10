@@ -51,7 +51,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new Win32UserWindow(config, parent);
-		return w->GetAutoPtr();
+		return AutoUserWindow(w, true);
 	}
 
 	void Win32UIBinding::ErrorDialog(std::string msg)

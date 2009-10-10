@@ -2,7 +2,8 @@
 import os, os.path as path
 Import('build')
 
-sources = Glob('*.cpp')+Glob('irc/*.cpp')+Glob('http/*.cpp')+Glob('proxy/*.cpp')
+sources = Glob('*.cpp') + Glob('irc/*.cpp') + \
+	Glob('http/*.cpp') + Glob('proxy/*.cpp')
 
 env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_NETWORK_API_EXPORT', 1))

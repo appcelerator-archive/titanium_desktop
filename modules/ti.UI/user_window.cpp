@@ -482,12 +482,6 @@ UserWindow::~UserWindow()
 	}
 }
 
-AutoUserWindow UserWindow::GetAutoPtr()
-{
-	this->duplicate();
-	return this;
-}
-
 SharedString UserWindow::DisplayString(int level)
 {
 	std::string* displayString = new std::string();
@@ -516,12 +510,12 @@ void UserWindow::Open()
 	this->FireEvent(Event::OPEN);
 
 	// We are now in the UI binding's open window list
-	this->binding->AddToOpenWindows(GetAutoPtr());
+	this->binding->AddToOpenWindows(AutoUserWindow(this, true));
 
 	// Tell the parent window that we are open for business
 	if (!parent.isNull())
 	{
-		parent->AddChild(GetAutoPtr());
+		parent->AddChild(AutoUserWindow(this, true));
 	}
 
 	this->initialized = true;
@@ -562,12 +556,12 @@ void UserWindow::Closed()
 	// Tell our parent that we are now closed
 	if (!this->parent.isNull())
 	{
-		this->parent->RemoveChild(GetAutoPtr());
+		this->parent->RemoveChild(AutoUserWindow(this, true));
 		this->parent->Focus(); // Focus the parent
 	}
 
 	// Tell the UIBinding that we are closed
-	this->binding->RemoveFromOpenWindows(GetAutoPtr());
+	this->binding->RemoveFromOpenWindows(AutoUserWindow(this, true));
 
 	// When we have no more open windows, we exit...
 	std::vector<AutoUserWindow> windows = this->binding->GetOpenWindows();
@@ -580,7 +574,7 @@ void UserWindow::Closed()
 
 void UserWindow::_GetCurrentWindow(const kroll::ValueList& args, kroll::SharedValue result)
 {
-	result->SetObject(GetAutoPtr());
+	result->SetObject(AutoUserWindow(this, true));
 }
 
 void UserWindow::_GetDOMWindow(const kroll::ValueList& args, kroll::SharedValue result)
@@ -1546,7 +1540,7 @@ AutoUserWindow UserWindow::CreateWindow(std::string& url)
 
 AutoUserWindow UserWindow::CreateWindow(WindowConfig* newConfig)
 {
-	AutoUserWindow autothis = GetAutoPtr();
+	AutoUserWindow autothis = AutoUserWindow(this, true);
 	return this->binding->CreateWindow(newConfig, autothis);
 }
 
@@ -1854,6 +1848,7 @@ void UserWindow::InsertAPI(SharedKObject frameGlobal)
 
 void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
+	printf("webframe context: %lx\n", (long int) context);
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
 	KJSUtil::ProtectGlobalContext(context);
@@ -1878,7 +1873,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 		UserWindow::LoadUIJavaScript(context);
 	}
 
-	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_INITIALIZED);
+	AutoPtr<Event> event = this->CreateEvent(Event::PAGE_INITIALIZED);
 	event->SetObject("scope", frameGlobal);
 	event->SetString("url", config->GetURL());
 	event->SetBool("hasTitaniumObject", hasTitaniumObject);
@@ -1909,7 +1904,7 @@ void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)
 void UserWindow::PageLoaded(
 	SharedKObject globalObject, std::string &url, JSGlobalContextRef context)
 {
-	AutoPtr<Event> event = new Event(this->GetAutoPtr(), Event::PAGE_LOADED);
+	AutoPtr<Event> event = this->CreateEvent(Event::PAGE_LOADED);
 	event->SetObject("scope", globalObject);
 	event->SetString("url", url);
 	this->FireEvent(event);

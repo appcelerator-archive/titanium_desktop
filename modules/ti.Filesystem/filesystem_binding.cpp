@@ -470,10 +470,7 @@ namespace ti
 	}
 	void FilesystemBinding::OnAsyncOperationTimer(Poco::Timer &timer)
 	{
-#ifdef OS_OSX
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#endif
-		KR_DUMP_LOCATION
+		ThreadManager manager;
 		ValueList args = ValueList();
 		SharedKMethod m = this->Get("_invoke")->ToMethod();
 		SharedValue result = host->InvokeMethodOnMainThread(m, args);
@@ -481,8 +478,5 @@ namespace ti
 		{
 			timer.restart(0);
 		}
-#ifdef OS_OSX
-		[pool release];
-#endif
 	}
 }

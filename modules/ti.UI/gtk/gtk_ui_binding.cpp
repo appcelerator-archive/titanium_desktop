@@ -43,7 +43,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new GtkUserWindow(config, parent);
-		return w->GetAutoPtr();
+		return AutoUserWindow(w, true);
 	}
 
 	void GtkUIBinding::ErrorDialog(std::string msg)

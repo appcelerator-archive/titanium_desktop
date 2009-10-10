@@ -101,7 +101,7 @@ namespace ti
 
 	void NativePipe::PollForReads()
 	{
-		this->duplicate();
+		SharedKObject save(this, true);
 
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
@@ -116,12 +116,11 @@ namespace ti
 		}
 
 		this->CloseNativeRead();
-		this->release();
 	}
 
 	void NativePipe::PollForWrites()
 	{
-		this->duplicate();
+		SharedKObject save(this, true);
 
 		AutoBlob blob = 0;
 		while (!closed || buffers.size() > 0)
@@ -131,7 +130,6 @@ namespace ti
 		}
 
 		this->CloseNativeWrite();
-		this->release();
 	}
 
 	void NativePipe::PollForWriteIteration()

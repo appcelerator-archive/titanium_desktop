@@ -40,7 +40,6 @@ namespace ti
 			AutoUserWindow CreateWindow(WindowConfig* config);
 			AutoUserWindow CreateWindow(std::string& url);
 			AutoUserWindow CreateWindow(SharedKObject properties);
-			AutoUserWindow GetAutoPtr();
 			inline SharedKObject GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
 			bool IsToolWindow() {return this->config->IsToolWindow(); }
