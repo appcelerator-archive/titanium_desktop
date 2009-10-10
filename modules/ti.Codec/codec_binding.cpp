@@ -22,12 +22,12 @@
 #include <Poco/Data/BLOBStream.h>
 #include <Poco/File.h>
 
-#define CODEC_MD2 		1
-#define CODEC_MD4	 	2
-#define CODEC_MD5 		3
-#define CODEC_SHA1 		4
-#define CODEC_CRC32		1
-#define CODEC_ADLER32	2
+#define CODEC_MD2       1
+#define CODEC_MD4       2
+#define CODEC_MD5       3
+#define CODEC_SHA1      4
+#define CODEC_CRC32     1
+#define CODEC_ADLER32   2
 
 namespace ti
 {
@@ -402,9 +402,9 @@ namespace ti
 		ValueList zipArgs;
 		zipArgs.push_back(Value::NewString(directory));
 		zipArgs.push_back(Value::NewString(zipFile));
-		
-		zipJob = new AsyncJob(zipAsyncMethod);
-		zipArgs.push_back(Value::NewObject(zipJob->GetAutoPtr()));
+
+		AutoPtr<AsyncJob> zipJob = new AsyncJob(zipAsyncMethod);
+		zipArgs.push_back(Value::NewObject(zipJob));
 		if (args.size() > 2 && args.at(2)->IsMethod())
 		{
 			zipArgs.push_back(args.at(2));
