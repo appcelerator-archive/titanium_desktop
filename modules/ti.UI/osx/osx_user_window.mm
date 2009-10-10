@@ -4,7 +4,6 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #import "../ui_module.h"
-#define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
 
 namespace ti
 {
@@ -688,13 +687,11 @@ namespace ti
 
 	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
-		STUB();
 		this->iconPath = iconPath;
 	}
 
 	std::string& OSXUserWindow::GetIcon()
 	{
-		STUB();
 		return this->iconPath;
 	}
 

@@ -258,7 +258,6 @@ namespace ti
 		std::string dir([[NSSearchPathForDirectoriesInDomains(
 			NSApplicationDirectory, NSLocalDomainMask, YES)
 			objectAtIndex: 0] UTF8String]);
-		printf("%s\n", dir.c_str());
 
 #elif OS_LINUX
 		// TODO: this might need to be configurable

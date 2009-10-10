@@ -49,53 +49,6 @@ namespace ti {
 		/*[in]*/ IWebFrame* frame,
 		/*[in]*/ IWebPolicyDecisionListener* listener)
 	{
-		/*
-		BSTR url;
-		request->URL(&url);
-
-		int navType = 0;
-		VARIANT var;
-		if (SUCCEEDED(actionInformation->Read(WebActionNavigationTypeKey, &var, 0))) {
-			V_VT(&var) = VT_I4;
-			navType = V_I4(&var);
-		}
-
-		const char* typeDescription;
-		switch (navType) {
-			case WebNavigationTypeLinkClicked:
-				typeDescription = "link clicked";
-				break;
-			case WebNavigationTypeFormSubmitted:
-				typeDescription = "form submitted";
-				break;
-			case WebNavigationTypeBackForward:
-				typeDescription = "back/forward";
-				break;
-			case WebNavigationTypeReload:
-				typeDescription = "reload";
-				break;
-			case WebNavigationTypeFormResubmitted:
-				typeDescription = "form resubmitted";
-				break;
-			case WebNavigationTypeOther:
-				typeDescription = "other";
-				break;
-			default:
-				typeDescription = "illegal value";
-		}
-
-		printf("Policy delegate: attempt to load %S with navigation type '%s'\n", url ? url : TEXT(""), typeDescription);
-
-		SysFreeString(url);
-
-		if (m_permissiveDelegate)
-			listener->use();
-		else
-			listener->ignore();
-
-		return S_OK;
-		*/
-
 		BSTR u;
 		request->URL(&u);
 		std::wstring u2(u);

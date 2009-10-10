@@ -1848,7 +1848,6 @@ void UserWindow::InsertAPI(SharedKObject frameGlobal)
 
 void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
-	printf("webframe context: %lx\n", (long int) context);
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
 	KJSUtil::ProtectGlobalContext(context);
