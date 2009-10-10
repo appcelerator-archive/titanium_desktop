@@ -283,7 +283,7 @@ namespace ti
 #elif OS_LINUX
 		passwd *user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
-		dir = FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL);
+		std::string dir(FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL));
 		if (!FileUtils::IsDirectory(dir))
 		{
 			dir = homeDirectory;
@@ -309,7 +309,7 @@ namespace ti
 #elif OS_LINUX
 		passwd* user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
-		dir = FileUtils::Join(homeDirectory.c_str(), "Documents", NULL);
+		std::string dir(FileUtils::Join(homeDirectory.c_str(), "Documents", NULL));
 		if (!FileUtils::IsDirectory(dir))
 		{
 			dir = homeDirectory;
