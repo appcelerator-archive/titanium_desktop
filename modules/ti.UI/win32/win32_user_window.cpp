@@ -284,7 +284,8 @@ void Win32UserWindow::InitWebKit()
 			privatePrefs->setDatabasesEnabled(true);
 			privatePrefs->setLocalStorageEnabled(true);
 			privatePrefs->setOfflineWebApplicationCacheEnabled(true);
-
+			privatePrefs->setAllowUniversalAccessFromFileURLs(true);
+			
 			_bstr_t dbPath(
 					FileUtils::GetApplicationDataDirectory(appid).c_str());
 			privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
