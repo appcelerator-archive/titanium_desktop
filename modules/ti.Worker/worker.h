@@ -24,9 +24,9 @@ namespace ti
 	public:
 		Worker(Host *host, kroll::SharedKObject global, std::string& code);
 		virtual ~Worker();
-		
+
 		inline JSObjectRef GetGlobalObject() { return global_object; }
-		
+
 	private:
 		kroll::Host *host;
 		kroll::SharedKObject global;
@@ -41,13 +41,13 @@ namespace ti
 		Poco::Mutex mutex;
 		std::list<SharedValue> messages;
 		kroll::SharedKObject context;
-		
+
 		void Run();
 		void Bound(const char *name, SharedValue value);
-
 		void Start(const ValueList& args, SharedValue result);
 		void Terminate(const ValueList& args, SharedValue result);
 		void PostMessage(const ValueList& args, SharedValue result);
+		void CallOnMessageCallback(SharedKMethod onMessage, SharedValue message);
 
 	};
 }

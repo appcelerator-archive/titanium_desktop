@@ -7,79 +7,100 @@
 
 namespace ti
 {
-	WorkerContext::WorkerContext(Host *host, SharedKObject worker) : KEventObject("Worker"), host(host), worker(worker)
+	WorkerContext::WorkerContext(Host *host, SharedKObject worker) :
+		KEventObject("Worker"),
+		host(host),
+		worker(worker)
 	{
-		//NOTE: don't really doc these since they are injected into the scope of the worker script and exposed that way
-		this->SetMethod("postMessage",&WorkerContext::PostMessage);
-		this->SetMethod("importScript",&WorkerContext::ImportScripts); // this is just a convenience map
-		this->SetMethod("importScripts",&WorkerContext::ImportScripts);
-		this->SetMethod("sleep",&WorkerContext::Sleep);
+		// NOTE: don't really doc these since they are injected into the
+		// scope of the worker script and exposed that way
+		this->SetMethod("postMessage", &WorkerContext::PostMessage);
+
+		// this is just a convenience map
+		this->SetMethod("importScript", &WorkerContext::ImportScripts); 
+		this->SetMethod("importScripts", &WorkerContext::ImportScripts);
+		this->SetMethod("sleep", &WorkerContext::Sleep);
 	}
+
 	WorkerContext::~WorkerContext()
 	{
 		worker = NULL;
 		host = NULL;
 	}
+
 	void WorkerContext::Terminate()
 	{
 		// if we're blocked in a sleep, signal him to wake up
 		condition.signal();
 	}
+
 	void WorkerContext::Yield()
 	{
-		// simple - attempt to lock which will block during sleep or immediately lock and unlock if not sleeping
+		// This method will block until sleeping has stopped.
 		Poco::ScopedLock<Poco::Mutex> lock(condmutex);
 	}
+
 	void WorkerContext::SendQueuedMessages()
 	{
 		Logger *logger = Logger::Get("WorkerContext");
 		logger->Debug("SendQueuedMessages called");
-		
-		SharedValue onmessage = worker->Get("onmessage");
+
+		if (messages.size() <= 0)
+			return;
+
+		SharedValue onMessageValue = worker->Get("onmessage");
+		if (!onMessageValue->IsMethod())
+			return;
+
+		SharedKMethod onMessage(onMessageValue->ToMethod());
 		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		if (onmessage->IsMethod())
+		std::list<SharedValue>::iterator i = messages.begin();
+		while (i != messages.end())
 		{
-			if (messages.size()>0)
-			{
-				std::list<SharedValue>::iterator i = messages.begin();
-				while(i!=messages.end())
-				{
-					SharedValue v = (*i++);
-					ValueList _args;
-					string name = "worker.message";
-					AutoPtr<KEventObject> target = this;
-					this->duplicate();
-					AutoPtr<Event> event = new Event(target, name);
-					event->Set("message", v);
-					_args.push_back(Value::NewObject(event));
-					host->InvokeMethodOnMainThread(onmessage->ToMethod(),_args,false);
-				}
-				messages.clear();
-			}
+			SharedValue message(*i++);
+			this->CallOnMessageCallback(onMessage, message);
+		}
+		messages.clear();
+	}
+
+	void WorkerContext::CallOnMessageCallback(SharedKMethod onMessage, SharedValue message)
+	{
+		static Logger* logger = Logger::Get("Worker");
+		AutoPtr<Event> event(this->CreateEvent("worker.message"));
+		event->Set("message", message);
+		ValueList args(Value::NewObject(event));
+
+		try
+		{
+			host->InvokeMethodOnMainThread(onMessage, args, false);
+		}
+		catch(ValueException& e)
+		{
+			logger->Error("Exception while during onMessage callback: %s",
+				e.ToString().c_str());
 		}
 	}
+
 	void WorkerContext::PostMessage(const ValueList &args, SharedValue result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
-		logger->Debug("PostMessage called");
-		try
+		SharedValue message(args.at(0));
+
+		logger->Debug("PostMessage called with %s", message->DisplayString()->c_str());
 		{
 			Poco::ScopedLock<Poco::Mutex> lock(mutex);
-			messages.push_back(args.at(0));
-			SendQueuedMessages();
+			messages.push_back(message);
 		}
-		catch(std::exception &e)
-		{
-			logger->Error("Error calling onmessage for worker. Error = %s",e.what());
-		}
+		SendQueuedMessages();
 	}
+
 	void WorkerContext::Sleep(const ValueList &args, SharedValue result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
 		long ms = args.at(0)->ToInt();
 		logger->Debug("worker is sleeping for %d ms", ms);
 		condmutex.lock();
-		if (condition.tryWait(condmutex,ms))
+		if (condition.tryWait(condmutex, ms))
 		{
 			logger->Debug("worker sleep was interrupted");
 			condmutex.unlock();
@@ -89,6 +110,7 @@ namespace ti
 		condmutex.unlock();
 		logger->Debug("worker sleep completed");
 	}
+
 	void WorkerContext::ImportScripts(const ValueList &args, SharedValue result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
