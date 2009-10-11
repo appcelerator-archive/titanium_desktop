@@ -4,7 +4,6 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #import "../ui_module.h"
-#define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
 
 namespace ti
 {
@@ -55,9 +54,8 @@ namespace ti
 			styleMask: mask
 			backing: NSBackingStoreBuffered
 			defer: false];
-		
-		this->duplicate();
-		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this);
+
+		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this, true);
 		[nativeWindow setUserWindow:shuw];
 
 		if (!config->IsFullscreen())
@@ -669,12 +667,12 @@ namespace ti
 
 	void OSXUserWindow::Focused()
 	{
-		this->osxBinding->WindowFocused(GetAutoPtr().cast<OSXUserWindow>());
+		this->osxBinding->WindowFocused(AutoPtr<OSXUserWindow>(this, true));
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		this->osxBinding->WindowUnfocused(GetAutoPtr().cast<OSXUserWindow>());
+		this->osxBinding->WindowUnfocused(AutoPtr<OSXUserWindow>(this, true));
 	}
 	
 	void OSXUserWindow::SetContextMenu(AutoMenu menu)
@@ -689,13 +687,11 @@ namespace ti
 
 	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
-		STUB();
 		this->iconPath = iconPath;
 	}
 
 	std::string& OSXUserWindow::GetIcon()
 	{
-		STUB();
 		return this->iconPath;
 	}
 

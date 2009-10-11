@@ -71,7 +71,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new OSXUserWindow(config, parent);
-		return w->GetAutoPtr();
+		return AutoUserWindow(w, true);
 	}
 
 	AutoMenu OSXUIBinding::CreateMenu()

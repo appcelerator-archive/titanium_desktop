@@ -425,8 +425,7 @@ namespace ti
 	{
 		// We're already exposed as an AutoPtr somewhere else, so we must create
 		// an AutoPtr version of ourselves with the 'shared' argument set to true.
-		AutoPtr<KObject> autoThis(this, true);
-		ValueList args(Value::NewObject(autoThis));
+		ValueList args(Value::NewObject(GetAutoPtr()));
 
 		// Must invoke the on*** handler functions
 		if (eventName == Event::HTTP_STATE_CHANGED && !this->onreadystate.isNull())
@@ -453,10 +452,11 @@ namespace ti
 	void HTTPClientBinding::run()
 	{
 		// We need this binding to stay alive at least until we have
-		// finished this thread.
-		this->duplicate();
+		// finished this thread. So save 'this' in an AutoPtr.
+		ThreadManager manager();
+		SharedKObject save(this, true);
+
 		this->ExecuteRequest();
-		this->release();
 	}
 
 	bool HTTPClientBinding::BeginRequest(SharedValue sendData)
@@ -697,10 +697,6 @@ namespace ti
 
 	void HTTPClientBinding::ExecuteRequest()
 	{
-#ifdef OS_OSX
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#endif
-
 		// Begin the request
 		try
 		{
@@ -801,10 +797,6 @@ namespace ti
 
 		this->Set("connected", Value::NewBool(false));
 		this->ChangeState(4); // closed
-
-#ifdef OS_OSX
-		[pool release];
-#endif
 	}
 }
 

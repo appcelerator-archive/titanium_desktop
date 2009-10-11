@@ -23,8 +23,7 @@ namespace ti
 		virtual ~CodecBinding();
 	private:
 		SharedKObject global;
-		AsyncJob *zipJob;
-		
+
 		void EncodeBase64(const ValueList& args, SharedValue result);
 		void DecodeBase64(const ValueList& args, SharedValue result);
 		void DigestToHex(const ValueList& args, SharedValue result);

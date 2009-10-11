@@ -122,14 +122,9 @@ namespace ti
 	}
 	void IRCClientBinding::Run (void* p)
 	{
-#ifdef OS_OSX
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#endif
+		ThreadManager manager();
 		IRC *irc = (IRC*)p;
 		irc->message_loop();
-#ifdef OS_OSX
-		[pool release];
-#endif
 	}
 	void IRCClientBinding::GetUsers(const ValueList& args, SharedValue result)
 	{

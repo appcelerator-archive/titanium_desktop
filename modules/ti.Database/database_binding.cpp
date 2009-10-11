@@ -54,9 +54,8 @@ namespace ti
 			}
 			else
 			{
-				char msg[255];
-				sprintf(msg, "unknown supported type: %s for argument", arg->GetType().c_str());
-				throw ValueException::FromString(msg);
+				throw ValueException::FromFormat("Unsupport type for argument: %s",
+					arg->GetType().c_str());
 			}
 		} 
 		ValueBinding() {}
