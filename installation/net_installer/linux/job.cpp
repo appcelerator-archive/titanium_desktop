@@ -78,7 +78,14 @@ Job::Job(std::string url, int type) :
 	else if (this->type == COMPONENT_JOB)
 	{
 		this->ParseURL(url);
+
 	}
+
+	// FIXME: Linux net_installer doesn't support SSL currently, because it
+	// has a statically linked version of libcurl, so we just assume we can
+	// fetch this update via regular HTTP instead.
+	if (this->url.find("https://") == 0)
+		this->url.erase(4, 1);
 }
 
 void Job::ParseFile(std::string url)
