@@ -112,7 +112,7 @@ Win32WebKitUIDelegate::createWebViewWithRequest(
 		config->SetHeight(height);
 	}
 	
-	AutoUserWindow parent = this->window->GetAutoPtr();
+	AutoUserWindow parent = this->window->GetAutoPtr().cast<UserWindow>();
 	AutoUserWindow window = UIBinding::GetInstance()->CreateWindow(config, parent);
 	window->Open();
 	
