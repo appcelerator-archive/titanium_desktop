@@ -4,6 +4,7 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #include <kroll/kroll.h>
+#include <kroll/thread_manager.h>
 #include "filesystem_binding.h"
 #include "file.h"
 #include "async_copy.h"
@@ -469,7 +470,8 @@ namespace ti
 	}
 	void FilesystemBinding::OnAsyncOperationTimer(Poco::Timer &timer)
 	{
-		ThreadManager manager();
+		START_KROLL_THREAD;
+
 		ValueList args = ValueList();
 		SharedKMethod m = this->Get("_invoke")->ToMethod();
 		SharedValue result = host->InvokeMethodOnMainThread(m, args);
@@ -477,5 +479,7 @@ namespace ti
 		{
 			timer.restart(0);
 		}
+
+		END_KROLL_THREAD;
 	}
 }

@@ -4,6 +4,7 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */	
 #include "worker.h"
+#include <kroll/thread_manager.h>
 
 namespace ti
 {
@@ -60,7 +61,8 @@ namespace ti
 
 	void Worker::Run()
 	{
-		ThreadManager manager();
+		START_KROLL_THREAD;
+
 		Logger *logger = Logger::Get("Worker");
 
 		bool error = false;
@@ -176,6 +178,8 @@ namespace ti
 		this->stopped = true;
 		
 		logger->Debug("exiting Worker thread");
+
+		END_KROLL_THREAD;
 	}
 
 	void Worker::Start(const ValueList& args, SharedValue result)

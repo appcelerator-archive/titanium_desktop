@@ -5,6 +5,7 @@
  */
 
 #include "http_client_binding.h"
+#include <kroll/thread_manager.h>
 #include <sstream>
 
 namespace ti
@@ -451,12 +452,14 @@ namespace ti
 
 	void HTTPClientBinding::run()
 	{
+		START_KROLL_THREAD;
+
 		// We need this binding to stay alive at least until we have
 		// finished this thread. So save 'this' in an AutoPtr.
-		ThreadManager manager();
 		SharedKObject save(this, true);
-
 		this->ExecuteRequest();
+
+		END_KROLL_THREAD;
 	}
 
 	bool HTTPClientBinding::BeginRequest(SharedValue sendData)

@@ -5,6 +5,7 @@
  */
 #include "async_copy.h"
 #include "filesystem_binding.h"
+#include <kroll/thread_manager.h>
 #include <iostream>
 #include <sstream>
 
@@ -105,7 +106,8 @@ namespace ti
 	}
 	void AsyncCopy::Run(void* data)
 	{
-		ThreadManager manager();
+		START_KROLL_THREAD;
+
 		Logger* logger = Logger::Get("Filesystem.AsyncCopy");
 
 		AsyncCopy* ac = static_cast<AsyncCopy*>(data);
@@ -171,6 +173,8 @@ namespace ti
 		ac->stopped = true;
 
 		logger->Debug(std::string("Job finished"));
+
+		END_KROLL_THREAD;
 	}
 	void AsyncCopy::ToString(const ValueList& args, SharedValue result)
 	{

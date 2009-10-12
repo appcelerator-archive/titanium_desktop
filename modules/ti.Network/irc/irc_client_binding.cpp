@@ -4,6 +4,7 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #include <kroll/kroll.h>
+#include <kroll/thread_manager.h>
 #include "irc_client_binding.h"
 #include <cstring>
 
@@ -122,9 +123,12 @@ namespace ti
 	}
 	void IRCClientBinding::Run (void* p)
 	{
-		ThreadManager manager();
+		START_KROLL_THREAD;
+
 		IRC *irc = (IRC*)p;
 		irc->message_loop();
+
+		END_KROLL_THREAD;
 	}
 	void IRCClientBinding::GetUsers(const ValueList& args, SharedValue result)
 	{
