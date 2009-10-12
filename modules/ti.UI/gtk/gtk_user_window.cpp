@@ -38,7 +38,7 @@ namespace ti
 		WebKitWebView*, WebKitWebFrame*, gpointer);
 	static gint NewWindowPolicyDecisionCallback(WebKitWebView*,
 		WebKitWebFrame*, WebKitNetworkRequest*, WebKitWebNavigationAction*,
-		WebKitWebPolicyDecision *, gchar*);
+		WebKitWebPolicyDecision *);
 	static void LoadFinishedCallback(WebKitWebView*, WebKitWebFrame*,
 		gpointer);
 	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
@@ -571,14 +571,12 @@ namespace ti
 		}
 	}
 
-	static gint NewWindowPolicyDecisionCallback(
-		WebKitWebView* webView,
-		WebKitWebFrame* frame,
-		WebKitNetworkRequest* request,
+	static gint NewWindowPolicyDecisionCallback(WebKitWebView* webView,
+		WebKitWebFrame* frame, WebKitNetworkRequest* request,
 		WebKitWebNavigationAction* navigationAction,
-		WebKitWebPolicyDecision *policyDecision,
-		gchar* frameName)
+		WebKitWebPolicyDecision *policyDecision)
 	{
+		const char* frameName = webkit_web_navigation_action_get_target_frame(navigationAction);
 		gchar* frame_name_case = g_utf8_casefold(frameName, g_utf8_strlen(frameName, -1));
 		if (g_utf8_collate(frame_name_case, "ti:systembrowser") == 0 ||
 			g_utf8_collate(frame_name_case, "_blank") == 0)
