@@ -1434,7 +1434,7 @@ namespace ti
 	{
 
 		GtkWidget* dialog = NULL;
-		GtkWidget* field = NULL; 
+		GtkWidget* field = 0;
 
 		if (type == ALERT)
 		{
@@ -1465,22 +1465,12 @@ namespace ti
 			Host::GetInstance()->GetApplication()->name.c_str());
 
 		gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-		bool toReturn = false;
-		if (response == GTK_RESPONSE_YES)
-		{
-			toReturn = true;
-		}
-		else if (GTK_RESPONSE_OK)
-		{
-			toReturn = true;
-			if (field)
-				*promptResponse = g_strdup(gtk_entry_get_text(GTK_ENTRY(field)));
-		}
-		else
-		{
-			toReturn = false;
-		}
-	
+		bool toReturn = ((type == PROMPT && response == GTK_RESPONSE_OK) ||
+			(type == CONFIRM && response == GTK_RESPONSE_YES));
+
+		if (toReturn && field)
+			*promptResponse = g_strdup(gtk_entry_get_text(GTK_ENTRY(field)));
+
 		gtk_widget_destroy(dialog);
 		return toReturn;
 	}
