@@ -798,6 +798,10 @@ namespace ti
 			this->FireEvent(Event::HTTP_TIMEOUT);
 		}
 
+		// Destroy the session here, so that even if this HTTPClient isn't
+		// garbage collected, the socket will close.
+		this->session = 0;
+
 		this->Set("connected", Value::NewBool(false));
 		this->ChangeState(4); // closed
 	}
