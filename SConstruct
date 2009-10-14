@@ -88,8 +88,6 @@ SConscript('SConscript.dist')
 SConscript('SConscript.docs')
 SConscript('SConscript.test')
 
-SConscript('installation/developer/SConscript')
-
 run = ARGUMENTS.get('run', 0)
 run_with = ARGUMENTS.get('run_with', 0)
 
