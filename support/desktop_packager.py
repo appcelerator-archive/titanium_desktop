@@ -118,7 +118,7 @@ class DesktopPackager(object):
 		# get the size of the image
 		add_to_size = 0
 		if self.options.dmg_background: add_to_size = os.path.getsize(builder.dmg_background)
-		disk_size_in_MB = 1 + self.folder_size_in_MB(builder.base_dir,add_to_size)
+		disk_size_in_MB = 10 + self.folder_size_in_MB(builder.base_dir,add_to_size)
 
 		# now run the DMG packager
 		builder.invoke("hdiutil create -srcfolder \"%s\" -scrub -volname \"%s\" -fs HFS+ -fsargs \"-c c=64,a=16,e=16\" -megabytes %d -format UDRW \"%s\"" % (builder.base_dir,builder.appname,disk_size_in_MB,temp_dmg))
@@ -143,7 +143,7 @@ class DesktopPackager(object):
 
 		builder.invoke("ditto \"%s\" \"%s/.VolumeIcon.icns\"" % (app_icns,volname))
 		builder.invoke("/Developer/Tools/SetFile -a C \"%s\"" % volname)
-		builder.invoke("/Developer/Tools/SetFile -a V \"%s/.background/background.jpg\"" % volname)
+		builder.invoke("/Developer/Tools/SetFile -a V \"%s/.background/background.%s\"" % (volname,dmg_bg_ext))
 		
 		builder.invoke("hdiutil detach \"%s\"" % volname)
 		builder.invoke("hdiutil convert \"%s.dmg\" -format UDBZ -imagekey zlib-level=9 -o \"%s.dmg\"" % (temp_dmg,dmg))
