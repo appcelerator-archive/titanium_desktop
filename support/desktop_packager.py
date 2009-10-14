@@ -117,7 +117,7 @@ class DesktopPackager(object):
 		
 		# get the size of the image
 		add_to_size = 0
-		if self.options.dmg_background: add_to_size = os.path.getsize(self.builder.dmg_background)
+		if self.options.dmg_background: add_to_size = os.path.getsize(builder.dmg_background)
 		disk_size_in_MB = 1 + self.folder_size_in_MB(builder.base_dir,add_to_size)
 
 		# now run the DMG packager
