@@ -131,7 +131,13 @@ describe("php tests",
 			{
 				var window = w.getDOMWindow();
 				var a = window.document.getElementById("a").innerHTML;
+				var requestURI = window.document.getElementById("request-uri").innerHTML;
+				var scriptName = window.document.getElementById("script-name").innerHTML;
+				
 				value_of(a).should_be("101");
+				value_of(requestURI).should_be("/test.php");
+				value_of(scriptName).should_be("/test.php");
+				
 				callback.passed();
 			}
 			catch(e)
