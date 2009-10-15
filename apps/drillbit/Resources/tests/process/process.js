@@ -489,8 +489,8 @@ describe("process tests",
 			clearTimeout(timer);
 		});
 
-		p.launch();
 		value_of(p.getExitCode()).should_be_null();
+		p.launch();
 
 		timer = setTimeout(function()
 		{

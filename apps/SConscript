@@ -66,6 +66,7 @@ build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 
 SConscript('testapp/SConscript')
 SConscript('drillbit/SConscript')
+SConscript('sdkinstaller/SConscript')
 
 developer_dir = path.normpath("%s/../../titanium_developer" % build.cwd())
 resources_dir = "%s/Resources" % developer_dir
