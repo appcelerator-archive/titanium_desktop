@@ -7,13 +7,13 @@
 
 namespace ti
 {
-	HTTPCookie::HTTPCookie() : AccessorBoundObject("HTTPCookie")
+	HTTPCookie::HTTPCookie() : KAccessorObject("HTTPCookie")
 	{
 		this->InitializeBinding();
 	}
 
 	HTTPCookie::HTTPCookie(Poco::Net::HTTPCookie& cookie) : 
-		AccessorBoundObject("HTTPCookie"),
+		KAccessorObject("HTTPCookie"),
 		cookie(cookie)
 	{
 		this->InitializeBinding();

@@ -1819,8 +1819,8 @@ void UserWindow::InsertAPI(SharedKObject frameGlobal)
 {
 	// Produce a delegating object to represent the top-level Titanium object.
 	// When a property isn't found in this object it will look for it globally.
-	SharedKObject windowTiObject = new AccessorBoundObject();
-	SharedKObject windowUIObject = new AccessorBoundObject();
+	SharedKObject windowTiObject(new KAccessorObject());
+	SharedKObject windowUIObject(new KAccessorObject());
 
 	// Place currentWindow in the delegate base.
 	windowUIObject->Set("getCurrentWindow", this->Get("getCurrentWindow"));

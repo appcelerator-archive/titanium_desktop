@@ -97,7 +97,7 @@
 			if (onExit) onExit(process.getExitCode());
 		});
 		
-		// wrap so AccessorBound doesn't take control
+		// wrap so that we can proxy the underlying Process object methods
 		var processWrapper =
 		{
 			set onread(fn)

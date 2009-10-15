@@ -14,7 +14,7 @@ namespace ti
 	int UIBinding::CENTERED = WindowConfig::DEFAULT_POSITION;
 
 	UIBinding::UIBinding(Host *host) :
-		AccessorBoundObject("UI"),
+		KAccessorObject("UI"),
 		host(host)
 	{
 		instance = this;

@@ -8,7 +8,7 @@
 #include <kroll/kroll.h>
 namespace ti
 {
-	class Menu : public AccessorBoundObject
+	class Menu : public KAccessorObject
 	{
 	public:
 		// Platform-independent implementation

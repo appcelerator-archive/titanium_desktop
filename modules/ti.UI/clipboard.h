@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	class Clipboard : public AccessorBoundObject
+	class Clipboard : public KAccessorObject
 	{
 		public:
 		Clipboard();

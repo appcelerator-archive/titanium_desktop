@@ -14,7 +14,7 @@ namespace ti
 {
 
 	std::map<std::string,int> ProcessBinding::signals;
-	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
+	ProcessBinding::ProcessBinding() : KAccessorObject("Process")
 	{
 		
 		/**

@@ -12,7 +12,7 @@
 
 namespace ti
 {
-	class UIBinding : public AccessorBoundObject
+	class UIBinding : public KAccessorObject
 	{
 
 	public:
