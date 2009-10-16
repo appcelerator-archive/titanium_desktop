@@ -122,21 +122,19 @@ describe("php tests",
 		value_of(myarray[3]).should_be(7);
 	},
 	test_preprocess_as_async: function(callback)
-	{
-		var w = Titanium.UI.currentWindow.createWindow('app://test.php');
+	{ 
+		var w = Titanium.UI.currentWindow.createWindow('app://test.php?param1=1&param2=2');
 		var timer = 0;
 		w.addEventListener(Titanium.PAGE_LOADED, function(event) {
 			clearTimeout(timer);
 			try
 			{
-				var window = w.getDOMWindow();
-				var a = window.document.getElementById("a").innerHTML;
-				var requestURI = window.document.getElementById("request-uri").innerHTML;
-				var scriptName = window.document.getElementById("script-name").innerHTML;
-				
-				value_of(a).should_be("101");
-				value_of(requestURI).should_be("/test.php");
-				value_of(scriptName).should_be("/test.php");
+				function domValue(id) { return w.getDOMWindow().document.getElementById(id).innerHTML; }
+				value_of(domValue("a")).should_be("101");
+				value_of(domValue("request-uri")).should_be("/test.php?param1=1&amp;param2=2");
+				value_of(domValue("script-name")).should_be("/test.php");
+				value_of(domValue("param1")).should_be(1);
+				value_of(domValue("param2")).should_be(2);
 				
 				callback.passed();
 			}
