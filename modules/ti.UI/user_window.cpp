@@ -1834,14 +1834,14 @@ void UserWindow::InsertAPI(SharedKObject frameGlobal)
 	windowUIObject->Set("openSaveAsDialog", this->Get("openSaveAsDialog"));
 
 	// Create a delegate object for the UI API. When a property cannot be
-	// found in binding, DelegateStaticBoundObject will search for it in
+	// found in binding, KDelegatingObject will search for it in
 	// the base. When developers modify this object, it will be modified
 	// globally.
-	KObject* delegateUIAPI = new DelegateStaticBoundObject(binding, windowUIObject);
+	KObject* delegateUIAPI = new KDelegatingObject(binding, windowUIObject);
 	windowTiObject->Set("UI", Value::NewObject(delegateUIAPI));
 
 	// Place the Titanium object into the window's global object
-	SharedKObject delegateGlobalObject = new DelegateStaticBoundObject(
+	SharedKObject delegateGlobalObject = new KDelegatingObject(
 		host->GetGlobalObject(), windowTiObject);
 	frameGlobal->SetObject(GLOBAL_NS_VARNAME, delegateGlobalObject);
 }
