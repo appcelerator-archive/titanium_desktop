@@ -26,8 +26,7 @@ namespace ti
 
 		if (!FileUtils::IsFile(config))
 		{
-			//FIXME: in this scenario we need a cleaner way of stopping the
-			//boot
+			//FIXME: in this scenario we need a cleaner way of stopping the boot
 			std::cerr << "can't load " CONFIG_FILENAME " from: " << config << std::endl;
 			//return;
 		}

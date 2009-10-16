@@ -7,7 +7,9 @@
 
 namespace ti
 {
-	HostBinding::HostBinding(IPAddress addr) : StaticBoundObject("Host"), name(addr.toString())
+	HostBinding::HostBinding(IPAddress addr) :
+		StaticBoundObject("Network.Host"),
+		name(addr.toString())
 	{
 		this->Init();
 		try

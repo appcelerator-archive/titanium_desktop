@@ -7,7 +7,7 @@
 namespace ti
 {
 	Sound::Sound (std::string &s) :
-		StaticBoundObject("Sound"),
+		StaticBoundObject("Media.Sound"),
 		state(STOPPED),
 		url(s),
 		callback(0),

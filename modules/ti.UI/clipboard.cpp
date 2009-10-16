@@ -10,7 +10,7 @@ using Poco::StringTokenizer;
 namespace ti
 {
 	Clipboard::Clipboard() :
-		KAccessorObject("Clipboard")
+		KAccessorObject("UI.Clipboard")
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Clipboard.setText,since=0.7)

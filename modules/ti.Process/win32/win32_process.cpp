@@ -10,7 +10,6 @@
 
 namespace ti
 {
-	
 	Win32Process::Win32Process() :
 		logger(Logger::Get("Process.Win32Process")),
 		nativeIn(new Win32Pipe(false)),

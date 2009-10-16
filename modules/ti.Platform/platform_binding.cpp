@@ -36,7 +36,9 @@
 
 namespace ti
 {
-	PlatformBinding::PlatformBinding(SharedKObject global) : global(global)
+	PlatformBinding::PlatformBinding(SharedKObject global) :
+		StaticBoundObject("Platform"),
+		global(global)
 	{
 		std::string os_name = Poco::Environment::osName();
 #ifdef OS_OSX

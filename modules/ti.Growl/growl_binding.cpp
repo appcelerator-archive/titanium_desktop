@@ -9,7 +9,9 @@
 
 namespace ti
 {
-	GrowlBinding::GrowlBinding(SharedKObject global) : global(global)
+	GrowlBinding::GrowlBinding(SharedKObject global) :
+		StaticBoundObject("Growl"),
+		global(global)
 	{
 		// These methods aren't public (not documented)
 		SetMethod("showNotification", &GrowlBinding::ShowNotification);

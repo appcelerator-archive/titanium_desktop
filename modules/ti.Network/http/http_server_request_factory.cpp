@@ -10,7 +10,8 @@
 namespace ti
 {
 	HttpServerRequestFactory::HttpServerRequestFactory(Host *host, SharedKMethod callback) :
-		host(host),callback(callback)
+		host(host),
+		callback(callback)
 	{
 	}
 
@@ -18,7 +19,8 @@ namespace ti
 	{
 	}
 
-	Poco::Net::HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
+	Poco::Net::HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(
+		const Poco::Net::HTTPServerRequest& request)
 	{
 		return new HttpServerRequest(host, callback, const_cast<Poco::Net::HTTPServerRequest&>(request));
 	}

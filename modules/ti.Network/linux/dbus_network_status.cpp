@@ -8,11 +8,11 @@
 namespace ti
 {
 	DBusNetworkStatus::DBusNetworkStatus(ti::NetworkBinding* binding) :
-	   NetworkStatus(binding),
-	   bus(NULL),
-	   wicd_wired_proxy(NULL),
-	   wicd_wireless_proxy(NULL),
-	   nm_proxy(NULL)
+		NetworkStatus(binding),
+		bus(NULL),
+		wicd_wired_proxy(NULL),
+		wicd_wireless_proxy(NULL),
+		nm_proxy(NULL)
 	{
 		this->SetMethod("_DBusStatus", &DBusNetworkStatus::_DBusStatus);
 	}

@@ -11,7 +11,10 @@
 
 namespace ti
 {
-	AppBinding::AppBinding(Host *host, SharedKObject global) : host(host), global(global)
+	AppBinding::AppBinding(Host *host, SharedKObject global) :
+		StaticBoundObject("App"),
+		host(host),
+		global(global)
 	{
 		/**
 		 * @tiapi(method=True,immutable=True,name=App.getID,since=0.2) Returns the application id

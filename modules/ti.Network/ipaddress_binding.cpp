@@ -7,7 +7,9 @@
 
 namespace ti
 {
-	IPAddressBinding::IPAddressBinding(std::string ip) : StaticBoundObject("IPAddress"), invalid(false)
+	IPAddressBinding::IPAddressBinding(std::string ip) :
+		StaticBoundObject("Network.IPAddress"),
+		invalid(false)
 	{
 		this->Init();
 		

@@ -17,18 +17,15 @@
 
 namespace ti
 {
-	AsyncCopy::AsyncCopy(
-		FilesystemBinding* parent, 
-		Host *host, 
-		std::vector<std::string> files, 
-		std::string destination, 
-		SharedKMethod callback)
-			: parent(parent),
-			  host(host),
-			  files(files),
-			  destination(destination),
-			  callback(callback),
-			  stopped(false)
+	AsyncCopy::AsyncCopy(FilesystemBinding* parent, Host *host,
+		std::vector<std::string> files, std::string destination, SharedKMethod callback) :
+			StaticBoundObject("Filesystem.AsyncCopy"),
+			parent(parent),
+			host(host),
+			files(files),
+			destination(destination),
+			callback(callback),
+			stopped(false)
 	{
 		/**
 		 * @tiapi(property=True,type=Boolean,name=Filesystem.AsyncCopy.running,since=0.3) Indicates if the copy operation is running

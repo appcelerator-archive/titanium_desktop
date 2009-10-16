@@ -15,6 +15,7 @@ using std::string;
 namespace ti
 {
 	MonkeyBinding::MonkeyBinding(Host *host, SharedKObject global) :
+		StaticBoundObject("Monkey"),
 		global(global),
 		logger(Logger::Get("Monkey"))
 	{

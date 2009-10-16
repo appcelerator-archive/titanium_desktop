@@ -10,11 +10,12 @@
 
 namespace ti
 {
-	HttpServerRequest::HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest& request) :
-		StaticBoundObject("HttpServerRequest"),
-		host(host),
-		callback(callback),
-		request(request)
+	HttpServerRequest::HttpServerRequest(Host *host, SharedKMethod callback, 
+		Poco::Net::HTTPServerRequest& request) :
+			StaticBoundObject("Network.HttpServerRequest"),
+			host(host),
+			callback(callback),
+			request(request)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerRequest.getMethod,since=0.3) get the HTTP method of this request

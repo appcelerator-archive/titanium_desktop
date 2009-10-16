@@ -17,9 +17,10 @@
 namespace ti
 {
 	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
-		host(host),modulePath(modulePath),
-		global(host->GetGlobalObject()),
-		next_listener_id(0)
+		StaticBoundObject("Network"),
+		host(host),
+		modulePath(modulePath),
+		global(host->GetGlobalObject())
 	{
 		SharedValue online = Value::NewBool(true);
 		/**
@@ -267,8 +268,9 @@ namespace ti
 		args.VerifyException("addConnectivityListener", "m");
 		SharedKMethod target = args.at(0)->ToMethod();
 
+		static long nextListenerId = 0;
 		Listener listener = Listener();
-		listener.id = this->next_listener_id++;
+		listener.id = nextListenerId++;
 		listener.callback = target;
 		this->listeners.push_back(listener);
 		result->SetInt(listener.id);

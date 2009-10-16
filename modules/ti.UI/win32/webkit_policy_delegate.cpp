@@ -7,7 +7,8 @@
 #include <shellapi.h>
 #include <string>
 
-namespace ti {
+namespace ti
+{
 	Win32WebKitPolicyDelegate::Win32WebKitPolicyDelegate(Win32UserWindow *window_)
 		: window(window_), m_refCount(1), m_permissiveDelegate(false)
 	{

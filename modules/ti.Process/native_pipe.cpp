@@ -11,6 +11,7 @@
 namespace ti
 {
 	NativePipe::NativePipe(bool isReader) :
+		Pipe("Process.NativePipe"),
 		closed(false),
 		isReader(isReader),
 		writeThreadAdapter(new Poco::RunnableAdapter<NativePipe>(

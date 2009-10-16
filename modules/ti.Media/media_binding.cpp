@@ -10,7 +10,9 @@
 
 namespace ti
 {
-	MediaBinding::MediaBinding(SharedKObject global) : global(global)
+	MediaBinding::MediaBinding(SharedKObject global) :
+		StaticBoundObject("Media"),
+		global(global)
 	{
 		/**
 		 * @tiapi(method=True,name=Media.createSound,since=0.2) Creates a sound object

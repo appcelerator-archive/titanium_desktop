@@ -10,39 +10,40 @@ namespace ti
 {
 	std::map<DWORD, Win32PopupDialog*> Win32PopupDialog::popups;
 
-	class DialogTemplate {
-		public:
-			LPCDLGTEMPLATE Template()
-			{
-				return (LPCDLGTEMPLATE)&v[0];
-			}
+	class DialogTemplate
+	{
+	public:
+		LPCDLGTEMPLATE Template()
+		{
+			return (LPCDLGTEMPLATE)&v[0];
+		}
 
-			void AlignToDword()
-			{
-				if (v.size() % 4) Write(NULL, 4 - (v.size() % 4));
-			}
+		void AlignToDword()
+		{
+			if (v.size() % 4) Write(NULL, 4 - (v.size() % 4));
+		}
 
-			void Write(LPCVOID pvWrite, DWORD cbWrite)
+		void Write(LPCVOID pvWrite, DWORD cbWrite)
+		{
+			v.insert(v.end(), cbWrite, 0);
+			if (pvWrite)
 			{
-				v.insert(v.end(), cbWrite, 0);
-				if (pvWrite)
-				{
-					CopyMemory(&v[v.size() - cbWrite], pvWrite, cbWrite);
-				}
+				CopyMemory(&v[v.size() - cbWrite], pvWrite, cbWrite);
 			}
+		}
 
-			template<typename T> void Write(T t)
-			{
-				Write(&t, sizeof(T));
-			}
+		template<typename T> void Write(T t)
+		{
+			Write(&t, sizeof(T));
+		}
 
-			void WriteString(LPCWSTR psz)
-			{
-				Write(psz, (lstrlenW(psz) + 1) * sizeof(WCHAR));
-			}
+		void WriteString(LPCWSTR psz)
+		{
+			Write(psz, (lstrlenW(psz) + 1) * sizeof(WCHAR));
+		}
 
-		private:
-			std::vector<BYTE> v;
+	private:
+		std::vector<BYTE> v;
 	};
 
 	Win32PopupDialog::Win32PopupDialog(HWND _windowHandle) :

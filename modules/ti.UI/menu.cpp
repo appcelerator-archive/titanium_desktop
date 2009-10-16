@@ -11,9 +11,9 @@ namespace ti
 	using std::vector;
 	using std::string;
 
-	Menu::Menu() : KAccessorObject("UI.Menu")
+	Menu::Menu() :
+		KAccessorObject("UI.Menu")
 	{
-
 		/**
 		 * @tiapi(method=True,name=UI.Menu.appendItem,since=0.6)
 		 * @tiapi Append a MenuItem object to a menu.

@@ -11,7 +11,10 @@
 
 namespace ti
 {
-	WorkerBinding::WorkerBinding(Host *host, SharedKObject global) : host(host), global(global)
+	WorkerBinding::WorkerBinding(Host *host, SharedKObject global) :
+		StaticBoundObject("Worker"),
+		host(host),
+		global(global)
 	{
 		/**
 		 * @tiapi(method=True,name=Worker.createWorker,since=0.6) 

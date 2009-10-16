@@ -30,7 +30,7 @@
 namespace ti
 {
 	File::File(std::string filename) :
-		StaticBoundObject("File")
+		StaticBoundObject("Filesystem.File")
 	{
 
 		Poco::Path pocoPath(Poco::Path::expand(filename));

@@ -12,7 +12,8 @@
 
 namespace ti
 {
-	Databases::Databases(std::string datadir) : datadir(datadir)
+	Databases::Databases(std::string datadir) :
+		datadir(datadir)
 	{
 		std::string dbpath = FileUtils::Join(datadir.c_str(),"Databases.db",NULL);
 

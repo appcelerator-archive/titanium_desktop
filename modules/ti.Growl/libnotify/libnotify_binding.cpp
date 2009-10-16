@@ -9,8 +9,11 @@
 #include <libnotify/notify.h>
 #include <cstring>
 
-namespace ti {
-	LibNotifyBinding::LibNotifyBinding(SharedKObject global) : GrowlBinding(global)
+namespace ti
+{
+
+	LibNotifyBinding::LibNotifyBinding(SharedKObject global) :
+		GrowlBinding(global)
 	{
 		notify_init(LibNotifyBinding::GetAppName().c_str());
 	}

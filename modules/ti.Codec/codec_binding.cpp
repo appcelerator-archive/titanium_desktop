@@ -31,7 +31,9 @@
 
 namespace ti
 {
-	CodecBinding::CodecBinding(SharedKObject global) : global(global)
+	CodecBinding::CodecBinding(SharedKObject global) :
+		StaticBoundObject("Codec"),
+		global(global)
 	{
 		/**
 		 * @tiapi(method=True,name=Codec.encodeBase64,since=0.7) encode a string or blob into base64

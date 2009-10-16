@@ -8,7 +8,7 @@
 namespace ti
 {
 	WorkerContext::WorkerContext(Host *host, SharedKObject worker) :
-		KEventObject("Worker"),
+		KEventObject("Worker.WorkerContext"),
 		host(host),
 		worker(worker)
 	{

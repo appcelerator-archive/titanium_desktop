@@ -30,7 +30,11 @@
 
 namespace ti
 {
-	FilesystemBinding::FilesystemBinding(Host *host, SharedKObject global) : host(host), global(global), timer(0)
+	FilesystemBinding::FilesystemBinding(Host *host, SharedKObject global) :
+		StaticBoundObject("Filesystem"),
+		host(host),
+		global(global),
+		timer(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Filesystem.createTempFile) Creates a temporary file

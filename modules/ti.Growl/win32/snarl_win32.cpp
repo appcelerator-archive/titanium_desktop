@@ -11,17 +11,19 @@
 using namespace ti;
 using namespace kroll;
 
-namespace ti {
-
+namespace ti
+{
 	UINT SnarlWin32::snarlWindowMessage = ::RegisterWindowMessage("TitaniumSnarlMessage");
 	std::map<long, SharedKMethod> SnarlWin32::snarlCallbacks;
 
 	SnarlWin32::SnarlWin32(SharedKObject global) :
 		GrowlBinding(global)
-	{ }
+	{
+	}
 
 	SnarlWin32::~SnarlWin32()
-	{ }
+	{
+	}
 
 	bool SnarlWin32::IsRunning()
 	{

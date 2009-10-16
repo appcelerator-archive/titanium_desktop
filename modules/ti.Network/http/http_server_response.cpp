@@ -10,7 +10,7 @@
 namespace ti
 {
 	HttpServerResponse::HttpServerResponse(Poco::Net::HTTPServerResponse &response) :
-		StaticBoundObject("HTTPServerResponse"),
+		StaticBoundObject("Network.HTTPServerResponse"),
 		response(response)
 	{
 		/**

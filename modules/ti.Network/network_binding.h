@@ -50,7 +50,6 @@ namespace ti
 			long id;
 		};
 		std::vector<Listener> listeners;
-		long next_listener_id;
 
 #if defined(OS_OSX)
 		NetworkReachability *networkDelegate;

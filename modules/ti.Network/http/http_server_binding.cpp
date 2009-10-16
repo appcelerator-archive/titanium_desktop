@@ -23,9 +23,12 @@
 namespace ti
 {
 	HTTPServerBinding::HTTPServerBinding(Host* host) :
-		StaticBoundObject("HTTPServer"),
-		host(host),global(host->GetGlobalObject()),
-		callback(NULL),socket(NULL),connection(NULL)
+		StaticBoundObject("Network.HTTPServer"),
+		host(host),
+		global(host->GetGlobalObject()),
+		callback(0),
+		socket(0),
+		connection(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface

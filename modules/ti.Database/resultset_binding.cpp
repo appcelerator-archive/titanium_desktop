@@ -10,7 +10,9 @@
 
 namespace ti
 {
-	ResultSetBinding::ResultSetBinding() : StaticBoundObject("ResultSet"), eof(true)
+	ResultSetBinding::ResultSetBinding() :
+		StaticBoundObject("Database.ResultSet"),
+		eof(true)
 	{
 		// no results result set
 		Bind();

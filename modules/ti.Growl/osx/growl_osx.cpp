@@ -14,13 +14,18 @@
 using namespace kroll;
 using namespace ti;
 
-namespace ti {
-	GrowlOSX::GrowlOSX(SharedKObject global) : GrowlBinding(global) {
-		delegate = [[TiGrowlDelegate alloc] init];
+namespace ti
+{
+
+	GrowlOSX::GrowlOSX(SharedKObject global) :
+		GrowlBinding(global)
+	{
 		//Delegate will have a retain count of one from the alloc init.
+		delegate = [[TiGrowlDelegate alloc] init];
 	}
 
-	GrowlOSX::~GrowlOSX() {
+	GrowlOSX::~GrowlOSX()
+	{
 		[delegate release];
 	}
 

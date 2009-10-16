@@ -108,8 +108,12 @@ namespace ti
 		std::vector<double*> doubles;
 		std::vector<bool*> bools;
 	};
-	
-	DatabaseBinding::DatabaseBinding(Host *host) : StaticBoundObject("DB"), host(host), database(NULL), session(NULL)
+
+	DatabaseBinding::DatabaseBinding(Host *host) :
+		StaticBoundObject("Database"),
+		host(host),
+		database(NULL),
+		session(NULL)
 	{
 		/**
 		 * @tiapi(method=True,name=Database.DB.execute,since=0.4) Executes an SQL query on the database.

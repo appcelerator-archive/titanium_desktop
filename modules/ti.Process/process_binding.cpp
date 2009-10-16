@@ -12,9 +12,9 @@
 
 namespace ti
 {
-
 	std::map<std::string,int> ProcessBinding::signals;
-	ProcessBinding::ProcessBinding() : KAccessorObject("Process")
+	ProcessBinding::ProcessBinding() :
+		KAccessorObject("Process")
 	{
 		
 		/**

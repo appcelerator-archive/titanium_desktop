@@ -9,7 +9,7 @@
 namespace ti
 {
 	Worker::Worker(Host* host, kroll::SharedKObject global, std::string& code) :
-		KEventObject("Worker"),
+		KEventObject("Worker.Worker"),
 		host(host),
 		global_object(0),
 		code(code),

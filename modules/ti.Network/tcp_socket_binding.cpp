@@ -12,9 +12,15 @@
 namespace ti
 {
 	TCPSocketBinding::TCPSocketBinding(Host* ti_host, std::string host, int port) :
-		StaticBoundObject("TCPSocket"),
-		ti_host(ti_host), host(host), port(port), opened(false), 
-		onRead(NULL), onWrite(NULL), onTimeout(NULL), onReadComplete(NULL)
+		StaticBoundObject("Network.TCPSocket"),
+		ti_host(ti_host),
+		host(host),
+		port(port),
+		opened(false), 
+		onRead(0),
+		onWrite(0),
+		onTimeout(0),
+		onReadComplete(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.TCPSocket.connect,since=0.2) Connects a Socket object to the host specified during creation
