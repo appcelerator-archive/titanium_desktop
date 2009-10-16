@@ -12,15 +12,16 @@
 
 namespace ti
 {
-	class AppBinding : public StaticBoundObject
+	class AppBinding : public KAccessorObject
 	{
 	public:
 		AppBinding(Host *host,SharedKObject);
 		virtual ~AppBinding();
+
 	private:
-		Host *host;
+		Host* host;
 		SharedKObject global;
-		
+
 		void GetID(const ValueList& args, SharedValue result);
 		void GetName(const ValueList& args, SharedValue result);
 		void GetVersion(const ValueList& args, SharedValue result);
@@ -31,6 +32,9 @@ namespace ti
 		void GetGUID(const ValueList& args, SharedValue result);
 		void GetIcon(const ValueList& args, SharedValue result);
 		void GetStreamURL(const ValueList& args, SharedValue result);
+		void GetPath(const ValueList& args, SharedValue result);
+		void GetHome(const ValueList& args, SharedValue result);
+		void GetArguments(const ValueList& args, SharedValue result);
 		void AppURLToPath(const ValueList& args, SharedValue result);
 		void SetMenu(const ValueList& args, SharedValue result);
 		void Exit(const ValueList& args, SharedValue result);
