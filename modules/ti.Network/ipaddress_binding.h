@@ -17,23 +17,20 @@ using Poco::Net::InvalidAddressException;
 
 namespace ti
 {
-	class IPAddressBinding : public StaticBoundObject
+	class IPAddressBinding : public KAccessorObject
 	{
 	public:
 		IPAddressBinding(std::string);
 		IPAddressBinding(IPAddress);
 		virtual ~IPAddressBinding();
-	protected:
-		void Init();
-	private:
-		SharedPtr<IPAddress> address;
-		bool invalid;
-		
-	public:
 		const bool IsInvalid() const { return invalid; }
 		const IPAddress* GetAddress() const { return address; }
 
+
 	private:
+		bool invalid;
+		SharedPtr<IPAddress> address;
+		void Init();
 		void ToString(const ValueList& args, SharedValue result);
 		void IsInvalid(const ValueList& args, SharedValue result);
 		void IsIPV4(const ValueList& args, SharedValue result);
