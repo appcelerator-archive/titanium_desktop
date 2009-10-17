@@ -308,45 +308,38 @@ namespace ti
 	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
 	{
 		// Get send data if provided
-		SharedValue sendData = Value::NewNull();
-		if (args.size() == 1)
-		{
-			sendData = args.at(0);
-		}
+		args.VerifyException("send", "?s|o|0");
+		SharedValue sendData(args.GetValue(0));
 
 		// Setup output stream for data
 		this->outstream = new std::ostringstream(std::ios::binary | std::ios::out);
-
 		result->SetBool(this->BeginRequest(sendData));
 	}
 
 	void HTTPClientBinding::Receive(const ValueList& args, SharedValue result)
 	{
-		result->SetBool(false);
-		if (args.size() < 1)
-		{
-			logger->Error("receive() requires an output handler!");
-			return;
-		}
+		args.VerifyException("receive", "m|o ?s|o|0");
 
 		// Set output handler
 		this->outstream = 0;
-		SharedValue outputHandler = args.at(0);
-		if (outputHandler->IsMethod())
+		result->SetBool(false);
+
+		if (args.at(0)->IsMethod())
 		{
-			this->outputHandler = outputHandler->ToMethod();
+			this->outputHandler = args.at(0)->ToMethod();
 		}
-		else if (outputHandler->IsObject())
+		else if (args.at(0)->IsObject())
 		{
-			SharedKObject handlerObject = outputHandler->ToObject();
-			if (handlerObject->GetType() == "File")
+			SharedKObject handlerObject(args.at(0)->ToObject());
+			SharedKMethod writeMethod(handlerObject->GetMethod("write", 0));
+			if (writeMethod.isNull())
 			{
-				this->outputHandler = handlerObject->Get("write")->ToMethod();
+				logger->Error("Unsupported object type as output handler:"
+					" does not have write method");
 			}
 			else
 			{
-				logger->Error("Unsupported object type as output handler!");
-				return;
+				this->outputHandler = writeMethod;
 			}
 		}
 		else
@@ -356,12 +349,7 @@ namespace ti
 		}
 
 		// Get the send data if provided
-		SharedValue sendData = Value::NewNull();
-		if (args.size() == 2)
-		{
-			sendData = args.at(1);
-		}
-
+		SharedValue sendData(args.GetValue(1));
 		result->SetBool(this->BeginRequest(sendData));
 	}
 
@@ -479,26 +467,37 @@ namespace ti
 		if (sendData->IsObject())
 		{
 			SharedKObject dataObject = sendData->ToObject();
+			SharedKMethod nativePathMethod(dataObject->GetMethod("nativePath"));
+			SharedKMethod sizeMethod(dataObject->GetMethod("size"));
 
-			if (dataObject->GetType() == "File")
+			if (nativePathMethod.isNull() || sizeMethod.isNull())
 			{
-				SharedValue result;
-				result = dataObject->GetMethod("nativePath")->Call();
-				const char* filename = result->ToString();
-				this->datastream = new std::ifstream(filename,
-						std::ios::in | std::ios::binary);
-				this->contentLength = dataObject->GetMethod("size")->Call()->ToInt();
-				if (this->datastream->fail())
-				{
-					logger->Error("Failed to open file: %s", filename);
-					return false;
-				}
+				std::string err("Unsupported File-like object: did not have"
+					"nativePath and size methods");
+				logger->Error(err);
+				throw ValueException::FromString(err);
 			}
-			else
+
+			const char* filename = nativePathMethod->Call()->ToString();
+			if (!filename)
 			{
-				logger->Error("Unsupported object type");
-				return false;
+				std::string err("Unsupported File-like object: nativePath method"
+					"did not return a String");
+				logger->Error(err);
+				throw ValueException::FromString(err);
 			}
+
+			this->datastream = new std::ifstream(filename,
+				std::ios::in | std::ios::binary);
+			if (this->datastream->fail())
+			{
+				std::string err("Failed to open file: ");
+				err.append(filename);
+				logger->Error(err);
+				throw ValueException::FromString(err);
+			}
+
+			this->contentLength = sizeMethod->Call()->ToInt();
 		}
 		else if (sendData->IsString())
 		{
@@ -510,17 +509,10 @@ namespace ti
 				this->contentLength = dataString.length();
 			}
 		}
-		else if (sendData->IsNull() || sendData->IsUndefined())
+		else
 		{
 			// Sending no data
 			this->datastream = 0;
-		}
-		else
-		{
-			// We do not support this type!
-			logger->Error("Unsupported datatype: %s",
-					sendData->GetType().c_str());
-			return false;
 		}
 
 		this->dirty = true;
