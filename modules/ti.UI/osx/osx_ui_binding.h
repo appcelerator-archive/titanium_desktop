@@ -18,7 +18,6 @@ namespace ti
 		~OSXUIBinding();
 
 		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-		void ErrorDialog(std::string);
 
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
@@ -48,6 +47,7 @@ namespace ti
 		long GetIdleTime();
 
 		static NSImage* MakeImage(std::string&);
+		static void ErrorDialog(std::string);
 
 	protected:
 		NSMenu* defaultMenu;

@@ -18,13 +18,53 @@ COLORREF transparencyColor = RGB(0xF9, 0xF9, 0xF9);
 
 static void* SetWindowUserData(HWND hwnd, void* userData)
 {
-	return reinterpret_cast<void*> (SetWindowLongPtr(hwnd, GWLP_USERDATA,
-			reinterpret_cast<LONG_PTR> (userData)));
+	return reinterpret_cast<void*>(SetWindowLongPtr(hwnd, GWLP_USERDATA,
+		reinterpret_cast<LONG_PTR> (userData)));
 }
 
 static void* GetWindowUserData(HWND hWnd)
 {
-	return reinterpret_cast<void*> (GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	return reinterpret_cast<void*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+}
+
+static void HandleHResultError(std::string message, HRESULT result, bool fatal=false)
+{
+	static Logger* logger = Logger::Get("UI.Win32UserWindow");
+
+	message.append(": ");
+	switch (result)
+	{
+		case REGDB_E_CLASSNOTREG:
+			message.append("REGDB_E_CLASSNOTREG");
+			break;
+		case CLASS_E_NOAGGREGATION:
+			message.append("CLASS_E_NOAGGREGATION");
+			break;
+		case E_NOINTERFACE:
+			message.append("E_NOINTERFACE");
+			break;
+		case E_UNEXPECTED:
+			message.append("E_UNEXPECTED");
+			break;
+		case E_OUTOFMEMORY:
+			message.append("E_OUTOFMEMORY");
+			break;
+		case E_INVALIDARG:
+			message.append("E_INVALIDARG");
+			break;
+		default:
+			message.append("Unknown Error (");
+			message.append(KList::IntToChars(result));
+			message.append(")");
+			break;
+	}
+
+	logger->Error(message);
+	Win32UIBinding::ErrorDialog(message);
+	if (fatal)
+		exit(1);
+	else
+		throw ValueException::FromString(message);
 }
 
 /*static*/
@@ -105,7 +145,8 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_SETFOCUS:
 			window->FireEvent(Event::FOCUSED);
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			window->Focus(); // Focus the WebView and not the main window.
+			return 0;
 
 		case WM_KILLFOCUS:
 			window->FireEvent(Event::UNFOCUSED);
@@ -182,42 +223,12 @@ void Win32UserWindow::InitWindow()
 
 void Win32UserWindow::InitWebKit()
 {
-	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0,
-		 IID_IWebView, (void**) &(this->webView));
-	
+	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0, IID_IWebView,
+		(void**) &(this->webView));
 	if (FAILED(hr))
-	{
-		std::string createError("Error creating WebKitWebView: ");
-		switch (hr)
-		{
-			case REGDB_E_CLASSNOTREG: 
-				createError += "REGDB_E_CLASSNOTREG";
-				break;
-			case CLASS_E_NOAGGREGATION: 
-				createError += "CLASS_E_NOAGGREGATION"; 
-				break;
-			case E_NOINTERFACE: 
-				createError += "E_NOINTERFACE"; 
-				break;
-			case E_UNEXPECTED: 
-				createError += "E_UNEXPECTED";
-				break;
-			case E_OUTOFMEMORY: 
-				createError += "E_OUTOFMEMORY";
-				break;
-			case E_INVALIDARG:
-				createError += "E_INVALIDARG";
-				break;
-			default:
-				createError += "Unknown Error: ";
-				break;
-		}
-		logger->Error(createError.c_str());
-		MessageBoxA(NULL, createError.c_str(), "Error Initializing WebKit", MB_ICONERROR | MB_OK);
-		exit(-1);
-	}
+		HandleHResultError("Error creating WebKitWebView", hr, true);
 
-	// set the custom user agent for Titanium
+	// Set the custom user agent for Titanium
 	const char *version = host->GetGlobalObject()->Get("version")->ToString();
 	char userAgent[128];
 	//TI-303 we need to add safari UA to our UA to resolve broken
@@ -228,73 +239,72 @@ void Win32UserWindow::InitWebKit()
 
 	// place our user agent string in the global so we can later use it
 	SharedKObject global = host->GetGlobalObject();
-	_bstr_t uaURL("http://titaniumapp.com");
-	BSTR uaResp;
-	webView->userAgentForURL(uaURL.copy(), &uaResp);
-	std::string uaStr = _bstr_t(uaResp);
-	global->Set("userAgent", Value::NewString(uaStr.c_str()));
+	if (global->Get("userAgent")->IsUndefined())
+	{
+		_bstr_t uaURL("http://titaniumapp.com");
+		BSTR uaResp;
+		webView->userAgentForURL(uaURL.copy(), &uaResp);
+		std::string uaStr = _bstr_t(uaResp);
+		global->Set("userAgent", Value::NewString(uaStr.c_str()));
+	}
 
-	logger->Debug("create frame load delegate ");
 	frameLoadDelegate = new Win32WebKitFrameLoadDelegate(this);
-	uiDelegate = new Win32WebKitUIDelegate(this);
-	policyDelegate = new Win32WebKitPolicyDelegate(this);
-	
-	logger->Debug("set delegates, set host window");
 	hr = webView->setFrameLoadDelegate(frameLoadDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting FrameLoadDelegate", hr, true);
+
+	uiDelegate = new Win32WebKitUIDelegate(this);
 	hr = webView->setUIDelegate(uiDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting UIDelegate", hr, true);
+
+	policyDelegate = new Win32WebKitPolicyDelegate(this);
 	hr = webView->setPolicyDelegate(policyDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting PolicyDelegate", hr, true);
+
 	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
-	
-	logger->Debug("init with frame");
+	if (FAILED(hr))
+		HandleHResultError("Error setting host window", hr, true);
+
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
 	hr = webView->initWithFrame(clientRect, 0, 0);
-
-	AppConfig *appConfig = AppConfig::Instance();
-	std::string appid = appConfig->GetAppID();
+	if (FAILED(hr))
+		HandleHResultError("Could not intialize WebView with frame", hr, true);
 
 	IWebPreferences *prefs = NULL;
-	hr = WebKitCreateInstance(CLSID_WebPreferences, 0,
-		IID_IWebPreferences, (void**) &prefs);
-	if (FAILED(hr) || prefs == NULL)
-	{
-		logger->Error("Couldn't create the web preferences object");
-	}
-	else
-	{
-		_bstr_t pi(appid.c_str());
-		prefs->initWithIdentifier(pi.copy(), &prefs);
+	hr = WebKitCreateInstance(CLSID_WebPreferences, 0, IID_IWebPreferences,
+		(void**) &prefs);
+	if (FAILED(hr) || !prefs)
+		HandleHResultError("Error getting IWebPreferences", hr, true);
 
-		prefs->setCacheModel(WebCacheModelDocumentBrowser);
-		prefs->setPlugInsEnabled(true);
-		prefs->setJavaEnabled(true);
-		prefs->setJavaScriptEnabled(true);
-		prefs->setJavaScriptCanOpenWindowsAutomatically(true);
-		prefs->setDOMPasteAllowed(true);
+	std::string appid(AppConfig::Instance()->GetAppID());
+	_bstr_t pi(appid.c_str());
+	prefs->initWithIdentifier(pi.copy(), &prefs);
+	prefs->setCacheModel(WebCacheModelDocumentBrowser);
+	prefs->setPlugInsEnabled(true);
+	prefs->setJavaEnabled(true);
+	prefs->setJavaScriptEnabled(true);
+	prefs->setJavaScriptCanOpenWindowsAutomatically(true);
+	prefs->setDOMPasteAllowed(true);
 
-		IWebPreferencesPrivate* privatePrefs = NULL;
-		hr = prefs->QueryInterface(IID_IWebPreferencesPrivate,
-				(void**) &privatePrefs);
-		if (FAILED(hr))
-		{
-			logger->Error("Failed to get private preferences");
-		} else {
-			privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
-			//privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
-			privatePrefs->setDatabasesEnabled(true);
-			privatePrefs->setLocalStorageEnabled(true);
-			privatePrefs->setOfflineWebApplicationCacheEnabled(true);
-			privatePrefs->setAllowUniversalAccessFromFileURLs(true);
-			
-			_bstr_t dbPath(
-					FileUtils::GetApplicationDataDirectory(appid).c_str());
-			privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
-			privatePrefs->Release();
-		}
+	IWebPreferencesPrivate* privatePrefs = NULL;
+	hr = prefs->QueryInterface(IID_IWebPreferencesPrivate, (void**) &privatePrefs);
+	if (FAILED(hr) || !privatePrefs)
+		HandleHResultError("Error getting IWebPreferencesPrivate", hr, true);
 
-		webView->setPreferences(prefs);
-		prefs->Release();
-	}
+	privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
+	privatePrefs->setDatabasesEnabled(true);
+	privatePrefs->setLocalStorageEnabled(true);
+	privatePrefs->setOfflineWebApplicationCacheEnabled(true);
+	privatePrefs->setAllowUniversalAccessFromFileURLs(true);
+	_bstr_t dbPath(FileUtils::GetApplicationDataDirectory(appid).c_str());
+	privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
+	privatePrefs->Release();
+
+	webView->setPreferences(prefs);
+	prefs->Release();
 
 	// allow app:// and ti:// to run with local permissions (cross-domain ajax,etc)
 	_bstr_t appProto("app");
@@ -304,23 +314,28 @@ void Win32UserWindow::InitWebKit()
 	webView->registerURLSchemeAsLocal(tiProto.copy());
 
 	IWebViewPrivate *webViewPrivate;
-	hr = webView->QueryInterface(IID_IWebViewPrivate,
-			(void**) &webViewPrivate);
-	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
+	hr = webView->QueryInterface(IID_IWebViewPrivate, (void**) &webViewPrivate);
+	if (FAILED(hr))
+		HandleHResultError("Error getting IWebViewPrivate", hr);
 
+	// Get the WebView's HWND
+	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
+	if (FAILED(hr))
+		HandleHResultError("Error getting WebView HWND", hr);
+
+	// Get the WebView's WebInspector
 	hr = webViewPrivate->inspector(&webInspector);
-	if (FAILED(hr) || webInspector == NULL)
-	{
-		logger->Error("Couldn't retrieve the web inspector object");
-	}
+	if (FAILED(hr) || !webInspector)
+		HandleHResultError("Error getting WebInspector HWND", hr);
 
 	webViewPrivate->Release();
 
 	_bstr_t inspector_url("ti://runtime/WebKit.resources/inspector/inspector.html");
 	webInspector->setInspectorURL(inspector_url.copy());
 
-	hr = webView->mainFrame(&webFrame);
-	//webView->setShouldCloseWithWindow(TRUE);
+	hr = webView->mainFrame(&mainFrame);
+	if (FAILED(hr) || !webInspector)
+		HandleHResultError("Error getting WebView main frame", hr);
 }
 
 Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
@@ -405,8 +420,8 @@ Win32UserWindow::~Win32UserWindow()
 	if (webView)
 		webView->Release();
 
-	if (webFrame)
-		webFrame->Release();
+	if (mainFrame)
+		mainFrame->Release();
 
 	DestroyWindow(windowHandle);
 }
@@ -415,11 +430,8 @@ std::string Win32UserWindow::GetTransparencyColor()
 {
 	char hexColor[7];
 	sprintf(hexColor, "%2x%2x%2x", (int) GetRValue(transparencyColor),
-			(int) GetGValue(transparencyColor), (int) GetBValue(
-					transparencyColor));
-
+		(int) GetGValue(transparencyColor), (int) GetBValue(transparencyColor));
 	std::string color(hexColor);
-
 	return color;
 }
 
@@ -477,7 +489,7 @@ bool Win32UserWindow::IsMaximized()
 
 void Win32UserWindow::Focus()
 {
-	SetFocus(windowHandle);
+	SetFocus(viewWindowHandle);
 }
 
 void Win32UserWindow::Unfocus()
@@ -492,7 +504,8 @@ void Win32UserWindow::Unfocus()
 
 void Win32UserWindow::Open()
 {
-	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", windowHandle,  viewWindowHandle);
+	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", 
+		windowHandle,  viewWindowHandle);
 
 	UpdateWindow(windowHandle);
 	UpdateWindow(viewWindowHandle);
@@ -646,9 +659,8 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 {
 	HWND desktop = GetDesktopWindow();
 	RECT desktopRect, boundsRect;
-	
+
 	GetWindowRect(desktop, &desktopRect);
-	
 	if (bounds.x == UIBinding::CENTERED)
 	{
 		bounds.x = (desktopRect.right - bounds.width) / 2;
@@ -665,7 +677,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	{
 		flags = SWP_HIDEWINDOW;
 	}
-	
+
 	boundsRect.left = bounds.x;
 	boundsRect.right = bounds.x + bounds.width;
 	boundsRect.top = bounds.y;
@@ -673,7 +685,8 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	
 	if (this->config->IsUsingChrome())
 	{
-		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), !menu.isNull());
+		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), 
+			!menu.isNull());
 		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
 		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
 	}
@@ -682,8 +695,9 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 		this->chromeWidth = 0;
 		this->chromeHeight = 0;
 	}
-	
-	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y, bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
+
+	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y,
+		bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
 }
 
 void Win32UserWindow::SetTitleImpl(std::string& title)
@@ -700,42 +714,41 @@ void Win32UserWindow::SetURL(std::string& url_)
 	IWebMutableURLRequest* request = 0;
 	std::wstring method = L"GET" ;
 
-	//if (url.length() > 0 && (PathFileExists(url.c_str()) || PathIsUNC(url.c_str())))
-	//{
-	//	TCHAR fileURL[INTERNET_MAX_URL_LENGTH];
-	//	DWORD fileURLLength = sizeof(fileURL)/sizeof(fileURL[0]);
-	//	if (SUCCEEDED(UrlCreateFromPath(url.c_str(), fileURL, &fileURLLength, 0)))
-	//		url = fileURL;
-	//}
-	std::wstring wurl = UTF8ToWide(url);
-
-	logger->Debug("CoCreateInstance");
 	HRESULT hr = WebKitCreateInstance(CLSID_WebMutableURLRequest, 0, 
 		IID_IWebMutableURLRequest, (void**) &request);
 	if (FAILED(hr))
-		goto exit;
+		HandleHResultError("Error creating WebMutableURLRequest", hr, true);
 
-	logger->Debug("initWithURL: %s", url.c_str());
-	hr = request->initWithURL(SysAllocString(wurl.c_str()), WebURLRequestUseProtocolCachePolicy, 60);
+	std::wstring wurl = UTF8ToWide(url);
+	hr = request->initWithURL(SysAllocString(wurl.c_str()), 
+		WebURLRequestUseProtocolCachePolicy, 60);
 	if (FAILED(hr))
-		goto exit;
+	{
+		request->Release();
+		std::string error("Error initialiazing WebMutableURLRequest for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
 
-	logger->Debug("set HTTP method");
 	hr = request->setHTTPMethod(SysAllocString(method.c_str()));
 	if (FAILED(hr))
-		goto exit;
-
-	logger->Debug("load request");
-	hr = webFrame->loadRequest(request);
-	if (FAILED(hr))
-		goto exit;
-
-	logger->Debug("set focus");
-	SetFocus(viewWindowHandle);
-
-exit:
-	if (request)
+	{
 		request->Release();
+		std::string error("Error setting HTTP method for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
+
+	hr = mainFrame->loadRequest(request);
+	if (FAILED(hr))
+	{
+		request->Release();
+		std::string error("Error starting load request for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
+
+	SetFocus(viewWindowHandle);
 }
 
 #define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
@@ -993,13 +1006,13 @@ void Win32UserWindow::SetTopMost(bool topmost)
 {
 	if (topmost)
 	{
-		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE
-				| SWP_NOSIZE);
+		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE);
 	}
 	else
 	{
-		SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE
-				| SWP_NOSIZE);
+		SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE);
 	}
 }
 

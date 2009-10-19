@@ -16,15 +16,11 @@ namespace ti
 	{
 
 	public:
-		static int CENTERED;
-
 		UIBinding(Host *host);
 		virtual ~UIBinding();
 		Host* GetHost();
-		static inline UIBinding* GetInstance() { return instance; }
 		virtual void CreateMainWindow(WindowConfig*);
 		virtual AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent) = 0;
-		virtual void ErrorDialog(std::string);
 
 		std::vector<AutoUserWindow>& GetOpenWindows();
 		void AddToOpenWindows(AutoUserWindow);
@@ -74,6 +70,10 @@ namespace ti
 		virtual void SetDockMenu(AutoMenu) {}
 		virtual void SetBadge(std::string& badgeLabel) {}
 		virtual void SetBadgeImage(std::string& badgeImagePath) {}
+
+		static int CENTERED;
+		static void ErrorDialog(std::string);
+		static inline UIBinding* GetInstance() { return instance; }
 
 	protected:
 		static UIBinding* instance;

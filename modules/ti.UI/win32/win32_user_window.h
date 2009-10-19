@@ -103,14 +103,13 @@ namespace ti
 		Win32WebKitFrameLoadDelegate *frameLoadDelegate;
 		Win32WebKitUIDelegate *uiDelegate;
 		Win32WebKitPolicyDelegate *policyDelegate;
-		
 		Bounds restoreBounds;
 		long restoreStyles;
 		int chromeWidth, chromeHeight;
-	
-		HWND windowHandle, viewWindowHandle;
+		HWND windowHandle;
+		HWND viewWindowHandle;
 		IWebView* webView;
-		IWebFrame *webFrame;
+		IWebFrame* mainFrame;
 		IWebInspector *webInspector;
 		bool requiresDisplay;
 	
