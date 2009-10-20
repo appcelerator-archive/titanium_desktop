@@ -308,7 +308,7 @@ static int totalJobs = 0;
 
 	[progressBar setIndeterminate:NO];
 	[progressBar setMinValue:0.0];
-	[progressBar setMaxValue:[jobs count]];
+	[progressBar setMaxValue:[jobs count] * 2];
 	[progressBar setDoubleValue:0.0];
 
 	const char* ext = numJobs > 1 ? "s" : "";
@@ -316,12 +316,12 @@ static int totalJobs = 0;
 	for (int i = 0; i < numJobs; i++)
 	{
 		Job* job = [jobs objectAtIndex:i];
-		[progressBar setDoubleValue:i];
-		[controller updateMessage:[NSString stringWithFormat:@"Installing %d of %d file%s", i, numJobs, ext]];
+		[progressBar setDoubleValue:((i+1) * 2) - 1];
+		[controller updateMessage:[NSString stringWithFormat:@"Installing %d of %d file%s", i + 1, numJobs, ext]];
 		[controller install:job];
 	}
 
-	[progressBar setDoubleValue:numJobs];
+	[progressBar setDoubleValue:numJobs * 2];
 	[controller finishInstallation];
 	[controller updateMessage:@"Installation complete"];
 	NSLog(@"Installation is complete, exiting after installing %d files", numJobs);
