@@ -20,7 +20,6 @@ namespace ti
 		~Win32UIBinding();
 
 		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-		void ErrorDialog(std::string);
 
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
@@ -46,6 +45,7 @@ namespace ti
 			cairo_surface_t *oldSurface, int newWidth, int newHeight);
 		static void ReleaseImage(HANDLE);
 		static void SetProxyForURL(std::string& url);
+		static void ErrorDialog(std::string);
 
 		private:
 		AutoPtr<Win32Menu> menu;

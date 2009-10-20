@@ -54,13 +54,6 @@ namespace ti
 		return AutoUserWindow(w, true);
 	}
 
-	void Win32UIBinding::ErrorDialog(std::string msg)
-	{
-		std::wstring msgW = UTF8ToWide(msg);
-		MessageBox(NULL, msgW.c_str(), L"Application Error", MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-		UIBinding::ErrorDialog(msg);
-	}
-
 	AutoMenu Win32UIBinding::CreateMenu()
 	{
 		return new Win32Menu();
@@ -362,6 +355,15 @@ namespace ti
 			proxyEnv.append(proxyURI.toString());
 			_putenv(proxyEnv.c_str());
 		}
+	}
+
+	/*static*/
+	void Win32UIBinding::ErrorDialog(std::string msg)
+	{
+		std::wstring msgW = UTF8ToWide(msg);
+		MessageBox(NULL, msgW.c_str(), L"Application Error", 
+			MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
+		UIBinding::ErrorDialog(msg);
 	}
 
 }
