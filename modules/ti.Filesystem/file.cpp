@@ -30,7 +30,8 @@
 namespace ti
 {
 	File::File(std::string filename) :
-		StaticBoundObject("Filesystem.File")
+		StaticBoundObject("Filesystem.File"),
+		readLineFS(0)
 	{
 
 		Poco::Path pocoPath(Poco::Path::expand(filename));
@@ -38,7 +39,7 @@ namespace ti
 
 		// If the filename we were given contains a trailing slash, just remove it
 		// so that users can count on reproducible results from toString.
-		size_t length = this->filename.length();		
+		size_t length = this->filename.length();
 		if (length > MIN_PATH_LENGTH && this->filename[length - 1] == Poco::Path::separator())
 		{
 			this->filename.resize(length - 1);
@@ -221,16 +222,12 @@ namespace ti
 		* @tiresult(for=Filesystem.File.unzip,type=Boolean) returns true if successful
 		 */
 		this->SetMethod("unzip",&File::Unzip);
-
-		this->readLineFS = NULL;
 	}
 
 	File::~File()
 	{
 		if (this->readLineFS)
-		{
 			delete this->readLineFS;
-		}
 	}
 
 	void File::ToURL(const ValueList& args, SharedValue result)
@@ -456,32 +453,26 @@ namespace ti
 	}
 	void File::ReadLine(const ValueList& args, SharedValue result)
 	{
-		bool openFile = false;
-		if(args.size() > 0)
-		{
-			openFile = args.at(0)->ToBool();
-		}
+		bool forceOpen = args.GetBool(0, false);
 
-		if(openFile)
+		if (!readLineFS || forceOpen)
 		{
-			// close file if it's already open
-			if(this->readLineFS)
-			{
-				this->readLineFS->Close();
-			}
+			// Close file if it's already open
+			if (this->readLineFS)
+				delete this->readLineFS;
 
-			// now open the file
 			this->readLineFS = new ti::FileStream(this->filename);
 			this->readLineFS->Open(MODE_READ);
 		}
 
-		if(this->readLineFS == NULL)
+		this->readLineFS->ReadLine(args, result);
+
+		// We've read the end of the file or errored out, so clean
+		// up the Filestream object.
+		if (result->IsNull())
 		{
-			result->SetNull();
-		}
-		else
-		{
-			this->readLineFS->ReadLine(args, result);
+			delete this->readLineFS;
+			this->readLineFS = 0;
 		}
 	}
 	void File::Copy(const ValueList& args, SharedValue result)

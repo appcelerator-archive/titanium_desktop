@@ -15,13 +15,14 @@ namespace ti
 		StaticBoundObject("Filesystem.FileStream"),
 		stream(0)
 	{
-	#ifdef OS_OSX
+#ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
 		// we do that with a nifty helper method in NSString
-		this->filename = [[[NSString stringWithCString:filenameIn.c_str() encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath] fileSystemRepresentation];
-	#else
+		this->filename = [[[NSString stringWithUTF8String:filenameIn.c_str()]
+			 stringByExpandingTildeInPath] fileSystemRepresentation];
+#else
 		this->filename = filenameIn;
-	#endif
+#endif
 
 		/**
 		 * @tiapi(method=True,name=Filesystem.Filestream.open,since=0.2) Opens the file
@@ -90,10 +91,17 @@ namespace ti
 		FileStreamMode mode = MODE_READ;
 		bool binary = false;
 		bool append = false;
-		if (args.size()>=1) mode = (FileStreamMode)args.at(0)->ToInt();
-		if (args.size()>=2) binary = args.at(1)->ToBool();
-		if (args.size()>=3) append = args.at(2)->ToBool();
-		bool opened = this->Open(mode,binary,append);
+
+		if (args.size() >= 1)
+			mode = (FileStreamMode) args.at(0)->ToInt();
+
+		if (args.size() >= 2)
+				binary = args.at(1)->ToBool();
+
+		if (args.size() >= 3)
+			append = args.at(2)->ToBool();
+
+		bool opened = this->Open(mode, binary, append);
 		result->SetBool(opened);
 	}
 	bool FileStream::Open(FileStreamMode mode, bool binary, bool append)
@@ -292,7 +300,7 @@ namespace ti
 	}
 	void FileStream::ReadLine(const ValueList& args, SharedValue result)
 	{
-		if(! this->stream)
+		if (!this->stream)
 		{
 			Logger* logger = Logger::Get("Filesystem.FileStream");
 			logger->Error("Error in readLine. FileStream must be opened before calling read");
@@ -302,14 +310,14 @@ namespace ti
 		try
 		{
 			Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
-			if(!fis)
+			if (!fis)
 			{
 				Logger* logger = Logger::Get("Filesystem.FileStream");
 				logger->Error("Error in readLine. FileInputStream is null");
 				throw ValueException::FromString("FileStream must be opened for reading before calling readLine");
 			}
 
-			if(fis->eof())
+			if (fis->eof())
 			{
 				// close the file
 				result->SetNull();
