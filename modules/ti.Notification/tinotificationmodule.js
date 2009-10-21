@@ -146,7 +146,7 @@ function TitaniumNotification(window)
 	/**
 	 * @tiapi(method=True,name=Notification.createNotification,since=0.2)
 	 * @tiapi Creates a new Notification object
-	 * @tiarg[UI.UserWindow, window, optional=True] The window object to use
+	 * @tiarg[DOMWindow, window, optional=True] The window object to use
 	 * @tiresult[Notification.Notification] a Notification object
 	 */
 	Titanium.Notification = {
