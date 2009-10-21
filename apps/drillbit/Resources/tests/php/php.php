@@ -143,3 +143,18 @@ function php_get_anonymous_function_two_args()
 	};
 	return $anon;
 }
+
+function CamelCaseFunctionOne()
+{
+	return "uno";
+}
+
+function camelCaseFunctionTwo()
+{
+	return "dos";
+}
+
+function ALLCAPSFUNCTION()
+{
+	return "tres";
+}

@@ -222,4 +222,10 @@ describe("php tests",
 	{
 		value_of(test_include()).should_be("yes");
 	},
+	test_cased_function_names: function()
+	{
+		value_of(CamelCaseFunctionOne()).should_be("uno");
+		value_of(camelCaseFunctionTwo()).should_be("dos");
+		value_of(ALLCAPSFUNCTION()).should_be("tres");
+	},
 });
