@@ -100,7 +100,7 @@ catch (e)
 			{
 				// wrap the exception message so we can report the failed test's line number
 				var ___err = {
-					message: ___e.message,
+					message: ___e.message || "Non-assertion exception: " + String(___e),
 					line: ___e.constructor == TitaniumTest.Error ? ___e.line : <%= entry.line_offsets[f] %>,
 					toString: function() { return this.message; }
 				};
