@@ -8,6 +8,8 @@
 #include <Poco/Data/MetaColumn.h>
 #include <Poco/DynamicAny.h>
 
+using Poco::Data::MetaColumn;
+
 namespace ti
 {
 	ResultSetBinding::ResultSetBinding() :

@@ -51,7 +51,7 @@ describe("Database Module",{
 	},
 	
 	db_basic_object_properties: function()
-	{    
+	{
 		value_of(this.db).should_not_be_null();
 		
 		var methods = ['execute','close','remove'];
@@ -268,6 +268,92 @@ describe("Database Module",{
 		value_of(rs.field(0)).should_be(0);
 		rs.close();
 		
+	},
+	test_file_database:function()
+	{
+		var datadir = Titanium.Filesystem.getApplicationDataDirectory();
+		var testFile = Titanium.Filesystem.getFile(datadir, "test_database.db");
+		var fileDB = Titanium.Database.openFile(testFile);
+
+		rs = fileDB.execute("CREATE TABLE TEST (name TEXT, size INT)");
+		rs.close();
+		value_of(rs).should_be_object();
+
+		fileDB.execute("insert into TEST values (?,?)", "foofoo", 555);
+		fileDB.execute("insert into TEST values (?,?)", "foofie", 444);
+		fileDB.execute("insert into TEST values (?,?)", "foofum", 333);
+		fileDB.close();
+
+		value_of(testFile.exists()).should_be_true();
+
+		fileDB = Titanium.Database.openFile(testFile);
+		rs = fileDB.execute("select * from TEST");
+		value_of(rs).should_be_object();
+		value_of(rs.rowCount()).should_be(3);
+		value_of(rs.fieldCount()).should_be(2);
+
+		value_of(rs.field(0)).should_be('foofoo');
+		value_of(rs.field(1)).should_be(555);
+		rs.next();
+
+		value_of(rs.field(0)).should_be('foofie');
+		value_of(rs.field(1)).should_be(444);
+		rs.next();
+
+		value_of(rs.field(0)).should_be('foofum');
+		value_of(rs.field(1)).should_be(333);
+
+		rs.close();
+	},
+	test_file_database_remove:function()
+	{
+		var datadir = Titanium.Filesystem.getApplicationDataDirectory();
+		var testFile = Titanium.Filesystem.getFile(datadir, "test_database.db");
+
+		var fileDB = Titanium.Database.openFile(testFile);
+		fileDB.close();
+		value_of(testFile.exists()).should_be_true();
+
+		// Remove with no close
+		fileDB = Titanium.Database.openFile(testFile);
+		fileDB.remove();
+		value_of(testFile.exists()).should_be_false();
+
+		var fileDB = Titanium.Database.openFile(testFile);
+		fileDB.close();
+		value_of(testFile.exists()).should_be_true();
+
+		// Remove after close
+		fileDB = Titanium.Database.openFile(testFile);
+		fileDB.close();
+		fileDB.remove();
+		value_of(testFile.exists()).should_be_false();
+	},
+	test_database_remove:function()
+	{
+		var name = "test_database_again";
+
+		var datab = Titanium.Database.open(name);
+		var file = Titanium.Filesystem.getFile(datab.path);
+		datab.close();
+
+		value_of(file.exists()).should_be_true();
+
+		// Remove with no close
+		datab = Titanium.Database.open(name);
+		datab.remove();
+		value_of(file.exists()).should_be_false();
+
+		var datab = Titanium.Database.open(name);
+		file = Titanium.Filesystem.getFile(datab.path);
+		datab.close();
+		value_of(file.exists()).should_be_true();
+
+		// Remove after close
+		datab = Titanium.Database.open(name);
+		datab.close();
+		datab.remove();
+		value_of(file.exists()).should_be_false();
 	}
 
-});	
+});

@@ -8,7 +8,7 @@
 #define _DATABASE_RESULTSET_BINDING_H_
 
 #include <kroll/kroll.h>
-#include "db_session.h"
+#include <Poco/Data/RecordSet.h>
 
 namespace ti
 {
@@ -20,9 +20,11 @@ namespace ti
 	{
 	public:
 		ResultSetBinding();
-		ResultSetBinding(Poco::Data::RecordSet &rs);
+		ResultSetBinding(Poco::Data::RecordSet& rs);
+
 	protected:
 		virtual ~ResultSetBinding();
+
 	private:
 		SharedPtr<Poco::Data::RecordSet> rs;
 		bool eof;
