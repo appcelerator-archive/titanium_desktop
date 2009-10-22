@@ -603,7 +603,7 @@ namespace ti
 	{
 		JSGlobalContextRef context = webkit_web_frame_get_global_context(frame);
 		JSObjectRef global_object = JSContextGetGlobalObject(context);
-		SharedKObject frame_global = new KKJSObject(context, global_object);
+		KObjectRef frame_global = new KKJSObject(context, global_object);
 
 		// If uri is NULL, then likely this is the result of a cancel,
 		// so don't report it as a PageLoad
@@ -1215,7 +1215,7 @@ namespace ti
 	struct FileChooserJob
 	{
 		GtkWindow* window;
-		SharedKMethod callback;
+		KMethodRef callback;
 		FileChooserMode mode;
 		bool multiple;
 		std::string title;
@@ -1225,11 +1225,11 @@ namespace ti
 		std::string typesDescription;
 	};
 
-	static SharedValue FileChooserWork(const ValueList& args)
+	static KValueRef FileChooserWork(const ValueList& args)
 	{
 		void* data = args.at(0)->ToVoidPtr();
 		FileChooserJob* job = static_cast<FileChooserJob*>(data);
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		static std::string openFilesDirectory("");
 	
 		GtkFileChooserAction action;
@@ -1324,7 +1324,7 @@ namespace ti
 	}
 	
 
-	void GtkUserWindow::OpenFileChooserDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenFileChooserDialog(KMethodRef callback,
 		bool multiple, std::string& title, std::string& path,
 		std::string& defaultName, std::vector<std::string>& types,
 		std::string& typesDescription)
@@ -1340,12 +1340,12 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SELECT_FILE;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
 		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenFolderChooserDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenFolderChooserDialog(KMethodRef callback,
 		bool multiple, std::string& title, std::string& path,
 		std::string& defaultName)
 	{
@@ -1363,12 +1363,12 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SELECT_FOLDER;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
 		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenSaveAsDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenSaveAsDialog(KMethodRef callback,
 		std::string& title, std::string& path, std::string& defaultName,
 		std::vector<std::string>& types, std::string& typesDescription)
 	{
@@ -1383,7 +1383,7 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SAVE_FILE;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
 		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
 	}

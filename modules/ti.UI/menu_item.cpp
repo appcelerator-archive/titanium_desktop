@@ -186,29 +186,29 @@ namespace ti
 	{
 	}
 
-	void MenuItem::_IsSeparator(const ValueList& args, SharedValue result)
+	void MenuItem::_IsSeparator(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->type == SEPARATOR);
 	}
 
-	void MenuItem::_IsCheck(const ValueList& args, SharedValue result)
+	void MenuItem::_IsCheck(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->type == CHECK);
 	}
 
-	void MenuItem::_SetLabel(const ValueList& args, SharedValue result)
+	void MenuItem::_SetLabel(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setLabel", "s|0");
 		string newLabel = args.GetString(0, "");
 		this->SetLabel(newLabel);
 	}
 
-	void MenuItem::_GetLabel(const ValueList& args, SharedValue result)
+	void MenuItem::_GetLabel(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->label);
 	}
 
-	void MenuItem::_SetIcon(const ValueList& args, SharedValue result)
+	void MenuItem::_SetIcon(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setIcon", "s|0");
 		std::string newIcon = "";
@@ -218,30 +218,30 @@ namespace ti
 		this->SetIcon(newIcon);
 	}
 
-	void MenuItem::_GetIcon(const ValueList& args, SharedValue result)
+	void MenuItem::_GetIcon(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->iconURL);
 	}
 
-	void MenuItem::_SetState(const ValueList& args, SharedValue result)
+	void MenuItem::_SetState(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setState", "b");
 		this->SetState(args.GetBool(0));
 	}
 
-	void MenuItem::_GetState(const ValueList& args, SharedValue result)
+	void MenuItem::_GetState(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->state);
 	}
 
-	void MenuItem::_SetSubmenu(const ValueList& args, SharedValue result)
+	void MenuItem::_SetSubmenu(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setCallback", "o|0");
 		AutoMenu newSubmenu = NULL;
 
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject o = args.at(0)->ToObject();
+			KObjectRef o = args.at(0)->ToObject();
 			o = KObject::Unwrap(o);
 			newSubmenu = o.cast<Menu>();
 		}
@@ -255,7 +255,7 @@ namespace ti
 		this->SetSubmenuImpl(newSubmenu);
 	}
 
-	void MenuItem::_GetSubmenu(const ValueList& args, SharedValue result)
+	void MenuItem::_GetSubmenu(const ValueList& args, KValueRef result)
 	{
 		if (this->submenu.isNull())
 		{
@@ -267,40 +267,40 @@ namespace ti
 		}
 	}
 
-	void MenuItem::_Enable(const ValueList& args, SharedValue result)
+	void MenuItem::_Enable(const ValueList& args, KValueRef result)
 	{
 		this->enabled = true;
 		this->SetEnabledImpl(true);
 	}
 
-	void MenuItem::_Disable(const ValueList& args, SharedValue result)
+	void MenuItem::_Disable(const ValueList& args, KValueRef result)
 	{
 		this->enabled = false;
 		this->SetEnabledImpl(true);
 	}
 
-	void MenuItem::_SetAutoCheck(const ValueList& args, SharedValue result)
+	void MenuItem::_SetAutoCheck(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setAutoCheck", "b");
 		this->autoCheck = args.GetBool(0);
 	}
 
-	void MenuItem::_IsAutoCheck(const ValueList& args, SharedValue result)
+	void MenuItem::_IsAutoCheck(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->autoCheck);
 	}
 
-	void MenuItem::_IsEnabled(const ValueList& args, SharedValue result)
+	void MenuItem::_IsEnabled(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->enabled);
 	}
 
-	void MenuItem::_Click(const ValueList& args, SharedValue result)
+	void MenuItem::_Click(const ValueList& args, KValueRef result)
 	{
 		this->HandleClickEvent(0);
 	}
 
-	void MenuItem::_AddItem(const ValueList& args, SharedValue result)
+	void MenuItem::_AddItem(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("addItem", "?s m|0 s|0");
 		UIBinding* binding = UIBinding::GetInstance();
@@ -313,7 +313,7 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void MenuItem::_AddSeparatorItem(const ValueList& args, SharedValue result)
+	void MenuItem::_AddSeparatorItem(const ValueList& args, KValueRef result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 		AutoMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
@@ -323,7 +323,7 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void MenuItem::_AddCheckItem(const ValueList& args, SharedValue result)
+	void MenuItem::_AddCheckItem(const ValueList& args, KValueRef result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 
@@ -335,7 +335,7 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void MenuItem::HandleClickEvent(SharedKObject source)
+	void MenuItem::HandleClickEvent(KObjectRef source)
 	{
 		if (this->IsCheck() && this->autoCheck)
 		{

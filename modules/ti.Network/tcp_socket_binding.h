@@ -50,21 +50,21 @@ namespace ti
 		std::string buffer;
 		Poco::Mutex bufferMutex; 
 
-		SharedKMethod onRead;
-		SharedKMethod onWrite;
-		SharedKMethod onTimeout;
-		SharedKMethod onError;
-		SharedKMethod onReadComplete;
+		KMethodRef onRead;
+		KMethodRef onWrite;
+		KMethodRef onTimeout;
+		KMethodRef onError;
+		KMethodRef onReadComplete;
 
-		void Connect(const ValueList& args, SharedValue result);
-		void Write(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void IsClosed(const ValueList& args, SharedValue result);
-		void SetOnRead(const ValueList& args, SharedValue result);
-		void SetOnWrite(const ValueList& args, SharedValue result);
-		void SetOnTimeout(const ValueList& args, SharedValue result);
-		void SetOnError(const ValueList& args, SharedValue result);
-		void SetOnReadComplete(const ValueList& args, SharedValue result);
+		void Connect(const ValueList& args, KValueRef result);
+		void Write(const ValueList& args, KValueRef result);
+		void Close(const ValueList& args, KValueRef result);
+		void IsClosed(const ValueList& args, KValueRef result);
+		void SetOnRead(const ValueList& args, KValueRef result);
+		void SetOnWrite(const ValueList& args, KValueRef result);
+		void SetOnTimeout(const ValueList& args, KValueRef result);
+		void SetOnError(const ValueList& args, KValueRef result);
+		void SetOnReadComplete(const ValueList& args, KValueRef result);
 
 		void OnRead(const Poco::AutoPtr<ReadableNotification>& n);
 		void OnWrite(const Poco::AutoPtr<WritableNotification>& n);

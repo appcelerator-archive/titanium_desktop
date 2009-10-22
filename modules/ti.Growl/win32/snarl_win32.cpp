@@ -14,9 +14,9 @@ using namespace kroll;
 namespace ti
 {
 	UINT SnarlWin32::snarlWindowMessage = ::RegisterWindowMessage("TitaniumSnarlMessage");
-	std::map<long, SharedKMethod> SnarlWin32::snarlCallbacks;
+	std::map<long, KMethodRef> SnarlWin32::snarlCallbacks;
 
-	SnarlWin32::SnarlWin32(SharedKObject global) :
+	SnarlWin32::SnarlWin32(KObjectRef global) :
 		GrowlBinding(global)
 	{
 	}
@@ -33,7 +33,7 @@ namespace ti
 	}
 
 	void SnarlWin32::ShowNotification(std::string& title, std::string& description,
-		std::string& iconURL, int timeout, SharedKMethod callback)
+		std::string& iconURL, int timeout, KMethodRef callback)
 	{
 		SnarlInterface snarlInterface;
 
@@ -64,7 +64,7 @@ namespace ti
 			return false;
 
 		long id = (long) lParam;
-		std::map<long, SharedKMethod>::iterator i = snarlCallbacks.find(id);
+		std::map<long, KMethodRef>::iterator i = snarlCallbacks.find(id);
 
 		if (i != snarlCallbacks.end())
 		{

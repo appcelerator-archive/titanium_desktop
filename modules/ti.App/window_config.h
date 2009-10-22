@@ -56,7 +56,7 @@ class TITANIUM_APP_API WindowConfig
 	WindowConfig() { SetDefaults(); }
 	WindowConfig(void* data);
 	WindowConfig(WindowConfig *config, std::string& url);
-	void UseProperties(SharedKObject properties);
+	void UseProperties(KObjectRef properties);
 
 	std::string ToString();
 

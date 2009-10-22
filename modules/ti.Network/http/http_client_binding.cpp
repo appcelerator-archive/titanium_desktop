@@ -250,12 +250,12 @@ namespace ti
 	{
 	}
 
-	void HTTPClientBinding::Abort(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::Abort(const ValueList& args, KValueRef result)
 	{
 		this->abort.set();
 	}
 
-	void HTTPClientBinding::Open(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::Open(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("open", "ss?bss");
 
@@ -298,25 +298,25 @@ namespace ti
 		result->SetBool(true);
 	}
 
-	void HTTPClientBinding::SetBasicCredentials(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::SetBasicCredentials(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setBasicCredentials", "ss");
 		this->basicCredentials.setUsername(args.GetString(0));
 		this->basicCredentials.setPassword(args.GetString(1));
 	}
 
-	void HTTPClientBinding::Send(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::Send(const ValueList& args, KValueRef result)
 	{
 		// Get send data if provided
 		args.VerifyException("send", "?s|o|0");
-		SharedValue sendData(args.GetValue(0));
+		KValueRef sendData(args.GetValue(0));
 
 		// Setup output stream for data
 		this->outstream = new std::ostringstream(std::ios::binary | std::ios::out);
 		result->SetBool(this->BeginRequest(sendData));
 	}
 
-	void HTTPClientBinding::Receive(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::Receive(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("receive", "m|o ?s|o|0");
 
@@ -330,8 +330,8 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			SharedKObject handlerObject(args.at(0)->ToObject());
-			SharedKMethod writeMethod(handlerObject->GetMethod("write", 0));
+			KObjectRef handlerObject(args.at(0)->ToObject());
+			KMethodRef writeMethod(handlerObject->GetMethod("write", 0));
 			if (writeMethod.isNull())
 			{
 				logger->Error("Unsupported object type as output handler:"
@@ -349,11 +349,11 @@ namespace ti
 		}
 
 		// Get the send data if provided
-		SharedValue sendData(args.GetValue(1));
+		KValueRef sendData(args.GetValue(1));
 		result->SetBool(this->BeginRequest(sendData));
 	}
 
-	void HTTPClientBinding::SetRequestHeader(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::SetRequestHeader(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setRequestHeader", "ss");
 		std::string key = args.GetString(0);
@@ -361,7 +361,7 @@ namespace ti
 		this->headers[key] = value;
 	}
 
-	void HTTPClientBinding::GetResponseHeader(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::GetResponseHeader(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getResponseHeader", "s");
 		std::string name = args.GetString(0);
@@ -376,25 +376,25 @@ namespace ti
 		}
 	}
 
-	void HTTPClientBinding::SetCookie(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::SetCookie(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setCookie", "ss");
 		this->requestCookies.add(args.GetString(0), args.GetString(1));
 	}
 
-	void HTTPClientBinding::ClearCookies(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::ClearCookies(const ValueList& args, KValueRef result)
 	{
 		this->requestCookies.clear();
 	}
 
-	void HTTPClientBinding::GetCookie(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::GetCookie(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getCookie", "s");
 		std::string cookieName = args.GetString(0);
 
 		if (this->responseCookies.find(cookieName) != this->responseCookies.end())
 		{
-			SharedKObject cookie = new HTTPCookie(this->responseCookies[cookieName]);
+			KObjectRef cookie = new HTTPCookie(this->responseCookies[cookieName]);
 			result->SetObject(cookie);
 		}
 		else
@@ -404,7 +404,7 @@ namespace ti
 		}
 	}
 
-	void HTTPClientBinding::SetTimeout(const ValueList& args, SharedValue result)
+	void HTTPClientBinding::SetTimeout(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setTimeout", "i");
 		this->timeout = args.GetInt(0);
@@ -444,13 +444,13 @@ namespace ti
 
 		// We need this binding to stay alive at least until we have
 		// finished this thread. So save 'this' in an AutoPtr.
-		SharedKObject save(this, true);
+		KObjectRef save(this, true);
 		this->ExecuteRequest();
 
 		END_KROLL_THREAD;
 	}
 
-	bool HTTPClientBinding::BeginRequest(SharedValue sendData)
+	bool HTTPClientBinding::BeginRequest(KValueRef sendData)
 	{
 		if (this->Get("connected")->ToBool())
 		{
@@ -466,9 +466,9 @@ namespace ti
 		// Determine what data type we have to send
 		if (sendData->IsObject())
 		{
-			SharedKObject dataObject = sendData->ToObject();
-			SharedKMethod nativePathMethod(dataObject->GetMethod("nativePath"));
-			SharedKMethod sizeMethod(dataObject->GetMethod("size"));
+			KObjectRef dataObject = sendData->ToObject();
+			KMethodRef nativePathMethod(dataObject->GetMethod("nativePath"));
+			KMethodRef sizeMethod(dataObject->GetMethod("size"));
 
 			if (nativePathMethod.isNull() || sizeMethod.isNull())
 			{

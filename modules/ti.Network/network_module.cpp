@@ -20,7 +20,7 @@ namespace ti
 		this->variables = new NetworkBinding(host,GetPath());
 
 		// set our ti.Network
-		SharedValue value = Value::NewObject(this->variables);
+		KValueRef value = Value::NewObject(this->variables);
 		host->GetGlobalObject()->Set("Network", value);
 	}
 

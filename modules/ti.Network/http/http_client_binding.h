@@ -43,17 +43,17 @@ namespace ti
 		HTTPClientBinding(Host* host, std::string path);
 		virtual ~HTTPClientBinding();
 
-		void Abort(const ValueList& args, SharedValue result);
-		void Open(const ValueList& args, SharedValue result);
-		void SetBasicCredentials(const ValueList& args, SharedValue result);
-		void Send(const ValueList& args, SharedValue result);
-		void Receive(const ValueList& args, SharedValue result);
-		void SetRequestHeader(const ValueList& args, SharedValue result);
-		void GetResponseHeader(const ValueList& args, SharedValue result);
-		void SetCookie(const ValueList& args, SharedValue result);
-		void ClearCookies(const ValueList& args, SharedValue result);
-		void GetCookie(const ValueList& args, SharedValue result);
-		void SetTimeout(const ValueList& args, SharedValue result);
+		void Abort(const ValueList& args, KValueRef result);
+		void Open(const ValueList& args, KValueRef result);
+		void SetBasicCredentials(const ValueList& args, KValueRef result);
+		void Send(const ValueList& args, KValueRef result);
+		void Receive(const ValueList& args, KValueRef result);
+		void SetRequestHeader(const ValueList& args, KValueRef result);
+		void GetResponseHeader(const ValueList& args, KValueRef result);
+		void SetCookie(const ValueList& args, KValueRef result);
+		void ClearCookies(const ValueList& args, KValueRef result);
+		void GetCookie(const ValueList& args, KValueRef result);
+		void SetTimeout(const ValueList& args, KValueRef result);
 
 		bool FireEvent(std::string& eventName);
 
@@ -68,16 +68,16 @@ namespace ti
 		std::string method;
 		bool async;
 		int timeout;
-		SharedKMethod outputHandler;
+		KMethodRef outputHandler;
 		SharedPtr<Poco::Net::HTTPClientSession> session;
 		Poco::Net::NameValueCollection requestCookies;
 		std::map<std::string, Poco::Net::HTTPCookie> responseCookies;
 		Poco::Net::HTTPBasicCredentials basicCredentials;
 
-		SharedKMethod ondatastream;
-		SharedKMethod onreadystate;
-		SharedKMethod onsendstream;
-		SharedKMethod onload;
+		KMethodRef ondatastream;
+		KMethodRef onreadystate;
+		KMethodRef onsendstream;
+		KMethodRef onload;
 
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;
@@ -90,7 +90,7 @@ namespace ti
 		// Thread main		
 		void run();
 
-		bool BeginRequest(SharedValue sendData);
+		bool BeginRequest(KValueRef sendData);
 		void ExecuteRequest();
 		void ChangeState(int readyState);
 		void Reset();

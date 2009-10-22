@@ -19,7 +19,7 @@ namespace ti
 
 			void OpenChooserDialog(
 				bool files,
-				SharedKMethod callback,
+				KMethodRef callback,
 				bool multiple,
 				std::string& title,
 				std::string& path,
@@ -28,7 +28,7 @@ namespace ti
 				std::string& typesDescription);
 			
 			void OpenFileChooserDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				bool multiple,
 				std::string& title,
 				std::string& path,
@@ -37,14 +37,14 @@ namespace ti
 				std::string& typesDescription);
 
 			void OpenFolderChooserDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				bool multiple,
 				std::string& title,
 				std::string& path,
 				std::string& defaultName);
 
 			void OpenSaveAsDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				std::string& title,
 				std::string& path,
 				std::string& defaultName,

@@ -23,25 +23,25 @@ namespace ti
 		virtual ~IRCClientBinding();
 	private:
 		Host* host;
-		SharedKObject global;
+		KObjectRef global;
 		IRC irc;
-		SharedKMethod callback;
+		KMethodRef callback;
 		Poco::Thread *thread;
 		
 		static void Run(void*);
 		static int Callback(char *cmd, char* params, irc_reply_data* data, void* conn, void* pd);
 		
 		
-		void Connect(const ValueList& args, SharedValue result);
-		void Disconnect(const ValueList& args, SharedValue result);
-		void Send(const ValueList& args, SharedValue result);
-		void SetNick(const ValueList& args, SharedValue result);
-		void GetNick(const ValueList& args, SharedValue result);
-		void Join(const ValueList& args, SharedValue result);
-		void Unjoin(const ValueList& args, SharedValue result);
-		void IsOp(const ValueList& args, SharedValue result);
-		void IsVoice(const ValueList& args, SharedValue result);
-		void GetUsers(const ValueList& args, SharedValue result);
+		void Connect(const ValueList& args, KValueRef result);
+		void Disconnect(const ValueList& args, KValueRef result);
+		void Send(const ValueList& args, KValueRef result);
+		void SetNick(const ValueList& args, KValueRef result);
+		void GetNick(const ValueList& args, KValueRef result);
+		void Join(const ValueList& args, KValueRef result);
+		void Unjoin(const ValueList& args, KValueRef result);
+		void IsOp(const ValueList& args, KValueRef result);
+		void IsVoice(const ValueList& args, KValueRef result);
+		void GetUsers(const ValueList& args, KValueRef result);
 
 	};
 }

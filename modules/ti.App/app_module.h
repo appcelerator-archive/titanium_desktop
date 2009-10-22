@@ -16,7 +16,7 @@ namespace ti
 		KROLL_MODULE_CLASS(AppModule)
 
 	private:
-		SharedKObject app_binding, properties_binding;
+		KObjectRef app_binding, properties_binding;
 	};
 
 }

@@ -16,7 +16,7 @@ namespace ti
 	FileSystemUtils::~FileSystemUtils() { }
 	
 	/*static*/
-	SharedString FileSystemUtils::GetFileName(SharedValue v)
+	SharedString FileSystemUtils::GetFileName(KValueRef v)
 	{
 		if (v->IsString())
 		{
@@ -36,7 +36,7 @@ namespace ti
 	}
 	
 	/*static*/
-	AutoPtr<File> FileSystemUtils::ToFile(SharedKObject object)
+	AutoPtr<File> FileSystemUtils::ToFile(KObjectRef object)
 	{
 		AutoPtr<File> file = object.cast<File>();
 		return file;

@@ -20,7 +20,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
 {
 	JSGlobalContextRef context = frame->globalContext();
 	JSObjectRef global_object = JSContextGetGlobalObject(context);
-	SharedKObject frame_global = new KKJSObject(context, global_object);
+	KObjectRef frame_global = new KKJSObject(context, global_object);
 
 	IWebDataSource *webDataSource;
 	frame->dataSource(&webDataSource);

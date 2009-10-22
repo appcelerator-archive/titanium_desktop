@@ -28,7 +28,7 @@ namespace ti
 		KROLL_MODULE_CLASS(DesktopModule)
 
 	private:
-		SharedKObject variables;
+		KObjectRef variables;
 	};
 
 }

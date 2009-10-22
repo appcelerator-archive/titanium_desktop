@@ -86,7 +86,7 @@ namespace ti
 		this->Close();
 	}
 
-	void FileStream::Open(const ValueList& args, SharedValue result)
+	void FileStream::Open(const ValueList& args, KValueRef result)
 	{
 		FileStreamMode mode = MODE_READ;
 		bool binary = false;
@@ -151,7 +151,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::Close(const ValueList& args, SharedValue result)
+	void FileStream::Close(const ValueList& args, KValueRef result)
 	{
 		bool closed = this->Close();
 		result->SetBool(closed);
@@ -182,13 +182,13 @@ namespace ti
 
 		return false;
 	}
-	void FileStream::Write(const ValueList& args, SharedValue result)
+	void FileStream::Write(const ValueList& args, KValueRef result)
 	{
 		char *text = NULL;
 		int size = 0;
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject b = args.at(0)->ToObject();
+			KObjectRef b = args.at(0)->ToObject();
 			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
@@ -256,7 +256,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::Read(const ValueList& args, SharedValue result)
+	void FileStream::Read(const ValueList& args, KValueRef result)
 	{
 		if (!this->stream)
 		{
@@ -298,7 +298,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::ReadLine(const ValueList& args, SharedValue result)
+	void FileStream::ReadLine(const ValueList& args, KValueRef result)
 	{
 		if (!this->stream)
 		{
@@ -362,7 +362,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::WriteLine(const ValueList& args, SharedValue result)
+	void FileStream::WriteLine(const ValueList& args, KValueRef result)
 	{
 		if(! this->stream)
 		{
@@ -372,7 +372,7 @@ namespace ti
 		int size = 0;
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject b = args.at(0)->ToObject();
+			KObjectRef b = args.at(0)->ToObject();
 			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
@@ -428,7 +428,7 @@ namespace ti
 		result->SetBool(true);
 	}
 
-	void FileStream::Ready(const ValueList& args, SharedValue result)
+	void FileStream::Ready(const ValueList& args, KValueRef result)
 	{
 		Poco::FileIOS* fis = this->stream;
 		if(!fis)
@@ -441,7 +441,7 @@ namespace ti
 		}
 	}
 
-	void FileStream::IsOpen(const ValueList& args, SharedValue result)
+	void FileStream::IsOpen(const ValueList& args, KValueRef result)
 	{
 		Poco::FileIOS* fis = this->stream;
 		result->SetBool(fis!=NULL);

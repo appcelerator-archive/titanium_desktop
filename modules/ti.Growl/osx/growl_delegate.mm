@@ -36,7 +36,7 @@
 {
 	NSMutableArray* array = (NSMutableArray*) clickContext;
 	MethodWrapper* wrapper = (MethodWrapper*) [array objectAtIndex:0];
-	SharedKMethod* method = [wrapper method];
+	KMethodRef* method = [wrapper method];
 	if (!method->isNull())
 	{
 		ValueList args;
@@ -49,7 +49,7 @@
 
 @implementation MethodWrapper
 
--(id) initWithMethod:(SharedKMethod*)m
+-(id) initWithMethod:(KMethodRef*)m
 {
 	self = [super init];
 	
@@ -60,7 +60,7 @@
 	return self;
 }
 
-- (SharedKMethod *) method
+- (KMethodRef *) method
 {
 	return method;
 }

@@ -214,7 +214,7 @@ void Win32UserWindow::InitWindow()
 
 	// these APIs are semi-private -- we probably shouldn't mark them
 	// make our HWND available to 3rd party devs without needing our headers
-	SharedValue windowHandle = Value::NewVoidPtr((void*) this->windowHandle);
+	KValueRef windowHandle = Value::NewVoidPtr((void*) this->windowHandle);
 	this->Set("windowHandle", windowHandle);
 	logger->Debug("Initializing windowHandle: %i", windowHandle);
 
@@ -238,7 +238,7 @@ void Win32UserWindow::InitWebKit()
 	webView->setApplicationNameForUserAgent(ua.copy());
 
 	// place our user agent string in the global so we can later use it
-	SharedKObject global = host->GetGlobalObject();
+	KObjectRef global = host->GetGlobalObject();
 	if (global->Get("userAgent")->IsUndefined())
 	{
 		_bstr_t uaURL("http://titaniumapp.com");
@@ -1051,7 +1051,7 @@ void Win32UserWindow::ShowInspector(bool console)
 }
 
 void Win32UserWindow::OpenFileChooserDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	bool multiple,
 	std::string& title,
 	std::string& path,
@@ -1060,36 +1060,36 @@ void Win32UserWindow::OpenFileChooserDialog(
 	std::string& typesDescription)
 {
 
-	SharedKList results = this->SelectFile(
+	KListRef results = this->SelectFile(
 		false, multiple, title, path, defaultName, types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
 void Win32UserWindow::OpenFolderChooserDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	bool multiple,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName)
 {
-	SharedKList results = SelectDirectory(multiple, title, path, defaultName);
+	KListRef results = SelectDirectory(multiple, title, path, defaultName);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
 void Win32UserWindow::OpenSaveAsDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName,
 	std::vector<std::string>& types,
 	std::string& typesDescription)
 {
-	SharedKList results = SelectFile(
+	KListRef results = SelectFile(
 		true, false, title, path, defaultName, types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
-SharedKList Win32UserWindow::SelectFile(
+KListRef Win32UserWindow::SelectFile(
  	bool saveDialog,
 	bool multiple,
 	std::string& title,
@@ -1159,7 +1159,7 @@ SharedKList Win32UserWindow::SelectFile(
 		ofn.Flags |= OFN_ALLOWMULTISELECT;
 	}
 
-	SharedKList results = new StaticBoundList();
+	KListRef results = new StaticBoundList();
 	// display the open dialog box
 	BOOL result;
 
@@ -1226,13 +1226,13 @@ SharedKList Win32UserWindow::SelectFile(
 	return results;
 }
 
-SharedKList Win32UserWindow::SelectDirectory(
+KListRef Win32UserWindow::SelectDirectory(
 	bool multiple,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName)
 {
-	SharedKList results = new StaticBoundList();
+	KListRef results = new StaticBoundList();
 
 	BROWSEINFO bi = { 0 };
 	std::wstring titleW = UTF8ToWide(title);

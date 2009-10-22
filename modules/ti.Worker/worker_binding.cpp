@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	WorkerBinding::WorkerBinding(Host *host, SharedKObject global) :
+	WorkerBinding::WorkerBinding(Host *host, KObjectRef global) :
 		StaticBoundObject("Worker"),
 		host(host),
 		global(global)
@@ -29,7 +29,7 @@ namespace ti
 	WorkerBinding::~WorkerBinding()
 	{
 	}
-	void WorkerBinding::CreateWorker(const ValueList& args, SharedValue result)
+	void WorkerBinding::CreateWorker(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=2)
 		{
@@ -51,10 +51,10 @@ namespace ti
 		else 
 		{
 			// this is a path -- probably should verify that this is relative and not an absolute URL to remote
-			SharedKMethod appURLToPath = global->GetNS("App.appURLToPath")->ToMethod();
+			KMethodRef appURLToPath = global->GetNS("App.appURLToPath")->ToMethod();
 			ValueList a;
 			a.push_back(args.at(0));
-			SharedValue result = appURLToPath->Call(a);
+			KValueRef result = appURLToPath->Call(a);
 			const char *path = result->ToString();
 			
 			logger->Debug("worker file path = %s",path);
@@ -82,7 +82,7 @@ namespace ti
 		
 		logger->Debug("Worker script code = %s", code.c_str());
 		
-		SharedKObject worker = new Worker(host,global,code);
+		KObjectRef worker = new Worker(host,global,code);
 		result->SetObject(worker);
 	}
 }

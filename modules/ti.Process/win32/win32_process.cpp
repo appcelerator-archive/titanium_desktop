@@ -59,7 +59,7 @@ namespace ti
 		See
 		http://msdn.microsoft.com/library/en-us/vccelng/htm/progs_12.asp
 	*/
-	std::string Win32Process::ArgListToString(SharedKList argList)
+	std::string Win32Process::ArgListToString(KListRef argList)
 	{
 		
 		std::string result = "";
@@ -182,9 +182,9 @@ namespace ti
 		nativeErr->StartMonitor();
 	}
 
-	AutoBlob Win32Process::MonitorSync()
+	BlobRef Win32Process::MonitorSync()
 	{
-		SharedKMethod readCallback =
+		KMethodRef readCallback =
 			StaticBoundMethod::FromMethod<Win32Process>(
 				this, &Win32Process::ReadCallback);
 
@@ -202,7 +202,7 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		AutoBlob output = 0;
+		BlobRef output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
 			output = Blob::GlobBlobs(processOutput);
@@ -241,11 +241,11 @@ namespace ti
 		return pid;
 	}
 	
-	void Win32Process::ReadCallback(const ValueList& args, SharedValue result)
+	void Win32Process::ReadCallback(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsObject())
 		{
-			AutoBlob blob = args.GetObject(0).cast<Blob>();
+			BlobRef blob = args.GetObject(0).cast<Blob>();
 			if (!blob.isNull() && blob->Length() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(processOutputMutex);

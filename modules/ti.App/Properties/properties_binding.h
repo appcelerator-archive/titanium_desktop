@@ -25,25 +25,25 @@ namespace ti
 		PropertiesBinding();
 		virtual ~PropertiesBinding();
 
-		void GetBool(const ValueList& args, SharedValue result);
-		void GetDouble(const ValueList& args, SharedValue result);
-		void GetInt(const ValueList& args, SharedValue result);
-		void GetString(const ValueList& args, SharedValue result);
-		void GetList(const ValueList& args, SharedValue result);
-		void SetBool(const ValueList& args, SharedValue result);
-		void SetDouble(const ValueList& args, SharedValue result);
-		void SetInt(const ValueList& args, SharedValue result);
-		void SetString(const ValueList& args, SharedValue result);
-		void SetList(const ValueList& args, SharedValue result);
-		void HasProperty(const ValueList& args, SharedValue result);
-		void ListProperties(const ValueList& args, SharedValue result);
-		void SaveTo(const ValueList& args, SharedValue result);
+		void GetBool(const ValueList& args, KValueRef result);
+		void GetDouble(const ValueList& args, KValueRef result);
+		void GetInt(const ValueList& args, KValueRef result);
+		void GetString(const ValueList& args, KValueRef result);
+		void GetList(const ValueList& args, KValueRef result);
+		void SetBool(const ValueList& args, KValueRef result);
+		void SetDouble(const ValueList& args, KValueRef result);
+		void SetInt(const ValueList& args, KValueRef result);
+		void SetString(const ValueList& args, KValueRef result);
+		void SetList(const ValueList& args, KValueRef result);
+		void HasProperty(const ValueList& args, KValueRef result);
+		void ListProperties(const ValueList& args, KValueRef result);
+		void SaveTo(const ValueList& args, KValueRef result);
 		
 		typedef enum
 		{
 			Bool, Double, Int, String, List
 		} Type;
-		void Getter(const ValueList& args, SharedValue result, Type type);
+		void Getter(const ValueList& args, KValueRef result, Type type);
 		void Setter(const ValueList& args, Type type);
 		
 		Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetConfig()

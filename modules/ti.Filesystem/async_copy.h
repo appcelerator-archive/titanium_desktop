@@ -28,7 +28,7 @@ namespace ti
 	class AsyncCopy : public StaticBoundObject
 	{
 		public:
-			AsyncCopy(FilesystemBinding* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, SharedKMethod callback);
+			AsyncCopy(FilesystemBinding* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, KMethodRef callback);
 			virtual ~AsyncCopy();
 
 		private:
@@ -36,7 +36,7 @@ namespace ti
 			Host *host;
 			std::vector<std::string> files;
 			std::string destination;
-			SharedKMethod callback;
+			KMethodRef callback;
 			Poco::Thread *thread;
 			bool stopped;
 			
@@ -51,7 +51,7 @@ namespace ti
 			 * Returns:
 			 *   the file name
 			 */
-			void ToString(const ValueList& args, SharedValue result);
+			void ToString(const ValueList& args, KValueRef result);
 			/**
 			 * Function: IsFile
 			 *   Determines if this File represents a file
@@ -61,7 +61,7 @@ namespace ti
 			 * Returns:
 			 *   true if this File repesents a file; false otherwise
 			 */
-			void Cancel(const ValueList& args, SharedValue result);
+			void Cancel(const ValueList& args, KValueRef result);
 			
 			void Copy(Poco::Path &src, Poco::Path &dest);
 	};

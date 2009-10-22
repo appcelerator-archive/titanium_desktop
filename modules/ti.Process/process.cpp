@@ -176,7 +176,7 @@ namespace ti
 		}
 	}
 
-	void Process::SetOnRead(SharedKMethod newOnRead)
+	void Process::SetOnRead(KMethodRef newOnRead)
 	{
 		if (running)
 		{
@@ -188,7 +188,7 @@ namespace ti
 		this->onRead = newOnRead;
 	}
 
-	void Process::SetOnExit(SharedKMethod newOnExit)
+	void Process::SetOnExit(KMethodRef newOnExit)
 	{
 		this->AddEventListener(Event::EXIT, newOnExit);
 		if (!this->onExit.isNull())
@@ -196,10 +196,10 @@ namespace ti
 		this->onExit = newOnExit;
 	}
 
-	SharedKObject Process::CloneEnvironment()
+	KObjectRef Process::CloneEnvironment()
 	{
 		SharedStringList properties = environment->GetPropertyNames();
-		SharedKObject clonedEnvironment = new StaticBoundObject();
+		KObjectRef clonedEnvironment = new StaticBoundObject();
 		for (size_t i = 0; i < properties->size(); i++)
 		{
 			std::string property = *properties->at(i);
@@ -255,14 +255,14 @@ namespace ti
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
-	AutoBlob Process::LaunchSync()
+	BlobRef Process::LaunchSync()
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
 
 		this->AttachPipes(false);
 		ForkAndExec();
-		AutoBlob output = MonitorSync();
+		BlobRef output = MonitorSync();
 
 		// Manually fire read events here so that
 		// we can be precise about the ordering.
@@ -308,12 +308,12 @@ namespace ti
 			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
 	}
 
-	void Process::ExitCallback(const ValueList& args, SharedValue result)
+	void Process::ExitCallback(const ValueList& args, KValueRef result)
 	{
 		this->Exited(true);
 	}
 
-	void Process::_GetPID(const ValueList& args, SharedValue result)
+	void Process::_GetPID(const ValueList& args, KValueRef result)
 	{
 		int pid = GetPID();
 		if (pid != -1)
@@ -322,21 +322,21 @@ namespace ti
 			result->SetNull();
 	}
 
-	void Process::_GetExitCode(const ValueList& args, SharedValue result)
+	void Process::_GetExitCode(const ValueList& args, KValueRef result)
 	{
 		result->SetValue(exitCode);
 	}
 	
-	void Process::_GetArguments(const ValueList& args, SharedValue result)
+	void Process::_GetArguments(const ValueList& args, KValueRef result)
 	{
 		result->SetList(this->args);
 	}
 	
-	void Process::_GetEnvironment(const ValueList& args, SharedValue result)
+	void Process::_GetEnvironment(const ValueList& args, KValueRef result)
 	{
 		if (args.size() > 0 && args.at(0)->IsString())
 		{
-			SharedValue value = environment->Get(args.at(0)->ToString());
+			KValueRef value = environment->Get(args.at(0)->ToString());
 			result->SetValue(value);
 		}
 		else {
@@ -344,7 +344,7 @@ namespace ti
 		}
 	}
 	
-	void Process::_SetEnvironment(const ValueList& args, SharedValue result)
+	void Process::_SetEnvironment(const ValueList& args, KValueRef result)
 	{
 		if (args.size() >= 2 && args.at(0)->IsString() && args.at(1)->IsString())
 		{
@@ -352,27 +352,27 @@ namespace ti
 		}
 	}
 	
-	void Process::_CloneEnvironment(const ValueList& args, SharedValue result)
+	void Process::_CloneEnvironment(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(CloneEnvironment());
 	}
 	
-	void Process::_Launch(const ValueList& args, SharedValue result)
+	void Process::_Launch(const ValueList& args, KValueRef result)
 	{
 		LaunchAsync();
 	}
 	
-	void Process::_Terminate(const ValueList& args, SharedValue result)
+	void Process::_Terminate(const ValueList& args, KValueRef result)
 	{
 		Terminate();
 	}
 	
-	void Process::_Kill(const ValueList& args, SharedValue result)
+	void Process::_Kill(const ValueList& args, KValueRef result)
 	{
 		Kill();
 	}
 	
-	void Process::_SendSignal(const ValueList& args, SharedValue result)
+	void Process::_SendSignal(const ValueList& args, KValueRef result)
 	{
 		if (args.size() >= 1 && args.at(0)->IsNumber())
 		{
@@ -417,53 +417,53 @@ namespace ti
 		}
 	}
 
-	void Process::_SetOnRead(const ValueList& args, SharedValue result)
+	void Process::_SetOnRead(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setOnRead", "m");
 		this->SetOnRead(args.GetMethod(0));
 	}
 
-	void Process::_SetOnExit(const ValueList& args, SharedValue result)
+	void Process::_SetOnExit(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setOnExit", "m");
 		this->SetOnExit(args.GetMethod(0));
 	}
 
-	void Process::_GetStdin(const ValueList& args, SharedValue result)
+	void Process::_GetStdin(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(stdinPipe);
 	}
 	
-	void Process::_GetStdout(const ValueList& args, SharedValue result)
+	void Process::_GetStdout(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(stdoutPipe);
 	}
 	
-	void Process::_GetStderr(const ValueList& args, SharedValue result)
+	void Process::_GetStderr(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(stderrPipe);
 	}
 	
-	void Process::_IsRunning(const ValueList& args, SharedValue result)
+	void Process::_IsRunning(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(running);
 	}
 
-	SharedValue Process::Call(const ValueList& args)
+	KValueRef Process::Call(const ValueList& args)
 	{
-		AutoBlob output = LaunchSync();
+		BlobRef output = LaunchSync();
 		return Value::NewObject(output);
 	}
 
-	void Process::_ToString(const ValueList& args, SharedValue result)
+	void Process::_ToString(const ValueList& args, KValueRef result)
 	{
 		result->SetString(ArgumentsToString().c_str());
 	}
 
 	/*static*/
-	SharedKObject Process::GetCurrentEnvironment()
+	KObjectRef Process::GetCurrentEnvironment()
 	{
-		SharedKObject kenv = new StaticBoundObject();
+		KObjectRef kenv = new StaticBoundObject();
 		std::map<std::string, std::string> env = EnvironmentUtils::GetEnvironment();
 
 		std::map<std::string, std::string>::iterator i = env.begin();

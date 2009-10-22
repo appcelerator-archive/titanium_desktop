@@ -230,19 +230,19 @@ namespace ti
 			delete this->readLineFS;
 	}
 
-	void File::ToURL(const ValueList& args, SharedValue result)
+	void File::ToURL(const ValueList& args, KValueRef result)
 	{
 		std::string url(URLUtils::PathToFileURL(this->filename));
 		result->SetString(url.c_str());
 	}
 
-	void File::ToString(const ValueList& args, SharedValue result)
+	void File::ToString(const ValueList& args, KValueRef result)
 	{
 		Logger::Get("File")->Debug("ToString: %s", filename.c_str());
 		result->SetString(this->filename.c_str());
 	}
 
-	void File::IsFile(const ValueList& args, SharedValue result)
+	void File::IsFile(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -263,7 +263,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsDirectory(const ValueList& args, SharedValue result)
+	void File::IsDirectory(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -284,7 +284,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsHidden(const ValueList& args, SharedValue result)
+	void File::IsHidden(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -305,7 +305,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsSymbolicLink(const ValueList& args, SharedValue result)
+	void File::IsSymbolicLink(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -326,7 +326,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsExecutable(const ValueList& args, SharedValue result)
+	void File::IsExecutable(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -346,7 +346,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsReadonly(const ValueList& args, SharedValue result)
+	void File::IsReadonly(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -380,7 +380,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsWriteable(const ValueList& args, SharedValue result)
+	void File::IsWriteable(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -400,7 +400,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::Resolve(const ValueList& args, SharedValue result)
+	void File::Resolve(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -417,7 +417,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::Write(const ValueList& args, SharedValue result)
+	void File::Write(const ValueList& args, KValueRef result)
 	{
 		FileStreamMode mode = MODE_WRITE;
 
@@ -441,7 +441,7 @@ namespace ti
 #endif		
 	}
 
-	void File::Read(const ValueList& args, SharedValue result)
+	void File::Read(const ValueList& args, KValueRef result)
 	{
 		Logger* logger = Logger::Get("Filesystem.File");
 		logger->Trace("read called for %s",this->filename.c_str());
@@ -451,7 +451,7 @@ namespace ti
 		fs.Read(args, result);
 		fs.Close();
 	}
-	void File::ReadLine(const ValueList& args, SharedValue result)
+	void File::ReadLine(const ValueList& args, KValueRef result)
 	{
 		bool forceOpen = args.GetBool(0, false);
 
@@ -475,7 +475,7 @@ namespace ti
 			this->readLineFS = 0;
 		}
 	}
-	void File::Copy(const ValueList& args, SharedValue result)
+	void File::Copy(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -489,7 +489,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::Move(const ValueList& args, SharedValue result)
+	void File::Move(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -503,7 +503,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::Rename(const ValueList& args, SharedValue result)
+	void File::Rename(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -519,7 +519,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::CreateDirectory(const ValueList& args, SharedValue result)
+	void File::CreateDirectory(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -553,7 +553,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::DeleteDirectory(const ValueList& args, SharedValue result)
+	void File::DeleteDirectory(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -578,7 +578,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::DeleteFile(const ValueList& args, SharedValue result)
+	void File::DeleteFile(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -597,7 +597,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetDirectoryListing(const ValueList& args, SharedValue result)
+	void File::GetDirectoryListing(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -608,18 +608,18 @@ namespace ti
 				std::vector<std::string> files;
 				dir.list(files);
 
-				SharedKList fileList = new StaticBoundList();
+				KListRef fileList = new StaticBoundList();
 				for(size_t i = 0; i < files.size(); i++)
 				{
 					std::string entry = files.at(i);
 					// store it as the fullpath
 					std::string filename = kroll::FileUtils::Join(this->filename.c_str(),entry.c_str(),NULL);
 					ti::File* file = new ti::File(filename);
-					SharedValue value = Value::NewObject((SharedKObject) file);
+					KValueRef value = Value::NewObject((KObjectRef) file);
 					fileList->Append(value);
 				}
 
-				SharedKList list = fileList;
+				KListRef list = fileList;
 				result->SetList(list);
 			}
 			else
@@ -632,7 +632,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetParent(const ValueList& args, SharedValue result)
+	void File::GetParent(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -646,7 +646,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetExists(const ValueList& args, SharedValue result)
+	void File::GetExists(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -659,7 +659,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetCreateTimestamp(const ValueList& args, SharedValue result)
+	void File::GetCreateTimestamp(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -673,7 +673,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetModificationTimestamp(const ValueList& args, SharedValue result)
+	void File::GetModificationTimestamp(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -687,7 +687,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetName(const ValueList& args, SharedValue result)
+	void File::GetName(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -699,7 +699,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetExtension(const ValueList& args, SharedValue result)
+	void File::GetExtension(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -719,7 +719,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetNativePath(const ValueList& args, SharedValue result)
+	void File::GetNativePath(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -732,7 +732,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetSize(const ValueList& args, SharedValue result)
+	void File::GetSize(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -745,7 +745,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::GetSpaceAvailable(const ValueList& args, SharedValue result)
+	void File::GetSpaceAvailable(const ValueList& args, KValueRef result)
 	{	
 		double diskSize = -1.0;
 		std::string error;
@@ -787,7 +787,7 @@ namespace ti
 			throw ValueException::FromString("Cannot determine diskspace on filename '" + this->filename + "' with error message " +error);
 		}
 	}
-	void File::CreateShortcut(const ValueList& args, SharedValue result)
+	void File::CreateShortcut(const ValueList& args, KValueRef result)
 	{
 		if (args.size()<1)
 		{
@@ -886,7 +886,7 @@ namespace ti
 #endif
 
 	}
-	void File::SetExecutable(const ValueList& args, SharedValue result)
+	void File::SetExecutable(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -907,7 +907,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::SetReadonly(const ValueList& args, SharedValue result)
+	void File::SetReadonly(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -944,7 +944,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::SetWriteable(const ValueList& args, SharedValue result)
+	void File::SetWriteable(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -975,7 +975,7 @@ namespace ti
 	 * Returns:
 	 *   true if succeeded
 	 */
-	void File::Unzip(const ValueList& args, SharedValue result)
+	void File::Unzip(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=1)
 		{

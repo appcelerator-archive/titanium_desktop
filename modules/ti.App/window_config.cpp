@@ -14,7 +14,7 @@
 
 #define SET_STRING(name, prop) \
 { \
-	SharedValue v = properties->Get(#name); \
+	KValueRef v = properties->Get(#name); \
 	if (v->IsString()) \
 	{ \
 		std::string value(v->ToString()); \
@@ -24,7 +24,7 @@
 
 #define SET_BOOL(name, prop) \
 { \
-	SharedValue v = properties->Get(#name); \
+	KValueRef v = properties->Get(#name); \
 	if (v->IsString()) \
 	{ \
 		std::string value(v->ToString()); \
@@ -49,7 +49,7 @@
 
 #define SET_INT(name, prop) \
 { \
-	SharedValue v = properties->Get(#name); \
+	KValueRef v = properties->Get(#name); \
 	if (v->IsNumber()) \
 	{ \
 		this->prop = v->ToInt(); \
@@ -58,7 +58,7 @@
 
 #define SET_DOUBLE(name, prop) \
 { \
-	SharedValue v = properties->Get(#name); \
+	KValueRef v = properties->Get(#name); \
 	if (v->IsNumber()) \
 	{ \
 		this->prop = v->ToDouble(); \
@@ -112,7 +112,7 @@ void WindowConfig::SetDefaults ()
 	this->title = Host::GetInstance()->GetApplication()->name;
 }
 
-void WindowConfig::UseProperties(SharedKObject properties)
+void WindowConfig::UseProperties(KObjectRef properties)
 {
 	this->SetDefaults();
 

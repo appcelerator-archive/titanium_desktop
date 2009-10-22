@@ -24,14 +24,14 @@ namespace ti
 		virtual void AppMenuChanged();
 		virtual void AppIconChanged();
 		void RemoveOldMenu();
-		void OpenFileChooserDialog(SharedKMethod callback,
+		void OpenFileChooserDialog(KMethodRef callback,
 			bool multiple, std::string& title, std::string& path,
 			std::string& defaultName, std::vector<std::string>& types,
 			std::string& typesDescription);
-		void OpenFolderChooserDialog(SharedKMethod callback,
+		void OpenFolderChooserDialog(KMethodRef callback,
 			bool multiple, std::string& title, std::string& path,
 			std::string& defaultName);
-		void OpenSaveAsDialog(SharedKMethod callback,
+		void OpenSaveAsDialog(KMethodRef callback,
 			std::string& title, std::string& path,
 			std::string& defaultName, std::vector<std::string>& types,
 			std::string& typesDescription);
@@ -132,7 +132,7 @@ namespace ti
 		std::string iconPath; // The path to this window's icon
 		GtkWidget *inspectorWindow; // This window's web inspector window
 
-		void _FileChooserWork(const ValueList&, SharedValue);
+		void _FileChooserWork(const ValueList&, KValueRef);
 		static std::string openFilesDirectory;
 
 	};

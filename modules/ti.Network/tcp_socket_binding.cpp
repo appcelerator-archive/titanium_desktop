@@ -89,31 +89,31 @@ namespace ti
 			this->socket.close();
 		}
 	}
-	void TCPSocketBinding::SetOnRead(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnRead(const ValueList& args, KValueRef result)
 	{
 		this->onRead = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnWrite(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnWrite(const ValueList& args, KValueRef result)
 	{
 		this->onWrite = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnTimeout(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnTimeout(const ValueList& args, KValueRef result)
 	{
 		this->onTimeout = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnError(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnError(const ValueList& args, KValueRef result)
 	{
 		this->onError = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnReadComplete(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnReadComplete(const ValueList& args, KValueRef result)
 	{
 		this->onReadComplete = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::IsClosed(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::IsClosed(const ValueList& args, KValueRef result)
 	{
 		return result->SetBool(!this->opened);
 	}
-	void TCPSocketBinding::Connect(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Connect(const ValueList& args, KValueRef result)
 	{
 		int timeout = 10;
 		if (args.size() > 0)
@@ -233,7 +233,7 @@ namespace ti
 		args.push_back(Value::NewString(n->name()));
 		ti_host->InvokeMethodOnMainThread(this->onError, args, false);
 	}
-	void TCPSocketBinding::Write(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Write(const ValueList& args, KValueRef result)
 	{
 		std::string eprefix = "TCPSocketBinding::Write: ";
 		if (!this->opened)
@@ -253,7 +253,7 @@ namespace ti
 		}
 
 	}
-	void TCPSocketBinding::Close(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Close(const ValueList& args, KValueRef result)
 	{
 		if (this->opened)
 		{

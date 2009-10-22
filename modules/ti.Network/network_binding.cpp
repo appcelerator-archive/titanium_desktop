@@ -22,7 +22,7 @@ namespace ti
 		modulePath(modulePath),
 		global(host->GetGlobalObject())
 	{
-		SharedValue online = Value::NewBool(true);
+		KValueRef online = Value::NewBool(true);
 		/**
 		 * @tiapi(property=True,name=Network.online,since=0.2) Whether or not the system is connected to the internet
 		 * @tiresult(for=Network.online,type=Boolean) true if the system is connected to the internet, false if otherwise
@@ -150,7 +150,7 @@ namespace ti
 		this->net_status = new DBusNetworkStatus(this);
 		this->net_status->Start();
 #elif defined(OS_OSX)
-		SharedKMethod delegate = this->Get("FireOnlineStatusChange")->ToMethod();
+		KMethodRef delegate = this->Get("FireOnlineStatusChange")->ToMethod();
 		networkDelegate = [[NetworkReachability alloc] initWithDelegate:delegate];
 #endif
 	}
@@ -170,7 +170,7 @@ namespace ti
 		listeners.clear();
 		PRINTD("NetworkBinding::Shutdown finish");
 	}
-	void NetworkBinding::_GetByHost(std::string hostname, SharedValue result)
+	void NetworkBinding::_GetByHost(std::string hostname, KValueRef result)
 	{
 		AutoPtr<HostBinding> binding = new HostBinding(hostname);
 		if (binding->IsInvalid())
@@ -179,11 +179,11 @@ namespace ti
 		}
 		result->SetObject(binding);
 	}
-	void NetworkBinding::GetHostByAddress(const ValueList& args, SharedValue result)
+	void NetworkBinding::GetHostByAddress(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject obj = args.at(0)->ToObject();
+			KObjectRef obj = args.at(0)->ToObject();
 			AutoPtr<IPAddressBinding> b = obj.cast<IPAddressBinding>();
 			if (!b.isNull())
 			{
@@ -201,12 +201,12 @@ namespace ti
 			}
 			else
 			{
-				SharedValue bo = obj->Get("toString");
+				KValueRef bo = obj->Get("toString");
 				if (bo->IsMethod())
 				{
-					SharedKMethod m = bo->ToMethod();
+					KMethodRef m = bo->ToMethod();
 					ValueList args;
-					SharedValue tostr = m->Call(args);
+					KValueRef tostr = m->Call(args);
 					this->_GetByHost(tostr->ToString(),result);
 					return;
 				}
@@ -220,11 +220,11 @@ namespace ti
 			this->_GetByHost(args.at(0)->ToString(),result);
 		}
 	}
-	void NetworkBinding::GetHostByName(const ValueList& args, SharedValue result)
+	void NetworkBinding::GetHostByName(const ValueList& args, KValueRef result)
 	{
 		this->_GetByHost(args.at(0)->ToString(),result);
 	}
-	void NetworkBinding::CreateIPAddress(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateIPAddress(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
 		if (binding->IsInvalid())
@@ -233,40 +233,40 @@ namespace ti
 		}
 		result->SetObject(binding);
 	}
-	void NetworkBinding::CreateTCPSocket(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateTCPSocket(const ValueList& args, KValueRef result)
 	{
 		//TODO: check for args
 		AutoPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
 		result->SetObject(tcp);
 	}
-	void NetworkBinding::CreateIRCClient(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateIRCClient(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<IRCClientBinding> irc = new IRCClientBinding(host);
 		result->SetObject(irc);
 	}
-	void NetworkBinding::CreateHTTPClient(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateHTTPClient(const ValueList& args, KValueRef result)
 	{
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
-		SharedKObject http = new HTTPClientBinding(host,modulePath);
+		KObjectRef http = new HTTPClientBinding(host,modulePath);
 		result->SetObject(http);
 	}
-	void NetworkBinding::CreateHTTPServer(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateHTTPServer(const ValueList& args, KValueRef result)
 	{
 		// we hold the reference to this until we're done with it
 		// which happense when the binding impl calls remove
-		SharedKObject http = new HTTPServerBinding(host);
+		KObjectRef http = new HTTPServerBinding(host);
 		result->SetObject(http);
 	}
-	void NetworkBinding::CreateHTTPCookie(const ValueList& args, SharedValue result)
+	void NetworkBinding::CreateHTTPCookie(const ValueList& args, KValueRef result)
 	{
-		SharedKObject cookie = new HTTPCookie();
+		KObjectRef cookie = new HTTPCookie();
 		result->SetObject(cookie);
 	}
-	void NetworkBinding::AddConnectivityListener(const ValueList& args, SharedValue result)
+	void NetworkBinding::AddConnectivityListener(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("addConnectivityListener", "m");
-		SharedKMethod target = args.at(0)->ToMethod();
+		KMethodRef target = args.at(0)->ToMethod();
 
 		static long nextListenerId = 0;
 		Listener listener = Listener();
@@ -278,7 +278,7 @@ namespace ti
 
 	void NetworkBinding::RemoveConnectivityListener(
 		const ValueList& args,
-		SharedValue result)
+		KValueRef result)
 	{
 		args.VerifyException("removeConnectivityListener", "n");
 		int id = args.at(0)->ToInt();
@@ -312,7 +312,7 @@ namespace ti
 		std::vector<Listener>::iterator it = this->listeners.begin();
 		while (it != this->listeners.end())
 		{
-			SharedKMethod callback = (*it++).callback;
+			KMethodRef callback = (*it++).callback;
 			try
 			{
 				host->InvokeMethodOnMainThread(callback, args, false);
@@ -326,7 +326,7 @@ namespace ti
 		}
 	}
 
-	void NetworkBinding::FireOnlineStatusChange(const ValueList& args, SharedValue result)
+	void NetworkBinding::FireOnlineStatusChange(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsBool())
 		{
@@ -334,7 +334,7 @@ namespace ti
 		}
 	}
 
-	void NetworkBinding::EncodeURIComponent(const ValueList &args, SharedValue result)
+	void NetworkBinding::EncodeURIComponent(const ValueList &args, KValueRef result)
 	{
 		if (args.at(0)->IsNull() || args.at(0)->IsUndefined())
 		{
@@ -370,7 +370,7 @@ namespace ti
 		}
 	}
 
-	void NetworkBinding::DecodeURIComponent(const ValueList &args, SharedValue result)
+	void NetworkBinding::DecodeURIComponent(const ValueList &args, KValueRef result)
 	{
 		if (args.at(0)->IsNull() || args.at(0)->IsUndefined())
 		{
@@ -413,14 +413,14 @@ namespace ti
 		return proxy;
 	}
 
-	void NetworkBinding::SetHTTPProxy(const ValueList& args, SharedValue result)
+	void NetworkBinding::SetHTTPProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPProxy", "s|0 ?s s s");
 		SharedProxy proxy = ArgumentsToProxy(args, "http://");
 		ProxyConfig::SetHTTPProxyOverride(proxy);
 	}
 
-	void NetworkBinding::GetHTTPProxy(const ValueList& args, SharedValue result)
+	void NetworkBinding::GetHTTPProxy(const ValueList& args, KValueRef result)
 	{
 		SharedProxy proxy = ProxyConfig::GetHTTPProxyOverride();
 
@@ -430,14 +430,14 @@ namespace ti
 			result->SetString(proxy->info->toString().c_str());
 	}
 
-	void NetworkBinding::SetHTTPSProxy(const ValueList& args, SharedValue result)
+	void NetworkBinding::SetHTTPSProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPSProxy", "s|0 ?s s s");
 		SharedProxy proxy = ArgumentsToProxy(args, "https://");
 		ProxyConfig::SetHTTPSProxyOverride(proxy);
 	}
 
-	void NetworkBinding::GetHTTPSProxy(const ValueList& args, SharedValue result)
+	void NetworkBinding::GetHTTPSProxy(const ValueList& args, KValueRef result)
 	{
 		SharedProxy proxy = ProxyConfig::GetHTTPSProxyOverride();
 

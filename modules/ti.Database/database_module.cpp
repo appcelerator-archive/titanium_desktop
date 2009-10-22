@@ -39,7 +39,7 @@ namespace ti
 		 */
 		this->SetMethod("openFile", &DatabaseModule::OpenFile);
 
-		SharedKObject autoThis(this, true);
+		KObjectRef autoThis(this, true);
 		host->GetGlobalObject()->SetObject("Database", autoThis);
 	}
 
@@ -48,14 +48,14 @@ namespace ti
 		host->GetGlobalObject()->SetUndefined("Database");
 	}
 
-	void DatabaseModule::Open(const ValueList& args, SharedValue result)
+	void DatabaseModule::Open(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("open", "?s");
 		std::string name(args.GetString(0, "unnamed"));
 		result->SetObject(new DatabaseBinding(name, true));
 	}
 
-	void DatabaseModule::OpenFile(const ValueList& args, SharedValue result)
+	void DatabaseModule::OpenFile(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("openFile", "s|o");
 		std::string name;
@@ -68,11 +68,11 @@ namespace ti
 			const char* error = "openFile requires an object with a "
 				"toString method returning a String";
 
-			SharedKObject o(args.GetObject(0));
+			KObjectRef o(args.GetObject(0));
 			if (!o->Get("toString")->IsMethod())
 				throw ValueException::FromString(error);
 
-			SharedValue v(o->Get("toString")->ToMethod()->Call());
+			KValueRef v(o->Get("toString")->ToMethod()->Call());
 			if (!v->IsString())
 				throw ValueException::FromString(error);
 

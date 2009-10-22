@@ -155,87 +155,87 @@ namespace ti
 		this->SetMethod("isGlobalMC",&IPAddressBinding::IsGlobalMC);
 	}
 
-	void IPAddressBinding::IsInvalid(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsInvalid(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->invalid);
 	}
 
-	void IPAddressBinding::ToString(const ValueList& args, SharedValue result)
+	void IPAddressBinding::ToString(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->address->toString().c_str());
 	}
 
-	void IPAddressBinding::IsIPV4(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsIPV4(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->family() == IPAddress::IPv4);
 	}
 
-	void IPAddressBinding::IsIPV6(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsIPV6(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->family() == IPAddress::IPv6);
 	}
 
-	void IPAddressBinding::IsWildcard(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsWildcard(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isWildcard());
 	}
 
-	void IPAddressBinding::IsBroadcast(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsBroadcast(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isBroadcast());
 	}
 
-	void IPAddressBinding::IsLoopback(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsLoopback(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isLoopback());
 	}
 
-	void IPAddressBinding::IsMulticast(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsMulticast(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isMulticast());
 	}
 
-	void IPAddressBinding::IsUnicast(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsUnicast(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isUnicast());
 	}
 
-	void IPAddressBinding::IsLinkLocal(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsLinkLocal(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isLinkLocal());
 	}
 
-	void IPAddressBinding::IsSiteLocal(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsSiteLocal(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isSiteLocal());
 	}
 
-	void IPAddressBinding::IsWellKnownMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsWellKnownMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isWellKnownMC());
 	}
 
-	void IPAddressBinding::IsNodeLocalMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsNodeLocalMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isNodeLocalMC());
 	}
 
-	void IPAddressBinding::IsLinkLocalMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsLinkLocalMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isLinkLocalMC());
 	}
 
-	void IPAddressBinding::IsSiteLocalMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsSiteLocalMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isSiteLocalMC());
 	}
 
-	void IPAddressBinding::IsOrgLocalMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsOrgLocalMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isOrgLocalMC());
 	}
 
-	void IPAddressBinding::IsGlobalMC(const ValueList& args, SharedValue result)
+	void IPAddressBinding::IsGlobalMC(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(!this->invalid && this->address->isGlobalMC());
 	}

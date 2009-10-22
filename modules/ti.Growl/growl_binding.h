@@ -16,12 +16,12 @@ namespace ti
 	class GrowlBinding : public StaticBoundObject
 	{
 	public:
-		GrowlBinding(SharedKObject);
+		GrowlBinding(KObjectRef);
 
-		void ShowNotification(const ValueList& args, SharedValue result);
-		void IsRunning(const ValueList& args, SharedValue result);
+		void ShowNotification(const ValueList& args, KValueRef result);
+		void IsRunning(const ValueList& args, KValueRef result);
 	protected:
-		kroll::SharedKObject global;
+		kroll::KObjectRef global;
 
 		virtual ~GrowlBinding();
 		virtual void ShowNotification(
@@ -29,7 +29,7 @@ namespace ti
 			std::string& description,
 			std::string& iconURL,
 			int notification_delay,
-			SharedKMethod callback) = 0;
+			KMethodRef callback) = 0;
 		virtual bool IsRunning() = 0;
 	};
 }

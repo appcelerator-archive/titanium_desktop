@@ -17,13 +17,13 @@ namespace ti
 	class HttpServerRequestFactory : public Poco::Net::HTTPRequestHandlerFactory
 	{
 	public:
-		HttpServerRequestFactory(Host *host, SharedKMethod callback);
+		HttpServerRequestFactory(Host *host, KMethodRef callback);
 		virtual ~HttpServerRequestFactory();
 		
 		Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest &request);
 	private:
 		Host *host;
-		SharedKMethod callback;
+		KMethodRef callback;
 	};
 }
 

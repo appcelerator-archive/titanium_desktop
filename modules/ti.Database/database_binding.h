@@ -21,11 +21,11 @@ namespace ti
 
 	protected:
 		virtual ~DatabaseBinding();
-		void Open(const ValueList& args, SharedValue result);
-		void Execute(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void Remove(const ValueList& args, SharedValue result);
-		void GetPath(const ValueList& args, SharedValue result);
+		void Open(const ValueList& args, KValueRef result);
+		void Execute(const ValueList& args, KValueRef result);
+		void Close(const ValueList& args, KValueRef result);
+		void Remove(const ValueList& args, KValueRef result);
+		void GetPath(const ValueList& args, KValueRef result);
 		void Close();
 
 		Poco::Data::Session *session;

@@ -15,35 +15,35 @@ namespace ti
 	class AppBinding : public KAccessorObject
 	{
 	public:
-		AppBinding(Host *host,SharedKObject);
+		AppBinding(Host *host,KObjectRef);
 		virtual ~AppBinding();
 
 	private:
 		Host* host;
-		SharedKObject global;
+		KObjectRef global;
 
-		void GetID(const ValueList& args, SharedValue result);
-		void GetName(const ValueList& args, SharedValue result);
-		void GetVersion(const ValueList& args, SharedValue result);
-		void GetPublisher(const ValueList& args, SharedValue result);
-		void GetCopyright(const ValueList& args, SharedValue result);
-		void GetDescription(const ValueList& args, SharedValue result);
-		void GetURL(const ValueList& args, SharedValue result);
-		void GetGUID(const ValueList& args, SharedValue result);
-		void GetIcon(const ValueList& args, SharedValue result);
-		void GetStreamURL(const ValueList& args, SharedValue result);
-		void GetPath(const ValueList& args, SharedValue result);
-		void GetHome(const ValueList& args, SharedValue result);
-		void GetArguments(const ValueList& args, SharedValue result);
-		void AppURLToPath(const ValueList& args, SharedValue result);
-		void SetMenu(const ValueList& args, SharedValue result);
-		void Exit(const ValueList& args, SharedValue result);
-		void StdOut(const ValueList& args, SharedValue result);
-		void StdErr(const ValueList& args, SharedValue result);
+		void GetID(const ValueList& args, KValueRef result);
+		void GetName(const ValueList& args, KValueRef result);
+		void GetVersion(const ValueList& args, KValueRef result);
+		void GetPublisher(const ValueList& args, KValueRef result);
+		void GetCopyright(const ValueList& args, KValueRef result);
+		void GetDescription(const ValueList& args, KValueRef result);
+		void GetURL(const ValueList& args, KValueRef result);
+		void GetGUID(const ValueList& args, KValueRef result);
+		void GetIcon(const ValueList& args, KValueRef result);
+		void GetStreamURL(const ValueList& args, KValueRef result);
+		void GetPath(const ValueList& args, KValueRef result);
+		void GetHome(const ValueList& args, KValueRef result);
+		void GetArguments(const ValueList& args, KValueRef result);
+		void AppURLToPath(const ValueList& args, KValueRef result);
+		void SetMenu(const ValueList& args, KValueRef result);
+		void Exit(const ValueList& args, KValueRef result);
+		void StdOut(const ValueList& args, KValueRef result);
+		void StdErr(const ValueList& args, KValueRef result);
 
-		void CreateProperties(const ValueList& args, SharedValue result);
-		void LoadProperties(const ValueList& args, SharedValue result);
-		void GetSystemProperties(const ValueList& args, SharedValue result);
+		void CreateProperties(const ValueList& args, KValueRef result);
+		void LoadProperties(const ValueList& args, KValueRef result);
+		void GetSystemProperties(const ValueList& args, KValueRef result);
 	};
 }
 

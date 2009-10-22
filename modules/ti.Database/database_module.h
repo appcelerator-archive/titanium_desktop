@@ -38,9 +38,9 @@ namespace ti
 		KROLL_MODULE_CLASS(DatabaseModule)
 
 	private:
-		kroll::SharedKObject binding;
-		void Open(const ValueList& args, SharedValue result);
-		void OpenFile(const ValueList& args, SharedValue result);
+		kroll::KObjectRef binding;
+		void Open(const ValueList& args, KValueRef result);
+		void OpenFile(const ValueList& args, KValueRef result);
 	};
 
 }

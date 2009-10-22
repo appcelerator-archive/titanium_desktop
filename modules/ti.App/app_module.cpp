@@ -38,7 +38,7 @@ namespace ti
 		this->app_binding = new AppBinding(host,host->GetGlobalObject());
 
 		// set our ti.App
-		SharedValue value = Value::NewObject(this->app_binding);
+		KValueRef value = Value::NewObject(this->app_binding);
 		host->GetGlobalObject()->Set("App",value);
 
 		std::string appid = AppConfig::Instance()->GetAppID();
@@ -54,7 +54,7 @@ namespace ti
 		
 		PropertiesBinding *pb = new PropertiesBinding(app_properties);
 		this->properties_binding = pb;
-		SharedValue properties_value = Value::NewObject(this->properties_binding);
+		KValueRef properties_value = Value::NewObject(this->properties_binding);
 		/**
 		 * @tiapi(property=True,type=App.Properties,name=App.Properties,since=0.2) The application's private Properties object
 		 */
@@ -66,7 +66,7 @@ namespace ti
 		ValueList args;
 		args.push_back(Value::NewString("ti.app.home"));
 		args.push_back(Value::NewString(home));
-		SharedValue result;
+		KValueRef result;
 		pb->SetString(args,result);
 	}
 

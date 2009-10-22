@@ -81,7 +81,7 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, KMethodRef cb)
 	{
 		AutoTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;

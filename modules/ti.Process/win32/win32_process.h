@@ -29,14 +29,14 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual AutoBlob MonitorSync();
+		virtual BlobRef MonitorSync();
 		virtual int Wait();
 		virtual std::string ArgumentsToString();
-		void ReadCallback(const ValueList& args, SharedValue result);
+		void ReadCallback(const ValueList& args, KValueRef result);
 		virtual void RecreateNativePipes();
 		
 	protected:
-		std::string ArgListToString(SharedKList argList);
+		std::string ArgListToString(KListRef argList);
 		
 		Poco::Thread exitMonitorThread;
 		Poco::RunnableAdapter<Win32Process>* exitMonitorAdapter;
@@ -44,7 +44,7 @@ namespace ti
 		Poco::Mutex mutex;
 		
 		Poco::Mutex processOutputMutex;
-		std::vector<AutoBlob> processOutput;
+		std::vector<BlobRef> processOutput;
 		
 		int pid;
 		HANDLE process;

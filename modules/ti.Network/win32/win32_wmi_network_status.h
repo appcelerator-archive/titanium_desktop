@@ -16,11 +16,11 @@ namespace ti
 	class Win32WMINetworkStatus : public IWbemObjectSink
 	{
 	protected:
-		SharedKMethod *callback;
+		KMethodRef *callback;
 		int ref_count;
 
 	public:
-		Win32WMINetworkStatus(SharedKMethod callback);
+		Win32WMINetworkStatus(KMethodRef callback);
 
 		//// IWbemObjectSink
 		virtual HRESULT STDMETHODCALLTYPE Indicate(long lObjectCount, IWbemClassObject** apObjArray );

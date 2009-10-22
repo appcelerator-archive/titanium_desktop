@@ -38,7 +38,7 @@ namespace ti
 	class ValueBinding
 	{
 	public:
-		void convert (Statement &select, SharedValue arg)
+		void convert (Statement &select, KValueRef arg)
 		{
 			if (arg->IsString())
 			{
@@ -187,7 +187,7 @@ namespace ti
 			delete session;
 	}
 
-	void DatabaseBinding::Execute(const ValueList& args, SharedValue result)
+	void DatabaseBinding::Execute(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("execute", "s");
 
@@ -210,13 +210,13 @@ namespace ti
 				
 				for (size_t c=1;c<args.size();c++)
 				{
-					SharedValue anarg = args.at(c);
+					KValueRef anarg = args.at(c);
 					if (anarg->IsList())
 					{
-						SharedKList list = anarg->ToList();
+						KListRef list = anarg->ToList();
 						for (size_t a=0;a<list->Size();a++)
 						{
-							SharedValue arg = list->At(a);
+							KValueRef arg = list->At(a);
 							binding.convert(select,arg);
 						}
 					}
@@ -245,12 +245,12 @@ namespace ti
 			if (count > 0)
 			{
 				RecordSet rs(select);
-				SharedKObject r = new ResultSetBinding(rs);
+				KObjectRef r = new ResultSetBinding(rs);
 				result->SetObject(r);
 			}
 			else
 			{
-				SharedKObject r = new ResultSetBinding();
+				KObjectRef r = new ResultSetBinding();
 				result->SetObject(r);
 			}
 		}
@@ -262,7 +262,7 @@ namespace ti
 		}
 	}
 
-	void DatabaseBinding::Close(const ValueList& args, SharedValue result)
+	void DatabaseBinding::Close(const ValueList& args, KValueRef result)
 	{
 		logger->Debug("Closing database: %s", name.c_str());
 		this->Close();
@@ -277,12 +277,12 @@ namespace ti
 		}
 	}
 
-	void DatabaseBinding::GetPath(const ValueList& args, SharedValue result)
+	void DatabaseBinding::GetPath(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->path);
 	}
 
-	void DatabaseBinding::Remove(const ValueList& args, SharedValue result)
+	void DatabaseBinding::Remove(const ValueList& args, KValueRef result)
 	{
 		this->Close();
 

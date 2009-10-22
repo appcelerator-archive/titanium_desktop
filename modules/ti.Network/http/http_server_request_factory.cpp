@@ -9,7 +9,7 @@
 
 namespace ti
 {
-	HttpServerRequestFactory::HttpServerRequestFactory(Host *host, SharedKMethod callback) :
+	HttpServerRequestFactory::HttpServerRequestFactory(Host *host, KMethodRef callback) :
 		host(host),
 		callback(callback)
 	{
