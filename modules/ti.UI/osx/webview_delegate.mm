@@ -101,9 +101,8 @@
 
 	// TI-303 we need to add safari UA to our UA to resolve broken
 	// sites that look at Safari and not WebKit for UA
-	NSString *appName = [NSString
-		stringWithFormat:@"Version/4.0 Safari/528.16 %s/%s",
-		PRODUCT_NAME, STRING(PRODUCT_VERSION)];
+	NSString *appName = [NSString stringWithFormat:
+		@"Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, PRODUCT_VERSION];
 	[webView setApplicationNameForUserAgent:appName];
 
 	// place our user agent string in the global so we can later use it

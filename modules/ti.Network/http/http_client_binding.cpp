@@ -238,9 +238,9 @@ namespace ti
 
 		/**
 		 * @tiapi(property=True, name=Network.HTTPClient.userAgent, since=0.7)
-		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCTVERSION)
+		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCT_VERSION)
 		 */
-		this->SetString("userAgent", PRODUCT_NAME"/"STRING(PRODUCT_VERSION));
+		this->SetString("userAgent", PRODUCT_NAME"/"PRODUCT_VERSION);
 
 		if (!HTTPClientBinding::logger)
 			HTTPClientBinding::logger = Logger::Get(this->type);

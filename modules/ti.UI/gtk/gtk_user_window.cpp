@@ -141,10 +141,7 @@ namespace ti
 				// this by default and some misbehaving JavaScript code relies on it.
 				// https://appcelerator.lighthouseapp.com/projects/25719/tickets/
 				// 149-windownavigator-is-undefined-when-running-on-linux
-				userAgent.append(" Version/4.0 ");
-				userAgent.append(PRODUCT_NAME);
-				userAgent.append("/");
-				userAgent.append(STRING(PRODUCT_VERSION));
+				userAgent.append(" Version/4.0 "PRODUCT_NAME"/"PRODUCT_VERSION);
 				host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
 			}
 			g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
