@@ -44,7 +44,7 @@ namespace ti
 
 			if (!scripts.empty())
 			{
-				KEventObject::root->AddEventListener(Event::PAGE_LOADED, callback);
+				GlobalObject::GetInstance()->AddEventListener(Event::PAGE_LOADED, callback);
 			}
 			
 		}
@@ -52,7 +52,7 @@ namespace ti
 
 	MonkeyBinding::~MonkeyBinding()
 	{
-		KEventObject::root->RemoveEventListener(Event::PAGE_LOADED, this->callback);
+		GlobalObject::GetInstance()->RemoveEventListener(Event::PAGE_LOADED, this->callback);
 
 		vector<Script*>::iterator i = scripts.begin();
 		while (i != scripts.end())
