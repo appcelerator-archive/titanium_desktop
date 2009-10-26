@@ -272,19 +272,16 @@ static int totalJobs = 0;
 	cmdline+="\" \"";
 	cmdline+=[destDir UTF8String];
 	cmdline+="\"";
-	
+
 #ifdef DEBUG
 	NSLog(@"Executing: %s", cmdline.c_str());
 #endif
 
 	int ec = system(cmdline.c_str());
 
-#ifdef DEBUG
-	NSLog(@"After unzip %@ to %@, exitcode:%d", path, destDir,ec);
-#endif
-
-	if (ec!=0)
+	if (ec != 0)
 	{
+		NSLog(@"Could not unzip %@ to %@, because ditto returned a non-zero exitcode (%d)", path, destDir, ec);
 		[self bailWithMessage:@"Download file extraction failed. Possibly it was corrupted or couldn't be properly downloaded."];
 	}
 }
@@ -361,13 +358,13 @@ static int totalJobs = 0;
 		[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
 	}
 
-	NSString *filename = [downloader suggestedFileName];
-	NSData *data = [downloader data];
+	NSString* filename = [downloader suggestedFilename];
+	NSData* data = [downloader data];
 	NSString* errorMsg = @"Some files failed to download properly. Cannot continue.";
 	if ([filename length] <= 5)
 	{
 		NSLog(@"Error in handling url \"%@\":", [job url]);
-		NSLog(@"File name is too small to specify a file. \"%@\" was made instead.",filename);
+		NSLog(@"File name is too small to specify a file. \"%@\" was made instead.", filename);
 		[downloader release];
 		[self performSelectorOnMainThread:@selector(bailWithMessage:) withObject:errorMsg waitUntilDone:YES];
 	}
@@ -375,7 +372,7 @@ static int totalJobs = 0;
 	{
 		NSLog(@"Error in handling url \"%@\":", [job url]);
 		NSString * dataString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-		NSLog(@"Response data was too small to be a file. Received \"%@\" instead.",dataString);
+		NSLog(@"Response data was too small to be a file. Received \"%@\" instead.", dataString);
 		[dataString release];
 		[downloader release];
 		[self performSelectorOnMainThread:@selector(bailWithMessage:) withObject:errorMsg waitUntilDone:YES];

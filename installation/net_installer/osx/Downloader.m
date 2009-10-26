@@ -5,44 +5,53 @@
  */
 
 #import "Downloader.h"
+#define STRING(str) #str
 
 @implementation Downloader
 
 -(id)initWithURL:(NSURL*)url progress:(NSProgressIndicator*)p
 {
 	self = [super init];
+
+	suggestedFilename = nil;
+	userAgent = nil;
+	downloadRequest = nil;
+	downloadConnection = nil;
+	data = nil;
+
 	if (self)
 	{
 		progress = [p retain];
 		[progress startAnimation:self];
 		[self performSelectorOnMainThread:@selector(startUrlRequest:) withObject:url waitUntilDone:YES];
 	}
+
+	userAgent = [NSString stringWithFormat:
+		@"Mozilla/5.0 (compatible; Titanium_Downloader/%s; Mac)",
+		STRING(_PRODUCT_VERSION)];
+
 	return self;
 }
 
-#define VAL(str) #str
-#define STRING(str) VAL(str)
-
-- (void)startUrlRequest: (NSURL *) url;
+- (void)startUrlRequest: (NSURL *)url;
 {
-	NSLog(@"Starting URL request for %@",url);
 	[data release];
+	data = [[NSMutableData alloc] init];
+
 	[downloadRequest release];
 	downloadRequest = [[NSMutableURLRequest alloc] initWithURL:url];
-	[downloadRequest setTimeoutInterval:10.0];
-	userAgent = [NSString stringWithFormat:@"Mozilla/5.0 (compatible; Titanium_Downloader/%s; Mac)",STRING(_PRODUCT_VERSION)];
 	[downloadRequest setValue:userAgent forHTTPHeaderField:@"User-Agent"];
-	data = [[NSMutableData alloc] init];
+
 	downloadConnection = [[NSURLConnection alloc] initWithRequest:downloadRequest delegate:self];
-	//NOTE: do not call start!! it's automatically called and you will segfault if you call it
-	//NOTE: do not release downloadRequest!
+
+	// NOTE: Do not call start!! it's automatically called and you will segfault if you call it
 	[self setCompleted:NO];
 }
 
 -(void)dealloc
 {
 	[downloadRequest release];
-	[suggestedFileName release];
+	[suggestedFilename release];
 	[downloadConnection release];
 	[progress release];
 	[data release];
@@ -54,9 +63,9 @@
 	return data;
 }
 
-- (NSString *)suggestedFileName 
+- (NSString *)suggestedFilename 
 {
-	return suggestedFileName;
+	return suggestedFilename;
 }
 
 - (BOOL)completed;
@@ -94,8 +103,13 @@
 {
 	[data setLength:0];
 	expectedBytes = [response expectedContentLength];
-	[suggestedFileName release];
-	suggestedFileName = [[[[response URL] path] lastPathComponent] retain];
+
+	[suggestedFilename release];
+	suggestedFilename = [[response suggestedFilename] retain];
+
+	NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
+	NSLog(@"Received %i for %@ (suggested filename=%@)", 
+		[httpResponse statusCode], [response URL], suggestedFilename);
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)newData
@@ -118,6 +132,16 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
 	[self setCompleted:YES];
+}
+
+-(NSURLRequest *)connection:(NSURLConnection *)connection
+	willSendRequest:(NSURLRequest *)request
+	redirectResponse:(NSURLResponse *)redirectResponse
+{
+	if (redirectResponse)
+		NSLog(@"Redirecting from %@ to %@", [redirectResponse URL], [request URL]);
+
+	return request;
 }
 
 @end

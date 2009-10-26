@@ -8,21 +8,20 @@
 
 
 @interface Downloader :  NSObject {
-	NSString* suggestedFileName;
+	NSString* suggestedFilename;
 	NSString* userAgent;
 	NSMutableURLRequest* downloadRequest;
 	NSURLConnection* downloadConnection;
 	NSProgressIndicator* progress;
-	int bytesRetrievedSoFar;
+	NSMutableData* data;
+
 	long long expectedBytes;
 	BOOL completed;
-	NSMutableData* data;
 }
 -(id)initWithURL:(NSURL*)url progress:(NSProgressIndicator*)p;
 -(BOOL)isDownloadComplete;
 -(BOOL)completed;
 -(void)setCompleted:(BOOL)value;
--(NSString *)suggestedFileName;
-
+-(NSString*)suggestedFilename;
 -(NSData*)data;
 @end
