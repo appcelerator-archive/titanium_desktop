@@ -11,8 +11,9 @@
 	ti::OSXUIBinding *binding;
 }
 +(TiApplicationDelegate*)instance;
-+(NSString*)appID;
 -(id)initWithBinding:(ti::OSXUIBinding*)binding;
+-(BOOL)application:(NSApplication*)theApplication openFile:(NSString*)filename;
+-(BOOL)application:(NSApplication*)theApplication openFiles:(NSArray*)filenames;
 @end
 
 #endif
