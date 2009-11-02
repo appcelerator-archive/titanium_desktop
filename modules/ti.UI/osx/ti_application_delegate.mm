@@ -9,13 +9,7 @@
 #import "osx_ui_binding.h"
 #import "osx_menu_item.h"
 
-static TiApplicationDelegate *tiAppInstance = NULL;
-
 @implementation TiApplicationDelegate
-+(TiApplicationDelegate*)instance
-{
-	return tiAppInstance;
-}
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
@@ -34,7 +28,6 @@ static TiApplicationDelegate *tiAppInstance = NULL;
 	if (self)
 	{
 		binding = b;
-		tiAppInstance = self;
 	}
 	return self;
 }
