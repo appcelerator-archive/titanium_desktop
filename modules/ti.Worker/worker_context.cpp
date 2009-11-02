@@ -114,21 +114,14 @@ namespace ti
 	void WorkerContext::ImportScripts(const ValueList &args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
-		
-		KMethodRef appURLToPath = host->GetGlobalObject()->GetNS("App.appURLToPath")->ToMethod();
 		AutoPtr<Worker> _worker = worker.cast<Worker>();
 		JSGlobalContextRef context = KJSUtil::GetGlobalContext(_worker->GetGlobalObject());
-		
+
 		for (size_t c = 0; c < args.size(); c++)
 		{
-			// first convert the path to a full URL file path
-			ValueList a;
-			a.push_back(args.at(c));
-			KValueRef result = appURLToPath->Call(a);
-			const char *path = result->ToString();
-
-			logger->Debug("attempting to import worker script = %s",path);
-			KJSUtil::EvaluateFile(context, (char*)path);
+			std::string path(URLUtils::URLToPath(args.GetString(0)));
+			logger->Debug("Attempting to import worker script = %s", path.c_str());
+			KJSUtil::EvaluateFile(context, path.c_str());
 		}
 	}
-}	
+}

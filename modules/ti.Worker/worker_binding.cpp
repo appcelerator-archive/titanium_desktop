@@ -44,23 +44,19 @@ namespace ti
 		if (is_function)
 		{
 			// convert the function to a string block 
-			code =  "(";
-			code += args.at(0)->ToString();
-			code += ")()";
+			code.append("(");
+			code.append(args.GetString(0));
+			code.append(")()");
 		}
 		else 
 		{
-			// this is a path -- probably should verify that this is relative and not an absolute URL to remote
-			KMethodRef appURLToPath = global->GetNS("App.appURLToPath")->ToMethod();
-			ValueList a;
-			a.push_back(args.at(0));
-			KValueRef result = appURLToPath->Call(a);
-			const char *path = result->ToString();
-			
-			logger->Debug("worker file path = %s",path);
-			
+			// We assume this is a URL corresponding to a local path, we should
+			// probably check that this isn't a remote URL.
+			std::string path(URLUtils::URLToPath(args.GetString(0)));
+			logger->Debug("worker file path = '%s' '%s'", path.c_str(), args.GetString(0).c_str());
+
 			std::ios::openmode flags = std::ios::in;
-			Poco::FileInputStream *fis = new Poco::FileInputStream(path,flags);
+			Poco::FileInputStream *fis = new Poco::FileInputStream(path, flags);
 			std::stringstream ostr;
 			char buf[8096];
 			int count = 0;

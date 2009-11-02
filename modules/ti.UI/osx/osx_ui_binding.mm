@@ -38,7 +38,7 @@ namespace ti
 		application = [[TiApplicationDelegate alloc] initWithBinding:this];
 		[application retain];
 
-		NSApplication *nsapp = [NSApplication sharedApplication];
+		NSApplication* nsapp = [NSApplication sharedApplication];
 		[nsapp setDelegate:application];
 		[NSBundle loadNibNamed:@"MainMenu" owner:nsapp];
 

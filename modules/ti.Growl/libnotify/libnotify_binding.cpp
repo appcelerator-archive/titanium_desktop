@@ -15,7 +15,8 @@ namespace ti
 	LibNotifyBinding::LibNotifyBinding(KObjectRef global) :
 		GrowlBinding(global)
 	{
-		notify_init(LibNotifyBinding::GetAppName().c_str());
+		std::string& appName = Host::GetInstance()->GetApplication()->name;
+		notify_init(appName);
 	}
 
 	LibNotifyBinding::~LibNotifyBinding()
@@ -50,23 +51,4 @@ namespace ti
 		notify_notification_show(n, NULL);
 		g_object_unref(G_OBJECT(n));
 	}
-
-	std::string LibNotifyBinding::GetAppName()
-	{
-		KValueRef meth_val = global->GetNS("App.getName");
-		if (!meth_val->IsMethod())
-			return "";
-
-		KMethodRef meth = meth_val->ToMethod();
-		KValueRef out_val = meth->Call(ValueList());
-		if (out_val->IsString())
-		{
-			return std::string(out_val->ToString());
-		}
-		else
-		{
-			return "";
-		}
-	}
-
 }

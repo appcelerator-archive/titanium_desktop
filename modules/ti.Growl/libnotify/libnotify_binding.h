@@ -28,8 +28,6 @@ namespace ti
 			std::string& iconURL,
 			int notification_delay,
 			KMethodRef callback);
-
-		std::string GetAppName();
 	};
 }
 
