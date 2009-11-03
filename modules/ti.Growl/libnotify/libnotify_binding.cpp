@@ -16,7 +16,7 @@ namespace ti
 		GrowlBinding(global)
 	{
 		std::string& appName = Host::GetInstance()->GetApplication()->name;
-		notify_init(appName);
+		notify_init(appName.c_str());
 	}
 
 	LibNotifyBinding::~LibNotifyBinding()
