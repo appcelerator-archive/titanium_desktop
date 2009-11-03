@@ -125,12 +125,14 @@
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
+	NSLog(@"Connection failed with error: %@", [error localizedDescription]);
 	[progress setIndeterminate:YES];
 	[self setCompleted:YES];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
+	NSLog(@"Connection finished loading");
 	[self setCompleted:YES];
 }
 
