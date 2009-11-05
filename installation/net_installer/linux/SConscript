@@ -4,7 +4,7 @@ import os.path as path
 Import('build')
 
 Env = build.env.Clone()
-Env.Append(LIBS=[File(build.tp('curl', 'lib', 'libcurl.a'))])
+Env.Append(LIBS=[File(build.tp('curl', 'static-lib', 'libcurl.a'))])
 Env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 gthread-2.0')
 
 sources = Glob('*.cpp')

@@ -31,7 +31,7 @@ namespace ti
 	class NetworkBinding : public StaticBoundObject
 	{
 	public:
-		NetworkBinding(Host*,std::string);
+		NetworkBinding(Host*);
 		virtual ~NetworkBinding();
 
 		bool HasNetworkStatusListeners();
@@ -41,7 +41,6 @@ namespace ti
 
 	private:
 		Host* host;
-		std::string modulePath;
 		KObjectRef global;
 
 		struct Listener

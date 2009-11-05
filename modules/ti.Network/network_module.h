@@ -8,6 +8,7 @@
 #define TI_NETWORK_MODULE_H_
 
 #include <kroll/kroll.h>
+#include <curl/curl.h>
 
 #if defined(OS_OSX) || defined(OS_LINUX)
 #define EXPORT __attribute__((visibility("default")))
@@ -27,7 +28,11 @@ namespace ti
 	class TITANIUM_NETWORK_API NetworkModule : public kroll::Module
 	{
 		KROLL_MODULE_CLASS(NetworkModule)
-		
+
+	public:
+		static std::string& GetRootCertPath();
+		static CURLSH* GetCurlShareHandle();
+
 	private:
 		KObjectRef variables;
 	};

@@ -14,18 +14,21 @@
 #include "http/http_client_binding.h"
 #include "http/http_server_binding.h"
 
+#include <Poco/Mutex.h>
+
 namespace ti
 {
-	NetworkBinding::NetworkBinding(Host* host, std::string modulePath) :
+	NetworkBinding::NetworkBinding(Host* host) :
 		StaticBoundObject("Network"),
 		host(host),
-		modulePath(modulePath),
 		global(host->GetGlobalObject())
 	{
 		KValueRef online = Value::NewBool(true);
+
 		/**
-		 * @tiapi(property=True,name=Network.online,since=0.2) Whether or not the system is connected to the internet
-		 * @tiresult(for=Network.online,type=Boolean) true if the system is connected to the internet, false if otherwise
+		 * @tiapi(property=True,name=Network.online,since=0.2)
+		 * @tiapi Whether or not the system is connected to the internet
+		 * @tiresult[Boolean] True if the system is connected to the internet, false if otherwise
 		 */
 		this->Set("online", online);
 
@@ -235,9 +238,9 @@ namespace ti
 	}
 	void NetworkBinding::CreateTCPSocket(const ValueList& args, KValueRef result)
 	{
-		//TODO: check for args
-		AutoPtr<TCPSocketBinding> tcp = new TCPSocketBinding(host, args.at(0)->ToString(), args.at(1)->ToInt());
-		result->SetObject(tcp);
+		args.VerifyException("createTCPSocket", "sn");
+		result->SetObject(new TCPSocketBinding(host,
+			args.GetString(0), args.GetInt(1)));
 	}
 	void NetworkBinding::CreateIRCClient(const ValueList& args, KValueRef result)
 	{
@@ -246,10 +249,7 @@ namespace ti
 	}
 	void NetworkBinding::CreateHTTPClient(const ValueList& args, KValueRef result)
 	{
-		// we hold the reference to this until we're done with it
-		// which happense when the binding impl calls remove
-		KObjectRef http = new HTTPClientBinding(host,modulePath);
-		result->SetObject(http);
+		result->SetObject(new HTTPClientBinding(host));
 	}
 	void NetworkBinding::CreateHTTPServer(const ValueList& args, KValueRef result)
 	{
@@ -315,7 +315,7 @@ namespace ti
 			KMethodRef callback = (*it++).callback;
 			try
 			{
-				host->InvokeMethodOnMainThread(callback, args, false);
+				RunOnMainThread(callback, args, false);
 			}
 			catch(ValueException& e)
 			{

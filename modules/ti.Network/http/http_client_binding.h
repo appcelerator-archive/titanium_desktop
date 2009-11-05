@@ -9,71 +9,46 @@
 
 #include <kroll/kroll.h>
 
-#ifdef OS_OSX
-#undef verify
-#endif
-
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPSClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NameValueCollection.h>
-#include <Poco/Net/HTTPBasicCredentials.h>
-#include <Poco/Buffer.h>
-#include <Poco/Path.h>
 #include <Poco/URI.h>
-#include <Poco/Exception.h>
 #include <Poco/Thread.h>
-#include <Poco/FileStream.h>
 #include <Poco/Runnable.h>
-#include <Poco/Event.h>
-#include <Poco/Net/SSLManager.h>
-#include <Poco/Net/KeyConsoleHandler.h>
-#include <Poco/Net/AcceptCertificateHandler.h>
+#include <curl/curl.h>
 
 #include "http_cookie.h"
 
 namespace ti
 {
-	class HTTPClientEvent;
-
 	class HTTPClientBinding : public KEventObject, public Poco::Runnable
 	{
 	public:
-		HTTPClientBinding(Host* host, std::string path);
+		HTTPClientBinding(Host* host);
 		virtual ~HTTPClientBinding();
 
-		void Abort(const ValueList& args, KValueRef result);
-		void Open(const ValueList& args, KValueRef result);
-		void SetBasicCredentials(const ValueList& args, KValueRef result);
-		void Send(const ValueList& args, KValueRef result);
-		void Receive(const ValueList& args, KValueRef result);
-		void SetRequestHeader(const ValueList& args, KValueRef result);
-		void GetResponseHeader(const ValueList& args, KValueRef result);
-		void SetCookie(const ValueList& args, KValueRef result);
-		void ClearCookies(const ValueList& args, KValueRef result);
-		void GetCookie(const ValueList& args, KValueRef result);
-		void SetTimeout(const ValueList& args, KValueRef result);
-
-		bool FireEvent(std::string& eventName);
+		size_t WriteRequestDataToBuffer(char* buffer, size_t bufferSize);
+		void ParseHTTPStatus(std::string& header);
+		void GotHeader(std::string& header);
+		void DataReceived(char* buffer, size_t numberOfBytes);
+		inline bool IsAborted() { return aborted; }
 
 	private:
-		static kroll::Logger* logger;
 		Host* host;
-		std::string modulePath;
-		Poco::Buffer<char> buffer;
 		std::string url;
-		std::map<std::string,std::string> headers;
-		Poco::Net::HTTPResponse response;
-		std::string method;
+		std::string httpMethod;
 		bool async;
 		int timeout;
-		KMethodRef outputHandler;
-		SharedPtr<Poco::Net::HTTPClientSession> session;
-		Poco::Net::NameValueCollection requestCookies;
-		std::map<std::string, Poco::Net::HTTPCookie> responseCookies;
-		Poco::Net::HTTPBasicCredentials basicCredentials;
+		long maxRedirects;
 
+		CURL* curlHandle;
+		std::string username;
+		std::string password;
+		Poco::Net::NameValueCollection requestCookies;
+		std::map<std::string, KObjectRef> responseCookies;
+		Poco::Net::NameValueCollection responseHeaders;
+		Poco::Net::NameValueCollection nextResponseHeaders;
+		std::vector<std::string> requestHeaders;
+
+		KMethodRef outputHandler;
 		KMethodRef ondatastream;
 		KMethodRef onreadystate;
 		KMethodRef onsendstream;
@@ -81,24 +56,41 @@ namespace ti
 
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;
-		SharedPtr<std::istream> datastream;
-		SharedPtr<std::ostringstream> outstream;
-		int contentLength;
-		Poco::Event abort;
+		SharedPtr<std::ifstream> requestStream;
+		BlobRef requestBlob;
+		SharedPtr<std::ostringstream> responseStream;
+		int requestContentLength;
+		bool aborted;
 		bool dirty;
+		size_t requestDataSent;
+		size_t responseDataReceived;;
+		bool sawHTTPStatus;
 
-		// Thread main		
-		void run();
-
+		void run(); // Poco Thread implementation.
 		bool BeginRequest(KValueRef sendData);
-		void ExecuteRequest();
+		void BeginWithFileLikeObject(KObjectRef dataObject);
 		void ChangeState(int readyState);
-		void Reset();
-		void InitHTTPS();
-		void PrepareSession(Poco::URI uri);
-		void SendRequestBody(std::ostream& out);
-		void ReceiveResponseBody(std::istream& in, int responseLength);
-		void GetCookies();
+		void GetResponseCookie(std::string cookieLine);
+		struct curl_slist* SetRequestHeaders(CURL* handle);
+		void ExecuteRequest();
+		bool FireEvent(std::string& eventName);
+		void HandleCurlResult(CURLcode result);
+		void SetupCurlMethodType();
+
+		void Abort(const ValueList& args, KValueRef result);
+		void Open(const ValueList& args, KValueRef result);
+		void SetCredentials(const ValueList& args, KValueRef result);
+		void Send(const ValueList& args, KValueRef result);
+		void Receive(const ValueList& args, KValueRef result);
+		void SetRequestHeader(const ValueList& args, KValueRef result);
+		void GetResponseHeader(const ValueList& args, KValueRef result);
+		void SetCookie(const ValueList& args, KValueRef result);
+		void ClearCookies(const ValueList& args, KValueRef result);
+		void GetCookie(const ValueList& args, KValueRef result);
+		void GetTimeout(const ValueList& args, KValueRef result);
+		void SetTimeout(const ValueList& args, KValueRef result);
+		void GetMaxRedirects(const ValueList& args, KValueRef result);
+		void SetMaxRedirects(const ValueList& args, KValueRef result);
 	};
 }
 

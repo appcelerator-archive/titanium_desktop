@@ -91,7 +91,7 @@ namespace ti
 
 		args.push_back(Value::NewObject(autoThis));
 		args.push_back(Value::NewObject(new HttpServerResponse(response)));
-		host->InvokeMethodOnMainThread(callback, args);
+		RunOnMainThread(callback, args);
 	}
 
 	void HttpServerRequest::GetMethod(const ValueList& args, KValueRef result)
