@@ -88,7 +88,7 @@ namespace ti
 			{
 				KMethodRef method = onerror->ToMethod();
 				ValueList args(e.GetValue());
-				this->host->InvokeMethodOnMainThread(method, args, false);
+				RunOnMainThread(method, args, false);
 			}
 		}
 
@@ -247,7 +247,7 @@ namespace ti
 
 		try
 		{
-			host->InvokeMethodOnMainThread(onMessage, args, false);
+			RunOnMainThread(onMessage, args, false);
 		}
 		catch(ValueException& e)
 		{

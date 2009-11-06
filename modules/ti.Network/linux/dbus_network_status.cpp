@@ -137,7 +137,7 @@ namespace ti
 			return true;
 
 		KMethodRef meth = this->Get("_DBusStatus")->ToMethod();
-		KValueRef r = binding->GetHost()->InvokeMethodOnMainThread(meth, ValueList());
+		KValueRef r(RunOnMainThread(meth, ValueList()));
 		return r->ToBool();
 	}
 }

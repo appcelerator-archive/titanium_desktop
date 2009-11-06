@@ -72,7 +72,7 @@ namespace ti
 
 		try
 		{
-			host->InvokeMethodOnMainThread(onMessage, args, false);
+			RunOnMainThread(onMessage, args, false);
 		}
 		catch(ValueException& e)
 		{

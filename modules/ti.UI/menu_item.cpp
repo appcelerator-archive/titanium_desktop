@@ -340,11 +340,8 @@ namespace ti
 		if (this->IsCheck() && this->autoCheck)
 		{
 			// Execute this later on the main thread
-			Host* host = Host::GetInstance();
-			host->InvokeMethodOnMainThread(
-				this->Get("setState")->ToMethod(),
-				ValueList(Value::NewBool(!this->GetState())),
-				false);
+			RunOnMainThread(this->Get("setState")->ToMethod(),
+				ValueList(Value::NewBool(!this->GetState())), false);
 		}
 
 		this->FireEvent(Event::CLICKED);

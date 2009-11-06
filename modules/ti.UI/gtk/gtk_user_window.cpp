@@ -677,7 +677,7 @@ namespace ti
 
 		// If we are in debug mode, leave the last two --
 		// a separator and the web inspector
-		if (userWindow->GetHost()->IsDebugMode())
+		if (userWindow->GetHost()->DebugModeEnabled())
 			extent = extent - 2;
 
 		// If we are not in debug mode, remove the default WebKit menu items
@@ -1339,7 +1339,7 @@ namespace ti
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		RunOnMainThread(work, args, false);
 	}
 
 	void GtkUserWindow::OpenFolderChooserDialog(KMethodRef callback,
@@ -1362,7 +1362,7 @@ namespace ti
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		RunOnMainThread(work, args, false);
 	}
 
 	void GtkUserWindow::OpenSaveAsDialog(KMethodRef callback,
@@ -1382,7 +1382,7 @@ namespace ti
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
 		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		RunOnMainThread(work, args, false);
 	}
 
 	void GtkUserWindow::ShowInspector(bool console)

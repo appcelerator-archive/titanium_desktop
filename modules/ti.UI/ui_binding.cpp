@@ -487,8 +487,7 @@ namespace ti
 			if (method.isNull())
 				method = console->GetMethod(methodName.c_str(), 0);
 
-			Host::GetInstance()->InvokeMethodOnMainThread(
-				method, ValueList(Value::NewString(message)), false);
+			RunOnMainThread(method, ValueList(Value::NewString(message)), false);
 		}
 	}
 }

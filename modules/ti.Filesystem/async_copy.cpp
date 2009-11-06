@@ -144,7 +144,7 @@ namespace ti
 				args.push_back(value);
 				args.push_back(Value::NewInt(c));
 				args.push_back(Value::NewInt(ac->files.size()));
-				ac->host->InvokeMethodOnMainThread(ac->callback, args, false);
+				RunOnMainThread(ac->callback, args, false);
 
 				logger->Debug("Callback executed");
 			}

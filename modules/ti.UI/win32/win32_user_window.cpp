@@ -294,7 +294,7 @@ void Win32UserWindow::InitWebKit()
 	if (FAILED(hr) || !privatePrefs)
 		HandleHResultError("Error getting IWebPreferencesPrivate", hr, true);
 
-	privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
+	privatePrefs->setDeveloperExtrasEnabled(host->DebugModeEnabled());
 	privatePrefs->setDatabasesEnabled(true);
 	privatePrefs->setLocalStorageEnabled(true);
 	privatePrefs->setOfflineWebApplicationCacheEnabled(true);

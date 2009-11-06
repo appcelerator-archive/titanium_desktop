@@ -309,14 +309,14 @@ Win32WebKitUIDelegate::trackCustomPopupMenu(
 	if (!menu.isNull()) {
 		this->nativeContextMenu = menu->CreateNative(false);
 
-	} else if (host->IsDebugMode()) {
+	} else if (host->DebugModeEnabled()) {
 		this->nativeContextMenu = CreatePopupMenu();
 		Win32Menu::ApplyNotifyByPositionStyleToNativeMenu(this->nativeContextMenu);
 	}
 
 	if (this->nativeContextMenu) {
 
-		if (host->IsDebugMode()) {
+		if (host->DebugModeEnabled()) {
 			AppendMenu(this->nativeContextMenu, MF_SEPARATOR, 1, L"Separator");
 			AppendMenu(this->nativeContextMenu,
 				MF_STRING, WEB_INSPECTOR_MENU_ITEM_ID, L"Show Inspector");

@@ -286,7 +286,7 @@ namespace ti
 		this->GetNativeStdout()->StopMonitors();
 		this->GetNativeStderr()->StopMonitors();
 		if (!exitCallback.isNull())
-			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+			RunOnMainThread(exitCallback, ValueList());
 	}
 
 	void Process::ExitMonitorAsync()
@@ -305,7 +305,7 @@ namespace ti
 		this->GetNativeStderr()->StopMonitors();
 
 		if (!exitCallback.isNull())
-			Host::GetInstance()->InvokeMethodOnMainThread(exitCallback, ValueList());
+			RunOnMainThread(exitCallback, ValueList());
 	}
 
 	void Process::ExitCallback(const ValueList& args, KValueRef result)

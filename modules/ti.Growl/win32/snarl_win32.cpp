@@ -70,8 +70,7 @@ namespace ti
 		{
 			if (wParam == SnarlInterface::SNARL_NOTIFICATION_CLICKED)
 			{
-				Host::GetInstance()->InvokeMethodOnMainThread(
-					i->second, ValueList(), false);
+				RunOnMainThread(i->second, ValueList(), false);
 			}
 			else if (wParam == SnarlInterface::SNARL_NOTIFICATION_TIMED_OUT)
 			{

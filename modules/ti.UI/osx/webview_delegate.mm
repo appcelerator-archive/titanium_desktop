@@ -27,7 +27,7 @@
 	// significantly.
 	[webPrefs setCacheModel:WebCacheModelDocumentBrowser];
 
-	[webPrefs setDeveloperExtrasEnabled:host->IsDebugMode()];
+	[webPrefs setDeveloperExtrasEnabled:host->DebugModeEnabled()];
 	[webPrefs setPlugInsEnabled:YES]; 
 	[webPrefs setJavaEnabled:YES];
 	[webPrefs setJavaScriptEnabled:YES];

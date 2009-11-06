@@ -82,8 +82,8 @@ namespace ti
 
 	void GrowlOSX::CopyToApp(kroll::Host *host, kroll::Module *module)
 	{
-		std::string dir = host->GetApplicationHomePath() + KR_PATH_SEP + "Contents" +
-			KR_PATH_SEP + "Frameworks" + KR_PATH_SEP + "Growl.framework";
+		std::string dir(FileUtils::Join(host->GetApplication()->home.c_str(),
+			"Contents", "Frameworks", "Growl.framework", 0));
 
 		if (!FileUtils::IsDirectory(dir))
 		{

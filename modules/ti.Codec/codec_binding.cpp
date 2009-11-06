@@ -451,7 +451,7 @@ namespace ti
 		{
 			ValueList args;
 			args.push_back(Value::NewString(zipFile));
-			Host::GetInstance()->InvokeMethodOnMainThread(callback, args, true);
+			RunOnMainThread(callback, args, true);
 		}
 		
 		return Value::Undefined;

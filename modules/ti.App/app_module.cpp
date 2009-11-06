@@ -18,8 +18,8 @@ namespace ti
 {
 	void AppModule::Initialize()
 	{
-		std::string home = host->GetApplicationHomePath();
-		std::string config = FileUtils::Join(home.c_str(),CONFIG_FILENAME,NULL);
+		std::string& home = host->GetApplication()->path;
+		std::string config(FileUtils::Join(home.c_str(), CONFIG_FILENAME, 0));
 
 		PRINTD("+++home = " << home);
 		PRINTD("+++config = " << config);

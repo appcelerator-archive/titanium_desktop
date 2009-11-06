@@ -325,14 +325,12 @@ namespace ti
 
 	void AppBinding::GetPath(const ValueList& args, KValueRef result)
 	{
-		static std::string path(host->GetCommandLineArg(0));
-		result->SetString(path);
+		result->SetString(host->GetApplication()->GetArguments().at(0).c_str());
 	}
 
 	void AppBinding::GetHome(const ValueList& args, KValueRef result)
 	{
-		static std::string path(host->GetApplicationHomePath());
-		result->SetString(path);
+		result->SetString(host->GetApplication()->path);
 	}
 
 	void AppBinding::GetArguments(const ValueList& args, KValueRef result)
@@ -340,10 +338,11 @@ namespace ti
 		static KListRef argList(0);
 		if (argList.isNull())
 		{
-			// Skip the first argument which is the filename to the executable
+			// Skip the first argument which is the filename of the executable.
+			std::vector<std::string>& args = host->GetApplication()->GetArguments();
 			argList = new StaticBoundList();
-			for (int i = 1; i < host->GetCommandLineArgCount(); i++)
-				argList->Append(Value::NewString(host->GetCommandLineArg(i)));
+			for (size_t i = 1; i < args.size(); i++)
+				argList->Append(Value::NewString(args.at(i)));
 		}
 
 		result->SetList(argList);
