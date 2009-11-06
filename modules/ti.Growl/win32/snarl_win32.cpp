@@ -37,13 +37,13 @@ namespace ti
 	{
 		SnarlInterface snarlInterface;
 
-		std::wstring wideTitle = UTF8ToWide(title);
-		std::wstring wideText = UTF8ToWide(description);
+		std::wstring wideTitle = ::UTF8ToWide(title);
+		std::wstring wideText = ::UTF8ToWide(description);
 		std::wstring wideIconPath(L"");
 		if (!iconURL.empty())
 		{
 			std::string iconPath = URLUtils::URLToPath(iconURL);
-			wideIconPath.append(UTF8ToWide(iconPath));
+			wideIconPath.append(::UTF8ToWide(iconPath));
 		}
 
 		HWND replyWindow = Win32Host::Win32Instance()->AddMessageHandler(

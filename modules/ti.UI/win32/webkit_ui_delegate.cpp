@@ -193,7 +193,7 @@ Win32WebKitUIDelegate::runJavaScriptAlertPanelWithMessage(
 	/* [in] */ BSTR message)
 {
 	HWND handle = window->GetWindowHandle();
-	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring title(::UTF8ToWide(window->GetTitle()));
 	std::wstring msg;
 	if (message)
 		msg.append(bstr_t(message));
@@ -215,7 +215,7 @@ Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMessage(
 	/* [retval][out] */ BOOL *result)
 {
 	HWND handle = window->GetWindowHandle();
-	std::wstring title(UTF8ToWide(window->GetTitle()));
+	std::wstring title(::UTF8ToWide(window->GetTitle()));
 	std::wstring msg;
 	if (message)
 		msg.append(bstr_t(message));

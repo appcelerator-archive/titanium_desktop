@@ -17,7 +17,7 @@ namespace ti
 
 	Win32Sound::Win32Sound(std::string &url) :
 		Sound(url),
-		path(UTF8ToWide(URLUtils::URLToPath(url))),
+		path(::UTF8ToWide(URLUtils::URLToPath(url))),
 		graphBuilder(NULL),
 		mediaControl(NULL),
 		mediaEventEx(NULL),
