@@ -227,12 +227,13 @@ namespace ti
 			AutoUIBinding binding;
 			KObjectRef domWindow;
 			Host* host;
-			WindowConfig *config;
+			WindowConfig* config;
 			AutoUserWindow parent;
 			std::vector<AutoUserWindow> children;
-			long next_listener_id;
 			bool active;
 			bool initialized;
+			std::string iconURL;
+
 			virtual AutoUserWindow GetParent();
 			virtual void AddChild(AutoUserWindow);
 			virtual void RemoveChild(AutoUserWindow);

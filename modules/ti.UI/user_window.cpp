@@ -14,7 +14,6 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	host(kroll::Host::GetInstance()),
 	config(config),
 	parent(parent),
-	next_listener_id(0),
 	active(false),
 	initialized(false)
 {
@@ -1453,9 +1452,14 @@ void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::KValueRef result)
 {
 	args.VerifyException("setIcon", "s|0");
 	std::string iconPath;
-	if (args.size() > 0) {
-		std::string in = args.GetString(0);
-		iconPath = URLUtils::URLToPath(in);
+	if (args.size() > 0)
+	{
+		this->iconURL = args.GetString(0);
+		iconPath = URLUtils::URLToPath(this->iconURL);
+	}
+	else
+	{
+		this->iconURL = iconPath = "";
 	}
 
 	if (this->active)
@@ -1466,7 +1470,7 @@ void UserWindow::_SetIcon(const kroll::ValueList& args, kroll::KValueRef result)
 
 void UserWindow::_GetIcon(const kroll::ValueList& args, kroll::KValueRef result)
 {
-	result->SetString(this->GetIcon());
+	result->SetString(this->iconURL);
 }
 
 void UserWindow::_GetParent(const kroll::ValueList& args, kroll::KValueRef result)
