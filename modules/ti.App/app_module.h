@@ -14,10 +14,6 @@ namespace ti
 	class AppModule : public kroll::Module
 	{
 		KROLL_MODULE_CLASS(AppModule)
-
-	private:
-		KObjectRef app_binding, properties_binding;
 	};
-
 }
 #endif

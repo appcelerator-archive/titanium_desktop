@@ -12,7 +12,7 @@
 #include <vector>
 #include <Poco/AutoPtr.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
-#include "../app_config.h"
+#include "app_config.h"
 
 using namespace kroll;
 

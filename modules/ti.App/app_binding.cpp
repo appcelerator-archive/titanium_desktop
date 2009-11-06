@@ -7,7 +7,7 @@
 #include <Poco/Environment.h>
 #include "app_binding.h"
 #include "app_config.h"
-#include "Properties/properties_binding.h"
+#include "properties_binding.h"
 
 namespace ti
 {

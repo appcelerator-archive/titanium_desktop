@@ -13,35 +13,24 @@
 #include <sstream>
 
 #include "app_api.h"
-#include "Properties/properties_binding.h"
+#include "properties_binding.h"
 
-#define TITRUE 1
-#define TIFALSE 0
 #define nodeNameEquals(n,s) (xmlStrcmp(n->name, (const xmlChar *)s) == 0)
 
-namespace ti {
+namespace ti
+{
 
 class WindowConfig;
 class PropertiesBinding;
 
-typedef std::vector<WindowConfig*> WindowConfigList ;
-
 class TITANIUM_APP_API AppConfig
 {
-private:
-	const char* error;
-	std::string appName, appID, description, copyright, url, version, publisher;
-	WindowConfigList windows;
-	AutoPtr<PropertiesBinding> systemProperties;
-
-	// icon properties
-	std::string icon16, icon32, icon48;
-	static AppConfig *instance_;
-
-	AppConfig(std::string& xmlfile);
-
 public:
 	~AppConfig();
+
+	WindowConfig* GetWindow(std::string &id);
+	WindowConfig* GetWindowByURL(std::string url);
+	WindowConfig* GetMainWindow();
 
 	std::string& GetAppName() { return appName; }
 	std::string& GetAppID() { return appID; }
@@ -51,29 +40,32 @@ public:
 	std::string& GetVersion() { return version; }
 	std::string& GetPublisher() { return publisher; }
 	AutoPtr<PropertiesBinding> GetSystemProperties() { return systemProperties; }
-	WindowConfigList& GetWindows() { return windows; }
-	WindowConfig* GetWindow(std::string &id);
-	WindowConfig* GetWindowByURL(std::string url);
-	WindowConfig* GetMainWindow();
-	
-
-	//icon accessors
+	std::vector<WindowConfig*>& GetWindows() { return windows; }
 	std::string& GetIcon16() { return icon16; }
 	std::string& GetIcon32() { return icon32; }
 	std::string& GetIcon48() { return icon48; }
-
 	const char* GetError() { return error; }
 
-	static AppConfig* Instance() {
-		return instance_;
-	}
+	static AppConfig* Instance();
 
-	static AppConfig* Init(std::string& xmlFile) {
-		if (instance_ == NULL) {
-			instance_ = new AppConfig(xmlFile);
-		}
-		return instance_;
-	}
+private:
+	AppConfig(std::string& xmlfile);
+
+	AutoPtr<PropertiesBinding> systemProperties;
+	std::vector<WindowConfig*> windows;
+	const char* error;
+	std::string appName;
+	std::string appID;
+	std::string description;
+	std::string copyright;
+	std::string url;
+	std::string version;
+	std::string publisher;
+	std::string icon16;
+	std::string icon32;
+	std::string icon48;
+
+	static AppConfig *instance_;
 };
 
 }

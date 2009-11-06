@@ -25,8 +25,7 @@ else:
 		env.ParseConfig('pkg-config --cflags --libs libxml-2.0')
 
 m = build.add_module('ti.App', env=env)
-sources = Glob('*.cpp') + Glob('Properties/*.cpp')
-t = env.SharedLibrary(target = m.build_dir + '/tiappmodule', source=sources)
+t = env.SharedLibrary(target = m.build_dir + '/tiappmodule', source=Glob('*.cpp'))
 build.mark_build_target(t)
 
 t = build.utils.CopyTree(Glob('*.js'), m.build_dir)
