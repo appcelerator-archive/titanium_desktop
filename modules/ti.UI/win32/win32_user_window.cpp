@@ -191,16 +191,24 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+DWORD Win32UserWindow::GetStyleFromConfig() const
+{
+	DWORD style = WS_EX_APPWINDOW;
+	if (config->IsToolWindow())
+		style = WS_EX_TOOLWINDOW;
+
+	if (config->GetTransparency() < 1.0)
+		style |= WS_EX_LAYERED;
+
+	return style;
+}
+
 void Win32UserWindow::InitWindow()
 {
 	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
 	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
-	DWORD windowStyle = WS_EX_APPWINDOW;
-	if (this->IsToolWindow())
-		windowStyle = WS_EX_TOOLWINDOW;
-
-	this->windowHandle = CreateWindowExW(windowStyle, USERWINDOW_WINDOW_CLASS,
+	this->windowHandle = CreateWindowExW(GetStyleFromConfig(), USERWINDOW_WINDOW_CLASS,
 		titleW.c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
 		NULL, NULL, win32Host->GetInstanceHandle(), NULL);
 
@@ -210,7 +218,6 @@ void Win32UserWindow::InitWindow()
 		error << "Error Creating Window: " << GetLastError();
 		logger->Error(error.str());
 	}
-
 
 	// these APIs are semi-private -- we probably shouldn't mark them
 	// make our HWND available to 3rd party devs without needing our headers
@@ -352,47 +359,22 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	win32Host = static_cast<kroll::Win32Host*>(binding->GetHost());
 	this->InitWindow();
 
-	this->ReloadTiWindowConfig();
+	this->SetTransparency(config->GetTransparency());	
 	this->SetupDecorations(false);
-
-	Bounds b;
-	b.x = config->GetX();
-	b.y = config->GetY();
-	b.width = config->GetWidth();
-	b.height = config->GetHeight();
-	SetBounds(b);
+	this->SetupPosition();
+	this->SetupState();
+	this->SetTopMost(config->IsTopMost() && config->IsVisible());
 
 	this->InitWebKit();
-	
-	//webView = WebView::createInstance();
-	logger->Debug("resize subviews");
-	ResizeSubViews();
+	this->ResizeSubViews();
 
 	// ensure we have valid restore values
 	restoreBounds = GetBounds();
 	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
 
-	if (this->config->IsFullscreen())
-	{
-		this->SetFullscreen(true);
-	}
-	else if (this->config->IsMaximized())
-	{
-		this->Maximize();
-	}
-	else if (this->config->IsMinimized())
-	{
-		this->Minimize();
-	}
-
-	if (this->config->IsTopMost() && this->config->IsVisible())
-	{
-		this->SetTopMost(true);
-	}
-
-	// set this flag to indicate that when the frame is loaded
-	// we want to show the window - we do this to prevent white screen
-	// while the URL is being fetched
+	// Set this flag to indicate that when the frame is loaded we want to
+	// show the window - we do this to prevent white screen while the first
+	// URL loads in the WebView.
 	this->requiresDisplay = true;
 
 	// set initial window icon to icon associated with exe file
@@ -402,16 +384,7 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	if (defaultIcon)
 	{
 		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
-				(LPARAM) defaultIcon);
-	}
-
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-				config->GetTransparency() * 255), LWA_ALPHA);
-		SetLayeredWindowAttributes(this->windowHandle, transparencyColor, 0,
-			LWA_COLORKEY);
+			(LPARAM) defaultIcon);
 	}
 }
 
@@ -437,6 +410,7 @@ std::string Win32UserWindow::GetTransparencyColor()
 
 void Win32UserWindow::ResizeSubViews()
 {
+	logger->Debug("Called resize subviews");
 	RECT rcClient;
 	GetClientRect(windowHandle, &rcClient);
 	MoveWindow(viewWindowHandle, 0, 0, rcClient.right, rcClient.bottom, TRUE);
@@ -513,21 +487,15 @@ void Win32UserWindow::Open()
 	ResizeSubViews();
 
 	UserWindow::Open();
-	SetURL(this->config->GetURL());
+	this->SetURL(this->config->GetURL());
 	if (!this->requiresDisplay)
 	{
-		ShowWindow(windowHandle, SW_SHOW);
+		Show();
 		ShowWindow(viewWindowHandle, SW_SHOW);
 	}
-	
-	this->SetupBounds();
-	if (this->config->IsMaximized()) {
-		this->Maximize();
-	}
-	else if (this->config->IsMinimized()) {
-		this->Minimize();
-	}
-	
+
+	SetupBounds();
+	SetupState();
 	FireEvent(Event::OPENED);
 }
 
@@ -751,16 +719,9 @@ void Win32UserWindow::SetURL(std::string& url_)
 	SetFocus(viewWindowHandle);
 }
 
-#define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
-#define UnsetFlag(x,flag) (x &= ~flag)=
-
-#define SetGWLFlag(wnd,flag,b) long window_style = GetWindowLong(wnd, GWL_STYLE);\
-SetFlag(window_style, flag, b);\
-SetWindowLong(wnd, GWL_STYLE, window_style);
-
 void Win32UserWindow::SetResizable(bool resizable)
 {
-	SetGWLFlag(windowHandle, WS_SIZEBOX, this->config->IsUsingChrome() && resizable);
+	this->SetupDecorations();
 	this->SetupSize();
 }
 
@@ -786,16 +747,9 @@ bool Win32UserWindow::IsVisible()
 
 void Win32UserWindow::SetTransparency(double transparency)
 {
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong(this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-		config->GetTransparency() * 255), LWA_ALPHA);
-	}
-	else
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-	}
+	SetWindowLong(windowHandle, GWL_EXSTYLE, GetStyleFromConfig());
+	SetLayeredWindowAttributes(windowHandle, 0,
+		(BYTE) floor(config->GetTransparency() * 255), LWA_ALPHA);
 }
 
 void Win32UserWindow::SetFullscreen(bool fullscreen)
@@ -888,10 +842,14 @@ void Win32UserWindow::SetupDecorations(bool showHide)
 	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
 
 	SetFlag(windowStyle, WS_OVERLAPPED, config->IsUsingChrome());
+	SetFlag(windowStyle, WS_SIZEBOX,
+		config->IsUsingChrome() && config->IsResizable());
+	SetFlag(windowStyle, WS_OVERLAPPEDWINDOW,
+		config->IsUsingChrome() && config->IsResizable());
+	SetFlag(windowStyle, WS_SYSMENU,
+		config->IsUsingChrome() && config->IsCloseable());
 	SetFlag(windowStyle, WS_CAPTION, config->IsUsingChrome());
-	SetFlag(windowStyle, WS_SYSMENU, config->IsUsingChrome() && config->IsCloseable());
 	SetFlag(windowStyle, WS_BORDER, config->IsUsingChrome());
-
 	SetFlag(windowStyle, WS_MAXIMIZEBOX, config->IsMaximizable());
 	SetFlag(windowStyle, WS_MINIMIZEBOX, config->IsMinimizable());
 
@@ -899,8 +857,24 @@ void Win32UserWindow::SetupDecorations(bool showHide)
 
 	if (showHide && config->IsVisible())
 	{
-		ShowWindow(windowHandle, SW_HIDE);
-		ShowWindow(windowHandle, SW_SHOW);
+		Hide();
+		Show();
+	}
+}
+
+void Win32UserWindow::SetupState()
+{
+	if (config->IsFullscreen())
+	{
+		this->SetFullscreen(true);
+	}
+	else if (config->IsMaximized())
+	{
+		this->Maximize();
+	}
+	else if (config->IsMinimized())
+	{
+		this->Minimize();
 	}
 }
 
@@ -957,43 +931,13 @@ void Win32UserWindow::SetupMenu()
 	}
 }
 
-void Win32UserWindow::ReloadTiWindowConfig()
-{
-	//host->webview()->GetMainFrame()->SetAllowsScrolling(tiWindowConfig->isUsingScrollbars());
-	//SetWindowText(hWnd, ::UTF8ToWide(tiWindowConfig->getTitle()).c_str());
-
-	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
-
-	SetFlag(windowStyle, WS_MINIMIZEBOX, config->IsMinimizable());
-	SetFlag(windowStyle, WS_MAXIMIZEBOX, config->IsMaximizable());
-
-	SetFlag(windowStyle, WS_OVERLAPPEDWINDOW, config->IsUsingChrome() && config->IsResizable());
-	SetFlag(windowStyle, WS_CAPTION, config->IsUsingChrome());
-
-	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
-
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-				config->GetTransparency() * 255), LWA_ALPHA);
-	}
-	else
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-	}
-	
-	SetLayeredWindowAttributes(this->windowHandle, transparencyColor, 0,
-			LWA_COLORKEY);
-}
-
 // called by frame load delegate to let the window know it's loaded
 void Win32UserWindow::FrameLoaded()
 {
 	if (this->requiresDisplay && this->config->IsVisible())
 	{
 		this->requiresDisplay = false;
-		ShowWindow(windowHandle, SW_SHOW);
+		this->Show();
 	}
 }
 
@@ -1021,7 +965,8 @@ void Win32UserWindow::SetupPosition()
 	Bounds b = GetBounds();
 	b.x = this->config->GetX();
 	b.y = this->config->GetY();
-	
+	b.width = this->config->GetWidth();
+	b.height = this->config->GetHeight();	
 	this->SetBounds(b);
 }
 

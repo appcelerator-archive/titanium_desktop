@@ -3,8 +3,10 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
+
 #ifndef __TI_WIN32_USER_WINDOW_H
 #define __TI_WIN32_USER_WINDOW_H
+
 namespace ti
 {
 	class Win32UserWindow : public UserWindow
@@ -12,28 +14,15 @@ namespace ti
 		public:
 		Win32UserWindow(WindowConfig* config, AutoUserWindow& parent);
 		virtual ~Win32UserWindow();
-	
-		void OpenFileChooserDialog(
-			KMethodRef callback,
-			bool multiple,
-			std::string& title,
-			std::string& path,
-			std::string& defaultName,
-			std::vector<std::string>& types,
-			std::string& typesDescription);
-		void OpenFolderChooserDialog(
-			KMethodRef callback,
-			bool multiple,
-			std::string& title,
-			std::string& path,
-			std::string& defaultName);
-		void OpenSaveAsDialog(
-			KMethodRef callback,
-			std::string& title,
-			std::string& path,
-			std::string& defaultName,
-			std::vector<std::string>& types,
-			std::string& typesDescription);
+
+		void OpenFileChooserDialog(KMethodRef callback, bool multiple,
+			std::string& title, std::string& path, std::string& defaultName,
+			std::vector<std::string>& types, std::string& typesDescription);
+		void OpenFolderChooserDialog( KMethodRef callback, bool multiple,
+			std::string& title, std::string& path, std::string& defaultName);
+		void OpenSaveAsDialog( KMethodRef callback, std::string& title,
+			std::string& path, std::string& defaultName,
+			std::vector<std::string>& types, std::string& typesDescription);
 		void ResizeSubViews();
 		HWND GetWindowHandle();
 		void Hide();
@@ -85,7 +74,6 @@ namespace ti
 		std::string& GetIcon();
 		bool IsTopMost();
 		void SetTopMost(bool topmost);
-
 		void FrameLoaded();
 		void ShowInspector(bool console);
 		static void RegisterWindowClass(HINSTANCE hInstance);
@@ -93,57 +81,10 @@ namespace ti
 		static Win32UserWindow* FromWindow(HWND hWnd);
 		void RedrawMenu();
 		static void RedrawAllMenus();
-
 		virtual void AppIconChanged();
 		virtual void AppMenuChanged();
-		IWebView* GetWebView() { return webView; };
-	
-		protected:
-		kroll::Win32Host *win32Host;
-		Win32WebKitFrameLoadDelegate *frameLoadDelegate;
-		Win32WebKitUIDelegate *uiDelegate;
-		Win32WebKitPolicyDelegate *policyDelegate;
-		Bounds restoreBounds;
-		long restoreStyles;
-		int chromeWidth, chromeHeight;
-		HWND windowHandle;
-		HWND viewWindowHandle;
-		IWebView* webView;
-		IWebFrame* mainFrame;
-		IWebInspector *webInspector;
-		bool requiresDisplay;
-	
-		AutoPtr<Win32Menu> menu; // The window-specific menu
-		AutoPtr<Win32Menu> activeMenu; // This window's active menu
-		HMENU nativeMenu; // This window's active native menu
-		AutoPtr<Win32Menu> contextMenu; // This window-specific context menu
-		std::string iconPath; // The path to this window's icon
-		HICON defaultIcon;
-	
-		void RemoveOldMenu();
-		void ReloadTiWindowConfig();
-		void InitWindow();
-		void InitWebKit();
-		void SetupBounds();
-		void SetupPosition();
-		void SetupSize();
-		void SetupDecorations(bool showHide = true);
-		void SetupMenu();
-		void SetupIcon();
-		KListRef SelectFile(
-			bool saveDialog, bool multiple, std::string& title,
-			std::string& path, std::string& defaultName,
-			std::vector<std::string>& types, std::string& typesDescription);
-		KListRef SelectDirectory(
-			bool multiple, std::string& title, std::string& path, std::string& defaultName);
-		
-		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
-		
-		static void ParseStringNullSeparated(const wchar_t *s, std::vector<std::string> &tokens);
-		Logger* logger;
 
-		public:
-		// Implementations that depend on instance variables
+		IWebView* GetWebView() { return webView; };
 		std::string GetTitle() { return config->GetTitle(); }
 		std::string GetURL() { return config->GetURL(); }
 		bool IsResizable() { return config->IsResizable(); }
@@ -155,6 +96,49 @@ namespace ti
 		bool IsUsingScrollbars() { return config->IsUsingScrollbars(); }
 		bool IsFullscreen() { return config->IsFullscreen(); }
 		std::string GetId() { return config->GetID(); }
+
+		private:
+		kroll::Win32Host* win32Host;
+		Win32WebKitFrameLoadDelegate* frameLoadDelegate;
+		Win32WebKitUIDelegate* uiDelegate;
+		Win32WebKitPolicyDelegate* policyDelegate;
+		Bounds restoreBounds;
+		long restoreStyles;
+		int chromeWidth, chromeHeight;
+		HWND windowHandle;
+		HWND viewWindowHandle;
+		IWebView* webView;
+		IWebFrame* mainFrame;
+		IWebInspector* webInspector;
+		bool requiresDisplay;
+		AutoPtr<Win32Menu> menu; // The window-specific menu
+		AutoPtr<Win32Menu> activeMenu; // This window's active menu
+		HMENU nativeMenu; // This window's active native menu
+		AutoPtr<Win32Menu> contextMenu; // This window-specific context menu
+		std::string iconPath; // The path to this window's icon
+		HICON defaultIcon;
+
+		void RemoveOldMenu();
+		DWORD GetStyleFromConfig() const;
+		void InitWindow();
+		void InitWebKit();
+		void SetupBounds();
+		void SetupPosition();
+		void SetupSize();
+		void SetupDecorations(bool showHide = true);
+		void SetupState();
+		void SetupMenu();
+		void SetupIcon();
+		KListRef SelectFile(
+			bool saveDialog, bool multiple, std::string& title,
+			std::string& path, std::string& defaultName,
+			std::vector<std::string>& types, std::string& typesDescription);
+		KListRef SelectDirectory(bool multiple, std::string& title,
+			std::string& path, std::string& defaultName);
+		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
+		static void ParseStringNullSeparated(const wchar_t *s,
+			std::vector<std::string> &tokens);
+		Logger* logger;
 	};
 }
 #endif
