@@ -76,6 +76,7 @@ namespace ti
 		bool FireEvent(std::string& eventName);
 		void HandleCurlResult(CURLcode result);
 		void SetupCurlMethodType();
+		void CleanupCurl(curl_slist* headers);
 
 		void Abort(const ValueList& args, KValueRef result);
 		void Open(const ValueList& args, KValueRef result);
