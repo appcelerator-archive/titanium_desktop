@@ -1028,13 +1028,12 @@ namespace ti
 
 			SetRequestCookies(curlHandle, this->requestCookies);
 
-			if (!this->username.empty())
+			if (!this->username.empty() || !this->password.empty())
 			{
-				SET_CURL_OPTION(curlHandle, CURLOPT_USERNAME, username.c_str());
-			}
-			if (!this->password.empty())
-			{
-				SET_CURL_OPTION(curlHandle, CURLOPT_PASSWORD, password.c_str());
+				std::string usernamePassword(this->username);
+				usernamePassword.append(":");
+				usernamePassword.append(this->password);
+				SET_CURL_OPTION(curlHandle, CURLOPT_USERPWD, usernamePassword.c_str());
 			}
 
 			this->Set("connected", Value::NewBool(true));
