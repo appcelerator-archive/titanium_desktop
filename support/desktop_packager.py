@@ -26,8 +26,14 @@ class DesktopPackager(object):
 			elif builder.options.platform == 'linux':
 				self.package = self.create_tgz(builder)
 			elif builder.options.platform == 'win32':
-				self.package = self.create_zip(builder)
+				#self.package = self.create_zip(builder)
+				self.package = self.create_wix(builder)
 
+	def create_wix(self, builder):
+		sys.path.append(os.path.join(os.path.dirname(__file__), 'win32'))
+		import wix
+		return wix.create_installer(builder)
+	
 	def create_zip(self, builder):
 		extractor = os.path.join(self.options.assets_dir, 'self_extractor.exe')
 		exe = builder.options.executable

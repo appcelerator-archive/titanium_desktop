@@ -78,6 +78,8 @@ if ARGUMENTS.get('test_crash', 0):
 ## Kroll *must not be required* for installation
 SConscript('kroll/SConscript.thirdparty', exports='debug')
 SConscript('installation/SConscript')
+if build.is_win32():
+	SConscript('support/win32/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be
