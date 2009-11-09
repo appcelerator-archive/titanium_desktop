@@ -76,7 +76,7 @@ namespace ti
 		if (popupDialog)
 		{
 			std::wstring textEnteredW = textEntered;
-			std::string textEnteredU = WideToUTF8(textEnteredW);
+			std::string textEnteredU = ::WideToUTF8(textEnteredW);
 			popupDialog->inputText.clear();
 			popupDialog->inputText.append(textEnteredU);
 			popupDialog->result = IDOK;

@@ -66,7 +66,7 @@ namespace ti
 			ZeroMemory(this->trayIconData->szTip, 128);
 
 			// make sure we don't overflow the static buffer.
-			std::wstring hintW = UTF8ToWide(hint);
+			std::wstring hintW = ::UTF8ToWide(hint);
 			lstrcpyn(this->trayIconData->szTip, hintW.c_str(), 128);
 
 			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);

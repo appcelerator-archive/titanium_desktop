@@ -195,7 +195,7 @@ void Win32UserWindow::InitWindow()
 {
 	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
-	std::wstring titleW = UTF8ToWide(config->GetTitle());
+	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
 	DWORD windowStyle = WS_EX_APPWINDOW;
 	if (this->IsToolWindow())
 		windowStyle = WS_EX_TOOLWINDOW;
@@ -702,7 +702,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 
 void Win32UserWindow::SetTitleImpl(std::string& title)
 {
-	std::wstring titleW = UTF8ToWide(title);
+	std::wstring titleW = ::UTF8ToWide(title);
 	SetWindowTextW(windowHandle, titleW.c_str());
 }
 
@@ -719,7 +719,7 @@ void Win32UserWindow::SetURL(std::string& url_)
 	if (FAILED(hr))
 		HandleHResultError("Error creating WebMutableURLRequest", hr, true);
 
-	std::wstring wurl = UTF8ToWide(url);
+	std::wstring wurl = ::UTF8ToWide(url);
 	hr = request->initWithURL(SysAllocString(wurl.c_str()), 
 		WebURLRequestUseProtocolCachePolicy, 60);
 	if (FAILED(hr))
@@ -960,7 +960,7 @@ void Win32UserWindow::SetupMenu()
 void Win32UserWindow::ReloadTiWindowConfig()
 {
 	//host->webview()->GetMainFrame()->SetAllowsScrolling(tiWindowConfig->isUsingScrollbars());
-	//SetWindowText(hWnd, UTF8ToWide(tiWindowConfig->getTitle()).c_str());
+	//SetWindowText(hWnd, ::UTF8ToWide(tiWindowConfig->getTitle()).c_str());
 
 	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
 
@@ -1099,7 +1099,7 @@ KListRef Win32UserWindow::SelectFile(
 	std::string& typesDescription)
 {
 	std::wstring filter;
-	std::wstring typesDescriptionW = UTF8ToWide(typesDescription);
+	std::wstring typesDescriptionW = ::UTF8ToWide(typesDescription);
 	if (types.size() > 0)
 	{
 		//"All\0*.*\0Test\0*.TXT\0";
@@ -1108,7 +1108,7 @@ KListRef Win32UserWindow::SelectFile(
 		for (int i = 0; i < types.size(); i++)
 		{
 			std::string type = types.at(i);
-			std::wstring typeW = UTF8ToWide(type);
+			std::wstring typeW = ::UTF8ToWide(type);
 			//multiple filters: "*.TXT;*.DOC;*.BAK"
 			size_t found = type.find("*.");
 			if (found != 0)
@@ -1123,10 +1123,10 @@ KListRef Win32UserWindow::SelectFile(
 
 	OPENFILENAME ofn;
 	wchar_t filenameW[1024];
-	wcscpy(filenameW, UTF8ToWide(defaultName).c_str());
+	wcscpy(filenameW, ::UTF8ToWide(defaultName).c_str());
 	
 	// init OPENFILE
-	std::wstring pathW = UTF8ToWide(path);
+	std::wstring pathW = ::UTF8ToWide(path);
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = this->windowHandle;
@@ -1145,7 +1145,7 @@ KListRef Win32UserWindow::SelectFile(
 
 	if (!title.empty())
 	{
-		std::wstring titleW = UTF8ToWide(title);
+		std::wstring titleW = ::UTF8ToWide(title);
 		ofn.lpstrTitle = titleW.c_str();
 	}
 
@@ -1235,7 +1235,7 @@ KListRef Win32UserWindow::SelectDirectory(
 	KListRef results = new StaticBoundList();
 
 	BROWSEINFO bi = { 0 };
-	std::wstring titleW = UTF8ToWide(title);
+	std::wstring titleW = ::UTF8ToWide(title);
 	bi.lpszTitle = titleW.c_str();
 	bi.hwndOwner = this->windowHandle;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS;
@@ -1247,7 +1247,7 @@ KListRef Win32UserWindow::SelectDirectory(
 		if (SHGetPathFromIDList(pidl, in_path))
 		{
 			std::wstring inPathW = in_path;
-			std::string inPath = WideToUTF8(inPathW);
+			std::string inPath = ::WideToUTF8(inPathW);
 			results->Append(Value::NewString(inPath));
 		}
 
