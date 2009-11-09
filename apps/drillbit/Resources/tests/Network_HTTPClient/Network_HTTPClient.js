@@ -23,8 +23,8 @@ describe("Network.HTTPClient",
 
 	before: function()
 	{
-		this.client = Titanium.Network.createHTTPClient();
 		this.url = "http://127.0.0.1:8888/";
+		this.client = Titanium.Network.createHTTPClient();
 	},
 	
 	after: function()
@@ -220,11 +220,19 @@ describe("Network.HTTPClient",
 		var url = 'https://api.appcelerator.net/p/v1/app-list';
 		var client = this.client;
 		var timer = 0;
-		
+
 		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
 			clearTimeout(timer);
-			callback.passed();
+
+			if (client.status != 200)
+			{
+				callback.failed("Status should have been 200, but was: " + client.status);
+			}
+			else
+			{
+				callback.passed();
+			}
 		});
 
 		timer = setTimeout(function()

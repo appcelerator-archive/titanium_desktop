@@ -557,7 +557,7 @@ namespace ti
 	bool HTTPClientBinding::BeginRequest(KValueRef sendData)
 	{
 		if (this->curlHandle)
-			throw ValueException::FromString("Tried to use an HTTPClient while"
+			throw ValueException::FromString("Tried to use an HTTPClient while "
 				"another transfer was in progress");
 
 		this->sawHTTPStatus = false;
@@ -935,12 +935,12 @@ namespace ti
 		}
 	}
 
-	static void CleanupCurl(CURL** handle, curl_slist* headers)
+	void HTTPClientBinding::CleanupCurl(curl_slist* headers)
 	{
-		if (*handle)
+		if (this->curlHandle)
 		{
-			curl_easy_cleanup(*handle);
-			*handle = 0;
+			curl_easy_cleanup(this->curlHandle);
+			this->curlHandle = 0;
 		}
 
 		if (headers)
@@ -1028,13 +1028,12 @@ namespace ti
 
 			SetRequestCookies(curlHandle, this->requestCookies);
 
-			if (!this->username.empty())
+			if (!this->username.empty() || !this->password.empty())
 			{
-				SET_CURL_OPTION(curlHandle, CURLOPT_USERNAME, username.c_str());
-			}
-			if (!this->password.empty())
-			{
-				SET_CURL_OPTION(curlHandle, CURLOPT_PASSWORD, password.c_str());
+				std::string usernamePassword(this->username);
+				usernamePassword.append(":");
+				usernamePassword.append(this->password);
+				SET_CURL_OPTION(curlHandle, CURLOPT_USERPWD, usernamePassword.c_str());
 			}
 
 			this->Set("connected", Value::NewBool(true));
@@ -1049,12 +1048,12 @@ namespace ti
 			GetLogger()->Error("Request to %s failed because: %s",
 			this->url.c_str(), e.ToString().c_str());
 
-			CleanupCurl(&curlHandle, curlHeaders);
+			this->CleanupCurl(curlHeaders);
 			if (!async)
 				throw e;
 		}
 
-		CleanupCurl(&curlHandle, curlHeaders);
+		CleanupCurl(curlHeaders);
 	}
 }
 
