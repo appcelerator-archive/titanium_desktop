@@ -98,8 +98,46 @@ describe("Network.HTTPClient",
 	{
 		value_of(this.client.open("GET", "http://test.com")).should_be_true();
 		value_of(this.client.open("GET", "https://test.com")).should_be_true();
-		value_of(this.client.open("GET", "bad://test.com")).should_be_false();
+		value_of(function() { this.client.open("GET", "bad://test.com")}).should_throw_exception();
 	},
+
+	test_async_get_as_async: function(callback)
+	{
+		var timer = null;
+		var text = this.text;
+		var client = this.client;
+		var url = this.url;
+		// We want to make sure the web server has started up, so sleep
+		// a little bit before starting this test.
+		function runTest()
+		{
+			client.addEventListener(Titanium.HTTP_DONE, function()
+			{
+				try
+				{
+					value_of(this.responseText).should_be(text);
+					clearTimeout(timer);
+					callback.passed();
+				}
+				catch(e)
+				{
+					clearTimeout(timer);
+					callback.failed(e);
+				}
+			});
+
+			timer = setTimeout(function()
+			{
+				callback.failed('Async GET test timed out');
+			}, 10000);
+
+			client.open("GET", url);
+			client.send(null);
+		}
+
+		setTimeout(runTest, 1000);
+	},
+
 
 	test_sync_get: function()
 	{
@@ -114,36 +152,6 @@ describe("Network.HTTPClient",
 		value_of(this.client.send(null)).should_be_true();
 		value_of(done).should_be_true();
 		value_of(this.client.responseText).should_be(this.text);
-	},
-
-	test_async_get_as_async: function(callback)
-	{
-		var timer = null;
-		var text = this.text;
-
-		this.client.addEventListener(Titanium.HTTP_DONE, function()
-		{
-			try
-			{
-				value_of(this.responseText).should_be(text);
-
-				clearTimeout(timer);
-				callback.passed();
-			}
-			catch(e)
-			{
-				clearTimeout(timer);
-				callback.failed(e);
-			}
-		});
-
-		timer = setTimeout(function()
-		{
-			callback.failed('Async GET test timed out');
-		},10000);
-
-		this.client.open("GET", this.url);
-		this.client.send(null);
 	},
 
 	test_timeout_as_async: function(callback)
@@ -169,7 +177,7 @@ describe("Network.HTTPClient",
 		timer = setTimeout(function()
 		{
 			// We should timeout only after 1 second
-			callback.failed('Timeout test did not timed out');
+			callback.failed('Timeout test did not time out');
 		},10000);
 
 		this.client.setTimeout(1000);
@@ -307,7 +315,7 @@ describe("Network.HTTPClient",
 	{
 		var timer = 0;
 		var text = this.text;
-        var data = "";
+		var data = "";
 
 		this.client.addEventListener(Titanium.HTTP_DONE, function()
 		{
@@ -435,19 +443,19 @@ describe("Network.HTTPClient",
 	{
 		this.client.setRequestHeader("Foo", "Bar");
 		this.client.setRequestHeader("Hello", "World");
-        this.client.setRequestHeader("Head", "Tail");
+		this.client.setRequestHeader("Head", "Tail");
 		this.client.open("GET", this.url + "requestheaders", false);
 		this.client.send();
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("Got the headers!");
 	},
 
-    test_response_headers: function()
-    {
+	test_response_headers: function()
+	{
 		this.client.open("GET", this.url + "responseheaders", false);
 		this.client.send();
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.getResponseHeader("Foo")).should_be("Bar");
 		value_of(this.client.getResponseHeader("Head")).should_be("Tail");
-    },
+	},
 });

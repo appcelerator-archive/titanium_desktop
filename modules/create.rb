@@ -47,11 +47,11 @@ namespace ti
 	class #{module_name}Binding : public StaticBoundObject
 	{
 	public:
-		#{module_name}Binding(SharedKObject);
+		#{module_name}Binding(KObjectRef);
 	protected:
 		virtual ~#{module_name}Binding();
 	private:
-		SharedKObject global;
+		KObjectRef global;
 	};
 }
 
@@ -72,7 +72,7 @@ bc.puts <<-END
 
 namespace ti
 {
-	#{module_name}Binding::#{module_name}Binding(SharedKObject global) : global(global)
+	#{module_name}Binding::#{module_name}Binding(KObjectRef global) : global(global)
 	{
 	}
 	#{module_name}Binding::~#{module_name}Binding()
@@ -114,7 +114,7 @@ namespace ti
 		KROLL_MODULE_CLASS(#{module_name}Module)
 		
 	private:
-		kroll::SharedKObject binding;
+		kroll::KObjectRef binding;
 	};
 
 }
@@ -146,7 +146,7 @@ namespace ti
 		this->binding = new #{module_name}Binding(host->GetGlobalObject());
 
 		// set our #{module_dir_name}
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("#{module_name}", value);
 	}
 

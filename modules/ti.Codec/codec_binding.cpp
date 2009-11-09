@@ -31,7 +31,7 @@
 
 namespace ti
 {
-	CodecBinding::CodecBinding(SharedKObject global) :
+	CodecBinding::CodecBinding(KObjectRef global) :
 		StaticBoundObject("Codec"),
 		global(global)
 	{
@@ -127,7 +127,7 @@ namespace ti
 	{
 	}
 	
-	static std::string& GetStringFromValue(SharedValue value)
+	static std::string& GetStringFromValue(KValueRef value)
 	{
 		static std::string data;
 		if (value->IsString())
@@ -149,7 +149,7 @@ namespace ti
 		return data;
 	}
 	
-	void CodecBinding::EncodeBase64(const ValueList& args, SharedValue result)
+	void CodecBinding::EncodeBase64(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("encodeBase64", "s|o");
 		
@@ -161,7 +161,7 @@ namespace ti
 		result->SetString(encoded);
 	}
 
-	void CodecBinding::DecodeBase64(const ValueList& args, SharedValue result)
+	void CodecBinding::DecodeBase64(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("decodeBase64", "s");
 
@@ -174,7 +174,7 @@ namespace ti
 		result->SetString(decoded);
 	}
 
-	void CodecBinding::DigestToHex(const ValueList& args, SharedValue result)
+	void CodecBinding::DigestToHex(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("digestToHex", "i s|o");
 		
@@ -229,7 +229,7 @@ namespace ti
 		delete engine;
 	}
 
-	void CodecBinding::DigestHMACToHex(const ValueList& args, SharedValue result)
+	void CodecBinding::DigestHMACToHex(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("digestHMACToHex", "i s s");
 		
@@ -280,7 +280,7 @@ namespace ti
 		}
 	}
 
-	void CodecBinding::EncodeHexBinary(const ValueList& args, SharedValue result)
+	void CodecBinding::EncodeHexBinary(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("encodeHexBinary", "s|o");
 		
@@ -292,7 +292,7 @@ namespace ti
 		result->SetString(encoded);
 	}
 
-	void CodecBinding::DecodeHexBinary(const ValueList& args, SharedValue result)
+	void CodecBinding::DecodeHexBinary(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("decodeHexBinary", "s");
 		
@@ -305,7 +305,7 @@ namespace ti
 		result->SetString(decoded);
 	}
 
-	void CodecBinding::Checksum(const ValueList& args, SharedValue result)
+	void CodecBinding::Checksum(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("checksum", "s|o ?i");
 
@@ -347,7 +347,7 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			AutoBlob blobData = args.at(0)->ToObject().cast<Blob>();
+			BlobRef blobData = args.at(0)->ToObject().cast<Blob>();
 			if (blobData.isNull())
 			{
 				delete checksum;
@@ -365,7 +365,7 @@ namespace ti
 		delete checksum;
 	}
 	
-	static std::string GetPathFromValue(SharedValue value)
+	static std::string GetPathFromValue(KValueRef value)
 	{
 		if (value->IsObject())
 		{
@@ -377,7 +377,7 @@ namespace ti
 		}
 	}
 	
-	void CodecBinding::CreateZip(const ValueList& args, SharedValue result)
+	void CodecBinding::CreateZip(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("createZip", "s|o s|o ?m");
 		
@@ -400,7 +400,7 @@ namespace ti
 			throw ValueException::FromFormat("Error: Directory %s doesn't exist in createZip", directory.c_str());
 		}
 		
-		SharedKMethod zipAsyncMethod = new KFunctionPtrMethod(&CodecBinding::CreateZipAsync);
+		KMethodRef zipAsyncMethod = new KFunctionPtrMethod(&CodecBinding::CreateZipAsync);
 		ValueList zipArgs;
 		zipArgs.push_back(Value::NewString(directory));
 		zipArgs.push_back(Value::NewString(zipFile));
@@ -418,12 +418,12 @@ namespace ti
 	}
 
 	/*static*/
-	SharedValue CodecBinding::CreateZipAsync(const ValueList& args)
+	KValueRef CodecBinding::CreateZipAsync(const ValueList& args)
 	{
 		std::string directory = args.GetString(0);
 		std::string zipFile = args.GetString(1);
 		AutoPtr<AsyncJob> job = args.GetObject(2).cast<AsyncJob>();
-		SharedKMethod callback = 0;
+		KMethodRef callback = 0;
 		if (args.size() > 3)
 		{
 			callback = args.GetMethod(3);
@@ -451,7 +451,7 @@ namespace ti
 		{
 			ValueList args;
 			args.push_back(Value::NewString(zipFile));
-			Host::GetInstance()->InvokeMethodOnMainThread(callback, args, true);
+			RunOnMainThread(callback, args, true);
 		}
 		
 		return Value::Undefined;

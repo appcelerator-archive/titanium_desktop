@@ -57,7 +57,7 @@ namespace ti
 		Pipe::Close();
 	}
 
-	int NativePipe::Write(AutoBlob blob)
+	int NativePipe::Write(BlobRef blob)
 	{
 		if (isReader)
 		{
@@ -102,7 +102,7 @@ namespace ti
 
 	void NativePipe::PollForReads()
 	{
-		SharedKObject save(this, true);
+		KObjectRef save(this, true);
 
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
@@ -111,7 +111,7 @@ namespace ti
 
 		while (bytesRead > 0)
 		{
-			AutoBlob blob = new Blob(buffer, bytesRead);
+			BlobRef blob = new Blob(buffer, bytesRead);
 			this->Write(blob);
 			bytesRead = this->RawRead(buffer, length);
 		}
@@ -121,9 +121,9 @@ namespace ti
 
 	void NativePipe::PollForWrites()
 	{
-		SharedKObject save(this, true);
+		KObjectRef save(this, true);
 
-		AutoBlob blob = 0;
+		BlobRef blob = 0;
 		while (!closed || buffers.size() > 0)
 		{
 			PollForWriteIteration();
@@ -135,7 +135,7 @@ namespace ti
 
 	void NativePipe::PollForWriteIteration()
 	{
-		AutoBlob blob = 0;
+		BlobRef blob = 0;
 		while (buffers.size() > 0)
 		{
 			{
@@ -151,7 +151,7 @@ namespace ti
 		}
 	}
 
-	void NativePipe::RawWrite(AutoBlob blob)
+	void NativePipe::RawWrite(BlobRef blob)
 	{
 		try
 		{

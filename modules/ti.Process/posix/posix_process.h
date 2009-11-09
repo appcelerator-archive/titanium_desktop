@@ -27,11 +27,11 @@ namespace ti
 
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual AutoBlob MonitorSync();
+		virtual BlobRef MonitorSync();
 		virtual int Wait();
 		virtual void RecreateNativePipes();
-		virtual void SetArguments(SharedKList args);
-		void ReadCallback(const ValueList& args, SharedValue result);
+		virtual void SetArguments(KListRef args);
+		void ReadCallback(const ValueList& args, KValueRef result);
 		inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
 		inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
 		inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
@@ -46,7 +46,7 @@ namespace ti
 		// For synchronous process execution store
 		// process output as a vector of blobs for speed.
 		Poco::Mutex processOutputMutex;
-		std::vector<AutoBlob> processOutput;
+		std::vector<BlobRef> processOutput;
 		void StartProcess();
 	};
 }

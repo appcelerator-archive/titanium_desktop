@@ -18,22 +18,22 @@ namespace ti
 	class CodecBinding : public StaticBoundObject
 	{
 	public:
-		CodecBinding(SharedKObject);
+		CodecBinding(KObjectRef);
 	protected:
 		virtual ~CodecBinding();
 	private:
-		SharedKObject global;
+		KObjectRef global;
 
-		void EncodeBase64(const ValueList& args, SharedValue result);
-		void DecodeBase64(const ValueList& args, SharedValue result);
-		void DigestToHex(const ValueList& args, SharedValue result);
-		void DigestHMACToHex(const ValueList& args, SharedValue result);
-		void EncodeHexBinary(const ValueList& args, SharedValue result);
-		void DecodeHexBinary(const ValueList& args, SharedValue result);
-		void Checksum(const ValueList& args, SharedValue result);
-		void CreateZip(const ValueList& args, SharedValue result);
+		void EncodeBase64(const ValueList& args, KValueRef result);
+		void DecodeBase64(const ValueList& args, KValueRef result);
+		void DigestToHex(const ValueList& args, KValueRef result);
+		void DigestHMACToHex(const ValueList& args, KValueRef result);
+		void EncodeHexBinary(const ValueList& args, KValueRef result);
+		void DecodeHexBinary(const ValueList& args, KValueRef result);
+		void Checksum(const ValueList& args, KValueRef result);
+		void CreateZip(const ValueList& args, KValueRef result);
 		
-		static SharedValue CreateZipAsync(const ValueList& args);
+		static KValueRef CreateZipAsync(const ValueList& args);
 	};
 }
 

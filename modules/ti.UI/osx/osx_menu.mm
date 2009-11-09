@@ -353,7 +353,7 @@ namespace ti
 		NSMenuItem *showInspectorSeparator = [windowMenu
 			itemWithTitle:NSLocalizedString(@"Show Inspector Separator", @"")];
 
-		if (!Host::GetInstance()->IsDebugMode())
+		if (!Host::GetInstance()->DebugModeEnabled())
 		{
 			if (showInspector != nil)
 				[windowMenu removeItem:showInspector];

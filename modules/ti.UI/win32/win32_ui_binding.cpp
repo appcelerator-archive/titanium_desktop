@@ -96,7 +96,7 @@ namespace ti
 		}
 	}
 
-	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cbSingleClick)
+	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, KMethodRef cbSingleClick)
 	{
 		AutoPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cbSingleClick);
 		return trayItem;
@@ -360,7 +360,7 @@ namespace ti
 	/*static*/
 	void Win32UIBinding::ErrorDialog(std::string msg)
 	{
-		std::wstring msgW = UTF8ToWide(msg);
+		std::wstring msgW = ::UTF8ToWide(msg);
 		MessageBox(NULL, msgW.c_str(), L"Application Error", 
 			MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
 		UIBinding::ErrorDialog(msg);

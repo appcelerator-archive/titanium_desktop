@@ -16,14 +16,14 @@ namespace ti
 		void SetLabelImpl(std::string newLabel);
 		void SetIconImpl(std::string newIconPath);
 		void SetStateImpl(bool newState);
-		void SetCallbackImpl(SharedKMethod callback);
+		void SetCallbackImpl(KMethodRef callback);
 		void SetSubmenuImpl(AutoMenu newSubmenu);
 		void SetEnabledImpl(bool enabled);
 
 		NSMenuItem* CreateNative(bool registerNative=true);
 		void DestroyNative(NSMenuItem* realization);
 		void UpdateNativeMenuItems();
-		virtual void HandleClickEvent(SharedKObject source);
+		virtual void HandleClickEvent(KObjectRef source);
 
 	private:
 		static void SetNSMenuItemTitle(NSMenuItem* item, std::string& title);

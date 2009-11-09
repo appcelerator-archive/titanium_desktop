@@ -37,7 +37,7 @@ namespace ti
 #endif
 
 		// set our ti.Growl
-		SharedValue value = Value::NewObject(binding);
+		KValueRef value = Value::NewObject(binding);
 		host->GetGlobalObject()->Set("Growl", value);
 	}
 

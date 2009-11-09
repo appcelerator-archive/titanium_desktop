@@ -94,8 +94,8 @@
 -(NSData*)preprocessRequest:(const char*)url returningMimeType:(NSString**)mimeType
 {
 	static Logger* logger = Logger::Get("UI.TitaniumProtocols");
-	SharedKObject scope = new StaticBoundObject();
-	SharedKObject headers = new StaticBoundObject();
+	KObjectRef scope = new StaticBoundObject();
+	KObjectRef headers = new StaticBoundObject();
 	scope->Set("httpHeaders", Value::NewObject(headers));
 
 	NSDictionary *httpHeaders = [[self request] allHTTPHeaderFields];

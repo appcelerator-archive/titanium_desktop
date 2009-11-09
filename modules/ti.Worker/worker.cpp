@@ -8,7 +8,7 @@
 
 namespace ti
 {
-	Worker::Worker(Host* host, kroll::SharedKObject global, std::string& code) :
+	Worker::Worker(Host* host, kroll::KObjectRef global, std::string& code) :
 		KEventObject("Worker.Worker"),
 		host(host),
 		global_object(0),
@@ -83,12 +83,12 @@ namespace ti
 		{
 			error = true;
 			logger->Error("Error loading worker: %s\n", e.ToString().c_str());
-			SharedValue onerror = this->Get("onerror");
+			KValueRef onerror = this->Get("onerror");
 			if (onerror->IsMethod())
 			{
-				SharedKMethod method = onerror->ToMethod();
+				KMethodRef method = onerror->ToMethod();
 				ValueList args(e.GetValue());
-				this->host->InvokeMethodOnMainThread(method, args, false);
+				RunOnMainThread(method, args, false);
 			}
 		}
 
@@ -119,23 +119,23 @@ namespace ti
 
 				// check to see if the worker wants to receive messages - we do this 
 				// each time since they could define at any time
-				SharedValue mv = KJSUtil::GetProperty(global_object, "onmessage");
+				KValueRef mv = KJSUtil::GetProperty(global_object, "onmessage");
 				if (mv->IsMethod())
 				{
-					SharedKMethod onMessage(mv->ToMethod());
+					KMethodRef onMessage(mv->ToMethod());
 					// we have to make a copy since calling the onmessage could be re-entrant
 					// which would cause the postMessage to deadlock. we hold the lock to 
 					// make a copy of the contents of the list and then iterate w/o lock
-					std::list<SharedValue> copy;
+					std::list<KValueRef> copy;
 					{
 						// lock inside block only to make copy
 						Poco::ScopedLock<Poco::Mutex> lock(mutex);
 						if (this->messages.size()>0)
 						{
-							std::list<SharedValue>::iterator i = this->messages.begin();
+							std::list<KValueRef>::iterator i = this->messages.begin();
 							while (i!=this->messages.end())
 							{
-								SharedValue message = (*i++);
+								KValueRef message = (*i++);
 								copy.push_back(message);
 							}
 							this->messages.clear();
@@ -143,10 +143,10 @@ namespace ti
 					}
 					if (copy.size()>0)
 					{
-						std::list<SharedValue>::iterator i = copy.begin();
+						std::list<KValueRef>::iterator i = copy.begin();
 						while (i != copy.end())
 						{
-							SharedValue message(*i++);
+							KValueRef message(*i++);
 							this->CallOnMessageCallback(onMessage, message);
 						}
 					}
@@ -182,7 +182,7 @@ namespace ti
 		END_KROLL_THREAD;
 	}
 
-	void Worker::Start(const ValueList& args, SharedValue result)
+	void Worker::Start(const ValueList& args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("Worker");
 		logger->Debug("Start called");
@@ -198,7 +198,7 @@ namespace ti
 		this->thread.start(*adapter);
 	}
 
-	void Worker::Terminate(const ValueList& args, SharedValue result)
+	void Worker::Terminate(const ValueList& args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("Worker");
 		logger->Debug("Terminate called");
@@ -238,7 +238,7 @@ namespace ti
 		}
 	}
 
-	void Worker::CallOnMessageCallback(SharedKMethod onMessage, SharedValue message)
+	void Worker::CallOnMessageCallback(KMethodRef onMessage, KValueRef message)
 	{
 		static Logger* logger = Logger::Get("Worker");
 		AutoPtr<Event> event(this->CreateEvent("worker.message"));
@@ -247,7 +247,7 @@ namespace ti
 
 		try
 		{
-			host->InvokeMethodOnMainThread(onMessage, args, false);
+			RunOnMainThread(onMessage, args, false);
 		}
 		catch(ValueException& e)
 		{
@@ -256,11 +256,11 @@ namespace ti
 		}
 	}
 
-	void Worker::PostMessage(const ValueList& args, SharedValue result)
+	void Worker::PostMessage(const ValueList& args, KValueRef result)
 	{
 		// store the message in our queue (waiting for the lock) and
 		// then signal the thread to wake up to process the message
-		SharedValue message = args.at(0);
+		KValueRef message = args.at(0);
 		{
 			Poco::ScopedLock<Poco::Mutex> lock(mutex);
 			this->messages.push_back(message);
@@ -268,7 +268,7 @@ namespace ti
 		this->condition.signal();
 	}
 
-	void Worker::Bound(const char *name, SharedValue value)
+	void Worker::Bound(const char *name, KValueRef value)
 	{
 		std::string n = name;
 		

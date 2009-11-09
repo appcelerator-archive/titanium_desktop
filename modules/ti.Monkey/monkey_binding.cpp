@@ -14,7 +14,7 @@ using std::string;
 
 namespace ti
 {
-	MonkeyBinding::MonkeyBinding(Host *host, SharedKObject global) :
+	MonkeyBinding::MonkeyBinding(Host *host, KObjectRef global) :
 		StaticBoundObject("Monkey"),
 		global(global),
 		logger(Logger::Get("Monkey"))
@@ -44,7 +44,7 @@ namespace ti
 
 			if (!scripts.empty())
 			{
-				KEventObject::root->AddEventListener(Event::PAGE_LOADED, callback);
+				GlobalObject::GetInstance()->AddEventListener(Event::PAGE_LOADED, callback);
 			}
 			
 		}
@@ -52,7 +52,7 @@ namespace ti
 
 	MonkeyBinding::~MonkeyBinding()
 	{
-		KEventObject::root->RemoveEventListener(Event::PAGE_LOADED, this->callback);
+		GlobalObject::GetInstance()->RemoveEventListener(Event::PAGE_LOADED, this->callback);
 
 		vector<Script*>::iterator i = scripts.begin();
 		while (i != scripts.end())
@@ -113,9 +113,9 @@ namespace ti
 		}
 	}
 
-	void MonkeyBinding::Callback(const ValueList &args, SharedValue result)
+	void MonkeyBinding::Callback(const ValueList &args, KValueRef result)
 	{
-		SharedKObject event = args.at(0)->ToObject();
+		KObjectRef event = args.at(0)->ToObject();
 		if (!event->Get("url")->IsString() ||
 			!event->Get("scope")->IsObject() ||
 			!event->GetObject("scope")->Get("window"))
@@ -125,7 +125,7 @@ namespace ti
 		}
 
 		std::string url = event->GetString("url");
-		SharedKObject windowObject = event->GetObject("scope")->GetObject("window");
+		KObjectRef windowObject = event->GetObject("scope")->GetObject("window");
 		vector<Script*>::iterator iter = scripts.begin();
 		while (iter != scripts.end())
 		{
@@ -138,8 +138,8 @@ namespace ti
 	}
 
 	void MonkeyBinding::EvaluateUserScript(
-		SharedKObject event, std::string& url,
-		SharedKObject windowObject, std::string& scriptSource)
+		KObjectRef event, std::string& url,
+		KObjectRef windowObject, std::string& scriptSource)
 	{
 		static Logger *logger = Logger::Get("Monkey");
 		// I got a castle in brooklyn, that's where i dwell
@@ -152,7 +152,7 @@ namespace ti
 			return;
 		}
 
-		SharedKObject target = event->GetObject("target");
+		KObjectRef target = event->GetObject("target");
 		if (!windowObject->Get(GLOBAL_NS_VARNAME)->IsObject() &&
 			!target.isNull() && target->Get("insertAPI")->IsMethod())
 		{
@@ -160,7 +160,7 @@ namespace ti
 			target->CallNS("insertAPI", Value::NewObject(windowObject));
 		}
 
-		SharedKMethod evalFunction = windowObject->GetMethod("eval");
+		KMethodRef evalFunction = windowObject->GetMethod("eval");
 		logger->Info("Loading userscript for %s\n", url.c_str());
 		try
 		{

@@ -35,6 +35,7 @@ you can successfully build.  You can run the following command from the root sou
 directory to update the submodule:
 
 > git submodule update --init
+> cd kroll && git checkout master && cd ..
 
 This will pull the contents of the submodule into your local kroll folder.
 

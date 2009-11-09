@@ -61,8 +61,8 @@ namespace ti
 	{
 		Logger* logger = Logger::Get("UI.URL");
 
-		SharedKObject scope = new StaticBoundObject();
-		SharedKObject kheaders = new StaticBoundObject();
+		KObjectRef scope = new StaticBoundObject();
+		KObjectRef kheaders = new StaticBoundObject();
 		while (headers->key)
 		{
 			kheaders->SetString(headers->key, headers->value);

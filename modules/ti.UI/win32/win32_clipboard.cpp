@@ -18,7 +18,7 @@ namespace ti
 		if (OpenClipboard(eventWindow))
 		{
 			EmptyClipboard();
-			std::wstring wideString = UTF8ToWide(newText);
+			std::wstring wideString = ::UTF8ToWide(newText);
 			HGLOBAL clipboardData = ::GlobalAlloc(GMEM_MOVEABLE, (newText.size()+1 * sizeof(char)));
 			if (clipboardData == NULL)
 			{
@@ -77,7 +77,7 @@ namespace ti
 						wchar_t *data = (wchar_t*) ::GlobalLock(wideClipboardData);
 						if (data != NULL)
 						{
-							clipboardText.assign(WideToUTF8(data));
+							clipboardText.assign(::WideToUTF8(data));
 							::GlobalUnlock(wideClipboardData);
 						}
 					}
@@ -117,13 +117,13 @@ namespace ti
 		}
 	}
 
-	AutoBlob Clipboard::GetImageImpl(std::string& mimeType)
+	BlobRef Clipboard::GetImageImpl(std::string& mimeType)
 	{
-		AutoBlob image(0);
+		BlobRef image(0);
 		return image;
 	}
 
-	void Clipboard::SetImageImpl(std::string& mimeType, AutoBlob image)
+	void Clipboard::SetImageImpl(std::string& mimeType, BlobRef image)
 	{
 	}
 

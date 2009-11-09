@@ -89,31 +89,31 @@ namespace ti
 			this->socket.close();
 		}
 	}
-	void TCPSocketBinding::SetOnRead(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnRead(const ValueList& args, KValueRef result)
 	{
 		this->onRead = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnWrite(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnWrite(const ValueList& args, KValueRef result)
 	{
 		this->onWrite = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnTimeout(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnTimeout(const ValueList& args, KValueRef result)
 	{
 		this->onTimeout = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnError(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnError(const ValueList& args, KValueRef result)
 	{
 		this->onError = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::SetOnReadComplete(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::SetOnReadComplete(const ValueList& args, KValueRef result)
 	{
 		this->onReadComplete = args.at(0)->ToMethod();
 	}
-	void TCPSocketBinding::IsClosed(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::IsClosed(const ValueList& args, KValueRef result)
 	{
 		return result->SetBool(!this->opened);
 	}
-	void TCPSocketBinding::Connect(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Connect(const ValueList& args, KValueRef result)
 	{
 		int timeout = 10;
 		if (args.size() > 0)
@@ -160,7 +160,7 @@ namespace ti
 			if (read_complete && !this->onReadComplete.isNull())
 			{
 				ValueList args;
-				ti_host->InvokeMethodOnMainThread(this->onReadComplete, args, false);
+				RunOnMainThread(this->onReadComplete, args, false);
 			}
 			else if (!read_complete && !this->onRead.isNull())
 			{
@@ -168,26 +168,26 @@ namespace ti
 
 				ValueList args;
 				args.push_back(Value::NewString(data));
-				ti_host->InvokeMethodOnMainThread(this->onRead, args, false);
+				RunOnMainThread(this->onRead, args, false);
 			}
 		}
 		catch(ValueException& e)
 		{
 			std::cerr << eprefix << *(e.GetValue()->DisplayString()) << std::endl;
 			ValueList args(Value::NewString(e.ToString()));
-			ti_host->InvokeMethodOnMainThread(this->onError, args, false);
+			RunOnMainThread(this->onError, args, false);
 		}
 		catch(Poco::Exception &e)
 		{
 			std::cerr << eprefix << e.displayText() << std::endl;
 			ValueList args(Value::NewString(e.displayText()));
-			ti_host->InvokeMethodOnMainThread(this->onError, args, false);
+			RunOnMainThread(this->onError, args, false);
 		}
 		catch(...)
 		{
 			std::cerr << eprefix << "Unknown exception" << std::endl;
 			ValueList args(Value::NewString("Unknown exception"));
-			ti_host->InvokeMethodOnMainThread(this->onError, args, false);
+			RunOnMainThread(this->onError, args, false);
 		}
 	}
 	void TCPSocketBinding::OnWrite(const Poco::AutoPtr<WritableNotification>& n)
@@ -207,7 +207,7 @@ namespace ti
 		{
 			ValueList args;
 			args.push_back(Value::NewInt(count));
-			ti_host->InvokeMethodOnMainThread(this->onWrite, args, false);
+			RunOnMainThread(this->onWrite, args, false);
 		}
 		else
 		{
@@ -220,8 +220,7 @@ namespace ti
 		{
 			return;
 		}
-		ValueList args;
-		ti_host->InvokeMethodOnMainThread(this->onTimeout, args, false);
+		RunOnMainThread(this->onTimeout, ValueList(), false);
 	}
 	void TCPSocketBinding::OnError(const Poco::AutoPtr<ErrorNotification>& n)
 	{
@@ -229,11 +228,10 @@ namespace ti
 		{
 			return;
 		}
-		ValueList args;
-		args.push_back(Value::NewString(n->name()));
-		ti_host->InvokeMethodOnMainThread(this->onError, args, false);
+		ValueList args(Value::NewString(n->name()));
+		RunOnMainThread(this->onError, args, false);
 	}
-	void TCPSocketBinding::Write(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Write(const ValueList& args, KValueRef result)
 	{
 		std::string eprefix = "TCPSocketBinding::Write: ";
 		if (!this->opened)
@@ -253,7 +251,7 @@ namespace ti
 		}
 
 	}
-	void TCPSocketBinding::Close(const ValueList& args, SharedValue result)
+	void TCPSocketBinding::Close(const ValueList& args, KValueRef result)
 	{
 		if (this->opened)
 		{

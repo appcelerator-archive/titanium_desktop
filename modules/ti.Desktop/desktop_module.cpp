@@ -20,7 +20,7 @@ namespace ti
 		this->variables = new DesktopBinding(host->GetGlobalObject());
 
 		// set our ti.Desktop
-		SharedValue value = Value::NewObject(this->variables);
+		KValueRef value = Value::NewObject(this->variables);
 		host->GetGlobalObject()->Set("Desktop",value);
 	}
 

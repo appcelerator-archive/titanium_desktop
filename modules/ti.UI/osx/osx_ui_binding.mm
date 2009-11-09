@@ -38,7 +38,7 @@ namespace ti
 		application = [[TiApplicationDelegate alloc] initWithBinding:this];
 		[application retain];
 
-		NSApplication *nsapp = [NSApplication sharedApplication];
+		NSApplication* nsapp = [NSApplication sharedApplication];
 		[nsapp setDelegate:application];
 		[NSBundle loadNibNamed:@"MainMenu" owner:nsapp];
 
@@ -283,7 +283,7 @@ namespace ti
 		return this->contextMenu;
 	}
 
-	AutoTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
+	AutoTrayItem OSXUIBinding::AddTray(std::string& iconPath, KMethodRef eventListener)
 	{
 		return new OSXTrayItem(iconPath, eventListener);
 	}

@@ -12,7 +12,7 @@ namespace ti
 	Win32MenuItem::Win32MenuItem(MenuItemType type) :
 		MenuItem(type),
 		oldSubmenu(0),
-		wideOldLabel(UTF8ToWide(label))
+		wideOldLabel(::UTF8ToWide(label))
 	{
 	}
 
@@ -24,7 +24,7 @@ namespace ti
 	{
 		if (!this->IsSeparator())
 		{
-			this->wideOldLabel = UTF8ToWide(newLabel);;
+			this->wideOldLabel = ::UTF8ToWide(newLabel);;
 			this->RecreateAllNativeItems();
 		}
 

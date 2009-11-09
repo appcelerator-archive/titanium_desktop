@@ -116,13 +116,13 @@ namespace ti
 		[pasteboard declareTypes:newTypes owner:nil];
 	}
 
-	AutoBlob Clipboard::GetImageImpl(std::string& mimeType)
+	BlobRef Clipboard::GetImageImpl(std::string& mimeType)
 	{
-		AutoBlob image(0);
+		BlobRef image(0);
 		return image;
 	}
 
-	void Clipboard::SetImageImpl(std::string& mimeType, AutoBlob image)
+	void Clipboard::SetImageImpl(std::string& mimeType, BlobRef image)
 	{
 	}
 

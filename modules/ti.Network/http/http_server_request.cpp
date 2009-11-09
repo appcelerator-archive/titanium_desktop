@@ -10,7 +10,7 @@
 
 namespace ti
 {
-	HttpServerRequest::HttpServerRequest(Host *host, SharedKMethod callback, 
+	HttpServerRequest::HttpServerRequest(Host *host, KMethodRef callback, 
 		Poco::Net::HTTPServerRequest& request) :
 			StaticBoundObject("Network.HttpServerRequest"),
 			host(host),
@@ -91,39 +91,39 @@ namespace ti
 
 		args.push_back(Value::NewObject(autoThis));
 		args.push_back(Value::NewObject(new HttpServerResponse(response)));
-		host->InvokeMethodOnMainThread(callback, args);
+		RunOnMainThread(callback, args);
 	}
 
-	void HttpServerRequest::GetMethod(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetMethod(const ValueList& args, KValueRef result)
 	{
 		std::string method = request.getMethod();
 		result->SetString(method);
 	}
 
-	void HttpServerRequest::GetVersion(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetVersion(const ValueList& args, KValueRef result)
 	{
 		std::string version = request.getVersion();
 		result->SetString(version);
 	}
 
-	void HttpServerRequest::GetURI(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetURI(const ValueList& args, KValueRef result)
 	{
 		std::string uri = request.getURI();
 		result->SetString(uri);
 	}
 
-	void HttpServerRequest::GetContentType(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetContentType(const ValueList& args, KValueRef result)
 	{
 		std::string ct = request.getContentType();
 		result->SetString(ct);
 	}
 
-	void HttpServerRequest::GetContentLength(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetContentLength(const ValueList& args, KValueRef result)
 	{
 		result->SetInt(request.getContentLength());
 	}
 
-	void HttpServerRequest::GetHeader(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetHeader(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getHeader", "s");
 		std::string name = args.at(0)->ToString();
@@ -138,10 +138,10 @@ namespace ti
 		}
 	}
 	
-	void HttpServerRequest::GetHeaders(const ValueList& args, SharedValue result)
+	void HttpServerRequest::GetHeaders(const ValueList& args, KValueRef result)
 	{
 		Poco::Net::HTTPServerRequest::ConstIterator iter = request.begin();
-		AutoKObject headers = new StaticBoundObject();
+		KObjectRef headers = new StaticBoundObject();
 		
 		for(; iter != request.end(); iter++)
 		{
@@ -152,14 +152,14 @@ namespace ti
 		result->SetObject(headers);
 	}
 
-	void HttpServerRequest::HasHeader(const ValueList& args, SharedValue result)
+	void HttpServerRequest::HasHeader(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("hasHeader", "s");
 		std::string name = args.at(0)->ToString();
 		result->SetBool(request.has(name));
 	}
 
-	void HttpServerRequest::Read(const ValueList& args, SharedValue result)
+	void HttpServerRequest::Read(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("read", "?i");
 

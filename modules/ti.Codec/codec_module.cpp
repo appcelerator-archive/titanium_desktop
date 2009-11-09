@@ -20,7 +20,7 @@ namespace ti
 		this->binding = new CodecBinding(host->GetGlobalObject());
 
 		// set our ti.Codec
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("Codec", value);
 	}
 

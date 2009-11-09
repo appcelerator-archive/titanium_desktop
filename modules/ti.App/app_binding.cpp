@@ -7,11 +7,11 @@
 #include <Poco/Environment.h>
 #include "app_binding.h"
 #include "app_config.h"
-#include "Properties/properties_binding.h"
+#include "properties_binding.h"
 
 namespace ti
 {
-	AppBinding::AppBinding(Host* host, SharedKObject global) :
+	AppBinding::AppBinding(Host* host, KObjectRef global) :
 		KAccessorObject("App"),
 		host(host),
 		global(global)
@@ -165,45 +165,45 @@ namespace ti
 	AppBinding::~AppBinding()
 	{
 	}
-	void AppBinding::GetID(const ValueList& args, SharedValue result)
+	void AppBinding::GetID(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetAppID().c_str());
 	}
-	void AppBinding::GetName(const ValueList& args, SharedValue result)
+	void AppBinding::GetName(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetAppName().c_str());
 	}
-	void AppBinding::GetVersion(const ValueList& args, SharedValue result)
+	void AppBinding::GetVersion(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetVersion().c_str());
 	}
-	void AppBinding::GetPublisher(const ValueList& args, SharedValue result)
+	void AppBinding::GetPublisher(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetPublisher().c_str());
 	}
-	void AppBinding::GetCopyright(const ValueList& args, SharedValue result)
+	void AppBinding::GetCopyright(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetCopyright().c_str());
 	}
-	void AppBinding::GetDescription(const ValueList& args, SharedValue result)
+	void AppBinding::GetDescription(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetDescription().c_str());
 	}
-	void AppBinding::GetURL(const ValueList& args, SharedValue result)
+	void AppBinding::GetURL(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetURL().c_str());
 	}
-	void AppBinding::GetGUID(const ValueList& args, SharedValue result)
+	void AppBinding::GetGUID(const ValueList& args, KValueRef result)
 	{
 		std::string guid = host->GetApplication()->guid;
 		result->SetString(guid);
 	}
-	void AppBinding::Exit(const ValueList& args, SharedValue result)
+	void AppBinding::Exit(const ValueList& args, KValueRef result)
 	{
 		host->Exit(args.size()==0 ? 0 : args.at(0)->ToInt());
 	}
 
-	void AppBinding::AppURLToPath(const ValueList& args, SharedValue result)
+	void AppBinding::AppURLToPath(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("appURLToPath", "s");
 		std::string url = args.GetString(0);
@@ -215,18 +215,18 @@ namespace ti
 		result->SetString(path);
 	}
 
-	void AppBinding::CreateProperties(const ValueList& args, SharedValue result)
+	void AppBinding::CreateProperties(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<PropertiesBinding> properties = new PropertiesBinding();
 		result->SetObject(properties);
 		
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			SharedKObject p = args.at(0)->ToObject();
+			KObjectRef p = args.at(0)->ToObject();
 			SharedStringList names = p->GetPropertyNames();
 			for (size_t i = 0; i < names->size(); i++)
 			{
-				SharedValue value = p->Get(names->at(i));
+				KValueRef value = p->Get(names->at(i));
 				ValueList setterArgs;
 				setterArgs.push_back(Value::NewString(names->at(i)));
 				setterArgs.push_back(value);
@@ -243,25 +243,25 @@ namespace ti
 		}
 	}
 
-	void AppBinding::LoadProperties(const ValueList& args, SharedValue result)
+	void AppBinding::LoadProperties(const ValueList& args, KValueRef result)
 	{
 		if (args.size() >= 1 && args.at(0)->IsString()) {
 			std::string file_path = args.at(0)->ToString();
-			SharedKObject properties = new PropertiesBinding(file_path);
+			KObjectRef properties = new PropertiesBinding(file_path);
 			result->SetObject(properties);
 		}
 	}
 	
-	void AppBinding::GetSystemProperties(const ValueList& args, SharedValue result)
+	void AppBinding::GetSystemProperties(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(AppConfig::Instance()->GetSystemProperties());
 	}
 
-	void AppBinding::StdOut(const ValueList& args, SharedValue result)
+	void AppBinding::StdOut(const ValueList& args, KValueRef result)
 	{
 		for (size_t c=0; c < args.size(); c++)
 		{
-			SharedValue arg = args.at(c);
+			KValueRef arg = args.at(c);
 			if (arg->IsString())
 			{
 				const char *s = arg->ToString();
@@ -276,11 +276,11 @@ namespace ti
 		std::cout << std::endl;
 	}
 
-	void AppBinding::StdErr(const ValueList& args, SharedValue result)
+	void AppBinding::StdErr(const ValueList& args, KValueRef result)
 	{
 		for (size_t c = 0; c < args.size(); c++)
 		{
-			SharedValue arg = args.at(c);
+			KValueRef arg = args.at(c);
 			if (arg->IsString())
 			{
 				const char *s = arg->ToString();
@@ -295,14 +295,14 @@ namespace ti
 		std::cerr << std::endl;
 	}
 
-	void AppBinding::GetStreamURL(const ValueList& args, SharedValue result)
+	void AppBinding::GetStreamURL(const ValueList& args, KValueRef result)
 	{
 		SharedApplication app = this->host->GetApplication();
 		std::string url(app->GetStreamURL("https"));
 
 		for (size_t c = 0; c < args.size(); c++)
 		{
-			SharedValue arg = args.at(c);
+			KValueRef arg = args.at(c);
 			if (arg->IsString())
 			{
 				url.append("/");
@@ -312,7 +312,7 @@ namespace ti
 		result->SetString(url);
 	}
 
-	void AppBinding::GetIcon(const ValueList& args, SharedValue result)
+	void AppBinding::GetIcon(const ValueList& args, KValueRef result)
 	{
 		SharedApplication app = this->host->GetApplication();
 		result->SetNull();	
@@ -323,27 +323,26 @@ namespace ti
 		}
 	}
 
-	void AppBinding::GetPath(const ValueList& args, SharedValue result)
+	void AppBinding::GetPath(const ValueList& args, KValueRef result)
 	{
-		static std::string path(host->GetCommandLineArg(0));
-		result->SetString(path);
+		result->SetString(host->GetApplication()->GetArguments().at(0).c_str());
 	}
 
-	void AppBinding::GetHome(const ValueList& args, SharedValue result)
+	void AppBinding::GetHome(const ValueList& args, KValueRef result)
 	{
-		static std::string path(host->GetApplicationHomePath());
-		result->SetString(path);
+		result->SetString(host->GetApplication()->path);
 	}
 
-	void AppBinding::GetArguments(const ValueList& args, SharedValue result)
+	void AppBinding::GetArguments(const ValueList& args, KValueRef result)
 	{
-		static SharedKList argList(0);
+		static KListRef argList(0);
 		if (argList.isNull())
 		{
-			// Skip the first argument which is the filename to the executable
+			// Skip the first argument which is the filename of the executable.
+			std::vector<std::string>& args = host->GetApplication()->GetArguments();
 			argList = new StaticBoundList();
-			for (int i = 1; i < host->GetCommandLineArgCount(); i++)
-				argList->Append(Value::NewString(host->GetCommandLineArg(i)));
+			for (size_t i = 1; i < args.size(); i++)
+				argList->Append(Value::NewString(args.at(i)));
 		}
 
 		result->SetList(argList);

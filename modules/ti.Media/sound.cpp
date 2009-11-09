@@ -1,4 +1,5 @@
-/** * Appcelerator Titanium - licensed under the Apache Public License 2
+/**
+ * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
@@ -89,27 +90,27 @@ namespace ti
 	{
 	}
 
-	void Sound::Play(const ValueList& args, SharedValue result)
+	void Sound::Play(const ValueList& args, KValueRef result)
 	{
 		this->Play();
 	}
 
-	void Sound::Pause(const ValueList& args, SharedValue result)
+	void Sound::Pause(const ValueList& args, KValueRef result)
 	{
 		this->Pause();
 	}
 
-	void Sound::Stop(const ValueList& args, SharedValue result)
+	void Sound::Stop(const ValueList& args, KValueRef result)
 	{
 		this->Stop();
 	}
 
-	void Sound::Reload(const ValueList& args, SharedValue result)
+	void Sound::Reload(const ValueList& args, KValueRef result)
 	{
 		this->Reload();
 	}
 
-	void Sound::SetVolume(const ValueList& args, SharedValue result)
+	void Sound::SetVolume(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setVolume", "n");
 		double volume = args.GetDouble(0);
@@ -117,33 +118,33 @@ namespace ti
 		this->SetVolume(volume);
 	}
 
-	void Sound::GetVolume(const ValueList& args, SharedValue result)
+	void Sound::GetVolume(const ValueList& args, KValueRef result)
 	{
 		result->SetDouble(this->GetVolume());
 	}
 
-	void Sound::SetLooping(const ValueList& args, SharedValue result)
+	void Sound::SetLooping(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setLooping", "b");
 		this->SetLooping(args.at(0)->ToBool());
 	}
 
-	void Sound::IsLooping(const ValueList& args, SharedValue result)
+	void Sound::IsLooping(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->IsLooping());
 	}
 
-	void Sound::IsPlaying(const ValueList& args, SharedValue result)
+	void Sound::IsPlaying(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->IsPlaying());
 	}
 
-	void Sound::IsPaused(const ValueList& args, SharedValue result)
+	void Sound::IsPaused(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->IsPaused());
 	}
 
-	void Sound::SetOnComplete(const ValueList& args, SharedValue result)
+	void Sound::SetOnComplete(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("onComplete", "m|0");
 		this->SetOnComplete(args.GetMethod(0, 0));
@@ -220,7 +221,7 @@ namespace ti
 		return state == PAUSED;
 	}
 
-	void Sound::SetOnComplete(SharedKMethod newCallback)
+	void Sound::SetOnComplete(KMethodRef newCallback)
 	{
 		this->callback = newCallback;
 	}

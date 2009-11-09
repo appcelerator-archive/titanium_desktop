@@ -32,7 +32,7 @@ namespace ti
 #elif OS_OSX
 		this->binding = new OSXMediaBinding(host->GetGlobalObject());
 #endif
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("Media", value);
 	}
 

@@ -28,7 +28,7 @@ namespace ti
 		KROLL_MODULE_CLASS(MediaModule)
 
 	private:
-		SharedKObject binding;
+		KObjectRef binding;
 	};
 
 }

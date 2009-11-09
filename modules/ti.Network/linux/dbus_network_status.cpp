@@ -43,7 +43,7 @@ namespace ti
 			g_object_unref(this->wicd_wired_proxy);
 	}
 
-	void DBusNetworkStatus::_DBusStatus(const ValueList& args, SharedValue lresult)
+	void DBusNetworkStatus::_DBusStatus(const ValueList& args, KValueRef lresult)
 	{
 		GError *error = NULL;
 		gchar* result = NULL;
@@ -136,8 +136,8 @@ namespace ti
 		if (this->bus == NULL)
 			return true;
 
-		SharedKMethod meth = this->Get("_DBusStatus")->ToMethod();
-		SharedValue r = binding->GetHost()->InvokeMethodOnMainThread(meth, ValueList());
+		KMethodRef meth = this->Get("_DBusStatus")->ToMethod();
+		KValueRef r(RunOnMainThread(meth, ValueList()));
 		return r->ToBool();
 	}
 }

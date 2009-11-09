@@ -48,8 +48,7 @@ namespace ti
 
 		protected:
 		ScriptEvaluator() {}
-		static AutoPtr<ScriptEvaluator> instance;
-		
+
 		public:
 #if defined(OS_WIN32)
 		virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject)

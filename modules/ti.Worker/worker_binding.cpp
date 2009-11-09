@@ -11,7 +11,7 @@
 
 namespace ti
 {
-	WorkerBinding::WorkerBinding(Host *host, SharedKObject global) :
+	WorkerBinding::WorkerBinding(Host *host, KObjectRef global) :
 		StaticBoundObject("Worker"),
 		host(host),
 		global(global)
@@ -29,7 +29,7 @@ namespace ti
 	WorkerBinding::~WorkerBinding()
 	{
 	}
-	void WorkerBinding::CreateWorker(const ValueList& args, SharedValue result)
+	void WorkerBinding::CreateWorker(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=2)
 		{
@@ -44,23 +44,19 @@ namespace ti
 		if (is_function)
 		{
 			// convert the function to a string block 
-			code =  "(";
-			code += args.at(0)->ToString();
-			code += ")()";
+			code.append("(");
+			code.append(args.GetString(0));
+			code.append(")()");
 		}
 		else 
 		{
-			// this is a path -- probably should verify that this is relative and not an absolute URL to remote
-			SharedKMethod appURLToPath = global->GetNS("App.appURLToPath")->ToMethod();
-			ValueList a;
-			a.push_back(args.at(0));
-			SharedValue result = appURLToPath->Call(a);
-			const char *path = result->ToString();
-			
-			logger->Debug("worker file path = %s",path);
-			
+			// We assume this is a URL corresponding to a local path, we should
+			// probably check that this isn't a remote URL.
+			std::string path(URLUtils::URLToPath(args.GetString(0)));
+			logger->Debug("worker file path = '%s' '%s'", path.c_str(), args.GetString(0).c_str());
+
 			std::ios::openmode flags = std::ios::in;
-			Poco::FileInputStream *fis = new Poco::FileInputStream(path,flags);
+			Poco::FileInputStream *fis = new Poco::FileInputStream(path, flags);
 			std::stringstream ostr;
 			char buf[8096];
 			int count = 0;
@@ -82,7 +78,7 @@ namespace ti
 		
 		logger->Debug("Worker script code = %s", code.c_str());
 		
-		SharedKObject worker = new Worker(host,global,code);
+		KObjectRef worker = new Worker(host,global,code);
 		result->SetObject(worker);
 	}
 }

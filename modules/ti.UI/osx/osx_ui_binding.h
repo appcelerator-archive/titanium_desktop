@@ -31,7 +31,7 @@ namespace ti
 		void SetContextMenu(AutoMenu);
 		void SetDockMenu(AutoMenu);
 
-		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
+		AutoTrayItem AddTray(std::string& icon_path, KMethodRef cb);
 		void SetIcon(std::string& iconPath);
 		virtual void SetDockIcon(std::string& iconPath);
 		virtual void SetBadge(std::string& badgeLabel);

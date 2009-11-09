@@ -131,7 +131,7 @@ namespace ti
 		}
 	}
 
-	void PropertiesBinding::Getter(const ValueList& args, SharedValue result, Type type)
+	void PropertiesBinding::Getter(const ValueList& args, KValueRef result, Type type)
 	{
 		if (args.size() > 0 && args.at(0)->IsString())
 		{
@@ -212,7 +212,7 @@ namespace ti
 						config->setString(property, args.at(1)->ToString());
 						break;
 					case List: {
-						SharedValue result;
+						KValueRef result;
 						this->SetList(args, result);
 					}
 					default: break;
@@ -230,78 +230,78 @@ namespace ti
 		}
 	}
 
-	void PropertiesBinding::GetBool(const ValueList& args, SharedValue result)
+	void PropertiesBinding::GetBool(const ValueList& args, KValueRef result)
 	{
 		Getter(args, result, Bool);
 	}
 
-	void PropertiesBinding::GetDouble(const ValueList& args, SharedValue result)
+	void PropertiesBinding::GetDouble(const ValueList& args, KValueRef result)
 	{
 		Getter(args, result, Double);
 	}
 
-	void PropertiesBinding::GetInt(const ValueList& args, SharedValue result)
+	void PropertiesBinding::GetInt(const ValueList& args, KValueRef result)
 	{
 		Getter(args, result, Int);
 	}
 
-	void PropertiesBinding::GetString(const ValueList& args, SharedValue result)
+	void PropertiesBinding::GetString(const ValueList& args, KValueRef result)
 	{
 		Getter(args, result, String);
 	}
 
-	void PropertiesBinding::GetList(const ValueList& args, SharedValue result)
+	void PropertiesBinding::GetList(const ValueList& args, KValueRef result)
 	{
-		SharedValue stringValue = Value::Null;
+		KValueRef stringValue = Value::Null;
 		GetString(args, stringValue);
 
 		if (!stringValue->IsNull())
 		{
-			SharedKList list = new StaticBoundList();
+			KListRef list = new StaticBoundList();
 			std::string string = stringValue->ToString();
 			Poco::StringTokenizer t(string, ",", Poco::StringTokenizer::TOK_TRIM);
 			for (size_t i = 0; i < t.count(); i++)
 			{
-				SharedValue token = Value::NewString(t[i].c_str());
+				KValueRef token = Value::NewString(t[i].c_str());
 				list->Append(token);
 			}
 
-			SharedKList list2 = list;
+			KListRef list2 = list;
 			result->SetList(list2);
 		}
 	}
 
-	void PropertiesBinding::SetBool(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SetBool(const ValueList& args, KValueRef result)
 	{
 		Setter(args, Bool);
 	}
 
-	void PropertiesBinding::SetDouble(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SetDouble(const ValueList& args, KValueRef result)
 	{
 		Setter(args, Double);
 	}
 
-	void PropertiesBinding::SetInt(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SetInt(const ValueList& args, KValueRef result)
 	{
 		Setter(args, Int);
 	}
 
-	void PropertiesBinding::SetString(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SetString(const ValueList& args, KValueRef result)
 	{
 		Setter(args, String);
 	}
 
-	void PropertiesBinding::SetList(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SetList(const ValueList& args, KValueRef result)
 	{
 		if (args.size() >= 2 && args.at(0)->IsString() && args.at(1)->IsList())
 		{
 			std::string property = args.at(0)->ToString();
-			SharedKList list = args.at(1)->ToList();
+			KListRef list = args.at(1)->ToList();
 
 			std::string value = "";
 			for (unsigned int i = 0; i < list->Size(); i++)
 			{
-				SharedValue arg = list->At(i);
+				KValueRef arg = list->At(i);
 				if (arg->IsString())
 				{
 					value += list->At(i)->ToString();
@@ -323,7 +323,7 @@ namespace ti
 		}
 	}
 
-	void PropertiesBinding::HasProperty(const ValueList& args, SharedValue result)
+	void PropertiesBinding::HasProperty(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(false);
 
@@ -334,22 +334,22 @@ namespace ti
 		}
 	}
 
-	void PropertiesBinding::ListProperties(const ValueList& args, SharedValue result)
+	void PropertiesBinding::ListProperties(const ValueList& args, KValueRef result)
 	{
 		std::vector<std::string> keys;
 		config->keys(keys);
 
-		SharedKList property_list = new StaticBoundList();
+		KListRef property_list = new StaticBoundList();
 		for (size_t i = 0; i < keys.size(); i++)
 		{
 			std::string property_name = keys.at(i);
-			SharedValue name_value = Value::NewString(property_name.c_str());
+			KValueRef name_value = Value::NewString(property_name.c_str());
 			property_list->Append(name_value);
 		}
 		result->SetList(property_list);
 	}
 	
-	void PropertiesBinding::SaveTo(const ValueList& args, SharedValue result)
+	void PropertiesBinding::SaveTo(const ValueList& args, KValueRef result)
 	{
 		if (args.size() == 0 || !args.at(0)->IsString())
 		{

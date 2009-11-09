@@ -7,7 +7,7 @@
 
 namespace ti
 {
-	WorkerContext::WorkerContext(Host *host, SharedKObject worker) :
+	WorkerContext::WorkerContext(Host *host, KObjectRef worker) :
 		KEventObject("Worker.WorkerContext"),
 		host(host),
 		worker(worker)
@@ -48,22 +48,22 @@ namespace ti
 		if (messages.size() <= 0)
 			return;
 
-		SharedValue onMessageValue = worker->Get("onmessage");
+		KValueRef onMessageValue = worker->Get("onmessage");
 		if (!onMessageValue->IsMethod())
 			return;
 
-		SharedKMethod onMessage(onMessageValue->ToMethod());
+		KMethodRef onMessage(onMessageValue->ToMethod());
 		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		std::list<SharedValue>::iterator i = messages.begin();
+		std::list<KValueRef>::iterator i = messages.begin();
 		while (i != messages.end())
 		{
-			SharedValue message(*i++);
+			KValueRef message(*i++);
 			this->CallOnMessageCallback(onMessage, message);
 		}
 		messages.clear();
 	}
 
-	void WorkerContext::CallOnMessageCallback(SharedKMethod onMessage, SharedValue message)
+	void WorkerContext::CallOnMessageCallback(KMethodRef onMessage, KValueRef message)
 	{
 		static Logger* logger = Logger::Get("Worker");
 		AutoPtr<Event> event(this->CreateEvent("worker.message"));
@@ -72,7 +72,7 @@ namespace ti
 
 		try
 		{
-			host->InvokeMethodOnMainThread(onMessage, args, false);
+			RunOnMainThread(onMessage, args, false);
 		}
 		catch(ValueException& e)
 		{
@@ -81,10 +81,10 @@ namespace ti
 		}
 	}
 
-	void WorkerContext::PostMessage(const ValueList &args, SharedValue result)
+	void WorkerContext::PostMessage(const ValueList &args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
-		SharedValue message(args.at(0));
+		KValueRef message(args.at(0));
 
 		logger->Debug("PostMessage called with %s", message->DisplayString()->c_str());
 		{
@@ -94,7 +94,7 @@ namespace ti
 		SendQueuedMessages();
 	}
 
-	void WorkerContext::Sleep(const ValueList &args, SharedValue result)
+	void WorkerContext::Sleep(const ValueList &args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
 		long ms = args.at(0)->ToInt();
@@ -111,24 +111,17 @@ namespace ti
 		logger->Debug("worker sleep completed");
 	}
 
-	void WorkerContext::ImportScripts(const ValueList &args, SharedValue result)
+	void WorkerContext::ImportScripts(const ValueList &args, KValueRef result)
 	{
 		Logger *logger = Logger::Get("WorkerContext");
-		
-		SharedKMethod appURLToPath = host->GetGlobalObject()->GetNS("App.appURLToPath")->ToMethod();
 		AutoPtr<Worker> _worker = worker.cast<Worker>();
 		JSGlobalContextRef context = KJSUtil::GetGlobalContext(_worker->GetGlobalObject());
-		
+
 		for (size_t c = 0; c < args.size(); c++)
 		{
-			// first convert the path to a full URL file path
-			ValueList a;
-			a.push_back(args.at(c));
-			SharedValue result = appURLToPath->Call(a);
-			const char *path = result->ToString();
-
-			logger->Debug("attempting to import worker script = %s",path);
-			KJSUtil::EvaluateFile(context, (char*)path);
+			std::string path(URLUtils::URLToPath(args.GetString(0)));
+			logger->Debug("Attempting to import worker script = %s", path.c_str());
+			KJSUtil::EvaluateFile(context, path.c_str());
 		}
 	}
-}	
+}

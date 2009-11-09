@@ -4,23 +4,50 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 
+#include "app_config.h"
+#include "window_config.h"
+#include "config_utils.h"
+#include "properties_binding.h"
+
+#include "Poco/RegularExpression.h"
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
 
-#include "app_config.h"
-#include "window_config.h"
-#include "config_utils.h"
-#include "Poco/RegularExpression.h"
-#include "Properties/properties_binding.h"
-
 using namespace ti;
-AppConfig *AppConfig::instance_ = NULL;
+
+static Logger* GetLogger()
+{
+	static Logger* logger = Logger::Get("App.AppConfig");
+	return logger;
+}
+
+AppConfig* AppConfig::Instance()
+{
+	static AppConfig* instance = 0;
+	if (!instance)
+	{
+		std::string configFilename(FileUtils::Join(
+			Host::GetInstance()->GetApplication()->path.c_str(),
+			CONFIG_FILENAME, 0));
+		GetLogger()->Debug("Loading config file: %s", configFilename.c_str());
+		if (!FileUtils::IsFile(configFilename))
+		{
+			GetLogger()->Critical("Cannot load config file: %s",
+				configFilename.c_str());
+			throw ValueException::FromFormat("Cannot load config file: %s",
+				configFilename.c_str());
+		}
+
+		instance = new AppConfig(configFilename);
+	}
+
+	return instance;
+}
 
 AppConfig::AppConfig(std::string& xmlfile)
 {
 	systemProperties = new PropertiesBinding();
-	instance_ = this;
 	error = NULL;
 	xmlParserCtxtPtr context = xmlNewParserCtxt();
 
@@ -171,7 +198,7 @@ WindowConfig* AppConfig::GetWindowByURL(std::string url)
 
 		regex.match(url, match);
 
-		if(match.length != 0)
+		if (match.length != 0)
 		{
 			return windows[i];
 		}

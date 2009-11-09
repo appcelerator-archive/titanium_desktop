@@ -33,7 +33,7 @@ namespace ti
 		SoupSession* session = webkit_get_default_session();
 		soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 
-		std::string webInspectorPath = host->GetRuntimePath();
+		std::string webInspectorPath(host->GetApplication()->runtime->path);
 		webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
 		webkit_titanium_set_inspector_url(webInspectorPath.c_str());
 	}
@@ -81,7 +81,7 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, KMethodRef cb)
 	{
 		AutoTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;

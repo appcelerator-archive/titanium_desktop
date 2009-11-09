@@ -6,10 +6,29 @@
 #include <kroll/kroll.h>
 #include "database_binding.h"
 #include "resultset_binding.h"
+#include "webkit_databases.h"
+
 #include <Poco/Data/AbstractBinding.h>
+#include <Poco/Data/RecordSet.h>
+#include <Poco/Data/MetaColumn.h>
+#include <Poco/Data/Statement.h>
+#include <Poco/Data/SessionFactory.h>
+#include <Poco/Data/SQLite/Connector.h>
+#include <Poco/Data/SQLite/SQLiteException.h>
+
+#include <Poco/File.h>
+
+using Poco::Data::Session;
+using Poco::Data::Statement;
+using Poco::Data::RecordSet;
+using Poco::Data::use;
+using Poco::Data::into;
+using Poco::Data::now;
 
 namespace ti
 {
+	static Logger* logger = Logger::Get("Database.DB");
+
 	/**
 	 * this is a class that manages Value to Data bindings
 	 * and manages the memory that needs to be created during the
@@ -19,7 +38,7 @@ namespace ti
 	class ValueBinding
 	{
 	public:
-		void convert (Statement &select, SharedValue arg)
+		void convert (Statement &select, KValueRef arg)
 		{
 			if (arg->IsString())
 			{
@@ -109,133 +128,76 @@ namespace ti
 		std::vector<bool*> bools;
 	};
 
-	DatabaseBinding::DatabaseBinding(Host *host) :
-		StaticBoundObject("Database"),
-		host(host),
-		database(NULL),
-		session(NULL)
+	static WebKitDatabases* GetWebKitDatabases()
+	{
+		static WebKitDatabases* databases = new WebKitDatabases();
+		return databases;
+	}
+
+	DatabaseBinding::DatabaseBinding(std::string& name, bool isWebKitDatabase) :
+		KAccessorObject("Database.DB"),
+		session(0),
+		name(name),
+		path(name),
+		isWebKitDatabase(isWebKitDatabase)
 	{
 		/**
 		 * @tiapi(method=True,name=Database.DB.execute,since=0.4) Executes an SQL query on the database.
 		 * @tiarg(for=Database.DB.execute,name=sql,type=String) the SQL query to execute.
 		 * @tiresult(for=Database.DB.execute,type=Database.ResultSet) returns a Database.ResultSet
 		 */
-		this->SetMethod("execute",&DatabaseBinding::Execute);
+		this->SetMethod("execute", &DatabaseBinding::Execute);
+
 		/**
 		 * @tiapi(method=True,name=Database.DB.close,since=0.4) Closes an open database
 		 */
-		this->SetMethod("close",&DatabaseBinding::Close);
+		this->SetMethod("close", &DatabaseBinding::Close);
+
 		/**
 		 * @tiapi(method=True,name=Database.DB.remove,since=0.4) Removes a database
 		 */
-		this->SetMethod("remove",&DatabaseBinding::Remove);
+		this->SetMethod("remove", &DatabaseBinding::Remove);
+
+		/**
+		 * @tiapi(method=True,name=Database.DB.getPath,since=0.8)
+		 * @tiapi Get the full filesystem path to the database.
+		 * @tiresult[String] the full fileystem path to the database.
+		 */
+		this->SetMethod("getPath", &DatabaseBinding::GetPath);
 
 		/**
 		 * @tiapi(property=True,name=Database.DB.lastInsertRowId) The row id of the last insert operation.
 		 */
 		this->SetInt("lastInsertRowId", 0);
-		
+
 		/**
 		 * @tiapi(property=True,name=Database.DB.rowsAffected) The number of rows affected by the last execute
 		 */
 		this->SetInt("rowsAffected", 0);
+
+		if (isWebKitDatabase)
+			this->path = GetWebKitDatabases()->Path(name);
+
+		session = new Session("SQLite", path);
 	}
+
 	DatabaseBinding::~DatabaseBinding()
 	{
-		if (database)
-		{
-			delete database;
-			database=NULL;
-		}
 		if (session)
-		{
 			delete session;
-			session = NULL;
-		}
 	}
-	std::string DatabaseBinding::GetSecurityOrigin(std::string &appid)
-	{
-		//this code is loosely based on:
-		//http://www.opensource.apple.com/darwinsource/Current/WebCore-5525.18.1/platform/SecurityOrigin.cpp
-		std::string origin = "app_"; // protocol which is app
-		origin+=appid; // host which is the appid
-		origin+="_0"; // port which is always 0
-		return origin;
-	}
-	void DatabaseBinding::Open(const ValueList& args, SharedValue result)
-	{
-		if (database)
-		{
-			delete database;
-			database = NULL;
-		}
-		if (session)
-		{
-			delete session;
-			session = NULL;
-		}
-		std::string appid = host->GetApplicationID();
-		std::string dbdir = FileUtils::GetApplicationDataDirectory(appid);
-		dbname = args.GetString(0, "unnamed");
-		origin = GetSecurityOrigin(appid);
 
-		static Logger* logger = Logger::Get("Database");
-		logger->Debug("appid=%s,dir=%s,dbname=%s,origin=%s",appid.c_str(),dbdir.c_str(),dbname.c_str(),origin.c_str());
-
-		database = new Databases(dbdir);
-		std::string path;
-		if (!database->Exists(origin,dbname))
-		{
-			path = database->Create(origin,dbname);
-		}
-		else
-		{
-			path = database->Path(origin,dbname);
-		}
-		session = new DBSession(path);
-	}
-	void DatabaseBinding::Convert(Statement &select, SharedValue arg, std::vector<SharedPtr <void*> >& mem)
+	void DatabaseBinding::Execute(const ValueList& args, KValueRef result)
 	{
-		if (arg->IsString())
-		{
-			std::string *s = new std::string(arg->ToString()); 
-			select , use(*s);
-		}
-		else if (arg->IsInt())
-		{
-			int *i = new int(arg->ToInt());
-			select , use(*i);
-		}
-		else if (arg->IsDouble())
-		{
-			double *d = new double(arg->ToDouble());
-			select , use(*d);
-		}
-		else if (arg->IsBool())
-		{
-			bool *b = new bool(arg->ToBool());
-			select , use(*b);
-		}
-		else
-		{
-			std::string msg = "Unsupported type for argument (";
-			msg.append(arg->GetType());
-			msg.append(")");
-			throw ValueException::FromString(msg);
-		}
-	}
-	void DatabaseBinding::Execute(const ValueList& args, SharedValue result)
-	{
-		if (database == NULL)
-		{
-			throw ValueException::FromString("no database opened");
-		}
-		std::string sql = args.at(0)->ToString();
+		args.VerifyException("execute", "s");
 
-		static Logger* logger = Logger::Get("Database");
-		logger->Debug("Execute called with %s",sql.c_str());
+		if (!session)
+			throw ValueException::FromString("Tried to call execute, but database was closed.");
+
+		std::string sql(args.GetString(0));
+		logger->Debug("Execute called with %s", sql.c_str());
 		
-		Statement select(session->GetSession());
+		Statement select(*this->session);
 		
 		try
 		{
@@ -248,13 +210,13 @@ namespace ti
 				
 				for (size_t c=1;c<args.size();c++)
 				{
-					SharedValue anarg = args.at(c);
+					KValueRef anarg = args.at(c);
 					if (anarg->IsList())
 					{
-						SharedKList list = anarg->ToList();
+						KListRef list = anarg->ToList();
 						for (size_t a=0;a<list->Size();a++)
 						{
-							SharedValue arg = list->At(a);
+							KValueRef arg = list->At(a);
 							binding.convert(select,arg);
 						}
 					}
@@ -271,7 +233,7 @@ namespace ti
 			this->SetInt("rowsAffected",count);
 
 			// get the row insert id
-			Statement ss(session->GetSession());
+			Statement ss(*this->session);
 			ss << "select last_insert_rowid()", now;
 			RecordSet rr(ss);
 			Poco::DynamicAny value = rr.value(0);
@@ -283,50 +245,57 @@ namespace ti
 			if (count > 0)
 			{
 				RecordSet rs(select);
-				SharedKObject r = new ResultSetBinding(rs);
+				KObjectRef r = new ResultSetBinding(rs);
 				result->SetObject(r);
 			}
 			else
 			{
-				SharedKObject r = new ResultSetBinding();
+				KObjectRef r = new ResultSetBinding();
 				result->SetObject(r);
 			}
 		}
 		catch (Poco::Data::DataException &e)
 		{
-			logger->Error("Exception executing: %s, Error was: %s",sql.c_str(),e.what());
+			logger->Error("Exception executing: %s, Error was: %s", sql.c_str(),
+				e.what());
 			throw ValueException::FromString(e.what());
 		}
 	}
-	void DatabaseBinding::Close(const ValueList& args, SharedValue result)
+
+	void DatabaseBinding::Close(const ValueList& args, KValueRef result)
 	{
-		static Logger* logger = Logger::Get("Database");
-		logger->Debug("Close database: %s",dbname.c_str());
+		logger->Debug("Closing database: %s", name.c_str());
+		this->Close();
+	}
+
+	void DatabaseBinding::Close()
+	{
 		if (session)
 		{
 			delete session;
-			session = NULL;
-		}
-		if (database)
-		{
-			delete database;
-			database = NULL;
+			session = 0;
 		}
 	}
-	void DatabaseBinding::Remove(const ValueList& args, SharedValue result)
+
+	void DatabaseBinding::GetPath(const ValueList& args, KValueRef result)
 	{
-		static Logger* logger = Logger::Get("Database");
-		logger->Debug("Remove database: %s",dbname.c_str());
-		if (session)
+		result->SetString(this->path);
+	}
+
+	void DatabaseBinding::Remove(const ValueList& args, KValueRef result)
+	{
+		this->Close();
+
+		if (isWebKitDatabase)
 		{
-			delete session;
-			session = NULL;
+			GetWebKitDatabases()->Delete(name);
 		}
-		if (database)
+		else
 		{
-			database->Delete(origin,dbname);
-			delete database;
-			database = NULL;
+			logger->Debug("Removing database file: %s", path.c_str());
+			Poco::File file(path);
+			if (file.canWrite())
+				file.remove();
 		}
 	}
 }

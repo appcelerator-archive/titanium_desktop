@@ -717,7 +717,7 @@ namespace ti
 
 	void OSXUserWindow::OpenChooserDialog(
 		bool files,
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -725,7 +725,7 @@ namespace ti
 		std::vector<std::string>& types,
 		std::string& typesDescription)
 	{
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 		[openDlg setTitle:[NSString stringWithUTF8String:title.c_str()]];
 		[openDlg setCanChooseFiles:files];
@@ -772,7 +772,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenFileChooserDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -786,7 +786,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenFolderChooserDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -800,7 +800,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenSaveAsDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		std::string& title,
 		std::string& path,
 		std::string& defaultName,
@@ -831,7 +831,7 @@ namespace ti
 
 		ValueList args;
 
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		if (runResult == NSFileHandlingPanelOKButton) 
 		{
 			NSString *selected = [sp filename];

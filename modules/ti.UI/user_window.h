@@ -35,101 +35,101 @@ namespace ti
 			virtual ~UserWindow();
 			void UpdateWindowForURL(std::string url);
 			void RegisterJSContext(JSGlobalContextRef);
-			void InsertAPI(SharedKObject frameGlobal);
-			void PageLoaded(SharedKObject scope, std::string &url, JSGlobalContextRef context);
+			void InsertAPI(KObjectRef frameGlobal);
+			void PageLoaded(KObjectRef scope, std::string &url, JSGlobalContextRef context);
 			AutoUserWindow CreateWindow(WindowConfig* config);
 			AutoUserWindow CreateWindow(std::string& url);
-			AutoUserWindow CreateWindow(SharedKObject properties);
-			inline SharedKObject GetDOMWindow() { return this->domWindow; }
+			AutoUserWindow CreateWindow(KObjectRef properties);
+			inline KObjectRef GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
 			bool IsToolWindow() {return this->config->IsToolWindow(); }
 			void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
 
-			void _GetCurrentWindow(const kroll::ValueList&, kroll::SharedValue);
-			void _GetDOMWindow(const kroll::ValueList&, kroll::SharedValue);
-			void _InsertAPI(const kroll::ValueList&, kroll::SharedValue);
-			void _Hide(const kroll::ValueList&, kroll::SharedValue);
-			void _Show(const kroll::ValueList&, kroll::SharedValue);
-			void _Minimize(const kroll::ValueList&, kroll::SharedValue);
-			void _Maximize(const kroll::ValueList&, kroll::SharedValue);
-			void _Unminimize(const kroll::ValueList&, kroll::SharedValue);
-			void _Unmaximize(const kroll::ValueList&, kroll::SharedValue);
-			void _IsMaximized(const kroll::ValueList&, kroll::SharedValue);
-			void _IsMinimized(const kroll::ValueList&, kroll::SharedValue);
-			void _Focus(const kroll::ValueList&, kroll::SharedValue);
-			void _Unfocus(const kroll::ValueList&, kroll::SharedValue);
-			void _IsUsingChrome(const kroll::ValueList&, kroll::SharedValue);
-			void _SetUsingChrome(const kroll::ValueList&, kroll::SharedValue);
-			void _IsToolWindow(const kroll::ValueList&, kroll::SharedValue);
-			void _SetToolWindow(const kroll::ValueList&, kroll::SharedValue);
-			void _IsUsingScrollbars(const kroll::ValueList&, kroll::SharedValue);
-			void _IsFullscreen(const kroll::ValueList&, kroll::SharedValue);
-			void _SetFullscreen(const kroll::ValueList&, kroll::SharedValue);
-			void _GetId(const kroll::ValueList&, kroll::SharedValue);
-			void _Open(const kroll::ValueList&, kroll::SharedValue);
-			void _Close(const kroll::ValueList&, kroll::SharedValue);
-			void _GetX(const kroll::ValueList&, kroll::SharedValue);
+			void _GetCurrentWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _GetDOMWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _InsertAPI(const kroll::ValueList&, kroll::KValueRef);
+			void _Hide(const kroll::ValueList&, kroll::KValueRef);
+			void _Show(const kroll::ValueList&, kroll::KValueRef);
+			void _Minimize(const kroll::ValueList&, kroll::KValueRef);
+			void _Maximize(const kroll::ValueList&, kroll::KValueRef);
+			void _Unminimize(const kroll::ValueList&, kroll::KValueRef);
+			void _Unmaximize(const kroll::ValueList&, kroll::KValueRef);
+			void _IsMaximized(const kroll::ValueList&, kroll::KValueRef);
+			void _IsMinimized(const kroll::ValueList&, kroll::KValueRef);
+			void _Focus(const kroll::ValueList&, kroll::KValueRef);
+			void _Unfocus(const kroll::ValueList&, kroll::KValueRef);
+			void _IsUsingChrome(const kroll::ValueList&, kroll::KValueRef);
+			void _SetUsingChrome(const kroll::ValueList&, kroll::KValueRef);
+			void _IsToolWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _SetToolWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _IsUsingScrollbars(const kroll::ValueList&, kroll::KValueRef);
+			void _IsFullscreen(const kroll::ValueList&, kroll::KValueRef);
+			void _SetFullscreen(const kroll::ValueList&, kroll::KValueRef);
+			void _GetId(const kroll::ValueList&, kroll::KValueRef);
+			void _Open(const kroll::ValueList&, kroll::KValueRef);
+			void _Close(const kroll::ValueList&, kroll::KValueRef);
+			void _GetX(const kroll::ValueList&, kroll::KValueRef);
 			double _GetX();
-			void _SetX(const kroll::ValueList&, kroll::SharedValue);
+			void _SetX(const kroll::ValueList&, kroll::KValueRef);
 			void _SetX(double x);
-			void _GetY(const kroll::ValueList&, kroll::SharedValue);
+			void _GetY(const kroll::ValueList&, kroll::KValueRef);
 			double _GetY();
-			void _SetY(const kroll::ValueList&, kroll::SharedValue);
+			void _SetY(const kroll::ValueList&, kroll::KValueRef);
 			void _SetY(double y);
-			void _GetWidth(const kroll::ValueList&, kroll::SharedValue);
+			void _GetWidth(const kroll::ValueList&, kroll::KValueRef);
 			double _GetWidth();
-			void _SetWidth(const kroll::ValueList&, kroll::SharedValue);
+			void _SetWidth(const kroll::ValueList&, kroll::KValueRef);
 			void _SetWidth(double width);
-			void _GetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMaxWidth(const kroll::ValueList&, kroll::SharedValue);
-			void _GetMinWidth(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMinWidth(const kroll::ValueList&, kroll::SharedValue);
-			void _GetHeight(const kroll::ValueList&, kroll::SharedValue);
+			void _GetMaxWidth(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMaxWidth(const kroll::ValueList&, kroll::KValueRef);
+			void _GetMinWidth(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMinWidth(const kroll::ValueList&, kroll::KValueRef);
+			void _GetHeight(const kroll::ValueList&, kroll::KValueRef);
 			double _GetHeight();
-			void _SetHeight(const kroll::ValueList&, kroll::SharedValue);
+			void _SetHeight(const kroll::ValueList&, kroll::KValueRef);
 			void _SetHeight(double height);
-			void _GetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMaxHeight(const kroll::ValueList&, kroll::SharedValue);
-			void _GetMinHeight(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMinHeight(const kroll::ValueList&, kroll::SharedValue);
-			void _GetBounds(const kroll::ValueList&, kroll::SharedValue);
-			void _SetBounds(const kroll::ValueList&, kroll::SharedValue);
-			void _GetTitle(const kroll::ValueList&, kroll::SharedValue);
-			void _SetTitle(const kroll::ValueList&, kroll::SharedValue);
-			void _GetURL(const kroll::ValueList&, kroll::SharedValue);
-			void _SetURL(const kroll::ValueList&, kroll::SharedValue);
-			void _IsResizable(const kroll::ValueList&, kroll::SharedValue);
-			void _SetResizable(const kroll::ValueList&, kroll::SharedValue);
-			void _IsMaximizable(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMaximizable(const kroll::ValueList&, kroll::SharedValue);
-			void _IsMinimizable(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMinimizable(const kroll::ValueList&, kroll::SharedValue);
-			void _IsCloseable(const kroll::ValueList&, kroll::SharedValue);
-			void _SetCloseable(const kroll::ValueList&, kroll::SharedValue);
-			void _IsVisible(const kroll::ValueList&, kroll::SharedValue);
-			void _IsActive(const kroll::ValueList&, kroll::SharedValue);
-			void _SetVisible(const kroll::ValueList&, kroll::SharedValue);
-			void _GetTransparency(const kroll::ValueList&, kroll::SharedValue);
-			void _SetTransparency(const kroll::ValueList&, kroll::SharedValue);
-			void _GetTransparencyColor(const kroll::ValueList&, kroll::SharedValue);
-			void _GetMenu(const kroll::ValueList&, kroll::SharedValue);
-			void _SetMenu(const kroll::ValueList&, kroll::SharedValue);
-			void _GetContextMenu(const kroll::ValueList&, kroll::SharedValue);
-			void _SetContextMenu(const kroll::ValueList&, kroll::SharedValue);
-			void _GetIcon(const kroll::ValueList&, kroll::SharedValue);
-			void _SetIcon(const kroll::ValueList&, kroll::SharedValue);
-			void _GetParent(const kroll::ValueList&, kroll::SharedValue);
-			void _GetChildren(const kroll::ValueList&, kroll::SharedValue);
-			void _CreateWindow(const kroll::ValueList&, kroll::SharedValue);
-			void _OpenFileChooserDialog(const ValueList& args, SharedValue result);
-			void _OpenFolderChooserDialog(const ValueList& args, SharedValue result);
-			void _OpenSaveAsDialog(const ValueList& args, SharedValue result);
-			void _IsTopMost(const kroll::ValueList&, kroll::SharedValue);
-			void _SetTopMost(const kroll::ValueList&, kroll::SharedValue);
-			virtual void _ShowInspector(const ValueList& args, SharedValue result);
+			void _GetMaxHeight(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMaxHeight(const kroll::ValueList&, kroll::KValueRef);
+			void _GetMinHeight(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMinHeight(const kroll::ValueList&, kroll::KValueRef);
+			void _GetBounds(const kroll::ValueList&, kroll::KValueRef);
+			void _SetBounds(const kroll::ValueList&, kroll::KValueRef);
+			void _GetTitle(const kroll::ValueList&, kroll::KValueRef);
+			void _SetTitle(const kroll::ValueList&, kroll::KValueRef);
+			void _GetURL(const kroll::ValueList&, kroll::KValueRef);
+			void _SetURL(const kroll::ValueList&, kroll::KValueRef);
+			void _IsResizable(const kroll::ValueList&, kroll::KValueRef);
+			void _SetResizable(const kroll::ValueList&, kroll::KValueRef);
+			void _IsMaximizable(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMaximizable(const kroll::ValueList&, kroll::KValueRef);
+			void _IsMinimizable(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMinimizable(const kroll::ValueList&, kroll::KValueRef);
+			void _IsCloseable(const kroll::ValueList&, kroll::KValueRef);
+			void _SetCloseable(const kroll::ValueList&, kroll::KValueRef);
+			void _IsVisible(const kroll::ValueList&, kroll::KValueRef);
+			void _IsActive(const kroll::ValueList&, kroll::KValueRef);
+			void _SetVisible(const kroll::ValueList&, kroll::KValueRef);
+			void _GetTransparency(const kroll::ValueList&, kroll::KValueRef);
+			void _SetTransparency(const kroll::ValueList&, kroll::KValueRef);
+			void _GetTransparencyColor(const kroll::ValueList&, kroll::KValueRef);
+			void _GetMenu(const kroll::ValueList&, kroll::KValueRef);
+			void _SetMenu(const kroll::ValueList&, kroll::KValueRef);
+			void _GetContextMenu(const kroll::ValueList&, kroll::KValueRef);
+			void _SetContextMenu(const kroll::ValueList&, kroll::KValueRef);
+			void _GetIcon(const kroll::ValueList&, kroll::KValueRef);
+			void _SetIcon(const kroll::ValueList&, kroll::KValueRef);
+			void _GetParent(const kroll::ValueList&, kroll::KValueRef);
+			void _GetChildren(const kroll::ValueList&, kroll::KValueRef);
+			void _CreateWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _OpenFileChooserDialog(const ValueList& args, KValueRef result);
+			void _OpenFolderChooserDialog(const ValueList& args, KValueRef result);
+			void _OpenSaveAsDialog(const ValueList& args, KValueRef result);
+			void _IsTopMost(const kroll::ValueList&, kroll::KValueRef);
+			void _SetTopMost(const kroll::ValueList&, kroll::KValueRef);
+			virtual void _ShowInspector(const ValueList& args, KValueRef result);
 
 			virtual void OpenFileChooserDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				bool multiple,
 				std::string& title,
 				std::string& path,
@@ -138,14 +138,14 @@ namespace ti
 				std::string& typesDescription) = 0;
 	
 			virtual void OpenFolderChooserDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				bool multiple,
 				std::string& title,
 				std::string& path,
 				std::string& defaultName) = 0;
 	
 			virtual void OpenSaveAsDialog(
-				SharedKMethod callback,
+				KMethodRef callback,
 				std::string& title,
 				std::string& path,
 				std::string& defaultName,
@@ -225,19 +225,20 @@ namespace ti
 		protected:
 			Logger* logger;
 			AutoUIBinding binding;
-			SharedKObject domWindow;
+			KObjectRef domWindow;
 			Host* host;
-			WindowConfig *config;
+			WindowConfig* config;
 			AutoUserWindow parent;
 			std::vector<AutoUserWindow> children;
-			long next_listener_id;
 			bool active;
 			bool initialized;
+			std::string iconURL;
+
 			virtual AutoUserWindow GetParent();
 			virtual void AddChild(AutoUserWindow);
 			virtual void RemoveChild(AutoUserWindow);
 			void ReadChooserDialogObject(
-				SharedKObject o,
+				KObjectRef o,
 				bool& multiple,
 				std::string& title,
 				std::string& path,

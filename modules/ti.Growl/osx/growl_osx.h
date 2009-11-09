@@ -18,13 +18,13 @@ namespace ti {
 		TiGrowlDelegate *delegate;
 
 	public:
-		GrowlOSX(SharedKObject global);
+		GrowlOSX(KObjectRef global);
 		virtual ~GrowlOSX();
 
 		void CopyToApp(kroll::Host *host, kroll::Module *module);
 		virtual void ShowNotification(std::string& title,
 			std::string& description, std::string& iconURL,
-			int notification_delay, SharedKMethod callback);
+			int notification_delay, KMethodRef callback);
 		virtual bool IsRunning();
 	};
 }

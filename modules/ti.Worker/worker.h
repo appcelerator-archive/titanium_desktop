@@ -22,14 +22,14 @@ namespace ti
 	class Worker : public KEventObject
 	{
 	public:
-		Worker(Host *host, kroll::SharedKObject global, std::string& code);
+		Worker(Host *host, kroll::KObjectRef global, std::string& code);
 		virtual ~Worker();
 
 		inline JSObjectRef GetGlobalObject() { return global_object; }
 
 	private:
 		kroll::Host *host;
-		kroll::SharedKObject global;
+		kroll::KObjectRef global;
 		JSObjectRef global_object;
 		std::string code;
 		bool stopped;
@@ -39,15 +39,15 @@ namespace ti
 		Poco::Condition condition;
 		Poco::Mutex condmutex;
 		Poco::Mutex mutex;
-		std::list<SharedValue> messages;
-		kroll::SharedKObject context;
+		std::list<KValueRef> messages;
+		kroll::KObjectRef context;
 
 		void Run();
-		void Bound(const char *name, SharedValue value);
-		void Start(const ValueList& args, SharedValue result);
-		void Terminate(const ValueList& args, SharedValue result);
-		void PostMessage(const ValueList& args, SharedValue result);
-		void CallOnMessageCallback(SharedKMethod onMessage, SharedValue message);
+		void Bound(const char *name, KValueRef value);
+		void Start(const ValueList& args, KValueRef result);
+		void Terminate(const ValueList& args, KValueRef result);
+		void PostMessage(const ValueList& args, KValueRef result);
+		void CallOnMessageCallback(KMethodRef onMessage, KValueRef message);
 
 	};
 }

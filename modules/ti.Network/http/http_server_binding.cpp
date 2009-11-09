@@ -54,7 +54,7 @@ namespace ti
 		KR_DUMP_LOCATION
 		Close();
 	}
-	void HTTPServerBinding::Bind(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::Bind(const ValueList& args, KValueRef result)
 	{
 		Close();
 		
@@ -97,11 +97,11 @@ namespace ti
 		}
 		this->callback = NULL;
 	}
-	void HTTPServerBinding::Close(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::Close(const ValueList& args, KValueRef result)
 	{
 		Close();
 	}
-	void HTTPServerBinding::IsClosed(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::IsClosed(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->connection==NULL);
 	}

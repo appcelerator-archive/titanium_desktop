@@ -6,7 +6,7 @@
 #include "../ui_module.h"
 namespace ti
 {
-	OSXTrayItem::OSXTrayItem(std::string& iconURL, SharedKMethod cb) :
+	OSXTrayItem::OSXTrayItem(std::string& iconURL, KMethodRef cb) :
 		TrayItem(iconURL),
 		nativeMenu(0),
 		menu(0),

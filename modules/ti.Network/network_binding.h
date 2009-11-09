@@ -31,7 +31,7 @@ namespace ti
 	class NetworkBinding : public StaticBoundObject
 	{
 	public:
-		NetworkBinding(Host*,std::string);
+		NetworkBinding(Host*);
 		virtual ~NetworkBinding();
 
 		bool HasNetworkStatusListeners();
@@ -41,12 +41,11 @@ namespace ti
 
 	private:
 		Host* host;
-		std::string modulePath;
-		SharedKObject global;
+		KObjectRef global;
 
 		struct Listener
 		{
-			SharedKMethod callback;
+			KMethodRef callback;
 			long id;
 		};
 		std::vector<Listener> listeners;
@@ -57,24 +56,24 @@ namespace ti
 		NetworkStatus *net_status;
 #endif
 
-		void CreateIPAddress(const ValueList& args, SharedValue result);
-		void CreateTCPSocket(const ValueList& args, SharedValue result);
-		void CreateIRCClient(const ValueList& args, SharedValue result);
-		void CreateHTTPClient(const ValueList& args, SharedValue result);
-		void CreateHTTPServer(const ValueList& args, SharedValue result);
-		void CreateHTTPCookie(const ValueList& args, SharedValue result);
-		void EncodeURIComponent(const ValueList &args, SharedValue result);
-		void DecodeURIComponent(const ValueList &args, SharedValue result);
-		void _GetByHost(std::string host, SharedValue result);
-		void GetHostByName(const ValueList& args, SharedValue result);
-		void GetHostByAddress(const ValueList& args, SharedValue result);
-		void AddConnectivityListener(const ValueList& args, SharedValue result);
-		void RemoveConnectivityListener(const ValueList& args, SharedValue result);
-		void FireOnlineStatusChange(const ValueList& args, SharedValue result);
-		void SetHTTPProxy(const ValueList& args, SharedValue result);
-		void SetHTTPSProxy(const ValueList& args, SharedValue result);
-		void GetHTTPProxy(const ValueList& args, SharedValue result);
-		void GetHTTPSProxy(const ValueList& args, SharedValue result);
+		void CreateIPAddress(const ValueList& args, KValueRef result);
+		void CreateTCPSocket(const ValueList& args, KValueRef result);
+		void CreateIRCClient(const ValueList& args, KValueRef result);
+		void CreateHTTPClient(const ValueList& args, KValueRef result);
+		void CreateHTTPServer(const ValueList& args, KValueRef result);
+		void CreateHTTPCookie(const ValueList& args, KValueRef result);
+		void EncodeURIComponent(const ValueList &args, KValueRef result);
+		void DecodeURIComponent(const ValueList &args, KValueRef result);
+		void _GetByHost(std::string host, KValueRef result);
+		void GetHostByName(const ValueList& args, KValueRef result);
+		void GetHostByAddress(const ValueList& args, KValueRef result);
+		void AddConnectivityListener(const ValueList& args, KValueRef result);
+		void RemoveConnectivityListener(const ValueList& args, KValueRef result);
+		void FireOnlineStatusChange(const ValueList& args, KValueRef result);
+		void SetHTTPProxy(const ValueList& args, KValueRef result);
+		void SetHTTPSProxy(const ValueList& args, KValueRef result);
+		void GetHTTPProxy(const ValueList& args, KValueRef result);
+		void GetHTTPSProxy(const ValueList& args, KValueRef result);
 	};
 }
 

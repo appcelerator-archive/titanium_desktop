@@ -17,7 +17,7 @@ using namespace ti;
 namespace ti
 {
 
-	GrowlOSX::GrowlOSX(SharedKObject global) :
+	GrowlOSX::GrowlOSX(KObjectRef global) :
 		GrowlBinding(global)
 	{
 		//Delegate will have a retain count of one from the alloc init.
@@ -30,7 +30,7 @@ namespace ti
 	}
 
 	void GrowlOSX::ShowNotification(std::string& title, std::string& description,
-		std::string& iconURL, int notification_delay, SharedKMethod callback)
+		std::string& iconURL, int notification_delay, KMethodRef callback)
 	{
 		std::string myIconURL = iconURL;
 		NSData *iconData = nil;
@@ -51,7 +51,7 @@ namespace ti
 		}
 
 		//NSMutableArray* clickContext = [[NSMutableArray alloc] init];
-		//[clickContext addObject:[[MethodWrapper alloc] initWithMethod:new SharedKMethod(callback)]];
+		//[clickContext addObject:[[MethodWrapper alloc] initWithMethod:new KMethodRef(callback)]];
 
 		const char* titleCString = title.c_str();
 		NSString * titleString = nil;
@@ -82,18 +82,19 @@ namespace ti
 
 	void GrowlOSX::CopyToApp(kroll::Host *host, kroll::Module *module)
 	{
-		std::string dir = host->GetApplicationHomePath() + KR_PATH_SEP + "Contents" +
-			KR_PATH_SEP + "Frameworks" + KR_PATH_SEP + "Growl.framework";
+		std::string appPath(host->GetApplication()->path);
+		std::string frameworkPath(FileUtils::Join(appPath.c_str(),
+			"Contents", "Frameworks", "Growl.framework", 0));
 
-		if (!FileUtils::IsDirectory(dir))
+		if (!FileUtils::IsDirectory(frameworkPath))
 		{
 			NSFileManager *fm = [NSFileManager defaultManager];
 			NSString *src = [NSString stringWithFormat:@"%s/Resources/Growl.framework", module->GetPath().c_str()];
-			NSString *dest = [NSString stringWithFormat:@"%s/Contents/Frameworks", host->GetApplicationHomePath().c_str()];
+			NSString *dest = [NSString stringWithFormat:@"%s/Contents/Frameworks", appPath.c_str()];
 			[fm copyPath:src toPath:dest handler:nil];
 
 			src = [NSString stringWithFormat:@"%s/Resources/Growl Registration Ticket.growlRegDict", module->GetPath().c_str()];
-			dest = [NSString stringWithFormat:@"%s/Contents/Resources", host->GetApplicationHomePath().c_str()];
+			dest = [NSString stringWithFormat:@"%s/Contents/Resources", appPath.c_str()];
 			[fm copyPath:src toPath:dest handler:nil];
 		}
 	}

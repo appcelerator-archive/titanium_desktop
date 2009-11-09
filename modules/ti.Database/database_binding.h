@@ -8,33 +8,30 @@
 #define _DATABASE_BINDING_H_
 
 #include <kroll/kroll.h>
-#include "databases.h"
-#include "db_session.h"
+#include "webkit_databases.h"
+#include <Poco/Data/Session.h>
+#include <Poco/Data/Statement.h>
 
 namespace ti
 {
-	class DatabaseBinding : public StaticBoundObject
+	class DatabaseBinding : public KAccessorObject
 	{
 	public:
-		DatabaseBinding(Host*);
+		DatabaseBinding(std::string& name, bool isWebKitDatabase);
+
 	protected:
 		virtual ~DatabaseBinding();
-	private:
-		Host* host;
-		Databases *database;
-		DBSession *session;
-		std::string dbname;
-		std::string origin;
-		
-		std::string GetSecurityOrigin(std::string &appid);
-		void Convert(Statement &select, SharedValue arg, std::vector<SharedPtr <void*> >& mem);
+		void Open(const ValueList& args, KValueRef result);
+		void Execute(const ValueList& args, KValueRef result);
+		void Close(const ValueList& args, KValueRef result);
+		void Remove(const ValueList& args, KValueRef result);
+		void GetPath(const ValueList& args, KValueRef result);
+		void Close();
 
-		void Open(const ValueList& args, SharedValue result);
-		void Execute(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void Remove(const ValueList& args, SharedValue result);
-		
-		friend class DatabaseModule;
+		Poco::Data::Session *session;
+		std::string name;
+		std::string path;
+		bool isWebKitDatabase;
 	};
 }
 

@@ -9,18 +9,8 @@
 #import "osx_ui_binding.h"
 #import "osx_menu_item.h"
 
-static TiApplicationDelegate *tiAppInstance = NULL;
-
 @implementation TiApplicationDelegate
-+(TiApplicationDelegate*)instance
-{
-	return tiAppInstance;
-}
-+(NSString*)appID
-{
-	AppConfig *config = AppConfig::Instance();
-	return [NSString stringWithUTF8String:config->GetAppID().c_str()];
-}
+
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
 	AutoPtr<OSXMenu> menu = binding->GetDockMenu().cast<OSXMenu>();
@@ -31,15 +21,48 @@ static TiApplicationDelegate *tiAppInstance = NULL;
 		return nil;
 	}
 }
+
 - (id)initWithBinding:(ti::OSXUIBinding*)b
 {
 	self = [super init];
 	if (self)
 	{
 		binding = b;
-		tiAppInstance = self;
 	}
 	return self;
 }
+
+-(BOOL)application:(NSApplication*)theApplication openFile:(NSString*)filename
+{
+	AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
+	AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
+
+	KListRef files(new StaticBoundList());
+	files->Append(Value::NewString([filename UTF8String]));
+	event->SetList("files", files);
+
+	globalObject->FireEvent(event);
+	return YES;
+}
+
+-(BOOL)application:(NSApplication*)theApplication openFiles:(NSArray*)filenames
+{
+	AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
+	AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
+
+	KListRef files(new StaticBoundList());
+
+	int arrayCount = [filenames count];
+	for (int i = 0; i < arrayCount; i++)
+	{
+		files->Append(Value::NewString(
+			[[filenames objectAtIndex:i] UTF8String]));
+	}
+	event->SetList("files", files);
+
+	globalObject->FireEvent(event);
+	return YES;
+}
+
 @end
 

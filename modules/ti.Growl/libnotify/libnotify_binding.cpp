@@ -12,10 +12,11 @@
 namespace ti
 {
 
-	LibNotifyBinding::LibNotifyBinding(SharedKObject global) :
+	LibNotifyBinding::LibNotifyBinding(KObjectRef global) :
 		GrowlBinding(global)
 	{
-		notify_init(LibNotifyBinding::GetAppName().c_str());
+		std::string& appName = Host::GetInstance()->GetApplication()->name;
+		notify_init(appName.c_str());
 	}
 
 	LibNotifyBinding::~LibNotifyBinding()
@@ -32,7 +33,7 @@ namespace ti
 		std::string& description,
 		std::string& iconURL,
 		int notification_timeout,
-		SharedKMethod callback)
+		KMethodRef callback)
 	{
 		std::string iconPath = "";
 		if (!iconURL.empty())
@@ -50,23 +51,4 @@ namespace ti
 		notify_notification_show(n, NULL);
 		g_object_unref(G_OBJECT(n));
 	}
-
-	std::string LibNotifyBinding::GetAppName()
-	{
-		SharedValue meth_val = global->GetNS("App.getName");
-		if (!meth_val->IsMethod())
-			return "";
-
-		SharedKMethod meth = meth_val->ToMethod();
-		SharedValue out_val = meth->Call(ValueList());
-		if (out_val->IsString())
-		{
-			return std::string(out_val->ToString());
-		}
-		else
-		{
-			return "";
-		}
-	}
-
 }

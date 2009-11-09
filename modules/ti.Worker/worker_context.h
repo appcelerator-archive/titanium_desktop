@@ -23,24 +23,24 @@ namespace ti
 	class WorkerContext : public KEventObject
 	{
 	public:
-		WorkerContext(Host *host, SharedKObject worker);
+		WorkerContext(Host *host, KObjectRef worker);
 		virtual ~WorkerContext();
 		void Terminate();
 		void Yield();
 
 	private:
 		Host *host;
-		SharedKObject worker;
-		std::list<SharedValue> messages;
+		KObjectRef worker;
+		std::list<KValueRef> messages;
 		Poco::Mutex mutex;
 		Poco::Condition condition;
 		Poco::Mutex condmutex;
 
 		void SendQueuedMessages();
-		void PostMessage(const ValueList &args, SharedValue result);
-		void ImportScripts(const ValueList &args, SharedValue result);
-		void Sleep(const ValueList &args, SharedValue result);
-		void CallOnMessageCallback(SharedKMethod onMessage, SharedValue message);
+		void PostMessage(const ValueList &args, KValueRef result);
+		void ImportScripts(const ValueList &args, KValueRef result);
+		void Sleep(const ValueList &args, KValueRef result);
+		void CallOnMessageCallback(KMethodRef onMessage, KValueRef message);
 
 		friend class Worker;
 	};

@@ -20,32 +20,32 @@ namespace ti
 		NativePipe(bool isReader);
 		~NativePipe();
 		void StartMonitor();
-		void StartMonitor(SharedKMethod readCallback);
+		void StartMonitor(KMethodRef readCallback);
 		virtual void StopMonitors();
-		virtual int Write(AutoBlob blob);
+		virtual int Write(BlobRef blob);
 		void PollForWriteIteration();
 		virtual void Close();
 		virtual void CloseNative();
 		virtual void CloseNativeRead() = 0;
 		virtual void CloseNativeWrite() = 0;
-		inline void SetReadCallback(SharedKMethod cb) { this->readCallback = cb; }
+		inline void SetReadCallback(KMethodRef cb) { this->readCallback = cb; }
 
 	protected:
 		bool closed;
 		bool isReader;
-		std::vector<SharedKObject> attachedObjects;
+		std::vector<KObjectRef> attachedObjects;
 		Poco::RunnableAdapter<NativePipe>* writeThreadAdapter;
 		Poco::RunnableAdapter<NativePipe>* readThreadAdapter;
 		Poco::Thread writeThread;
 		Poco::Thread readThread;
-		SharedKMethod readCallback;
+		KMethodRef readCallback;
 		Logger* logger;
 		Poco::Mutex buffersMutex;
-		std::queue<AutoBlob> buffers;
+		std::queue<BlobRef> buffers;
 
 		void PollForReads();
 		void PollForWrites();
-		virtual void RawWrite(AutoBlob blob);
+		virtual void RawWrite(BlobRef blob);
 		virtual int RawRead(char *buffer, int size) = 0;
 		virtual int RawWrite(const char *buffer, int size) = 0;
 	};

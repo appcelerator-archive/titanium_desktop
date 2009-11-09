@@ -10,7 +10,7 @@ namespace ti
 	class OSXTrayItem: public TrayItem
 	{
 	public:
-		OSXTrayItem(std::string& iconURL, SharedKMethod cb);
+		OSXTrayItem(std::string& iconURL, KMethodRef cb);
 		virtual ~OSXTrayItem();
 
 		void SetIcon(std::string& iconPath);
@@ -22,7 +22,7 @@ namespace ti
 	private:
 		NSMenu* nativeMenu;
 		AutoPtr<OSXMenu> menu;
-		SharedKMethod callback;
+		KMethodRef callback;
 		NSStatusItem* nativeItem;
 	};
 }

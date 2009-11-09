@@ -200,7 +200,7 @@ namespace ti
 		}
 	}
 
-	void OSXMenuItem::HandleClickEvent(SharedKObject source)
+	void OSXMenuItem::HandleClickEvent(KObjectRef source)
 	{
 		MenuItem::HandleClickEvent(source);
 	}

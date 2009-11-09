@@ -94,11 +94,13 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			self.error('Missing content length')
 		length = int( self.headers['content-length'] )
 		data = self.rfile.read(length)
-		print "Got data: %s" % data
-		if data == 'here is some text for you!':
+		expected_data = 'here is some text for you!'
+		print "Got data: '%s' length=%i expected: '%s' length=%i " %  \
+			(data, len(data), expected_data, len(expected_data))
+		if data == expected_data:
 			self.send_text('I got it!')
 		else:
-			self.error('Invalid data: %s' % data)
+			self.error('Invalid data: \'%s\'' % data)
 
 	def recv_file(self):
 		correct_text = """Just some test text that will be sent
