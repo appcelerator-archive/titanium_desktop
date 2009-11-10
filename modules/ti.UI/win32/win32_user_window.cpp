@@ -1088,9 +1088,10 @@ KListRef Win32UserWindow::SelectFile(
 	ofn.lpstrInitialDir = (LPWSTR) (pathW.length() == 0 ? NULL : pathW.c_str());
 	ofn.Flags = OFN_EXPLORER;
 
+	std::wstring titleW;
 	if (!title.empty())
 	{
-		std::wstring titleW = ::UTF8ToWide(title);
+		titleW = ::UTF8ToWide(title);
 		ofn.lpstrTitle = titleW.c_str();
 	}
 
