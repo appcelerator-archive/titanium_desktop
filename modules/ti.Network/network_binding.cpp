@@ -388,35 +388,22 @@ namespace ti
 		}
 	}
 
-	static SharedProxy ArgumentsToProxy(const ValueList& args, const std::string& defaultPrefix)
+	static SharedProxy ArgumentsToProxy(const ValueList& args, const std::string& scheme)
 	{
 		if (args.at(0)->IsNull())
 			return 0;
 
-		std::string host(args.GetString(0));
-		if (host.empty())
+		std::string entry(args.GetString(0));
+		if (entry.empty())
 			return 0;
 
-		if (host.find("://") == std::string::npos)
-			host = defaultPrefix + host;
-
-		SharedProxy proxy = new Proxy;
-		try
-		{
-			proxy->info = new Poco::URI(host);
-		}
-		catch (...)
-		{
-			throw ValueException::FromFormat("Could not parse proxy URL: %s", host.c_str());
-		}
-
-		return proxy;
+		return ProxyConfig::ParseProxyEntry(entry, scheme, scheme);
 	}
 
 	void NetworkBinding::SetHTTPProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPProxy", "s|0 ?s s s");
-		SharedProxy proxy = ArgumentsToProxy(args, "http://");
+		SharedProxy proxy = ArgumentsToProxy(args, "http");
 		ProxyConfig::SetHTTPProxyOverride(proxy);
 	}
 
@@ -427,13 +414,13 @@ namespace ti
 		if (proxy.isNull())
 			result->SetNull();
 		else
-			result->SetString(proxy->info->toString().c_str());
+			result->SetString(proxy->ToString().c_str());
 	}
 
 	void NetworkBinding::SetHTTPSProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPSProxy", "s|0 ?s s s");
-		SharedProxy proxy = ArgumentsToProxy(args, "https://");
+		SharedProxy proxy = ArgumentsToProxy(args, "https");
 		ProxyConfig::SetHTTPSProxyOverride(proxy);
 	}
 
@@ -444,7 +431,7 @@ namespace ti
 		if (proxy.isNull())
 			result->SetNull();
 		else
-			result->SetString(proxy->info->toString().c_str());
+			result->SetString(proxy->ToString().c_str());
 	}
 
 	Host* NetworkBinding::GetHost()

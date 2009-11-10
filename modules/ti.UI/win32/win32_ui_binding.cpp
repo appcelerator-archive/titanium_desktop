@@ -6,6 +6,7 @@
 #include "../ui_module.h"
 #define _WINSOCKAPI_
 #include <cstdlib>
+#include <sstream>
 
 using std::vector;
 namespace ti
@@ -334,26 +335,25 @@ namespace ti
 	/*static*/
 	void Win32UIBinding::SetProxyForURL(std::string& url)
 	{
-		SharedPtr<Proxy> proxy = ProxyConfig::GetProxyForURL(url);
+		SharedPtr<Proxy> proxy(ProxyConfig::GetProxyForURL(url));
 		if (!proxy.isNull())
 		{
-			// We make a copy of the URI here so that we can  modify it 
-			// without worrying about changing a potentially global one.
-			Poco::URI proxyURI(*proxy->info);
-			Poco::URI uri = Poco::URI(url);
-			proxyURI.setScheme(uri.getScheme());
+			std::stringstream proxyEnv;
+			if (proxy->type == HTTP)
+				proxyEnv << "http_proxy=http://";
+			else if (proxy->type = HTTPS)
+				proxyEnv << "HTTPS_PROXY=https://";
 
-			std::string proxyEnv;
-			if (proxyURI.getScheme() == "http")
-			{
-				proxyEnv.append("http_proxy=");
-			}
-			else if (proxyURI.getScheme() == "https")
-			{
-				proxyEnv.append("HTTPS_PROXY=");
-			}
-			proxyEnv.append(proxyURI.toString());
-			_putenv(proxyEnv.c_str());
+			if (!proxy->username.empty() || !proxy->password.empty())
+				proxyEnv << proxy->username << ":" << proxy->password << "@";
+
+			proxyEnv << proxy->host;
+
+			if (proxy->port != 0)
+				proxyEnv << ":" << proxy->port;
+
+			std::string proxyEnvStr(proxyEnv.str());
+			_putenv(proxyEnvStr.c_str());
 		}
 	}
 

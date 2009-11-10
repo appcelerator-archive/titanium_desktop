@@ -989,8 +989,8 @@ namespace ti
 		if (proxy.isNull())
 			return;
 
-		SET_CURL_OPTION(curlHandle, CURLOPT_PROXY, proxy->info->getHost().c_str());
-		SET_CURL_OPTION(curlHandle, CURLOPT_PROXYPORT, proxy->info->getPort());
+		std::string proxyString(proxy->ToString());
+		SET_CURL_OPTION(curlHandle, CURLOPT_PROXY, proxyString.c_str());
 	}
 
 	void HTTPClientBinding::ExecuteRequest()
