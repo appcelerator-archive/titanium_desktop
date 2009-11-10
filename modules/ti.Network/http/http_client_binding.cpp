@@ -9,14 +9,15 @@
 #include <kroll/thread_manager.h>
 #include <sstream>
 
-#define SET_CURL_OPTION(handle, option, value) {\
-	CURLcode result = curl_easy_setopt(handle, option, value); \
-	if (CURLE_OK != result) \
-	{ \
-		GetLogger()->Error("Failed to set cURL handle option ("#option"): %s", \
-			curl_easy_strerror(result)); \
-	} \
-}
+#define SET_CURL_OPTION(handle, option, value) \
+	{\
+		CURLcode result = curl_easy_setopt(handle, option, value); \
+		if (CURLE_OK != result) \
+		{ \
+			GetLogger()->Error("Failed to set cURL handle option ("#option"): %s", \
+				curl_easy_strerror(result)); \
+		} \
+	}
 
 using Poco::Net::NameValueCollection;
 
@@ -989,8 +990,32 @@ namespace ti
 		if (proxy.isNull())
 			return;
 
-		std::string proxyString(proxy->ToString());
-		SET_CURL_OPTION(curlHandle, CURLOPT_PROXY, proxyString.c_str());
+		if (proxy->type == SOCKS)
+		{
+			SET_CURL_OPTION(curlHandle, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+		}
+		else
+		{
+			SET_CURL_OPTION(curlHandle, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+		}
+
+		SET_CURL_OPTION(curlHandle, CURLOPT_PROXY, proxy->host.c_str());
+		if (proxy->port != 0)
+		{
+			SET_CURL_OPTION(curlHandle, CURLOPT_PROXYPORT, proxy->port);
+		}
+
+		if (!proxy->username.empty() || !proxy->password.empty())
+		{
+			// We are allowing any sort of authentication. This may not be the fastest
+			// method, but at least the request will succeed.
+			std::string proxyAuthString(proxy->username);
+			proxyAuthString.append(":");
+			proxyAuthString.append(proxy->password.c_str());
+
+			SET_CURL_OPTION(curlHandle, CURLOPT_PROXYUSERPWD, proxyAuthString.c_str());
+			SET_CURL_OPTION(curlHandle, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+		}
 	}
 
 	void HTTPClientBinding::ExecuteRequest()
