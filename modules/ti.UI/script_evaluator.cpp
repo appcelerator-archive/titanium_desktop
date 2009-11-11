@@ -14,8 +14,8 @@ namespace ti
 	{
 		static AutoPtr<ScriptEvaluator> instance(new ScriptEvaluator());
 #if defined(OS_OSX)
-		//[WebScriptElement addScriptEvaluator:[[OSXScriptEvaluator alloc]
-		//	initWithEvaluator:instance.get()]];
+		[WebScriptElement addScriptEvaluator:[[OSXScriptEvaluator alloc]
+			initWithEvaluator:instance.get()]];
 #elif defined(OS_WIN32)
 		addScriptEvaluator(instance.get());
 #elif defined(OS_LINUX)

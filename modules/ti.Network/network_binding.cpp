@@ -403,7 +403,7 @@ namespace ti
 	void NetworkBinding::SetHTTPProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPProxy", "s|0 ?s s s");
-		SharedProxy proxy = ArgumentsToProxy(args, "http");
+		SharedProxy proxy(ArgumentsToProxy(args, "http"));
 		ProxyConfig::SetHTTPProxyOverride(proxy);
 	}
 
@@ -420,7 +420,7 @@ namespace ti
 	void NetworkBinding::SetHTTPSProxy(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setHTTPSProxy", "s|0 ?s s s");
-		SharedProxy proxy = ArgumentsToProxy(args, "https");
+		SharedProxy proxy(ArgumentsToProxy(args, "https"));
 		ProxyConfig::SetHTTPSProxyOverride(proxy);
 	}
 
