@@ -1048,8 +1048,14 @@ KListRef Win32UserWindow::SelectFile(
 	if (types.size() > 0)
 	{
 		//"All\0*.*\0Test\0*.TXT\0";
+		if (typesDescription.size() == 0)
+		{
+			// Reasonable default?
+			typesDescriptionW = L"Selected Files";
+		}
 		filter.append(typesDescriptionW);
 		filter.push_back(L'\0');
+		
 		for (int i = 0; i < types.size(); i++)
 		{
 			std::string type = types.at(i);
@@ -1240,7 +1246,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 	const wchar_t *s, std::vector<std::string> &tokens)
 {
 	std::string token;
-
+	
 	// input string is expected to be composed of single-NULL-separated tokens, and double-NULL terminated
 	int i = 0;
 	while (true)
@@ -1249,7 +1255,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 
 		c = s[i++];
 
-		if (c == '\0')
+		if (c == L'\0')
 		{
 			// finished reading a token, save it in tokens vectory
 			tokens.push_back(token);
@@ -1258,7 +1264,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 			c = s[i]; // don't increment index because next token loop needs to read this char again
 
 			// if next char is NULL, then break out of the while loop
-			if (c == '\0')
+			if (c == L'\0')
 			{
 				break; // out of while loop
 			}
