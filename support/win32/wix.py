@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import os, sys, string, shutil
-import uuid, simplejson, re
-import tempfile, subprocess
+import uuid, re, tempfile, subprocess
 import PyRTF
 
 support_dir = os.path.abspath(os.path.dirname(__file__))
@@ -374,9 +373,14 @@ def create_installer(builder):
 	tmpfile.close()
 	
 	wix_dir = os.path.join("C:\\", "Program Files", "Windows Installer XML v3", "bin")
+	if not os.path.exists(wix_dir):
+		wix_dir = os.path.join("C:\\", "Program Files (x86)", "Windows Installer XML v3", "bin")
+	if not os.path.exists(wix_dir):
+		print >>sys.stderr, "Error: Couldn't find WiX v3 installation dir for creating installer"
+		sys.exit(-1)
+
 	candle = os.path.join(wix_dir, "candle.exe")
 	light = os.path.join(wix_dir, "light.exe")
-	
 	run_command([candle, wxsname, "-out", wxsname+".wixobj"])
 	run_command([light, wxsname+".wixobj", "-ext", "WixUIExtension", "-out", msi])
 	#run_command([light, wxsname+".wixobj", "-out", msi])
