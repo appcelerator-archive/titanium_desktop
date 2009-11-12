@@ -77,8 +77,6 @@ if ARGUMENTS.get('test_crash', 0):
 
 ## Kroll *must not be required* for installation
 SConscript('installation/SConscript')
-if build.is_win32():
-	SConscript('support/win32/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be
@@ -88,6 +86,9 @@ SConscript('modules/SConscript')
 SConscript('SConscript.dist')
 SConscript('SConscript.docs')
 SConscript('SConscript.test')
+
+if build.is_win32():
+	SConscript('support/win32/SConscript')
 
 run = ARGUMENTS.get('run', 0)
 run_with = ARGUMENTS.get('run_with', 0)
