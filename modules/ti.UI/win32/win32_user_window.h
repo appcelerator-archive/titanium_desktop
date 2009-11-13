@@ -102,6 +102,7 @@ namespace ti
 		Win32WebKitFrameLoadDelegate* frameLoadDelegate;
 		Win32WebKitUIDelegate* uiDelegate;
 		Win32WebKitPolicyDelegate* policyDelegate;
+		Win32WebKitResourceLoadDelegate* resourceLoadDelegate;
 		Bounds restoreBounds;
 		long restoreStyles;
 		int chromeWidth, chromeHeight;

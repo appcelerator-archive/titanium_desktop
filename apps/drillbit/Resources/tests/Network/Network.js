@@ -95,6 +95,14 @@ describe("Network Module",{
 		var proxy = Titanium.Network.getHTTPProxy();
 		value_of(proxy).should_be("http://www.yahoo.com:81");
 
+		Titanium.Network.setHTTPProxy("direct://");
+		var proxy = Titanium.Network.getHTTPProxy();
+		value_of(proxy).should_be_null();
+
+		Titanium.Network.setHTTPProxy("http://joe:blow@foo.com:80");
+		var proxy = Titanium.Network.getHTTPProxy();
+		value_of(proxy).should_be("http://joe:blow@foo.com:80");
+
 		Titanium.Network.setHTTPProxy("");
 		proxy = Titanium.Network.getHTTPProxy();
 		value_of(proxy).should_be(null);
@@ -119,6 +127,14 @@ describe("Network Module",{
 		Titanium.Network.setHTTPSProxy("www.yahoo.com:81");
 		var proxy = Titanium.Network.getHTTPSProxy();
 		value_of(proxy).should_be("https://www.yahoo.com:81");
+
+		Titanium.Network.setHTTPSProxy("direct://");
+		var proxy = Titanium.Network.getHTTPSProxy();
+		value_of(proxy).should_be_null();
+
+		Titanium.Network.setHTTPSProxy("http://joe:blow@foo.com:80");
+		var proxy = Titanium.Network.getHTTPSProxy();
+		value_of(proxy).should_be("http://joe:blow@foo.com:80");
 
 		Titanium.Network.setHTTPSProxy("");
 		proxy = Titanium.Network.getHTTPSProxy();

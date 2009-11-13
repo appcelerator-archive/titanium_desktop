@@ -397,7 +397,9 @@ namespace ti
 		if (entry.empty())
 			return 0;
 
-		return ProxyConfig::ParseProxyEntry(entry, scheme, scheme);
+		// Do not pass the third argument entryScheme, because it overrides
+		// any scheme set in the proxy string.
+		return ProxyConfig::ParseProxyEntry(entry, scheme, std::string());
 	}
 
 	void NetworkBinding::SetHTTPProxy(const ValueList& args, KValueRef result)

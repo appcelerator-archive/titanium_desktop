@@ -270,6 +270,11 @@ void Win32UserWindow::InitWebKit()
 	if (FAILED(hr))
 		HandleHResultError("Error setting PolicyDelegate", hr, true);
 
+	resourceLoadDelegate = new Win32WebKitResourceLoadDelegate(this);
+	hr = webView->setResourceLoadDelegate(resourceLoadDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting ResourceLoadDelegate", hr, true);
+
 	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
 	if (FAILED(hr))
 		HandleHResultError("Error setting host window", hr, true);
