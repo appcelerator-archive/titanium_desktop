@@ -52,6 +52,18 @@ namespace ti
 		}
 	}
 
+	void ProxyForURLCallback(const char* url, char* buffer, int bufferLength)
+	{
+		buffer[bufferLength - 1] = '\0';
+
+		std::string urlString(url);
+		SharedProxy proxy(ProxyConfig::GetProxyForURL(urlString));
+		if (proxy.isNull())
+			strncpy(buffer, "direct://", bufferLength);
+		else
+			strncpy(buffer, proxy->ToString().c_str(), bufferLength);
+	}
+
 	int CanPreprocessURLCallback(const char* url)
 	{
 		return Script::GetInstance()->CanPreprocess(url);

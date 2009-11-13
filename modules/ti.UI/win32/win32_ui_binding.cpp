@@ -41,6 +41,7 @@ namespace ti
 		setURLToFileURLCallback(URLToFileURLCallback);
 		setCanPreprocessCallback(CanPreprocessURLCallback);
 		setPreprocessCallback(PreprocessURLCallback);
+		setProxyCallback(ProxyForURLCallback);
 	}
 	
 	Win32UIBinding::~Win32UIBinding()
