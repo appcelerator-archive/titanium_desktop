@@ -241,15 +241,37 @@ def walk_dir(builder, path, current_dir, relative_path=""):
 			newdir = Directory(file_relative_path)
 			current_dir.add_dir(newdir)
 			walk_dir(builder, file_full_path, newdir, file_relative_path)
-				
+
+def build_msi(template, args, basename, destdir):
+	t = string.Template(template)
+	wxs = t.safe_substitute(args)
+	
+	msi = os.path.join(destdir, basename+ ".msi")
+	wxsname = os.path.join(tempfile.gettempdir(), basename + ".wxs")
+	tmpfile = open(wxsname, "w+")
+	tmpfile.write(wxs)
+	tmpfile.close()
+	
+	wix_dir = os.path.join("C:\\", "Program Files", "Windows Installer XML v3", "bin")
+	if not os.path.exists(wix_dir):
+		wix_dir = os.path.join("C:\\", "Program Files (x86)", "Windows Installer XML v3", "bin")
+	if not os.path.exists(wix_dir):
+		print >>sys.stderr, "Error: Couldn't find WiX v3 installation dir for creating installer"
+		sys.exit(-1)
+
+	candle = os.path.join(wix_dir, "candle.exe")
+	light = os.path.join(wix_dir, "light.exe")
+	run_command([candle, wxsname, "-out", wxsname+".wixobj"])
+	run_command([light, wxsname+".wixobj", "-ext", "WixUIExtension", "-out", msi])
+	#os.unlink(wxsname)
+	#os.unlink(wxsname+".wixobj")
+	
+	return msi
+	
 def create_installer(builder):
 	app_installer_template = read_template('app_installer_template.wxs')
-	root_dir = Directory(".", is_root=True)
-	walk_dir(builder, builder.base_dir, root_dir)
-	
-	app_dirs_xml = root_dir.to_xml()
-	components_xml = root_dir.to_components_xml()
-	
+	app_update_template = read_template('app_update_template.wxs')
+		
 	lang = get_from_tiapp(builder.options.tiapp, 'language', 'en-us')
 	app_language = get_app_language(lang)
 	app_codepage = get_app_codepage(lang)
@@ -286,6 +308,38 @@ def create_installer(builder):
 	banner_bmp = get_bmp('banner-bmp', default_banner_bmp)
 	
 	titanium_installer_dll = os.path.join(support_dir, "titanium_installer.dll")
+	common_args = {
+		"app_name": builder.appname,
+		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
+		"app_icon": get_app_icon(builder),
+		"app_id": builder.options.manifest['appid'],
+		"app_guid": builder.options.manifest['guid'].upper(),
+		"app_publisher": builder.options.manifest['publisher'],
+		"app_description": builder.options.manifest['desc'],
+		"app_version": builder.appversion,
+		"upgrade_guid": gen_guid(), # TODO : we need to cache the upgrade guid and send it to the packaging server..
+		"program_menu_guid": gen_guid(),
+		"app_language": app_language,
+		"app_codepage": app_codepage,
+		"license_rtf": license_rtf,
+		"dialog_bmp": dialog_bmp,
+		"banner_bmp": banner_bmp,
+		"titanium_installer_dll": titanium_installer_dll }
+	
+	update_args = common_args.copy()
+	update_args["manifest_guid"] = gen_guid()
+	update_args["manifest_path"] = os.path.join(builder.base_dir, "manifest")
+	update_msi = build_msi(app_update_template, update_args,
+		builder.appname, os.path.join(builder.base_dir, 'installer'))
+	
+	installed_file = os.path.join(builder.base_dir, ".installed")
+	open(installed_file, "a").close() #touch
+	
+	root_dir = Directory(".", is_root=True)
+	walk_dir(builder, builder.base_dir, root_dir)
+	
+	app_dirs_xml = root_dir.to_xml()
+	components_xml = root_dir.to_components_xml()
 	bundled_xml = ""
 	#if builder.options.type != 'network':
 	#	runtime_root_dir = Directory(".", is_root=True)
@@ -338,52 +392,15 @@ def create_installer(builder):
 	if bundled_runtime is True:
 		bundled_runtime_xml = '<Property Id="AppBundledRuntime" Value="runtime"/>'
 	
-	app_template_args = {
-		"app_dirs": app_dirs_xml,
-		"app_components": components_xml,
-		"app_name": builder.appname,
-		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
-		"app_icon": get_app_icon(builder),
-		"app_id": builder.options.manifest['appid'],
-		"app_guid": builder.options.manifest['guid'].upper(),
-		"app_publisher": builder.options.manifest['publisher'],
-		"app_description": builder.options.manifest['desc'],
-		"app_version": builder.appversion,
-		"upgrade_guid": gen_guid(),
-		"program_menu_guid": gen_guid(),
-		"app_language": app_language,
-		"app_codepage": app_codepage,
-		"license_rtf": license_rtf,
-		"dialog_bmp": dialog_bmp,
-		"banner_bmp": banner_bmp,
-		"titanium_installer_dll": titanium_installer_dll,
-		"bundled_xml": bundled_xml,
-		"dependencies": "&amp;".join(dependencies),
-		"bundled_modules": bundled_modules_xml,
-		"bundled_runtime": bundled_runtime_xml
-	}
+	app_template_args = common_args.copy()
+	app_template_args["app_dirs"] = app_dirs_xml
+	app_template_args["app_components"] = components_xml
+	app_template_args["bundled_xml"] = bundled_xml
+	app_template_args["dependencies"] = "&amp;".join(dependencies)
+	app_template_args["bundled_modules"] = bundled_modules_xml
+	app_template_args["bundled_runtime"] = bundled_runtime_xml
 	
-	t = string.Template(app_installer_template)
-	app_installer_wxs = t.safe_substitute(app_template_args)
-	msi = os.path.join(builder.options.destination, builder.appname + ".msi")
+	install_msi = build_msi(app_installer_template, app_template_args,
+		builder.appname, builder.options.destination)
 	
-	wxsname = os.path.join(tempfile.gettempdir(), builder.appname + ".wxs")
-	tmpfile = open(wxsname, "w+")
-	tmpfile.write(app_installer_wxs)
-	tmpfile.close()
-	
-	wix_dir = os.path.join("C:\\", "Program Files", "Windows Installer XML v3", "bin")
-	if not os.path.exists(wix_dir):
-		wix_dir = os.path.join("C:\\", "Program Files (x86)", "Windows Installer XML v3", "bin")
-	if not os.path.exists(wix_dir):
-		print >>sys.stderr, "Error: Couldn't find WiX v3 installation dir for creating installer"
-		sys.exit(-1)
-
-	candle = os.path.join(wix_dir, "candle.exe")
-	light = os.path.join(wix_dir, "light.exe")
-	run_command([candle, wxsname, "-out", wxsname+".wixobj"])
-	run_command([light, wxsname+".wixobj", "-ext", "WixUIExtension", "-out", msi])
-	#run_command([light, wxsname+".wixobj", "-out", msi])
-	#os.unlink(wxsname)
-	#os.unlink(wxsname+".wixobj")
-	return msi
+	return install_msi

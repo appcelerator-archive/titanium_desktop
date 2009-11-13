@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Name="${app_name}" Id="${app_guid}" UpgradeCode="${upgrade_guid}"
 		Language="${app_language}" Codepage="${app_codepage}" Version="${app_version}" Manufacturer="${app_publisher}">
@@ -7,11 +7,14 @@
 		Description="${app_name}"
 		Comments="${app_description}" Manufacturer="${app_publisher}"
 		InstallerVersion="300" Languages="${app_language}" Compressed="yes" SummaryCodepage="${app_codepage}" />
-	
+
 	<Upgrade Id="${upgrade_guid}">
-		<UpgradeVersion OnlyDetect="yes" Property="NEWERFOUND" Minimum="${app_version}" IncludeMinimum="no" />
+		<UpgradeVersion OnlyDetect="yes" Property="SELFFOUND"
+			Minimum="${app_version}" IncludeMinimum="yes" Maximum="${app_version}" IncludeMaximum="yes" />
+		<UpgradeVersion OnlyDetect="yes" Property="NEWERFOUND"
+			Minimum="${app_version}" />
 	</Upgrade>
-  
+	
     <Media Id="1" Cabinet="${app_id}.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
     <Property Id="DiskPrompt" Value="${app_name}" />
 
@@ -19,30 +22,18 @@
 		<Directory Id="ProgramFilesFolder" Name="PFiles">
 			<Directory Id="${app_publisher}" Name="${app_publisher}">
 				<Directory Id="INSTALLDIR" Name="${app_name}">
-					${app_dirs}
+					<Component Id="manifest" Guid="${manifest_guid}">
+						<File Id="manifest" Source="${manifest_path}" KeyPath="yes"/>
+					</Component>
 				</Directory>
 			</Directory>
 		</Directory>
-	
-		<Directory Id="ProgramMenuFolder" Name="Programs">
-			<Directory Id="ProgramMenuDir" Name="${app_name}">
-				<Component Id="ProgramMenuDir" Guid="${program_menu_guid}">
-					<RemoveFolder Id="ProgramMenuDir" On="uninstall" />
-					<RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes" />
-				</Component>
-			</Directory>
-		</Directory>
-
-		<Directory Id="DesktopFolder" Name="Desktop" />
-		
-		${bundled_xml}
     </Directory>
 	
 	
 	<Feature Id="Application" Title="${app_name}" Description="${app_description}" Level="1"
 		ConfigurableDirectory="INSTALLDIR">
-		<ComponentRef Id="ProgramMenuDir" />
-		${app_components}
+		<ComponentRef Id="manifest" />
 	</Feature>
 
 	<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
@@ -52,31 +43,24 @@
 	<WixVariable Id="WixUILicenseRtf" Value="${license_rtf}"/>
 	
     <Icon Id="${app_icon}" SourceFile="${app_exe}" />
-	<Property Id="ARPPRODUCTICON" Value="${app_icon}" />
-	
-	<Property Id="AppDependencies" Value="${dependencies}"/>
-	${bundled_modules}
-	${bundled_runtime}
-	
-	<CustomAction Id="NoDowngrade" Error="A later version of [ProductName] is already installed." />
 	
 	<!-- the "immediate" setup action exists to initialize the progress bar with our job count -->
 	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstaller" DllEntry="NetInstallSetup"/>
 	<!-- ugly hack to pass in our dependenices and bundled modules/runtime into the deferred/async action -->
-	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="[AppDependencies];[AppBundledModules];[AppBundledRuntime]"/>
+	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="app_update;[APP_UPDATE_MANIFEST];[INSTALLDIR]"/>
 	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstaller" DllEntry="NetInstall" Execute="deferred"/>
+	<CustomAction Id="Clean" BinaryKey="TitaniumInstaller" DllEntry="Clean"/>
 	
 	<InstallExecuteSequence>
-		<Custom Action="NoDowngrade" After="FindRelatedProducts">NEWERFOUND</Custom>
-		<Custom Action="NetInstall.Setup" After="InstallInitialize">NOT Installed</Custom>
-		<Custom Action="NetInstall.Params" After="NetInstall.Setup">NOT Installed</Custom>
-		<Custom Action="NetInstall" After="NetInstall.Params">NOT Installed</Custom>
+		<Custom Action="NetInstall.Setup" After="InstallInitialize"><![CDATA[Installed AND APP_UPDATE_MANIFEST <> ""]]></Custom>
+		<Custom Action="NetInstall.Params" After="NetInstall.Setup"><![CDATA[Installed AND APP_UPDATE_MANIFEST <> ""]]></Custom>
+		<Custom Action="NetInstall" After="NetInstall.Params"><![CDATA[Installed AND APP_UPDATE_MANIFEST <> ""]]></Custom>
+		<Custom Action="Clean" After="InstallFinalize"><![CDATA[Installed AND APP_UPDATE_MANIFEST = ""]]></Custom>
 	</InstallExecuteSequence>
 		
 	<Binary Id="TitaniumInstaller" SourceFile="${titanium_installer_dll}"/>
 	<Binary Id="BannerBmp" SourceFile="${banner_bmp}"/>
 	
-	<UIRef Id="WixUI_Common" />
 	<UIRef Id="WixUI_InstallDir" />
   </Product>
 </Wix>
