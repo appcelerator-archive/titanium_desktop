@@ -228,17 +228,4 @@ describe("UI Window Tests",{
 			value_of(w.result).should_be('Hello');
 		}, ["data:text/html;charset=utf-8;base64,"+Titanium.Codec.encodeBase64(html)]);
 	},
-	test_data_uri_with_html_parameter_as_async: function(test)
-	{
-		var path = Titanium.App.appURLToPath("app://rel.html");
-		var html = Titanium.Filesystem.getFile(path).read();
-
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.result).should_be('Hello');
-		}, [{html:html}]);
-	}
 });
