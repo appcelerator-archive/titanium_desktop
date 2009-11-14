@@ -25,7 +25,6 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 		std::string value(v->ToString());
 		if (value=="yes" || value=="1" || value=="true" || value=="True")
 			return true;
-
 		else
 			return false;
 	}
