@@ -137,8 +137,8 @@ namespace ti
 		KListRef SelectDirectory(bool multiple, std::string& title,
 			std::string& path, std::string& defaultName);
 		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
-		static void ParseStringNullSeparated(const wchar_t *s,
-			std::vector<std::string> &tokens);
+		static void ParseSelectedFiles(const wchar_t *s,
+			std::vector<std::string> &selectedFiles);
 		Logger* logger;
 	};
 }

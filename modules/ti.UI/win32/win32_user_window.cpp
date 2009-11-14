@@ -1134,22 +1134,22 @@ KListRef Win32UserWindow::SelectFile(
 		// if the user selected multiple files, ofn.lpstrFile is a NULL-separated list of filenames
 		// if the user only selected one file, ofn.lpstrFile is a normal string
 
-		std::vector<std::string> tokens;
-		ParseStringNullSeparated(ofn.lpstrFile, tokens);
-
-		if (tokens.size() == 1)
+		std::vector<std::string> selectedFiles;
+		ParseSelectedFiles(ofn.lpstrFile, selectedFiles);
+		
+		if (selectedFiles.size() == 1)
 		{
-			results->Append(Value::NewString(tokens.at(0)));
+			results->Append(Value::NewString(selectedFiles.at(0)));
 		}
-		else if (tokens.size() > 1)
+		else if (selectedFiles.size() > 1)
 		{
-			std::string directory(tokens.at(0));
-			for (int i = 1; i < tokens.size(); i++)
+			std::string directory(selectedFiles.at(0));
+			for (int i = 1; i < selectedFiles.size(); i++)
 			{
 				std::string n;
 				n.append(directory.c_str());
 				n.append("\\");
-				n.append(tokens.at(i).c_str());
+				n.append(selectedFiles.at(i).c_str());
 				results->Append(Value::NewString(n));
 			}
 		}
@@ -1159,26 +1159,6 @@ KListRef Win32UserWindow::SelectFile(
 		DWORD error = CommDlgExtendedError();
 		std::string errorMessage = Win32Utils::QuickFormatMessage(error);
 		Logger::Get("UI.Win32UserWindow")->Error("Error while opening files: %s", errorMessage.c_str());
-		/*
-		printf("Error when opening files: %d\n", error);
-		switch(error)
-		{
-			case CDERR_DIALOGFAILURE: printf("CDERR_DIALOGFAILURE\n"); break;
-			case CDERR_FINDRESFAILURE: printf("CDERR_FINDRESFAILURE\n"); break;
-			case CDERR_NOHINSTANCE: printf("CDERR_NOHINSTANCE\n"); break;
-			case CDERR_INITIALIZATION: printf("CDERR_INITIALIZATION\n"); break;
-			case CDERR_NOHOOK: printf("CDERR_NOHOOK\n"); break;
-			case CDERR_LOCKRESFAILURE: printf("CDERR_LOCKRESFAILURE\n"); break;
-			case CDERR_NOTEMPLATE: printf("CDERR_NOTEMPLATE\n"); break;
-			case CDERR_LOADRESFAILURE: printf("CDERR_LOADRESFAILURE\n"); break;
-			case CDERR_STRUCTSIZE: printf("CDERR_STRUCTSIZE\n"); break;
-			case CDERR_LOADSTRFAILURE: printf("CDERR_LOADSTRFAILURE\n"); break;
-			case FNERR_BUFFERTOOSMALL: printf("FNERR_BUFFERTOOSMALL\n"); break;
-			case CDERR_MEMALLOCFAILURE: printf("CDERR_MEMALLOCFAILURE\n"); break;
-			case FNERR_INVALIDFILENAME: printf("FNERR_INVALIDFILENAME\n"); break;
-			case CDERR_MEMLOCKFAILURE: printf("CDERR_MEMLOCKFAILURE\n"); break;
-			case FNERR_SUBCLASSFAILURE: printf("FNERR_SUBCLASSFAILURE\n"); break;
-		}*/
 	}
 	return results;
 }
@@ -1247,10 +1227,10 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
 }
 
-void Win32UserWindow::ParseStringNullSeparated(
-	const wchar_t *s, std::vector<std::string> &tokens)
+void Win32UserWindow::ParseSelectedFiles(
+	const wchar_t *s, std::vector<std::string> &selectedFiles)
 {
-	std::string token;
+	std::string selectedFile;
 	
 	// input string is expected to be composed of single-NULL-separated tokens, and double-NULL terminated
 	int i = 0;
@@ -1263,9 +1243,15 @@ void Win32UserWindow::ParseStringNullSeparated(
 		if (c == L'\0')
 		{
 			// finished reading a token, save it in tokens vectory
-			tokens.push_back(token);
-			token.clear();
+			selectedFiles.push_back(selectedFile);
+			selectedFile.clear();
 
+			if (!FileUtils::IsDirectory(selectedFiles.at(0)) && selectedFiles.size() == 1)
+			{
+				// The first entry is a file, and not a directory
+				// This means we should only have 1 file in this selection
+				break;
+			}
 			c = s[i]; // don't increment index because next token loop needs to read this char again
 
 			// if next char is NULL, then break out of the while loop
@@ -1279,7 +1265,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 			}
 		}
 
-		token.push_back(c);
+		selectedFile.push_back(c);
 	}
 }
 

@@ -73,9 +73,9 @@
 			function chooseFileTypes()
 			{
 				Titanium.UI.openFileChooserDialog(selectFilesCallback, {
-					multiple:false,
-					types:['xml']//,
-					//typesDescription: 'Web Files'
+					multiple:true,
+					types:['js', 'html'],
+					typesDescription: 'Web Files'
 				});
 			}
 			function openSaveAs()
