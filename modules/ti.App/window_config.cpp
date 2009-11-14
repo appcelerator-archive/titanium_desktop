@@ -14,8 +14,6 @@
 
 namespace ti
 {
-<<<<<<< HEAD
-
 int WindowConfig::DEFAULT_POSITION = -404404404;
 int WindowConfig::windowCount = 0;
 
@@ -36,21 +34,15 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 
 	else if (v->IsBool())
 		return v->ToBool();
-=======
->>>>>>> 5ead195... Move regression tests into appropriate test directories.
 
 	return defaultValue;
 }
 
 static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 {
-<<<<<<< HEAD
-=======
-	printf("Coercing bool: %s\n", name);
 	KValueRef v(props->Get(name));
 	if (v->IsString())
 	{
-		printf("It's astring\n");
 		std::string value(v->ToString());
 		if (value=="yes" || value=="1" || value=="true" || value=="True")
 			return true;
@@ -59,24 +51,20 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 	}
 	else if (v->IsInt())
 	{
-		printf("It's an int\n");
 		return v->ToInt();
 	}
 	else if (v->IsBool())
 	{
-		printf("boo: %i\n", v->ToBool());
 		return v->ToBool();
 	}
 	else
 	{
-		printf("default value: %i\n", defaultValue);
 		return defaultValue;
 	}
 }
 
 void WindowConfig::SetDefaults ()
 {
->>>>>>> 5ead195... Move regression tests into appropriate test directories.
 	WindowConfig::windowCount++;
 	std::ostringstream winid;
 	winid << "win_" << WindowConfig::windowCount;
@@ -139,11 +127,7 @@ void WindowConfig::UseProperties(KObjectRef properties)
 	fullscreen = CoerceBool(properties, "fullscreen", fullscreen);
 	maximized = CoerceBool(properties, "maximized", maximized);
 	minimized = CoerceBool(properties, "minimized", minimized);
-<<<<<<< HEAD
-	usingChrome = CoerceBool(properties, "usingChrome", minimized);
-=======
 	usingChrome = CoerceBool(properties, "usingChrome", usingChrome);
->>>>>>> 5ead195... Move regression tests into appropriate test directories.
 	toolWindow = CoerceBool(properties, "toolWindow", toolWindow);
 	topMost = CoerceBool(properties, "topMost", topMost);
 	visible = CoerceBool(properties, "visible", visible);
