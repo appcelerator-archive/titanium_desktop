@@ -38,7 +38,7 @@ namespace ti
 		void HasProperty(const ValueList& args, KValueRef result);
 		void ListProperties(const ValueList& args, KValueRef result);
 		void SaveTo(const ValueList& args, KValueRef result);
-		
+
 		typedef enum
 		{
 			Bool, Double, Int, String, List

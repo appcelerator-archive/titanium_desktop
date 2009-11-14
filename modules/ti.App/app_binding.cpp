@@ -160,6 +160,11 @@ namespace ti
 		 * @tiresult[String] The application icon path.
 		 */
 		this->SetMethod("getIcon", &AppBinding::GetIcon);
+
+		// Don't document this temporary API point. This will be replaced by
+		// a generic method of reading arbitrary property values from tiapp.xml.
+		this->SetBool("analyticsEnabled",
+			AppConfig::Instance()->IsAnalyticsEnabled());
 	}
 
 	AppBinding::~AppBinding()

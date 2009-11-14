@@ -15,7 +15,7 @@
 #include "app_api.h"
 #include "properties_binding.h"
 
-#define nodeNameEquals(n,s) (xmlStrcmp(n->name, (const xmlChar *)s) == 0)
+#define nodeNameEquals(n,s) (xmlStrcmp(n->name, s) == 0)
 
 namespace ti
 {
@@ -41,16 +41,13 @@ public:
 	std::string& GetPublisher() { return publisher; }
 	AutoPtr<PropertiesBinding> GetSystemProperties() { return systemProperties; }
 	std::vector<WindowConfig*>& GetWindows() { return windows; }
-	std::string& GetIcon16() { return icon16; }
-	std::string& GetIcon32() { return icon32; }
-	std::string& GetIcon48() { return icon48; }
+	std::string& GetIcon() { return icon; }
 	const char* GetError() { return error; }
+	bool IsAnalyticsEnabled() { return analyticsEnabled; }
 
 	static AppConfig* Instance();
 
 private:
-	AppConfig(std::string& xmlfile);
-
 	AutoPtr<PropertiesBinding> systemProperties;
 	std::vector<WindowConfig*> windows;
 	const char* error;
@@ -61,11 +58,11 @@ private:
 	std::string url;
 	std::string version;
 	std::string publisher;
-	std::string icon16;
-	std::string icon32;
-	std::string icon48;
-
+	std::string icon;
+	bool analyticsEnabled;
 	static AppConfig *instance_;
+
+	AppConfig(std::string& xmlfile);
 };
 
 }
