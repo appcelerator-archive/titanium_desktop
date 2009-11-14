@@ -924,5 +924,20 @@ describe("UI Module Tests",{
 		}
 		openPage("black_page",runTest);
 		openPage("white_page",runTest);
-	}
+	},
+	issue32_unicode_in_title: function()
+	{
+		var win = Titanium.UI.getCurrentWindow().createWindow('http://en.wikipedia.org/wiki/The_Evil_Dead');
+		win.setTitle("'添加新帐户");
+		value_of(win.getTitle()).should_be("'添加新帐户");
+	},
+	TI224_test_mixcase_urls: function()
+	{
+		var url = 'http://en.wikipedia.org/wiki/The_Evil_Dead';
+		var w = Titanium.UI.createWindow(url);
+		w.open();
+		
+		value_of(w.getURL()).should_be(url);
+		w.close();
+	},
 });

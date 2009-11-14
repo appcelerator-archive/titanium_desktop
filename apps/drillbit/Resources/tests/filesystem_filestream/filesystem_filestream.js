@@ -138,7 +138,24 @@ describe("Ti.Filesystem FileStream tests",{
 		var textRead = fs.read();
 		fs.close();
 		value_of(textToWrite+textToAppend).should_be(textRead);	
-	}
+	},
+	// old JIRA issues for regression
+	TI328_open_and_write_filestream: function()
+	{
+		var filename = ".data.txt";
+		var contents = "this is some data";
+		var userDir = Titanium.Filesystem.getUserDirectory();
+		var sessionFile = Titanium.Filesystem.getFile(userDir, filename);
+		var sessionStream = Titanium.Filesystem.getFileStream(sessionFile);
+		sessionStream.open(Titanium.Filesystem.MODE_WRITE);
+		sessionStream.write(contents);
+		sessionStream.close();
+		
+		value_of(sessionFile.exists()).should_be_true();
+		value_of(sessionFile.size()).should_be(contents.length);
+		sessionFile.deleteFile();
+		value_of(sessionFile.exists()).should_be_false();
+	},
 
 });
 

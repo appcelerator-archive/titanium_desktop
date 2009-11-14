@@ -175,4 +175,14 @@ describe("ti.Media tests", {
 			callback.failed("Timeout waiting for sound to loop");
 		}, 4000);
 	},
+	issue35_open_sound_crashes_as_async: function(callback)
+	{
+		var sound = Titanium.Media.createSound('app://sound.wav');
+		sound.play();
+		
+		var timer = setTimeout(function(){
+			window.location.href = 'http://en.wikipedia.org/wiki/The_Evil_Dead';
+			callback.passed();
+		}, 3000);
+	},
 });
