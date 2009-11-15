@@ -65,6 +65,7 @@ namespace ti
 		size_t requestDataSent;
 		size_t responseDataReceived;;
 		bool sawHTTPStatus;
+		std::vector<BlobRef> responseData;
 
 		void run(); // Poco Thread implementation.
 		bool BeginRequest(KValueRef sendData);

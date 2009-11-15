@@ -139,11 +139,9 @@ describe("Network.TCPSocket",{
 
 		var output = null;
 		var timer = null;
-		
-		TCPsocket.onRead( function(buf)
+		TCPsocket.onRead(function(buf)
 		{
-   			alert("like yo");
-			if ( buf == null )
+			if (buf == null)
 			{
 				test.failed("buffer sent to onRead is null");
 			}
