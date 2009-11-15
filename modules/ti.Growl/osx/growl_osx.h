@@ -12,20 +12,22 @@
 #include "../growl_binding.h"
 #include "growl_delegate.h"
 
-namespace ti {
-	class GrowlOSX : public GrowlBinding {
-	protected:
-		TiGrowlDelegate *delegate;
-
+namespace ti
+{
+	class GrowlOSX : public GrowlBinding
+	{
 	public:
 		GrowlOSX(KObjectRef global);
 		virtual ~GrowlOSX();
 
 		void CopyToApp(kroll::Host *host, kroll::Module *module);
-		virtual void ShowNotification(std::string& title,
-			std::string& description, std::string& iconURL,
-			int notification_delay, KMethodRef callback);
+		virtual void ShowNotification(std::string& title, std::string& description,
+			 std::string& iconURL, int timeout, KMethodRef callback);
 		virtual bool IsRunning();
+
+	protected:
+		TiGrowlDelegate* delegate;
+
 	};
 }
 

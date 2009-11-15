@@ -28,12 +28,8 @@ namespace ti
 		return notify_is_initted();
 	}
 
-	void LibNotifyBinding::ShowNotification(
-		std::string& title,
-		std::string& description,
-		std::string& iconURL,
-		int notification_timeout,
-		KMethodRef callback)
+	void LibNotifyBinding::ShowNotification(std::string& title, std::string& description,
+		std::string& iconURL, int timeout, KMethodRef callback)
 	{
 		std::string iconPath = "";
 		if (!iconURL.empty())
@@ -47,7 +43,7 @@ namespace ti
 			iconPath.c_str(),
 			NULL);
 
-		notify_notification_set_timeout(n, notification_timeout * 1000);
+		notify_notification_set_timeout(n, timeout * 1000);
 		notify_notification_show(n, NULL);
 		g_object_unref(G_OBJECT(n));
 	}

@@ -22,12 +22,8 @@ namespace ti
 
 	protected:
 		bool IsRunning();
-		void ShowNotification(
-			std::string& title,
-			std::string& description,
-			std::string& iconURL,
-			int notification_delay,
-			KMethodRef callback);
+		void ShowNotification(std::string& title, std::string& description,
+			std::string& iconURL, int timeout, KMethodRef callback);
 	};
 }
 

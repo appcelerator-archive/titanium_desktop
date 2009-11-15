@@ -2,7 +2,7 @@ var notification_windows = 1;
 
 function TitaniumNotification(window)
 {
-	var width = 300, height = 80, notificationDelay = 3000;
+	var width = 300, height = 80, notificationTimeout = 3000;
 	if (Titanium.platform == "win32") {
 		height = 80;  
 	}
@@ -57,14 +57,16 @@ function TitaniumNotification(window)
 	};
 
 	/**
-	 * @tiapi(method=True,name=Notification.Notification.setDelay,since=0.2)
-	 * @tiapi Sets the delay time before a Notification object is displayed
-	 * @tiarg[Number, delay] The delay time in milliseconds
+	 * @tiapi(method=True,name=Notification.Notification.setTimeout,since=0.2)
+	 * @tiapi Set amount of time in milliseconds before the notification disappears. This
+	 * @tiapi feature is currently unsupported on OS X. The default value is 3 seconds.
+	 * @tiarg[Number, timeout] The timeout in milliseconds.
 	 */
-	this.setDelay = function(value)
+	this.setTimeout = function(value)
 	{
-		notificationDelay = value;
+		notificationTimeout = value;
 	};
+	this.setDelay = this.setTimeout.
 
 	/**
 	 * @tiapi(method=True,name=Notification.Notification.setCallback,since=0.2)
@@ -85,7 +87,7 @@ function TitaniumNotification(window)
 	this.show = function(animate,autohide)
 	{
 		if ('Growl' in Titanium && Titanium.Growl.isRunning()) {
-			Titanium.Growl.showNotification(title, message, icon, notificationDelay/1000, callback);
+			Titanium.Growl.showNotification(title, message, icon, notificationTimeout/1000, callback);
 			return;
 		}
 
@@ -120,7 +122,7 @@ function TitaniumNotification(window)
 			hideTimer = window.setTimeout(function()
 			{
 				self.hide();
-			},notificationDelay + (animate ? 1000 : 0));
+			},notificationTimeout + (animate ? 1000 : 0));
 		}
 	};
 

@@ -17,19 +17,15 @@ namespace ti
 	{
 	public:
 		GrowlBinding(KObjectRef);
-
 		void ShowNotification(const ValueList& args, KValueRef result);
 		void IsRunning(const ValueList& args, KValueRef result);
+
 	protected:
 		kroll::KObjectRef global;
 
 		virtual ~GrowlBinding();
-		virtual void ShowNotification(
-			std::string& title,
-			std::string& description,
-			std::string& iconURL,
-			int notification_delay,
-			KMethodRef callback) = 0;
+		virtual void ShowNotification(std::string& title, std::string& description,
+			std::string& iconURL, int timeout, KMethodRef callback) = 0;
 		virtual bool IsRunning() = 0;
 	};
 }
