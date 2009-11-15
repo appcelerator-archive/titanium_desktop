@@ -236,7 +236,6 @@ void Win32UserWindow::InitWebKit()
 		HandleHResultError("Error creating WebKitWebView", hr, true);
 
 	// Set the custom user agent for Titanium
-	//const char *version = host->GetGlobalObject()->Get("version")->ToString();
 	char userAgent[128];
 	//TI-303 we need to add safari UA to our UA to resolve broken
 	//sites that look at Safari and not WebKit for UA

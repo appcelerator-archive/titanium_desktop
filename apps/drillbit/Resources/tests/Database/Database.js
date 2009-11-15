@@ -304,6 +304,7 @@ describe("Database Module",{
 		value_of(rs.field(1)).should_be(333);
 
 		rs.close();
+		fileDB.close();
 	},
 	test_file_database_remove:function()
 	{
