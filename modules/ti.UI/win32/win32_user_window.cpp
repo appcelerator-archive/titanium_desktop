@@ -235,13 +235,9 @@ void Win32UserWindow::InitWebKit()
 	if (FAILED(hr))
 		HandleHResultError("Error creating WebKitWebView", hr, true);
 
-	// Set the custom user agent for Titanium
-	//const char *version = host->GetGlobalObject()->Get("version")->ToString();
-	char userAgent[128];
-	//TI-303 we need to add safari UA to our UA to resolve broken
-	//sites that look at Safari and not WebKit for UA
-	sprintf(userAgent, "Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, PRODUCT_VERSION);
-	_bstr_t ua(userAgent);
+	// TI-303 we need to add safari UA to our UA to resolve broken
+	// sites that look at Safari and not WebKit for UA.
+	_bstr_t ua("Version/4.0 Safari/528.16"PRODUCT_NAME"/"PRODUCT_VERSION);
 	webView->setApplicationNameForUserAgent(ua.copy());
 
 	// place our user agent string in the global so we can later use it
