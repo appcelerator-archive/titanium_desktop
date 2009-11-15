@@ -203,9 +203,10 @@ namespace ti
 		std::string guid = host->GetApplication()->guid;
 		result->SetString(guid);
 	}
+
 	void AppBinding::Exit(const ValueList& args, KValueRef result)
 	{
-		host->Exit(args.size()==0 ? 0 : args.at(0)->ToInt());
+		host->Exit(args.GetInt(0, 0));
 	}
 
 	void AppBinding::AppURLToPath(const ValueList& args, KValueRef result)

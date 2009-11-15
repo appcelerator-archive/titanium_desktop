@@ -107,7 +107,7 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 LRESULT CALLBACK
 Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	Win32UserWindow *window = Win32UserWindow::FromWindow(hWnd);
+	Win32UserWindow* window = Win32UserWindow::FromWindow(hWnd);
 
 	switch (message)
 	{

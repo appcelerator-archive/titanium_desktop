@@ -25,27 +25,6 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 		std::string value(v->ToString());
 		if (value=="yes" || value=="1" || value=="true" || value=="True")
 			return true;
-
-		else
-			return false;
-	}
-	else if (v->IsInt())
-		return v->ToInt();
-
-	else if (v->IsBool())
-		return v->ToBool();
-
-	return defaultValue;
-}
-
-static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
-{
-	KValueRef v(props->Get(name));
-	if (v->IsString())
-	{
-		std::string value(v->ToString());
-		if (value=="yes" || value=="1" || value=="true" || value=="True")
-			return true;
 		else
 			return false;
 	}
