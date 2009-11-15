@@ -219,6 +219,13 @@ namespace ti
 		this->SetNull("responseXML");
 
 		/**
+		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseData, since=0.8)
+		 * @tiapi The response of an HTTP request as a Blob. Currently this property
+		 * @tiapi is only valid after the request has been completed.
+		 */
+		this->SetNull("responseData");
+
+		/**
 		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.status, since=0.3)
 		 * @tiapi The response status code of an HTTP request
 		 */
@@ -568,12 +575,14 @@ namespace ti
 		this->aborted = false;
 		this->requestBlob = 0;
 		this->requestStream = 0;
+		this->responseData.clear();
 
 		this->SetInt("dataSent", 0);
 		this->SetInt("dataReceived", 0);
 
 		this->SetBool("timedOut", false);
 		this->SetNull("responseText");
+		this->SetNull("responseData");
 		this->SetNull("status");
 		this->SetNull("statusText");
 
@@ -832,6 +841,7 @@ namespace ti
 	{
 		// Pass data to handler on main thread
 		BlobRef blob(new Blob(buffer, bufferSize, true));
+		responseData.push_back(blob);
 
 		if (this->responseStream)
 		{
@@ -1065,7 +1075,9 @@ namespace ti
 			this->HandleCurlResult(curl_easy_perform(curlHandle));
 			this->Set("connected", Value::NewBool(false));
 
-			// FIXME: Should this be the ready-state after an error?
+			if (!responseData.empty())
+				this->SetObject("responseData", Blob::GlobBlobs(this->responseData));
+
 			this->ChangeState(4); // Done
 		}
 		catch (ValueException& e)
