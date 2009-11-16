@@ -126,7 +126,7 @@ namespace ti
 		void SetupBounds();
 		void SetupPosition();
 		void SetupSize();
-		void SetupDecorations(bool showHide = true);
+		void SetupDecorations();
 		void SetupState();
 		void SetupMenu();
 		void SetupIcon();
