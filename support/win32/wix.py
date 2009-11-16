@@ -329,6 +329,7 @@ def create_installer(builder):
 	update_args = common_args.copy()
 	update_args["manifest_guid"] = gen_guid()
 	update_args["manifest_path"] = os.path.join(builder.base_dir, "manifest")
+	update_args["app_exe_guid"] = gen_guid()
 	update_msi = build_msi(app_update_template, update_args,
 		builder.appname, os.path.join(builder.base_dir, 'installer'))
 	
