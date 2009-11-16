@@ -353,40 +353,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	nativeMenu(0),
 	contextMenu(0),
 	defaultIcon(0),
-	webInspector(0)
+	webInspector(0),
+	win32Host(Win32Host::Win32Instance())
 {
 	logger = Logger::Get("UI.Win32UserWindow");
-	
-	win32Host = static_cast<kroll::Win32Host*>(binding->GetHost());
-	this->InitWindow();
 
-	this->SetTransparency(config->GetTransparency());	
-	this->SetupDecorations(false);
-	this->SetupPosition();
-	this->SetupState();
-	this->SetTopMost(config->IsTopMost() && config->IsVisible());
-
-	this->InitWebKit();
-	this->ResizeSubViews();
-
-	// ensure we have valid restore values
-	restoreBounds = GetBounds();
-	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
-
-	// Set this flag to indicate that when the frame is loaded we want to
-	// show the window - we do this to prevent white screen while the first
-	// URL loads in the WebView.
-	this->requiresDisplay = true;
-
-	// set initial window icon to icon associated with exe file
-	char exePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
-	if (defaultIcon)
-	{
-		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
-			(LPARAM) defaultIcon);
-	}
 }
 
 Win32UserWindow::~Win32UserWindow()
@@ -479,6 +450,33 @@ void Win32UserWindow::Unfocus()
 
 void Win32UserWindow::Open()
 {
+	this->InitWindow();
+	this->SetTransparency(config->GetTransparency());	
+	this->SetupDecorations();
+	this->SetupPosition();
+	this->SetupState();
+	this->SetTopMost(config->IsTopMost() && config->IsVisible());
+	this->InitWebKit();
+	this->ResizeSubViews();
+
+	// Ensure we have valid restore values
+	restoreBounds = GetBounds();
+	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
+
+	// Set this flag to indicate that when the frame is loaded we want to
+	// show the window - we do this to prevent white screen while the first
+	// URL loads in the WebView.
+	this->requiresDisplay = true;
+
+	// set initial window icon to icon associated with exe file
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
+	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
+	if (defaultIcon)
+	{
+		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
+			(LPARAM) defaultIcon);
+	}
 	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", 
 		windowHandle,  viewWindowHandle);
 
@@ -838,7 +836,7 @@ void Win32UserWindow::SetUsingChrome(bool chrome)
 	this->SetupDecorations();
 }
 
-void Win32UserWindow::SetupDecorations(bool showHide)
+void Win32UserWindow::SetupDecorations()
 {
 	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
 
@@ -856,7 +854,7 @@ void Win32UserWindow::SetupDecorations(bool showHide)
 
 	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
 
-	if (showHide && config->IsVisible())
+	if (this->active && config->IsVisible())
 	{
 		Hide();
 		Show();
