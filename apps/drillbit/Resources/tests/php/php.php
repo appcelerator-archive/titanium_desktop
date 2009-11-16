@@ -163,13 +163,22 @@ function php_test_mysql()
 {
 	// try the public ensembl/genome mysql db
 	// http://www.ensembl.org/info/data/mysql.html
-	
-	$link = mysql_connect("ensembldb.ensembl.org:5306", "anonymous", "");
-	$success = true;
-	if (!$link) {
-		$success = false;
+	if (!defined('mysql_connect'))
+	{
+		return "mysql_connect not defined";
 	}
+
+	if (!defined('mysql_close'))
+	{
+		return "mysql_close not defined";
+	}
+
+	$link = mysql_connect("ensembldb.ensembl.org:5306", "anonymous", "");
+	if (!$link)
+	{
+		return "mysql_connect did not return a good value.";
+	}
+
 	mysql_close($link);
-	
-	return $success;
+	return true;
 }
