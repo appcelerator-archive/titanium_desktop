@@ -163,12 +163,12 @@ function php_test_mysql()
 {
 	// try the public ensembl/genome mysql db
 	// http://www.ensembl.org/info/data/mysql.html
-	if (!defined('mysql_connect'))
+	if (!function_exists('mysql_connect'))
 	{
 		return "mysql_connect not defined";
 	}
 
-	if (!defined('mysql_close'))
+	if (!function_exists('mysql_close'))
 	{
 		return "mysql_close not defined";
 	}
