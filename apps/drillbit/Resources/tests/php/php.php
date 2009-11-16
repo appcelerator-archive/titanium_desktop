@@ -158,3 +158,18 @@ function ALLCAPSFUNCTION()
 {
 	return "tres";
 }
+
+function php_test_mysql()
+{
+	// try the public ensembl/genome mysql db
+	// http://www.ensembl.org/info/data/mysql.html
+	
+	$link = mysql_connect("ensembldb.ensembl.org:5306", "anonymous", "");
+	$success = true;
+	if (!$link) {
+		$success = false;
+	}
+	mysql_close($link);
+	
+	return $success;
+}

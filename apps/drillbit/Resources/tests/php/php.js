@@ -228,4 +228,8 @@ describe("php tests",
 		value_of(camelCaseFunctionTwo()).should_be("dos");
 		value_of(ALLCAPSFUNCTION()).should_be("tres");
 	},
+	test_mysql: function()
+	{
+		value_of(php_test_mysql()).should_be_true();
+	}
 });
