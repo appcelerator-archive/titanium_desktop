@@ -197,8 +197,6 @@ namespace ti
 			char data[BUFFER_SIZE + 1];
 			int size = socket.receiveBytes(&data, BUFFER_SIZE);
 
-			if (size > 0 || this->readStarted)
-				printf("blah read: %i readStarted:%i\n", size, readStarted);
 			// A read is only complete if we've already read some bytes from the socket.
 			bool readComplete = this->readStarted && (size <= 0);
 			this->readStarted = (size > 0);
