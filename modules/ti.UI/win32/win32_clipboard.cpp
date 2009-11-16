@@ -80,19 +80,11 @@ namespace ti
 		UINT format = 0;
 		clipboardText = "";
 		if (IsClipboardFormatAvailable(CF_UNICODETEXT))
-		{
-			printf("Getting unicode text\n");
 			format = CF_UNICODETEXT;
-		}
 		else if (IsClipboardFormatAvailable(CF_TEXT))
-		{
-			printf("Getting ansi text\n");
 			format = CF_TEXT;
-		}
 		else
-		{
 			return clipboardText;
-		}
 
 		HANDLE clipboardData = GetClipboardData(format);
 		if (!clipboardData)
