@@ -43,29 +43,21 @@ This will pull the contents of the submodule into your local kroll folder.
  Building
 ----------
 
-Titanium uses SCons for building.  You can run scons by typing:
+Titanium uses SCons for building.  You can build and install the SDK by running:
 
-> scons
+> scons debug=1 sdkinstaller run=1
 
-To enable a debug build, use the debug flag:
+Titanium uses the Drillbit application under apps/ to perform tests. You can build
+and run Drillbit:
 
-> scons debug=1
+> scons debug=1 drillbit run=1
 
-To build the packaged bundles, use package flag:
+To build the distribution packages run:
 
-> scons package=1
+> scons debug=1 dist
 
 The output of the build will be in a folder named build\<osname> such as 
 build/osx for OSX.
-
------------
- Testing
------------
-
-Titanium uses the Drillbit application under apps/ to perform tests. You can build 
-and run Drillbit:
-
-> scons drillbit run=1
 
 ---------------
  Platform Info 
