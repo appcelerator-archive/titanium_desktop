@@ -66,7 +66,7 @@ function TitaniumNotification(window)
 	{
 		notificationTimeout = value;
 	};
-	this.setDelay = this.setTimeout.
+	this.setDelay = this.setTimeout;
 
 	/**
 	 * @tiapi(method=True,name=Notification.Notification.setCallback,since=0.2)
