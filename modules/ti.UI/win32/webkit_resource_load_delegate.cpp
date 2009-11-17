@@ -32,102 +32,98 @@ HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::QueryInterface(
 {
 	*ppvObject = 0;
 	if (IsEqualGUID(riid, IID_IUnknown))
-	{
 		*ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
-	}
 	else if (IsEqualGUID(riid, IID_IWebResourceLoadDelegate))
-	{
 		*ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
-	}
 	else
-	{
 		return E_NOINTERFACE;
-	}
+
+	AddRef();
 	return S_OK;
 }
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::identifierForInitialRequest(
-		/* [in] */ IWebView *webView,
-		/* [in] */ IWebURLRequest *request,
-		/* [in] */ IWebDataSource *dataSource,
-		/* [in] */ unsigned long identifier)
-	{
-		return E_NOTIMPL;
-	}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::willSendRequest(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebURLRequest *request,
-		/* [in] */ IWebURLResponse *redirectResponse,
-		/* [in] */ IWebDataSource *dataSource,
-		/* [retval][out] */ IWebURLRequest **newRequest)
-	{
-		BSTR u;
-		request->URL(&u);
-		std::wstring u2(u);
-		std::string url(::WideToUTF8(u2));
-		printf("WILL SEND REQUEST: %s\n", url.c_str());
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::identifierForInitialRequest(
+	/* [in] */ IWebView *webView,
+	/* [in] */ IWebURLRequest *request,
+	/* [in] */ IWebDataSource *dataSource,
+	/* [in] */ unsigned long identifier)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveAuthenticationChallenge(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebURLAuthenticationChallenge *challenge,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::willSendRequest(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebURLRequest *request,
+	/* [in] */ IWebURLResponse *redirectResponse,
+	/* [in] */ IWebDataSource *dataSource,
+	/* [retval][out] */ IWebURLRequest **newRequest)
+{
+	BSTR u;
+	request->URL(&u);
+	std::wstring u2(u);
+	std::string url(::WideToUTF8(u2));
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didCancelAuthenticationChallenge(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebURLAuthenticationChallenge *challenge,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveAuthenticationChallenge(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebURLAuthenticationChallenge *challenge,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveResponse(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebURLResponse *response,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didCancelAuthenticationChallenge(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebURLAuthenticationChallenge *challenge,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveContentLength(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ UINT length,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveResponse(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebURLResponse *response,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didFinishLoadingFromDataSource(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didReceiveContentLength(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ UINT length,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didFailLoadingWithError(
-		/* [in] */ IWebView *webView,
-		/* [in] */ unsigned long identifier,
-		/* [in] */ IWebError *error,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didFinishLoadingFromDataSource(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 
-	HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::plugInFailedWithError(
-		/* [in] */ IWebView *webView,
-		/* [in] */ IWebError *error,
-		/* [in] */ IWebDataSource *dataSource)
-	{
-		return E_NOTIMPL;
-	}
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::didFailLoadingWithError(
+	/* [in] */ IWebView *webView,
+	/* [in] */ unsigned long identifier,
+	/* [in] */ IWebError *error,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
+
+HRESULT STDMETHODCALLTYPE Win32WebKitResourceLoadDelegate::plugInFailedWithError(
+	/* [in] */ IWebView *webView,
+	/* [in] */ IWebError *error,
+	/* [in] */ IWebDataSource *dataSource)
+{
+	return E_NOTIMPL;
+}
 }

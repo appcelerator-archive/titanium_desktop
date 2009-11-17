@@ -52,17 +52,13 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::QueryInterface(
 {
 	*ppvObject = 0;
 	if (IsEqualGUID(riid, IID_IUnknown))
-	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	}
 	else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate))
-	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	}
 	else
-	{
 		return E_NOINTERFACE;
-	}
+
+	AddRef();
 	return S_OK;
 }
 

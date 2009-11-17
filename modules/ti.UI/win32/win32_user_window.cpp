@@ -144,12 +144,12 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_SETFOCUS:
-			window->FireEvent(Event::FOCUSED);
+			// The focus event will be fired by the UIDelegate
 			window->Focus(); // Focus the WebView and not the main window.
 			return 0;
 
 		case WM_KILLFOCUS:
-			window->FireEvent(Event::UNFOCUSED);
+			// The unfocus event will be fired by the UIDelegate
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_MOVE:
