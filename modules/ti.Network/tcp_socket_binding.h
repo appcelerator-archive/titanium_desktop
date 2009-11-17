@@ -28,6 +28,8 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketReactor.h>
 #include <Poco/Net/SocketNotification.h>
+#include <Poco/NObserver.h>
+#include <queue>
 
 using namespace Poco;
 using namespace Poco::Net;
@@ -39,6 +41,7 @@ namespace ti
 	public:
 		TCPSocketBinding(Host *ti_host, std::string host, int port);
 		virtual ~TCPSocketBinding();
+
 	private:
 		Host* ti_host;
 		std::string host;
@@ -47,14 +50,22 @@ namespace ti
 		SocketReactor reactor;
 		Thread thread;
 		bool opened;
-		std::string buffer;
-		Poco::Mutex bufferMutex; 
+
+		std::queue<BlobRef> sendData;
+		Poco::Mutex sendDataMutex;
+		size_t currentSendDataOffset;
+		bool readStarted;
 
 		KMethodRef onRead;
 		KMethodRef onWrite;
 		KMethodRef onTimeout;
 		KMethodRef onError;
 		KMethodRef onReadComplete;
+
+		NObserver<TCPSocketBinding, ReadableNotification> readObserver;
+		NObserver<TCPSocketBinding, WritableNotification> writeObserver;
+		NObserver<TCPSocketBinding, TimeoutNotification> timeoutObserver;
+		NObserver<TCPSocketBinding, ErrorNotification> errorObserver;
 
 		void Connect(const ValueList& args, KValueRef result);
 		void Write(const ValueList& args, KValueRef result);
@@ -66,8 +77,8 @@ namespace ti
 		void SetOnError(const ValueList& args, KValueRef result);
 		void SetOnReadComplete(const ValueList& args, KValueRef result);
 
-		void OnRead(const Poco::AutoPtr<ReadableNotification>& n);
-		void OnWrite(const Poco::AutoPtr<WritableNotification>& n);
+		void ReadyForRead(const Poco::AutoPtr<ReadableNotification>& n);
+		void ReadyForWrite(const Poco::AutoPtr<WritableNotification>& n);
 		void OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n);
 		void OnError(const Poco::AutoPtr<ErrorNotification>& n);
 	};
