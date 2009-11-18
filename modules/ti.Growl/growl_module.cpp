@@ -24,12 +24,8 @@ namespace ti
 
 	void GrowlModule::Initialize()
 	{
-
 #if defined(OS_OSX)
-		// load our variables
-		GrowlOSX *g = new GrowlOSX(host->GetGlobalObject());
-		binding = g;
-		g->CopyToApp(host,this);
+		binding = new GrowlOSX(host->GetGlobalObject());
 #elif defined(OS_WIN32)
 		binding = new SnarlWin32(host->GetGlobalObject());
 #elif defined(OS_LINUX)
@@ -37,7 +33,7 @@ namespace ti
 #endif
 
 		// set our ti.Growl
-		KValueRef value = Value::NewObject(binding);
+		KValueRef value(Value::NewObject(binding));
 		host->GetGlobalObject()->Set("Growl", value);
 	}
 
