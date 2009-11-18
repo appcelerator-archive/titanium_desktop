@@ -1,22 +1,12 @@
-#!/usr/bin/env python
+import os.path as path
+import tools
+from kroll import BuildConfig
 
-# this will ensure that you're using the right version of scons
 EnsureSConsVersion(1,2,0)
-# this will ensure that you're using the right version of python
 EnsurePythonVersion(2,5)
 
-# common SConscripts
-
-import os, re, sys, inspect, os.path as path
-from sets import Set
-import subprocess, distutils.dir_util as dir_util
-sys.path.append(path.join(path.abspath('.'), 'build'))
-import titanium_version
-
-from kroll import BuildConfig
 build = BuildConfig(
-	PRODUCT_VERSION = titanium_version.version,
-	INSTALL_PREFIX = '/usr/local',
+	PRODUCT_VERSION = tools.get_titanium_version(),
 	PRODUCT_NAME = 'Titanium',
 	GLOBAL_NS_VARNAME = 'Titanium',
 	CONFIG_FILENAME = 'tiapp.xml',
