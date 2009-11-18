@@ -302,8 +302,10 @@
 	});
 
 	/**
-	 * @tiapi(method=True,name=UpdateManager.installAppUpdate,since=0.4) Install an application update received from update monitor. This method will cause the process to first be restarted for the update to begin.
-	 * @tiarg(for=UpdateManager.installAppUpdate,name=spec,type=Object) Update spec object received from update service.
+	 * @tiapi(method=True,name=UpdateManager.installAppUpdate,since=0.4)
+	 * @tiapi Install an application update received from update monitor. This
+	 * @tiapi method will cause the process to first be restarted for the update to begin.
+	 * @tiarg[Object, updateSpec] Update spec object received from update service.
 	 */
 	Titanium.API.set("UpdateManager.installAppUpdate", function(updateSpec)
 	{
@@ -319,7 +321,7 @@
 		update.write(updateSpec.manifest);
 		
 		// restart ourselves to cause the install
-		Titanium.Process.restart();
+		Titanium.App.restart();
 	}
 	
 

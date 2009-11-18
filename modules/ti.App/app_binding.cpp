@@ -115,7 +115,13 @@ namespace ti
 		 * @tiapi(method=True,name=App.exit,since=0.2)
 		 * @tiapi Exit the application.
 		 */
-		this->SetMethod("exit",&AppBinding::Exit);
+		this->SetMethod("exit", &AppBinding::Exit);
+
+		/**
+		 * @tiapi(method=True,name=App.restart,since=0.9)
+		 * @tiapi Restart the application.
+		 */
+		this->SetMethod("restart", &AppBinding::Restart);
 
 		/**
 		 * @tiapi(method=True,name=App.createProperties,since=0.6)
