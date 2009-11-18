@@ -14,7 +14,7 @@ namespace ti
 void AppBinding::Restart(const ValueList& args, KValueRef result)
 {
 	Host* host = Host::GetInstance();
-	std::string cmdline(host->GetApplication->arguments.at(0));
+	std::string cmdline(host->GetApplication()->arguments.at(0));
 
 	NSProcessInfo* p = [NSProcessInfo processInfo];
 	NSString* path = [[NSBundle mainBundle] bundlePath];
