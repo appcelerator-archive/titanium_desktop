@@ -15,12 +15,18 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 	Host* host = Host::GetInstance();
 	std::string cmdline(host->GetApplication()->arguments.at(0));
 
-	// Remove all "'s
-	while ((size_t idx = cmdline.find('\"')) != std::string::npos)
-		cmdline.replace(idx, 1, "");
+	// Remove all quotes.
+	size_t i = cmdline.find('\"');
+	while (i != std::string::npos)
+	{
+		cmdline.replace(i, 1, "");
+		i = cmdline.find('\"');
+	}
 
 	std::string script = "\"" + cmdline + "\" &";
 	system(script.c_str());
+
+	host->Exit(0);
 }
 
 }

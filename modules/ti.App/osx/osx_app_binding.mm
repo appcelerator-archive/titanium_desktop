@@ -27,6 +27,8 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 		killArg1AndOpenArg2Script, nil];
 	NSTask* restartTask = [NSTask launchedTaskWithLaunchPath:@"/bin/sh" arguments:shArgs];
 	[restartTask waitUntilExit]; //wait for killArg1AndOpenArg2Script to finish
+
+	host->Exit(0);
 }
 
 }

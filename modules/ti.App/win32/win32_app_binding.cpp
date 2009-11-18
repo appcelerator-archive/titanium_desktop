@@ -34,7 +34,8 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 		&pi);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
-	Host::GetInstance()->Exit(0);
+
+	host->Exit(0);
 }
 
 }
