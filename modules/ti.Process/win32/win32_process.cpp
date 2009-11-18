@@ -142,11 +142,13 @@ namespace ti
 		nativeOut->DuplicateWrite(hProc, &startupInfo.hStdOutput);
 		nativeErr->DuplicateWrite(hProc, &startupInfo.hStdError);
 		
-		std::string commandLine = ArgListToString(args);
+		std::string commandLine(ArgListToString(args));
+		std::wstring commandLineW(::UTF8ToWide(commandLine));
 		logger->Debug("Launching: %s", commandLine.c_str());
+
 		PROCESS_INFORMATION processInfo;
-		BOOL rc = CreateProcessA(NULL,
-			(char*)commandLine.c_str(),
+		BOOL rc = CreateProcessW(NULL,
+			(wchar_t*) commandLineW.c_str(),
 			NULL,
 			NULL,
 			TRUE,

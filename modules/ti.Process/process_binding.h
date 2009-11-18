@@ -19,6 +19,7 @@ namespace ti
 		ProcessBinding();
 		virtual ~ProcessBinding();
 		static std::map<std::string,int> signals;
+
 	private:
 		void CreateProcess(const ValueList& args, KValueRef result);
 		void CreatePipe(const ValueList& args, KValueRef result);
