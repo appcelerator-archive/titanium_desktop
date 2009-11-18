@@ -3,5 +3,6 @@
 *.swo
 /vc80.pdb
 /vc80.idb
+*.pyc
 
 /installation/self_extractor/progress.res
