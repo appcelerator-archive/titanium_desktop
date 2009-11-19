@@ -221,7 +221,7 @@ void Win32UserWindow::InitWindow()
 
 	// these APIs are semi-private -- we probably shouldn't mark them
 	// make our HWND available to 3rd party devs without needing our headers
-	KValueRef windowHandle = Value::NewVoidPtr((void*) this->windowHandle);
+	KValueRef windowHandle = Value::NewObject(new VoidPtr(this->windowHandle));
 	this->Set("windowHandle", windowHandle);
 	logger->Debug("Initializing windowHandle: %i", windowHandle);
 

@@ -1224,7 +1224,8 @@ namespace ti
 
 	static KValueRef FileChooserWork(const ValueList& args)
 	{
-		void* data = args.at(0)->ToVoidPtr();
+		AutoPtr<VoidPtr> dataObject(args.at(0)->ToObject().cast<VoidPtr>());
+		void* data = dataObject->GetPtr();
 		FileChooserJob* job = static_cast<FileChooserJob*>(data);
 		KListRef results = new StaticBoundList();
 		static std::string openFilesDirectory("");
@@ -1338,7 +1339,7 @@ namespace ti
 		job->mode = SELECT_FILE;
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
 		RunOnMainThread(work, args, false);
 	}
 
@@ -1361,7 +1362,7 @@ namespace ti
 		job->mode = SELECT_FOLDER;
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
 		RunOnMainThread(work, args, false);
 	}
 
@@ -1381,7 +1382,7 @@ namespace ti
 		job->mode = SAVE_FILE;
 
 		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
 		RunOnMainThread(work, args, false);
 	}
 
