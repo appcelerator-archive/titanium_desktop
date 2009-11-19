@@ -1,5 +1,6 @@
 import os.path as path
 import tools
+import distutils.dir_util as dir_util
 from kroll import BuildConfig
 
 EnsureSConsVersion(1,2,0)
