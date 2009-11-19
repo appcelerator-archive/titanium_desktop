@@ -86,6 +86,7 @@ namespace ti
 		void Receive(const ValueList& args, KValueRef result);
 		void SetRequestHeader(const ValueList& args, KValueRef result);
 		void GetResponseHeader(const ValueList& args, KValueRef result);
+		void GetResponseHeaders(const ValueList& args, KValueRef result);
 		void SetCookie(const ValueList& args, KValueRef result);
 		void ClearCookies(const ValueList& args, KValueRef result);
 		void GetCookie(const ValueList& args, KValueRef result);

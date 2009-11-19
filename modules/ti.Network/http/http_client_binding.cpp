@@ -111,11 +111,19 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True, name=Network.HTTPClient.getResponseHeader, since=0.3)
-		 * @tiapi Returns the value of a response header
-		 * @tiarg[String, name] the response header name
-		 * @tiresult[String] the value of the response header
+		 * @tiapi Return the value of a response header, given it's name. If the given
+		 * @tiapi name occurs multiple times, this method will only return one occurence.
+		 * @tiarg[String, name] The response header name.
+		 * @tiresult[String] The value of the response header.
 		 */
 		this->SetMethod("getResponseHeader", &HTTPClientBinding::GetResponseHeader);
+
+		/**
+		 * @tiapi(method=True, name=Network.HTTPClient.getResponseHeaders, since=0.8)
+		 * @tiapi Return all response headers as an array of two element arrays.
+		 * @tiresult[Array<Array<String, String>>] The array of response headers.
+		 */
+		this->SetMethod("getResponseHeaders", &HTTPClientBinding::GetResponseHeaders);
 
 		/**
 		 * @tiapi(method=True, name=Network.HTTPClient.setCookie, since=0.7)
@@ -426,7 +434,7 @@ namespace ti
 	void HTTPClientBinding::GetResponseHeader(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getResponseHeader", "s");
-		std::string name = args.GetString(0);
+		std::string name(args.GetString(0));
 
 		if (this->responseHeaders.has(name))
 		{
@@ -436,6 +444,23 @@ namespace ti
 		{
 			result->SetNull();
 		}
+	}
+
+	void HTTPClientBinding::GetResponseHeaders(const ValueList& args, KValueRef result)
+	{
+		KListRef headers(new StaticBoundList());
+
+		NameValueCollection::ConstIterator i = this->responseHeaders.begin();
+		while (i != this->responseHeaders.end())
+		{
+			KListRef headerEntry(new StaticBoundList());
+			headerEntry->Append(Value::NewString(i->first));
+			headerEntry->Append(Value::NewString(i->second));
+			headers->Append(Value::NewList(headerEntry));
+			i++;
+		}
+
+		result->SetList(headers);
 	}
 
 	void HTTPClientBinding::SetCookie(const ValueList& args, KValueRef result)
@@ -819,7 +844,7 @@ namespace ti
 
 			std::string headerName(header.substr(0, splitPos));
 			std::string headerValue(FileUtils::Trim(header.substr(splitPos + 1)));
-			nextResponseHeaders.set(headerName, headerValue);
+			nextResponseHeaders.add(headerName, headerValue);
 
 			Poco::toLowerInPlace(headerName);
 			if (headerName == "set-cookie")

@@ -458,12 +458,42 @@ describe("Network.HTTPClient",
 		value_of(this.client.responseText).should_be("Got the headers!");
 	},
 
-	test_response_headers: function()
+	test_get_response_header: function()
 	{
 		this.client.open("GET", this.url + "responseheaders", false);
 		this.client.send();
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.getResponseHeader("Foo")).should_be("Bar");
 		value_of(this.client.getResponseHeader("Head")).should_be("Tail");
+	},
+
+	test_get_response_headers: function()
+	{
+		this.client.open("GET", this.url + "responseheaders", false);
+		this.client.send();
+		value_of(this.client.status).should_be("200");
+
+		var headers = this.client.getResponseHeaders();
+		value_of(headers).should_be_array();
+		var sawFoo = false;
+		var sawHead = false;
+
+		for (var i = 0; i < headers.length; i++)
+		{
+			var h = headers[i]
+			if (h[0] == "Foo")
+			{
+				sawFoo = true;
+				value_of(h[1]).should_be("Bar");
+			}
+			if (h[0] == "Head")
+			{
+				sawHead = true;
+				value_of(h[1]).should_be("Tail");
+			}
+		}
+
+		//value_of(sawFoo).should_be_true();
+		//value_of(sawHead).should_be_true();
 	},
 });
