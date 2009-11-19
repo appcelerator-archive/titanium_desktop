@@ -308,6 +308,11 @@ def create_installer(builder):
 	banner_bmp = get_bmp('banner-bmp', default_banner_bmp)
 	
 	titanium_installer_dll = os.path.join(support_dir, "titanium_installer.dll")
+	app_version = builder.appversion
+	version_parts = len(app_version.split("."))
+	if version_parts < 3:
+		app_version += ('.0' * (version_parts-1))
+
 	common_args = {
 		"app_name": builder.appname,
 		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
@@ -316,7 +321,7 @@ def create_installer(builder):
 		"app_guid": builder.options.manifest['guid'].upper(),
 		"app_publisher": builder.options.manifest['publisher'],
 		"app_description": builder.options.manifest['desc'],
-		"app_version": builder.appversion,
+		"app_version": app_version,
 		"upgrade_guid": gen_guid(), # TODO : we need to cache the upgrade guid and send it to the packaging server..
 		"program_menu_guid": gen_guid(),
 		"app_language": app_language,
