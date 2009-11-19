@@ -749,6 +749,8 @@ void Win32UserWindow::SetTransparency(double transparency)
 	SetWindowLong(windowHandle, GWL_EXSTYLE, GetStyleFromConfig());
 	SetLayeredWindowAttributes(windowHandle, 0,
 		(BYTE) floor(config->GetTransparency() * 255), LWA_ALPHA);
+	SetLayeredWindowAttributes(windowHandle, transparencyColor, 0,
+		LWA_COLORKEY);
 }
 
 void Win32UserWindow::SetFullscreen(bool fullscreen)

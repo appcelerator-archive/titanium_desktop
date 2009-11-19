@@ -50,10 +50,35 @@
 		}
 		
 		// adjust background transparency for window if needed
-		if(Titanium.platform == "win32") {
-			if(Titanium.UI.currentWindow.getTransparency() < 1) {
-				var c = Titanium.UI.currentWindow.getTransparencyColor();
-				document.body.style.background='#' + c;
+		if (Titanium.platform == "win32" &&
+			Titanium.UI.currentWindow.getTransparency() < 1)
+		{
+			var color = "#" + Titanium.UI.currentWindow.getTransparencyColor();
+			if (document.body.style.background == "transparent")
+			{
+				document.body.style.background = color;
+			}
+			if (document.body.style.backgroundColor == "transparent")
+			{
+				document.body.style.backgroundColor = color;
+			}
+			// also check external stylesheets, but still modify the DOM (hurray)
+			for (var i = 0; i < document.styleSheets.length; i++)
+			{
+				for (var j = 0; j < document.styleSheets[i].cssRules.length; j++)
+				{
+					var rule = document.styleSheets[i].cssRules[j];
+					if (rule.selectorText != "body") continue;
+					
+					if (rule.style.background == "transparent")
+					{
+						document.body.style.background = color;
+					}
+					if (rule.style.backgroundColor == "transparent")
+					{
+						document.body.style.backgroundColor = color;
+					}
+				}
 			}
 		}
 
