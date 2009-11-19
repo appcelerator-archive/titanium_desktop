@@ -3,6 +3,7 @@
    <id>com.titaniumapp.testapp</id>
    <name>Testapp</name>
    <version>0.1</version>
+   <analytics>false</analytics>
    <window>
       <id>initial</id>
       <title>Titanium Test Application</title>

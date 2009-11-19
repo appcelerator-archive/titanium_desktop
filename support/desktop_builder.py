@@ -91,12 +91,6 @@ class DesktopBuilder(object):
 			dir_util.copy_tree(netinstaller,installer,preserve_symlinks=True)
 			# copy in the custom app icon into the net installer
 			shutil.copy(self.app_icns,os.path.join(installer,'Contents','Resources','English.lproj'))
-		elif options.platform == 'win32':
-			installer = os.path.join(self.contents_dir,'installer')
-			if not os.path.exists(installer):
-				os.makedirs(installer)
-			netinstaller = os.path.join(options.runtime_dir, 'installer', 'Installer.exe')
-			shutil.copy(netinstaller, installer)
 		elif options.platform == 'linux':
 			installer = os.path.join(self.contents_dir,'installer')
 			if not os.path.exists(installer):
