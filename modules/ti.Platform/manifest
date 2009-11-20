@@ -1,5 +1,0 @@
-name: ti.Platform
-version: 0.1
-description: ti.Platform
-os: win32, linux, osx
-depends:

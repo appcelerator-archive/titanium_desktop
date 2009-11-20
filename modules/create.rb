@@ -175,17 +175,6 @@ build.mark_build_target(t)
 END
 sc.close
 
-mf = File.open(File.join(module_dir_name,"manifest"),'w')
-mf.puts <<-END
-#name: #{module_dir_name}
-#version: 0.1
-#description: #{module_dir_name}
-#os: win32, linux, osx
-#depends:
-END
-mf.close
-
-
 puts "Created: #{module_dir_name}"
 exit 0
 

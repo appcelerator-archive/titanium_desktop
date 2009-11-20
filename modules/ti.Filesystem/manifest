@@ -1,4 +1,0 @@
-name: ti.Filesystem
-version: 0.1
-description: ti.Filesystem module
-os: win32, osx, linux
