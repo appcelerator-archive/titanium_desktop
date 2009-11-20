@@ -26,7 +26,6 @@ class DesktopPackager(object):
 			elif builder.options.platform == 'linux':
 				self.package = self.create_tgz(builder)
 			elif builder.options.platform == 'win32':
-				#self.package = self.create_zip(builder)
 				self.package = self.create_wix(builder)
 
 	def create_wix(self, builder):

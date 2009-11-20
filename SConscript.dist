@@ -65,7 +65,6 @@ def build_sdk(target, source, env):
 	bundleSupport(platformSupportDir)
 	
 	if build.is_win32():
-		sdkZip.write(os.path.join(build.dir, 'self_extractor.exe'), '/'.join(['sdk', build.os, baseVersion, 'self_extractor.exe']))
 		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'), '/'.join(['sdk', build.os, baseVersion, 'titanium_installer.dll']))
 	
 	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, baseVersion))
