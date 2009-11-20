@@ -29,21 +29,17 @@ def build_sdk(target, source, env):
 	print "Packing %s " % sdkZipPath
 	
 	sdkZip = zipfile.ZipFile(sdkZipPath, 'w', zipfile.ZIP_DEFLATED)
-	
-	sys.path.append(path.join(build.titanium_source_dir, 'build'))
-	import titanium_version
-	baseVersion = titanium_version.version
-	
+
 	def buildRuntimeZip(file):
 		relativePath = file.replace(build.runtime_build_dir, '')
-		zipPath = '/'.join(['runtime', build.os, baseVersion, relativePath])
+		zipPath = '/'.join(['runtime', build.os, build.version, relativePath])
 		futils.AddToZip(sdkZip, file, zipPath)
 		
 	futils.walk_dir(build.runtime_build_dir, buildRuntimeZip, exclude=excludes, dirs=True)
 	
 	def buildModuleZip(file, module):
 		relativePath = file.replace(m.build_dir, '')
-		zipPath = '/'.join(['modules', build.os, module.name, baseVersion, relativePath])
+		zipPath = '/'.join(['modules', build.os, module.name, build.version, relativePath])
 		futils.AddToZip(sdkZip, file, zipPath)
 	
 	for m in build.modules:
@@ -56,18 +52,19 @@ def build_sdk(target, source, env):
 			exclude = fileExt in excludes or file == fileExt
 			
 			if not exclude and path.isfile(supportFile):
-				sdkZip.write(supportFile, '/'.join(['sdk', build.os, baseVersion, file]))
+				sdkZip.write(supportFile, '/'.join(['sdk', build.os, build.version, file]))
 
 	supportDir = path.join(build.titanium_source_dir, 'support')
 	platformSupportDir = path.join(supportDir, build.os)
 	
 	bundleSupport(supportDir)
 	bundleSupport(platformSupportDir)
-	
+
 	if build.is_win32():
-		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'), '/'.join(['sdk', build.os, baseVersion, 'titanium_installer.dll']))
+		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'),
+		'/'.join(['sdk', build.os, build.version, 'titanium_installer.dll']))
 	
-	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, baseVersion))
+	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, build.version))
 	sdkZip.close()
 
 build.env.Append(BUILDERS = {'BuildSDK' : Builder(action=build_sdk)})
