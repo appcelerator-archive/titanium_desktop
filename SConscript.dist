@@ -4,7 +4,7 @@ import os.path as path, futils, os, zipfile, sys
 # Network installable zip files for distribution. We must
 # encase this in a builder because the files necessary for zipping
 # don't exist when this file is processed.
-excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd']
+excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd', '.cpp', '.obj', '.pyc', 'SConscript']
 def build_dist_zips(target, source, env):
 	
 	f = path.join(build.dist_dir, 'runtime-%s.zip' % build.version)
@@ -66,6 +66,7 @@ def build_sdk(target, source, env):
 	
 	if build.is_win32():
 		sdkZip.write(os.path.join(build.dir, 'self_extractor.exe'), '/'.join(['sdk', build.os, baseVersion, 'self_extractor.exe']))
+		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'), '/'.join(['sdk', build.os, baseVersion, 'titanium_installer.dll']))
 	
 	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, baseVersion))
 	sdkZip.close()
