@@ -240,6 +240,11 @@ describe("Ruby Tests",
 		procMethod = get_ruby_proc_arity(-2);
 		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
 	},
+	test_ruby_api_is_there: function()
+	{
+		// This test makes sure that the Ruby standard library  is around.
+		value_of(api_is_there()).should_be_true();
+	},
 	test_krubyobject_iterate_properties: function()
 	{
 		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
