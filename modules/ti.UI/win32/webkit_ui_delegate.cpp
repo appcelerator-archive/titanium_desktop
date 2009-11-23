@@ -116,8 +116,8 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewClose(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewClose() not implemented");
-	return E_NOTIMPL;
+	window->Close();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewFocus(

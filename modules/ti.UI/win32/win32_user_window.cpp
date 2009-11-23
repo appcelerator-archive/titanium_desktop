@@ -115,9 +115,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_CLOSE:
-			if (window->Close())
-				return DefWindowProc(hWnd, message, wParam, lParam);
-			else
+			if (!window->Close())
 				return 0;
 
 		case WM_GETMINMAXINFO:
@@ -368,7 +366,7 @@ Win32UserWindow::~Win32UserWindow()
 	if (mainFrame)
 		mainFrame->Release();
 
-	DestroyWindow(windowHandle);
+	this->Close();
 }
 
 std::string Win32UserWindow::GetTransparencyColor()
@@ -511,6 +509,7 @@ bool Win32UserWindow::Close()
 	{
 		this->RemoveOldMenu();
 		UserWindow::Closed();
+		DestroyWindow(windowHandle);
 	}
 
 	return !this->active;
@@ -1196,6 +1195,8 @@ KListRef Win32UserWindow::SelectDirectory(
 
 void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 {
+	if (!minMaxInfo) return;
+	
 	static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
 	static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
 	int maxWidth = (int) GetMaxWidth();
