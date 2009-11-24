@@ -1,5 +1,4 @@
-/**
- * Appcelerator Titanium - licensed under the Apache Public License 2
+/** * Appcelerator Titanium - licensed under the Apache Public License 2
  * SEE LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
@@ -319,10 +318,13 @@ void Win32UserWindow::InitWebKit()
 	_bstr_t tiProto("ti");
 	webView->registerURLSchemeAsLocal(tiProto.copy());
 
-	IWebViewPrivate *webViewPrivate;
+	IWebViewPrivate* webViewPrivate;
 	hr = webView->QueryInterface(IID_IWebViewPrivate, (void**) &webViewPrivate);
 	if (FAILED(hr))
 		HandleHResultError("Error getting IWebViewPrivate", hr);
+
+	if (this->GetTransparency())
+		webViewPrivate->setTransparent(true);
 
 	// Get the WebView's HWND
 	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
