@@ -42,8 +42,10 @@ namespace ti
 			AutoUserWindow CreateWindow(KObjectRef properties);
 			inline KObjectRef GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
-			bool IsToolWindow() {return this->config->IsToolWindow(); }
-			void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
+			inline bool IsToolWindow() {return this->config->IsToolWindow(); }
+			inline void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
+			inline bool HasTransparentBackground() { return this->config->HasTransparentBackground(); }
+			inline void SetTransparentBackground(bool transparentBackground) { this->config->SetTransparentBackground(transparentBackground); }
 
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::KValueRef);
 			void _GetDOMWindow(const kroll::ValueList&, kroll::KValueRef);
@@ -62,6 +64,8 @@ namespace ti
 			void _SetUsingChrome(const kroll::ValueList&, kroll::KValueRef);
 			void _IsToolWindow(const kroll::ValueList&, kroll::KValueRef);
 			void _SetToolWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _HasTransparentBackground(const kroll::ValueList&, kroll::KValueRef);
+			void _SetTransparentBackground(const kroll::ValueList&, kroll::KValueRef);
 			void _IsUsingScrollbars(const kroll::ValueList&, kroll::KValueRef);
 			void _IsFullscreen(const kroll::ValueList&, kroll::KValueRef);
 			void _SetFullscreen(const kroll::ValueList&, kroll::KValueRef);
@@ -111,7 +115,6 @@ namespace ti
 			void _SetVisible(const kroll::ValueList&, kroll::KValueRef);
 			void _GetTransparency(const kroll::ValueList&, kroll::KValueRef);
 			void _SetTransparency(const kroll::ValueList&, kroll::KValueRef);
-			void _GetTransparencyColor(const kroll::ValueList&, kroll::KValueRef);
 			void _GetMenu(const kroll::ValueList&, kroll::KValueRef);
 			void _SetMenu(const kroll::ValueList&, kroll::KValueRef);
 			void _GetContextMenu(const kroll::ValueList&, kroll::KValueRef);
@@ -169,28 +172,25 @@ namespace ti
 			virtual void Open();
 			virtual bool Close();
 			void Closed();
-	
 			virtual double GetX() = 0;
 			virtual void SetX(double x) = 0;
 			virtual double GetY() = 0;
 			virtual void SetY(double y) = 0;
-	
 			virtual double GetWidth() = 0;
 			virtual void SetWidth(double width) = 0;
 			virtual double GetMaxWidth() = 0;
 			virtual void SetMaxWidth(double width) = 0;
 			virtual double GetMinWidth() = 0;
 			virtual void SetMinWidth(double width) = 0;
-	
 			virtual double GetHeight() = 0;
 			virtual void SetHeight(double height) = 0;
 			virtual double GetMaxHeight() = 0;
 			virtual void SetMaxHeight(double height) = 0;
 			virtual double GetMinHeight() = 0;
 			virtual void SetMinHeight(double height) = 0;
-	
 			virtual Bounds GetBounds() = 0;
-			virtual void SetBounds(Bounds bounds) = 0;
+			void SetBounds(Bounds bounds);
+			virtual void SetBoundsImpl(Bounds bounds) = 0;
 			virtual std::string GetTitle() = 0;
 			virtual void SetTitle(std::string& title);
 			virtual void SetTitleImpl(std::string& title) = 0;
@@ -208,7 +208,6 @@ namespace ti
 			virtual bool IsVisible() = 0;
 			virtual double GetTransparency() = 0;
 			virtual void SetTransparency(double transparency) = 0;
-			virtual std::string GetTransparencyColor() { return ""; }
 			virtual void SetFullscreen(bool fullscreen) = 0;
 			virtual void SetUsingChrome(bool chrome) = 0;
 			virtual void SetMenu(AutoMenu menu) = 0;

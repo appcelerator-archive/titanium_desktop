@@ -299,6 +299,10 @@ public:
 		/* [in] */ HDC hDC,
 		/* [in] */ RECT rect) { return E_NOTIMPL; }
 
+	virtual HRESULT STDMETHODCALLTYPE paint(
+		/* [in] */ IWebView *webView,
+		/* [in] */ OLE_HANDLE bitmap);
+
 protected:
 	// IWebUIDelegatePrivate
 

@@ -344,7 +344,7 @@ namespace ti
 
 	void Clipboard::ClearImage()
 	{
-		return this->ClearImage();
+		this->ClearImageImpl();
 	}
 
 	std::vector<std::string>& Clipboard::GetURIList()

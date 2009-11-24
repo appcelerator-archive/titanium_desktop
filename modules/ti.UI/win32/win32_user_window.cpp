@@ -9,11 +9,9 @@
 #define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
 #define UnsetFlag(x,flag) (x &= ~flag)=
 #define USERWINDOW_WINDOW_CLASS L"Win32UserWindow"
+#define MEANING_OF_LIFE 42
 
 using namespace ti;
-
-// slightly off white, there's probably a better way to do this
-COLORREF transparencyColor = RGB(0xF9, 0xF9, 0xF9);
 
 static void* SetWindowUserData(HWND hwnd, void* userData)
 {
@@ -66,14 +64,115 @@ static void HandleHResultError(std::string message, HRESULT result, bool fatal=f
 		throw ValueException::FromString(message);
 }
 
-/*static*/
-Win32UserWindow* Win32UserWindow::FromWindow(HWND hWnd)
+static LRESULT CALLBACK UserWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	return reinterpret_cast<Win32UserWindow*> (GetWindowUserData(hWnd));
+	Win32UserWindow* window = Win32UserWindow::FromWindow(hWnd);
+	if (!window)
+		return DefWindowProc(hWnd, message, wParam, lParam);
+
+	LRESULT handled = 0;
+	if (window->HasTransparentBackground())
+	{
+		if (message == WM_ERASEBKGND)
+		{
+			handled = 1;
+		}
+		else if (message == WM_TIMER && wParam == window->GetTimer())
+		{
+			window->UpdateBitmap();
+			handled = 1;
+		}
+		else
+		{
+			IWebView* webView = window->GetWebView();
+			if (webView)
+			{
+				handled = webView->forwardingWindowProc(
+					reinterpret_cast<OLE_HANDLE>(hWnd), message, wParam, lParam);
+
+				// WebKit sometimes causes WM_PAINT messages to fire. We need to ensure
+				// we call DefWindowProc in this case, otherwise Windows will assume
+				// that it was not handled and continue to flood us with WM_PAINT messages.
+				if (message == WM_PAINT)
+				{
+					// Calling UpdateBitmap here, assures smooth resizing.
+					window->UpdateBitmap();
+					handled = 0;
+				}
+			}
+		}
+	}
+
+	switch (message)
+	{
+		case WM_CLOSE:
+			if (!window->Close())
+				handled = 1;
+			break;
+
+		case WM_GETMINMAXINFO:
+			window->GetMinMaxInfo((MINMAXINFO*) lParam);
+			handled = 1;
+			break;
+
+		case WM_SIZE:
+			window->FireEvent(Event::RESIZED);
+			if (wParam == SIZE_MAXIMIZED)
+			{
+				window->FireEvent(Event::MAXIMIZED);
+				window->ResizeSubViews();
+			}
+			else if (wParam == SIZE_MINIMIZED)
+			{
+				window->FireEvent(Event::MINIMIZED);
+			}
+			else
+			{
+				window->ResizeSubViews();
+			}
+			handled = 1;
+			break;
+
+		case WM_SETFOCUS:
+			// The focus event will be fired by the UIDelegate
+			window->Focus(); // Focus the WebView and not the main window.
+			handled = 1;
+			break;
+
+		case WM_MOVE:
+			window->FireEvent(Event::MOVED);
+			break;
+
+		case WM_SHOWWINDOW:
+			window->FireEvent(((BOOL)wParam) ? Event::SHOWN : Event::HIDDEN);
+			break;
+
+		case WM_MENUCOMMAND:
+		{
+			HMENU nativeMenu = (HMENU) lParam;
+			UINT position = (UINT) wParam;
+			UINT itemId = GetMenuItemID(nativeMenu, position);
+
+			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID)
+			{
+				handled = 1;
+				window->ShowInspector(false);
+			}
+			else
+			{
+				handled = Win32MenuItem::HandleClickEvent(nativeMenu, position);
+			}
+		}
+		break;
+	}
+
+	if (!handled)
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	else
+		return handled;
 }
 
-/*static*/
-void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
+static void RegisterWindowClass(HINSTANCE hInstance)
 {
 	static bool classInitialized = false;
 	if (!classInitialized)
@@ -81,14 +180,14 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 		WNDCLASSEXW wcex;
 		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
-		wcex.lpfnWndProc = Win32UserWindow::WndProc;
+		wcex.lpfnWndProc = UserWindowWndProc;
 		wcex.cbClsExtra = 0;
-		wcex.cbWndExtra = 0;
+		wcex.cbWndExtra = 4;
 		wcex.hInstance = hInstance;
 		wcex.hIcon = 0;
 		wcex.hIconSm = 0;
 		wcex.hCursor = LoadCursor(hInstance, IDC_ARROW);
-		wcex.hbrBackground = CreateSolidBrush(transparencyColor);
+		wcex.hbrBackground = 0;
 		wcex.lpszMenuName = L"";
 		wcex.lpszClassName = USERWINDOW_WINDOW_CLASS;
 
@@ -103,98 +202,34 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 }
 
 /*static*/
-LRESULT CALLBACK
-Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+Win32UserWindow* Win32UserWindow::FromWindow(HWND hWnd)
 {
-	Win32UserWindow* window = Win32UserWindow::FromWindow(hWnd);
+	return reinterpret_cast<Win32UserWindow*>(GetWindowUserData(hWnd));
+}
 
-	switch (message)
+/*static*/
+AutoPtr<Win32UserWindow> Win32UserWindow::FromWebView(IWebView* webView)
+{
+	std::vector<AutoUserWindow>& openWindows(UIBinding::GetInstance()->GetOpenWindows());
+	for (size_t i = 0; i < openWindows.size(); i++)
 	{
-		case WM_DESTROY:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		case WM_CLOSE:
-			if (!window->Close())
-				return 0;
-
-		case WM_GETMINMAXINFO:
-			if (window)
-			{
-				window->GetMinMaxInfo((MINMAXINFO*) lParam);
-			}
-			break;
-
-		case WM_SIZE:
-			if (window->webView)
-			{
-				window->ResizeSubViews();
-				window->FireEvent(Event::RESIZED);
-				if (wParam == SIZE_MAXIMIZED)
-				{
-					window->FireEvent(Event::MAXIMIZED);
-				}
-				else if (wParam == SIZE_MINIMIZED)
-				{
-					window->FireEvent(Event::MINIMIZED);
-				}
-			}
-			break;
-
-		case WM_SETFOCUS:
-			// The focus event will be fired by the UIDelegate
-			window->Focus(); // Focus the WebView and not the main window.
-			return 0;
-
-		case WM_KILLFOCUS:
-			// The unfocus event will be fired by the UIDelegate
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		case WM_MOVE:
-			window->FireEvent(Event::MOVED);
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		case WM_SHOWWINDOW:
-			window->FireEvent(((BOOL)wParam) ? Event::SHOWN : Event::HIDDEN);
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
-		case WM_MENUCOMMAND:
+		AutoPtr<Win32UserWindow> userWindow(openWindows.at(i).cast<Win32UserWindow>());
+		if (userWindow->webView == webView)
 		{
-			HMENU nativeMenu = (HMENU) lParam;
-			UINT position = (UINT) wParam;
-			UINT itemId = GetMenuItemID(nativeMenu, position);
-
-			if (itemId == WEB_INSPECTOR_MENU_ITEM_ID)
-			{
-				Win32UserWindow* inspectorWindow = Win32UserWindow::FromWindow(hWnd);
-				if (inspectorWindow)
-					inspectorWindow->ShowInspector(false);
-				break;
-
-			}
-			else if (Win32MenuItem::HandleClickEvent(nativeMenu, position))
-			{
-				break;
-			}
-			else
-			{
-				return DefWindowProc(hWnd, message, wParam, lParam);
-			}
+			return userWindow;
 		}
-
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-
 	return 0;
 }
 
-DWORD Win32UserWindow::GetStyleFromConfig() const
+
+DWORD Win32UserWindow::GetStyleFromConfig()
 {
 	DWORD style = WS_EX_APPWINDOW;
 	if (config->IsToolWindow())
 		style = WS_EX_TOOLWINDOW;
 
-	if (config->GetTransparency() < 1.0)
+	if (config->GetTransparency() < 1.0 || this->HasTransparentBackground())
 		style |= WS_EX_LAYERED;
 
 	return style;
@@ -202,27 +237,25 @@ DWORD Win32UserWindow::GetStyleFromConfig() const
 
 void Win32UserWindow::InitWindow()
 {
-	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
+	RegisterWindowClass(win32Host->GetInstanceHandle());
 
 	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
 	this->windowHandle = CreateWindowExW(GetStyleFromConfig(), USERWINDOW_WINDOW_CLASS,
-		titleW.c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
-		NULL, NULL, win32Host->GetInstanceHandle(), NULL);
+		titleW.c_str(), 0, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
+		NULL, NULL, win32Host->GetInstanceHandle(), (LPVOID)this);
 
-	if (this->windowHandle == NULL)
+	SetWindowUserData(this->windowHandle, reinterpret_cast<void*>(this));
+
+	if (this->HasTransparentBackground())
+		this->timer = ::SetTimer(this->windowHandle, MEANING_OF_LIFE, 1000/40, NULL);
+
+	if (!this->windowHandle)
 	{
-		std::ostringstream error;
-		error << "Error Creating Window: " << GetLastError();
-		logger->Error(error.str());
+		throw ValueException::FromFormat("Error Creating Window: %s",
+			Win32Utils::QuickFormatMessage(GetLastError()));
 	}
 
-	// these APIs are semi-private -- we probably shouldn't mark them
-	// make our HWND available to 3rd party devs without needing our headers
-	KValueRef windowHandle = Value::NewObject(new VoidPtr(this->windowHandle));
-	this->Set("windowHandle", windowHandle);
-	logger->Debug("Initializing windowHandle: %i", windowHandle);
-
-	SetWindowUserData(this->windowHandle, this);
+	this->SetTransparency(config->GetTransparency());
 }
 
 void Win32UserWindow::InitWebKit()
@@ -268,15 +301,30 @@ void Win32UserWindow::InitWebKit()
 	if (FAILED(hr))
 		HandleHResultError("Error setting ResourceLoadDelegate", hr, true);
 
-	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
-	if (FAILED(hr))
-		HandleHResultError("Error setting host window", hr, true);
-
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
-	hr = webView->initWithFrame(clientRect, 0, 0);
+
+	OLE_HANDLE oleWindowHandle = NULL;
+	if (this->HasTransparentBackground())
+		oleWindowHandle = (OLE_HANDLE) this->windowHandle;
+
+	IWebViewPrivate* webViewPrivate;
+	hr = webView->QueryInterface(IID_IWebViewPrivate, (void**) &webViewPrivate);
+	if (FAILED(hr))
+		HandleHResultError("Error getting IWebViewPrivate", hr);
+
+	if (!this->HasTransparentBackground())
+	{
+		hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
+		if (FAILED(hr))
+			HandleHResultError("Error setting host window", hr, true);
+	}
+
+	hr = webView->initWithFrame(clientRect, 0, 0, oleWindowHandle);
 	if (FAILED(hr))
 		HandleHResultError("Could not intialize WebView with frame", hr, true);
+
+	webViewPrivate->setTransparent(this->HasTransparentBackground());
 
 	IWebPreferences *prefs = NULL;
 	hr = WebKitCreateInstance(CLSID_WebPreferences, 0, IID_IWebPreferences,
@@ -318,14 +366,6 @@ void Win32UserWindow::InitWebKit()
 	_bstr_t tiProto("ti");
 	webView->registerURLSchemeAsLocal(tiProto.copy());
 
-	IWebViewPrivate* webViewPrivate;
-	hr = webView->QueryInterface(IID_IWebViewPrivate, (void**) &webViewPrivate);
-	if (FAILED(hr))
-		HandleHResultError("Error getting IWebViewPrivate", hr);
-
-	if (this->GetTransparency())
-		webViewPrivate->setTransparent(true);
-
 	// Get the WebView's HWND
 	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
 	if (FAILED(hr))
@@ -348,16 +388,30 @@ void Win32UserWindow::InitWebKit()
 
 Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	UserWindow(config, parent),
+	win32Host(Win32Host::Win32Instance()),
+	frameLoadDelegate(0),
+	uiDelegate(0),
+	policyDelegate(0),
+	resourceLoadDelegate(0),
+	restoreStyles(0),
+	chromeWidth(0),
+	chromeHeight(0),
+	windowHandle(0),
+	viewWindowHandle(0),
+	webkitBitmap(0),
+	timer(0),
+	webView(0),
+	mainFrame(0),
+	webInspector(0),
+	requiresDisplay(true),
 	menu(0),
 	activeMenu(0),
 	nativeMenu(0),
 	contextMenu(0),
-	defaultIcon(0),
-	webInspector(0),
-	win32Host(Win32Host::Win32Instance())
+	iconPath(""),
+	defaultIcon(0)
 {
 	logger = Logger::Get("UI.Win32UserWindow");
-
 }
 
 Win32UserWindow::~Win32UserWindow()
@@ -371,21 +425,96 @@ Win32UserWindow::~Win32UserWindow()
 	this->Close();
 }
 
-std::string Win32UserWindow::GetTransparencyColor()
+typedef struct DrawChildWindowData_
 {
-	char hexColor[7];
-	sprintf(hexColor, "%2x%2x%2x", (int) GetRValue(transparencyColor),
-		(int) GetGValue(transparencyColor), (int) GetBValue(transparencyColor));
-	std::string color(hexColor);
-	return color;
+	HWND parentWindow;
+	HDC hdc;
+} DrawChildWindowData;
+
+static BOOL CALLBACK DrawChildWindow(HWND hWnd, LPARAM lParam)
+{
+	DrawChildWindowData* data = reinterpret_cast<DrawChildWindowData*>(lParam);
+	HDC hdc = data->hdc;
+
+	// Figure out what the child window offset is inside the parent window.
+	RECT childWindowRect;
+	GetWindowRect(hWnd, &childWindowRect);
+	RECT windowRect;
+	GetWindowRect(data->parentWindow, &windowRect);
+	int xOffset = childWindowRect.left - windowRect.left;
+	int yOffset = childWindowRect.top - windowRect.top;
+
+	// Modify the world transform so that the plugin is positioned properly.
+	XFORM originalTransform;
+	GetWorldTransform(hdc, &originalTransform);
+	XFORM transform = originalTransform;
+	transform.eDx = xOffset;
+	transform.eDy = yOffset;
+	SetWorldTransform(hdc, &transform);
+
+	// SelectClipRgn does not appear to honor our world transform
+	// so offset it by the child window position inside the parent window.
+	HRGN windowRegion = CreateRectRgn(0, 0, 0, 0);
+	GetWindowRgn(hWnd, windowRegion);
+	OffsetRgn(windowRegion, xOffset, yOffset);
+	SelectClipRgn(hdc, windowRegion);
+
+	// Tell the plugin to paint onto our HDC.
+	SendMessage(hWnd, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(hdc),
+		PRF_CLIENT | PRF_CHILDREN | PRF_OWNED);
+
+	SetWorldTransform(hdc, &originalTransform);
+	return TRUE;
+}
+
+void Win32UserWindow::UpdateBitmap()
+{
+	if (!this->HasTransparentBackground())
+		return;
+
+	if (!this->webkitBitmap)
+		return;
+
+	HDC hdcScreen = GetDC(NULL);
+	HDC hdcMem = CreateCompatibleDC(hdcScreen);
+	HBITMAP hbmOld = (HBITMAP)SelectObject(hdcMem, webkitBitmap);
+
+	// Force child windows (plugins) to draw onto our backing store.
+	// The graphics mode of the HDC must be GM_ADVANCED so it will be capable
+	// of selecting world transforms (for positioning plugin draws).
+	SetGraphicsMode(hdcMem, GM_ADVANCED);
+	DrawChildWindowData data = {windowHandle, hdcMem};
+	EnumChildWindows(windowHandle, DrawChildWindow, reinterpret_cast<LPARAM>(&data));
+
+	BLENDFUNCTION blendFunction;
+	blendFunction.BlendOp = AC_SRC_OVER;
+	blendFunction.BlendFlags = 0;
+	blendFunction.SourceConstantAlpha = floor(config->GetTransparency() * 255);
+	blendFunction.AlphaFormat = AC_SRC_ALPHA;
+
+	POINT bitmapOrigin = {0, 0};
+
+	Bounds bounds = GetBounds();
+	POINT windowOrigin = {bounds.x, bounds.y};
+	SIZE windowSize = {bounds.width, bounds.height};
+	UpdateLayeredWindow(windowHandle, hdcScreen,
+		&windowOrigin, &windowSize,
+		hdcMem, &bitmapOrigin,
+		0, &blendFunction, ULW_ALPHA);
+
+	SelectObject(hdcMem, hbmOld);
+	DeleteDC(hdcMem);
+	ReleaseDC(NULL, hdcScreen);
 }
 
 void Win32UserWindow::ResizeSubViews()
 {
-	logger->Debug("Called resize subviews");
+	if (this->HasTransparentBackground() || !viewWindowHandle)
+		return;
+
 	RECT rcClient;
 	GetClientRect(windowHandle, &rcClient);
-	MoveWindow(viewWindowHandle, 0, 0, rcClient.right, rcClient.bottom, TRUE);
+	MoveWindow(viewWindowHandle, rcClient.left, rcClient.top, rcClient.right, rcClient.bottom, TRUE);
 }
 
 HWND Win32UserWindow::GetWindowHandle()
@@ -400,7 +529,31 @@ void Win32UserWindow::Hide()
 
 void Win32UserWindow::Show()
 {
-	ShowWindow(windowHandle, SW_SHOW);
+	if (requiresDisplay)
+	{
+		this->requiresDisplay = false;
+
+		// Stuff to do when we want a show to happen.
+		this->SetupFrame();
+		this->SetupState();
+		this->SetTopMost(config->IsTopMost() && config->IsVisible());
+		this->ResizeSubViews();
+
+		// Ensure we have valid restore values
+		restoreBounds = GetBounds();
+		restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
+
+		ShowWindow(windowHandle, SW_SHOW);
+
+		UpdateWindow(this->windowHandle);
+		if (this->windowHandle != viewWindowHandle)
+			UpdateWindow(viewWindowHandle);
+		SetFocus(viewWindowHandle);
+	}
+	else
+	{
+		ShowWindow(windowHandle, SW_SHOW);
+	}
 }
 
 void Win32UserWindow::Minimize()
@@ -435,7 +588,8 @@ bool Win32UserWindow::IsMaximized()
 
 void Win32UserWindow::Focus()
 {
-	SetFocus(viewWindowHandle);
+	if (viewWindowHandle && HasTransparentBackground())
+		SetFocus(viewWindowHandle);
 }
 
 void Win32UserWindow::Unfocus()
@@ -452,24 +606,10 @@ void Win32UserWindow::Unfocus()
 void Win32UserWindow::Open()
 {
 	this->InitWindow();
-	this->SetTransparency(config->GetTransparency());	
 	this->SetupDecorations();
-	this->SetupPosition();
-	this->SetupState();
-	this->SetTopMost(config->IsTopMost() && config->IsVisible());
 	this->InitWebKit();
-	this->ResizeSubViews();
 
-	// Ensure we have valid restore values
-	restoreBounds = GetBounds();
-	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
-
-	// Set this flag to indicate that when the frame is loaded we want to
-	// show the window - we do this to prevent white screen while the first
-	// URL loads in the WebView.
-	this->requiresDisplay = true;
-
-	// set initial window icon to icon associated with exe file
+	// Set initial window icon to icon associated with exe file
 	char exePath[MAX_PATH];
 	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
 	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
@@ -478,24 +618,10 @@ void Win32UserWindow::Open()
 		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
 			(LPARAM) defaultIcon);
 	}
-	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", 
-		windowHandle,  viewWindowHandle);
-
-	UpdateWindow(windowHandle);
-	UpdateWindow(viewWindowHandle);
-
-	ResizeSubViews();
 
 	UserWindow::Open();
 	this->SetURL(this->config->GetURL());
-	if (!this->requiresDisplay)
-	{
-		Show();
-		ShowWindow(viewWindowHandle, SW_SHOW);
-	}
 
-	SetupBounds();
-	SetupState();
 	FireEvent(Event::OPENED);
 }
 
@@ -512,6 +638,10 @@ bool Win32UserWindow::Close()
 	{
 		this->RemoveOldMenu();
 		UserWindow::Closed();
+
+		if (this->timer)
+			::KillTimer(this->windowHandle, this->timer);
+
 		DestroyWindow(windowHandle);
 	}
 
@@ -525,7 +655,7 @@ double Win32UserWindow::GetX()
 
 void Win32UserWindow::SetX(double x)
 {
-	this->SetupPosition();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetY()
@@ -535,7 +665,7 @@ double Win32UserWindow::GetY()
 
 void Win32UserWindow::SetY(double y)
 {
-	this->SetupPosition();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetWidth()
@@ -614,7 +744,7 @@ Bounds Win32UserWindow::GetBounds()
 	return bounds;
 }
 
-void Win32UserWindow::SetupBounds()
+void Win32UserWindow::SetupFrame()
 {
 	Bounds bounds;
 	bounds.x = this->config->GetX();
@@ -624,7 +754,7 @@ void Win32UserWindow::SetupBounds()
 	this->SetBounds(bounds);
 }
 
-void Win32UserWindow::SetBounds(Bounds bounds)
+void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 {
 	HWND desktop = GetDesktopWindow();
 	RECT desktopRect, boundsRect;
@@ -654,7 +784,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	
 	if (this->config->IsUsingChrome())
 	{
-		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), 
+		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE),
 			!menu.isNull());
 		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
 		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
@@ -665,8 +795,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 		this->chromeHeight = 0;
 	}
 
-	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y,
-		bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
+	MoveWindow(windowHandle, bounds.x, bounds.y, bounds.width, bounds.height, TRUE);
 }
 
 void Win32UserWindow::SetTitleImpl(std::string& title)
@@ -716,8 +845,6 @@ void Win32UserWindow::SetURL(std::string& url_)
 		error.append(url);
 		HandleHResultError(error, hr, true);
 	}
-
-	SetFocus(viewWindowHandle);
 }
 
 void Win32UserWindow::SetResizableImpl(bool resizable)
@@ -748,11 +875,12 @@ bool Win32UserWindow::IsVisible()
 
 void Win32UserWindow::SetTransparency(double transparency)
 {
-	SetWindowLong(windowHandle, GWL_EXSTYLE, GetStyleFromConfig());
-	SetLayeredWindowAttributes(windowHandle, 0,
-		(BYTE) floor(config->GetTransparency() * 255), LWA_ALPHA);
-	SetLayeredWindowAttributes(windowHandle, transparencyColor, 0,
-		LWA_COLORKEY);
+	if (!HasTransparentBackground())
+	{
+		SetWindowLong(windowHandle, GWL_EXSTYLE, GetStyleFromConfig());
+		SetLayeredWindowAttributes(windowHandle, 0,
+			(BYTE) floor(config->GetTransparency() * 255), LWA_ALPHA);
+	}
 }
 
 void Win32UserWindow::SetFullscreen(bool fullscreen)
@@ -762,16 +890,17 @@ void Win32UserWindow::SetFullscreen(bool fullscreen)
 		restoreBounds = GetBounds();
 		restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
 
-		HMONITOR hmon = MonitorFromWindow(this->windowHandle,
-				MONITOR_DEFAULTTONEAREST);
+		HMONITOR hmon = MonitorFromWindow(
+			this->windowHandle, MONITOR_DEFAULTTONEAREST);
 		MONITORINFO mi;
 		mi.cbSize = sizeof(MONITORINFO);
 		if (GetMonitorInfo(hmon, &mi))
 		{
 			SetWindowLong(windowHandle, GWL_STYLE, 0);
-			SetWindowPos(windowHandle, NULL, 0, 0, mi.rcMonitor.right
-					- mi.rcMonitor.left,
-					mi.rcMonitor.bottom - mi.rcMonitor.top, SWP_SHOWWINDOW);
+			SetWindowPos(windowHandle, NULL, 0, 0, 
+				mi.rcMonitor.right - mi.rcMonitor.left,
+				mi.rcMonitor.bottom - mi.rcMonitor.top,
+				SWP_SHOWWINDOW);
 		}
 
 		FireEvent(Event::FULLSCREENED);
@@ -858,7 +987,10 @@ void Win32UserWindow::SetupDecorations()
 
 	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
 
-	if (this->active && config->IsVisible())
+	// If the window is visible and the first frame load has completed
+	// then we need to hide and show the window so that the decorations
+	// refresh.
+	if (!requiresDisplay && config->IsVisible())
 	{
 		Hide();
 		Show();
@@ -934,12 +1066,11 @@ void Win32UserWindow::SetupMenu()
 	}
 }
 
-// called by frame load delegate to let the window know it's loaded
+// Called by FrameLoadDelegate to let the window know it's loaded.
 void Win32UserWindow::FrameLoaded()
 {
 	if (this->requiresDisplay && this->config->IsVisible())
 	{
-		this->requiresDisplay = false;
 		this->Show();
 	}
 }
@@ -963,23 +1094,11 @@ void Win32UserWindow::SetTopMost(bool topmost)
 	}
 }
 
-void Win32UserWindow::SetupPosition()
-{
-	Bounds b = GetBounds();
-	b.x = this->config->GetX();
-	b.y = this->config->GetY();
-	b.width = this->config->GetWidth();
-	b.height = this->config->GetHeight();	
-	this->SetBounds(b);
-}
-
-
 void Win32UserWindow::SetupSize()
 {
 	Bounds b = GetBounds();
 	b.width = this->config->GetWidth();
 	b.height = this->config->GetHeight();
-
 	this->SetBounds(b);
 }
 
@@ -1227,8 +1346,9 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
 }
 
-void Win32UserWindow::ParseSelectedFiles(
-	const wchar_t *s, std::vector<std::string> &selectedFiles)
+/*static*/
+void Win32UserWindow::ParseSelectedFiles(const wchar_t *s,
+	std::vector<std::string> &selectedFiles)
 {
 	std::string selectedFile;
 	
@@ -1271,9 +1391,8 @@ void Win32UserWindow::ParseSelectedFiles(
 
 void Win32UserWindow::RedrawMenu()
 {
-	if (this->windowHandle) {
+	if (this->windowHandle)
 		DrawMenuBar(this->windowHandle);
-	}
 }
 
 /*static*/

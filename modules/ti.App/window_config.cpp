@@ -37,7 +37,7 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 	return defaultValue;
 }
 
-void WindowConfig::SetDefaults ()
+void WindowConfig::SetDefaults()
 {
 	WindowConfig::windowCount++;
 	std::ostringstream winid;
@@ -63,6 +63,7 @@ void WindowConfig::SetDefaults ()
 #endif
 
 	this->transparency = 1.0;
+	this->transparentBackground = false;
 	this->width = 800;
 	this->height = 600;
 	this->x = WindowConfig::DEFAULT_POSITION;
@@ -105,6 +106,8 @@ void WindowConfig::UseProperties(KObjectRef properties)
 	toolWindow = CoerceBool(properties, "toolWindow", toolWindow);
 	topMost = CoerceBool(properties, "topMost", topMost);
 	visible = CoerceBool(properties, "visible", visible);
+	transparentBackground = CoerceBool(properties,
+		"transparentBackground", transparentBackground);
 	transparency = properties->GetDouble("transparency", transparency);
 
 #ifdef OS_OSX
@@ -227,6 +230,11 @@ WindowConfig::WindowConfig(void* data)
 		{
 			std::string value(ConfigUtils::GetNodeValue(child));
 			transparency = (float) atof(value.c_str());
+		}
+		else if (nodeName == "transparent-background")
+		{
+			transparentBackground =
+				ConfigUtils::GetNodeValueAsBool(child);
 		}
 		else if (nodeName == "x")
 		{

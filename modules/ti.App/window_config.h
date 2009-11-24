@@ -43,6 +43,7 @@ class TITANIUM_APP_API WindowConfig
 	bool toolWindow;
 	bool usingScrollbars;
 	bool topMost;
+	bool transparentBackground;
 #ifdef OS_OSX
 	bool texturedBackground;
 #endif
@@ -57,10 +58,8 @@ class TITANIUM_APP_API WindowConfig
 	WindowConfig(void* data);
 	WindowConfig(WindowConfig *config, std::string& url);
 	void UseProperties(KObjectRef properties);
-
 	std::string ToString();
 
-	// window accessors
 	std::string& GetURL() { return url; }
 	void SetURL(std::string& url_) { url = url_; }
 	std::string& GetURLRegex() { return urlRegex; }
@@ -113,6 +112,8 @@ class TITANIUM_APP_API WindowConfig
 	void SetUsingScrollbars(bool usingScrollbars_) { usingScrollbars = usingScrollbars_; }
 	bool IsTopMost() { return topMost; }
 	void SetTopMost(bool topmost_) { topMost = topmost_; }
+	bool HasTransparentBackground() { return transparentBackground; }
+	void SetTransparentBackground(bool transparentBackground) { this->transparentBackground = transparentBackground; }
 
 // probably long term a better way of doing this, but we need a quick way to disable these
 #ifdef OS_OSX

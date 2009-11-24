@@ -3,10 +3,12 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
+
 #include "../ui_module.h"
 #define _WINSOCKAPI_
 #include <cstdlib>
 #include <sstream>
+#include <windows.h>
 
 using std::vector;
 namespace ti
@@ -249,34 +251,56 @@ namespace ti
 		if (sizeY == 0)
 			sizeY = GetSystemMetrics(SM_CYSMICON);
 
-		cairo_surface_t* insurface = cairo_image_surface_create_from_png(path.c_str());
-		cairo_t* pngcr = cairo_create(insurface);
-		if (cairo_status(pngcr) != CAIRO_STATUS_SUCCESS) {
+		cairo_surface_t* pngSurface = cairo_image_surface_create_from_png(path.c_str());
+		cairo_t* pngcr = cairo_create(pngSurface);
+		if (cairo_status(pngcr) != CAIRO_STATUS_SUCCESS)
 			return 0;
-		}
 
-		cairo_surface_t* pngsurface = ScaleCairoSurface(insurface, sizeX, sizeY);
+		BITMAPINFO bitmapInfo;
+		memset(&bitmapInfo, 0, sizeof(bitmapInfo));
+		bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bitmapInfo.bmiHeader.biWidth = sizeX;
+		bitmapInfo.bmiHeader.biHeight = -sizeY; // Bottom-up
+		bitmapInfo.bmiHeader.biPlanes = 1;
+		bitmapInfo.bmiHeader.biBitCount = 32;
+		bitmapInfo.bmiHeader.biCompression = BI_RGB;
+		bitmapInfo.bmiHeader.biSizeImage = 0;
+		bitmapInfo.bmiHeader.biXPelsPerMeter = 1000;
+		bitmapInfo.bmiHeader.biYPelsPerMeter = bitmapInfo.bmiHeader.biXPelsPerMeter;
+		bitmapInfo.bmiHeader.biClrUsed = 0;
+		bitmapInfo.bmiHeader.biClrImportant = 0;
 
-		HDC hdc = GetDC(NULL);
-		HDC hdcmem = CreateCompatibleDC(hdc);
-		HBITMAP bitmap = CreateCompatibleBitmap(hdc, sizeX, sizeY);
-		HBITMAP holdbitmap = (HBITMAP) SelectObject(hdcmem, bitmap);
+		void* pixels = NULL;
+		HDC hdc = ::GetDC(NULL);
+		HBITMAP out = CreateDIBSection(hdc, &bitmapInfo, DIB_RGB_COLORS,
+			&pixels, NULL, 0);
+		::ReleaseDC(NULL, hdc);
 
-		cairo_surface_t* w32surface = cairo_win32_surface_create(hdcmem);
-		cairo_t *cr = cairo_create(w32surface);
-		cairo_set_source_surface(cr, pngsurface, 0, 0);
+		BITMAP info;
+		::GetObjectW(out, sizeof(info), &info);
+		cairo_surface_t* outSurface = cairo_image_surface_create_for_data(
+			(unsigned char*) pixels, CAIRO_FORMAT_ARGB32,
+			sizeX, sizeY, info.bmWidthBytes);
+		cairo_surface_t* scaledSurface = ScaleCairoSurface(pngSurface, sizeX, sizeY);
+
+		cairo_t *cr = cairo_create(outSurface);
+
+		cairo_save(cr);
+		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cr);
+		cairo_restore(cr);
+
+		cairo_set_source_surface(cr, scaledSurface, 0, 0);
 		cairo_rectangle(cr, 0, 0, sizeX, sizeY);
 		cairo_fill(cr);
 
 		cairo_destroy(cr);
-		cairo_surface_destroy(w32surface);
-		cairo_surface_destroy(pngsurface);
+		cairo_surface_destroy(outSurface);
+		cairo_surface_destroy(scaledSurface);
 		cairo_destroy(pngcr);
-		cairo_surface_destroy(insurface);
-		
-		SelectObject(hdc, holdbitmap);
-		DeleteDC(hdcmem);
-		return bitmap;
+		cairo_surface_destroy(pngSurface);
+
+		return out;
 	}
 
 	cairo_surface_t* Win32UIBinding::ScaleCairoSurface(

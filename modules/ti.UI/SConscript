@@ -8,7 +8,6 @@ env.Append(LIBPATH=[
 	build.get_module('tiapp').build_dir,
 	build.get_module('javascript').build_dir])
 env.Append(CPPPATH = [
-	build.kroll_include_dir,
 	'%s/modules/javascript' % build.kroll_source_dir,
 	'%s/modules/ti.App' % build.titanium_source_dir])
 
@@ -17,31 +16,24 @@ build.add_thirdparty(env, 'webkit')
 env.Append(LIBS=['tiappmodule','javascriptmodule'])
 
 sources = Glob('*.cpp') + ['url/url.cpp']
-webkit_lib = build.tp('webkit', 'lib')
-webkit_inc = build.tp('webkit', 'include')
-
 if build.is_linux():
 	sources = sources + Glob('gtk/*.cpp')
-	env.Append(LIBS=['webkittitanium-1.0', 'Xss', 'libsoup-2.4', 'libsoup-gnome-2.4'])
-	env.Append(LIBPATH=[webkit_lib])
-	env.Append(CPPPATH=[webkit_inc])
+	env.Append(LIBS=['Xss', 'libsoup-2.4', 'libsoup-gnome-2.4'])
 	env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 x11 xext')
 
 elif build.is_win32():
 	sources = sources + Glob('win32/*.cpp')
 	sources += Glob('binding/kjs*.cpp')
-	env.Append(LIBPATH=[webkit_lib])
-	env.Append(CPPPATH=[webkit_inc, build.tp('icu', 'include')])
+	env.Append(CPPPATH=[build.tp('icu', 'include')])
 	env.Append(LIBS=[
-		'WebKitGUID', 'WebKit', 'kernel32', 'shell32', 'user32', 
-		'ole32', 'comdlg32', 'comctl32', 'gdi32', 'shlwapi', 'oleaut32',
-		'icuuc', 'pthreadVC2', 'libcurl_imp', 'khost', 'comsuppw', 'cairo'])
+		'kernel32', 'shell32', 'user32', 'ole32', 'comdlg32', 'comctl32',
+		'gdi32', 'shlwapi', 'oleaut32', 'icuuc', 'pthreadVC2', 'libcurl_imp',
+		'khost', 'comsuppw', 'cairo'])
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO', '/OPT:REF'])
 
 elif build.is_osx():
-	env.Append(FRAMEWORKPATH=[build.tp('webkit')])
-	env.Append(FRAMEWORKS=['Cocoa','Carbon','WebKit','JavaScriptCore','IOKit'])
+	env.Append(FRAMEWORKS=['Cocoa','Carbon', 'IOKit'])
 	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 
