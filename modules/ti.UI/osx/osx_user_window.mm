@@ -68,8 +68,8 @@ namespace ti
 			this->ReconfigureWindowConstraints();
 			if (!config->IsResizable())
 			{
-				[nativeWindow setMinSize: rect.size];
-				[nativeWindow setMaxSize: rect.size];
+				[nativeWindow setMinSize:rect.size];
+				[nativeWindow setMaxSize:rect.size];
 			}
 		}
 
@@ -111,7 +111,7 @@ namespace ti
 
 	void OSXUserWindow::Hide()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			this->Unfocus();
 			[nativeWindow orderOut:nil];
@@ -121,7 +121,7 @@ namespace ti
 
 	void OSXUserWindow::Focus()
 	{
-		if (active && nativeWindow && ![nativeWindow isKeyWindow])
+		if (nativeWindow && ![nativeWindow isKeyWindow])
 		{
 			[nativeWindow makeKeyAndOrderFront:nil];
 			this->Focused();
@@ -132,7 +132,7 @@ namespace ti
 	{
 		// Cocoa doesn't really have a concept of blurring a window, but
 		// we can send the window to the back of the window list.
-		if (active && nativeWindow && [nativeWindow isKeyWindow])
+		if ( nativeWindow && [nativeWindow isKeyWindow])
 		{
 			[nativeWindow orderBack:nil];
 			this->Unfocused();
@@ -141,7 +141,7 @@ namespace ti
 
 	void OSXUserWindow::Show()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			this->Focus();
 			this->FireEvent(Event::SHOWN);
@@ -150,7 +150,7 @@ namespace ti
 
 	void OSXUserWindow::Minimize()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			[nativeWindow miniaturize:nativeWindow];
 		}
@@ -158,7 +158,7 @@ namespace ti
 
 	void OSXUserWindow::Unminimize()
 	{
-		if (active && nativeWindow && [nativeWindow isMiniaturized])
+		if (nativeWindow && [nativeWindow isMiniaturized])
 		{
 			[nativeWindow deminiaturize:nativeWindow];
 		}
@@ -166,7 +166,7 @@ namespace ti
 
 	bool OSXUserWindow::IsMinimized()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [nativeWindow isMiniaturized];
 		}
@@ -178,7 +178,7 @@ namespace ti
 
 	void OSXUserWindow::Maximize()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			[nativeWindow zoom:nativeWindow];
 		}
@@ -186,7 +186,7 @@ namespace ti
 	
 	void OSXUserWindow::Unmaximize()
 	{
-		if (active && nativeWindow && [nativeWindow isZoomed])
+		if (nativeWindow && [nativeWindow isZoomed])
 		{
 			[nativeWindow zoom:nativeWindow];
 		}
@@ -194,7 +194,7 @@ namespace ti
 
 	bool OSXUserWindow::IsMaximized()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [nativeWindow isZoomed];
 		}
@@ -291,7 +291,7 @@ namespace ti
 
 	double OSXUserWindow::GetX()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
@@ -306,7 +306,7 @@ namespace ti
 	
 	void OSXUserWindow::SetX(double x)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newRect = CalculateWindowFrame(
 				x, this->GetY(), this->GetWidth(), this->GetHeight());
@@ -316,7 +316,7 @@ namespace ti
 
 	double OSXUserWindow::GetY()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
@@ -335,7 +335,7 @@ namespace ti
 
 	void OSXUserWindow::SetY(double y)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newRect = CalculateWindowFrame(
 				this->GetX(), y, this->GetWidth(), this->GetHeight());
@@ -345,7 +345,7 @@ namespace ti
 
 	double OSXUserWindow::GetWidth()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [[nativeWindow contentView] frame].size.width;
 		}
@@ -357,7 +357,7 @@ namespace ti
 
 	void OSXUserWindow::SetWidth(double width)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				this->GetX(), this->GetY(), width, this->GetHeight());
@@ -376,7 +376,7 @@ namespace ti
 
 	double OSXUserWindow::GetHeight()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [[nativeWindow contentView] frame].size.height;
 		}
@@ -388,7 +388,7 @@ namespace ti
 
 	void OSXUserWindow::SetHeight(double height)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				this->GetX(), this->GetY(), this->GetWidth(), height);
@@ -407,10 +407,8 @@ namespace ti
 
 	void OSXUserWindow::ReconfigureWindowConstraints()
 	{
-		if (!active || nativeWindow == nil)
-		{
+		if (nativeWindow == nil)
 			return;
-		}
 
 		NSSize minSize, maxSize;
 		double maxWidth = this->config->GetMaxWidth();
@@ -510,7 +508,7 @@ namespace ti
 
 	void OSXUserWindow::SetBounds(Bounds bounds)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				bounds.x, bounds.y, bounds.width, bounds.height);
@@ -531,7 +529,7 @@ namespace ti
 
 	void OSXUserWindow::SetTitleImpl(std::string& newTitle)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			[nativeWindow setTitle:[NSString stringWithUTF8String:newTitle.c_str()]];
 		}
@@ -539,7 +537,7 @@ namespace ti
 
 	std::string OSXUserWindow::GetURL()
 	{
-		if (active && nativeWindow) {
+		if (nativeWindow) {
 			NSString* url = [[nativeWindow webView] mainFrameURL];
 			return [url UTF8String];
 		} else {
@@ -549,7 +547,7 @@ namespace ti
 
 	void OSXUserWindow::SetURL(std::string& url)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			std::string nurl = kroll::URLUtils::NormalizeURL(url);
 			NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:nurl.c_str()]];
@@ -564,7 +562,7 @@ namespace ti
 
 	void OSXUserWindow::SetResizable(bool resizable)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			[nativeWindow setShowsResizeIndicator:resizable];
 			if (resizable)
