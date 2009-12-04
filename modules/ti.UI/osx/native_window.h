@@ -37,7 +37,6 @@ using namespace ti;
 - (WebView*)webView;
 - (WindowConfig*)config;
 - (UserWindow*)userWindow;
-- (void)setInitialWindow:(BOOL)yn;
 - (void)showInspector:(BOOL)console;
 @end
 

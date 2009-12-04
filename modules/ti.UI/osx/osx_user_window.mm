@@ -7,7 +7,6 @@
 
 namespace ti
 {
-	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
 		unsigned int mask = 0;
@@ -78,12 +77,6 @@ namespace ti
 		this->SetMinimizable(config->IsMinimizable());
 
 		[nativeWindow setupDecorations:config];
-		if (OSXUserWindow::initial)
-		{
-			OSXUserWindow::initial = false;
-			[nativeWindow setInitialWindow:YES];
-		}
-
 		this->SetTopMost(config->IsTopMost());
 
 		if (config->IsMaximized())
@@ -123,7 +116,9 @@ namespace ti
 	{
 		if (nativeWindow && ![nativeWindow isKeyWindow])
 		{
-			[nativeWindow makeKeyAndOrderFront:nil];
+			[NSApp arrangeInFront:nativeWindow];
+			[nativeWindow makeKeyAndOrderFront:nativeWindow];
+			[NSApp activateIgnoringOtherApps:YES];
 			this->Focused();
 		}
 	}
