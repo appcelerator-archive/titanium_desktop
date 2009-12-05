@@ -245,12 +245,10 @@
 
 - (void)open
 {
-	// When open is called, wait until the frame has loaded to actually
-	// show the window.
+	// Wait until the frame has loaded to show the window. This prevents
+	// showing an unloaded WebView (a white screen).
 	requiresDisplay = YES;
 
-	//if (config->IsVisible() && !config->IsMinimized())
-	//	requiresDisplay = YES;
 	if (config->IsFullscreen())
 		[self setFullscreen:YES];
 
