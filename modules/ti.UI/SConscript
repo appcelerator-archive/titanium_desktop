@@ -13,6 +13,7 @@ env.Append(CPPPATH = [
 	'%s/modules/ti.App' % build.titanium_source_dir])
 
 build.add_thirdparty(env, 'poco')
+build.add_thirdparty(env, 'webkit')
 env.Append(LIBS=['tiappmodule','javascriptmodule'])
 
 sources = Glob('*.cpp') + ['url/url.cpp']
