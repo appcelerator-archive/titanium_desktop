@@ -17,7 +17,7 @@ namespace ti
 		global(global)
 	{
 		/**
-		 * @tiapi(method=Truename=App.getID,since=0.2)
+		 * @tiapi(method=True,name=App.getID,since=0.2)
 		 * @tiapi Return the application id.
 		 * @tiresult[String] The application id.
 		 */
