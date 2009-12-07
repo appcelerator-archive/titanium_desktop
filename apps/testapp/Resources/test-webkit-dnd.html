@@ -8,16 +8,11 @@
 	
 	function fileDragStart(event)
 	{
-		function toFileURL(appURL) {
-			return "file://"+Titanium.App.appURLToPath(appURL).replace("\\", "/");
-		}
-		var files = toFileURL("app://sound.wav");
-		files += "\n"+toFileURL("app://icon.png");
-		alert(files);
-		
+		var fileURL = "file://"+Titanium.App.appURLToPath("app://sound.wav");
+		fileURL = fileURL.replace("\\", "/");
 		//var fileURL = "file:///C:/Users/marshall/Code/titanium_desktop/apps/testapp/Resources/sound.wav";
-		//event.dataTransfer.setData("public.file-url", fileURL);
-		event.dataTransfer.setData("text/uri-list", files);
+		event.dataTransfer.setData("public.file-url", fileURL);
+		event.dataTransfer.setData("text/uri-list", fileURL);
 	}
 	
 	function onLoad()
@@ -73,16 +68,14 @@
 			clipboardValue = clipboardValue.toUpperCase();
 			event.clipboardData.setData("text/plain", clipboardValue);
 			
-			dropInfo.innerHTML = "attempted to copy text area contents:" +
-				textarea.value + ", overrode with all caps: " + clipboardValue;
+			dropInfo.innerHTML = "attempted to copy text area contents:" + textarea.value + ", overrode with all caps: " + clipboardValue;
 		});
 		textarea.addEventListener("paste", function(event)
 		{
 			event.preventDefault();
 			var textValue = ""+event.clipboardData.getData("text/plain");
 			textValue = textValue.toLowerCase();
-			dropInfo.innerHTML = "attempted to paste data: " +
-				event.clipboardData.getData("text/plain") + " overrode with lowercase: " + textValue;
+			dropInfo.innerHTML = "attempted to paste data: " + event.clipboardData.getData("text/plain") + " overrode with lowercase: " + textValue;
 			textarea.value = textValue;
 		});
 	}
