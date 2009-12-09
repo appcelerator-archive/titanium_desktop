@@ -143,3 +143,42 @@ function php_get_anonymous_function_two_args()
 	};
 	return $anon;
 }
+
+function CamelCaseFunctionOne()
+{
+	return "uno";
+}
+
+function camelCaseFunctionTwo()
+{
+	return "dos";
+}
+
+function ALLCAPSFUNCTION()
+{
+	return "tres";
+}
+
+function php_test_mysql()
+{
+	// try the public ensembl/genome mysql db
+	// http://www.ensembl.org/info/data/mysql.html
+	if (!function_exists('mysql_connect'))
+	{
+		return "mysql_connect not defined";
+	}
+
+	if (!function_exists('mysql_close'))
+	{
+		return "mysql_close not defined";
+	}
+
+	$link = mysql_connect("ensembldb.ensembl.org:5306", "anonymous", "");
+	if (!$link)
+	{
+		return "mysql_connect did not return a good value.";
+	}
+
+	mysql_close($link);
+	return true;
+}

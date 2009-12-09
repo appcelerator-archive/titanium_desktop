@@ -18,7 +18,6 @@ namespace ti
 		~OSXUIBinding();
 
 		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-		void ErrorDialog(std::string);
 
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
@@ -32,7 +31,7 @@ namespace ti
 		void SetContextMenu(AutoMenu);
 		void SetDockMenu(AutoMenu);
 
-		AutoTrayItem AddTray(std::string& icon_path, SharedKMethod cb);
+		AutoTrayItem AddTray(std::string& icon_path, KMethodRef cb);
 		void SetIcon(std::string& iconPath);
 		virtual void SetDockIcon(std::string& iconPath);
 		virtual void SetBadge(std::string& badgeLabel);
@@ -48,6 +47,7 @@ namespace ti
 		long GetIdleTime();
 
 		static NSImage* MakeImage(std::string&);
+		static void ErrorDialog(std::string);
 
 	protected:
 		NSMenu* defaultMenu;

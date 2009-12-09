@@ -38,7 +38,7 @@ namespace ti
 		WebKitWebView*, WebKitWebFrame*, gpointer);
 	static gint NewWindowPolicyDecisionCallback(WebKitWebView*,
 		WebKitWebFrame*, WebKitNetworkRequest*, WebKitWebNavigationAction*,
-		WebKitWebPolicyDecision *, gchar*);
+		WebKitWebPolicyDecision *);
 	static void LoadFinishedCallback(WebKitWebView*, WebKitWebFrame*,
 		gpointer);
 	static void TitleChangedCallback(WebKitWebView*, WebKitWebFrame*,
@@ -141,10 +141,7 @@ namespace ti
 				// this by default and some misbehaving JavaScript code relies on it.
 				// https://appcelerator.lighthouseapp.com/projects/25719/tickets/
 				// 149-windownavigator-is-undefined-when-running-on-linux
-				userAgent.append(" Version/4.0 ");
-				userAgent.append(PRODUCT_NAME);
-				userAgent.append("/");
-				userAgent.append(STRING(PRODUCT_VERSION));
+				userAgent.append(" Version/4.0 "PRODUCT_NAME"/"PRODUCT_VERSION);
 				host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
 			}
 			g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
@@ -571,14 +568,12 @@ namespace ti
 		}
 	}
 
-	static gint NewWindowPolicyDecisionCallback(
-		WebKitWebView* webView,
-		WebKitWebFrame* frame,
-		WebKitNetworkRequest* request,
+	static gint NewWindowPolicyDecisionCallback(WebKitWebView* webView,
+		WebKitWebFrame* frame, WebKitNetworkRequest* request,
 		WebKitWebNavigationAction* navigationAction,
-		WebKitWebPolicyDecision *policyDecision,
-		gchar* frameName)
+		WebKitWebPolicyDecision *policyDecision)
 	{
+		const char* frameName = webkit_web_navigation_action_get_target_frame(navigationAction);
 		gchar* frame_name_case = g_utf8_casefold(frameName, g_utf8_strlen(frameName, -1));
 		if (g_utf8_collate(frame_name_case, "ti:systembrowser") == 0 ||
 			g_utf8_collate(frame_name_case, "_blank") == 0)
@@ -605,7 +600,7 @@ namespace ti
 	{
 		JSGlobalContextRef context = webkit_web_frame_get_global_context(frame);
 		JSObjectRef global_object = JSContextGetGlobalObject(context);
-		SharedKObject frame_global = new KKJSObject(context, global_object);
+		KObjectRef frame_global = new KKJSObject(context, global_object);
 
 		// If uri is NULL, then likely this is the result of a cancel,
 		// so don't report it as a PageLoad
@@ -682,7 +677,7 @@ namespace ti
 
 		// If we are in debug mode, leave the last two --
 		// a separator and the web inspector
-		if (userWindow->GetHost()->IsDebugMode())
+		if (userWindow->GetHost()->DebugModeEnabled())
 			extent = extent - 2;
 
 		// If we are not in debug mode, remove the default WebKit menu items
@@ -1217,7 +1212,7 @@ namespace ti
 	struct FileChooserJob
 	{
 		GtkWindow* window;
-		SharedKMethod callback;
+		KMethodRef callback;
 		FileChooserMode mode;
 		bool multiple;
 		std::string title;
@@ -1227,11 +1222,12 @@ namespace ti
 		std::string typesDescription;
 	};
 
-	static SharedValue FileChooserWork(const ValueList& args)
+	static KValueRef FileChooserWork(const ValueList& args)
 	{
-		void* data = args.at(0)->ToVoidPtr();
+		AutoPtr<VoidPtr> dataObject(args.at(0)->ToObject().cast<VoidPtr>());
+		void* data = dataObject->GetPtr();
 		FileChooserJob* job = static_cast<FileChooserJob*>(data);
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		static std::string openFilesDirectory("");
 	
 		GtkFileChooserAction action;
@@ -1326,7 +1322,7 @@ namespace ti
 	}
 	
 
-	void GtkUserWindow::OpenFileChooserDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenFileChooserDialog(KMethodRef callback,
 		bool multiple, std::string& title, std::string& path,
 		std::string& defaultName, std::vector<std::string>& types,
 		std::string& typesDescription)
@@ -1342,12 +1338,12 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SELECT_FILE;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
+		RunOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenFolderChooserDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenFolderChooserDialog(KMethodRef callback,
 		bool multiple, std::string& title, std::string& path,
 		std::string& defaultName)
 	{
@@ -1365,12 +1361,12 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SELECT_FOLDER;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
+		RunOnMainThread(work, args, false);
 	}
 
-	void GtkUserWindow::OpenSaveAsDialog(SharedKMethod callback,
+	void GtkUserWindow::OpenSaveAsDialog(KMethodRef callback,
 		std::string& title, std::string& path, std::string& defaultName,
 		std::vector<std::string>& types, std::string& typesDescription)
 	{
@@ -1385,9 +1381,9 @@ namespace ti
 		job->typesDescription = typesDescription;
 		job->mode = SAVE_FILE;
 
-		SharedKMethod work(new kroll::KFunctionPtrMethod(&FileChooserWork));
-		ValueList args(Value::NewVoidPtr(job));
-		Host::GetInstance()->InvokeMethodOnMainThread(work, args, false);
+		KMethodRef work(new kroll::KFunctionPtrMethod(&FileChooserWork));
+		ValueList args(Value::NewObject(new VoidPtr(job)));
+		RunOnMainThread(work, args, false);
 	}
 
 	void GtkUserWindow::ShowInspector(bool console)
@@ -1436,7 +1432,7 @@ namespace ti
 	{
 
 		GtkWidget* dialog = NULL;
-		GtkWidget* field = NULL; 
+		GtkWidget* field = 0;
 
 		if (type == ALERT)
 		{
@@ -1467,22 +1463,12 @@ namespace ti
 			Host::GetInstance()->GetApplication()->name.c_str());
 
 		gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-		bool toReturn = false;
-		if (response == GTK_RESPONSE_YES)
-		{
-			toReturn = true;
-		}
-		else if (GTK_RESPONSE_OK)
-		{
-			toReturn = true;
-			if (field)
-				*promptResponse = g_strdup(gtk_entry_get_text(GTK_ENTRY(field)));
-		}
-		else
-		{
-			toReturn = false;
-		}
-	
+		bool toReturn = ((type == PROMPT && response == GTK_RESPONSE_OK) ||
+			(type == CONFIRM && response == GTK_RESPONSE_YES));
+
+		if (toReturn && field)
+			*promptResponse = g_strdup(gtk_entry_get_text(GTK_ENTRY(field)));
+
 		gtk_widget_destroy(dialog);
 		return toReturn;
 	}

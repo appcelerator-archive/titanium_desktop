@@ -33,7 +33,7 @@ namespace ti
 		SoupSession* session = webkit_get_default_session();
 		soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 
-		std::string webInspectorPath = host->GetRuntimePath();
+		std::string webInspectorPath(host->GetApplication()->runtime->path);
 		webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
 		webkit_titanium_set_inspector_url(webInspectorPath.c_str());
 	}
@@ -43,21 +43,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new GtkUserWindow(config, parent);
-		return w->GetAutoPtr();
-	}
-
-	void GtkUIBinding::ErrorDialog(std::string msg)
-	{
-		GtkWidget* dialog = gtk_message_dialog_new(
-			NULL,
-			GTK_DIALOG_MODAL,
-			GTK_MESSAGE_ERROR,
-			GTK_BUTTONS_OK,
-			"%s",
-			msg.c_str());
-		gtk_dialog_run(GTK_DIALOG (dialog));
-		gtk_widget_destroy(dialog);
-		UIBinding::ErrorDialog(msg);
+		return AutoUserWindow(w, true);
 	}
 
 	AutoMenu GtkUIBinding::CreateMenu()
@@ -95,7 +81,7 @@ namespace ti
 		this->iconPath = iconPath;
 	}
 
-	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, SharedKMethod cb)
+	AutoTrayItem GtkUIBinding::AddTray(std::string& iconPath, KMethodRef cb)
 	{
 		AutoTrayItem item = new GtkTrayItem(iconPath, cb);
 		return item;
@@ -131,4 +117,18 @@ namespace ti
 		return this->iconPath;
 	}
 
+	/*static*/
+	void GtkUIBinding::ErrorDialog(std::string msg)
+	{
+		GtkWidget* dialog = gtk_message_dialog_new(
+			NULL,
+			GTK_DIALOG_MODAL,
+			GTK_MESSAGE_ERROR,
+			GTK_BUTTONS_OK,
+			"%s",
+			msg.c_str());
+		gtk_dialog_run(GTK_DIALOG (dialog));
+		gtk_widget_destroy(dialog);
+		UIBinding::ErrorDialog(msg);
+	}
 }

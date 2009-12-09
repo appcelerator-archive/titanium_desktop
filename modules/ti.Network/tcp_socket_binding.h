@@ -28,6 +28,8 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketReactor.h>
 #include <Poco/Net/SocketNotification.h>
+#include <Poco/NObserver.h>
+#include <queue>
 
 using namespace Poco;
 using namespace Poco::Net;
@@ -39,6 +41,7 @@ namespace ti
 	public:
 		TCPSocketBinding(Host *ti_host, std::string host, int port);
 		virtual ~TCPSocketBinding();
+
 	private:
 		Host* ti_host;
 		std::string host;
@@ -47,27 +50,35 @@ namespace ti
 		SocketReactor reactor;
 		Thread thread;
 		bool opened;
-		std::string buffer;
-		Poco::Mutex bufferMutex; 
 
-		SharedKMethod onRead;
-		SharedKMethod onWrite;
-		SharedKMethod onTimeout;
-		SharedKMethod onError;
-		SharedKMethod onReadComplete;
+		std::queue<BlobRef> sendData;
+		Poco::Mutex sendDataMutex;
+		size_t currentSendDataOffset;
+		bool readStarted;
 
-		void Connect(const ValueList& args, SharedValue result);
-		void Write(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void IsClosed(const ValueList& args, SharedValue result);
-		void SetOnRead(const ValueList& args, SharedValue result);
-		void SetOnWrite(const ValueList& args, SharedValue result);
-		void SetOnTimeout(const ValueList& args, SharedValue result);
-		void SetOnError(const ValueList& args, SharedValue result);
-		void SetOnReadComplete(const ValueList& args, SharedValue result);
+		KMethodRef onRead;
+		KMethodRef onWrite;
+		KMethodRef onTimeout;
+		KMethodRef onError;
+		KMethodRef onReadComplete;
 
-		void OnRead(const Poco::AutoPtr<ReadableNotification>& n);
-		void OnWrite(const Poco::AutoPtr<WritableNotification>& n);
+		NObserver<TCPSocketBinding, ReadableNotification> readObserver;
+		NObserver<TCPSocketBinding, WritableNotification> writeObserver;
+		NObserver<TCPSocketBinding, TimeoutNotification> timeoutObserver;
+		NObserver<TCPSocketBinding, ErrorNotification> errorObserver;
+
+		void Connect(const ValueList& args, KValueRef result);
+		void Write(const ValueList& args, KValueRef result);
+		void Close(const ValueList& args, KValueRef result);
+		void IsClosed(const ValueList& args, KValueRef result);
+		void SetOnRead(const ValueList& args, KValueRef result);
+		void SetOnWrite(const ValueList& args, KValueRef result);
+		void SetOnTimeout(const ValueList& args, KValueRef result);
+		void SetOnError(const ValueList& args, KValueRef result);
+		void SetOnReadComplete(const ValueList& args, KValueRef result);
+
+		void ReadyForRead(const Poco::AutoPtr<ReadableNotification>& n);
+		void ReadyForWrite(const Poco::AutoPtr<WritableNotification>& n);
 		void OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n);
 		void OnError(const Poco::AutoPtr<ErrorNotification>& n);
 	};

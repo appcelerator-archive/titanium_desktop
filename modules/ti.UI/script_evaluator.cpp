@@ -10,15 +10,12 @@
 namespace ti
 {
 	/*static*/
-	AutoPtr<ScriptEvaluator> ScriptEvaluator::instance;
-	
-	/*static*/
 	void ScriptEvaluator::Initialize()
 	{
-		instance = new ScriptEvaluator();
+		static AutoPtr<ScriptEvaluator> instance(new ScriptEvaluator());
 #if defined(OS_OSX)
-		OSXScriptEvaluator *evaluator = [[OSXScriptEvaluator alloc] initWithEvaluator:instance.get()];
-		[WebScriptElement addScriptEvaluator:evaluator];
+		[WebScriptElement addScriptEvaluator:[[OSXScriptEvaluator alloc]
+			initWithEvaluator:instance.get()]];
 #elif defined(OS_WIN32)
 		addScriptEvaluator(instance.get());
 #elif defined(OS_LINUX)
@@ -35,10 +32,12 @@ namespace ti
 	delegate = evaluator;
 	return self;
 }
+
 -(BOOL) matchesMimeType:(NSString*)mimeType
 {
 	return kroll::Script::GetInstance()->CanEvaluate([mimeType UTF8String]);
 }
+
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context
 {
 	// TODO get source name from webkit
@@ -51,7 +50,6 @@ namespace ti
 	{
 		Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
 			exception.ToString().c_str());
-
 	}
 }
 @end

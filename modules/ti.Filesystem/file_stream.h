@@ -46,7 +46,7 @@ namespace ti
 		 * Returns:
 		 *   true if the file stream is opened successfully; false otherwise
 		 */
-		void Open(const ValueList& args, SharedValue result);
+		void Open(const ValueList& args, KValueRef result);
 		bool Open(FileStreamMode mode, bool binary = false, bool append = false);
 		/**
 		 * Function: Close
@@ -57,7 +57,7 @@ namespace ti
 		 * Returns:
 		 *   true if the file stream is closed successfully; false otherwise
 		 */
-		void Close(const ValueList& args, SharedValue result);
+		void Close(const ValueList& args, KValueRef result);
 		bool Close();
 		/**
 		 * Function: Write
@@ -77,7 +77,7 @@ namespace ti
 		 * Returns:
 		 *   true if the text was written successfully; false otherwise
 		 */
-		void Write(const ValueList& args, SharedValue result);
+		void Write(const ValueList& args, KValueRef result);
 		void Write(char *,int);
 		/**
 		 * Function: Read
@@ -94,7 +94,7 @@ namespace ti
 		 * Returns:
 		 *   the text file contents as a string
 		 */
-		void Read(const ValueList& args, SharedValue result);
+		void Read(const ValueList& args, KValueRef result);
 		/**
 		 * Function: ReadLine
 		 *   Reads the next line of this File.
@@ -115,26 +115,26 @@ namespace ti
 		 * Returns:
 		 *   a string representing the next line of text in the file.
 		 */
-		void ReadLine(const ValueList& args, SharedValue result);
+		void ReadLine(const ValueList& args, KValueRef result);
 		
 		/**
 		 * Function: WriteLine
 		 *   Write a line of this File.
 		 *   The file must be open for reading the first time this method is called.
 		 */
-		void WriteLine(const ValueList& args, SharedValue result);
+		void WriteLine(const ValueList& args, KValueRef result);
 
 		/**
 		 * Function: Ready
 		 *   returns true if the file is valid for IO operations
 		 */
-		void Ready(const ValueList& args, SharedValue result);
+		void Ready(const ValueList& args, KValueRef result);
 
 		/**
 		 * Function: IsOpen
 		 *   returns true if the file is open
 		 */
-		void IsOpen(const ValueList& args, SharedValue result);
+		void IsOpen(const ValueList& args, KValueRef result);
 
 	private:
 		std::string filename;

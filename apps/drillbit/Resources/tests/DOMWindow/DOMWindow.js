@@ -62,63 +62,6 @@ describe("UI Window Tests",{
 			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
 		}, ["a.html", "a"]);
 	},
-	test_open_fullscreen_yes_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			if (Titanium.platform != 'linux')
-			{
-				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
-			}
-		}, ["a.html","a","fullscreen=yes"]);
-	},
-	test_open_fullscreen_no_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-
-			if (Titanium.platform != 'linux')
-			{
-				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
-			}
-		}, ["a.html","a","fullscreen=no"]);
-	},
-	test_open_fullscreen_1_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			if (Titanium.platform != 'linux')
-			{
-				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_true();
-			}
-		}, ["a.html","a","fullscreen=1"]);
-	},
-	test_open_fullscreen_0_as_async: function(test)
-	{
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.Titanium.UI.getCurrentWindow()).should_be_object();
-			if (Titanium.platform != 'linux')
-			{
-				value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
-			}
-		}, ["a.html","a","fullscreen=0"]);
-	},
 	test_open_height_100_as_async: function(test)
 	{
 		this.async_window_open(test, function(w)
@@ -179,7 +122,7 @@ describe("UI Window Tests",{
 			value_of(w.Titanium.UI.getCurrentWindow().getWidth()).should_be(121);
 			value_of(w.Titanium.UI.getCurrentWindow().getHeight()).should_be(101);
 			value_of(w.Titanium.UI.getCurrentWindow().isFullscreen()).should_be_false();
-		}, ["a.html","a","left=125,top=125,fullscreen=0,width=121,height=101"]);
+		}, ["a.html","a","left=125,top=125,width=121,height=101"]);
 	},
 	test_open_child_dom_as_async: function(test)
 	{
@@ -202,43 +145,30 @@ describe("UI Window Tests",{
 			value_of(w.a_value).should_be(42);
 		}, ["app://rel.html"]);
 	},
-	test_data_uri_non_base64_encoded_as_async: function(test)
-	{
-		var path = Titanium.App.appURLToPath("app://rel.html");
-		var html = Titanium.Filesystem.getFile(path).read();
+	//test_data_uri_non_base64_encoded_as_async: function(test)
+	//{
+	//	var path = Titanium.App.appURLToPath("app://rel.html");
+	//	var html = Titanium.Filesystem.getFile(path).read();
 
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.result).should_be('Hello');
-		}, ["data:text/html;charset=utf-8,"+html]);
-	},
-	test_data_uri_base64_encoded_as_async: function(test)
-	{
-		var path = Titanium.App.appURLToPath("app://rel.html");
-		var html = Titanium.Filesystem.getFile(path).read();
+	//	this.async_window_open(test, function(w)
+	//	{
+	//		value_of(w).should_be_object();
+	//		value_of(w.Titanium).should_be_object();
+	//		value_of(w.document.title).should_be("Hello");
+	//		value_of(w.result).should_be('Hello');
+	//	}, ["data:text/html;charset=utf-8,"+html]);
+	//},
+	//test_data_uri_base64_encoded_as_async: function(test)
+	//{
+	//	var path = Titanium.App.appURLToPath("app://rel.html");
+	//	var html = Titanium.Filesystem.getFile(path).read();
 
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.result).should_be('Hello');
-		}, ["data:text/html;charset=utf-8;base64,"+Titanium.Codec.encodeBase64(html)]);
-	},
-	test_data_uri_with_html_parameter_as_async: function(test)
-	{
-		var path = Titanium.App.appURLToPath("app://rel.html");
-		var html = Titanium.Filesystem.getFile(path).read();
-
-		this.async_window_open(test, function(w)
-		{
-			value_of(w).should_be_object();
-			value_of(w.Titanium).should_be_object();
-			value_of(w.document.title).should_be("Hello");
-			value_of(w.result).should_be('Hello');
-		}, [{html:html}]);
-	}
+	//	this.async_window_open(test, function(w)
+	//	{
+	//		value_of(w).should_be_object();
+	//		value_of(w.Titanium).should_be_object();
+	//		value_of(w.document.title).should_be("Hello");
+	//		value_of(w.result).should_be('Hello');
+	//	}, ["data:text/html;charset=utf-8;base64,"+Titanium.Codec.encodeBase64(html)]);
+	//},
 });

@@ -1,35 +1,5 @@
 #!/usr/bin/env python
-import os.path as path
+import os, sys
 
 Import('build')
-
 Env = build.env.Clone()
-Env.Append(CPPDEFINES=['USE_NO_EXPORT=1'])
-
-Env.Append(LIBS=[
-	'wininet', 'urlmon', 'comctl32', 'comdlg32', 
-	'ole32', 'kernel32', 'user32', 'shell32', 
-	'advapi32', 'gdi32', 'iphlpapi'])
-
-ccf = Env['CCFLAGS'][:]
-if '/MD' in ccf: ccf.remove('/MD')
-ccf.append('/MT') # Allow threads
-ccf.append('/Os') # Favor size optimizations
-ccf.append('/O1') # Optimize for minimum size
-ccf.append('/DUNICODE') # Use wchar_t functions
-ccf.append('/D_UNICODE') # Ditto
-Env['CCFLAGS'] = ccf
-
-sources = Glob("*.cpp") + Env.RES("progress.rc")
-out_file = path.join(build.runtime_build_dir, 'installer', 'Installer.exe')
-
-Env.Append(CPPPATH=[build.kroll_utils_dir])
-sources.extend(build.get_kroll_utils(path.join(build.dir, 'objs', 'netinstaller')))
-
-p = Env.Program(out_file, sources)
-build.mark_build_target(p)
-
-# Don't use the common controls manifest from the support directory, because
-# our copy contains some special provisions for UAC.
-common_controls_manifest = path.join(build.cwd(), 'common_controls.manifest')
-Env.AddPostAction(p, 'mt.exe -nologo -manifest "%s" -outputresource:"%s;1"' % (common_controls_manifest, out_file))

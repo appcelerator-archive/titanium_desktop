@@ -40,11 +40,11 @@ namespace ti
 		const bool IsInvalid() const { return invalid; }
 
 	private:
-		void ToString(const ValueList& args, SharedValue result);
-		void IsInvalid(const ValueList& args, SharedValue result);
-		void GetName(const ValueList& args, SharedValue result);
-		void GetAliases(const ValueList& args, SharedValue result);
-		void GetAddresses(const ValueList& args, SharedValue result);
+		void ToString(const ValueList& args, KValueRef result);
+		void IsInvalid(const ValueList& args, KValueRef result);
+		void GetName(const ValueList& args, KValueRef result);
+		void GetAliases(const ValueList& args, KValueRef result);
+		void GetAddresses(const ValueList& args, KValueRef result);
 	};
 }
 

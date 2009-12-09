@@ -10,7 +10,6 @@
 
 namespace ti
 {
-	
 	Win32Process::Win32Process() :
 		logger(Logger::Get("Process.Win32Process")),
 		nativeIn(new Win32Pipe(false)),
@@ -60,7 +59,7 @@ namespace ti
 		See
 		http://msdn.microsoft.com/library/en-us/vccelng/htm/progs_12.asp
 	*/
-	std::string Win32Process::ArgListToString(SharedKList argList)
+	std::string Win32Process::ArgListToString(KListRef argList)
 	{
 		
 		std::string result = "";
@@ -143,11 +142,13 @@ namespace ti
 		nativeOut->DuplicateWrite(hProc, &startupInfo.hStdOutput);
 		nativeErr->DuplicateWrite(hProc, &startupInfo.hStdError);
 		
-		std::string commandLine = ArgListToString(args);
+		std::string commandLine(ArgListToString(args));
+		std::wstring commandLineW(::UTF8ToWide(commandLine));
 		logger->Debug("Launching: %s", commandLine.c_str());
+
 		PROCESS_INFORMATION processInfo;
-		BOOL rc = CreateProcessA(NULL,
-			(char*)commandLine.c_str(),
+		BOOL rc = CreateProcessW(NULL,
+			(wchar_t*) commandLineW.c_str(),
 			NULL,
 			NULL,
 			TRUE,
@@ -183,9 +184,9 @@ namespace ti
 		nativeErr->StartMonitor();
 	}
 
-	AutoBlob Win32Process::MonitorSync()
+	BlobRef Win32Process::MonitorSync()
 	{
-		SharedKMethod readCallback =
+		KMethodRef readCallback =
 			StaticBoundMethod::FromMethod<Win32Process>(
 				this, &Win32Process::ReadCallback);
 
@@ -203,7 +204,7 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		AutoBlob output = 0;
+		BlobRef output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
 			output = Blob::GlobBlobs(processOutput);
@@ -242,11 +243,11 @@ namespace ti
 		return pid;
 	}
 	
-	void Win32Process::ReadCallback(const ValueList& args, SharedValue result)
+	void Win32Process::ReadCallback(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsObject())
 		{
-			AutoBlob blob = args.GetObject(0).cast<Blob>();
+			BlobRef blob = args.GetObject(0).cast<Blob>();
 			if (!blob.isNull() && blob->Length() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(processOutputMutex);

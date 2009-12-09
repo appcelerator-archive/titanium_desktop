@@ -4,6 +4,7 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
 #include <kroll/kroll.h>
+#include <kroll/thread_manager.h>
 #include "filesystem_binding.h"
 #include "file.h"
 #include "async_copy.h"
@@ -29,7 +30,11 @@
 
 namespace ti
 {
-	FilesystemBinding::FilesystemBinding(Host *host, SharedKObject global) : host(host), global(global), timer(0)
+	FilesystemBinding::FilesystemBinding(Host *host, KObjectRef global) :
+		StaticBoundObject("Filesystem"),
+		host(host),
+		global(global),
+		timer(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Filesystem.createTempFile) Creates a temporary file
@@ -131,6 +136,7 @@ namespace ti
 		 */
 		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
 	}
+
 	FilesystemBinding::~FilesystemBinding()
 	{
 		if (this->timer!=NULL)
@@ -140,7 +146,8 @@ namespace ti
 			this->timer = NULL;
 		}
 	}
-	void FilesystemBinding::CreateTempFile(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::CreateTempFile(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -156,7 +163,8 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FilesystemBinding::CreateTempDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::CreateTempDirectory(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -172,12 +180,13 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::ResolveFileName(const ValueList& args, std::string& filename)
 	{
 		if (args.at(0)->IsList())
 		{
 			// you can pass in an array of parts to join
-			SharedKList list = args.at(0)->ToList();
+			KListRef list = args.at(0)->ToList();
 			for (size_t c = 0; c < list->Size(); c++)
 			{
 				std::string arg = list->At(c)->ToString();
@@ -198,120 +207,124 @@ namespace ti
 			throw ValueException::FromString("invalid file type");
 		}
 	}
-	void FilesystemBinding::GetFile(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetFile(const ValueList& args, KValueRef result)
 	{
 		std::string filename;
 		this->ResolveFileName(args, filename);
 		ti::File* file = new ti::File(filename);
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetFileStream(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetFileStream(const ValueList& args, KValueRef result)
 	{
 		std::string filename;
 		this->ResolveFileName(args, filename);
 		ti::FileStream* fs = new ti::FileStream(filename);
 		result->SetObject(fs);
 	}
-	void FilesystemBinding::GetApplicationDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetApplicationDirectory(const ValueList& args, KValueRef result)
 	{
 		ti::File* file = new ti::File(host->GetApplication()->path);
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetApplicationDataDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetApplicationDataDirectory(const ValueList& args, KValueRef result)
 	{
 		std::string appid = AppConfig::Instance()->GetAppID();
 		std::string dir = FileUtils::GetApplicationDataDirectory(appid);
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetRuntimeHomeDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetRuntimeHomeDirectory(const ValueList& args, KValueRef result)
 	{
 		std::string dir = FileUtils::GetSystemRuntimeHomeDirectory();
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetResourcesDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetResourcesDirectory(const ValueList& args, KValueRef result)
 	{
 		ti::File* file = new ti::File(host->GetApplication()->GetResourcesPath());
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetProgramsDirectory(const ValueList &args, SharedValue result)
+
+	void FilesystemBinding::GetProgramsDirectory(const ValueList &args, KValueRef result)
 	{
 #ifdef OS_WIN32
-		std::string dir;
 		char path[MAX_PATH];
-		if(SHGetSpecialFolderPath(NULL,path,CSIDL_PROGRAM_FILES,FALSE))
-		{
-			dir.append(path);
-		}
+		if (!SHGetSpecialFolderPath(NULL, path, CSIDL_PROGRAM_FILES, FALSE))
+			throw ValueException::FromString("Could not get Program Files path.");
+		std::string dir(path);
+
 #elif OS_OSX
-		NSString *fullPath = @"/Applications";
-		std::string dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSApplicationDirectory, NSLocalDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+
 #elif OS_LINUX
-		std::string dir = "/usr/local/bin"; //TODO: this might need to be configurable
+		// TODO: this might need to be configurable
+		std::string dir("/usr/local/bin");
 #endif
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
 
-	void FilesystemBinding::GetDesktopDirectory(const ValueList& args, SharedValue result)
+	void FilesystemBinding::GetDesktopDirectory(const ValueList& args, KValueRef result)
 	{
-		std::string dir;
-
 #ifdef OS_WIN32
 		char path[MAX_PATH];
+		if (!SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE))
+			throw ValueException::FromString("Could not get Desktop path.");
+		std::string dir(path);
 
-		if(SHGetSpecialFolderPath(NULL, path, CSIDL_DESKTOPDIRECTORY, FALSE))
-		{
-			dir.append(path);
-		}
 #elif OS_OSX
-		NSString *fullPath = [@"~/Desktop" stringByExpandingTildeInPath];
-		dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSDesktopDirectory, NSUserDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+
 #elif OS_LINUX
 		passwd *user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
-		dir = FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL);
+		std::string dir(FileUtils::Join(homeDirectory.c_str(), "Desktop", NULL));
 		if (!FileUtils::IsDirectory(dir))
 		{
 			dir = homeDirectory;
 		}
 #endif
-		if (!dir.empty())
-		{
-			ti::File* file = new ti::File(dir);
-			result->SetObject(file);
-		}
+		ti::File* file = new ti::File(dir);
+		result->SetObject(file);
 	}
-	void FilesystemBinding::GetDocumentsDirectory(const ValueList& args, SharedValue result)
-	{
-		std::string dir;
 
+	void FilesystemBinding::GetDocumentsDirectory(const ValueList& args, KValueRef result)
+	{
 #ifdef OS_WIN32
 		char path[MAX_PATH];
-		if(SHGetSpecialFolderPath(NULL,path,CSIDL_PERSONAL,FALSE))
-		{
-			dir.append(path);
-		}
+		if (!SHGetSpecialFolderPath(NULL,path,CSIDL_PERSONAL,FALSE))
+			throw ValueException::FromString("Could not get Documents path.");
+		std::string dir(path);
+
 #elif OS_OSX
-		NSString *fullPath = [@"~/Documents" stringByExpandingTildeInPath];
-		dir = [fullPath UTF8String];
+		std::string dir([[NSSearchPathForDirectoriesInDomains(
+			NSDocumentDirectory, NSUserDomainMask, YES)
+			objectAtIndex: 0] UTF8String]);
+
 #elif OS_LINUX
-		passwd *user = getpwuid(getuid());
+		passwd* user = getpwuid(getuid());
 		std::string homeDirectory = user->pw_dir;
-		dir = FileUtils::Join(homeDirectory.c_str(), "Documents", NULL);
+		std::string dir(FileUtils::Join(homeDirectory.c_str(), "Documents", NULL));
 		if (!FileUtils::IsDirectory(dir))
 		{
 			dir = homeDirectory;
 		}
 #endif
-		if (dir.empty())
-		{
-			ti::File* file = new ti::File(dir);
-			result->SetObject(file);
-		}
+		ti::File* file = new ti::File(dir);
+		result->SetObject(file);
 	}
-	void FilesystemBinding::GetUserDirectory(const ValueList& args, SharedValue result)
+
+	void FilesystemBinding::GetUserDirectory(const ValueList& args, KValueRef result)
 	{
 		std::string dir;
 		try
@@ -320,16 +333,18 @@ namespace ti
 		}
 		catch (Poco::Exception& exc)
 		{
-			std::string error = "Couldn't determine home directory: ";
+			std::string error = "Could not determine home directory: ";
 			error.append(exc.displayText());
 			throw ValueException::FromString(error);
 		}
 
-
 #ifdef OS_WIN32
-		if (dir.size() == 3) // C:\ -- %%HOMEPATH%% might be borked
+		// If dir is equal to C:\ get the diretory in a different way.
+		// Poco uses %%HOMEPATH%% to get this directory which might be borked
+		// e.g. while running in Cygwin.
+		if (dir.size() == 3)
 		{
-			std::string odir = EnvironmentUtils::Get("USERPROFILE");	
+			std::string odir = EnvironmentUtils::Get("USERPROFILE");
 			if (!odir.empty())
 			{
 				dir = odir;
@@ -340,7 +355,7 @@ namespace ti
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
-	void FilesystemBinding::GetLineEnding(const ValueList& args, SharedValue result)
+	void FilesystemBinding::GetLineEnding(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -351,7 +366,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FilesystemBinding::GetSeparator(const ValueList& args, SharedValue result)
+	void FilesystemBinding::GetSeparator(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -364,7 +379,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FilesystemBinding::GetRootDirectories(const ValueList& args, SharedValue result)
+	void FilesystemBinding::GetRootDirectories(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -372,15 +387,15 @@ namespace ti
 			std::vector<std::string> roots;
 			path.listRoots(roots);
 
-			SharedKList rootList = new StaticBoundList();
+			KListRef rootList = new StaticBoundList();
 			for(size_t i = 0; i < roots.size(); i++)
 			{
 				ti::File* file = new ti::File(roots.at(i));
-				SharedValue value = Value::NewObject((SharedKObject) file);
+				KValueRef value = Value::NewObject((KObjectRef) file);
 				rootList->Append(value);
 			}
 
-			SharedKList list = rootList;
+			KListRef list = rootList;
 			result->SetList(list);
 		}
 		catch (Poco::Exception& exc)
@@ -388,7 +403,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FilesystemBinding::ExecuteAsyncCopy(const ValueList& args, SharedValue result)
+	void FilesystemBinding::ExecuteAsyncCopy(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=3)
 		{
@@ -401,10 +416,10 @@ namespace ti
 		}
 		else if (args.at(0)->IsList())
 		{
-			SharedKList list = args.at(0)->ToList();
+			KListRef list = args.at(0)->ToList();
 			for (unsigned int c = 0; c < list->Size(); c++)
 			{
-				SharedValue v = list->At(c);
+				KValueRef v = list->At(c);
 				files.push_back(FileSystemUtils::GetFileName(v)->c_str());
 			}
 		}
@@ -412,10 +427,10 @@ namespace ti
 		{
 			files.push_back(FileSystemUtils::GetFileName(args.at(0))->c_str());
 		}
-		SharedValue v = args.at(1);
+		KValueRef v = args.at(1);
 		std::string destination(FileSystemUtils::GetFileName(v)->c_str());
-		SharedKMethod method = args.at(2)->ToMethod();
-		SharedKObject copier = new ti::AsyncCopy(this,host,files,destination,method);
+		KMethodRef method = args.at(2)->ToMethod();
+		KObjectRef copier = new ti::AsyncCopy(this,host,files,destination,method);
 		result->SetObject(copier);
 		asyncOperations.push_back(copier);
 		// we need to create a timer thread that can cleanup operations
@@ -431,7 +446,7 @@ namespace ti
 			this->timer->restart(100);
 		}
 	}
-	void FilesystemBinding::DeletePendingOperations(const ValueList& args, SharedValue result)
+	void FilesystemBinding::DeletePendingOperations(const ValueList& args, KValueRef result)
 	{
 		KR_DUMP_LOCATION
 		if (asyncOperations.size()==0)
@@ -439,12 +454,12 @@ namespace ti
 			result->SetBool(true);
 			return;
 		}
-		std::vector<SharedKObject>::iterator iter = asyncOperations.begin();
+		std::vector<KObjectRef>::iterator iter = asyncOperations.begin();
 
 		while (iter!=asyncOperations.end())
 		{
-			SharedKObject c = (*iter);
-			SharedValue v = c->Get("running");
+			KObjectRef c = (*iter);
+			KValueRef v = c->Get("running");
 			bool running = v->ToBool();
 			if (!running)
 			{
@@ -459,19 +474,16 @@ namespace ti
 	}
 	void FilesystemBinding::OnAsyncOperationTimer(Poco::Timer &timer)
 	{
-#ifdef OS_OSX
-		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#endif
-		KR_DUMP_LOCATION
+		START_KROLL_THREAD;
+
 		ValueList args = ValueList();
-		SharedKMethod m = this->Get("_invoke")->ToMethod();
-		SharedValue result = host->InvokeMethodOnMainThread(m, args);
+		KMethodRef m = this->Get("_invoke")->ToMethod();
+		KValueRef result = RunOnMainThread(m, args);
 		if (result->ToBool())
 		{
 			timer.restart(0);
 		}
-#ifdef OS_OSX
-		[pool release];
-#endif
+
+		END_KROLL_THREAD;
 	}
 }

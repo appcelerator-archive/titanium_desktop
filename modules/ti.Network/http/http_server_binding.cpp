@@ -23,9 +23,12 @@
 namespace ti
 {
 	HTTPServerBinding::HTTPServerBinding(Host* host) :
-		StaticBoundObject("HTTPServer"),
-		host(host),global(host->GetGlobalObject()),
-		callback(NULL),socket(NULL),connection(NULL)
+		StaticBoundObject("Network.HTTPServer"),
+		host(host),
+		global(host->GetGlobalObject()),
+		callback(0),
+		socket(0),
+		connection(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
@@ -51,7 +54,7 @@ namespace ti
 		KR_DUMP_LOCATION
 		Close();
 	}
-	void HTTPServerBinding::Bind(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::Bind(const ValueList& args, KValueRef result)
 	{
 		Close();
 		
@@ -94,11 +97,11 @@ namespace ti
 		}
 		this->callback = NULL;
 	}
-	void HTTPServerBinding::Close(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::Close(const ValueList& args, KValueRef result)
 	{
 		Close();
 	}
-	void HTTPServerBinding::IsClosed(const ValueList& args, SharedValue result)
+	void HTTPServerBinding::IsClosed(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->connection==NULL);
 	}

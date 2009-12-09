@@ -5,44 +5,53 @@
  */
 
 #import "Downloader.h"
+#define STRING(str) #str
 
 @implementation Downloader
 
 -(id)initWithURL:(NSURL*)url progress:(NSProgressIndicator*)p
 {
 	self = [super init];
+
+	suggestedFilename = nil;
+	userAgent = nil;
+	downloadRequest = nil;
+	downloadConnection = nil;
+	data = nil;
+
 	if (self)
 	{
 		progress = [p retain];
 		[progress startAnimation:self];
 		[self performSelectorOnMainThread:@selector(startUrlRequest:) withObject:url waitUntilDone:YES];
 	}
+
+	userAgent = [NSString stringWithFormat:
+		@"Mozilla/5.0 (compatible; Titanium_Downloader/%s; Mac)",
+		STRING(_PRODUCT_VERSION)];
+
 	return self;
 }
 
-#define VAL(str) #str
-#define STRING(str) VAL(str)
-
-- (void)startUrlRequest: (NSURL *) url;
+- (void)startUrlRequest: (NSURL *)url;
 {
-	NSLog(@"Starting URL request for %@",url);
 	[data release];
+	data = [[NSMutableData alloc] init];
+
 	[downloadRequest release];
 	downloadRequest = [[NSMutableURLRequest alloc] initWithURL:url];
-	[downloadRequest setTimeoutInterval:10.0];
-	userAgent = [NSString stringWithFormat:@"Mozilla/5.0 (compatible; Titanium_Downloader/%s; Mac)",STRING(_PRODUCT_VERSION)];
 	[downloadRequest setValue:userAgent forHTTPHeaderField:@"User-Agent"];
-	data = [[NSMutableData alloc] init];
+
 	downloadConnection = [[NSURLConnection alloc] initWithRequest:downloadRequest delegate:self];
-	//NOTE: do not call start!! it's automatically called and you will segfault if you call it
-	//NOTE: do not release downloadRequest!
+
+	// NOTE: Do not call start!! it's automatically called and you will segfault if you call it
 	[self setCompleted:NO];
 }
 
 -(void)dealloc
 {
 	[downloadRequest release];
-	[suggestedFileName release];
+	[suggestedFilename release];
 	[downloadConnection release];
 	[progress release];
 	[data release];
@@ -54,9 +63,9 @@
 	return data;
 }
 
-- (NSString *)suggestedFileName 
+- (NSString *)suggestedFilename 
 {
-	return suggestedFileName;
+	return suggestedFilename;
 }
 
 - (BOOL)completed;
@@ -88,80 +97,19 @@
 // NSURLConnection Delegate Methods
 //
 
-// part of this code courtesy of google mac toolkit
-
-// This method just says "follow all redirects", which _should_ be the default behavior,
-// According to file:///Developer/ADC%20Reference%20Library/documentation/Cocoa/Conceptual/URLLoadingSystem
-// but the redirects were not being followed until I added this method.  May be
-// a bug in the NSURLConnection code, or the documentation.
-//
-// In OS X 10.4.8 and earlier, the redirect request doesn't
-// get the original's headers and body. This causes POSTs to fail. 
-// So we construct a new request, a copy of the original, with overrides from the
-// redirect.
-//
-// Docs say that if redirectResponse is nil, just return the redirectRequest.
-
-- (NSURLRequest *)connection:(NSURLConnection *)connection
-             willSendRequest:(NSURLRequest *)redirectRequest
-            redirectResponse:(NSURLResponse *)redirectResponse 
-{
-	if (redirectResponse==nil)
-	{
-		return redirectRequest;
-	}
-
-	if (redirectRequest && redirectResponse) 
-	{
-		NSURL *redirectURL = [redirectRequest URL];
-		NSURL *url = [downloadRequest URL];
-
-		NSMutableURLRequest *newRequest = [[NSMutableURLRequest alloc] init];
-		[newRequest setTimeoutInterval:10.0];
-		[newRequest setValue:userAgent forHTTPHeaderField:@"User-Agent"];
-
-		// disallow scheme changes (say, from https to http)
-		NSString *redirectScheme = [url scheme];
-		NSString *newScheme = [redirectURL scheme];
-		NSString *newResourceSpecifier = [redirectURL resourceSpecifier];
-
-		if ([redirectScheme caseInsensitiveCompare:@"http"] == NSOrderedSame
-			&& newScheme != nil
-			&& [newScheme caseInsensitiveCompare:@"https"] == NSOrderedSame) 
-		{
-			// allow the change from http to https
-			redirectScheme = newScheme; 
-		}
-
-		NSString *newUrlString = [NSString stringWithFormat:@"%@:%@",
-			redirectScheme, newResourceSpecifier];
-
-		NSURL *newURL = [NSURL URLWithString:newUrlString];
-		[newRequest setURL:newURL];
-
-		// any headers in the redirect override headers in the original.
-		NSDictionary *redirectHeaders = [redirectRequest allHTTPHeaderFields];
-		if (redirectHeaders) 
-		{
-			NSEnumerator *enumerator = [redirectHeaders keyEnumerator];
-			NSString *key;
-			while (nil != (key = [enumerator nextObject])) 
-			{
-				NSString *value = [redirectHeaders objectForKey:key];
-				[newRequest setValue:value forHTTPHeaderField:key];
-			}
-		}
-		return newRequest;
-	}
-	return redirectRequest;
-}
+// Part of this code courtesy of google mac toolkit
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
 {
 	[data setLength:0];
 	expectedBytes = [response expectedContentLength];
-	[suggestedFileName release];
-	suggestedFileName = [[[[response URL] path] lastPathComponent] retain];
+
+	[suggestedFilename release];
+	suggestedFilename = [[response suggestedFilename] retain];
+
+	NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*) response;
+	NSLog(@"Received %i for %@ (suggested filename=%@)", 
+		[httpResponse statusCode], [response URL], suggestedFilename);
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)newData
@@ -177,13 +125,25 @@
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
+	NSLog(@"Connection failed with error: %@", [error localizedDescription]);
 	[progress setIndeterminate:YES];
 	[self setCompleted:YES];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
+	NSLog(@"Connection finished loading");
 	[self setCompleted:YES];
+}
+
+-(NSURLRequest *)connection:(NSURLConnection *)connection
+	willSendRequest:(NSURLRequest *)request
+	redirectResponse:(NSURLResponse *)redirectResponse
+{
+	if (redirectResponse)
+		NSLog(@"Redirecting from %@ to %@", [redirectResponse URL], [request URL]);
+
+	return request;
 }
 
 @end

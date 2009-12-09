@@ -17,25 +17,25 @@ namespace ti
 	class HttpServerRequest : public Poco::Net::HTTPRequestHandler, public StaticBoundObject
 	{
 	public:
-		HttpServerRequest(Host *host, SharedKMethod callback, Poco::Net::HTTPServerRequest& request);
+		HttpServerRequest(Host *host, KMethodRef callback, Poco::Net::HTTPServerRequest& request);
 		virtual ~HttpServerRequest();
 
 		void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse& response);
 
 	private:
 		Host *host;
-		SharedKMethod callback;
+		KMethodRef callback;
 		Poco::Net::HTTPServerRequest& request;
 
-		void GetMethod(const ValueList& args, SharedValue result);
-		void GetVersion(const ValueList& args, SharedValue result);
-		void GetURI(const ValueList& args, SharedValue result);
-		void GetContentType(const ValueList& args, SharedValue result);
-		void GetContentLength(const ValueList& args, SharedValue result);
-		void GetHeader(const ValueList& args, SharedValue result);
-		void GetHeaders(const ValueList& args, SharedValue result);
-		void HasHeader(const ValueList& args, SharedValue result);
-		void Read(const ValueList& args, SharedValue result);
+		void GetMethod(const ValueList& args, KValueRef result);
+		void GetVersion(const ValueList& args, KValueRef result);
+		void GetURI(const ValueList& args, KValueRef result);
+		void GetContentType(const ValueList& args, KValueRef result);
+		void GetContentLength(const ValueList& args, KValueRef result);
+		void GetHeader(const ValueList& args, KValueRef result);
+		void GetHeaders(const ValueList& args, KValueRef result);
+		void HasHeader(const ValueList& args, KValueRef result);
+		void Read(const ValueList& args, KValueRef result);
 	};
 }
 

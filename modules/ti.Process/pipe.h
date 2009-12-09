@@ -22,29 +22,29 @@ namespace ti
 		public:
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
-		virtual int Write(AutoBlob data);
-		virtual void CallWrite(SharedKObject target, AutoBlob data);
+		virtual int Write(BlobRef data);
+		virtual void CallWrite(KObjectRef target, BlobRef data);
 		virtual void Close();
-		virtual void CallClose(SharedKObject target);
+		virtual void CallClose(KObjectRef target);
 		virtual void Flush();
-		void Attach(SharedKObject object);
-		void Detach(SharedKObject object);
+		void Attach(KObjectRef object);
+		void Detach(KObjectRef object);
 		bool IsAttached();
 		AutoPipe Clone();
-		std::vector<AutoBlob> readData;
+		std::vector<BlobRef> readData;
 		static void FireEventAsynchronously(AutoPtr<Event> event);
 
 		protected:
 		int FindFirstLineFeed(char *data, int length, int *charsToErase);
-		void _Close(const ValueList& args, SharedValue result);
-		void _SetOnClose(const ValueList& args, SharedValue result);
-		void _Attach(const ValueList& args, SharedValue result);
-		void _Detach(const ValueList& args, SharedValue result);
-		void _IsAttached(const ValueList& args, SharedValue result);
-		void _Write(const ValueList& args, SharedValue result);
-		void _Flush(const ValueList& args, SharedValue result);
+		void _Close(const ValueList& args, KValueRef result);
+		void _SetOnClose(const ValueList& args, KValueRef result);
+		void _Attach(const ValueList& args, KValueRef result);
+		void _Detach(const ValueList& args, KValueRef result);
+		void _IsAttached(const ValueList& args, KValueRef result);
+		void _Write(const ValueList& args, KValueRef result);
+		void _Flush(const ValueList& args, KValueRef result);
 		Poco::Mutex attachedMutex;
-		std::vector<SharedKObject> attachedObjects;
+		std::vector<KObjectRef> attachedObjects;
 		Logger *logger;
 	};
 }

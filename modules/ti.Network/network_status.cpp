@@ -9,8 +9,8 @@
 
 namespace ti
 {
-	NetworkStatus::NetworkStatus(NetworkBinding* binding) : 
-		StaticBoundObject(),
+	NetworkStatus::NetworkStatus(NetworkBinding* binding) :
+		StaticBoundObject("Network.NetworkStatus"),
 		binding(binding),
 		previous_status(false),
 		running(true)

@@ -13,17 +13,18 @@
 
 namespace ti
 {
-	class ProcessBinding : public AccessorBoundObject
+	class ProcessBinding : public KAccessorObject
 	{
 	public:
 		ProcessBinding();
 		virtual ~ProcessBinding();
 		static std::map<std::string,int> signals;
+
 	private:
-		void CreateProcess(const ValueList& args, SharedValue result);
-		void CreatePipe(const ValueList& args, SharedValue result);
-		void GetCurrentProcess(const ValueList& args, SharedValue result);
-		void ExtendArgs(SharedKList dest, SharedKList args);
+		void CreateProcess(const ValueList& args, KValueRef result);
+		void CreatePipe(const ValueList& args, KValueRef result);
+		void GetCurrentProcess(const ValueList& args, KValueRef result);
+		void ExtendArgs(KListRef dest, KListRef args);
 	};
 }
 

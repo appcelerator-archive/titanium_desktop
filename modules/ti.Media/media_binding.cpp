@@ -10,7 +10,9 @@
 
 namespace ti
 {
-	MediaBinding::MediaBinding(SharedKObject global) : global(global)
+	MediaBinding::MediaBinding(KObjectRef global) :
+		StaticBoundObject("Media"),
+		global(global)
 	{
 		/**
 		 * @tiapi(method=True,name=Media.createSound,since=0.2) Creates a sound object
@@ -28,7 +30,7 @@ namespace ti
 	{
 	}
 
-	void MediaBinding::_CreateSound(const ValueList& args, SharedValue result)
+	void MediaBinding::_CreateSound(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=1)
 			throw ValueException::FromString("createSound takes 1 parameter");
@@ -37,7 +39,7 @@ namespace ti
 		result->SetObject(this->CreateSound(path));
 	}
 
-	void MediaBinding::_Beep(const ValueList& args, SharedValue result)
+	void MediaBinding::_Beep(const ValueList& args, KValueRef result)
 	{
 		this->Beep();
 	}

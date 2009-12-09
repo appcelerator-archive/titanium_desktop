@@ -4,7 +4,7 @@ import os.path as path, futils, os, zipfile, sys
 # Network installable zip files for distribution. We must
 # encase this in a builder because the files necessary for zipping
 # don't exist when this file is processed.
-excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd']
+excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd', '.cpp', '.obj', '.pyc', 'SConscript']
 def build_dist_zips(target, source, env):
 	
 	f = path.join(build.dist_dir, 'runtime-%s.zip' % build.version)
@@ -29,45 +29,46 @@ def build_sdk(target, source, env):
 	print "Packing %s " % sdkZipPath
 	
 	sdkZip = zipfile.ZipFile(sdkZipPath, 'w', zipfile.ZIP_DEFLATED)
-	
-	sys.path.append(path.join(build.titanium_source_dir, 'build'))
-	import titanium_version
-	baseVersion = titanium_version.version
-	
+
 	def buildRuntimeZip(file):
 		relativePath = file.replace(build.runtime_build_dir, '')
-		zipPath = '/'.join(['runtime', build.os, baseVersion, relativePath])
+		zipPath = '/'.join(['runtime', build.os, build.version, relativePath])
 		futils.AddToZip(sdkZip, file, zipPath)
 		
 	futils.walk_dir(build.runtime_build_dir, buildRuntimeZip, exclude=excludes, dirs=True)
 	
 	def buildModuleZip(file, module):
 		relativePath = file.replace(m.build_dir, '')
-		zipPath = '/'.join(['modules', build.os, module.name, baseVersion, relativePath])
+		zipPath = '/'.join(['modules', build.os, module.name, build.version, relativePath])
 		futils.AddToZip(sdkZip, file, zipPath)
 	
 	for m in build.modules:
 		futils.walk_dir(m.build_dir, lambda f: buildModuleZip(f, m), exclude=excludes, dirs=True)
-	
-	def bundleSupport(supportDir):
-		for file in os.listdir(supportDir):
-			supportFile = path.join(supportDir, file)
-			fileExt = os.path.splitext(file)[1]
-			exclude = fileExt in excludes or file == fileExt
-			
-			if not exclude and path.isfile(supportFile):
-				sdkZip.write(supportFile, '/'.join(['sdk', build.os, baseVersion, file]))
+
+	def bundleSupport(supportDir,recurse=False):
+		for root, dirs, files in os.walk(supportDir):
+			if recurse or root == supportDir:
+				for file in files:
+					relativeFile = os.path.join(root[len(supportDir)+1:], file)
+					absoluteFile = os.path.join(root, file)
+					fileExt = os.path.splitext(relativeFile)[1]
+					exclude = fileExt in excludes or file == fileExt
+					
+					if not exclude and path.isfile(absoluteFile):
+						zipPath = '/'.join(relativeFile.split(os.sep))
+						sdkZip.write(absoluteFile, '/'.join(['sdk', build.os, build.version, zipPath]))	
 
 	supportDir = path.join(build.titanium_source_dir, 'support')
 	platformSupportDir = path.join(supportDir, build.os)
 	
 	bundleSupport(supportDir)
-	bundleSupport(platformSupportDir)
-	
+	bundleSupport(platformSupportDir, recurse=True)
+
 	if build.is_win32():
-		sdkZip.write(os.path.join(build.dir, 'self_extractor.exe'), '/'.join(['sdk', build.os, baseVersion, 'self_extractor.exe']))
+		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'),
+		'/'.join(['sdk', build.os, build.version, 'titanium_installer.dll']))
 	
-	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, baseVersion))
+	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, build.version))
 	sdkZip.close()
 
 build.env.Append(BUILDERS = {'BuildSDK' : Builder(action=build_sdk)})

@@ -11,9 +11,9 @@ namespace ti
 	using std::vector;
 	using std::string;
 
-	Menu::Menu() : AccessorBoundObject("UI.Menu")
+	Menu::Menu() :
+		KAccessorObject("UI.Menu")
 	{
-
 		/**
 		 * @tiapi(method=True,name=UI.Menu.appendItem,since=0.6)
 		 * @tiapi Append a MenuItem object to a menu.
@@ -91,7 +91,7 @@ namespace ti
 		this->children.clear();
 	}
 
-	void Menu::_AddItem(const ValueList& args, SharedValue result)
+	void Menu::_AddItem(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("addItem", "?s m|0 s|0");
 		UIBinding* binding = UIBinding::GetInstance();
@@ -102,7 +102,7 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void Menu::_AddSeparatorItem(const ValueList& args, SharedValue result)
+	void Menu::_AddSeparatorItem(const ValueList& args, KValueRef result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 		AutoMenuItem newItem = binding->__CreateSeparatorMenuItem(args);
@@ -110,7 +110,7 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void Menu::_AddCheckItem(const ValueList& args, SharedValue result)
+	void Menu::_AddCheckItem(const ValueList& args, KValueRef result)
 	{
 		UIBinding* binding = UIBinding::GetInstance();
 		AutoMenuItem newItem = binding->__CreateCheckMenuItem(args);
@@ -118,10 +118,10 @@ namespace ti
 		result->SetObject(newItem);
 	}
 
-	void Menu::_AppendItem(const ValueList& args, SharedValue result)
+	void Menu::_AppendItem(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("appendItem", "o");
-		SharedKObject o = args.at(0)->ToObject();
+		KObjectRef o = args.at(0)->ToObject();
 
 		AutoMenuItem item = o.cast<MenuItem>();
 		if (!item.isNull())
@@ -132,17 +132,17 @@ namespace ti
 		}
 	}
 
-	void Menu::_GetItemAt(const ValueList& args, SharedValue result)
+	void Menu::_GetItemAt(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getItemAt", "i");
 		AutoMenuItem item = this->GetItemAt(args.GetInt(0));
 		result->SetObject(item);
 	}
 
-	void Menu::_InsertItemAt(const ValueList& args, SharedValue result)
+	void Menu::_InsertItemAt(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("insertItemAt", "o,i");
-		SharedKObject o = args.at(0)->ToObject();
+		KObjectRef o = args.at(0)->ToObject();
 		AutoMenuItem item = o.cast<MenuItem>();
 
 		if (!item.isNull())
@@ -154,7 +154,7 @@ namespace ti
 		}
 	}
 
-	void Menu::_RemoveItemAt(const ValueList& args, SharedValue result)
+	void Menu::_RemoveItemAt(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("removeItemAt", "i");
 		size_t index = static_cast<size_t>(args.GetInt(0));
@@ -162,12 +162,12 @@ namespace ti
 		this->RemoveItemAt(index);
 	}
 
-	void Menu::_GetLength(const ValueList& args, SharedValue result)
+	void Menu::_GetLength(const ValueList& args, KValueRef result)
 	{
 		result->SetInt(this->children.size());
 	}
 
-	void Menu::_Clear(const ValueList& args, SharedValue result)
+	void Menu::_Clear(const ValueList& args, KValueRef result)
 	{
 		this->children.clear();
 		this->ClearImpl();

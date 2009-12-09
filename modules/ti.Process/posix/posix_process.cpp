@@ -41,7 +41,7 @@ namespace ti
 		stdinPipe->Attach(this->GetNativeStdin());
 	}
 
-	void PosixProcess::SetArguments(SharedKList args)
+	void PosixProcess::SetArguments(KListRef args)
 	{
 #if defined(OS_OSX)
 		std::string cmd = args->At(0)->ToString();
@@ -124,9 +124,9 @@ namespace ti
 		nativeErr->StartMonitor();
 	}
 
-	AutoBlob PosixProcess::MonitorSync()
+	BlobRef PosixProcess::MonitorSync()
 	{
-		SharedKMethod readCallback =
+		KMethodRef readCallback =
 			StaticBoundMethod::FromMethod<PosixProcess>(
 				this, &PosixProcess::ReadCallback);
 
@@ -144,7 +144,7 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		AutoBlob output = 0;
+		BlobRef output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
 			output = Blob::GlobBlobs(processOutput);
@@ -170,11 +170,11 @@ namespace ti
 		return exitCode;
 	}
 
-	void PosixProcess::ReadCallback(const ValueList& args, SharedValue result)
+	void PosixProcess::ReadCallback(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsObject())
 		{
-			AutoBlob blob = args.GetObject(0).cast<Blob>();
+			BlobRef blob = args.GetObject(0).cast<Blob>();
 			if (!blob.isNull() && blob->Length() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(processOutputMutex);

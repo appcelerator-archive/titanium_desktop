@@ -245,14 +245,14 @@
 
 - (void)open
 {
-	if (config->IsVisible() && !config->IsMinimized())
-	{
-		// if we call open and we're initially visible
-		// we need to basically set requires display which
-		// will cause the window to be shown once the url is loaded
-		requiresDisplay = YES;
-	}
-	std::string url = kroll::URLUtils::NormalizeURL(config->GetURL());
+	// Wait until the frame has loaded to show the window. This prevents
+	// showing an unloaded WebView (a white screen).
+	requiresDisplay = YES;
+
+	if (config->IsFullscreen())
+		[self setFullscreen:YES];
+
+	std::string url(kroll::URLUtils::NormalizeURL(config->GetURL()));
 	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
 	
@@ -269,28 +269,12 @@
 	[super close];
 }
 
-- (void)setInitialWindow:(BOOL)yn
-{
-	// this is a boolean to indicate that when the frame is loaded,
-	// we should go ahead and display the window
-	requiresDisplay = yn;
-}
-
 - (void)frameLoaded
 {
-	if (requiresDisplay)
+	if (requiresDisplay && (*userWindow)->IsVisible())
 	{
 		requiresDisplay = NO;
-		config->SetVisible(true);
-
-		[NSApp arrangeInFront:self];
-		[self makeKeyAndOrderFront:self];
-		[NSApp activateIgnoringOtherApps:YES];
-
-		if (config->IsFullscreen())
-		{
-			[self setFullscreen:YES];
-		}
+		(*userWindow)->Show();
 	}
 	[self invalidateShadow];
 }

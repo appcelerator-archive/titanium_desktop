@@ -28,7 +28,7 @@ namespace ti
 		KROLL_MODULE_CLASS(PlatformModule)
 
 	private:
-		kroll::SharedKObject binding;
+		kroll::KObjectRef binding;
 	};
 
 }

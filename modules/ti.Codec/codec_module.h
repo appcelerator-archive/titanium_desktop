@@ -28,7 +28,7 @@ namespace ti
 		KROLL_MODULE_CLASS(CodecModule)
 		
 	private:
-		kroll::SharedKObject binding;
+		kroll::KObjectRef binding;
 	};
 
 }

@@ -11,6 +11,7 @@
 namespace ti
 {
 	NativePipe::NativePipe(bool isReader) :
+		Pipe("Process.NativePipe"),
 		closed(false),
 		isReader(isReader),
 		writeThreadAdapter(new Poco::RunnableAdapter<NativePipe>(
@@ -56,7 +57,7 @@ namespace ti
 		Pipe::Close();
 	}
 
-	int NativePipe::Write(AutoBlob blob)
+	int NativePipe::Write(BlobRef blob)
 	{
 		if (isReader)
 		{
@@ -101,7 +102,7 @@ namespace ti
 
 	void NativePipe::PollForReads()
 	{
-		this->duplicate();
+		KObjectRef save(this, true);
 
 		char buffer[MAX_BUFFER_SIZE];
 		int length = MAX_BUFFER_SIZE;
@@ -110,20 +111,19 @@ namespace ti
 
 		while (bytesRead > 0)
 		{
-			AutoBlob blob = new Blob(buffer, bytesRead);
+			BlobRef blob = new Blob(buffer, bytesRead);
 			this->Write(blob);
 			bytesRead = this->RawRead(buffer, length);
 		}
 
 		this->CloseNativeRead();
-		this->release();
 	}
 
 	void NativePipe::PollForWrites()
 	{
-		this->duplicate();
+		KObjectRef save(this, true);
 
-		AutoBlob blob = 0;
+		BlobRef blob = 0;
 		while (!closed || buffers.size() > 0)
 		{
 			PollForWriteIteration();
@@ -131,12 +131,11 @@ namespace ti
 		}
 
 		this->CloseNativeWrite();
-		this->release();
 	}
 
 	void NativePipe::PollForWriteIteration()
 	{
-		AutoBlob blob = 0;
+		BlobRef blob = 0;
 		while (buffers.size() > 0)
 		{
 			{
@@ -152,7 +151,7 @@ namespace ti
 		}
 	}
 
-	void NativePipe::RawWrite(AutoBlob blob)
+	void NativePipe::RawWrite(BlobRef blob)
 	{
 		try
 		{

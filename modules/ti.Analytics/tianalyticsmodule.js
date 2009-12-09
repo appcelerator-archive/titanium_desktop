@@ -5,7 +5,7 @@
 {
 	var update_check_delay = 30000; // how many ms before we initiate check
 	var update_check_interval_secs = (60000 * 15) / 1000; // once per 15 min
-	
+
 	var url = Titanium.App.getStreamURL("app-track");
 	var guid = null;
 	var sid = null;
@@ -15,20 +15,31 @@
 	var refresh_components = true;
 	var update_check_timer = null;
 	var analytics_spec_version = 2;
-	var tz_offset_mins = - (new Date().getTimezoneOffset()); // js returns minutes to add to local to get UTC,
-	                                                         // Java returns ms to add to UTC to get local
-	
+
+	// js returns minutes to add to local to get UTC,
+	// Java returns ms to add to UTC to get local
+	var tz_offset_mins = - (new Date().getTimezoneOffset());
+
 	function send(qsv,async,timeout)
 	{
 		try
 		{
-			// if we're offline we don't even attempt these
-			if (qsv.type!='ti.start' && qsv.type!='ti.end' && Titanium.Network.online===false)
+			// If we're offline we don't even attempt these
+			if (qsv.type != 'ti.start' && qsv.type != 'ti.end'
+				&& Titanium.Network.online === false)
 			{
 				//TODO: we need to place these in DB and re-send later
-				Titanium.API.debug("we're not online - skipping analytics");
+				Titanium.API.debug("Not online -- skipping analytics");
 				return;
 			}
+
+			// If we're offline we don't even attempt these
+			if (!Titanium.App.analyticsEnabled)
+			{
+				Titanium.API.debug("Analytics disabled via tiapp.xml, skipping");
+				return;
+			}
+
 			async = (typeof async=='undefined') ? true : async;
 			qsv.mid = Titanium.Platform.id;
 			qsv.guid = guid;
@@ -46,7 +57,7 @@
 			qsv.ip = Titanium.Platform.address;
 			qsv.ver = analytics_spec_version;
 			qsv.tz = tz_offset_mins;
-			
+
 			var qs = '';
 			for (var p in qsv)
 			{
@@ -80,7 +91,9 @@
 	}
 	
 	/** Undocumented, perhaps to be deprecated
-	 * @no_tiapi(method=True,name=Analytics.addEvent,since=0.3) Sends an analytics event associated with the application, likely to be deprecated in favor of userEvent
+	 * @no_tiapi(method=True,name=Analytics.addEvent,since=0.3)
+	 * @no_tiapi Sends an analytics event associated with the application,
+	 * @no_tiapi likely to be deprecated in favor of userEvent
 	 * @no_tiarg(for=Analytics.addEvent,type=String,name=event) event name
 	 * @no_tiarg(for=Analytics.addEvent,type=Object,name=data,optional=True) event data
 	 */
@@ -184,8 +197,6 @@
 		}
 	});
 
-	
-
 	/**
 	 * @tiapi(method=True,name=Analytics.userEvent,since=0.7) Sends an analytics event not covered by the other interfaces
 	 * @tiarg(for=Analytics.userEvent,type=String,name=event) event name
@@ -196,7 +207,7 @@
 		if (typeof(name)!='undefined')
 		{
 			data = ((typeof(data)!='undefined') ? Titanium.JSON.stringify(data) : null);
-			send({type:'app.user',event:name,data:data});		
+			send({type:'app.user',event:name,data:data});
 		}
 	});
 
@@ -291,8 +302,10 @@
 	});
 
 	/**
-	 * @tiapi(method=True,name=UpdateManager.installAppUpdate,since=0.4) Install an application update received from update monitor. This method will cause the process to first be restarted for the update to begin.
-	 * @tiarg(for=UpdateManager.installAppUpdate,name=spec,type=Object) Update spec object received from update service.
+	 * @tiapi(method=True,name=UpdateManager.installAppUpdate,since=0.4)
+	 * @tiapi Install an application update received from update monitor. This
+	 * @tiapi method will cause the process to first be restarted for the update to begin.
+	 * @tiarg[Object, updateSpec] Update spec object received from update service.
 	 */
 	Titanium.API.set("UpdateManager.installAppUpdate", function(updateSpec)
 	{
@@ -308,7 +321,7 @@
 		update.write(updateSpec.manifest);
 		
 		// restart ourselves to cause the install
-		Titanium.Process.restart();
+		Titanium.App.restart();
 	}
 	
 

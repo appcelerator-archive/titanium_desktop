@@ -14,86 +14,109 @@ namespace ti
 
 	void Clipboard::SetTextImpl(std::string& newText)
 	{
+		if (newText.empty())
+		{
+			this->ClearText();
+			return;
+		}
+
 		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
-		if (OpenClipboard(eventWindow))
+		if (!OpenClipboard(eventWindow))
 		{
-			EmptyClipboard();
-			std::wstring wideString = UTF8ToWide(newText);
-			HGLOBAL clipboardData = ::GlobalAlloc(GMEM_MOVEABLE, (newText.size()+1 * sizeof(char)));
-			if (clipboardData == NULL)
-			{
-				CloseClipboard();
-				return;
-			}
-			
-			HGLOBAL wideClipboardData = ::GlobalAlloc(GMEM_MOVEABLE, (wideString.size()+1 * sizeof(wchar_t)));
-			if (wideClipboardData == NULL)
-			{
-				CloseClipboard();
-				return;
-			}
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat("Could not open Win32 clipbaord: %s",
+				error.c_str());
+		}
 
-			char *data = (char*) ::GlobalLock(clipboardData);
-			strcpy(data, newText.c_str());
-			::GlobalUnlock(clipboardData);
-			SetClipboardData(CF_TEXT, clipboardData);
-			
-			wchar_t *wideData = (wchar_t*) ::GlobalLock(wideClipboardData);
-			wcscpy(wideData, wideString.c_str());
-			::GlobalUnlock(wideClipboardData);
+		// Do not empty clipboard here, because we want to preserve existing data of
+		// different types.
 
-			SetClipboardData(CF_UNICODETEXT, wideClipboardData);
+		// We need to use the default ANSI code page when setting the clipboard
+		// data, not the data passed in, which is in Unicode.
+		std::wstring wideString(::UTF8ToWide(newText));
+		std::string ansiString(::WideToMultiByte(wideString, CP_ACP));
+
+		size_t length = ansiString.size() + 1;
+		HGLOBAL clipboardData = ::GlobalAlloc(GMEM_MOVEABLE, length);
+		if (!clipboardData)
+		{
 			CloseClipboard();
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat(
+				"Could allocate ASNI clipbaord data: %s", error.c_str());
 		}
-		else
+		LPVOID data = ::GlobalLock(clipboardData);
+		CopyMemory(data, ansiString.c_str(), length);
+		::GlobalUnlock(clipboardData);
+		SetClipboardData(CF_TEXT, clipboardData);
+
+		length = (wideString.size() + 1) * sizeof(wchar_t);
+		clipboardData = ::GlobalAlloc(GMEM_MOVEABLE, length);
+		if (!clipboardData)
 		{
-			throw ValueException::FromString("Couldn't open clipboard in setText");
+			CloseClipboard();
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat(
+				"Could allocate Unicode clipbaord data: %s", error.c_str());
 		}
+		data = ::GlobalLock(clipboardData);
+		CopyMemory(data, wideString.c_str(), length);
+		::GlobalUnlock(clipboardData);
+		SetClipboardData(CF_UNICODETEXT, clipboardData);
 	}
 
 	std::string& Clipboard::GetTextImpl()
 	{
 		static std::string clipboardText;
-		if (HasText())
+		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		if (!OpenClipboard(eventWindow))
 		{
-			HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
-			if (OpenClipboard(eventWindow))
-			{
-				HANDLE clipboardData = GetClipboardData(CF_TEXT);
-				if (clipboardData != NULL)
-				{
-					char *data = (char*) ::GlobalLock(clipboardData);
-					if (data != NULL)
-					{
-						clipboardText.assign(data);
-						::GlobalUnlock(clipboardData);
-					}
-				}
-				else
-				{
-					HANDLE wideClipboardData = GetClipboardData(CF_UNICODETEXT);
-					if (wideClipboardData != NULL)
-					{
-						wchar_t *data = (wchar_t*) ::GlobalLock(wideClipboardData);
-						if (data != NULL)
-						{
-							clipboardText.assign(WideToUTF8(data));
-							::GlobalUnlock(wideClipboardData);
-						}
-					}
-				}
-				CloseClipboard();
-			}
-			else
-			{
-				throw ValueException::FromString("Couldn't open clipboard in getText");
-			}
-		}
-		else
-		{
-			clipboardText = "";
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat("Could not open Win32 clipbaord: %s",
+				error.c_str());
 		}
 
+		// TODO(mrobinson): We need to also test for text/html here, I think.
+		UINT format = 0;
+		clipboardText = "";
+		if (IsClipboardFormatAvailable(CF_UNICODETEXT))
+			format = CF_UNICODETEXT;
+		else if (IsClipboardFormatAvailable(CF_TEXT))
+			format = CF_TEXT;
+		else
+			return clipboardText;
+
+		HANDLE clipboardData = GetClipboardData(format);
+		if (!clipboardData)
+		{
+			CloseClipboard();
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat(
+				"Could not get clipbaord data: %s", error.c_str());
+		}
+
+		LPVOID data = ::GlobalLock(clipboardData);
+		if (!data)
+		{
+			CloseClipboard();
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat(
+				"Could not lock clipbaord data: %s", error.c_str());
+		}
+
+		if (format == CF_TEXT)
+		{
+			std::string ansiText(static_cast<char*>(data));
+			clipboardText = ::MultiByteToMultiByte(ansiText, CP_ACP, CP_UTF8);
+		}
+		else if (format == CF_UNICODETEXT)
+		{
+			std::wstring wideString(static_cast<wchar_t*>(data));
+			clipboardText = ::WideToUTF8(wideString);
+		}
+
+		::GlobalUnlock(clipboardData);
+		CloseClipboard();
 		return clipboardText;
 	}
 
@@ -106,24 +129,26 @@ namespace ti
 	void Clipboard::ClearTextImpl()
 	{
 		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
-		if (OpenClipboard(eventWindow))
+
+		// TODO(mrobinson): If possible we need to clear only the text portion here.
+		if (!OpenClipboard(eventWindow))
 		{
-			EmptyClipboard();
-			CloseClipboard();
+			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
+			throw ValueException::FromFormat("Could not open Win32 clipbaord: %s",
+				error.c_str());
 		}
-		else
-		{
-			throw ValueException::FromString("Couldn't open clipboard in clearData");
-		}
+
+		EmptyClipboard();
+		CloseClipboard();
 	}
 
-	AutoBlob Clipboard::GetImageImpl(std::string& mimeType)
+	BlobRef Clipboard::GetImageImpl(std::string& mimeType)
 	{
-		AutoBlob image(0);
+		BlobRef image(0);
 		return image;
 	}
 
-	void Clipboard::SetImageImpl(std::string& mimeType, AutoBlob image)
+	void Clipboard::SetImageImpl(std::string& mimeType, BlobRef image)
 	{
 	}
 
@@ -140,7 +165,6 @@ namespace ti
 	{
 		static std::vector<std::string> uriList;
 		uriList.clear();
-		
 		return uriList;
 	}
 

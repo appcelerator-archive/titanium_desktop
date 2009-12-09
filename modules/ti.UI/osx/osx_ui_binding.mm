@@ -38,7 +38,7 @@ namespace ti
 		application = [[TiApplicationDelegate alloc] initWithBinding:this];
 		[application retain];
 
-		NSApplication *nsapp = [NSApplication sharedApplication];
+		NSApplication* nsapp = [NSApplication sharedApplication];
 		[nsapp setDelegate:application];
 		[NSBundle loadNibNamed:@"MainMenu" owner:nsapp];
 
@@ -71,7 +71,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new OSXUserWindow(config, parent);
-		return w->GetAutoPtr();
+		return AutoUserWindow(w, true);
 	}
 
 	AutoMenu OSXUIBinding::CreateMenu()
@@ -92,14 +92,6 @@ namespace ti
 	AutoMenuItem OSXUIBinding::CreateCheckMenuItem()
 	{
 		return new OSXMenuItem(MenuItem::CHECK);
-	}
-
-	void OSXUIBinding::ErrorDialog(std::string msg)
-	{
-		NSApplicationLoad();
-		if (!msg.empty())
-			 NSRunCriticalAlertPanel (@"Application Error", [NSString stringWithUTF8String:msg.c_str()],nil,nil,nil);
-		UIBinding::ErrorDialog(msg);
 	}
 
 	void OSXUIBinding::SetMenu(AutoMenu menu)
@@ -291,7 +283,7 @@ namespace ti
 		return this->contextMenu;
 	}
 
-	AutoTrayItem OSXUIBinding::AddTray(std::string& iconPath, SharedKMethod eventListener)
+	AutoTrayItem OSXUIBinding::AddTray(std::string& iconPath, KMethodRef eventListener)
 	{
 		return new OSXTrayItem(iconPath, eventListener);
 	}
@@ -360,5 +352,14 @@ namespace ti
 		IOObjectRelease(curObj);
 		IOObjectRelease(iter);
 		return (long)tHandle;
+	}
+
+	/*static*/
+	void OSXUIBinding::ErrorDialog(std::string msg)
+	{
+		NSApplicationLoad();
+		NSRunCriticalAlertPanel(@"Application Error", 
+			[NSString stringWithUTF8String:msg.c_str()], nil, nil, nil);
+		UIBinding::ErrorDialog(msg);
 	}
 }

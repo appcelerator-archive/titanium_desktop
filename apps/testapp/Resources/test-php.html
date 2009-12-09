@@ -1,7 +1,14 @@
 <html>
 <body>
 	<script type="text/php" src="test.php"></script>
+	<script type="text/php">
+		function do_phpinfo()
+		{
+			phpinfo();
+		}
+	</script>
 	<a href="test-php.php">Test pre-processed file</a>
 	<a href="javascript: test_function();">call test_function()</a>
+	<a href="javascript: do_phpinfo();">call phpinfo()</a>
 </body>
 </html>

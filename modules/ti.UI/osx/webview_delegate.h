@@ -18,14 +18,14 @@
 	Host *host;
 	WebInspector *inspector;
 	BOOL initialDisplay;
-	std::map<WebFrame*, SharedKObject> *frameToGlobalObject;
+	std::map<WebFrame*, KObjectRef> *frameToGlobalObject;
 	Logger *logger;
 }
 -(id)initWithWindow:(NativeWindow*)window;
 -(void)setupPreferences;
--(void)registerGlobalObject:(SharedKObject) globalObject forFrame:(WebFrame *)frame;
--(SharedKObject)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame;
+-(void)registerGlobalObject:(KObjectRef) globalObject forFrame:(WebFrame *)frame;
+-(KObjectRef)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame;
 -(BOOL)isGlobalObjectRegisteredForFrame:(WebFrame*) frame;
--(SharedKObject)globalObjectForFrame:(WebFrame*) frame;
+-(KObjectRef)globalObjectForFrame:(WebFrame*) frame;
 -(void)deregisterGlobalObjectForFrame:(WebFrame *)frame;
 @end

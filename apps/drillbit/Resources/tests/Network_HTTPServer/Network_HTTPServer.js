@@ -17,7 +17,7 @@ describe("Network.HTTPServer",
 				value_of(request.hasHeader('Foo')).should_be_false();
 				value_of(request.getHeader('Foo')).should_be_null();
 				value_of(request.getContentType()).should_be('');
-				value_of(request.getContentLength()).should_be(0);
+				value_of(request.getContentLength()).should_be(-1);
 				value_of(request.read()).should_be_null();
 				value_of(server.isClosed()).should_be_false();
 				server.close();
@@ -32,7 +32,7 @@ describe("Network.HTTPServer",
 		});
 		
 		var xhr = Titanium.Network.createHTTPClient();
-		xhr.open("GET","http://127.0.0.1:8082/foo");
+		xhr.open("GET", "http://127.0.0.1:8082/foo");
 		xhr.send(null);
 		
 	},

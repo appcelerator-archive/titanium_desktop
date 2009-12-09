@@ -9,18 +9,20 @@
 
 namespace ti
 {
-	GrowlBinding::GrowlBinding(SharedKObject global) : global(global)
+	GrowlBinding::GrowlBinding(KObjectRef global) :
+		StaticBoundObject("Growl"),
+		global(global)
 	{
 		// These methods aren't public (not documented)
 		SetMethod("showNotification", &GrowlBinding::ShowNotification);
 		SetMethod("isRunning", &GrowlBinding::IsRunning);
 	}
 
-	void GrowlBinding::ShowNotification(const ValueList& args, SharedValue result)
+	void GrowlBinding::ShowNotification(const ValueList& args, KValueRef result)
 	{
 		std::string title, description, iconURL = "";
 		int notification_timeout = 3;
-		SharedKMethod callback;
+		KMethodRef callback;
 
 		if (args.size() >= 2) {
 			title = args.at(0)->ToString();
@@ -33,7 +35,7 @@ namespace ti
 				notification_timeout = args.at(3)->ToInt();
 			}
 
-			SharedKMethod callback;
+			KMethodRef callback;
 			if (args.size() >= 5 && args.at(4)->IsMethod()) {
 				callback = args.at(4)->ToMethod();
 			}
@@ -41,9 +43,9 @@ namespace ti
 			ShowNotification(title, description, iconURL, notification_timeout, callback);
 		}
 		else if (args.size() == 1  && args.at(0)->IsObject()) {
-			SharedKObject options = args.at(0)->ToObject();
+			KObjectRef options = args.at(0)->ToObject();
 
-			SharedValue value = options->Get("title");
+			KValueRef value = options->Get("title");
 			if (value->IsUndefined()) {
 				throw ValueException::FromString("Notification title was not set");
 			}
@@ -74,7 +76,7 @@ namespace ti
 		}
 	}
 
-	void GrowlBinding::IsRunning(const ValueList& args, SharedValue result)
+	void GrowlBinding::IsRunning(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(IsRunning());
 	}

@@ -1,4 +1,0 @@
-name: ti.Desktop
-version: 0.1
-description: ti.Desktop module
-os: win32, osx, linux

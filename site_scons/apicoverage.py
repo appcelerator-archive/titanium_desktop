@@ -12,11 +12,9 @@ import traceback
 cwd = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 sys.path.append(path.join(cwd,"../build"))
 
-import titanium_version
-baseVersion = titanium_version.version
-t = baseVersion.split(".")
-defaultVersion = "%s.%s" % (t[0],t[1])
-
+# Instead of making the default version be the current version,
+# which is likely inaccurate -- we should print a warning when
+# an API doesn't have a 'since=" value  correct it.
 
 class GlobDirectoryWalker:
 	# a forward iterator that traverses a directory tree
@@ -174,7 +172,7 @@ class API(dict):
 		self.name = self['name'] = name.strip()
 		self.module = module
 		self['deprecated'] = False
-		self['since'] = defaultVersion
+		self['since'] = "unknown"
 		self['description'] = ''
 	
 	def add_object(self,obj):

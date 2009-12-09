@@ -8,9 +8,13 @@
 #include <Poco/Data/MetaColumn.h>
 #include <Poco/DynamicAny.h>
 
+using Poco::Data::MetaColumn;
+
 namespace ti
 {
-	ResultSetBinding::ResultSetBinding() : StaticBoundObject("ResultSet"), eof(true)
+	ResultSetBinding::ResultSetBinding() :
+		StaticBoundObject("Database.ResultSet"),
+		eof(true)
 	{
 		// no results result set
 		Bind();
@@ -74,7 +78,7 @@ namespace ti
 	ResultSetBinding::~ResultSetBinding()
 	{
 	}
-	void ResultSetBinding::IsValidRow(const ValueList& args, SharedValue result)
+	void ResultSetBinding::IsValidRow(const ValueList& args, KValueRef result)
 	{
 		if (rs.isNull())
 		{
@@ -85,21 +89,21 @@ namespace ti
 			result->SetBool(!eof);
 		}
 	}
-	void ResultSetBinding::Next(const ValueList& args, SharedValue result)
+	void ResultSetBinding::Next(const ValueList& args, KValueRef result)
 	{
 		if (!rs.isNull() && !eof)
 		{
 			eof = (rs->moveNext() == false);
 		}
 	}
-	void ResultSetBinding::Close(const ValueList& args, SharedValue result)
+	void ResultSetBinding::Close(const ValueList& args, KValueRef result)
 	{
 		if (!rs.isNull())
 		{
 			rs = NULL;
 		}
 	}
-	void ResultSetBinding::RowCount(const ValueList& args, SharedValue result)
+	void ResultSetBinding::RowCount(const ValueList& args, KValueRef result)
 	{
 		if (rs.isNull())
 		{
@@ -110,7 +114,7 @@ namespace ti
 			result->SetInt(rs->rowCount());
 		}
 	}
-	void ResultSetBinding::FieldCount(const ValueList& args, SharedValue result)
+	void ResultSetBinding::FieldCount(const ValueList& args, KValueRef result)
 	{
 		if (rs.isNull())
 		{
@@ -121,7 +125,7 @@ namespace ti
 			result->SetInt(rs->columnCount());
 		}
 	}
-	void ResultSetBinding::FieldName(const ValueList& args, SharedValue result)
+	void ResultSetBinding::FieldName(const ValueList& args, KValueRef result)
 	{
 		if (rs.isNull())
 		{
@@ -134,7 +138,7 @@ namespace ti
 			result->SetString(str.c_str());
 		}
 	}
-	void ResultSetBinding::Field(const ValueList& args, SharedValue result)
+	void ResultSetBinding::Field(const ValueList& args, KValueRef result)
 	{
 		if (rs.isNull())
 		{
@@ -146,7 +150,7 @@ namespace ti
 			TransformValue(args.at(0)->ToInt(),result);
 		}
 	}
-	void ResultSetBinding::FieldByName(const ValueList& args, SharedValue result)
+	void ResultSetBinding::FieldByName(const ValueList& args, KValueRef result)
 	{
 		result->SetNull();
 		if (!rs.isNull())
@@ -165,7 +169,7 @@ namespace ti
 			}
 		}
 	}
-	void ResultSetBinding::TransformValue(size_t index, SharedValue result)
+	void ResultSetBinding::TransformValue(size_t index, KValueRef result)
 	{
 		MetaColumn::ColumnDataType type = rs->columnType(index);
 		Poco::DynamicAny value = rs->value(index);

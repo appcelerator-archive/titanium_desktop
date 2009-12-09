@@ -6,6 +6,7 @@
 <publisher>Appcelerator</publisher>
 <url>titaniumapp.com</url>
 <copyright>2009 by Appcelerator</copyright>
+<analytics>false</analytics>
 <window>
 <id>initial</id>
 <title>Titanium Unit Test Driver (aka Drillbit)</title>

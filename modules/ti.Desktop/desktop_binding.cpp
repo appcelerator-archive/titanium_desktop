@@ -24,7 +24,7 @@
 
 namespace ti
 {
-	DesktopBinding::DesktopBinding(SharedKObject global) : global(global)
+	DesktopBinding::DesktopBinding(KObjectRef global) : global(global)
 	{
 		/**
 		 * @tiapi(method=True,name=Desktop.openApplication,since=0.2) Opens an application on the users system
@@ -47,7 +47,7 @@ namespace ti
 	{
 	}
 
-	void DesktopBinding::OpenApplication(const ValueList& args, SharedValue result)
+	void DesktopBinding::OpenApplication(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=1)
 		{
@@ -57,7 +57,7 @@ namespace ti
 		result->SetBool(TI_DESKTOP::OpenApplication(app));
 	}
 
-	void DesktopBinding::OpenURL(const ValueList& args, SharedValue result)
+	void DesktopBinding::OpenURL(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=1)
 		{
@@ -67,7 +67,7 @@ namespace ti
 		result->SetBool(TI_DESKTOP::OpenURL(url));
 	}
 
-	void DesktopBinding::TakeScreenshot(const ValueList& args, SharedValue result)
+	void DesktopBinding::TakeScreenshot(const ValueList& args, KValueRef result)
 	{
 		if (args.size() < 1) {
 			throw ValueException::FromString("takeScreenshot takes 1 parameter");

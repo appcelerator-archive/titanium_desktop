@@ -9,8 +9,8 @@
 using namespace ti;
 using namespace kroll;
 
-Win32WebKitFrameLoadDelegate::Win32WebKitFrameLoadDelegate(Win32UserWindow *window_) :
-	window(window_),
+Win32WebKitFrameLoadDelegate::Win32WebKitFrameLoadDelegate(Win32UserWindow *window) :
+	window(window),
 	ref_count(1)
 {
 }
@@ -20,7 +20,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
 {
 	JSGlobalContextRef context = frame->globalContext();
 	JSObjectRef global_object = JSContextGetGlobalObject(context);
-	SharedKObject frame_global = new KKJSObject(context, global_object);
+	KObjectRef frame_global = new KKJSObject(context, global_object);
 
 	IWebDataSource *webDataSource;
 	frame->dataSource(&webDataSource);
@@ -29,9 +29,8 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
 
 	BSTR u;
 	urlRequest->URL(&u);
-	std::wstring u2(u);
-	std::string url;
-	url.assign(u2.begin(), u2.end());
+	std::wstring wideURL(u);
+	std::string url(::WideToUTF8(wideURL));
 
 	window->PageLoaded(frame_global, url, context);
 	window->FrameLoaded();
@@ -39,11 +38,10 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didClearWindowObject(
-		IWebView *webView, JSContextRef context, 
-		JSObjectRef windowScriptObject, IWebFrame *frame)
+	IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject,
+	IWebFrame *frame)
 {
-	Win32UserWindow* userWindow = this->window;
-	userWindow->RegisterJSContext((JSGlobalContextRef) context);
+	this->window->RegisterJSContext((JSGlobalContextRef) context);
 	return S_OK;
 }
 
@@ -52,17 +50,13 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::QueryInterface(
 {
 	*ppvObject = 0;
 	if (IsEqualGUID(riid, IID_IUnknown))
-	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	}
 	else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate))
-	{
 		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	}
 	else
-	{
 		return E_NOINTERFACE;
-	}
+
+	AddRef();
 	return S_OK;
 }
 

@@ -17,17 +17,17 @@ namespace ti
 	class MediaBinding : public StaticBoundObject
 	{
 		public:
-		MediaBinding(SharedKObject);
+		MediaBinding(KObjectRef);
 
 		protected:
 		virtual ~MediaBinding();
 
 		private:
-		SharedKObject global;
-		void _CreateSound(const ValueList& args, SharedValue result);
-		void _Beep(const ValueList& args, SharedValue result);
+		KObjectRef global;
+		void _CreateSound(const ValueList& args, KValueRef result);
+		void _Beep(const ValueList& args, KValueRef result);
 
-		virtual SharedKObject CreateSound(std::string& url) = 0;
+		virtual KObjectRef CreateSound(std::string& url) = 0;
 		virtual void Beep() = 0;
 	};
 }

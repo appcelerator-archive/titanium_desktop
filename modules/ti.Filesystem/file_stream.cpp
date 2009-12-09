@@ -11,15 +11,18 @@
 
 namespace ti 
 {
-	FileStream::FileStream(std::string filename_) : StaticBoundObject("FileStream"), stream(NULL)
+	FileStream::FileStream(std::string filenameIn) :
+		StaticBoundObject("Filesystem.FileStream"),
+		stream(0)
 	{
-	#ifdef OS_OSX
+#ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
 		// we do that with a nifty helper method in NSString
-		this->filename = [[[NSString stringWithCString:filename_.c_str() encoding:NSUTF8StringEncoding] stringByExpandingTildeInPath] fileSystemRepresentation];
-	#else
-		this->filename = filename_;
-	#endif
+		this->filename = [[[NSString stringWithUTF8String:filenameIn.c_str()]
+			 stringByExpandingTildeInPath] fileSystemRepresentation];
+#else
+		this->filename = filenameIn;
+#endif
 
 		/**
 		 * @tiapi(method=True,name=Filesystem.Filestream.open,since=0.2) Opens the file
@@ -83,15 +86,22 @@ namespace ti
 		this->Close();
 	}
 
-	void FileStream::Open(const ValueList& args, SharedValue result)
+	void FileStream::Open(const ValueList& args, KValueRef result)
 	{
 		FileStreamMode mode = MODE_READ;
 		bool binary = false;
 		bool append = false;
-		if (args.size()>=1) mode = (FileStreamMode)args.at(0)->ToInt();
-		if (args.size()>=2) binary = args.at(1)->ToBool();
-		if (args.size()>=3) append = args.at(2)->ToBool();
-		bool opened = this->Open(mode,binary,append);
+
+		if (args.size() >= 1)
+			mode = (FileStreamMode) args.at(0)->ToInt();
+
+		if (args.size() >= 2)
+				binary = args.at(1)->ToBool();
+
+		if (args.size() >= 3)
+			append = args.at(2)->ToBool();
+
+		bool opened = this->Open(mode, binary, append);
 		result->SetBool(opened);
 	}
 	bool FileStream::Open(FileStreamMode mode, bool binary, bool append)
@@ -141,7 +151,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::Close(const ValueList& args, SharedValue result)
+	void FileStream::Close(const ValueList& args, KValueRef result)
 	{
 		bool closed = this->Close();
 		result->SetBool(closed);
@@ -172,13 +182,13 @@ namespace ti
 
 		return false;
 	}
-	void FileStream::Write(const ValueList& args, SharedValue result)
+	void FileStream::Write(const ValueList& args, KValueRef result)
 	{
 		char *text = NULL;
 		int size = 0;
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject b = args.at(0)->ToObject();
+			KObjectRef b = args.at(0)->ToObject();
 			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
@@ -246,7 +256,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::Read(const ValueList& args, SharedValue result)
+	void FileStream::Read(const ValueList& args, KValueRef result)
 	{
 		if (!this->stream)
 		{
@@ -288,9 +298,9 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::ReadLine(const ValueList& args, SharedValue result)
+	void FileStream::ReadLine(const ValueList& args, KValueRef result)
 	{
-		if(! this->stream)
+		if (!this->stream)
 		{
 			Logger* logger = Logger::Get("Filesystem.FileStream");
 			logger->Error("Error in readLine. FileStream must be opened before calling read");
@@ -300,14 +310,14 @@ namespace ti
 		try
 		{
 			Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
-			if(!fis)
+			if (!fis)
 			{
 				Logger* logger = Logger::Get("Filesystem.FileStream");
 				logger->Error("Error in readLine. FileInputStream is null");
 				throw ValueException::FromString("FileStream must be opened for reading before calling readLine");
 			}
 
-			if(fis->eof())
+			if (fis->eof())
 			{
 				// close the file
 				result->SetNull();
@@ -352,7 +362,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void FileStream::WriteLine(const ValueList& args, SharedValue result)
+	void FileStream::WriteLine(const ValueList& args, KValueRef result)
 	{
 		if(! this->stream)
 		{
@@ -362,7 +372,7 @@ namespace ti
 		int size = 0;
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject b = args.at(0)->ToObject();
+			KObjectRef b = args.at(0)->ToObject();
 			AutoPtr<Blob> blob = b.cast<Blob>();
 			if (!blob.isNull())
 			{
@@ -418,7 +428,7 @@ namespace ti
 		result->SetBool(true);
 	}
 
-	void FileStream::Ready(const ValueList& args, SharedValue result)
+	void FileStream::Ready(const ValueList& args, KValueRef result)
 	{
 		Poco::FileIOS* fis = this->stream;
 		if(!fis)
@@ -431,7 +441,7 @@ namespace ti
 		}
 	}
 
-	void FileStream::IsOpen(const ValueList& args, SharedValue result)
+	void FileStream::IsOpen(const ValueList& args, KValueRef result)
 	{
 		Poco::FileIOS* fis = this->stream;
 		result->SetBool(fis!=NULL);

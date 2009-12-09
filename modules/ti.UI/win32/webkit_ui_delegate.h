@@ -6,23 +6,16 @@
 #ifndef TI_WEBKIT_WIN32_UI_DELEGATE_H_
 #define TI_WEBKIT_WIN32_UI_DELEGATE_H_
 #include <windows.h>
-namespace ti {
+namespace ti
+{
 
 class Win32UserWindow;
-
-//class Win32WebKitUIDelegate : public IWebUIDelegate, IWebUIDelegatePrivate3 {
-class Win32WebKitUIDelegate : public IWebUIDelegate {
-	protected:
-	Win32UserWindow *window;
-	HMENU nativeContextMenu;
-	Logger* logger;
-	int ref_count;
-	
-	public:
+class Win32WebKitUIDelegate : public IWebUIDelegate2, IWebUIDelegatePrivate
+{
+public:
 	Win32WebKitUIDelegate(Win32UserWindow *window);
 
-	// These function declarations copied from WebKit source (UIDelegate.cpp)
-
+	// These function declarations copied from WebKit DumpRenderTree (UIDelegate.cpp)
 	// IUnknown
 	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject);
 	virtual ULONG STDMETHODCALLTYPE AddRef(void);
@@ -153,32 +146,19 @@ class Win32WebKitUIDelegate : public IWebUIDelegate {
 	virtual HRESULT STDMETHODCALLTYPE dragDestinationActionMaskForDraggingInfo(
 		/* [in] */ IWebView *webView,
 		/* [in] */ IDataObject *draggingInfo,
-		/* [retval][out] */ WebDragDestinationAction *action) {
-		
-		logger->Debug("dragDestinationActionMaskForDraggingInfo");
-		*action = WebDragDestinationActionAny;
-		return S_OK;
-	}
+		/* [retval][out] */ WebDragDestinationAction *action) { return E_NOTIMPL; }
 
 	virtual HRESULT STDMETHODCALLTYPE willPerformDragDestinationAction(
 		/* [in] */ IWebView *webView,
 		/* [in] */ WebDragDestinationAction action,
-		/* [in] */ IDataObject *draggingInfo) {
-		
-		logger->Debug("willPerformDragDestinationAction");
-		return S_OK;
-	}
+		/* [in] */ IDataObject *draggingInfo) { return E_NOTIMPL; }
 
 	virtual HRESULT STDMETHODCALLTYPE dragSourceActionMaskForPoint(
 		/* [in] */ IWebView *webView,
 		/* [in] */ LPPOINT point,
-		/* [retval][out] */ WebDragSourceAction *action) {
-		logger->Debug("dragSourceActionMaskForPoint");
-		*action = WebDragSourceActionAny;
-		return S_OK;
-	}
+		/* [retval][out] */ WebDragSourceAction *action) { return E_NOTIMPL; }
 
-	virtual HRESULT STDMETHODCALLTYPE  willPerformDragSourceAction( 
+	virtual HRESULT STDMETHODCALLTYPE willPerformDragSourceAction(
 		/* [in] */ IWebView *webView,
 		/* [in] */ WebDragSourceAction action,
 		/* [in] */ LPPOINT point,
@@ -243,67 +223,66 @@ class Win32WebKitUIDelegate : public IWebUIDelegate {
 
 	virtual HRESULT STDMETHODCALLTYPE canRedo(
 		/* [retval][out] */ BOOL *result);
-		
-	
-	virtual HRESULT STDMETHODCALLTYPE printFrame( 
-			/* [in] */ IWebView *webView,
-			/* [in] */ IWebFrame *frame) { return E_NOTIMPL; }
 
-	virtual HRESULT STDMETHODCALLTYPE webViewHeaderHeight( 
+	virtual HRESULT STDMETHODCALLTYPE printFrame(
+		/* [in] */ IWebView *webView,
+		/* [in] */ IWebFrame *frame) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE ftpDirectoryTemplatePath(
+		/* [in] */ IWebView *webView,
+		/* [retval][out] */ BSTR *path) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE webViewHeaderHeight(
 		/* [in] */ IWebView *webView,
 		/* [retval][out] */ float *result) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE webViewFooterHeight( 
+
+	virtual HRESULT STDMETHODCALLTYPE webViewFooterHeight(
 		/* [in] */ IWebView *webView,
 		/* [retval][out] */ float *result) { return E_NOTIMPL; }
-		
-	virtual HRESULT STDMETHODCALLTYPE drawHeaderInRect( 
+
+	virtual HRESULT STDMETHODCALLTYPE drawHeaderInRect(
 		/* [in] */ IWebView *webView,
 		/* [in] */ RECT *rect,
 		/* [in] */ OLE_HANDLE drawingContext) { return E_NOTIMPL; }
-		
-	virtual HRESULT STDMETHODCALLTYPE drawFooterInRect( 
+
+	virtual HRESULT STDMETHODCALLTYPE drawFooterInRect(
 		/* [in] */ IWebView *webView,
 		/* [in] */ RECT *rect,
 		/* [in] */ OLE_HANDLE drawingContext,
 		/* [in] */ UINT pageIndex,
 		/* [in] */ UINT pageCount) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE ftpDirectoryTemplatePath( 
-		/* [in] */ IWebView *webView,
-		/* [retval][out] */ BSTR *path) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE webViewPrintingMarginRect( 
+
+	virtual HRESULT STDMETHODCALLTYPE webViewPrintingMarginRect(
 		/* [in] */ IWebView *webView,
 		/* [retval][out] */ RECT *rect) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE canRunModal( 
+
+	virtual HRESULT STDMETHODCALLTYPE canRunModal(
 		/* [in] */ IWebView *webView,
 		/* [retval][out] */ BOOL *canRunBoolean) { return E_NOTIMPL; }
-	
+
 	virtual HRESULT STDMETHODCALLTYPE createModalDialog(
 		/* [in] */ IWebView *sender,
 		/* [in] */ IWebURLRequest *request,
 		/* [retval][out] */ IWebView **newWebView) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE runModal( 
+
+	virtual HRESULT STDMETHODCALLTYPE runModal(
 		/* [in] */ IWebView *webView) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE isMenuBarVisible( 
-			/* [in] */ IWebView *webView,
-			/* [retval][out] */ BOOL *visible) { return E_NOTIMPL; }
-		
-	virtual HRESULT STDMETHODCALLTYPE setMenuBarVisible( 
+
+	virtual HRESULT STDMETHODCALLTYPE isMenuBarVisible(
+		/* [in] */ IWebView *webView,
+		/* [retval][out] */ BOOL *visible) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE setMenuBarVisible(
 		/* [in] */ IWebView *webView,
 		/* [in] */ BOOL visible) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE runDatabaseSizeLimitPrompt( 
+
+	virtual HRESULT STDMETHODCALLTYPE runDatabaseSizeLimitPrompt(
 		/* [in] */ IWebView *webView,
 		/* [in] */ BSTR displayName,
 		/* [in] */ IWebFrame *initiatedByFrame,
 		/* [retval][out] */ BOOL *allowed) { return E_NOTIMPL; }
-		
-	virtual HRESULT STDMETHODCALLTYPE paintCustomScrollbar( 
+
+	virtual HRESULT STDMETHODCALLTYPE paintCustomScrollbar(
 		/* [in] */ IWebView *webView,
 		/* [in] */ HDC hDC,
 		/* [in] */ RECT rect,
@@ -314,29 +293,18 @@ class Win32WebKitUIDelegate : public IWebUIDelegate {
 		/* [in] */ float value,
 		/* [in] */ float proportion,
 		/* [in] */ WebScrollbarControlPartMask parts) { return E_NOTIMPL; }
-	
-	virtual HRESULT STDMETHODCALLTYPE paintCustomScrollCorner( 
+
+	virtual HRESULT STDMETHODCALLTYPE paintCustomScrollCorner(
 		/* [in] */ IWebView *webView,
 		/* [in] */ HDC hDC,
 		/* [in] */ RECT rect) { return E_NOTIMPL; }
-	
+
 protected:
 	// IWebUIDelegatePrivate
 
-	virtual HRESULT STDMETHODCALLTYPE webViewResizerRect(
-		/* [in] */ IWebView *sender,
-		/* [retval][out] */ RECT *rect) { return E_NOTIMPL; }
-
-	virtual HRESULT STDMETHODCALLTYPE webViewSendResizeMessage(
-		/* [in] */ UINT uMsg,
-		/* [in] */ WPARAM wParam,
-		/* [in] */ LPARAM lParam) { return E_NOTIMPL; }
-
-	virtual HRESULT STDMETHODCALLTYPE webViewDrawResizer(
-		/* [in] */ IWebView *sender,
-		/* [in] */ HDC dc,
-		/* [in] */ BOOL overlapsContent,
-		/* [in] */ RECT *rect) { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE unused1() { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE unused2() { return E_NOTIMPL; }
+	virtual HRESULT STDMETHODCALLTYPE unused3() { return E_NOTIMPL; }
 
 	virtual HRESULT STDMETHODCALLTYPE webViewScrolled(
 		/* [in] */ IWebView *sender) { return E_NOTIMPL; }
@@ -353,11 +321,11 @@ protected:
 		/* [retval][out] */ BOOL *result) { return E_NOTIMPL; }
 
 	virtual HRESULT STDMETHODCALLTYPE webViewReceivedFocus(
-		/* [in] */ IWebView *sender) { return E_NOTIMPL; }
+		/* [in] */ IWebView *sender);
 
 	virtual HRESULT STDMETHODCALLTYPE webViewLostFocus(
 		/* [in] */ IWebView *sender,
-		/* [in] */ OLE_HANDLE loseFocusTo) { return E_NOTIMPL; }
+		/* [in] */ OLE_HANDLE loseFocusTo);
 
 	virtual HRESULT STDMETHODCALLTYPE doDragDrop(
 		/* [in] */ IWebView *sender,
@@ -371,12 +339,8 @@ protected:
 		/* [in] */ UINT keyCode,
 		/* [retval][out] */ LONG_PTR *code);
 
-	// IWebUIDelegatePrivate2
-
 	virtual HRESULT STDMETHODCALLTYPE webViewPainted(
 		/* [in] */ IWebView *sender);
-
-	// IWebUIDelegatePrivate3
 
 	virtual HRESULT STDMETHODCALLTYPE exceededDatabaseQuota(
 		/* [in] */ IWebView *sender,
@@ -384,9 +348,33 @@ protected:
 		/* [in] */ IWebSecurityOrigin *origin,
 		/* [in] */ BSTR databaseIdentifier);
 
+	virtual HRESULT STDMETHODCALLTYPE embeddedViewWithArguments(
+		/* [in] */ IWebView *sender,
+		/* [in] */ IWebFrame *frame,
+		/* [in] */ IPropertyBag *arguments,
+		/* [retval][out] */ IWebEmbeddedView **view) { return E_NOTIMPL; }
 
+	virtual HRESULT STDMETHODCALLTYPE webViewClosing(
+		/* [in] */ IWebView *sender) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE webViewSetCursor(
+		/* [in] */ IWebView *sender,
+		/* [in] */ OLE_HANDLE cursor) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE webViewDidInvalidate(
+		/* [in] */ IWebView *sender) { return E_NOTIMPL; }
+
+	virtual HRESULT STDMETHODCALLTYPE desktopNotificationsDelegate(
+		/* [out] */ IWebDesktopNotificationsDelegate** result) { return E_NOTIMPL; }
+
+private:
+	Win32UserWindow* window;
+	HMENU nativeContextMenu;
+	Logger* logger;
+	int referenceCount;
 };
 
-}
+} // namespace ti
 
-#endif /* TI_WEBKIT_WIN32_UI_DELEGATE_H_ */
+#endif
+

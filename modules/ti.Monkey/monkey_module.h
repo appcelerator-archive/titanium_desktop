@@ -29,7 +29,7 @@ namespace ti
 		
 
 	private:
-		kroll::SharedKObject binding;
+		kroll::KObjectRef binding;
 	};
 
 }

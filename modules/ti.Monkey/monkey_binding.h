@@ -25,18 +25,18 @@ namespace ti
 	class MonkeyBinding : public kroll::StaticBoundObject
 	{
 		public:
-		MonkeyBinding(Host*, SharedKObject);
+		MonkeyBinding(Host*, KObjectRef);
 
 		protected:
 		virtual ~MonkeyBinding();
 		void ParseFile(string filePath);
-		void Callback(const ValueList &args, SharedValue result);
+		void Callback(const ValueList &args, KValueRef result);
 		void EvaluateUserScript(
-			SharedKObject, std::string&,SharedKObject, std::string&);
+			KObjectRef, std::string&,KObjectRef, std::string&);
 
-		SharedKObject global;
+		KObjectRef global;
 		Logger* logger;
-		SharedKMethod callback;
+		KMethodRef callback;
 		std::vector<Script*> scripts;
 	};
 }

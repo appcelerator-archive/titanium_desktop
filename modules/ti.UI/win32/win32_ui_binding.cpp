@@ -6,6 +6,7 @@
 #include "../ui_module.h"
 #define _WINSOCKAPI_
 #include <cstdlib>
+#include <sstream>
 
 using std::vector;
 namespace ti
@@ -40,6 +41,7 @@ namespace ti
 		setURLToFileURLCallback(URLToFileURLCallback);
 		setCanPreprocessCallback(CanPreprocessURLCallback);
 		setPreprocessCallback(PreprocessURLCallback);
+		setProxyCallback(ProxyForURLCallback);
 	}
 	
 	Win32UIBinding::~Win32UIBinding()
@@ -51,14 +53,7 @@ namespace ti
 		AutoUserWindow& parent)
 	{
 		UserWindow* w = new Win32UserWindow(config, parent);
-		return w->GetAutoPtr();
-	}
-
-	void Win32UIBinding::ErrorDialog(std::string msg)
-	{
-		std::wstring msgW = UTF8ToWide(msg);
-		MessageBox(NULL, msgW.c_str(), L"Application Error", MB_OK|MB_ICONERROR|MB_SYSTEMMODAL);
-		UIBinding::ErrorDialog(msg);
+		return AutoUserWindow(w, true);
 	}
 
 	AutoMenu Win32UIBinding::CreateMenu()
@@ -103,7 +98,7 @@ namespace ti
 		}
 	}
 
-	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, SharedKMethod cbSingleClick)
+	AutoPtr<TrayItem> Win32UIBinding::AddTray(std::string& iconPath, KMethodRef cbSingleClick)
 	{
 		AutoPtr<TrayItem> trayItem = new Win32TrayItem(iconPath, cbSingleClick);
 		return trayItem;
@@ -341,27 +336,35 @@ namespace ti
 	/*static*/
 	void Win32UIBinding::SetProxyForURL(std::string& url)
 	{
-		SharedPtr<Proxy> proxy = ProxyConfig::GetProxyForURL(url);
+		SharedPtr<Proxy> proxy(ProxyConfig::GetProxyForURL(url));
 		if (!proxy.isNull())
 		{
-			// We make a copy of the URI here so that we can  modify it 
-			// without worrying about changing a potentially global one.
-			Poco::URI proxyURI(*proxy->info);
-			Poco::URI uri = Poco::URI(url);
-			proxyURI.setScheme(uri.getScheme());
+			std::stringstream proxyEnv;
+			if (proxy->type == HTTP)
+				proxyEnv << "http_proxy=http://";
+			else if (proxy->type = HTTPS)
+				proxyEnv << "HTTPS_PROXY=https://";
 
-			std::string proxyEnv;
-			if (proxyURI.getScheme() == "http")
-			{
-				proxyEnv.append("http_proxy=");
-			}
-			else if (proxyURI.getScheme() == "https")
-			{
-				proxyEnv.append("HTTPS_PROXY=");
-			}
-			proxyEnv.append(proxyURI.toString());
-			_putenv(proxyEnv.c_str());
+			if (!proxy->username.empty() || !proxy->password.empty())
+				proxyEnv << proxy->username << ":" << proxy->password << "@";
+
+			proxyEnv << proxy->host;
+
+			if (proxy->port != 0)
+				proxyEnv << ":" << proxy->port;
+
+			std::string proxyEnvStr(proxyEnv.str());
+			_putenv(proxyEnvStr.c_str());
 		}
+	}
+
+	/*static*/
+	void Win32UIBinding::ErrorDialog(std::string msg)
+	{
+		std::wstring msgW = ::UTF8ToWide(msg);
+		MessageBox(NULL, msgW.c_str(), L"Application Error", 
+			MB_OK | MB_ICONERROR | MB_SYSTEMMODAL);
+		UIBinding::ErrorDialog(msg);
 	}
 
 }

@@ -24,8 +24,8 @@ namespace ti
 	{
 		public:
 			
-			static SharedString GetFileName(SharedValue);
-			static AutoPtr<File> ToFile(SharedKObject object);
+			static SharedString GetFileName(KValueRef);
+			static AutoPtr<File> ToFile(KObjectRef object);
 			
 		private:
 			FileSystemUtils();

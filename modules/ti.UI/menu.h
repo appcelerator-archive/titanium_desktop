@@ -8,23 +8,23 @@
 #include <kroll/kroll.h>
 namespace ti
 {
-	class Menu : public AccessorBoundObject
+	class Menu : public KAccessorObject
 	{
 	public:
 		// Platform-independent implementation
 		Menu();
 		~Menu();
 
-		void _AppendItem(const ValueList& args, SharedValue result);
-		void _GetItemAt(const ValueList& args, SharedValue result);
-		void _InsertItemAt(const ValueList& args, SharedValue result);
-		void _RemoveItemAt(const ValueList& args, SharedValue result);
-		void _GetLength(const ValueList& args, SharedValue result);
-		void _Clear(const ValueList& args, SharedValue result);
+		void _AppendItem(const ValueList& args, KValueRef result);
+		void _GetItemAt(const ValueList& args, KValueRef result);
+		void _InsertItemAt(const ValueList& args, KValueRef result);
+		void _RemoveItemAt(const ValueList& args, KValueRef result);
+		void _GetLength(const ValueList& args, KValueRef result);
+		void _Clear(const ValueList& args, KValueRef result);
 
-		void _AddItem(const ValueList& args, SharedValue result);
-		void _AddSeparatorItem(const ValueList& args, SharedValue result);
-		void _AddCheckItem(const ValueList& args, SharedValue result);
+		void _AddItem(const ValueList& args, KValueRef result);
+		void _AddSeparatorItem(const ValueList& args, KValueRef result);
+		void _AddCheckItem(const ValueList& args, KValueRef result);
 
 		void AppendItem(AutoMenuItem item);
 		AutoMenuItem GetItemAt(int index);

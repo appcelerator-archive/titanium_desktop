@@ -47,11 +47,11 @@ namespace ti
 	class #{module_name}Binding : public StaticBoundObject
 	{
 	public:
-		#{module_name}Binding(SharedKObject);
+		#{module_name}Binding(KObjectRef);
 	protected:
 		virtual ~#{module_name}Binding();
 	private:
-		SharedKObject global;
+		KObjectRef global;
 	};
 }
 
@@ -72,7 +72,7 @@ bc.puts <<-END
 
 namespace ti
 {
-	#{module_name}Binding::#{module_name}Binding(SharedKObject global) : global(global)
+	#{module_name}Binding::#{module_name}Binding(KObjectRef global) : global(global)
 	{
 	}
 	#{module_name}Binding::~#{module_name}Binding()
@@ -114,7 +114,7 @@ namespace ti
 		KROLL_MODULE_CLASS(#{module_name}Module)
 		
 	private:
-		kroll::SharedKObject binding;
+		kroll::KObjectRef binding;
 	};
 
 }
@@ -146,7 +146,7 @@ namespace ti
 		this->binding = new #{module_name}Binding(host->GetGlobalObject());
 
 		// set our #{module_dir_name}
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("#{module_name}", value);
 	}
 
@@ -167,25 +167,13 @@ Import('build')
 
 env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_#{header_define}_API_EXPORT', 1))
-env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
-m = build.add_module('ti.#{name}')
+m = build.add_module('ti.#{name}', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/ti#{name}module', source = Glob('*.cpp'))
 build.mark_build_target(t)
 END
 sc.close
-
-mf = File.open(File.join(module_dir_name,"manifest"),'w')
-mf.puts <<-END
-#name: #{module_dir_name}
-#version: 0.1
-#description: #{module_dir_name}
-#os: win32, linux, osx
-#depends:
-END
-mf.close
-
 
 puts "Created: #{module_dir_name}"
 exit 0

@@ -77,19 +77,19 @@ namespace ti
 	{
 	}
 
-	void Pipe::Attach(SharedKObject object)
+	void Pipe::Attach(KObjectRef object)
 	{
 		Poco::Mutex::ScopedLock lock(attachedMutex);
 		attachedObjects.push_back(object);
 	}
 
-	void Pipe::Detach(SharedKObject object)
+	void Pipe::Detach(KObjectRef object)
 	{
 		Poco::Mutex::ScopedLock lock(attachedMutex);
-		std::vector<SharedKObject>::iterator i = attachedObjects.begin();
+		std::vector<KObjectRef>::iterator i = attachedObjects.begin();
 		while (i != attachedObjects.end())
 		{
-			SharedKObject obj = *i;
+			KObjectRef obj = *i;
 			if (obj->Equals(object))
 			{
 				i = attachedObjects.erase(i);
@@ -138,28 +138,28 @@ namespace ti
 		return pipe;
 	}
 
-	void Pipe::_Attach(const ValueList& args, SharedValue result)
+	void Pipe::_Attach(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("attach", "o");
 		this->Attach(args.at(0)->ToObject());
 	}
 	
-	void Pipe::_Detach(const ValueList& args, SharedValue result)
+	void Pipe::_Detach(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("detach", "o");
 		this->Detach(args.at(0)->ToObject());
 	}
 
-	void Pipe::_IsAttached(const ValueList& args, SharedValue result)
+	void Pipe::_IsAttached(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->IsAttached());
 	}
 
-	void Pipe::_Write(const ValueList& args, SharedValue result)
+	void Pipe::_Write(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("write", "o|s");
 		
-		AutoBlob blob = new Blob();
+		BlobRef blob = new Blob();
 		if (args.at(0)->IsObject())
 		{
 			blob = args.at(0)->ToObject().cast<Blob>();
@@ -178,17 +178,17 @@ namespace ti
 		result->SetInt(written);
 	}
 
-	void Pipe::_Flush(const ValueList& args, SharedValue result)
+	void Pipe::_Flush(const ValueList& args, KValueRef result)
 	{
 		this->Flush();
 	}
 
-	void Pipe::_Close(const ValueList& args, SharedValue result)
+	void Pipe::_Close(const ValueList& args, KValueRef result)
 	{
 		this->Close();
 	}
 
-	int Pipe::Write(AutoBlob blob)
+	int Pipe::Write(BlobRef blob)
 	{
 		{ // Start the callbacks
 			Poco::Mutex::ScopedLock lock(pipesNeedingReadEventsMutex);
@@ -212,9 +212,9 @@ namespace ti
 		return blob->Length();
 	}
 
-	void Pipe::CallWrite(SharedKObject target, AutoBlob blob)
+	void Pipe::CallWrite(KObjectRef target, BlobRef blob)
 	{
-		SharedKMethod writeMethod = target->GetMethod("write");
+		KMethodRef writeMethod = target->GetMethod("write");
 
 		if (writeMethod.isNull())
 		{
@@ -255,9 +255,9 @@ namespace ti
 		}
 	}
 
-	void Pipe::CallClose(SharedKObject target)
+	void Pipe::CallClose(KObjectRef target)
 	{
-		SharedValue closeMethod = target->Get("close");
+		KValueRef closeMethod = target->Get("close");
 
 		if (!closeMethod->IsMethod())
 		{
@@ -333,7 +333,7 @@ namespace ti
 
 					if (pipe->readData.size() > 0)
 					{
-						AutoBlob glob(Blob::GlobBlobs(pipe->readData));
+						BlobRef glob(Blob::GlobBlobs(pipe->readData));
 						AutoPtr<Event> event = new ReadEvent(pipe, glob);
 						readEvents.push(event);
 						pipe->readData.clear();

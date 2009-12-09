@@ -4,11 +4,9 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #import "../ui_module.h"
-#define STUB() printf("Method is still a stub, %s:%i\n", __FILE__, __LINE__)
 
 namespace ti
 {
-	bool OSXUserWindow::initial = false;
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
 		unsigned int mask = 0;
@@ -55,9 +53,8 @@ namespace ti
 			styleMask: mask
 			backing: NSBackingStoreBuffered
 			defer: false];
-		
-		this->duplicate();
-		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this);
+
+		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this, true);
 		[nativeWindow setUserWindow:shuw];
 
 		if (!config->IsFullscreen())
@@ -70,8 +67,8 @@ namespace ti
 			this->ReconfigureWindowConstraints();
 			if (!config->IsResizable())
 			{
-				[nativeWindow setMinSize: rect.size];
-				[nativeWindow setMaxSize: rect.size];
+				[nativeWindow setMinSize:rect.size];
+				[nativeWindow setMaxSize:rect.size];
 			}
 		}
 
@@ -80,12 +77,6 @@ namespace ti
 		this->SetMinimizable(config->IsMinimizable());
 
 		[nativeWindow setupDecorations:config];
-		if (OSXUserWindow::initial)
-		{
-			OSXUserWindow::initial = false;
-			[nativeWindow setInitialWindow:YES];
-		}
-
 		this->SetTopMost(config->IsTopMost());
 
 		if (config->IsMaximized())
@@ -113,7 +104,7 @@ namespace ti
 
 	void OSXUserWindow::Hide()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			this->Unfocus();
 			[nativeWindow orderOut:nil];
@@ -123,9 +114,11 @@ namespace ti
 
 	void OSXUserWindow::Focus()
 	{
-		if (active && nativeWindow && ![nativeWindow isKeyWindow])
+		if (nativeWindow && ![nativeWindow isKeyWindow])
 		{
-			[nativeWindow makeKeyAndOrderFront:nil];
+			[NSApp arrangeInFront:nativeWindow];
+			[nativeWindow makeKeyAndOrderFront:nativeWindow];
+			[NSApp activateIgnoringOtherApps:YES];
 			this->Focused();
 		}
 	}
@@ -134,7 +127,7 @@ namespace ti
 	{
 		// Cocoa doesn't really have a concept of blurring a window, but
 		// we can send the window to the back of the window list.
-		if (active && nativeWindow && [nativeWindow isKeyWindow])
+		if ( nativeWindow && [nativeWindow isKeyWindow])
 		{
 			[nativeWindow orderBack:nil];
 			this->Unfocused();
@@ -143,7 +136,7 @@ namespace ti
 
 	void OSXUserWindow::Show()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			this->Focus();
 			this->FireEvent(Event::SHOWN);
@@ -152,7 +145,7 @@ namespace ti
 
 	void OSXUserWindow::Minimize()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			[nativeWindow miniaturize:nativeWindow];
 		}
@@ -160,7 +153,7 @@ namespace ti
 
 	void OSXUserWindow::Unminimize()
 	{
-		if (active && nativeWindow && [nativeWindow isMiniaturized])
+		if (nativeWindow && [nativeWindow isMiniaturized])
 		{
 			[nativeWindow deminiaturize:nativeWindow];
 		}
@@ -168,7 +161,7 @@ namespace ti
 
 	bool OSXUserWindow::IsMinimized()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [nativeWindow isMiniaturized];
 		}
@@ -180,7 +173,7 @@ namespace ti
 
 	void OSXUserWindow::Maximize()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			[nativeWindow zoom:nativeWindow];
 		}
@@ -188,7 +181,7 @@ namespace ti
 	
 	void OSXUserWindow::Unmaximize()
 	{
-		if (active && nativeWindow && [nativeWindow isZoomed])
+		if (nativeWindow && [nativeWindow isZoomed])
 		{
 			[nativeWindow zoom:nativeWindow];
 		}
@@ -196,7 +189,7 @@ namespace ti
 
 	bool OSXUserWindow::IsMaximized()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [nativeWindow isZoomed];
 		}
@@ -293,7 +286,7 @@ namespace ti
 
 	double OSXUserWindow::GetX()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
@@ -308,7 +301,7 @@ namespace ti
 	
 	void OSXUserWindow::SetX(double x)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newRect = CalculateWindowFrame(
 				x, this->GetY(), this->GetWidth(), this->GetHeight());
@@ -318,7 +311,7 @@ namespace ti
 
 	double OSXUserWindow::GetY()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			// Cocoa frame coordinates are absolute on a plane with all
 			// screens, but Titanium wants them relative to the screen.
@@ -337,7 +330,7 @@ namespace ti
 
 	void OSXUserWindow::SetY(double y)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newRect = CalculateWindowFrame(
 				this->GetX(), y, this->GetWidth(), this->GetHeight());
@@ -347,7 +340,7 @@ namespace ti
 
 	double OSXUserWindow::GetWidth()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [[nativeWindow contentView] frame].size.width;
 		}
@@ -359,7 +352,7 @@ namespace ti
 
 	void OSXUserWindow::SetWidth(double width)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				this->GetX(), this->GetY(), width, this->GetHeight());
@@ -378,7 +371,7 @@ namespace ti
 
 	double OSXUserWindow::GetHeight()
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			return [[nativeWindow contentView] frame].size.height;
 		}
@@ -390,7 +383,7 @@ namespace ti
 
 	void OSXUserWindow::SetHeight(double height)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				this->GetX(), this->GetY(), this->GetWidth(), height);
@@ -409,10 +402,8 @@ namespace ti
 
 	void OSXUserWindow::ReconfigureWindowConstraints()
 	{
-		if (!active || nativeWindow == nil)
-		{
+		if (nativeWindow == nil)
 			return;
-		}
 
 		NSSize minSize, maxSize;
 		double maxWidth = this->config->GetMaxWidth();
@@ -512,7 +503,7 @@ namespace ti
 
 	void OSXUserWindow::SetBounds(Bounds bounds)
 	{
-		if (active && nativeWindow)
+		if (nativeWindow)
 		{
 			NSRect newFrame = CalculateWindowFrame(
 				bounds.x, bounds.y, bounds.width, bounds.height);
@@ -533,7 +524,7 @@ namespace ti
 
 	void OSXUserWindow::SetTitleImpl(std::string& newTitle)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			[nativeWindow setTitle:[NSString stringWithUTF8String:newTitle.c_str()]];
 		}
@@ -541,7 +532,7 @@ namespace ti
 
 	std::string OSXUserWindow::GetURL()
 	{
-		if (active && nativeWindow) {
+		if (nativeWindow) {
 			NSString* url = [[nativeWindow webView] mainFrameURL];
 			return [url UTF8String];
 		} else {
@@ -551,7 +542,7 @@ namespace ti
 
 	void OSXUserWindow::SetURL(std::string& url)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			std::string nurl = kroll::URLUtils::NormalizeURL(url);
 			NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:nurl.c_str()]];
@@ -566,7 +557,7 @@ namespace ti
 
 	void OSXUserWindow::SetResizable(bool resizable)
 	{
-		if (active && nativeWindow != nil)
+		if (nativeWindow != nil)
 		{
 			[nativeWindow setShowsResizeIndicator:resizable];
 			if (resizable)
@@ -669,12 +660,12 @@ namespace ti
 
 	void OSXUserWindow::Focused()
 	{
-		this->osxBinding->WindowFocused(GetAutoPtr().cast<OSXUserWindow>());
+		this->osxBinding->WindowFocused(AutoPtr<OSXUserWindow>(this, true));
 	}
 
 	void OSXUserWindow::Unfocused()
 	{
-		this->osxBinding->WindowUnfocused(GetAutoPtr().cast<OSXUserWindow>());
+		this->osxBinding->WindowUnfocused(AutoPtr<OSXUserWindow>(this, true));
 	}
 	
 	void OSXUserWindow::SetContextMenu(AutoMenu menu)
@@ -689,13 +680,11 @@ namespace ti
 
 	void OSXUserWindow::SetIcon(std::string& iconPath)
 	{
-		STUB();
 		this->iconPath = iconPath;
 	}
 
 	std::string& OSXUserWindow::GetIcon()
 	{
-		STUB();
 		return this->iconPath;
 	}
 
@@ -721,7 +710,7 @@ namespace ti
 
 	void OSXUserWindow::OpenChooserDialog(
 		bool files,
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -729,7 +718,7 @@ namespace ti
 		std::vector<std::string>& types,
 		std::string& typesDescription)
 	{
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		NSOpenPanel* openDlg = [NSOpenPanel openPanel];
 		[openDlg setTitle:[NSString stringWithUTF8String:title.c_str()]];
 		[openDlg setCanChooseFiles:files];
@@ -776,7 +765,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenFileChooserDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -790,7 +779,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenFolderChooserDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		bool multiple,
 		std::string& title,
 		std::string& path,
@@ -804,7 +793,7 @@ namespace ti
 	}
 
 	void OSXUserWindow::OpenSaveAsDialog(
-		SharedKMethod callback,
+		KMethodRef callback,
 		std::string& title,
 		std::string& path,
 		std::string& defaultName,
@@ -835,7 +824,7 @@ namespace ti
 
 		ValueList args;
 
-		SharedKList results = new StaticBoundList();
+		KListRef results = new StaticBoundList();
 		if (runResult == NSFileHandlingPanelOKButton) 
 		{
 			NSString *selected = [sp filename];

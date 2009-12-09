@@ -1,5 +1,4 @@
-/**
- * Appcelerator Titanium - licensed under the Apache Public License 2
+/** * Appcelerator Titanium - licensed under the Apache Public License 2
  * SEE LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
@@ -18,13 +17,53 @@ COLORREF transparencyColor = RGB(0xF9, 0xF9, 0xF9);
 
 static void* SetWindowUserData(HWND hwnd, void* userData)
 {
-	return reinterpret_cast<void*> (SetWindowLongPtr(hwnd, GWLP_USERDATA,
-			reinterpret_cast<LONG_PTR> (userData)));
+	return reinterpret_cast<void*>(SetWindowLongPtr(hwnd, GWLP_USERDATA,
+		reinterpret_cast<LONG_PTR> (userData)));
 }
 
 static void* GetWindowUserData(HWND hWnd)
 {
-	return reinterpret_cast<void*> (GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	return reinterpret_cast<void*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+}
+
+static void HandleHResultError(std::string message, HRESULT result, bool fatal=false)
+{
+	static Logger* logger = Logger::Get("UI.Win32UserWindow");
+
+	message.append(": ");
+	switch (result)
+	{
+		case REGDB_E_CLASSNOTREG:
+			message.append("REGDB_E_CLASSNOTREG");
+			break;
+		case CLASS_E_NOAGGREGATION:
+			message.append("CLASS_E_NOAGGREGATION");
+			break;
+		case E_NOINTERFACE:
+			message.append("E_NOINTERFACE");
+			break;
+		case E_UNEXPECTED:
+			message.append("E_UNEXPECTED");
+			break;
+		case E_OUTOFMEMORY:
+			message.append("E_OUTOFMEMORY");
+			break;
+		case E_INVALIDARG:
+			message.append("E_INVALIDARG");
+			break;
+		default:
+			message.append("Unknown Error (");
+			message.append(KList::IntToChars(result));
+			message.append(")");
+			break;
+	}
+
+	logger->Error(message);
+	Win32UIBinding::ErrorDialog(message);
+	if (fatal)
+		exit(1);
+	else
+		throw ValueException::FromString(message);
 }
 
 /*static*/
@@ -67,7 +106,7 @@ void Win32UserWindow::RegisterWindowClass(HINSTANCE hInstance)
 LRESULT CALLBACK
 Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	Win32UserWindow *window = Win32UserWindow::FromWindow(hWnd);
+	Win32UserWindow* window = Win32UserWindow::FromWindow(hWnd);
 
 	switch (message)
 	{
@@ -75,9 +114,7 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_CLOSE:
-			if (window->Close())
-				return DefWindowProc(hWnd, message, wParam, lParam);
-			else
+			if (!window->Close())
 				return 0;
 
 		case WM_GETMINMAXINFO:
@@ -104,11 +141,12 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_SETFOCUS:
-			window->FireEvent(Event::FOCUSED);
-			return DefWindowProc(hWnd, message, wParam, lParam);
+			// The focus event will be fired by the UIDelegate
+			window->Focus(); // Focus the WebView and not the main window.
+			return 0;
 
 		case WM_KILLFOCUS:
-			window->FireEvent(Event::UNFOCUSED);
+			// The unfocus event will be fired by the UIDelegate
 			return DefWindowProc(hWnd, message, wParam, lParam);
 
 		case WM_MOVE:
@@ -150,16 +188,24 @@ Win32UserWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+DWORD Win32UserWindow::GetStyleFromConfig() const
+{
+	DWORD style = WS_EX_APPWINDOW;
+	if (config->IsToolWindow())
+		style = WS_EX_TOOLWINDOW;
+
+	if (config->GetTransparency() < 1.0)
+		style |= WS_EX_LAYERED;
+
+	return style;
+}
+
 void Win32UserWindow::InitWindow()
 {
 	Win32UserWindow::RegisterWindowClass(win32Host->GetInstanceHandle());
 
-	std::wstring titleW = UTF8ToWide(config->GetTitle());
-	DWORD windowStyle = WS_EX_APPWINDOW;
-	if (this->IsToolWindow())
-		windowStyle = WS_EX_TOOLWINDOW;
-
-	this->windowHandle = CreateWindowExW(windowStyle, USERWINDOW_WINDOW_CLASS,
+	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
+	this->windowHandle = CreateWindowExW(GetStyleFromConfig(), USERWINDOW_WINDOW_CLASS,
 		titleW.c_str(), WS_CLIPCHILDREN, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
 		NULL, NULL, win32Host->GetInstanceHandle(), NULL);
 
@@ -170,10 +216,9 @@ void Win32UserWindow::InitWindow()
 		logger->Error(error.str());
 	}
 
-
 	// these APIs are semi-private -- we probably shouldn't mark them
 	// make our HWND available to 3rd party devs without needing our headers
-	SharedValue windowHandle = Value::NewVoidPtr((void*) this->windowHandle);
+	KValueRef windowHandle = Value::NewObject(new VoidPtr(this->windowHandle));
 	this->Set("windowHandle", windowHandle);
 	logger->Debug("Initializing windowHandle: %i", windowHandle);
 
@@ -182,118 +227,89 @@ void Win32UserWindow::InitWindow()
 
 void Win32UserWindow::InitWebKit()
 {
-	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0,
-		 IID_IWebView, (void**) &(this->webView));
-	
+	HRESULT hr = WebKitCreateInstance(CLSID_WebView, 0, IID_IWebView,
+		(void**) &(this->webView));
 	if (FAILED(hr))
-	{
-		std::string createError("Error creating WebKitWebView: ");
-		switch (hr)
-		{
-			case REGDB_E_CLASSNOTREG: 
-				createError += "REGDB_E_CLASSNOTREG";
-				break;
-			case CLASS_E_NOAGGREGATION: 
-				createError += "CLASS_E_NOAGGREGATION"; 
-				break;
-			case E_NOINTERFACE: 
-				createError += "E_NOINTERFACE"; 
-				break;
-			case E_UNEXPECTED: 
-				createError += "E_UNEXPECTED";
-				break;
-			case E_OUTOFMEMORY: 
-				createError += "E_OUTOFMEMORY";
-				break;
-			case E_INVALIDARG:
-				createError += "E_INVALIDARG";
-				break;
-			default:
-				createError += "Unknown Error: ";
-				break;
-		}
-		logger->Error(createError.c_str());
-		MessageBoxA(NULL, createError.c_str(), "Error Initializing WebKit", MB_ICONERROR | MB_OK);
-		exit(-1);
-	}
+		HandleHResultError("Error creating WebKitWebView", hr, true);
 
-	// set the custom user agent for Titanium
-	const char *version = host->GetGlobalObject()->Get("version")->ToString();
-	char userAgent[128];
-	//TI-303 we need to add safari UA to our UA to resolve broken
-	//sites that look at Safari and not WebKit for UA
-	sprintf(userAgent, "Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, version);
-	_bstr_t ua(userAgent);
+	// TI-303 we need to add safari UA to our UA to resolve broken
+	// sites that look at Safari and not WebKit for UA.
+	_bstr_t ua("Version/4.0 Safari/528.16 "PRODUCT_NAME"/"PRODUCT_VERSION);
 	webView->setApplicationNameForUserAgent(ua.copy());
 
 	// place our user agent string in the global so we can later use it
-	SharedKObject global = host->GetGlobalObject();
-	_bstr_t uaURL("http://titaniumapp.com");
-	BSTR uaResp;
-	webView->userAgentForURL(uaURL.copy(), &uaResp);
-	std::string uaStr = _bstr_t(uaResp);
-	global->Set("userAgent", Value::NewString(uaStr.c_str()));
+	KObjectRef global = host->GetGlobalObject();
+	if (global->Get("userAgent")->IsUndefined())
+	{
+		_bstr_t uaURL("http://titaniumapp.com");
+		BSTR uaResp;
+		webView->userAgentForURL(uaURL.copy(), &uaResp);
+		std::string uaStr = _bstr_t(uaResp);
+		global->Set("userAgent", Value::NewString(uaStr.c_str()));
+	}
 
-	logger->Debug("create frame load delegate ");
 	frameLoadDelegate = new Win32WebKitFrameLoadDelegate(this);
-	uiDelegate = new Win32WebKitUIDelegate(this);
-	policyDelegate = new Win32WebKitPolicyDelegate(this);
-	
-	logger->Debug("set delegates, set host window");
 	hr = webView->setFrameLoadDelegate(frameLoadDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting FrameLoadDelegate", hr, true);
+
+	uiDelegate = new Win32WebKitUIDelegate(this);
 	hr = webView->setUIDelegate(uiDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting UIDelegate", hr, true);
+
+	policyDelegate = new Win32WebKitPolicyDelegate(this);
 	hr = webView->setPolicyDelegate(policyDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting PolicyDelegate", hr, true);
+
+	resourceLoadDelegate = new Win32WebKitResourceLoadDelegate(this);
+	hr = webView->setResourceLoadDelegate(resourceLoadDelegate);
+	if (FAILED(hr))
+		HandleHResultError("Error setting ResourceLoadDelegate", hr, true);
+
 	hr = webView->setHostWindow((OLE_HANDLE) windowHandle);
-	
-	logger->Debug("init with frame");
+	if (FAILED(hr))
+		HandleHResultError("Error setting host window", hr, true);
+
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
 	hr = webView->initWithFrame(clientRect, 0, 0);
-
-	AppConfig *appConfig = AppConfig::Instance();
-	std::string appid = appConfig->GetAppID();
+	if (FAILED(hr))
+		HandleHResultError("Could not intialize WebView with frame", hr, true);
 
 	IWebPreferences *prefs = NULL;
-	hr = WebKitCreateInstance(CLSID_WebPreferences, 0,
-		IID_IWebPreferences, (void**) &prefs);
-	if (FAILED(hr) || prefs == NULL)
-	{
-		logger->Error("Couldn't create the web preferences object");
-	}
-	else
-	{
-		_bstr_t pi(appid.c_str());
-		prefs->initWithIdentifier(pi.copy(), &prefs);
+	hr = WebKitCreateInstance(CLSID_WebPreferences, 0, IID_IWebPreferences,
+		(void**) &prefs);
+	if (FAILED(hr) || !prefs)
+		HandleHResultError("Error getting IWebPreferences", hr, true);
 
-		prefs->setCacheModel(WebCacheModelDocumentBrowser);
-		prefs->setPlugInsEnabled(true);
-		prefs->setJavaEnabled(true);
-		prefs->setJavaScriptEnabled(true);
-		prefs->setJavaScriptCanOpenWindowsAutomatically(true);
-		prefs->setDOMPasteAllowed(true);
+	std::string appid(AppConfig::Instance()->GetAppID());
+	_bstr_t pi(appid.c_str());
+	prefs->initWithIdentifier(pi.copy(), &prefs);
+	prefs->setCacheModel(WebCacheModelDocumentBrowser);
+	prefs->setPlugInsEnabled(true);
+	prefs->setJavaEnabled(true);
+	prefs->setJavaScriptEnabled(true);
+	prefs->setJavaScriptCanOpenWindowsAutomatically(true);
+	prefs->setDOMPasteAllowed(true);
 
-		IWebPreferencesPrivate* privatePrefs = NULL;
-		hr = prefs->QueryInterface(IID_IWebPreferencesPrivate,
-				(void**) &privatePrefs);
-		if (FAILED(hr))
-		{
-			logger->Error("Failed to get private preferences");
-		} else {
-			privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
-			//privatePrefs->setDeveloperExtrasEnabled(host->IsDebugMode());
-			privatePrefs->setDatabasesEnabled(true);
-			privatePrefs->setLocalStorageEnabled(true);
-			privatePrefs->setOfflineWebApplicationCacheEnabled(true);
+	IWebPreferencesPrivate* privatePrefs = NULL;
+	hr = prefs->QueryInterface(IID_IWebPreferencesPrivate, (void**) &privatePrefs);
+	if (FAILED(hr) || !privatePrefs)
+		HandleHResultError("Error getting IWebPreferencesPrivate", hr, true);
 
-			_bstr_t dbPath(
-					FileUtils::GetApplicationDataDirectory(appid).c_str());
-			privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
-			privatePrefs->Release();
-		}
+	privatePrefs->setDeveloperExtrasEnabled(host->DebugModeEnabled());
+	privatePrefs->setDatabasesEnabled(true);
+	privatePrefs->setLocalStorageEnabled(true);
+	privatePrefs->setOfflineWebApplicationCacheEnabled(true);
+	privatePrefs->setAllowUniversalAccessFromFileURLs(true);
+	_bstr_t dbPath(FileUtils::GetApplicationDataDirectory(appid).c_str());
+	privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
+	privatePrefs->Release();
 
-		webView->setPreferences(prefs);
-		prefs->Release();
-	}
+	webView->setPreferences(prefs);
+	prefs->Release();
 
 	// allow app:// and ti:// to run with local permissions (cross-domain ajax,etc)
 	_bstr_t appProto("app");
@@ -302,24 +318,32 @@ void Win32UserWindow::InitWebKit()
 	_bstr_t tiProto("ti");
 	webView->registerURLSchemeAsLocal(tiProto.copy());
 
-	IWebViewPrivate *webViewPrivate;
-	hr = webView->QueryInterface(IID_IWebViewPrivate,
-			(void**) &webViewPrivate);
-	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
+	IWebViewPrivate* webViewPrivate;
+	hr = webView->QueryInterface(IID_IWebViewPrivate, (void**) &webViewPrivate);
+	if (FAILED(hr))
+		HandleHResultError("Error getting IWebViewPrivate", hr);
 
+	if (this->GetTransparency())
+		webViewPrivate->setTransparent(true);
+
+	// Get the WebView's HWND
+	hr = webViewPrivate->viewWindow((OLE_HANDLE*) &viewWindowHandle);
+	if (FAILED(hr))
+		HandleHResultError("Error getting WebView HWND", hr);
+
+	// Get the WebView's WebInspector
 	hr = webViewPrivate->inspector(&webInspector);
-	if (FAILED(hr) || webInspector == NULL)
-	{
-		logger->Error("Couldn't retrieve the web inspector object");
-	}
+	if (FAILED(hr) || !webInspector)
+		HandleHResultError("Error getting WebInspector HWND", hr);
 
 	webViewPrivate->Release();
 
 	_bstr_t inspector_url("ti://runtime/WebKit.resources/inspector/inspector.html");
 	webInspector->setInspectorURL(inspector_url.copy());
 
-	hr = webView->mainFrame(&webFrame);
-	//webView->setShouldCloseWithWindow(TRUE);
+	hr = webView->mainFrame(&mainFrame);
+	if (FAILED(hr) || !webInspector)
+		HandleHResultError("Error getting WebView main frame", hr);
 }
 
 Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
@@ -329,74 +353,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	nativeMenu(0),
 	contextMenu(0),
 	defaultIcon(0),
-	webInspector(0)
+	webInspector(0),
+	win32Host(Win32Host::Win32Instance())
 {
 	logger = Logger::Get("UI.Win32UserWindow");
-	
-	win32Host = static_cast<kroll::Win32Host*>(binding->GetHost());
-	this->InitWindow();
 
-	this->ReloadTiWindowConfig();
-	this->SetupDecorations(false);
-
-	Bounds b;
-	b.x = config->GetX();
-	b.y = config->GetY();
-	b.width = config->GetWidth();
-	b.height = config->GetHeight();
-	SetBounds(b);
-
-	this->InitWebKit();
-	
-	//webView = WebView::createInstance();
-	logger->Debug("resize subviews");
-	ResizeSubViews();
-
-	// ensure we have valid restore values
-	restoreBounds = GetBounds();
-	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
-
-	if (this->config->IsFullscreen())
-	{
-		this->SetFullscreen(true);
-	}
-	else if (this->config->IsMaximized())
-	{
-		this->Maximize();
-	}
-	else if (this->config->IsMinimized())
-	{
-		this->Minimize();
-	}
-
-	if (this->config->IsTopMost() && this->config->IsVisible())
-	{
-		this->SetTopMost(true);
-	}
-
-	// set this flag to indicate that when the frame is loaded
-	// we want to show the window - we do this to prevent white screen
-	// while the URL is being fetched
-	this->requiresDisplay = true;
-
-	// set initial window icon to icon associated with exe file
-	char exePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
-	if (defaultIcon)
-	{
-		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
-				(LPARAM) defaultIcon);
-	}
-
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-				config->GetTransparency() * 255), LWA_ALPHA);
-		SetLayeredWindowAttributes(this->windowHandle, transparencyColor, 0,
-			LWA_COLORKEY);
-	}
 }
 
 Win32UserWindow::~Win32UserWindow()
@@ -404,26 +365,24 @@ Win32UserWindow::~Win32UserWindow()
 	if (webView)
 		webView->Release();
 
-	if (webFrame)
-		webFrame->Release();
+	if (mainFrame)
+		mainFrame->Release();
 
-	DestroyWindow(windowHandle);
+	this->Close();
 }
 
 std::string Win32UserWindow::GetTransparencyColor()
 {
 	char hexColor[7];
 	sprintf(hexColor, "%2x%2x%2x", (int) GetRValue(transparencyColor),
-			(int) GetGValue(transparencyColor), (int) GetBValue(
-					transparencyColor));
-
+		(int) GetGValue(transparencyColor), (int) GetBValue(transparencyColor));
 	std::string color(hexColor);
-
 	return color;
 }
 
 void Win32UserWindow::ResizeSubViews()
 {
+	logger->Debug("Called resize subviews");
 	RECT rcClient;
 	GetClientRect(windowHandle, &rcClient);
 	MoveWindow(viewWindowHandle, 0, 0, rcClient.right, rcClient.bottom, TRUE);
@@ -476,7 +435,7 @@ bool Win32UserWindow::IsMaximized()
 
 void Win32UserWindow::Focus()
 {
-	SetFocus(windowHandle);
+	SetFocus(viewWindowHandle);
 }
 
 void Win32UserWindow::Unfocus()
@@ -491,7 +450,35 @@ void Win32UserWindow::Unfocus()
 
 void Win32UserWindow::Open()
 {
-	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", windowHandle,  viewWindowHandle);
+	this->InitWindow();
+	this->SetTransparency(config->GetTransparency());	
+	this->SetupDecorations();
+	this->SetupPosition();
+	this->SetupState();
+	this->SetTopMost(config->IsTopMost() && config->IsVisible());
+	this->InitWebKit();
+	this->ResizeSubViews();
+
+	// Ensure we have valid restore values
+	restoreBounds = GetBounds();
+	restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
+
+	// Set this flag to indicate that when the frame is loaded we want to
+	// show the window - we do this to prevent white screen while the first
+	// URL loads in the WebView.
+	this->requiresDisplay = true;
+
+	// set initial window icon to icon associated with exe file
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
+	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
+	if (defaultIcon)
+	{
+		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
+			(LPARAM) defaultIcon);
+	}
+	logger->Debug("Opening windowHandle=%i, viewWindowHandle=%i", 
+		windowHandle,  viewWindowHandle);
 
 	UpdateWindow(windowHandle);
 	UpdateWindow(viewWindowHandle);
@@ -499,21 +486,15 @@ void Win32UserWindow::Open()
 	ResizeSubViews();
 
 	UserWindow::Open();
-	SetURL(this->config->GetURL());
+	this->SetURL(this->config->GetURL());
 	if (!this->requiresDisplay)
 	{
-		ShowWindow(windowHandle, SW_SHOW);
+		Show();
 		ShowWindow(viewWindowHandle, SW_SHOW);
 	}
-	
-	this->SetupBounds();
-	if (this->config->IsMaximized()) {
-		this->Maximize();
-	}
-	else if (this->config->IsMinimized()) {
-		this->Minimize();
-	}
-	
+
+	SetupBounds();
+	SetupState();
 	FireEvent(Event::OPENED);
 }
 
@@ -530,6 +511,7 @@ bool Win32UserWindow::Close()
 	{
 		this->RemoveOldMenu();
 		UserWindow::Closed();
+		DestroyWindow(windowHandle);
 	}
 
 	return !this->active;
@@ -645,9 +627,8 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 {
 	HWND desktop = GetDesktopWindow();
 	RECT desktopRect, boundsRect;
-	
+
 	GetWindowRect(desktop, &desktopRect);
-	
 	if (bounds.x == UIBinding::CENTERED)
 	{
 		bounds.x = (desktopRect.right - bounds.width) / 2;
@@ -664,7 +645,7 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	{
 		flags = SWP_HIDEWINDOW;
 	}
-	
+
 	boundsRect.left = bounds.x;
 	boundsRect.right = bounds.x + bounds.width;
 	boundsRect.top = bounds.y;
@@ -672,7 +653,8 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 	
 	if (this->config->IsUsingChrome())
 	{
-		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), !menu.isNull());
+		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE), 
+			!menu.isNull());
 		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
 		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
 	}
@@ -681,13 +663,14 @@ void Win32UserWindow::SetBounds(Bounds bounds)
 		this->chromeWidth = 0;
 		this->chromeHeight = 0;
 	}
-	
-	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y, bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
+
+	SetWindowPos(windowHandle, NULL, bounds.x, bounds.y,
+		bounds.width + chromeWidth, bounds.height + chromeHeight, flags);
 }
 
 void Win32UserWindow::SetTitleImpl(std::string& title)
 {
-	std::wstring titleW = UTF8ToWide(title);
+	std::wstring titleW = ::UTF8ToWide(title);
 	SetWindowTextW(windowHandle, titleW.c_str());
 }
 
@@ -699,54 +682,46 @@ void Win32UserWindow::SetURL(std::string& url_)
 	IWebMutableURLRequest* request = 0;
 	std::wstring method = L"GET" ;
 
-	//if (url.length() > 0 && (PathFileExists(url.c_str()) || PathIsUNC(url.c_str())))
-	//{
-	//	TCHAR fileURL[INTERNET_MAX_URL_LENGTH];
-	//	DWORD fileURLLength = sizeof(fileURL)/sizeof(fileURL[0]);
-	//	if (SUCCEEDED(UrlCreateFromPath(url.c_str(), fileURL, &fileURLLength, 0)))
-	//		url = fileURL;
-	//}
-	std::wstring wurl = UTF8ToWide(url);
-
-	logger->Debug("CoCreateInstance");
 	HRESULT hr = WebKitCreateInstance(CLSID_WebMutableURLRequest, 0, 
 		IID_IWebMutableURLRequest, (void**) &request);
 	if (FAILED(hr))
-		goto exit;
+		HandleHResultError("Error creating WebMutableURLRequest", hr, true);
 
-	logger->Debug("initWithURL: %s", url.c_str());
-	hr = request->initWithURL(SysAllocString(wurl.c_str()), WebURLRequestUseProtocolCachePolicy, 60);
+	std::wstring wurl = ::UTF8ToWide(url);
+	hr = request->initWithURL(SysAllocString(wurl.c_str()), 
+		WebURLRequestUseProtocolCachePolicy, 60);
 	if (FAILED(hr))
-		goto exit;
+	{
+		request->Release();
+		std::string error("Error initialiazing WebMutableURLRequest for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
 
-	logger->Debug("set HTTP method");
 	hr = request->setHTTPMethod(SysAllocString(method.c_str()));
 	if (FAILED(hr))
-		goto exit;
-
-	logger->Debug("load request");
-	hr = webFrame->loadRequest(request);
-	if (FAILED(hr))
-		goto exit;
-
-	logger->Debug("set focus");
-	SetFocus(viewWindowHandle);
-
-exit:
-	if (request)
+	{
 		request->Release();
+		std::string error("Error setting HTTP method for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
+
+	hr = mainFrame->loadRequest(request);
+	if (FAILED(hr))
+	{
+		request->Release();
+		std::string error("Error starting load request for ");
+		error.append(url);
+		HandleHResultError(error, hr, true);
+	}
+
+	SetFocus(viewWindowHandle);
 }
-
-#define SetFlag(x,flag,b) ((b) ? x |= flag : x &= ~flag)
-#define UnsetFlag(x,flag) (x &= ~flag)=
-
-#define SetGWLFlag(wnd,flag,b) long window_style = GetWindowLong(wnd, GWL_STYLE);\
-SetFlag(window_style, flag, b);\
-SetWindowLong(wnd, GWL_STYLE, window_style);
 
 void Win32UserWindow::SetResizable(bool resizable)
 {
-	SetGWLFlag(windowHandle, WS_SIZEBOX, this->config->IsUsingChrome() && resizable);
+	this->SetupDecorations();
 	this->SetupSize();
 }
 
@@ -772,16 +747,11 @@ bool Win32UserWindow::IsVisible()
 
 void Win32UserWindow::SetTransparency(double transparency)
 {
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong(this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-		config->GetTransparency() * 255), LWA_ALPHA);
-	}
-	else
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-	}
+	SetWindowLong(windowHandle, GWL_EXSTYLE, GetStyleFromConfig());
+	SetLayeredWindowAttributes(windowHandle, 0,
+		(BYTE) floor(config->GetTransparency() * 255), LWA_ALPHA);
+	SetLayeredWindowAttributes(windowHandle, transparencyColor, 0,
+		LWA_COLORKEY);
 }
 
 void Win32UserWindow::SetFullscreen(bool fullscreen)
@@ -869,24 +839,44 @@ void Win32UserWindow::SetUsingChrome(bool chrome)
 	this->SetupDecorations();
 }
 
-void Win32UserWindow::SetupDecorations(bool showHide)
+void Win32UserWindow::SetupDecorations()
 {
 	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
 
 	SetFlag(windowStyle, WS_OVERLAPPED, config->IsUsingChrome());
+	SetFlag(windowStyle, WS_SIZEBOX,
+		config->IsUsingChrome() && config->IsResizable());
+	SetFlag(windowStyle, WS_OVERLAPPEDWINDOW,
+		config->IsUsingChrome() && config->IsResizable());
+	SetFlag(windowStyle, WS_SYSMENU,
+		config->IsUsingChrome() && config->IsCloseable());
 	SetFlag(windowStyle, WS_CAPTION, config->IsUsingChrome());
-	SetFlag(windowStyle, WS_SYSMENU, config->IsUsingChrome() && config->IsCloseable());
 	SetFlag(windowStyle, WS_BORDER, config->IsUsingChrome());
-
 	SetFlag(windowStyle, WS_MAXIMIZEBOX, config->IsMaximizable());
 	SetFlag(windowStyle, WS_MINIMIZEBOX, config->IsMinimizable());
 
 	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
 
-	if (showHide && config->IsVisible())
+	if (this->active && config->IsVisible())
 	{
-		ShowWindow(windowHandle, SW_HIDE);
-		ShowWindow(windowHandle, SW_SHOW);
+		Hide();
+		Show();
+	}
+}
+
+void Win32UserWindow::SetupState()
+{
+	if (config->IsFullscreen())
+	{
+		this->SetFullscreen(true);
+	}
+	else if (config->IsMaximized())
+	{
+		this->Maximize();
+	}
+	else if (config->IsMinimized())
+	{
+		this->Minimize();
 	}
 }
 
@@ -943,43 +933,13 @@ void Win32UserWindow::SetupMenu()
 	}
 }
 
-void Win32UserWindow::ReloadTiWindowConfig()
-{
-	//host->webview()->GetMainFrame()->SetAllowsScrolling(tiWindowConfig->isUsingScrollbars());
-	//SetWindowText(hWnd, UTF8ToWide(tiWindowConfig->getTitle()).c_str());
-
-	long windowStyle = GetWindowLong(this->windowHandle, GWL_STYLE);
-
-	SetFlag(windowStyle, WS_MINIMIZEBOX, config->IsMinimizable());
-	SetFlag(windowStyle, WS_MAXIMIZEBOX, config->IsMaximizable());
-
-	SetFlag(windowStyle, WS_OVERLAPPEDWINDOW, config->IsUsingChrome() && config->IsResizable());
-	SetFlag(windowStyle, WS_CAPTION, config->IsUsingChrome());
-
-	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
-
-	if (config->GetTransparency() < 1.0)
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_LAYERED);
-		SetLayeredWindowAttributes(this->windowHandle, 0, (BYTE) floor(
-				config->GetTransparency() * 255), LWA_ALPHA);
-	}
-	else
-	{
-		SetWindowLong( this->windowHandle, GWL_EXSTYLE, WS_EX_APPWINDOW);
-	}
-	
-	SetLayeredWindowAttributes(this->windowHandle, transparencyColor, 0,
-			LWA_COLORKEY);
-}
-
 // called by frame load delegate to let the window know it's loaded
 void Win32UserWindow::FrameLoaded()
 {
 	if (this->requiresDisplay && this->config->IsVisible())
 	{
 		this->requiresDisplay = false;
-		ShowWindow(windowHandle, SW_SHOW);
+		this->Show();
 	}
 }
 
@@ -992,13 +952,13 @@ void Win32UserWindow::SetTopMost(bool topmost)
 {
 	if (topmost)
 	{
-		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE
-				| SWP_NOSIZE);
+		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE);
 	}
 	else
 	{
-		SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE
-				| SWP_NOSIZE);
+		SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE);
 	}
 }
 
@@ -1007,7 +967,8 @@ void Win32UserWindow::SetupPosition()
 	Bounds b = GetBounds();
 	b.x = this->config->GetX();
 	b.y = this->config->GetY();
-	
+	b.width = this->config->GetWidth();
+	b.height = this->config->GetHeight();	
 	this->SetBounds(b);
 }
 
@@ -1037,7 +998,7 @@ void Win32UserWindow::ShowInspector(bool console)
 }
 
 void Win32UserWindow::OpenFileChooserDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	bool multiple,
 	std::string& title,
 	std::string& path,
@@ -1046,36 +1007,36 @@ void Win32UserWindow::OpenFileChooserDialog(
 	std::string& typesDescription)
 {
 
-	SharedKList results = this->SelectFile(
+	KListRef results = this->SelectFile(
 		false, multiple, title, path, defaultName, types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
 void Win32UserWindow::OpenFolderChooserDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	bool multiple,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName)
 {
-	SharedKList results = SelectDirectory(multiple, title, path, defaultName);
+	KListRef results = SelectDirectory(multiple, title, path, defaultName);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
 void Win32UserWindow::OpenSaveAsDialog(
-	SharedKMethod callback,
+	KMethodRef callback,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName,
 	std::vector<std::string>& types,
 	std::string& typesDescription)
 {
-	SharedKList results = SelectFile(
+	KListRef results = SelectFile(
 		true, false, title, path, defaultName, types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
-SharedKList Win32UserWindow::SelectFile(
+KListRef Win32UserWindow::SelectFile(
  	bool saveDialog,
 	bool multiple,
 	std::string& title,
@@ -1085,16 +1046,22 @@ SharedKList Win32UserWindow::SelectFile(
 	std::string& typesDescription)
 {
 	std::wstring filter;
-	std::wstring typesDescriptionW = UTF8ToWide(typesDescription);
+	std::wstring typesDescriptionW = ::UTF8ToWide(typesDescription);
 	if (types.size() > 0)
 	{
 		//"All\0*.*\0Test\0*.TXT\0";
+		if (typesDescription.size() == 0)
+		{
+			// Reasonable default?
+			typesDescriptionW = L"Selected Files";
+		}
 		filter.append(typesDescriptionW);
 		filter.push_back(L'\0');
+		
 		for (int i = 0; i < types.size(); i++)
 		{
 			std::string type = types.at(i);
-			std::wstring typeW = UTF8ToWide(type);
+			std::wstring typeW = ::UTF8ToWide(type);
 			//multiple filters: "*.TXT;*.DOC;*.BAK"
 			size_t found = type.find("*.");
 			if (found != 0)
@@ -1109,10 +1076,10 @@ SharedKList Win32UserWindow::SelectFile(
 
 	OPENFILENAME ofn;
 	wchar_t filenameW[1024];
-	wcscpy(filenameW, UTF8ToWide(defaultName).c_str());
+	wcscpy(filenameW, ::UTF8ToWide(defaultName).c_str());
 	
 	// init OPENFILE
-	std::wstring pathW = UTF8ToWide(path);
+	std::wstring pathW = ::UTF8ToWide(path);
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = this->windowHandle;
@@ -1129,9 +1096,10 @@ SharedKList Win32UserWindow::SelectFile(
 	ofn.lpstrInitialDir = (LPWSTR) (pathW.length() == 0 ? NULL : pathW.c_str());
 	ofn.Flags = OFN_EXPLORER;
 
+	std::wstring titleW;
 	if (!title.empty())
 	{
-		std::wstring titleW = UTF8ToWide(title);
+		titleW = ::UTF8ToWide(title);
 		ofn.lpstrTitle = titleW.c_str();
 	}
 
@@ -1145,7 +1113,7 @@ SharedKList Win32UserWindow::SelectFile(
 		ofn.Flags |= OFN_ALLOWMULTISELECT;
 	}
 
-	SharedKList results = new StaticBoundList();
+	KListRef results = new StaticBoundList();
 	// display the open dialog box
 	BOOL result;
 
@@ -1163,22 +1131,22 @@ SharedKList Win32UserWindow::SelectFile(
 		// if the user selected multiple files, ofn.lpstrFile is a NULL-separated list of filenames
 		// if the user only selected one file, ofn.lpstrFile is a normal string
 
-		std::vector<std::string> tokens;
-		ParseStringNullSeparated(ofn.lpstrFile, tokens);
-
-		if (tokens.size() == 1)
+		std::vector<std::string> selectedFiles;
+		ParseSelectedFiles(ofn.lpstrFile, selectedFiles);
+		
+		if (selectedFiles.size() == 1)
 		{
-			results->Append(Value::NewString(tokens.at(0)));
+			results->Append(Value::NewString(selectedFiles.at(0)));
 		}
-		else if (tokens.size() > 1)
+		else if (selectedFiles.size() > 1)
 		{
-			std::string directory(tokens.at(0));
-			for (int i = 1; i < tokens.size(); i++)
+			std::string directory(selectedFiles.at(0));
+			for (int i = 1; i < selectedFiles.size(); i++)
 			{
 				std::string n;
 				n.append(directory.c_str());
 				n.append("\\");
-				n.append(tokens.at(i).c_str());
+				n.append(selectedFiles.at(i).c_str());
 				results->Append(Value::NewString(n));
 			}
 		}
@@ -1188,40 +1156,20 @@ SharedKList Win32UserWindow::SelectFile(
 		DWORD error = CommDlgExtendedError();
 		std::string errorMessage = Win32Utils::QuickFormatMessage(error);
 		Logger::Get("UI.Win32UserWindow")->Error("Error while opening files: %s", errorMessage.c_str());
-		/*
-		printf("Error when opening files: %d\n", error);
-		switch(error)
-		{
-			case CDERR_DIALOGFAILURE: printf("CDERR_DIALOGFAILURE\n"); break;
-			case CDERR_FINDRESFAILURE: printf("CDERR_FINDRESFAILURE\n"); break;
-			case CDERR_NOHINSTANCE: printf("CDERR_NOHINSTANCE\n"); break;
-			case CDERR_INITIALIZATION: printf("CDERR_INITIALIZATION\n"); break;
-			case CDERR_NOHOOK: printf("CDERR_NOHOOK\n"); break;
-			case CDERR_LOCKRESFAILURE: printf("CDERR_LOCKRESFAILURE\n"); break;
-			case CDERR_NOTEMPLATE: printf("CDERR_NOTEMPLATE\n"); break;
-			case CDERR_LOADRESFAILURE: printf("CDERR_LOADRESFAILURE\n"); break;
-			case CDERR_STRUCTSIZE: printf("CDERR_STRUCTSIZE\n"); break;
-			case CDERR_LOADSTRFAILURE: printf("CDERR_LOADSTRFAILURE\n"); break;
-			case FNERR_BUFFERTOOSMALL: printf("FNERR_BUFFERTOOSMALL\n"); break;
-			case CDERR_MEMALLOCFAILURE: printf("CDERR_MEMALLOCFAILURE\n"); break;
-			case FNERR_INVALIDFILENAME: printf("FNERR_INVALIDFILENAME\n"); break;
-			case CDERR_MEMLOCKFAILURE: printf("CDERR_MEMLOCKFAILURE\n"); break;
-			case FNERR_SUBCLASSFAILURE: printf("FNERR_SUBCLASSFAILURE\n"); break;
-		}*/
 	}
 	return results;
 }
 
-SharedKList Win32UserWindow::SelectDirectory(
+KListRef Win32UserWindow::SelectDirectory(
 	bool multiple,
 	std::string& title,
 	std::string& path,
 	std::string& defaultName)
 {
-	SharedKList results = new StaticBoundList();
+	KListRef results = new StaticBoundList();
 
 	BROWSEINFO bi = { 0 };
-	std::wstring titleW = UTF8ToWide(title);
+	std::wstring titleW = ::UTF8ToWide(title);
 	bi.lpszTitle = titleW.c_str();
 	bi.hwndOwner = this->windowHandle;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS;
@@ -1233,7 +1181,7 @@ SharedKList Win32UserWindow::SelectDirectory(
 		if (SHGetPathFromIDList(pidl, in_path))
 		{
 			std::wstring inPathW = in_path;
-			std::string inPath = WideToUTF8(inPathW);
+			std::string inPath = ::WideToUTF8(inPathW);
 			results->Append(Value::NewString(inPath));
 		}
 
@@ -1249,6 +1197,8 @@ SharedKList Win32UserWindow::SelectDirectory(
 
 void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 {
+	if (!minMaxInfo) return;
+	
 	static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
 	static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
 	int maxWidth = (int) GetMaxWidth();
@@ -1276,11 +1226,11 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
 }
 
-void Win32UserWindow::ParseStringNullSeparated(
-	const wchar_t *s, std::vector<std::string> &tokens)
+void Win32UserWindow::ParseSelectedFiles(
+	const wchar_t *s, std::vector<std::string> &selectedFiles)
 {
-	std::string token;
-
+	std::string selectedFile;
+	
 	// input string is expected to be composed of single-NULL-separated tokens, and double-NULL terminated
 	int i = 0;
 	while (true)
@@ -1289,16 +1239,22 @@ void Win32UserWindow::ParseStringNullSeparated(
 
 		c = s[i++];
 
-		if (c == '\0')
+		if (c == L'\0')
 		{
 			// finished reading a token, save it in tokens vectory
-			tokens.push_back(token);
-			token.clear();
+			selectedFiles.push_back(selectedFile);
+			selectedFile.clear();
 
+			if (!FileUtils::IsDirectory(selectedFiles.at(0)) && selectedFiles.size() == 1)
+			{
+				// The first entry is a file, and not a directory
+				// This means we should only have 1 file in this selection
+				break;
+			}
 			c = s[i]; // don't increment index because next token loop needs to read this char again
 
 			// if next char is NULL, then break out of the while loop
-			if (c == '\0')
+			if (c == L'\0')
 			{
 				break; // out of while loop
 			}
@@ -1308,7 +1264,7 @@ void Win32UserWindow::ParseStringNullSeparated(
 			}
 		}
 
-		token.push_back(c);
+		selectedFile.push_back(c);
 	}
 }
 

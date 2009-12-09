@@ -122,16 +122,20 @@ describe("php tests",
 		value_of(myarray[3]).should_be(7);
 	},
 	test_preprocess_as_async: function(callback)
-	{
-		var w = Titanium.UI.currentWindow.createWindow('app://test.php');
+	{ 
+		var w = Titanium.UI.currentWindow.createWindow('app://test.php?param1=1&param2=2');
 		var timer = 0;
 		w.addEventListener(Titanium.PAGE_LOADED, function(event) {
 			clearTimeout(timer);
 			try
 			{
-				var window = w.getDOMWindow();
-				var a = window.document.getElementById("a").innerHTML;
-				value_of(a).should_be("101");
+				function domValue(id) { return w.getDOMWindow().document.getElementById(id).innerHTML; }
+				value_of(domValue("a")).should_be("101");
+				value_of(domValue("request-uri")).should_be("/test.php?param1=1&amp;param2=2");
+				value_of(domValue("script-name")).should_be("/test.php");
+				value_of(domValue("param1")).should_be(1);
+				value_of(domValue("param2")).should_be(2);
+				
 				callback.passed();
 			}
 			catch(e)
@@ -218,4 +222,14 @@ describe("php tests",
 	{
 		value_of(test_include()).should_be("yes");
 	},
+	test_cased_function_names: function()
+	{
+		value_of(CamelCaseFunctionOne()).should_be("uno");
+		value_of(camelCaseFunctionTwo()).should_be("dos");
+		value_of(ALLCAPSFUNCTION()).should_be("tres");
+	},
+	test_mysql: function()
+	{
+		value_of(php_test_mysql()).should_be_true();
+	}
 });

@@ -93,45 +93,47 @@ describe("ti.Media tests", {
 
 		steps = [
 			function() {
-				if (!sound.isPlaying()) {
-					callback.failed("Sound did not start");
-				}
+				if (!sound.isPlaying())
+					throw "Sound did not start";
 				sound.setVolume(0.5);
 			},
 			function() {
 				var volume = sound.getVolume();
-				if (volume != 0.5) {
-					callback.failed("Volume should have been 0.5, but was " + volume);
-				}
+				if (volume != 0.5)
+					throw "Volume should have been 0.5, but was " + volume;
 				sound.setVolume(0.25);
 			},
 			function() {
 				var volume = sound.getVolume();
-				if (volume != 0.25) {
-					callback.failed("Volume should have been 0.25, but was " + volume);
-				}
+				if (volume != 0.25)
+					throw "Volume should have been 0.25, but was " + volume;
 				sound.setVolume(-0.25);
 			},
 			function() {
 				var volume = sound.getVolume();
-				if (volume != 0) {
-					callback.failed("Volume should have been 0, but was " + volume);
-				}
+				if (volume != 0)
+					throw "Volume should have been 0, but was " + volume;
 				sound.setVolume(100);
 			},
 			function() {
 				var volume = sound.getVolume();
-				if (volume != 1) {
-					callback.failed("Volume should have been 1, but was " + volume);
-				}
+				if (volume != 1)
+					throw "Volume should have been 1, but was " + volume;
 				sound.stop();
 				callback.passed();
 			}];
 
 		var run_next_test = function() {
 			var test = steps.shift();
-			test();
-			setTimeout(run_next_test, 250);
+			try
+			{
+				test();
+				setTimeout(run_next_test, 250);
+			}
+			catch (e)
+			{
+				callback.failed(e);
+			}
 		};
 		setTimeout(run_next_test, 250);
 	},
@@ -174,5 +176,15 @@ describe("ti.Media tests", {
 		{
 			callback.failed("Timeout waiting for sound to loop");
 		}, 4000);
+	},
+	issue35_open_sound_crashes_as_async: function(callback)
+	{
+		var sound = Titanium.Media.createSound('app://sound.wav');
+		sound.play();
+		
+		var timer = setTimeout(function(){
+			window.location.href = 'http://en.wikipedia.org/wiki/The_Evil_Dead';
+			callback.passed();
+		}, 3000);
 	},
 });

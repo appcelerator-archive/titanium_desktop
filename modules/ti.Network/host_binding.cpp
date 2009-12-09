@@ -7,7 +7,9 @@
 
 namespace ti
 {
-	HostBinding::HostBinding(IPAddress addr) : StaticBoundObject("Host"), name(addr.toString())
+	HostBinding::HostBinding(IPAddress addr) :
+		StaticBoundObject("Network.Host"),
+		name(addr.toString())
 	{
 		this->Init();
 		try
@@ -76,24 +78,24 @@ namespace ti
 		 */
 		this->SetMethod("getAddresses",&HostBinding::GetAddresses);
 	}
-	void HostBinding::ToString(const ValueList& args, SharedValue result)
+	void HostBinding::ToString(const ValueList& args, KValueRef result)
 	{
 		std::string s("[IPAddress ");
 		s+=name;
 		s+="]";
 		result->SetString(s.c_str());
 	}
-	void HostBinding::IsInvalid(const ValueList& args, SharedValue result)
+	void HostBinding::IsInvalid(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->invalid);
 	}
-	void HostBinding::GetName(const ValueList& args, SharedValue result)
+	void HostBinding::GetName(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->host.name().c_str());
 	}
-	void HostBinding::GetAliases(const ValueList& args, SharedValue result)
+	void HostBinding::GetAliases(const ValueList& args, KValueRef result)
 	{
-		SharedKList list = new StaticBoundList();
+		KListRef list = new StaticBoundList();
 		std::vector<std::string> aliases = this->host.aliases();
 		std::vector<std::string>::iterator iter = aliases.begin();
 		while (iter!=aliases.end())
@@ -103,16 +105,16 @@ namespace ti
 		}
 		result->SetList(list);
 	}
-	void HostBinding::GetAddresses(const ValueList& args, SharedValue result)
+	void HostBinding::GetAddresses(const ValueList& args, KValueRef result)
 	{
-		SharedKList list = new StaticBoundList();
+		KListRef list = new StaticBoundList();
 		std::vector<IPAddress> addresses = this->host.addresses();
 		std::vector<IPAddress>::iterator iter = addresses.begin();
 		while (iter!=addresses.end())
 		{
 			IPAddress address = (*iter++);
-			SharedKObject obj = new IPAddressBinding(address);
-			SharedValue addr = Value::NewObject(obj);
+			KObjectRef obj = new IPAddressBinding(address);
+			KValueRef addr = Value::NewObject(obj);
 			list->Append(addr);
 		}
 		result->SetList(list);

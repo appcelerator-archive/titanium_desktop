@@ -20,12 +20,12 @@ namespace ti
 	class GstMediaBinding : public MediaBinding
 	{
 		public:
-		GstMediaBinding(SharedKObject);
+		GstMediaBinding(KObjectRef);
 		~GstMediaBinding();
 
 		protected:
 		void Beep();
-		SharedKObject CreateSound(std::string&);
+		KObjectRef CreateSound(std::string&);
 
 	};
 }

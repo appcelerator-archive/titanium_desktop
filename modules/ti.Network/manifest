@@ -1,4 +1,0 @@
-name: ti.Network
-version: 0.1
-description: Networking module
-os: win32, osx, linux

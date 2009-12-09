@@ -16,19 +16,19 @@ namespace ti
 	class SnarlWin32 : public GrowlBinding
 	{
 		public:
-		SnarlWin32(SharedKObject global);
+		SnarlWin32(KObjectRef global);
 		virtual ~SnarlWin32();
 
 		virtual bool IsRunning();
 		virtual void ShowNotification(std::string& title, 
 			std::string& description, std::string& iconURL, 
-			int timeout, SharedKMethod callback);
+			int timeout, KMethodRef callback);
 		void InvokeCallback();
 		static bool MessageHandler(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		private:
 		static UINT snarlWindowMessage;
-		static std::map<long, SharedKMethod> snarlCallbacks;
+		static std::map<long, KMethodRef> snarlCallbacks;
 	};
 }
 

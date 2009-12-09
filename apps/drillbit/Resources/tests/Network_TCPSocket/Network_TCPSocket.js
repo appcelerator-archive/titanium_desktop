@@ -51,7 +51,7 @@ describe("Network.TCPSocket",{
 		value_of(this.socket.onTimeout).should_be_function();
 		value_of(this.socket.onWrite).should_be_function();
 		value_of(this.socket.write).should_be_function();
-   	},
+	},
 	
 	test_network_TCPSocket_isClosed: function()
 	{
@@ -139,11 +139,9 @@ describe("Network.TCPSocket",{
 
 		var output = null;
 		var timer = null;
-		
-		TCPsocket.onRead( function(buf)
+		TCPsocket.onRead(function(buf)
 		{
-   			alert("like yo");
-			if ( buf == null )
+			if (buf == null)
 			{
 				test.failed("buffer sent to onRead is null");
 			}
@@ -191,7 +189,7 @@ describe("Network.TCPSocket",{
 			}
 			catch(e)
 			{
-				test.failed("TCPSocket error: "+e);			
+				test.failed("TCPSocket error: "+e);
 			}
 			TCPsocket.close();
 		}
@@ -236,7 +234,7 @@ describe("Network.TCPSocket",{
 		
 		TCPsocket.onReadComplete( function(buf)
 		{
-  			clearTimeout(timer);
+			clearTimeout(timer);
 			try
 			{
 				if ( output.length > 0 )

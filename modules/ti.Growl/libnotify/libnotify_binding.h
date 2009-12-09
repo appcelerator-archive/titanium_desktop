@@ -10,26 +10,20 @@
 
 #include <kroll/kroll.h>
 
-using kroll::SharedKObject;
+using kroll::KObjectRef;
 
 namespace ti
 {
 	class LibNotifyBinding : public GrowlBinding
 	{
 	public:
-		LibNotifyBinding(SharedKObject);
+		LibNotifyBinding(KObjectRef);
 		~LibNotifyBinding();
 
 	protected:
 		bool IsRunning();
-		void ShowNotification(
-			std::string& title,
-			std::string& description,
-			std::string& iconURL,
-			int notification_delay,
-			SharedKMethod callback);
-
-		std::string GetAppName();
+		void ShowNotification(std::string& title, std::string& description,
+			std::string& iconURL, int timeout, KMethodRef callback);
 	};
 }
 

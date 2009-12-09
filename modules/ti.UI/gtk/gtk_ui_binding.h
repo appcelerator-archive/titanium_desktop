@@ -19,8 +19,6 @@ namespace ti
 		GtkUIBinding(Host* host);
 
 		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-		void ErrorDialog(std::string);
-
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
 		AutoMenuItem CreateSeparatorMenuItem();
@@ -28,12 +26,13 @@ namespace ti
 		void SetMenu(AutoMenu newMenu);
 		void SetContextMenu(AutoMenu);
 		void SetIcon(std::string&);
-		AutoTrayItem AddTray(std::string&, SharedKMethod cb);
+		AutoTrayItem AddTray(std::string&, KMethodRef cb);
 		long GetIdleTime();
-
 		AutoMenu GetMenu();
 		AutoMenu GetContextMenu();
 		std::string& GetIcon();
+
+		static void ErrorDialog(std::string);
 
 		protected:
 		SharedPtr<ScriptEvaluator> evaluator;

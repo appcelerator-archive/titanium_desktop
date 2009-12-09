@@ -10,22 +10,25 @@
 #include <kroll/kroll.h>
 #include <string>
 #include "../growl_binding.h"
-#include "growl_delegate.h"
 
-namespace ti {
-	class GrowlOSX : public GrowlBinding {
-	protected:
-		TiGrowlDelegate *delegate;
-
+namespace ti
+{
+	class GrowlOSX : public GrowlBinding
+	{
 	public:
-		GrowlOSX(SharedKObject global);
+		GrowlOSX(KObjectRef global);
 		virtual ~GrowlOSX();
-
-		void CopyToApp(kroll::Host *host, kroll::Module *module);
-		virtual void ShowNotification(std::string& title,
-			std::string& description, std::string& iconURL,
-			int notification_delay, SharedKMethod callback);
+		virtual void ShowNotification(std::string& title, std::string& description,
+			 std::string& iconURL, int timeout, KMethodRef callback);
 		virtual bool IsRunning();
+
+	protected:
+		SharedApplication app;
+		CFRef<CFStringRef> appName;
+		CFRef<CFStringRef> appId;
+		CFStringRef notificationName; // This is a constant.
+		CFNotificationCenterRef distCenter;
+		NSConnection* connection;
 	};
 }
 

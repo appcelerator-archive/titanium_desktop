@@ -24,8 +24,18 @@ else:
 	if not build.is_osx():
 		env.ParseConfig('pkg-config --cflags --libs libxml-2.0')
 
+sources = Glob('*.cpp')
+if build.is_win32():
+	sources += Glob('win32/*.cpp')
+elif build.is_linux():
+	sources += Glob('linux/*.cpp')
+elif build.is_osx():
+	sources += Glob('osx/*.mm')
+
+if build.is_win32():
+	env.Append(CCFLAGS=['/DUNICODE', '/D_UNICODE'])
+
 m = build.add_module('ti.App', env=env)
-sources = Glob('*.cpp') + Glob('Properties/*.cpp')
 t = env.SharedLibrary(target = m.build_dir + '/tiappmodule', source=sources)
 build.mark_build_target(t)
 

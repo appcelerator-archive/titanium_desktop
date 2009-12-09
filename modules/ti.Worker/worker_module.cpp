@@ -20,7 +20,7 @@ namespace ti
 		this->binding = new WorkerBinding(host,host->GetGlobalObject());
 
 		// set our ti.Worker
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("Worker", value);
 	}
 

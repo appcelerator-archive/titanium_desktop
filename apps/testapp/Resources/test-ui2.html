@@ -70,11 +70,18 @@
 			{
 				Titanium.UI.currentWindow.close();
 			}
+			function closeDOMWindow()
+			{
+				var w = window.open('http://www.google.com');
+				setTimeout(function() {
+					w.close();
+				}, 2000);
+			}
 			function chooseFileTypes()
 			{
 				Titanium.UI.openFileChooserDialog(selectFilesCallback, {
 					multiple:true,
-					types:[ 'js','html' ],
+					types:['js', 'html'],
 					typesDescription: 'Web Files'
 				});
 			}
@@ -113,7 +120,9 @@
 		<div>
 			<button onclick="closeWindow()">Close Window</button>
 		</div>
-
+		<div>
+			<button onclick="closeDOMWindow()">Open and close DOM window</button>
+		</div>
 		<div id="log">
 		</div>
 	</body>

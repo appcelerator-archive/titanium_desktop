@@ -52,6 +52,18 @@ namespace ti
 		}
 	}
 
+	void ProxyForURLCallback(const char* url, char* buffer, int bufferLength)
+	{
+		buffer[bufferLength - 1] = '\0';
+
+		std::string urlString(url);
+		SharedProxy proxy(ProxyConfig::GetProxyForURL(urlString));
+		if (proxy.isNull())
+			strncpy(buffer, "direct://", bufferLength);
+		else
+			strncpy(buffer, proxy->ToString().c_str(), bufferLength);
+	}
+
 	int CanPreprocessURLCallback(const char* url)
 	{
 		return Script::GetInstance()->CanPreprocess(url);
@@ -61,8 +73,8 @@ namespace ti
 	{
 		Logger* logger = Logger::Get("UI.URL");
 
-		SharedKObject scope = new StaticBoundObject();
-		SharedKObject kheaders = new StaticBoundObject();
+		KObjectRef scope = new StaticBoundObject();
+		KObjectRef kheaders = new StaticBoundObject();
 		while (headers->key)
 		{
 			kheaders->SetString(headers->key, headers->value);

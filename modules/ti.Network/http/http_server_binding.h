@@ -27,8 +27,8 @@ namespace ti
 
 	private:
 		Host* host;
-		SharedKObject global;
-		SharedKMethod callback;
+		KObjectRef global;
+		KMethodRef callback;
 		std::string ipaddress;
 		int port;
 		Poco::Thread *thread;
@@ -37,9 +37,9 @@ namespace ti
 		
 		static void Run(void*);
 		
-		void Bind(const ValueList& args, SharedValue result);
-		void Close(const ValueList& args, SharedValue result);
-		void IsClosed(const ValueList& args, SharedValue result);
+		void Bind(const ValueList& args, KValueRef result);
+		void Close(const ValueList& args, KValueRef result);
+		void IsClosed(const ValueList& args, KValueRef result);
 		
 		void Close();
 		

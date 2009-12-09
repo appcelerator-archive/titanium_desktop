@@ -67,5 +67,20 @@ build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 SConscript('testapp/SConscript')
 SConscript('drillbit/SConscript')
 SConscript('alloy/SConscript')
+SConscript('sdkinstaller/SConscript')
 
+developer_dir = path.normpath("%s/../../titanium_developer" % build.cwd())
+resources_dir = "%s/Resources" % developer_dir
+tiapp_xml = "%s/tiapp.xml" % developer_dir
+t = build.env.PackageApp('#titanium-developer-target',
+	[Dir(resources_dir), tiapp_xml],
+	FULLNAME='Titanium Developer',
+	ID='com.titaniumapp.titanium_developer_test',
+	GUID='0830db0d-b1a1-49cc-b3fe-27d6f7c0025c',
+	PUBLISHER='Appcelerator, Inc.',
+	URL='http://www.titaniumapp.com',
+	VERSION=build.version,
+	INSTALLED=True)
+Depends(t, build.build_targets + build.staging_targets)
+Alias('developer', t)
 

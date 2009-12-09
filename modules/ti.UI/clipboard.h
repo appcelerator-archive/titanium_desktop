@@ -11,21 +11,21 @@
 
 namespace ti
 {
-	class Clipboard : public AccessorBoundObject
+	class Clipboard : public KAccessorObject
 	{
 		public:
 		Clipboard();
 		~Clipboard();
 
 		enum DataType { TEXT, URI_LIST, IMAGE, UNKNOWN };
-		void _GetData(const ValueList& args, SharedValue result);
-		void _SetData(const ValueList& args, SharedValue result);
-		void _ClearData(const ValueList& args, SharedValue result);
-		void _HasData(const ValueList& args, SharedValue result);
-		void _GetText(const ValueList& args, SharedValue result);
-		void _SetText(const ValueList& args, SharedValue result);
-		void _ClearText(const ValueList& args, SharedValue result);
-		void _HasText(const ValueList& args, SharedValue result);
+		void _GetData(const ValueList& args, KValueRef result);
+		void _SetData(const ValueList& args, KValueRef result);
+		void _ClearData(const ValueList& args, KValueRef result);
+		void _HasData(const ValueList& args, KValueRef result);
+		void _GetText(const ValueList& args, KValueRef result);
+		void _SetText(const ValueList& args, KValueRef result);
+		void _ClearText(const ValueList& args, KValueRef result);
+		void _HasText(const ValueList& args, KValueRef result);
 		bool HasData(DataType type);
 		void ClearData(DataType type);
 
@@ -33,8 +33,8 @@ namespace ti
 		void SetText(std::string& newText);
 		bool HasText();
 		void ClearText();
-		AutoBlob GetImage(std::string& mimeType);
-		void SetImage(std::string& mimeType, AutoBlob newImage);
+		BlobRef GetImage(std::string& mimeType);
+		void SetImage(std::string& mimeType, BlobRef newImage);
 		bool HasImage();
 		void ClearImage();
 		std::vector<std::string>& GetURIList();
@@ -46,8 +46,8 @@ namespace ti
 		void SetTextImpl(std::string& newText);
 		bool HasTextImpl();
 		void ClearTextImpl();
-		AutoBlob GetImageImpl(std::string& mimeType);
-		void SetImageImpl(std::string& mimeType, AutoBlob image);
+		BlobRef GetImageImpl(std::string& mimeType);
+		void SetImageImpl(std::string& mimeType, BlobRef image);
 		bool HasImageImpl();
 		void ClearImageImpl();
 		std::vector<std::string>& GetURIListImpl();

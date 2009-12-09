@@ -12,9 +12,9 @@
 
 namespace ti
 {
-
 	std::map<std::string,int> ProcessBinding::signals;
-	ProcessBinding::ProcessBinding() : AccessorBoundObject("Process")
+	ProcessBinding::ProcessBinding() :
+		KAccessorObject("Process")
 	{
 		
 		/**
@@ -179,19 +179,19 @@ namespace ti
 	{
 	}
 
-	void ProcessBinding::CreateProcess(const ValueList& args, SharedValue result)
+	void ProcessBinding::CreateProcess(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("createProcess", "o|l");
-		SharedKObject temp = 0;
-		SharedKList argList = 0;
-		SharedKObject environment = 0;
+		KObjectRef temp = 0;
+		KListRef argList = 0;
+		KObjectRef environment = 0;
 		AutoPipe stdinPipe = 0;
 		AutoPipe stdoutPipe = 0;
 		AutoPipe stderrPipe = 0;
 
 		if (args.at(0)->IsObject())
 		{
-			SharedKObject options = args.GetObject(0);
+			KObjectRef options = args.GetObject(0);
 			argList = options->GetList("args", 0);
 			if (argList.isNull())
 				throw ValueException::FromString(
@@ -259,7 +259,7 @@ namespace ti
 				"Titanium.Process 1st argument must not be null/empty");
 		}
 
-		SharedKList argsClone = new StaticBoundList();
+		KListRef argsClone = new StaticBoundList();
 		ExtendArgs(argsClone, argList);
 
 		AutoProcess process = Process::CreateProcess();
@@ -278,14 +278,14 @@ namespace ti
 		result->SetMethod(process);
 	}
 	
-	void ProcessBinding::ExtendArgs(SharedKList dest, SharedKList args)
+	void ProcessBinding::ExtendArgs(KListRef dest, KListRef args)
 	{
 		for (size_t i = 0; i < args->Size(); i++)
 		{
-			SharedValue arg = Value::Undefined;
+			KValueRef arg = Value::Undefined;
 			if (args->At(i)->IsList())
 			{
-				SharedKList list = args->At(i)->ToList();
+				KListRef list = args->At(i)->ToList();
 				ExtendArgs(dest, list);
 				continue;
 			}
@@ -302,7 +302,7 @@ namespace ti
 		}
 	}
 
-	void ProcessBinding::CreatePipe(const ValueList& args, SharedValue result)
+	void ProcessBinding::CreatePipe(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(new Pipe());
 	}

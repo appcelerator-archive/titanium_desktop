@@ -21,26 +21,26 @@ namespace ti
 		MenuItem(MenuItemType type);
 		~MenuItem();
 
-		void _IsSeparator(const ValueList& args, SharedValue result);
-		void _IsCheck(const ValueList& args, SharedValue result);
-		void _SetLabel(const ValueList& args, SharedValue result);
-		void _GetLabel(const ValueList& args, SharedValue result);
-		void _SetIcon(const ValueList& args, SharedValue result);
-		void _GetIcon(const ValueList& args, SharedValue result);
-		void _SetState(const ValueList& args, SharedValue result);
-		void _GetState(const ValueList& args, SharedValue result);
-		void _SetAutoCheck(const ValueList& args, SharedValue result);
-		void _IsAutoCheck(const ValueList& args, SharedValue result);
-		void _SetSubmenu(const ValueList& args, SharedValue result);
-		void _GetSubmenu(const ValueList& args, SharedValue result);
-		void _Enable(const ValueList& args, SharedValue result);
-		void _Disable(const ValueList& args, SharedValue result);
-		void _IsEnabled(const ValueList& args, SharedValue result);
-		void _Click(const ValueList& args, SharedValue result);
+		void _IsSeparator(const ValueList& args, KValueRef result);
+		void _IsCheck(const ValueList& args, KValueRef result);
+		void _SetLabel(const ValueList& args, KValueRef result);
+		void _GetLabel(const ValueList& args, KValueRef result);
+		void _SetIcon(const ValueList& args, KValueRef result);
+		void _GetIcon(const ValueList& args, KValueRef result);
+		void _SetState(const ValueList& args, KValueRef result);
+		void _GetState(const ValueList& args, KValueRef result);
+		void _SetAutoCheck(const ValueList& args, KValueRef result);
+		void _IsAutoCheck(const ValueList& args, KValueRef result);
+		void _SetSubmenu(const ValueList& args, KValueRef result);
+		void _GetSubmenu(const ValueList& args, KValueRef result);
+		void _Enable(const ValueList& args, KValueRef result);
+		void _Disable(const ValueList& args, KValueRef result);
+		void _IsEnabled(const ValueList& args, KValueRef result);
+		void _Click(const ValueList& args, KValueRef result);
 
-		void _AddItem(const ValueList& args, SharedValue result);
-		void _AddSeparatorItem(const ValueList& args, SharedValue result);
-		void _AddCheckItem(const ValueList& args, SharedValue result);
+		void _AddItem(const ValueList& args, KValueRef result);
+		void _AddSeparatorItem(const ValueList& args, KValueRef result);
+		void _AddCheckItem(const ValueList& args, KValueRef result);
 
 		void SetLabel(string& label);
 		std::string& GetLabel();
@@ -50,7 +50,7 @@ namespace ti
 		bool IsSeparator();
 		bool IsCheck();
 		bool IsEnabled();
-		virtual void HandleClickEvent(SharedKObject source);
+		virtual void HandleClickEvent(KObjectRef source);
 		void EnsureHasSubmenu();
 		bool ContainsItem(MenuItem* item);
 		bool ContainsSubmenu(Menu* submenu);
@@ -68,9 +68,9 @@ namespace ti
 		std::string label;
 		std::string iconURL;
 		std::string iconPath;
-		SharedKMethod callback;
+		KMethodRef callback;
 		AutoMenu submenu;
-		std::vector<SharedKMethod> eventListeners;
+		std::vector<KMethodRef> eventListeners;
 		bool state;
 		bool autoCheck;
 	};

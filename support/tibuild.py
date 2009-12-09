@@ -14,6 +14,7 @@ from optparse import OptionParser
 from desktop_builder import DesktopBuilder
 from desktop_packager import DesktopPackager
 import sys, os.path, platform, re, subprocess, signal
+from xml.etree.ElementTree import ElementTree
 
 VERSION = '0.1'
 PLATFORMS = ['win32','osx','linux']
@@ -24,24 +25,28 @@ def log(options,msg):
 		print msg
 		sys.stdout.flush()
 
-def get_from_tiapp(appdir,name,defv):
-	f = os.path.join(appdir,'tiapp.xml')
-	if not os.path.exists(f):
-		print "Couldn't find tiapp.xml at: %s" % appdir
-		sys.exit(1)
-	xml = open(f).read()
-	m = re.search('<%s>(.*?)</%s>' % (name,name),xml)
-	if m==None: return defv
-	return str(m.group(1)).strip()
+def get_from_tiapp(tiapp,name,defv):
+	el = tiapp.find(name)
+	if el is None or el is -1:
+		return defv
+	return el.text
+	#f = os.path.join(appdir,'tiapp.xml')
+	#if not os.path.exists(f):
+	#	print "Couldn't find tiapp.xml at: %s" % appdir
+	#	sys.exit(1)
+	#xml = open(f).read()
+	#m = re.search('<%s>(.*?)</%s>' % (name,name),xml)
+	#if m==None: return defv
+	#return str(m.group(1)).strip()
 
-def get_icon_from_tiapp(appdir):
-	return get_from_tiapp(appdir,'icon','default_app_logo.png')
+def get_icon_from_tiapp(tiapp):
+	return get_from_tiapp(tiapp,'icon','default_app_logo.png')
 
-def get_dmg_background_from_tiapp(appdir):
-	return get_from_tiapp(appdir,'dmg_background',None)
+def get_dmg_background_from_tiapp(tiapp):
+	return get_from_tiapp(tiapp,'dmg_background',None)
 	
-def get_version_from_tiapp(appdir):
-	return get_from_tiapp(appdir,'version','1.0')
+def get_version_from_tiapp(tiapp):
+	return get_from_tiapp(tiapp,'version','1.0')
 			
 def examine_manifest(appdir):
 	f = os.path.join(appdir,'manifest')
@@ -59,7 +64,16 @@ def examine_manifest(appdir):
 			else:
 				manifest['modules'][tok[0].strip()]=tok[1].strip()
 	return manifest
-	
+
+def examine_module_manifest(moduledir):
+	f = os.path.join(moduledir, 'manifest')
+	manifest = {}
+	if os.path.exists(f):
+		for line in open(f).readlines():
+			tok = line.strip().split(":")
+			manifest[tok[0].strip()] = tok[1].strip()
+	return manifest
+
 def find_titanium_base():
 	p = get_platform()
 	f = None
@@ -111,6 +125,7 @@ def desktop_setup(options,appdir):
 		entry = {'name':name,'version':version}
 		if os.path.exists(os.path.join(appdir,'modules',name,version)):
 			entry['path']=os.path.join(appdir,'modules',name,version)
+			entry['manifest'] = examine_module_manifest(entry['path'])
 			module_paths.append(entry)
 		else:
 			# if we're not network, we must find it to be bundled
@@ -118,6 +133,7 @@ def desktop_setup(options,appdir):
 			if options.type != 'network':
 				if os.path.exists(os.path.join(options.source,'modules',options.platform,name,version)):
 					entry['path']=os.path.join(options.source,'modules',options.platform,name,version)
+					entry['manifest'] = examine_module_manifest(entry['path'])
 					module_paths.append(entry)
 				else:
 					print("Couldn't find required module: %s with version: %s" %(name,version))
@@ -130,11 +146,11 @@ def desktop_setup(options,appdir):
 	options.appdir = appdir
 	
 	# assign icon
-	options.icon = get_icon_from_tiapp(appdir)
+	options.icon = get_icon_from_tiapp(options.tiapp)
 	
 	# get the DMG background (OSX only)
 	if options.platform == 'osx':
-		options.dmg_background = get_dmg_background_from_tiapp(appdir)
+		options.dmg_background = get_dmg_background_from_tiapp(options.tiapp)
 	
 	# convert this option
 	if options.package == 'false' or options.package == 'no':
@@ -212,11 +228,16 @@ def main(options,appdir):
 		print('Invalid destination directory: %s' % options.destination)
 		sys.exit(1)
 	
+	# tiapp ElementTree
+	options.tiapp = ElementTree()
+	if os.path.exists(os.path.join(appdir, 'tiapp.xml')):
+		options.tiapp.parse(os.path.join(appdir, 'tiapp.xml'))
+	
 	# read the manifest
 	options.manifest = examine_manifest(appdir)
 
 	# get the version from the tiapp.xml
-	options.version = get_version_from_tiapp(appdir)
+	options.version = get_version_from_tiapp(options.tiapp)
 	
 	# run the builders
 	builder = desktop_setup(options,appdir)

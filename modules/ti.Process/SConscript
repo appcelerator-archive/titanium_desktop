@@ -9,12 +9,14 @@ env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
 sources = Glob('*.cpp')
-
 if build.is_win32():
 	sources += Glob('win32/*.cpp')
 else:
 	sources += Glob('posix/*.cpp')
-	
+
+if build.is_win32():
+	env.Append(CCFLAGS=['/DUNICODE', '/D_UNICODE'])
+
 m = build.add_module('ti.Process', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tiprocessmodule', source = sources)
 build.mark_build_target(t)

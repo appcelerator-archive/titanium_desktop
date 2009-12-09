@@ -17,19 +17,17 @@
 
 -(void)setupPreferences
 {
-	AppConfig *appConfig = AppConfig::Instance();
-	std::string appid = appConfig->GetAppID();
-	NSString *appID = [NSString stringWithUTF8String:appid.c_str()];
-	[[window webView] setPreferencesIdentifier:appID];
-
-	WebPreferences *webPrefs = [[WebPreferences alloc] initWithIdentifier:appID];
+	NSString* appId = [NSString stringWithUTF8String:
+		Host::GetInstance()->GetApplication()->id.c_str()];
+	[[window webView] setPreferencesIdentifier:appId];
+	WebPreferences *webPrefs = [[WebPreferences alloc] initWithIdentifier:appId];
 
 	// This indicates that WebViews in this app will not browse multiple pages,
 	// but rather show a small number. This reduces memory cache footprint
 	// significantly.
 	[webPrefs setCacheModel:WebCacheModelDocumentBrowser];
 
-	[webPrefs setDeveloperExtrasEnabled:host->IsDebugMode()];
+	[webPrefs setDeveloperExtrasEnabled:host->DebugModeEnabled()];
 	[webPrefs setPlugInsEnabled:YES]; 
 	[webPrefs setJavaEnabled:YES];
 	[webPrefs setJavaScriptEnabled:YES];
@@ -48,7 +46,7 @@
 
 	// Setup the DB to store it's DB under our data directory for the app
 	NSString *datadir = [NSString stringWithUTF8String:
-		kroll::FileUtils::GetApplicationDataDirectory(appid).c_str()];
+		Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
 	[webPrefs _setLocalStorageDatabasePath:datadir];
 
 	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
@@ -73,7 +71,7 @@
 
 	window = inWindow;
 	logger = Logger::Get("UI.WebViewDelegate");
-	frameToGlobalObject = new std::map<WebFrame*, SharedKObject>();
+	frameToGlobalObject = new std::map<WebFrame*, KObjectRef>();
 	host = Host::GetInstance();
 	WebView* webView = [window webView];
 
@@ -101,13 +99,12 @@
 
 	// TI-303 we need to add safari UA to our UA to resolve broken
 	// sites that look at Safari and not WebKit for UA
-	NSString *appName = [NSString
-		stringWithFormat:@"Version/4.0 Safari/528.16 %s/%s",
-		PRODUCT_NAME, STRING(PRODUCT_VERSION)];
+	NSString *appName = [NSString stringWithFormat:
+		@"Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, PRODUCT_VERSION];
 	[webView setApplicationNameForUserAgent:appName];
 
 	// place our user agent string in the global so we can later use it
-	SharedKObject global = host->GetGlobalObject();
+	KObjectRef global = host->GetGlobalObject();
 	NSString* fullUserAgent = [webView userAgentForURL:
 		[NSURL URLWithString:@"http://titaniumapp.com"]];
 	global->SetString("userAgent", [fullUserAgent UTF8String]);
@@ -180,19 +177,19 @@
 #pragma mark -
 #pragma mark WebFrameLoadDelegate
 
-- (void)registerGlobalObject:(SharedKObject)globalObject forFrame:(WebFrame *)frame
+- (void)registerGlobalObject:(KObjectRef)globalObject forFrame:(WebFrame *)frame
 {
 	(*frameToGlobalObject)[frame] = globalObject;
 }
 
-- (SharedKObject)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame
+- (KObjectRef)registerJSContext:(JSGlobalContextRef)context forFrame:(WebFrame*)frame
 {
 	UserWindow* userWindow = [window userWindow];
 	userWindow->RegisterJSContext(context);
 
 	// Track that we've cleared this frame
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
-	SharedKObject globalKObject  = new KKJSObject(context, globalObject);
+	KObjectRef globalKObject  = new KKJSObject(context, globalObject);
 	[self registerGlobalObject:globalKObject forFrame:frame];
 
 	return globalKObject;
@@ -200,14 +197,14 @@
 
 - (BOOL)isGlobalObjectRegisteredForFrame:(WebFrame*) frame
 {
-	std::map<WebFrame*, SharedKObject>::iterator iter =
+	std::map<WebFrame*, KObjectRef>::iterator iter =
 		frameToGlobalObject->find(frame);
 	return iter != frameToGlobalObject->end();
 }
 
-- (SharedKObject)globalObjectForFrame:(WebFrame*) frame
+- (KObjectRef)globalObjectForFrame:(WebFrame*) frame
 {
-	std::map<WebFrame*, SharedKObject>::iterator iter =
+	std::map<WebFrame*, KObjectRef>::iterator iter =
 		frameToGlobalObject->find(frame);
 	if (iter == frameToGlobalObject->end()) {
 		return NULL;
@@ -218,7 +215,7 @@
 
 - (void)deregisterGlobalObjectForFrame:(WebFrame *)frame
 {
-	std::map<WebFrame*, SharedKObject>::iterator i =
+	std::map<WebFrame*, KObjectRef>::iterator i =
 		frameToGlobalObject->find(frame);
 	frameToGlobalObject->erase(frame);
 }
@@ -252,7 +249,7 @@
 	}
 
 	JSGlobalContextRef context = [frame globalContext];
-	SharedKObject global = [self globalObjectForFrame:frame];
+	KObjectRef global = [self globalObjectForFrame:frame];
 	if (global.isNull())
 	{
 		// The load was successful, but this page doesn't have a script tag

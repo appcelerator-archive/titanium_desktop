@@ -20,12 +20,11 @@ namespace ti
 		this->binding = new MonkeyBinding(host,host->GetGlobalObject());
 
 		// set our ti.Monkey
-		SharedValue value = Value::NewObject(this->binding);
+		KValueRef value = Value::NewObject(this->binding);
 		host->GetGlobalObject()->Set("Monkey", value);
 	}
 
 	void MonkeyModule::Stop()
 	{
 	}
-	
 }

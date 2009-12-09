@@ -14,14 +14,14 @@ namespace ti
 	class WorkerBinding : public StaticBoundObject
 	{
 	public:
-		WorkerBinding(Host*, SharedKObject);
+		WorkerBinding(Host*, KObjectRef);
 	protected:
 		virtual ~WorkerBinding();
 	private:
 		Host *host;
-		SharedKObject global;
+		KObjectRef global;
 		
-		void CreateWorker(const ValueList& args, SharedValue result);
+		void CreateWorker(const ValueList& args, KValueRef result);
 	};
 }
 

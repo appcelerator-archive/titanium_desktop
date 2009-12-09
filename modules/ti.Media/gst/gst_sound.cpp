@@ -8,11 +8,10 @@
 
 namespace ti
 {
-
 	static gboolean GSTBusCallback(GstBus *bus, GstMessage *message, gpointer data);
 	GstSound::GstSound(std::string &path) :
 		Sound(path),
-		pipeline(NULL)
+		pipeline(0)
 	{
 		this->Load();
 	}

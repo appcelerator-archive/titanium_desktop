@@ -30,7 +30,7 @@ namespace ti
 		virtual void InitializeLoop();
 		virtual bool GetStatus();
 		virtual void CleanupLoop();
-		void _DBusStatus(const ValueList& args, SharedValue result);
+		void _DBusStatus(const ValueList& args, KValueRef result);
 	};
 }
 

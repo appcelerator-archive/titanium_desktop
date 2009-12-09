@@ -355,10 +355,17 @@ describe("async worker tests",
 				result.passed();
 			}
 		};
+
 		// give it a bit, then kill it
 		setTimeout(function()
 		{
 			worker.terminate();
-		},500);
+		}, 500);
+
+		setTimeout(function()
+		{
+			alert("whutt");
+			result.failed("Test timed out.");
+		}, 2000);
 	}
 });

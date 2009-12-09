@@ -10,7 +10,7 @@ using Poco::StringTokenizer;
 namespace ti
 {
 	Clipboard::Clipboard() :
-		AccessorBoundObject("Clipboard")
+		KAccessorObject("UI.Clipboard")
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Clipboard.setText,since=0.7)
@@ -102,11 +102,11 @@ namespace ti
 		}
 	}
 
-	static AutoBlob ValueToBlob(SharedValue value)
+	static BlobRef ValueToBlob(KValueRef value)
 	{
 		if (value->IsObject())
 		{
-			AutoBlob blob = value->ToObject().cast<Blob>();
+			BlobRef blob = value->ToObject().cast<Blob>();
 			if (blob.isNull())
 				blob = new Blob("", 0);
 			return blob;
@@ -122,15 +122,15 @@ namespace ti
 		}
 	}
 
-	static std::vector<std::string> ValueToURIList(SharedValue value)
+	static std::vector<std::string> ValueToURIList(KValueRef value)
 	{
 		std::vector<std::string> uriList;
 		if (value->IsList())
 		{
-			SharedKList list(value->ToList());
+			KListRef list(value->ToList());
 			for (unsigned int i = 0; i < list->Size(); i++)
 			{
-				SharedValue element(list->At(i));
+				KValueRef element(list->At(i));
 				if (element->IsString())
 					uriList.push_back(element->ToString());
 			}
@@ -151,7 +151,7 @@ namespace ti
 		return uriList;
 	}
 
-	void Clipboard::_GetData(const ValueList& args, SharedValue result)
+	void Clipboard::_GetData(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("getData", "s");
 
@@ -183,7 +183,7 @@ namespace ti
 		}
 	}
 
-	void Clipboard::_SetData(const ValueList& args, SharedValue result)
+	void Clipboard::_SetData(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setData", "s s|o|l|0");
 
@@ -202,7 +202,7 @@ namespace ti
 		}
 		else if (type == IMAGE)
 		{
-			AutoBlob imageBlob(ValueToBlob(args.at(1)));
+			BlobRef imageBlob(ValueToBlob(args.at(1)));
 			this->SetImage(mimeType, imageBlob);
 		}
 		else
@@ -212,7 +212,7 @@ namespace ti
 		}
 	}
 
-	void Clipboard::_HasData(const ValueList& args, SharedValue result)
+	void Clipboard::_HasData(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("hasData", "?s");
 
@@ -226,7 +226,7 @@ namespace ti
 		result->SetBool(this->HasData(type));
 	}
 
-	void Clipboard::_ClearData(const ValueList& args, SharedValue result)
+	void Clipboard::_ClearData(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setData", "?s");
 
@@ -240,24 +240,24 @@ namespace ti
 		this->ClearData(type);
 	}
 
-	void Clipboard::_SetText(const ValueList& args, SharedValue result)
+	void Clipboard::_SetText(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setText", "s");
 		std::string newText(args.GetString(0, ""));
 		this->SetText(newText);
 	}
 
-	void Clipboard::_GetText(const ValueList& args, SharedValue result)
+	void Clipboard::_GetText(const ValueList& args, KValueRef result)
 	{
 		result->SetString(this->GetText());
 	}
 
-	void Clipboard::_ClearText(const ValueList& args, SharedValue result)
+	void Clipboard::_ClearText(const ValueList& args, KValueRef result)
 	{
 		this->ClearText();
 	}
 
-	void Clipboard::_HasText(const ValueList& args, SharedValue result)
+	void Clipboard::_HasText(const ValueList& args, KValueRef result)
 	{
 		result->SetBool(this->HasText());
 	}
@@ -327,12 +327,12 @@ namespace ti
 		return this->HasTextImpl();
 	}
 
-	AutoBlob Clipboard::GetImage(std::string& mimeType)
+	BlobRef Clipboard::GetImage(std::string& mimeType)
 	{
 		return this->GetImageImpl(mimeType);
 	}
 
-	void Clipboard::SetImage(std::string& mimeType, AutoBlob newImage)
+	void Clipboard::SetImage(std::string& mimeType, BlobRef newImage)
 	{
 		this->SetImageImpl(mimeType, newImage);
 	}
