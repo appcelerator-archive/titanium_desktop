@@ -123,28 +123,21 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewClose(
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewFocus(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewFocus() called");
-	return E_NOTIMPL;
+	window->Focus();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewUnfocus(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewUnfocus() called");
-	return E_NOTIMPL;
+	window->Unfocus();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::setStatusText(
 	/* [in] */ IWebView *sender,
 	/* [in] */ BSTR text)
 {
-	std::string s;
-
-	if(text)
-	{
-		s.append(_bstr_t(text));
-	}
-	logger->Debug("setStatusText() called '%s'", s.c_str());
 	return E_NOTIMPL;
 }
 
@@ -378,7 +371,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewReceivedFocus(
 {
 	window->FireEvent(Event::FOCUSED);
 	window->Focus(); // Focus the WebView and not the main window.
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewLostFocus(
@@ -386,7 +379,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewLostFocus(
 	/* [in] */ OLE_HANDLE loseFocusTo)
 {
 	window->FireEvent(Event::UNFOCUSED);
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::doDragDrop(

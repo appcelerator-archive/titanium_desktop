@@ -442,7 +442,8 @@ void Win32UserWindow::Unfocus()
 {
 	// SetFocus sends a WM_KILLFOCUS message to the window that has focus.
 	// By sending NULL, we basically turn off keystrokes to window that had focus.
-	if (GetFocus() == windowHandle)
+	HWND focusedWindow = GetFocus();
+	if (focusedWindow == windowHandle || ::IsChild(windowHandle, focusedWindow))
 	{
 		SetFocus(NULL);
 	}
