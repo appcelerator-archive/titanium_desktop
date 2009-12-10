@@ -197,7 +197,8 @@ namespace ti
 			virtual std::string GetURL() = 0;
 			virtual void SetURL(std::string &url) = 0;
 			virtual bool IsResizable() = 0;
-			virtual void SetResizable(bool resizable) = 0;
+			virtual void SetResizable(bool resizable);
+			virtual void SetResizableImpl(bool resizable) = 0;
 			virtual bool IsMaximizable() = 0;
 			virtual void SetMaximizable(bool maximizable) = 0;
 			virtual bool IsMinimizable() = 0;

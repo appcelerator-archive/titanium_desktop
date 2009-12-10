@@ -720,7 +720,7 @@ void Win32UserWindow::SetURL(std::string& url_)
 	SetFocus(viewWindowHandle);
 }
 
-void Win32UserWindow::SetResizable(bool resizable)
+void Win32UserWindow::SetResizableImpl(bool resizable)
 {
 	this->SetupDecorations();
 	this->SetupSize();

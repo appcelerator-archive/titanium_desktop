@@ -1250,11 +1250,15 @@ void UserWindow::_IsResizable(const kroll::ValueList& args, kroll::KValueRef res
 void UserWindow::_SetResizable(const kroll::ValueList& args, kroll::KValueRef result)
 {
 	args.VerifyException("setResizable", "b");
-	bool b = args.at(0)->ToBool();
-	this->config->SetResizable(b);
+	this->SetResizable(args.at(0)->ToBool());
+}
+
+void UserWindow::SetResizable(bool resizable)
+{
+	this->config->SetResizable(resizable);
 	if (this->active)
 	{
-		this->SetResizable(b);
+		this->SetResizableImpl(resizable);
 	}
 }
 

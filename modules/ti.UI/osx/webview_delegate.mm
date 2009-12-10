@@ -206,11 +206,10 @@
 {
 	std::map<WebFrame*, KObjectRef>::iterator iter =
 		frameToGlobalObject->find(frame);
-	if (iter == frameToGlobalObject->end()) {
-		return NULL;
-	} else {
+	if (iter == frameToGlobalObject->end())
+		return 0;
+	else
 		return iter->second;
-	}
 }
 
 - (void)deregisterGlobalObjectForFrame:(WebFrame *)frame
@@ -257,7 +256,7 @@
 	}
 
 	// fire load event
-	UserWindow *userWindow = [window userWindow];
+	UserWindow* userWindow = [window userWindow];
 	std::string url = [[[[[frame dataSource] request] URL] absoluteString] UTF8String];
 	userWindow->PageLoaded(global, url, context);
 
@@ -301,9 +300,9 @@
 
 - (WebView *)webView:(WebView *)sender createWebViewWithRequest:(NSURLRequest *)request windowFeatures:(NSDictionary *)features
 {
-	AutoUserWindow newWindow = 0;
-	NSString *url = [[request URL] absoluteString];
-	WindowConfig *config = new WindowConfig();
+	AutoUserWindow newWindow(0);
+	NSString* url = [[request URL] absoluteString];
+	WindowConfig* config = new WindowConfig();
 	
 	if ([url length] > 0)
 	{
@@ -338,9 +337,9 @@
 	{
 		config->SetHeight([(NSNumber*)height intValue]);
 	}
-	
+
 	newWindow = [window userWindow]->CreateWindow(config);
-	AutoPtr<OSXUserWindow> osxWindow = newWindow.cast<OSXUserWindow>();
+	AutoPtr<OSXUserWindow> osxWindow(newWindow.cast<OSXUserWindow>());
 	osxWindow->Open();
 	return [osxWindow->GetNative() webView];
 }
@@ -352,66 +351,53 @@
 
 - (void)webViewClose:(WebView *)wv 
 {
-	[[wv window] close];
-	WindowConfig *config = [window config];
-	config->SetVisible(NO);
-	
-	if (inspector)
-	{
-		[inspector webViewClosed];
-	}
+	[window userWindow]->Close();
 }
 
 - (void)webViewFocus:(WebView *)wv 
 {
-	[[wv window] makeKeyAndOrderFront:wv];
+	[window userWindow]->Focus();
 }
 
 - (void)webViewUnfocus:(WebView *)wv 
 {
-	if ([[wv window] isKeyWindow] || [[[wv window] attachedSheet] isKeyWindow]) 
-	{
-		[NSApp _cycleWindowsReversed:FALSE];
-	}
+	[window userWindow]->Unfocus();
 }
 
-- (NSResponder *)webViewFirstResponder:(WebView *)wv 
+- (NSResponder *)webViewFirstResponder:(WebView *)wv
 {
 	return [[wv window] firstResponder];
 }
 
-- (void)webView:(WebView *)wv makeFirstResponder:(NSResponder *)responder 
+- (void)webView:(WebView *)wv makeFirstResponder:(NSResponder *)responder
 {
 	[[wv window] makeFirstResponder:responder];
 }
 
-- (NSString *)webViewStatusText:(WebView *)wv 
+- (NSString *)webViewStatusText:(WebView *)wv
 {
 	return nil;
 }
 
-- (BOOL)webViewIsResizable:(WebView *)wv 
+- (BOOL)webViewIsResizable:(WebView *)wv
 {
-	WindowConfig *config = [window config];
-	return config->IsResizable();
+	return [window config]->IsResizable();
 }
 
-- (void)webView:(WebView *)wv setResizable:(BOOL)resizable; 
+- (void)webView:(WebView *)wv setResizable:(BOOL)resizable;
 {
-	WindowConfig *config = [window config];
-	config->SetResizable(resizable);
-	[[wv window] setShowsResizeIndicator:resizable];
+	[window userWindow]->SetResizable(resizable);
 }
 
 
-- (void)webView:(WebView *)wv setFrame:(NSRect)frame 
+- (void)webView:(WebView *)wv setFrame:(NSRect)frame
 {
 	[[wv window] setFrame:frame display:YES];
 }
 
 - (NSRect)webViewFrame:(WebView *)wv 
 {
-	NSWindow *w = [wv window];
+	NSWindow* w = [wv window];
 	return w == nil ? NSZeroRect : [w frame];
 }
 

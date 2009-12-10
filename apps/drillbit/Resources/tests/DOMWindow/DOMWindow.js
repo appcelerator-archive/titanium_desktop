@@ -24,10 +24,10 @@ describe("UI Window Tests",{
 					{
 						test.failed(e);
 					}
-				};	
+				};
 			});
 			timer = setTimeout(function(){
-				test.failed("open url timed out");
+				test.failed("Window open timed out.");
 			}, 3000);
 		};
 	},
@@ -144,6 +144,33 @@ describe("UI Window Tests",{
 			value_of(w.result).should_be('Hello');
 			value_of(w.a_value).should_be(42);
 		}, ["app://rel.html"]);
+	},
+	test_window_focus_as_async: function(test)
+	{
+		// Open window1.
+		w1 = Titanium.UI.createWindow("app://rel.html");
+		w1.addEventListener(Titanium.PAGE_INITIALIZED, function() {
+
+			//Open window2 so that window1 no longer has focus.
+			w1.addEventListener(w1.FOCUSED, function() {test.passed();});
+			w2 = Titanium.UI.createWindow("app://rel.html");
+			w2.addEventListener(Titanium.PAGE_INITIALIZED, 
+				function() { w1.domWindow.focus(); });
+			w2.open();
+		});
+		w1.open();
+		setTimeout(function() {test.failed("Didn't get focused message"); }, 4000);
+	},
+	test_window_unfocus_as_async: function(test)
+	{
+		// Open window1.
+		w1 = Titanium.UI.createWindow("app://rel.html");
+		w1.addEventListener(Titanium.UNFOCUSED, function() {test.passed();});
+		w1.open();
+		setTimeout(function() {
+			w1.domWindow.blur();
+		}, 1000);
+		setTimeout(function() {test.failed("Didn't get unfocused message"); }, 4000);
 	},
 	//test_data_uri_non_base64_encoded_as_async: function(test)
 	//{

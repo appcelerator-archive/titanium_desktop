@@ -1048,7 +1048,7 @@ namespace ti
 		return this->config->IsResizable();
 	}
 
-	void GtkUserWindow::SetResizable(bool resizable)
+	void GtkUserWindow::SetResizableImpl(bool resizable)
 	{
 		if (this->gtkWindow != NULL)
 		{

@@ -92,7 +92,7 @@ namespace ti
 			std::string GetURL();
 			void SetURL(std::string& url);
 			bool IsResizable();
-			void SetResizable(bool resizable);
+			void SetResizableImpl(bool resizable);
 			bool IsMaximizable();
 			void SetMaximizable(bool maximizable);
 			bool IsMinimizable();

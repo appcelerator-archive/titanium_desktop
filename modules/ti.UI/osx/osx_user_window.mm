@@ -126,11 +126,14 @@ namespace ti
 	void OSXUserWindow::Unfocus()
 	{
 		// Cocoa doesn't really have a concept of blurring a window, but
-		// we can send the window to the back of the window list.
+		// we can send the window to the back of the window list. We need
+		// to fire an unfocused event manually though, because we are still
+		// the key window.
+		// TODO: Improve this by making Finder the key window.
 		if ( nativeWindow && [nativeWindow isKeyWindow])
 		{
 			[nativeWindow orderBack:nil];
-			this->Unfocused();
+			[nativeWindow windowDidResignKey:nil];
 		}
 	}
 
@@ -555,7 +558,7 @@ namespace ti
 		return this->config->IsResizable();
 	}
 
-	void OSXUserWindow::SetResizable(bool resizable)
+	void OSXUserWindow::SetResizableImpl(bool resizable)
 	{
 		if (nativeWindow != nil)
 		{

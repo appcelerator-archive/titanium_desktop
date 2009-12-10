@@ -57,7 +57,7 @@ namespace ti
 		void SetBounds(Bounds bounds);
 		void SetTitleImpl(std::string& title);
 		void SetURL(std::string& url);
-		void SetResizable(bool resizable);
+		void SetResizableImpl(bool resizable);
 		void SetMaximizable(bool maximizable);
 		void SetMinimizable(bool minimizable);
 		void SetCloseable(bool closeable);
