@@ -24,7 +24,8 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 	}
 
 	std::string script = "\"" + cmdline + "\" &";
-	system(script.c_str());
+	if (system(script.c_str()) == -1)
+		throw ValueException::FromString("Failed to start new process.");
 
 	host->Exit(0);
 }
