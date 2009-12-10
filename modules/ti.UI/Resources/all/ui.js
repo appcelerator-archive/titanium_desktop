@@ -136,7 +136,7 @@
 		obj[originalMethodName] = obj[methodName];
 		var fn = function()
 		{
-			newMethod.call(arguments);
+			newMethod.apply(null, arguments);
 			obj[originalMethodName].apply(obj, arguments);
 		};
 		obj[methodName] = fn;
