@@ -7,7 +7,6 @@
 #include "../ui_module.h"
 #include <iostream>
 #include <Poco/Process.h>
-#define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
 #define TRANSPARENCY_MAJOR_VERSION 2
 #define TRANSPARENCY_MINOR_VERSION 16
 extern const guint gtk_major_version;
@@ -96,8 +95,6 @@ namespace ti
 		if (this->gtkWindow == NULL)
 		{
 			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
-			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
-
 			g_object_connect(G_OBJECT(webView),
 				"signal::window-object-cleared",
 				G_CALLBACK(WindowObjectClearedCallback), this,
@@ -126,8 +123,8 @@ namespace ti
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), 
 				"enable-developer-extras", TRUE,
-				//"enable-universal-access-from-file-uris", TRUE,
-				//"javascript-can-open-windows-automatically", TRUE,
+				"enable-universal-access-from-file-uris", TRUE,
+				"javascript-can-open-windows-automatically", TRUE,
 				NULL);
 			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
 

@@ -49,7 +49,7 @@ namespace ti
 			frame = NSMakeRect(0, 0, 10, 10);
 
 		nativeWindow = [[NativeWindow alloc]
-			initWithContentRect: frame
+			initWithContentRect:frame
 			styleMask: mask
 			backing: NSBackingStoreBuffered
 			defer: false];
