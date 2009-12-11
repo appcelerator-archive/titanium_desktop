@@ -60,6 +60,7 @@ namespace ti
 		const gchar* message, const gchar* defaultPromptResponse,
 		char** promptResponse);
 	static inline bool GtkVersionSupportsWebViewTransparency();
+	//static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
@@ -118,13 +119,15 @@ namespace ti
 				G_CALLBACK(ScriptConfirmCallback), this->gtkWindow,
 				"signal::script-prompt",
 				G_CALLBACK(ScriptPromptCallback), this->gtkWindow,
+				//"signal::close-web-view",
+				//G_CALLBACK(CloseWebViewCallback), this,
 				NULL);
 
 			WebKitWebSettings* settings = webkit_web_settings_new();
 			g_object_set(G_OBJECT(settings), 
 				"enable-developer-extras", TRUE,
-				"enable-universal-access-from-file-uris", TRUE,
-				"javascript-can-open-windows-automatically", TRUE,
+				//"enable-universal-access-from-file-uris", TRUE,
+				//"javascript-can-open-windows-automatically", TRUE,
 				NULL);
 			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
 
@@ -262,14 +265,14 @@ namespace ti
 			// Destroy the GTK bits, if we have them first, because
 			// we need to assume the GTK window is gone for  everything
 			// below (this method might be called by DeleteCallback)
-			if (this->gtkWindow != NULL)
+			if (this->gtkWindow)
 			{
 				// We don't want the destroy signal handler to fire after now.
 				g_signal_handler_disconnect(this->gtkWindow, this->deleteCallbackId);
 				gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
 
-				this->gtkWindow = NULL;
-				this->webView = NULL;
+				this->gtkWindow = 0;
+				this->webView = 0;
 			}
 			this->RemoveOldMenu(); // Cleanup old menu
 
@@ -722,8 +725,7 @@ namespace ti
 		return WEBKIT_WEB_VIEW(newWebView);
 	}
 
-	static gboolean InspectorShowWindowCallback(
-		WebKitWebInspector* inspector,
+	static gboolean InspectorShowWindowCallback(WebKitWebInspector* inspector,
 		gpointer data)
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
@@ -738,6 +740,13 @@ namespace ti
 			return FALSE;
 		}
 	}
+
+	//static gboolean CloseWebViewCallback(WebKitWebView*, gpointer data)
+	//{
+	//	GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+	//	userWindow->Close();
+	//	return TRUE;
+	//}
 
 	static inline bool GtkVersionSupportsWebViewTransparency()
 	{

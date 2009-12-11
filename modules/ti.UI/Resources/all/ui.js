@@ -185,7 +185,14 @@
 		}
 		return w;
 	};
-	
+
+	// This is a work-around for Linux, until we can update the/ version of WebKit
+	// we are shipping to one with the proper delegate method.
+	if (Titanium.platform == "linux")
+	{
+		window.close = Titanium.UI.currentWindow.close;
+	}
+
 	//
 	// UI Dialog class
 	//
