@@ -1001,7 +1001,7 @@ namespace ti
 		return b;
 	}
 	
-	void GtkUserWindow::SetBounds(Bounds b)
+	void GtkUserWindow::SetBoundsImpl(Bounds b)
 	{
 		this->SetupPosition();
 		this->SetupSize();

@@ -86,7 +86,7 @@ namespace ti
 			double GetMinHeight();
 			void SetMinHeight(double height);
 			Bounds GetBounds();
-			void SetBounds(Bounds bounds);
+			void SetBoundsImpl(Bounds bounds);
 			std::string GetTitle();
 			void SetTitleImpl(std::string& title);
 			std::string GetURL();

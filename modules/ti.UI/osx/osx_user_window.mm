@@ -504,7 +504,7 @@ namespace ti
 		return b;
 	}
 
-	void OSXUserWindow::SetBounds(Bounds bounds)
+	void OSXUserWindow::SetBoundsImpl(Bounds bounds)
 	{
 		if (nativeWindow)
 		{
