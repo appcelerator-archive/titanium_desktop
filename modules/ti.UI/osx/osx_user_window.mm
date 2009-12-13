@@ -39,36 +39,32 @@ namespace ti
 	void OSXUserWindow::Open()
 	{
 		unsigned int mask = toWindowMask(config);
-		NSRect mainFrame = [[NSScreen mainScreen] frame];
-		NSRect frame = mainFrame;
-
-		// Set up the size and position of the
-		// window using our Set<...> methods so
-		// we avoid duplicating the logic here.
+		NSRect frame;
 		if (!config->IsFullscreen())
-			frame = NSMakeRect(0, 0, 10, 10);
+		{
+			frame = CalculateWindowFrame(
+				config->GetX(), config->GetY(),
+				config->GetWidth(), config->GetHeight());
+		}
+		else
+		{
+			frame = [[NSScreen mainScreen] frame];
+		}
 
 		nativeWindow = [[NativeWindow alloc]
 			initWithContentRect:frame
-			styleMask: mask
-			backing: NSBackingStoreBuffered
-			defer: false];
-
-		AutoPtr<OSXUserWindow>* shuw = new AutoPtr<OSXUserWindow>(this, true);
-		[nativeWindow setUserWindow:shuw];
+			styleMask:mask
+			backing:NSBackingStoreBuffered
+			defer:false];
+		[nativeWindow setUserWindow:new AutoPtr<OSXUserWindow>(this, true)];
 
 		if (!config->IsFullscreen())
 		{
-			NSRect rect = CalculateWindowFrame(
-				config->GetX(), config->GetY(),
-				config->GetWidth(), config->GetHeight());
-			[nativeWindow setFrame:rect display:NO animate:NO];
-
 			this->ReconfigureWindowConstraints();
 			if (!config->IsResizable())
 			{
-				[nativeWindow setMinSize:rect.size];
-				[nativeWindow setMaxSize:rect.size];
+				[nativeWindow setMinSize:frame.size];
+				[nativeWindow setMaxSize:frame.size];
 			}
 		}
 
