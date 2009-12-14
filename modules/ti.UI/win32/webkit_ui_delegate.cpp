@@ -408,7 +408,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::exceededDatabaseQuota(
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::paint(
+HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::newBackingStore(
 	/* [in] */ IWebView *webView,
 	/* [in] */ OLE_HANDLE bitmapHandle)
 {

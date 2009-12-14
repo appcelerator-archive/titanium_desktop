@@ -299,7 +299,7 @@ public:
 		/* [in] */ HDC hDC,
 		/* [in] */ RECT rect) { return E_NOTIMPL; }
 
-	virtual HRESULT STDMETHODCALLTYPE paint(
+	virtual HRESULT STDMETHODCALLTYPE newBackingStore(
 		/* [in] */ IWebView *webView,
 		/* [in] */ OLE_HANDLE bitmap);
 
