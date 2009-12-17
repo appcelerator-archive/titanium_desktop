@@ -11,16 +11,23 @@ namespace ti {
 
 	class Win32PopupDialog {
 	public:
-		Win32PopupDialog(HWND _windowHandle);
+		Win32PopupDialog(HWND windowHandle);
 		virtual ~Win32PopupDialog();
 
-		void SetShowInputText(bool flag) { this->showInputText = flag; }
-		void SetTitle(std::string _title) { this->title = _title; }
-		void SetMessage(std::string _message) { this->message = _message; }
-		void SetInputText(std::string _inputText) { this->inputText = _inputText; }
+		void SetShowInputText(bool showInputText)
+		{
+			this->showInputText = showInputText;
+		}
+		void SetTitle(std::string title) { this->title = title; }
+		void SetMessage(std::string message) { this->message = message; }
+		void SetInputText(std::string inputText) { this->inputText = inputText; }
 		std::string GetInputText() { return this->inputText; }
-		void SetShowCancelButton(bool flag) { this->showCancelButton = flag; }
-		int ParseMessage(std::string stringMsg, std::string stringSearch);
+		void SetShowCancelButton(bool showCancelButton)
+		{
+			this->showCancelButton = showCancelButton;
+		}
+		
+		int CountMatches(std::string& message, const char *token);
 
 		int Show();
 	private:
