@@ -568,7 +568,10 @@ void Win32UserWindow::Unminimize()
 
 bool Win32UserWindow::IsMinimized()
 {
-	return IsIconic(windowHandle) != 0;
+	if (!requiresDisplay)
+		return IsIconic(windowHandle) != 0;
+	else
+		return config->IsMinimized();
 }
 
 void Win32UserWindow::Maximize()
@@ -583,7 +586,10 @@ void Win32UserWindow::Unmaximize()
 
 bool Win32UserWindow::IsMaximized()
 {
-	return IsZoomed(windowHandle) != 0;
+	if (!requiresDisplay)
+		return IsZoomed(windowHandle) != 0;
+	else
+		return config->IsMaximized();
 }
 
 void Win32UserWindow::Focus()
@@ -618,10 +624,11 @@ void Win32UserWindow::Open()
 		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
 			(LPARAM) defaultIcon);
 	}
-
+	
 	UserWindow::Open();
 	this->SetURL(this->config->GetURL());
-
+	this->SetupFrame();
+	
 	FireEvent(Event::OPENED);
 }
 
@@ -675,7 +682,8 @@ double Win32UserWindow::GetWidth()
 
 void Win32UserWindow::SetWidth(double width)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetHeight()
@@ -685,7 +693,8 @@ double Win32UserWindow::GetHeight()
 
 void Win32UserWindow::SetHeight(double height)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetMaxWidth()
@@ -695,7 +704,8 @@ double Win32UserWindow::GetMaxWidth()
 
 void Win32UserWindow::SetMaxWidth(double width)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetMinWidth()
@@ -705,7 +715,8 @@ double Win32UserWindow::GetMinWidth()
 
 void Win32UserWindow::SetMinWidth(double width)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetMaxHeight()
@@ -715,7 +726,8 @@ double Win32UserWindow::GetMaxHeight()
 
 void Win32UserWindow::SetMaxHeight(double height)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 double Win32UserWindow::GetMinHeight()
@@ -725,7 +737,8 @@ double Win32UserWindow::GetMinHeight()
 
 void Win32UserWindow::SetMinHeight(double height)
 {
-	this->SetupSize();
+	//this->SetupSize();
+	this->SetupFrame();
 }
 
 Bounds Win32UserWindow::GetBounds()
@@ -738,8 +751,10 @@ Bounds Win32UserWindow::GetBounds()
 
 	bounds.x = windowRect.left;
 	bounds.y = windowRect.top;
-	bounds.width = rect.right - rect.left;
-	bounds.height = rect.bottom - rect.top;
+	bounds.width = windowRect.right - windowRect.left;
+	bounds.height = windowRect.bottom - windowRect.top;
+	//bounds.width = rect.right - rect.left;
+	//bounds.height = rect.bottom - rect.top;
 	
 	return bounds;
 }
@@ -795,6 +810,7 @@ void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 		this->chromeHeight = 0;
 	}
 
+	logger->Debug("move window: %f,%f %f x %f", bounds.x, bounds.y, bounds.width, bounds.height);
 	MoveWindow(windowHandle, bounds.x, bounds.y, bounds.width, bounds.height, TRUE);
 }
 
@@ -1327,7 +1343,7 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	int minHeight = (int) GetMinHeight();
 
 	// offset the size of the window chrome
-	if (IsUsingChrome()) 
+	/*if (IsUsingChrome()) 
 	{
 		if (maxWidth > -1)
 			maxWidth += chromeWidth;
@@ -1338,7 +1354,7 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 			maxHeight += chromeHeight;
 		if (minHeight > -1)
 			minHeight += chromeHeight;
-	}
+	}*/
 
 	minMaxInfo->ptMaxTrackSize.x = maxWidth == -1 ? INT_MAX : maxWidth;
 	minMaxInfo->ptMinTrackSize.x = minWidth == -1 ? minXTrackSize : minWidth;

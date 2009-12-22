@@ -244,6 +244,18 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setMinHeight", &UserWindow::_SetMinHeight);
 
 	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getChromeWidth,since=0.8) Returns a window's chrome width
+	 * @tiresult[int] The width of this window's chrome. If this window has no chrome, this returns 0.
+	 */
+	this->SetMethod("getChromeWidth", &UserWindow::_GetChromeWidth);
+	
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.getChromeHeight,since=0.8) Returns a window's chrome height
+	 * @tiresult[int] The height of this window's chrome. If this window has no chrome, this returns 0.
+	 */
+	this->SetMethod("getChromeHeight", &UserWindow::_GetChromeHeight);
+	
+	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getBounds,since=0.2) Returns the window bounds
 	 * @tiresult(for=UI.UserWindow.getBounds,type=object) an object containing the value for the window bounds
 	 */
@@ -1130,6 +1142,38 @@ void UserWindow::_SetMaxHeight(const kroll::ValueList& args, kroll::KValueRef re
 			this->SetHeight(mh);
 		}
 	}
+}
+
+void UserWindow::_GetChromeWidth(const kroll::ValueList& args, kroll::KValueRef result)
+{
+	if (!this->config->IsUsingChrome())
+	{
+		result->SetDouble(0);
+		return;
+	}
+	
+	result->SetDouble(this->GetChromeWidth());
+}
+
+void UserWindow::_GetChromeHeight(const kroll::ValueList& args, kroll::KValueRef result)
+{
+	if (!this->config->IsUsingChrome())
+	{
+		result->SetDouble(0);
+		return;
+	}
+	
+	result->SetDouble(this->GetChromeHeight());	
+}
+
+double UserWindow::GetChromeWidth()
+{
+	return 0;
+}
+
+double UserWindow::GetChromeHeight()
+{
+	return 0;
 }
 
 void UserWindow::_GetBounds(const kroll::ValueList& args, kroll::KValueRef result)

@@ -103,16 +103,16 @@ describe("UI Module Tests",{
 
 		w.setMinWidth(-1);
 		w.setMinHeight(-1);
-		w.setHeight(100);
-		w.setWidth(130);
+		w.setHeight(135);
+		w.setWidth(135);
 
 		w.open();
 		
 		// for some reason, the lowest value i can get out of win32 is 116px width.. 
 		// webkit might be constraining the minimum width of it's content area, not sure
 		// for now use 125 instead of 100 for width
-		value_of(w.getHeight()).should_be(100);
-		value_of(w.getWidth()).should_be(130);
+		value_of(w.getHeight()).should_be(135);
+		value_of(w.getWidth()).should_be(135);
 		
 
 		w.setMinHeight(500);
@@ -149,22 +149,22 @@ describe("UI Module Tests",{
 		w.setHeight(0);
 		value_of(w.getHeight()).should_be(100);
 		w.open();
-		w.setHeight(100);
-		value_of(w.getHeight()).should_be(100);
+		w.setHeight(135);
+		value_of(w.getHeight()).should_be(135);
 		w.setHeight(200);
 		value_of(w.getHeight()).should_be(200);
-		w.setHeight(100);
-		value_of(w.getHeight()).should_be(100);
+		w.setHeight(135);
+		value_of(w.getHeight()).should_be(135);
 		w.setHeight(10000);
 		value_of(w.getHeight()).should_be(10000);
-		w.setHeight(100);
-		value_of(w.getHeight()).should_be(100);
+		w.setHeight(135);
+		value_of(w.getHeight()).should_be(135);
 		w.setHeight(-1);
-		value_of(w.getHeight()).should_be(100);
+		value_of(w.getHeight()).should_be(135);
 		w.setHeight(-666);
-		value_of(w.getHeight()).should_be(100);
+		value_of(w.getHeight()).should_be(135);
 		w.setHeight(0);
-		value_of(w.getHeight()).should_be(100);
+		value_of(w.getHeight()).should_be(135);
 	},
 	test_window_set_width: function()
 	{
@@ -184,22 +184,22 @@ describe("UI Module Tests",{
 		w.setWidth(0);
 		value_of(w.getWidth()).should_be(100);
 		w.open()
-		w.setWidth(130);
-		value_of(w.getWidth()).should_be(130);
+		w.setWidth(135);
+		value_of(w.getWidth()).should_be(135);
 		w.setWidth(200);
 		value_of(w.getWidth()).should_be(200);
-		w.setWidth(130);
-		value_of(w.getWidth()).should_be(130);
+		w.setWidth(135);
+		value_of(w.getWidth()).should_be(135);
 		w.setWidth(10000);
 		value_of(w.getWidth()).should_be(10000);
-		w.setWidth(130);
-		value_of(w.getWidth()).should_be(130);
+		w.setWidth(135);
+		value_of(w.getWidth()).should_be(135);
 		w.setWidth(-1);
-		value_of(w.getWidth()).should_be(130);
+		value_of(w.getWidth()).should_be(135);
 		w.setWidth(-666);
-		value_of(w.getWidth()).should_be(130);
+		value_of(w.getWidth()).should_be(135);
 		w.setWidth(0);
-		value_of(w.getWidth()).should_be(130);
+		value_of(w.getWidth()).should_be(135);
 	},
 	test_window_set_closeable: function()
 	{
@@ -253,7 +253,7 @@ describe("UI Module Tests",{
 		w.setUsingChrome(true);
 		value_of(w.isUsingChrome()).should_be_true();
 	},
-	test_window_visibility: function()
+	test_window_visibility_as_async: function(test)
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow({url: 'app://blahblah.html', visible: false});
 		value_of(w.isVisible()).should_be_false();
@@ -265,16 +265,35 @@ describe("UI Module Tests",{
 		value_of(w.isVisible()).should_be_false();
 		w.setVisible(true);
 		value_of(w.isVisible()).should_be_false();
+		
+		var timer = 0;
+		// may not be visible right away, we need to add an event listener
+		// for PAGE_LOADED
+		w.addEventListener(Titanium.PAGE_LOADED, function(event)
+		{
+			clearTimeout(timer);
+			try
+			{
+				value_of(w.isVisible()).should_be_true();
+				w.setVisible(false);
+				value_of(w.isVisible()).should_be_false();
+		
+				w.show();
+				value_of(w.isVisible()).should_be_true();
+				w.hide();
+				value_of(w.isVisible()).should_be_false();
+				test.passed();
+			}
+			catch (e)
+			{
+				test.failed(e);	
+			}
+		});
+		
+		timer = setTimeout(function() {
+			test.failed("timed out waiting for page to initialize");
+		}, 10000);
 		w.open();
-		value_of(w.isVisible()).should_be_true();
-
-		w.setVisible(false);
-		value_of(w.isVisible()).should_be_false();
-
-		w.show();
-		value_of(w.isVisible()).should_be_true();
-		w.hide();
-		value_of(w.isVisible()).should_be_false();
 	},
 	test_window_location: function()
 	{

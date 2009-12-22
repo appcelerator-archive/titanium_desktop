@@ -195,11 +195,12 @@ describe("UI Module Tests",{
 	test_window_events_as_async: function(callback)
 	{
 		var eventTests = [];
-		var addEventTest = function(eventTrigger, eventsToVerify)
+		var addEventTest = function(eventTrigger, eventsToVerify, timeout)
 		{
 			eventTests.push({ 
 				'trigger': eventTrigger,
-				'events': eventsToVerify
+				'events': eventsToVerify,
+				'timeout': timeout == null ? 250 : timeout
 			});
 		}
 
@@ -209,11 +210,11 @@ describe("UI Module Tests",{
 			observedEvents[event.getType()] = "Yakko";
 		}
 
-		var w = Titanium.UI.getCurrentWindow().createWindow('http://www.google.com');
+		var w = Titanium.UI.getCurrentWindow().createWindow('app://test.html');
 		var listenerID = w.addEventListener(eventListener);
 		value_of(listenerID).should_be_number();
 
-		addEventTest(function() { w.open(); }, [Titanium.OPEN, Titanium.OPENED]);
+		addEventTest(function() { w.open(); }, [Titanium.OPEN, Titanium.OPENED, Titanium.PAGE_LOADED], 2000);
 		addEventTest(function() { w.setVisible(false); }, [Titanium.HIDDEN]);
 		addEventTest(function() { w.setVisible(true); }, [Titanium.SHOWN]);
 		addEventTest(function() { w.setFullscreen(true); }, [Titanium.FULLSCREENED]);
@@ -225,7 +226,7 @@ describe("UI Module Tests",{
 		addEventTest(function() {var b = w.getBounds(); w.setWidth(b.width*2); }, [Titanium.RESIZED]);
 		addEventTest(function() {var b = w.getBounds(); w.setHeight(b.height+1); }, [Titanium.RESIZED]);
 		addEventTest(function() {w.close();}, [Titanium.CLOSE, Titanium.CLOSED]);
-
+		
 		var runNextTest = function() {
 			if (eventTests.length <= 0)
 			{
@@ -244,7 +245,7 @@ describe("UI Module Tests",{
 					}
 				}
 				runNextTest();
-			}, 250);
+			}, nextTest.timeout);
 			observedEvents = {};
 			nextTest.trigger();
 		}
