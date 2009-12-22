@@ -96,8 +96,6 @@ namespace ti
 			void _SetMaxHeight(const kroll::ValueList&, kroll::KValueRef);
 			void _GetMinHeight(const kroll::ValueList&, kroll::KValueRef);
 			void _SetMinHeight(const kroll::ValueList&, kroll::KValueRef);
-			void _GetChromeHeight(const kroll::ValueList&, kroll::KValueRef);
-			void _GetChromeWidth(const kroll::ValueList&, kroll::KValueRef);
 			void _GetBounds(const kroll::ValueList&, kroll::KValueRef);
 			void _SetBounds(const kroll::ValueList&, kroll::KValueRef);
 			void _GetTitle(const kroll::ValueList&, kroll::KValueRef);
@@ -190,8 +188,6 @@ namespace ti
 			virtual void SetMaxHeight(double height) = 0;
 			virtual double GetMinHeight() = 0;
 			virtual void SetMinHeight(double height) = 0;
-			virtual double GetChromeWidth();
-			virtual double GetChromeHeight();
 			virtual Bounds GetBounds() = 0;
 			void SetBounds(Bounds bounds);
 			virtual void SetBoundsImpl(Bounds bounds) = 0;
