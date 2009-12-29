@@ -2,29 +2,30 @@ var notification_windows = 1;
 
 function TitaniumNotification(window)
 {
-	var width = 300, height = 80, notificationTimeout = 3000;
-	if (Titanium.platform == "win32") {
-		height = 80;  
-	}
+	var self = this;
+	var width = 300;
+	var height = 80;
+	var notificationTimeout = 3000;
 	var showing = false;
-	var myid = 'notification_'+(notification_windows++);
-	var transparency = .99;
-	
-	var mywindow = Titanium.UI.mainWindow.createWindow({
+	var title = '';
+	var message = '';
+	var icon = '';
+	var callback = null;
+	var hideTimer = null;
+
+	var mywindow = Titanium.UI.mainWindow.createWindow(
+	{
 		width:width,
 		height:height,
-		transparency:transparency,
+		transparentBackground:true,
 		usingChrome:false,
 		toolWindow:true,
-		id:myid,
+		id:'notification_' + (notification_windows++),
 		visible:false,
 		topMost:true,
 		url:'app://blank'
 	});
-	var self = this;
-	var title = '', message = '', icon = '';
-	var callback = null;
-	var hideTimer = null;
+	mywindow.open();
 
 	/**
 	 * @tiapi(method=True,name=Notification.Notification.setTitle,since=0.2)
@@ -112,10 +113,12 @@ function TitaniumNotification(window)
 			self.hide();
 		};
 
-		mywindow.setTransparency(.99);
 		mywindow.callback = notificationClicked;
-			mywindow.setURL('ti://tinotification/tinotification.html?title='+encodeURIComponent(title)+'&message='+encodeURIComponent(message)+'&icon='+encodeURIComponent(icon));
-		mywindow.open();
+		mywindow.setURL('ti://tinotification/tinotification.html?'
+		 + 'title=' + encodeURIComponent(title)
+		 + '&message=' + encodeURIComponent(message)
+		 + '&icon=' + encodeURIComponent(icon));
+
 		mywindow.show();
 		if (autohide)
 		{
