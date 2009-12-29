@@ -802,7 +802,6 @@ void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 		this->chromeHeight = 0;
 	}
 
-	logger->Debug("move window: %f,%f %f x %f", bounds.x, bounds.y, bounds.width, bounds.height);
 	MoveWindow(windowHandle, bounds.x, bounds.y, bounds.width, bounds.height, TRUE);
 }
 
@@ -1325,19 +1324,18 @@ KListRef Win32UserWindow::SelectDirectory(
 
 void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 {
-	if (!minMaxInfo) return;
-	
-	static int minYTrackSize = GetSystemMetrics(SM_CXMINTRACK);
-	static int minXTrackSize = GetSystemMetrics(SM_CYMINTRACK);
+	if (!minMaxInfo)
+		return;
+
 	int maxWidth = (int) GetMaxWidth();
 	int minWidth = (int) GetMinWidth();
 	int maxHeight = (int) GetMaxHeight();
 	int minHeight = (int) GetMinHeight();
 
 	minMaxInfo->ptMaxTrackSize.x = maxWidth == -1 ? INT_MAX : maxWidth;
-	minMaxInfo->ptMinTrackSize.x = minWidth == -1 ? minXTrackSize : minWidth;
+	minMaxInfo->ptMinTrackSize.x = minWidth == -1 ? 0 : minWidth;
 	minMaxInfo->ptMaxTrackSize.y = maxHeight == -1 ? INT_MAX : maxHeight;
-	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? minYTrackSize : minHeight;
+	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? 0 : minHeight;
 }
 
 /*static*/
