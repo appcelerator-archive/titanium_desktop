@@ -10,18 +10,20 @@ namespace ti
 	static unsigned int toWindowMask(WindowConfig *config)
 	{
 		unsigned int mask = 0;
-		if (config->IsTexturedBackground())
-		{
+		if (!config->HasTransparentBackground() && config->IsTexturedBackground())
 			mask |= NSTexturedBackgroundWindowMask;
-		}
+
 		if (!config->IsUsingChrome() || config->IsFullscreen())
 		{
-			return mask | NSBorderlessWindowMask;
+			mask |= NSBorderlessWindowMask;
 		}
 		else
 		{
-			return mask | NSTitledWindowMask | NSClosableWindowMask | NSResizableWindowMask | NSMiniaturizableWindowMask;
+			mask |= NSTitledWindowMask | NSClosableWindowMask |
+				NSResizableWindowMask | NSMiniaturizableWindowMask;
 		}
+
+		return mask;
 	}
 
 	OSXUserWindow::OSXUserWindow(WindowConfig* config, AutoUserWindow& parent) :
