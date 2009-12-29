@@ -386,6 +386,19 @@ void Win32UserWindow::InitWebKit()
 		HandleHResultError("Error getting WebView main frame", hr);
 }
 
+static void GetChromeSize(Bounds& chromeSize, DWORD windowStyle)
+{
+	RECT rect;
+	rect.left = rect.top = 0;
+	rect.bottom = rect.right = 100;
+
+	// Don't take into account the menu size (last argument to AdjustWindowRect)
+	// when getting the chrome size. This matches the behavior on Linux.
+	AdjustWindowRect(&rect, windowStyle, 0);
+	chromeSize.width = rect.right - rect.left - 100;
+	chromeSize.height = rect.bottom - rect.top - 100;
+}
+
 Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	UserWindow(config, parent),
 	win32Host(Win32Host::Win32Instance()),
@@ -394,8 +407,6 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	policyDelegate(0),
 	resourceLoadDelegate(0),
 	restoreStyles(0),
-	chromeWidth(0),
-	chromeHeight(0),
 	windowHandle(0),
 	viewWindowHandle(0),
 	webkitBitmap(0),
@@ -534,7 +545,6 @@ void Win32UserWindow::Show()
 		this->requiresDisplay = false;
 
 		// Stuff to do when we want a show to happen.
-		this->SetupFrame();
 		this->SetupState();
 		this->SetTopMost(config->IsTopMost() && config->IsVisible());
 		this->ResizeSubViews();
@@ -737,17 +747,18 @@ void Win32UserWindow::SetMinHeight(double height)
 
 Bounds Win32UserWindow::GetBounds()
 {
-	Bounds bounds;
-
-	RECT rect, windowRect;
+	// We need to use window rectangle to get the position, since we
+	// position independent of chrome and the client rectange for the size
+	// since the size is adjusted for chrome.
+	RECT clientRect, windowRect;
+	GetClientRect(windowHandle, &clientRect);
 	GetWindowRect(windowHandle, &windowRect);
-	GetClientRect(windowHandle, &rect);
 
+	Bounds bounds;
 	bounds.x = windowRect.left;
 	bounds.y = windowRect.top;
-	bounds.width = windowRect.right - windowRect.left;
-	bounds.height = windowRect.bottom - windowRect.top;
-	
+	bounds.width = clientRect.right - clientRect.left;
+	bounds.height = clientRect.bottom - clientRect.top;
 	return bounds;
 }
 
@@ -788,18 +799,11 @@ void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 	boundsRect.right = bounds.x + bounds.width;
 	boundsRect.top = bounds.y;
 	boundsRect.bottom = bounds.y + bounds.height;
-	
+
 	if (this->config->IsUsingChrome())
 	{
-		AdjustWindowRect(&boundsRect, GetWindowLong(windowHandle, GWL_STYLE),
-			!menu.isNull());
-		this->chromeWidth = boundsRect.right - boundsRect.left - (int)bounds.width;
-		this->chromeHeight = boundsRect.bottom - boundsRect.top - (int)bounds.height;
-	}
-	else
-	{
-		this->chromeWidth = 0;
-		this->chromeHeight = 0;
+		bounds.width += this->chromeSize.width;
+		bounds.height += this->chromeSize.height;
 	}
 
 	MoveWindow(windowHandle, bounds.x, bounds.y, bounds.width, bounds.height, TRUE);
@@ -857,7 +861,6 @@ void Win32UserWindow::SetURL(std::string& url_)
 void Win32UserWindow::SetResizableImpl(bool resizable)
 {
 	this->SetupDecorations();
-	this->SetupSize();
 }
 
 void Win32UserWindow::SetMaximizable(bool maximizable)
@@ -993,6 +996,7 @@ void Win32UserWindow::SetupDecorations()
 	SetFlag(windowStyle, WS_MINIMIZEBOX, config->IsMinimizable());
 
 	SetWindowLong(this->windowHandle, GWL_STYLE, windowStyle);
+	GetChromeSize(this->chromeSize, windowStyle);
 
 	// If the window is visible and the first frame load has completed
 	// then we need to hide and show the window so that the decorations
@@ -1099,14 +1103,6 @@ void Win32UserWindow::SetTopMost(bool topmost)
 		SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, 0, 0,
 			SWP_NOMOVE | SWP_NOSIZE);
 	}
-}
-
-void Win32UserWindow::SetupSize()
-{
-	Bounds b = GetBounds();
-	b.width = this->config->GetWidth();
-	b.height = this->config->GetHeight();
-	this->SetBounds(b);
 }
 
 void Win32UserWindow::ShowInspector(bool console)
@@ -1336,6 +1332,20 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	minMaxInfo->ptMinTrackSize.x = minWidth == -1 ? 0 : minWidth;
 	minMaxInfo->ptMaxTrackSize.y = maxHeight == -1 ? INT_MAX : maxHeight;
 	minMaxInfo->ptMinTrackSize.y = minHeight == -1 ? 0 : minHeight;
+
+	// We want the maximum and minimum size of the window to apply to only
+	// the client area of the window. The chrome size might change radically,
+	// but this will allow developers to set min/max sizes independent of that.
+	if (this->config->IsUsingChrome())
+	{
+		if (minMaxInfo->ptMaxTrackSize.x != INT_MAX)
+			minMaxInfo->ptMaxTrackSize.x += this->chromeSize.width;
+		if (minMaxInfo->ptMaxTrackSize.y != INT_MAX)
+			minMaxInfo->ptMaxTrackSize.y += this->chromeSize.height;
+
+		minMaxInfo->ptMinTrackSize.x += this->chromeSize.width;
+		minMaxInfo->ptMinTrackSize.y += this->chromeSize.height;
+	}
 }
 
 /*static*/

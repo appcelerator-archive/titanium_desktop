@@ -108,7 +108,6 @@ namespace ti
 		Win32WebKitResourceLoadDelegate* resourceLoadDelegate;
 		Bounds restoreBounds;
 		long restoreStyles;
-		int chromeWidth, chromeHeight;
 		HWND windowHandle;
 		HWND viewWindowHandle;
 		HBITMAP webkitBitmap;
@@ -116,6 +115,7 @@ namespace ti
 		IWebView* webView;
 		IWebFrame* mainFrame;
 		IWebInspector* webInspector;
+		Bounds chromeSize;
 
 		// Set this flag to indicate that when the frame is loaded we want to
 		// show the window - we do this to prevent white screen while the first
@@ -133,7 +133,6 @@ namespace ti
 		void InitWindow();
 		void InitWebKit();
 		void SetupFrame();
-		void SetupSize();
 		void SetupDecorations();
 		void SetupState();
 		void SetupMenu();
