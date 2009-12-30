@@ -240,33 +240,61 @@ describe("Ruby Tests",
 		procMethod = get_ruby_proc_arity(-2);
 		value_of(procMethod("boo", "foo", "doo")).should_be("boo|foo|doo|");
 	},
+	test_ruby_collect: function()
+	{
+		var list = [1, 2, 3, 4];
+		var result = test_rb_collect(list);
+		value_of(result.length).should_be(list.length);
+		value_of(result[0]).should_be(2);
+		value_of(result[1]).should_be(4);
+		value_of(result[2]).should_be(6);
+		value_of(result[3]).should_be(8);
+
+		list = [];
+		result = test_rb_collect(list);
+		value_of(result.length).should_be(list.length);
+	},
+	test_ruby_map: function()
+	{
+		var list = [1, 2, 3, 4];
+		var result = test_rb_map(list);
+		value_of(result.length).should_be(list.length);
+		value_of(result[0]).should_be(2);
+		value_of(result[1]).should_be(4);
+		value_of(result[2]).should_be(6);
+		value_of(result[3]).should_be(8);
+
+		list = [];
+		result = test_rb_map(list);
+		value_of(result.length).should_be(list.length);
+	},
 	test_ruby_api_is_there: function()
 	{
 		// This test makes sure that the Ruby standard library  is around.
 		value_of(api_is_there()).should_be_true();
 	},
-	test_krubyobject_iterate_properties: function()
-	{
-		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
-		var obj = get_empty_ruby_object();
+	//test_krubyobject_iterate_properties: function()
+	//{
+	//	var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
+	//	var obj = get_empty_ruby_object();
 
-		// Iterating through Ruby properties many times sometimes casues a segfault
-		var orig_property_count = count_properties(obj);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-		value_of(count_properties(obj)).should_be(orig_property_count);
-	},
+	//	// Iterating through Ruby properties many times sometimes casues a segfault
+	//	var orig_property_count = count_properties(obj);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//	value_of(count_properties(obj)).should_be(orig_property_count);
+	//},
 	test_empty_krubyobject: function()
 	{
 		var count_properties = function(o) { var n = 0; for (var x in o) { n++; } return n; };
