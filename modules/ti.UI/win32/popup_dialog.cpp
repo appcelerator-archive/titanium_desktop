@@ -286,9 +286,9 @@ namespace ti
 				tmp.Write<WORD>(height - margin - buttonHeight); // y
 				tmp.Write<WORD>(buttonWidth); // width
 				tmp.Write<WORD>(buttonHeight); // height
-				tmp.Write<DWORD>(IDOK); // control ID
+				tmp.Write<DWORD>(IDCANCEL); // control ID
 				tmp.Write<DWORD>(0x0080FFFF); // button class atom
-				tmp.WriteString(L"OK"); // text
+				tmp.WriteString(L"Cancel"); // text
 				tmp.Write<WORD>(0); // no extra data
 
 				if (this->showCancelButton)
@@ -302,9 +302,9 @@ namespace ti
 					tmp.Write<WORD>(height - margin - buttonHeight); // y
 					tmp.Write<WORD>(buttonWidth); // width
 					tmp.Write<WORD>(buttonHeight); // height
-					tmp.Write<DWORD>(IDCANCEL); // control ID
+					tmp.Write<DWORD>(IDOK); // control ID
 					tmp.Write<DWORD>(0x0080FFFF); // button class atom
-					tmp.WriteString(L"Cancel"); // text
+					tmp.WriteString(L"OK"); // text
 					tmp.Write<WORD>(0); // no extra data
 				}
 
