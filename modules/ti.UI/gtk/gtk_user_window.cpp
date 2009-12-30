@@ -58,7 +58,7 @@ namespace ti
 	static bool MakeScriptDialog(DialogType type, GtkWindow* window,
 		const gchar* message, const gchar* defaultPromptResponse,
 		char** promptResponse);
-	//static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
+	static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
@@ -116,8 +116,8 @@ namespace ti
 			G_CALLBACK(ScriptConfirmCallback), this->gtkWindow,
 			"signal::script-prompt",
 			G_CALLBACK(ScriptPromptCallback), this->gtkWindow,
-			//"signal::close-web-view",
-			//G_CALLBACK(CloseWebViewCallback), this,
+			"signal::close-web-view",
+			G_CALLBACK(CloseWebViewCallback), this,
 			NULL);
 
 		WebKitWebSettings* settings = webkit_web_settings_new();
@@ -714,12 +714,12 @@ namespace ti
 		}
 	}
 
-	//static gboolean CloseWebViewCallback(WebKitWebView*, gpointer data)
-	//{
-	//	GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-	//	userWindow->Close();
-	//	return TRUE;
-	//}
+	static gboolean CloseWebViewCallback(WebKitWebView*, gpointer data)
+	{
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		userWindow->Close();
+		return TRUE;
+	}
 
 	void GtkUserWindow::SetInspectorWindow(GtkWidget* inspectorWindow)
 	{
