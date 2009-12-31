@@ -123,10 +123,6 @@
 				document.body.appendChild(link);
 			}
 		}
-		/*window.XMLHttpRequest = function() {
-			// a hack to get around the win32 typeof(string) issue..
-			return Titanium.Network.createHTTPClient();	
-		};*/
 	};
 
 	/// override the standard XHR to work around a weird typeof bug:

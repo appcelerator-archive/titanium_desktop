@@ -133,7 +133,7 @@ namespace ti
 		static std::string userAgent;
 		if (userAgent.empty())
 		{
-			const char* cUserAgent = 0;
+			gchar* cUserAgent = 0;
 			g_object_get(G_OBJECT(settings), "user-agent", &cUserAgent, NULL);
 			userAgent.append(cUserAgent);
 
@@ -142,6 +142,8 @@ namespace ti
 			// https://appcelerator.lighthouseapp.com/projects/25719/tickets/149-windownavigator-is-undefined-when-running-on-linux
 			userAgent.append(" Version/4.0 "PRODUCT_NAME"/"PRODUCT_VERSION);
 			host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
+
+			g_free(cUserAgent);
 		}
 		g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
 
