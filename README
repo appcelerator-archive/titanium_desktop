@@ -79,35 +79,6 @@ Needed service packs from Microsoft:
 - MS Visual Studio 2005 SP1
 - Windows Server 2003 SDK R2 <http://www.microsoft.com/downloads/details.aspx?familyid=0baf2b35-c656-4969-ace8-e4c0c0716adb&displaylang=en>
 
-Win32 Python Notes
-==================
-
-You will need to set the environment variable PYTHONHOME to the location of your 
-installed python.
-
-Set PYTHONHOME environment (Windows only):
-
-> set PYTHONHOME=c:\Python25
-
-(Suggest you open Control Panel and set it in your permanent environment)
-You will need to have Python 2.5 installed to build Win32. Later versions currently
-are not supported. You can download Python at <http://www.python.org/download/releases/2.5.2>
-
-
-Win32 Ruby Notes
-================
-
-To build Ruby module support you will need to first install Ruby 1.8+ and make sure
-it's own your path.  There is a problem with the included Ruby header file named
-config.h (under $RUBY\lib\ruby\1.8\i386-mswin32\) that requires you to hand edit
-the file to comment out the check.  If you receive the following warning:
-
-fatal error C1189: #error : MSC version unmatch
-
-Then you have experienced this error.  Hand edit the file and comment out the top
-of the header file that checks the version and re-compile.
-
- 
 OSX
 ----
 

@@ -52,9 +52,6 @@ namespace ti
 		AutoPtr<Win32Menu> contextMenu;
 		std::string iconPath;
 
-		// Cookie and handle for WebKit Activation Context
-		ULONG_PTR lpCookie; 
-		HANDLE pActCtx;
 		static std::vector<HICON> loadedICOs;
 		static std::vector<HBITMAP> loadedBMPs;
 	};

@@ -26,17 +26,31 @@
 	config = inConfig;
 
 	[self setTitle:[NSString stringWithUTF8String:config->GetTitle().c_str()]];
-	[self setOpaque:false];
 	[self setHasShadow:true];
 
 	webView = [[WebView alloc] init];
-	[webView setDrawsBackground:NO];
 
 	delegate = [[WebViewDelegate alloc] initWithWindow:self];
 	[webView setFrameLoadDelegate:delegate];
 	[webView setUIDelegate:delegate];
 	[webView setResourceLoadDelegate:delegate];
 	[webView setPolicyDelegate:delegate];
+
+	// Because of the Win32 implementation, this setting
+	// only applies during window creation.
+	if (config->HasTransparentBackground())
+	{
+		[self setOpaque:false];
+		[self setBackgroundColor:[NSColor clearColor]];
+		[webView setDrawsBackground:NO];
+		[webView setBackgroundColor:[NSColor clearColor]];
+	}
+	else
+	{
+		// This is to match the default Windows behavior of painting
+		// the background of the web view white.
+		[webView setBackgroundColor:[NSColor whiteColor]];
+	}
 
 	[self setContentView:webView];
 	[self setDelegate:self];
@@ -154,14 +168,6 @@
 - (void)setTransparency:(double)transparency
 {
 	[self setAlphaValue:transparency];
-	if (transparency < 1.0)
-	{
-		[webView setBackgroundColor:[NSColor clearColor]];
-	}
-	else
-	{
-		[webView setBackgroundColor:[NSColor whiteColor]];
-	}
 	[self invalidateShadow];
 }
 
