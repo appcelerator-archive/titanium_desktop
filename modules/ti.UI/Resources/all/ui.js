@@ -123,7 +123,78 @@
 				document.body.appendChild(link);
 			}
 		}
+		/*window.XMLHttpRequest = function() {
+			// a hack to get around the win32 typeof(string) issue..
+			return Titanium.Network.createHTTPClient();	
+		};*/
 	};
+
+	/// override the standard XHR to work around a weird typeof bug:
+	/// https://bugs.webkit.org/show_bug.cgi?id=33057
+	var originalXHR = window.XMLHttpRequest;
+	function TiXMLHttpRequest() {
+		this.xhr = new originalXHR();
+		this.UNSENT = this.xhr.UNSENT;
+		this.OPENED = this.xhr.OPENED;
+		this.HEADERS_RECEIVED = this.xhr.HEADERS_RECEIVED;
+		this.LOADING = this.xhr.LOADING;
+		this.DONE = this.xhr.DONE;
+	};
+
+	TiXMLHttpRequest.prototype.__defineSetter__("onreadystatechange", function(f)
+	{
+		var self = this;
+		this.xhr.onreadystatechange = function() {
+			f.call(self, Array.prototype.slice.call(arguments));
+		};
+	});
+	TiXMLHttpRequest.prototype.__defineGetter__("status", function()
+	{
+		return this.xhr.status;
+	});
+	TiXMLHttpRequest.prototype.__defineGetter__("statusText", function()
+	{
+		return this.xhr.statusText;
+	});
+	TiXMLHttpRequest.prototype.__defineGetter__("readyState", function()
+	{
+		return this.xhr.readyState;
+	});
+	TiXMLHttpRequest.prototype.__defineGetter__("responseXML", function()
+	{
+		return this.xhr.responseXML;
+	});
+	TiXMLHttpRequest.prototype.__defineGetter__("responseText", function()
+	{
+		return String(this.xhr.responseText);
+	});
+	TiXMLHttpRequest.prototype.open = function()
+	{
+		this.xhr.open.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+	TiXMLHttpRequest.prototype.setRequestHeader = function()
+	{
+		this.xhr.setRequestHeader.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+	TiXMLHttpRequest.prototype.send = function()
+	{
+		this.xhr.send.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+	TiXMLHttpRequest.prototype.abort = function()
+	{
+		this.xhr.abort.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+	TiXMLHttpRequest.prototype.getResponseHeader = function()
+	{
+		return this.xhr.getResponseHeader.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+	TiXMLHttpRequest.prototype.getAllResponseHeaders = function()
+	{
+		return this.xhr.getAllResponseHeaders.apply(this.xhr, Array.prototype.slice.call(arguments));
+	};
+
+	//XMLHttpRequest.prototype = TiXMLHttpRequest.prototype;
+	window.XMLHttpRequest = TiXMLHttpRequest;
 
 	
 	//
