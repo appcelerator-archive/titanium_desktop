@@ -10,10 +10,11 @@ namespace ti
 {
 	class GtkUserWindow : public UserWindow
 	{
-
-		public:
+	public:
 		GtkUserWindow(WindowConfig*, AutoUserWindow&);
 		virtual ~GtkUserWindow();
+		void CreateWidgets();
+		void ShowWidgets();
 		void SetupDecorations();
 		void SetupTransparency();
 		void SetupSizeLimits();
@@ -50,7 +51,6 @@ namespace ti
 		void SetUsingChrome(bool chrome);
 		bool IsUsingScrollbars();
 		bool IsFullscreen();
-		std::string GetId();
 		void Open();
 		bool Close();
 		double GetX();
@@ -72,7 +72,7 @@ namespace ti
 		double GetMinHeight();
 		void SetMinHeight(double height);
 
-		Bounds GetBounds();
+		Bounds GetBoundsImpl();
 		void SetBoundsImpl(Bounds bounds);
 		std::string GetTitle();
 		void SetTitleImpl(std::string& title);
@@ -118,13 +118,12 @@ namespace ti
 		bool targetMaximized;
 		bool targetMinimized;
 
-		protected:
+	protected:
 		GtkWindow* gtkWindow;
 		GtkWidget* vbox;
 		WebKitWebView* webView;
 		bool topmost;
 		gulong deleteCallbackId;
-
 		AutoPtr<GtkMenu> menu; // The window-specific menu.
 		AutoPtr<GtkMenu> activeMenu; // This window's active menu 
 		AutoPtr<GtkMenu> contextMenu; // The window specific context menu 
@@ -133,8 +132,6 @@ namespace ti
 		GtkWidget *inspectorWindow; // This window's web inspector window
 
 		void _FileChooserWork(const ValueList&, KValueRef);
-		static std::string openFilesDirectory;
-
 	};
 
 }

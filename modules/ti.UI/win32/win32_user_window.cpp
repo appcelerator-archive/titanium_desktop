@@ -745,7 +745,7 @@ void Win32UserWindow::SetMinHeight(double height)
 	this->SetupFrame();
 }
 
-Bounds Win32UserWindow::GetBounds()
+Bounds Win32UserWindow::GetBoundsImpl()
 {
 	// We need to use window rectangle to get the position, since we
 	// position independent of chrome and the client rectange for the size
@@ -754,11 +754,11 @@ Bounds Win32UserWindow::GetBounds()
 	GetClientRect(windowHandle, &clientRect);
 	GetWindowRect(windowHandle, &windowRect);
 
-	Bounds bounds;
-	bounds.x = windowRect.left;
-	bounds.y = windowRect.top;
-	bounds.width = clientRect.right - clientRect.left;
-	bounds.height = clientRect.bottom - clientRect.top;
+	Bounds bounds =
+	{
+		windowRect.left, windowRect.top,
+		clientRect.right - clientRect.left, clientRect.bottom - clientRect.top
+	}
 	return bounds;
 }
 

@@ -46,6 +46,7 @@ namespace ti
 			inline void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
 			inline bool HasTransparentBackground() { return this->config->HasTransparentBackground(); }
 			inline void SetTransparentBackground(bool transparentBackground) { this->config->SetTransparentBackground(transparentBackground); }
+			inline std::string GetId() { return this->config->GetID(); }
 
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::KValueRef);
 			void _GetDOMWindow(const kroll::ValueList&, kroll::KValueRef);
@@ -168,7 +169,6 @@ namespace ti
 			virtual bool IsUsingChrome() = 0;
 			virtual bool IsUsingScrollbars() = 0;
 			virtual bool IsFullscreen() = 0;
-			virtual std::string GetId() = 0;
 			virtual void Open();
 			virtual bool Close();
 			void Closed();
@@ -188,7 +188,8 @@ namespace ti
 			virtual void SetMaxHeight(double height) = 0;
 			virtual double GetMinHeight() = 0;
 			virtual void SetMinHeight(double height) = 0;
-			virtual Bounds GetBounds() = 0;
+			virtual Bounds GetBounds();
+			virtual Bounds GetBoundsImpl() = 0;
 			void SetBounds(Bounds bounds);
 			virtual void SetBoundsImpl(Bounds bounds) = 0;
 			virtual std::string GetTitle() = 0;

@@ -65,7 +65,6 @@ namespace ti
 			void SetUsingChrome(bool chrome);
 			bool IsUsingScrollbars();
 			bool IsFullscreen();
-			std::string GetId();
 			void Open();
 			bool Close();
 			double GetX();
@@ -85,7 +84,7 @@ namespace ti
 			void ReconfigureWindowConstraints();
 			double GetMinHeight();
 			void SetMinHeight(double height);
-			Bounds GetBounds();
+			Bounds GetBoundsImpl();
 			void SetBoundsImpl(Bounds bounds);
 			std::string GetTitle();
 			void SetTitleImpl(std::string& title);

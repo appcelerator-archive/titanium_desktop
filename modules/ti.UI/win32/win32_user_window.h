@@ -53,7 +53,7 @@ namespace ti
 		void SetMaxHeight(double height);
 		double GetMinHeight();
 		void SetMinHeight(double height);
-		Bounds GetBounds();
+		Bounds GetBoundsImpl();
 		void SetBoundsImpl(Bounds bounds);
 		void SetTitleImpl(std::string& title);
 		void SetURL(std::string& url);
@@ -94,7 +94,6 @@ namespace ti
 		bool IsUsingChrome() { return config->IsUsingChrome(); }
 		bool IsUsingScrollbars() { return config->IsUsingScrollbars(); }
 		bool IsFullscreen() { return config->IsFullscreen(); }
-		std::string GetId() { return config->GetID(); }
 		void SetBitmap(HBITMAP bitmap) { this->webkitBitmap = bitmap; }
 		UINT_PTR GetTimer() { return this->timer; }
 		void UpdateBitmap();

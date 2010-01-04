@@ -215,11 +215,6 @@ namespace ti
 		return this->config->IsFullscreen();
 	}
 
-	std::string OSXUserWindow::GetId()
-	{
-		return this->config->GetID();
-	}
-
 	bool OSXUserWindow::Close()
 	{
 		// Guard against re-closing a window
@@ -492,13 +487,9 @@ namespace ti
 		this->ReconfigureWindowConstraints();
 	}
 
-	Bounds OSXUserWindow::GetBounds()
+	Bounds OSXUserWindow::GetBoundsImpl()
 	{
-		Bounds b;
-		b.width = this->GetWidth();
-		b.height = this->GetHeight();
-		b.x = this->GetX();
-		b.y = this->GetY();
+		Bounds b = {this->GetX(), this->GetY(), this->GetWidth(), this->GetHeight() };
 		return b;
 	}
 

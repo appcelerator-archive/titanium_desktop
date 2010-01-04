@@ -1134,25 +1134,26 @@ void UserWindow::_SetMaxHeight(const kroll::ValueList& args, kroll::KValueRef re
 
 void UserWindow::_GetBounds(const kroll::ValueList& args, kroll::KValueRef result)
 {
-	Bounds bounds;
-	if (this->active)
-	{
-		bounds = this->GetBounds();
-	}
-	else
-	{
-		bounds.x = this->config->GetX();
-		bounds.y = this->config->GetY();
-		bounds.width = this->config->GetWidth();
-		bounds.height = this->config->GetHeight();
-	}
-
-	kroll::StaticBoundObject *b = new kroll::StaticBoundObject();
-	b->Set("x", kroll::Value::NewInt(bounds.x));
-	b->Set("y", kroll::Value::NewInt(bounds.y));
-	b->Set("width", kroll::Value::NewInt(bounds.width));
-	b->Set("height", kroll::Value::NewInt(bounds.height));
+	Bounds bounds = this->GetBounds();
+	KObjectRef b(new StaticBoundObject());
+	b->SetInt("x", bounds.x);
+	b->SetInt("y", bounds.y);
+	b->SetInt("width", bounds.width);
+	b->SetInt("height", bounds.height);
 	result->SetObject(b);
+}
+
+Bounds UserWindow::GetBounds()
+{
+	if (this->active)
+		return this->GetBoundsImpl();
+
+	Bounds bounds;
+	bounds.x = this->config->GetX();
+	bounds.y = this->config->GetY();
+	bounds.width = this->config->GetWidth();
+	bounds.height = this->config->GetHeight();
+	return bounds;
 }
 
 void UserWindow::_SetBounds(const kroll::ValueList& args, kroll::KValueRef result)
@@ -1183,7 +1184,7 @@ void UserWindow::_SetBounds(const kroll::ValueList& args, kroll::KValueRef resul
 	bounds.y = y;
 	bounds.width = w;
 	bounds.height = h;
-		
+
 	this->SetBounds(bounds);
 }
 
@@ -1195,7 +1196,7 @@ void UserWindow::SetBounds(Bounds b)
 	this->config->SetY(b.y);
 	this->config->SetWidth(w);
 	this->config->SetHeight(h);
-	
+
 	if (this->active)
 	{
 		this->SetBoundsImpl(b);
