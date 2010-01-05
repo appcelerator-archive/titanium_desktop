@@ -115,11 +115,11 @@ namespace ti
 			NativeWindow* GetNative() { return nativeWindow; }
 			void Focused();
 			void Unfocused();
-			
 			virtual void ShowInspector(bool console=false);
 
 		private:
-			NativeWindow *nativeWindow;
+			NativeWindow* nativeWindow;
+			unsigned int nativeWindowMask;
 			bool focused;
 			AutoPtr<OSXMenu> menu;
 			AutoPtr<OSXMenu> contextMenu;
@@ -127,8 +127,9 @@ namespace ti
 			static bool initial;
 			std::string iconPath;
 
+			NSRect CalculateWindowFrame(double x, double y,
+				double width, double height);
 			NSScreen* GetWindowScreen();
-			NSRect CalculateWindowFrame(double, double, double, double);
 			DISALLOW_EVIL_CONSTRUCTORS(OSXUserWindow);
 	};
 }

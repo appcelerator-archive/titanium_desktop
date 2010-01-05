@@ -209,12 +209,12 @@
 		fullscreen = YES;
 		savedFrame = [self frame];
 		
-		// adjust to remove toolbar from view on window
-		NSView *toolbarView = [[self toolbar] valueForKey:@"toolbarView"];
+		// Adjust to remove toolbar from view on window
+		NSView* toolbarView = [[self toolbar] valueForKey:@"toolbarView"];
 		float toolbarHeight = [toolbarView frame].size.height;
-		if (![[self toolbar] isVisible]) {
+		if (![[self toolbar] isVisible])
 			toolbarHeight = 0;
-		}
+
 		float windowBarHeight = [self frame].size.height - ([[self contentView] frame].size.height + toolbarHeight);
 		NSRect frame = [[NSScreen mainScreen] frame];
 		frame.size.height += windowBarHeight;
