@@ -85,10 +85,10 @@ describe("UI Module Tests",{
 	{
 		var w = Titanium.UI.getCurrentWindow().createWindow('app://blahblah.html');
 		w.setHeight(100);
-		w.setWidth(100);
+		w.setWidth(130);
 
 		value_of(w.getHeight()).should_be(100);
-		value_of(w.getWidth()).should_be(100);
+		value_of(w.getWidth()).should_be(130);
 
 		w.setMinHeight(500);
 		value_of(w.getHeight()).should_be(500);
@@ -97,22 +97,19 @@ describe("UI Module Tests",{
 		value_of(w.getWidth()).should_be(400);
 
 		w.setHeight(100);
-		w.setWidth(100);
+		w.setWidth(130);
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
 
 		w.setMinWidth(-1);
 		w.setMinHeight(-1);
-		w.setHeight(135);
-		w.setWidth(135);
+		w.setHeight(100);
+		w.setWidth(130);
 
 		w.open();
-		
-		// for some reason, the lowest value i can get out of win32 is 116px width.. 
-		// webkit might be constraining the minimum width of it's content area, not sure
-		// for now use 125 instead of 100 for width
-		value_of(w.getHeight()).should_be(135);
-		value_of(w.getWidth()).should_be(135);
+
+		value_of(w.getHeight()).should_be(100);
+		value_of(w.getWidth()).should_be(130);
 		
 
 		w.setMinHeight(500);
@@ -122,7 +119,7 @@ describe("UI Module Tests",{
 		value_of(w.getWidth()).should_be(400);
 
 		w.setHeight(100);
-		w.setWidth(100);
+		w.setWidth(130);
 		value_of(w.getHeight()).should_be(500);
 		value_of(w.getWidth()).should_be(400);
 
@@ -149,22 +146,22 @@ describe("UI Module Tests",{
 		w.setHeight(0);
 		value_of(w.getHeight()).should_be(100);
 		w.open();
-		w.setHeight(135);
-		value_of(w.getHeight()).should_be(135);
+		w.setHeight(136);
+		value_of(w.getHeight()).should_be(136);
 		w.setHeight(200);
 		value_of(w.getHeight()).should_be(200);
-		w.setHeight(135);
-		value_of(w.getHeight()).should_be(135);
+		w.setHeight(136);
+		value_of(w.getHeight()).should_be(136);
 		w.setHeight(10000);
 		value_of(w.getHeight()).should_be(10000);
-		w.setHeight(135);
-		value_of(w.getHeight()).should_be(135);
+		w.setHeight(136);
+		value_of(w.getHeight()).should_be(136);
 		w.setHeight(-1);
-		value_of(w.getHeight()).should_be(135);
+		value_of(w.getHeight()).should_be(136);
 		w.setHeight(-666);
-		value_of(w.getHeight()).should_be(135);
+		value_of(w.getHeight()).should_be(136);
 		w.setHeight(0);
-		value_of(w.getHeight()).should_be(135);
+		value_of(w.getHeight()).should_be(136);
 	},
 	test_window_set_width: function()
 	{
@@ -184,22 +181,22 @@ describe("UI Module Tests",{
 		w.setWidth(0);
 		value_of(w.getWidth()).should_be(100);
 		w.open()
-		w.setWidth(135);
-		value_of(w.getWidth()).should_be(135);
+		w.setWidth(136);
+		value_of(w.getWidth()).should_be(136);
 		w.setWidth(200);
 		value_of(w.getWidth()).should_be(200);
-		w.setWidth(135);
-		value_of(w.getWidth()).should_be(135);
+		w.setWidth(136);
+		value_of(w.getWidth()).should_be(136);
 		w.setWidth(10000);
 		value_of(w.getWidth()).should_be(10000);
-		w.setWidth(135);
-		value_of(w.getWidth()).should_be(135);
+		w.setWidth(136);
+		value_of(w.getWidth()).should_be(136);
 		w.setWidth(-1);
-		value_of(w.getWidth()).should_be(135);
+		value_of(w.getWidth()).should_be(136);
 		w.setWidth(-666);
-		value_of(w.getWidth()).should_be(135);
+		value_of(w.getWidth()).should_be(136);
 		w.setWidth(0);
-		value_of(w.getWidth()).should_be(135);
+		value_of(w.getWidth()).should_be(136);
 	},
 	test_window_set_closeable: function()
 	{
