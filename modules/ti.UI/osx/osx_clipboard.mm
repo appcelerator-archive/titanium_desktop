@@ -152,14 +152,13 @@ namespace ti
 		{
 			NSArray* filenamesArray = [pasteboard 
 				propertyListForType:NSFilenamesPboardType];
-			if (filenamesArray)
+			if (!filenamesArray)
+				return uriList;
+
+			for (unsigned int i = 0; i < [filenamesArray count]; i++)
 			{
-				for (unsigned int i = 0; i < [filenamesArray count]; i++)
-				{
-					NSString* filename = [filenamesArray objectAtIndex:i];
-					NSURL* url = [NSURL fileURLWithPath:filename];
-					uriList.push_back([[url absoluteString] UTF8String]);
-				}
+				uriList.push_back(URLUtils::PathToFileURL(
+					[[filenamesArray objectAtIndex:i] UTF8String]));
 			}
 		}
 
@@ -174,7 +173,7 @@ namespace ti
 
 		for (unsigned int i = 0; i < uriList.size(); i++)
 		{
-			NSURL *url = [[NSURL alloc] initWithString:
+			NSURL* url = [[NSURL alloc] initWithString:
 				[NSString stringWithUTF8String:uriList[i].c_str()]];
 
 			if (!url)
