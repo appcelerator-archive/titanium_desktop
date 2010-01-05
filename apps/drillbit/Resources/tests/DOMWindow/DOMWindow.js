@@ -2,40 +2,46 @@ describe("UI Window Tests",{
 	before_all: function()
 	{
 		var self = this;
+		var open_window_timer = null;
+		var open_window_assert = null;
+		var open_window_test = null;
+
+		Titanium.open_window_callback = function(windowIn)
+		{
+			clearTimeout(open_window_timer);
+			try
+			{
+				open_window_assert.apply(self, [windowIn]);
+				open_window_test.passed();
+
+				// We now seem to be running in the global context of
+				// the newly opened window. When the next test is executed
+				// if this window is closed the settings allowing JavaScript
+				// popups seems to be gone on the GTK+ port. The current work
+				// around for this is to not close the window here.
+				// windowIn.close();
+			}
+			catch (e)
+			{
+				open_window_test.failed(e);
+			}
+		}
+
 		this.async_window_open = function(test, assertFn, args)
 		{
+			open_window_test = test;
+			open_window_assert = assertFn;
 			var w = window.open.apply(window, args);
-			value_of(w).should_be_object();
-			Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
-			{
-				if (!event.hasTitaniumObject)
-					return;
-
-				w.callback = function()
-				{
-					clearTimeout(timer);
-					try
-					{
-						assertFn.apply(self, [w]);
-						w.close();
-						test.passed();
-					}
-					catch (e)
-					{
-						test.failed(e);
-					}
-				};
-			});
-			timer = setTimeout(function(){
-				test.failed("Window open timed out.");
+			open_window_timer = setTimeout(function(){
+				open_window_test.failed("Window open timed out.");
 			}, 3000);
-		};
+			return w;
+		}
 	},
 	test_open_no_url_as_async: function(callback)
 	{
 		var w = window.open()
 		setTimeout(function() {
-			Titanium.API.debug(w.Titanium);
 			if (typeof(w) != "object" || typeof(w.Titanium) != 'object')
 				callback.failed("Could not find Titanium object in window");
 			else
