@@ -758,7 +758,7 @@ Bounds Win32UserWindow::GetBoundsImpl()
 	{
 		windowRect.left, windowRect.top,
 		clientRect.right - clientRect.left, clientRect.bottom - clientRect.top
-	}
+	};
 	return bounds;
 }
 
