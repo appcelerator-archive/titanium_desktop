@@ -58,12 +58,16 @@ namespace ti
 			initWithContentRect:contentRect
 			styleMask:nativeWindowMask
 			backing:NSBackingStoreBuffered
-			defer:false];
+			defer:NO];
 		[nativeWindow setUserWindow:new AutoPtr<OSXUserWindow>(this, true)];
 
 		if (!config->IsFullscreen())
 		{
+			// NSWindow initwithContentRect doesn't seem to honor window placement
+			// that insersects with the dock. We set the frame again here, to ensure
+			// that the window is placed where we want it.
 			[nativeWindow setFrame:frame display:NO animate:NO];
+
 			this->ReconfigureWindowConstraints();
 			if (!config->IsResizable())
 			{
