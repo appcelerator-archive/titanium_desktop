@@ -119,7 +119,7 @@ namespace ti
 
 		for (size_t c = 0; c < args.size(); c++)
 		{
-			std::string path(URLUtils::URLToPath(args.GetString(0)));
+			std::string path(URLUtils::URLToPath(args.GetString(c)));
 			logger->Debug("Attempting to import worker script = %s", path.c_str());
 			KJSUtil::EvaluateFile(context, path.c_str());
 		}
