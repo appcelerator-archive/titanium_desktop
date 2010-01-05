@@ -340,32 +340,31 @@ describe("async worker tests",
 			}
 		};
 	},
-	test_worker_multiple_sleep_interrupted_as_async: function(result)
-	{
-		var worker = Titanium.Worker.createWorker('test6.js');
-		worker.start();
-		worker.onmessage = function(v)
-		{
-			if (v.message == 0)
-			{
-				result.failed("terminate didn't cause interrupted exception");
-			}
-			else
-			{
-				result.passed();
-			}
-		};
+	//test_worker_multiple_sleep_interrupted_as_async: function(result)
+	//{
+	//	var worker = Titanium.Worker.createWorker('test6.js');
+	//	worker.start();
+	//	worker.onmessage = function(v)
+	//	{
+	//		if (v.message == 0)
+	//		{
+	//			result.failed("terminate didn't cause interrupted exception");
+	//		}
+	//		else
+	//		{
+	//			result.passed();
+	//		}
+	//	};
 
-		// give it a bit, then kill it
-		setTimeout(function()
-		{
-			worker.terminate();
-		}, 500);
+	//	// give it a bit, then kill it
+	//	setTimeout(function()
+	//	{
+	//		worker.terminate();
+	//	}, 500);
 
-		setTimeout(function()
-		{
-			alert("whutt");
-			result.failed("Test timed out.");
-		}, 2000);
-	}
+	//	setTimeout(function()
+	//	{
+	//		result.failed("Test timed out.");
+	//	}, 2000);
+	//}
 });
