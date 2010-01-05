@@ -400,18 +400,18 @@ describe("UI Module Tests",{
 		value_of(b.width).should_be(444);
 		value_of(b.height).should_be(333);
 
-		b.x = 444;
+		b.x = 555;
 		b.y = 222;
 		b.width = 500;
 		b.height = 200;
 		w.setBounds(b);
 
 		var b = w.getBounds();
-		value_of(b.x).should_be(444);
+		value_of(b.x).should_be(555);
 		value_of(b.y).should_be(222);
 		value_of(b.width).should_be(500);
 		value_of(b.height).should_be(200);
-		value_of(w.getX()).should_be(444);
+		value_of(w.getX()).should_be(555);
 		value_of(w.getY()).should_be(222);
 		value_of(w.getWidth()).should_be(500);
 		value_of(w.getHeight()).should_be(200);
@@ -433,18 +433,18 @@ describe("UI Module Tests",{
 		value_of(b.width).should_be(444);
 		value_of(b.height).should_be(333);
 
-		b.x = 444;
+		b.x = 555;
 		b.y = 222;
 		b.width = 500;
 		b.height = 200;
 		w.setBounds(b);
 
 		var b = w.getBounds();
-		value_of(b.x).should_be(444);
+		value_of(b.x).should_be(555);
 		value_of(b.y).should_be(222);
 		value_of(b.width).should_be(500);
 		value_of(b.height).should_be(200);
-		value_of(w.getX()).should_be(444);
+		value_of(w.getX()).should_be(555);
 		value_of(w.getY()).should_be(222);
 		value_of(w.getWidth()).should_be(500);
 		value_of(w.getHeight()).should_be(200);
