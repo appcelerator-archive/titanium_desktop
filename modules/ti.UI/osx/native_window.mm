@@ -102,8 +102,7 @@
 
 - (void)titaniumQuit:(id)sender
 {
-	Host* host = Host::GetInstance();
-	host->Exit(0);
+	Host::GetInstance()->Exit(0);
 }
 
 - (void)windowWillClose:(NSNotification *)notification
@@ -191,11 +190,7 @@
 
 - (NSRect)constrainFrameRect:(NSRect)frameRect toScreen:(NSScreen *)screen 
 {
-	if (fullscreen)
-	{
-		return frameRect;
-	}
-	return [super constrainFrameRect:frameRect toScreen:screen];
+	return frameRect;
 }
 
 - (void)setFullscreen:(BOOL)yn
@@ -208,16 +203,15 @@
 	{
 		fullscreen = YES;
 		savedFrame = [self frame];
-		
-		// Adjust to remove toolbar from view on window
-		NSView* toolbarView = [[self toolbar] valueForKey:@"toolbarView"];
-		float toolbarHeight = [toolbarView frame].size.height;
-		if (![[self toolbar] isVisible])
-			toolbarHeight = 0;
 
-		float windowBarHeight = [self frame].size.height - ([[self contentView] frame].size.height + toolbarHeight);
+		float toolbarHeight = 0;
+		if ([[self toolbar] isVisible])
+			toolbarHeight = [[[self toolbar] valueForKey:@"toolbarView"]
+				frame].size.height;
+
 		NSRect frame = [[NSScreen mainScreen] frame];
-		frame.size.height += windowBarHeight;
+		frame.size.height += [self frame].size.height -
+			([[self contentView] frame].size.height + toolbarHeight);
 
 		SetSystemUIMode(kUIModeAllHidden,kUIOptionAutoShowMenuBar);
 		[self setFrame:frame display:display animate:display];
@@ -284,4 +278,5 @@
 	}
 	[self invalidateShadow];
 }
+
 @end
