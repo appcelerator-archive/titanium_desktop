@@ -10,7 +10,7 @@ namespace ti
 	static unsigned int toWindowMask(WindowConfig* config)
 	{
 		unsigned int mask = 0;
-		if (!config->HasTransparentBackground() && config->IsTexturedBackground())
+		if (!config->HasTransparentBackground() && config->HasTexturedBackground())
 			mask |= NSTexturedBackgroundWindowMask;
 
 		if (!config->IsUsingChrome() || config->IsFullscreen())

@@ -118,7 +118,7 @@ class TITANIUM_APP_API WindowConfig
 // probably long term a better way of doing this, but we need a quick way to disable these
 #ifdef OS_OSX
 	void SetTexturedBackground(bool texturedBackground_) { texturedBackground = texturedBackground_; }
-	bool IsTexturedBackground() { return texturedBackground; }
+	bool HasTexturedBackground() { return texturedBackground; }
 #endif
 
 };

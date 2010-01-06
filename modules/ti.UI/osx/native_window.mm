@@ -45,7 +45,7 @@
 		[webView setDrawsBackground:NO];
 		[webView setBackgroundColor:[NSColor clearColor]];
 	}
-	else if (config->IsTexturedBackground())
+	else if (config->HasTexturedBackground())
 	{
 		[self setOpaque:false];
 		[webView setDrawsBackground:NO];

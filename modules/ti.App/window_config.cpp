@@ -146,7 +146,7 @@ WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
 	this->transparency = config->GetTransparency();
 
 #ifdef OS_OSX
-	this->texturedBackground = config->IsTexturedBackground();
+	this->texturedBackground = config->HasTexturedBackground();
 #endif
 }
 
