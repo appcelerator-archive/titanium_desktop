@@ -45,6 +45,11 @@
 		[webView setDrawsBackground:NO];
 		[webView setBackgroundColor:[NSColor clearColor]];
 	}
+	else if (config->IsTexturedBackground())
+	{
+		[self setOpaque:false];
+		[webView setDrawsBackground:NO];
+	}
 	else
 	{
 		// This is to match the default Windows behavior of painting
