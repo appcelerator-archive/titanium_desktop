@@ -9,7 +9,7 @@
       <title>Titanium Test Application</title>
       <url>app://index.html</url>
       <width>750</width>
-      <height>800</height>
+      <height>600</height>
       <fullscreen>false</fullscreen>
       <!--
       <minimizable>true</minimizable>
