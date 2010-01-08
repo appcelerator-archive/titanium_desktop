@@ -307,7 +307,7 @@ def create_installer(builder):
 	dialog_bmp = get_bmp('dialog-bmp', default_dialog_bmp)
 	banner_bmp = get_bmp('banner-bmp', default_banner_bmp)
 	
-	titanium_installer_dll = os.path.join(support_dir, "titanium_installer.dll")
+	titanium_installer_dll = os.path.join(builder.options.assets_dir, "titanium_installer.dll")
 	app_version = builder.appversion
 	version_parts = len(app_version.split("."))
 	if version_parts < 3:
