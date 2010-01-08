@@ -28,7 +28,7 @@
 	[self setTitle:[NSString stringWithUTF8String:config->GetTitle().c_str()]];
 	[self setHasShadow:true];
 
-	webView = [[WebView alloc] init];
+	webView = [[WebView alloc] initWithFrame:[[self contentView] bounds]];
 
 	delegate = [[WebViewDelegate alloc] initWithWindow:self];
 	[webView setFrameLoadDelegate:delegate];
@@ -49,6 +49,14 @@
 	{
 		[self setOpaque:false];
 		[webView setDrawsBackground:NO];
+		[self setMovableByWindowBackground:NO]; // On by default.
+
+		// HACK: When a large portion of a textured window is covered
+		// by an opaque subview, OS X will push the window gradient up
+		// to emulate the look of a non-textured window. Since we are
+		// *really* transparent here, make the alpha value less than
+		// 1.0 to trick OS X into knowing that we are transparent.
+		[webView setAlphaValue:0.99];
 	}
 	else
 	{
@@ -57,11 +65,16 @@
 		[webView setBackgroundColor:[NSColor whiteColor]];
 	}
 
-	[self setContentView:webView];
+	if (config->IsResizable() && config->IsUsingChrome())
+		[self setShowsResizeIndicator:YES];
+	else
+		[self setShowsResizeIndicator:NO];
+
 	[self setDelegate:self];
 	[self setTransparency:config->GetTransparency()];
 	[self setInitialFirstResponder:webView];
 	[self setShowsResizeIndicator:config->IsResizable()];
+	[self setContentView:webView];
 }
 
 - (void)dealloc

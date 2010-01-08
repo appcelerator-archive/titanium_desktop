@@ -84,18 +84,10 @@
 	} else {
 		[[[webView mainFrame] frameView] setAllowsScrolling:NO];
 	}
-	if (o->IsResizable() && o->IsUsingChrome()) {
-		[window setShowsResizeIndicator:YES];
-	} else {
-		[window setShowsResizeIndicator:NO];
-	}
 
 	[webView setBackgroundColor:[NSColor clearColor]];
 	[webView setAutoresizingMask:NSViewHeightSizable | NSViewWidthSizable];
 	[webView setShouldCloseWithWindow:NO];
-
-	// if we use a textured window mask, this is on by default which we don't want
-	[window setMovableByWindowBackground:NO];
 
 	// TI-303 we need to add safari UA to our UA to resolve broken
 	// sites that look at Safari and not WebKit for UA
