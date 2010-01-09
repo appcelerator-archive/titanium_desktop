@@ -419,8 +419,7 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	activeMenu(0),
 	nativeMenu(0),
 	contextMenu(0),
-	iconPath(""),
-	defaultIcon(0)
+	iconPath("")
 {
 	logger = Logger::Get("UI.Win32UserWindow");
 }
@@ -625,20 +624,12 @@ void Win32UserWindow::Open()
 	this->SetupDecorations();
 	this->InitWebKit();
 
-	// Set initial window icon to icon associated with exe file
-	char exePath[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-	defaultIcon = ExtractIconA(win32Host->GetInstanceHandle(), exePath, 0);
-	if (defaultIcon)
-	{
-		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG,
-			(LPARAM) defaultIcon);
-	}
-	
+	this->SetupIcon();
+
 	UserWindow::Open();
 	this->SetURL(this->config->GetURL());
 	this->SetupFrame();
-	
+
 	FireEvent(Event::OPENED);
 }
 
@@ -950,23 +941,48 @@ void Win32UserWindow::SetIcon(std::string& iconPath)
 	this->SetupIcon();
 }
 
+static HICON GetDefaultIcon()
+{
+	// Set initial window icon to icon associated with exe file.
+	static HICON defaultIcon = 0;
+
+	if (!defaultIcon)
+	{
+		char exePath[MAX_PATH];
+		GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
+		defaultIcon = ExtractIconA(Win32Host::Win32Instance()->GetInstanceHandle(), exePath, 0);
+	}
+
+	return defaultIcon;
+}
+
 void Win32UserWindow::SetupIcon()
 {
-	std::string iconPath = this->iconPath;
+	std::string iconPath(this->iconPath);
+	if (iconPath.empty())
+		iconPath = static_cast<Win32UIBinding*>(UIBinding::GetInstance())->GetIcon();
 
-	if (iconPath.empty()) {
-		Win32UIBinding* b = static_cast<Win32UIBinding*>(UIBinding::GetInstance());
-		iconPath = b->GetIcon();
+	HICON smallIcon = 0;
+	HICON largeIcon = 0;
+	if (!iconPath.empty())
+	{
+		int smallIconSizeX = GetSystemMetrics(SM_CXSMICON);
+		int smallIconSizeY = GetSystemMetrics(SM_CYSMICON);
+		int largeIconSizeX = GetSystemMetrics(SM_CXICON);
+		int largeIconSizeY = GetSystemMetrics(SM_CYICON);
+
+		largeIcon = Win32UIBinding::LoadImageAsIcon(iconPath, largeIconSizeX, largeIconSizeY);
+		smallIcon = Win32UIBinding::LoadImageAsIcon(iconPath, smallIconSizeX, smallIconSizeY);
 	}
 
-	HICON icon = defaultIcon;
-	if (!iconPath.empty()) {
-		icon = Win32UIBinding::LoadImageAsIcon(iconPath, 32, 32);
-	}
-	if (!icon) { // Icon failed to load
-		icon = defaultIcon;
-	}
-	SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG, (LPARAM) icon);
+	if (!largeIcon)
+		largeIcon = GetDefaultIcon();
+	if (!smallIcon)
+		smallIcon = GetDefaultIcon();
+	if (largeIcon)
+		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_BIG, (LPARAM) largeIcon);
+	if (smallIcon)
+		SendMessageA(windowHandle, (UINT) WM_SETICON, ICON_SMALL, (LPARAM) smallIcon);
 }
 
 std::string& Win32UserWindow::GetIcon()

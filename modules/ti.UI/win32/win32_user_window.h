@@ -125,7 +125,6 @@ namespace ti
 		HMENU nativeMenu; // This window's active native menu
 		AutoPtr<Win32Menu> contextMenu; // This window-specific context menu
 		std::string iconPath; // The path to this window's icon
-		HICON defaultIcon;
 
 		void RemoveOldMenu();
 		DWORD GetStyleFromConfig();
