@@ -443,10 +443,6 @@ bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency de
 		return false;
 	}
 
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not determine content length: ") + error;
-		ShowError(error);
-
 	// now stream the resulting HTTP into a file
 	HANDLE file = CreateFileW(outFilename.c_str(), GENERIC_WRITE,
 		0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
