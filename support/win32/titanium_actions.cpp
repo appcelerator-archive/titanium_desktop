@@ -25,7 +25,8 @@ wstring MsiProperty(MSIHANDLE hInstall, const wchar_t* property)
 	return wstring(buffer, bufferLength);
 }
 
-vector<wstring> &Split(const wstring &s, wchar_t delim, vector<wstring> &elems) {
+vector<wstring>&
+Split(const wstring& s, wchar_t delim, vector<wstring>& elems) {
 	wstringstream ss(s);
 	wstring item;
 	while(getline(ss, item, delim)) {
@@ -45,7 +46,8 @@ SharedApplication CreateApplication(MSIHANDLE hInstall)
 		wstring updateManifest = tokens[1];
 		wstring appPath = tokens[2];
 
-		return Application::NewApplication(WideToUTF8(updateManifest), WideToUTF8(appPath));
+		return Application::NewApplication(
+			WideToUTF8(updateManifest), WideToUTF8(appPath));
 	}
 	else
 	{
@@ -58,7 +60,8 @@ SharedApplication CreateApplication(MSIHANDLE hInstall)
 			wstring key = token.substr(0, token.find(L"="));
 			wstring value = token.substr(token.find(L"=")+1);
 
-			manifest.push_back(pair<string,string>(WideToUTF8(key), WideToUTF8(value)));
+			manifest.push_back(pair<string,string>(
+				WideToUTF8(key), WideToUTF8(value)));
 		}
 
 		return Application::NewApplication(manifest);
@@ -70,7 +73,8 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 {
 	vector<SharedDependency> unresolved;
 	vector<SharedComponent> components;
-	vector<SharedComponent>& installedComponents = BootUtils::GetInstalledComponents(true);
+	vector<SharedComponent>& installedComponents =
+		BootUtils::GetInstalledComponents(true);
 	for (size_t i = 0; i < installedComponents.size(); i++)
 	{
 		components.push_back(installedComponents.at(i));
@@ -107,12 +111,14 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 	Split(bundledModules, L',', tokens);
 	for (size_t i = 0; i < tokens.size(); i++)
 	{
-		components.push_back(KComponent::NewComponent(MODULE, WideToUTF8(tokens[i]), "", "", true));
+		components.push_back(KComponent::NewComponent(
+			MODULE, WideToUTF8(tokens[i]), "", "", true));
 	}
 
 	if (bundledRuntime.size() > 0)
 	{
-		components.push_back(KComponent::NewComponent(RUNTIME, "runtime", "", "", true));
+		components.push_back(KComponent::NewComponent(
+			RUNTIME, "runtime", "", "", true));
 	}
 
 	if (updateManifest.size() > 0)
@@ -124,7 +130,8 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 		unresolved = app->ResolveDependencies();
 		if (FileUtils::Basename(WideToUTF8(updateManifest)) == ".update")
 		{
-			unresolved.push_back(Dependency::NewDependencyFromValues(APP_UPDATE, "app_update", app->version));
+			unresolved.push_back(Dependency::NewDependencyFromValues(
+				APP_UPDATE, "app_update", app->version));
 		}
 	}
 
@@ -140,7 +147,8 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 			continue;
 		}
 
-		SharedDependency dependency = Dependency::NewDependencyFromManifestLine(WideToUTF8(key), WideToUTF8(value));
+		SharedDependency dependency = Dependency::NewDependencyFromManifestLine(
+			WideToUTF8(key), WideToUTF8(value));
 		SharedComponent c = BootUtils::ResolveDependency(dependency, components);
 		if (c.isNull())
 		{
@@ -152,7 +160,8 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 }
 
 // a helper function that sends a progress message to the installer
-UINT Progress(MSIHANDLE hInstall, SharedDependency dependency, const wchar_t *intro, int percent)
+UINT Progress(MSIHANDLE hInstall, SharedDependency dependency,
+	const wchar_t *intro, int percent)
 {
 	wstring message(intro);
 	if (dependency->type == MODULE)
@@ -208,7 +217,8 @@ NetInstallSetup(MSIHANDLE hInstall)
 	MsiRecordSetInteger(hProgressRec, 1, 3);
 	MsiRecordSetInteger(hProgressRec, 2, unresolved.size());
 
-	UINT iResult = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
+	UINT iResult = MsiProcessMessage(
+		hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
 	if ((iResult == IDCANCEL))
 		return ERROR_INSTALL_USEREXIT;
 	return ERROR_SUCCESS;
@@ -234,7 +244,8 @@ bool UnzipProgress(char *message, int current, int total, void *data)
 	UnzipProgressData* progressData = (UnzipProgressData*) data;
 
 	int percent = total == 0 ? 0 : floor(((double)current/(double)total)*100);
-	UINT result = Progress(progressData->hInstall, progressData->dependency, L"Extracting ", percent);
+	UINT result = Progress(progressData->hInstall,
+		progressData->dependency, L"Extracting ", percent);
 	if (result == IDCANCEL)
 		return false;
 	return true;
@@ -273,12 +284,14 @@ bool Install(MSIHANDLE hInstall, SharedDependency dependency)
 	if (dependency->type == MODULE)
 	{
 		destination = FileUtils::Join(
-			componentInstallPath.c_str(), "modules", OS_NAME, dependency->name.c_str(), dependency->version.c_str(), NULL);
+			componentInstallPath.c_str(), "modules", OS_NAME,
+			dependency->name.c_str(), dependency->version.c_str(), NULL);
 	}
 	else if (dependency->type == RUNTIME)
 	{
 		destination = FileUtils::Join(
-			componentInstallPath.c_str(), "runtime", OS_NAME, dependency->version.c_str(), NULL);
+			componentInstallPath.c_str(), "runtime", OS_NAME,
+			dependency->version.c_str(), NULL);
 	}
 	else if (dependency->type == SDK || dependency->type == MOBILESDK)
 	{
@@ -305,7 +318,8 @@ bool Install(MSIHANDLE hInstall, SharedDependency dependency)
 	FileUtils::CreateDirectory(destination, true);
 
 	string utf8Path = WideToUTF8(GetFilePath(dependency));
-	bool success = FileUtils::Unzip(utf8Path, destination, &UnzipProgress, (void*)data);
+	bool success = FileUtils::Unzip(
+		utf8Path, destination, &UnzipProgress, (void*)data);
 
 	if (success && dependency->type == APP_UPDATE)
 	{
@@ -413,7 +427,8 @@ bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency de
 		return false;
 	}
 
-	success = HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+	success = HttpQueryInfo(hRequest,
+		HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
 		(LPDWORD)&contentLength, (LPDWORD)&size, NULL);
 	if (!success)
 	{
@@ -463,7 +478,8 @@ bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency de
 	return !failed;
 }
 
-bool ProcessDependency(MSIHANDLE hInstall, PMSIHANDLE hProgressRec, HINTERNET hINet, SharedDependency dependency)
+bool ProcessDependency(MSIHANDLE hInstall, PMSIHANDLE hProgressRec,
+	HINTERNET hINet, SharedDependency dependency)
 {
 	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
 	if ((result == IDCANCEL))
@@ -549,7 +565,8 @@ NetInstall(MSIHANDLE hInstall)
 		for (size_t i = 0; i < unresolved.size(); i++)
 		{
 			SharedDependency dep = unresolved.at(i);
-			if (dep->type != SDK && dep->type != MOBILESDK && dep->type != APP_UPDATE && !sdkInstalled)
+			if (dep->type != SDK && dep->type != MOBILESDK &&
+				dep->type != APP_UPDATE && !sdkInstalled)
 			{
 				if (!ProcessDependency(hInstall, hProgressRec, hINet, dep))
 					return ERROR_INSTALL_USEREXIT;
