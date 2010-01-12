@@ -42,8 +42,11 @@ namespace ti
 			AutoUserWindow CreateWindow(KObjectRef properties);
 			inline KObjectRef GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
-			bool IsToolWindow() {return this->config->IsToolWindow(); }
-			void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
+			inline bool IsToolWindow() {return this->config->IsToolWindow(); }
+			inline void SetToolWindow(bool toolWindow) {this->config->SetToolWindow(toolWindow); }
+			inline bool HasTransparentBackground() { return this->config->HasTransparentBackground(); }
+			inline void SetTransparentBackground(bool transparentBackground) { this->config->SetTransparentBackground(transparentBackground); }
+			inline std::string GetId() { return this->config->GetID(); }
 
 			void _GetCurrentWindow(const kroll::ValueList&, kroll::KValueRef);
 			void _GetDOMWindow(const kroll::ValueList&, kroll::KValueRef);
@@ -62,6 +65,8 @@ namespace ti
 			void _SetUsingChrome(const kroll::ValueList&, kroll::KValueRef);
 			void _IsToolWindow(const kroll::ValueList&, kroll::KValueRef);
 			void _SetToolWindow(const kroll::ValueList&, kroll::KValueRef);
+			void _HasTransparentBackground(const kroll::ValueList&, kroll::KValueRef);
+			void _SetTransparentBackground(const kroll::ValueList&, kroll::KValueRef);
 			void _IsUsingScrollbars(const kroll::ValueList&, kroll::KValueRef);
 			void _IsFullscreen(const kroll::ValueList&, kroll::KValueRef);
 			void _SetFullscreen(const kroll::ValueList&, kroll::KValueRef);
@@ -111,7 +116,6 @@ namespace ti
 			void _SetVisible(const kroll::ValueList&, kroll::KValueRef);
 			void _GetTransparency(const kroll::ValueList&, kroll::KValueRef);
 			void _SetTransparency(const kroll::ValueList&, kroll::KValueRef);
-			void _GetTransparencyColor(const kroll::ValueList&, kroll::KValueRef);
 			void _GetMenu(const kroll::ValueList&, kroll::KValueRef);
 			void _SetMenu(const kroll::ValueList&, kroll::KValueRef);
 			void _GetContextMenu(const kroll::ValueList&, kroll::KValueRef);
@@ -165,39 +169,37 @@ namespace ti
 			virtual bool IsUsingChrome() = 0;
 			virtual bool IsUsingScrollbars() = 0;
 			virtual bool IsFullscreen() = 0;
-			virtual std::string GetId() = 0;
 			virtual void Open();
 			virtual bool Close();
 			void Closed();
-	
 			virtual double GetX() = 0;
 			virtual void SetX(double x) = 0;
 			virtual double GetY() = 0;
 			virtual void SetY(double y) = 0;
-	
 			virtual double GetWidth() = 0;
 			virtual void SetWidth(double width) = 0;
 			virtual double GetMaxWidth() = 0;
 			virtual void SetMaxWidth(double width) = 0;
 			virtual double GetMinWidth() = 0;
 			virtual void SetMinWidth(double width) = 0;
-	
 			virtual double GetHeight() = 0;
 			virtual void SetHeight(double height) = 0;
 			virtual double GetMaxHeight() = 0;
 			virtual void SetMaxHeight(double height) = 0;
 			virtual double GetMinHeight() = 0;
 			virtual void SetMinHeight(double height) = 0;
-	
-			virtual Bounds GetBounds() = 0;
-			virtual void SetBounds(Bounds bounds) = 0;
+			virtual Bounds GetBounds();
+			virtual Bounds GetBoundsImpl() = 0;
+			void SetBounds(Bounds bounds);
+			virtual void SetBoundsImpl(Bounds bounds) = 0;
 			virtual std::string GetTitle() = 0;
 			virtual void SetTitle(std::string& title);
 			virtual void SetTitleImpl(std::string& title) = 0;
 			virtual std::string GetURL() = 0;
 			virtual void SetURL(std::string &url) = 0;
 			virtual bool IsResizable() = 0;
-			virtual void SetResizable(bool resizable) = 0;
+			virtual void SetResizable(bool resizable);
+			virtual void SetResizableImpl(bool resizable) = 0;
 			virtual bool IsMaximizable() = 0;
 			virtual void SetMaximizable(bool maximizable) = 0;
 			virtual bool IsMinimizable() = 0;
@@ -207,7 +209,6 @@ namespace ti
 			virtual bool IsVisible() = 0;
 			virtual double GetTransparency() = 0;
 			virtual void SetTransparency(double transparency) = 0;
-			virtual std::string GetTransparencyColor() { return ""; }
 			virtual void SetFullscreen(bool fullscreen) = 0;
 			virtual void SetUsingChrome(bool chrome) = 0;
 			virtual void SetMenu(AutoMenu menu) = 0;

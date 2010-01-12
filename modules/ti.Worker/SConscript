@@ -6,22 +6,13 @@ Import('build')
 env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_WORKER_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
+build.add_thirdparty(env, 'webkit')
 
 env.Append(CPPPATH = ['%s/modules/javascript' % build.kroll_source_dir])
 env.Append(LIBPATH=[build.get_module('javascript').build_dir])
 env.Append(LIBS=['javascriptmodule'])
 
-webkit_lib = build.tp('webkit', 'lib')
-webkit_inc = build.tp('webkit', 'include')
-
-if build.is_linux():
-	env.Append(LIBS=['webkittitanium-1.0'])
-	env.Append(LIBPATH=[webkit_lib])
-	env.Append(CPPPATH=[webkit_inc])
-elif build.is_win32():
-	env.Append(LIBPATH=[webkit_lib])
-	env.Append(CPPPATH=[webkit_inc])
-	env.Append(LIBS=['WebKitGUID', 'WebKit'])
+if build.is_win32():
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
 

@@ -279,3 +279,11 @@ end
 def api_is_there()
 	return defined?(RSS) != nil
 end
+
+def test_rb_collect(input)
+    return input.collect {|x| x * 2}
+end
+
+def test_rb_map(input)
+    return input.map {|x| x * 2}
+end

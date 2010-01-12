@@ -247,7 +247,6 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b1).should_be_object();
 		value_of(b1.length).should_be_number();
 		value_of(b1.toString).should_be_function();
-		value_of(b1.get).should_be_function();
 		value_of(b1.indexOf).should_be_function();
 		value_of(b1.lastIndexOf).should_be_function();
 		value_of(b1.charAt).should_be_function();
@@ -266,7 +265,6 @@ describe("Blob, KObject, KList, etc",{
 		value_of(b1).should_be_object();
 		value_of(b1.length).should_be_number();
 		value_of(b1.toString).should_be_function();
-		value_of(b1.get).should_be_function();
 		value_of(b1.indexOf).should_be_function();
 		value_of(b1.lastIndexOf).should_be_function();
 		value_of(b1.charAt).should_be_function();

@@ -7,7 +7,6 @@
 #include "../ui_module.h"
 #include <iostream>
 #include <Poco/Process.h>
-#define G_OBJECT_USER_WINDOW_KEY "gtk-user-window"
 #define TRANSPARENCY_MAJOR_VERSION 2
 #define TRANSPARENCY_MINOR_VERSION 16
 extern const guint gtk_major_version;
@@ -31,6 +30,7 @@ namespace ti
 
 	static gboolean DeleteCallback(GtkWidget*, GdkEvent*, gpointer);
 	static gboolean EventCallback(GtkWidget*, GdkEvent*, gpointer);
+	static gboolean WebViewReadyCallback(WebKitWebView*, gpointer);
 	static void WindowObjectClearedCallback(WebKitWebView*,
 		WebKitWebFrame*, JSGlobalContextRef, JSObjectRef, gpointer);
 	static void PopulatePopupCallback(WebKitWebView*, GtkMenu*, gpointer);
@@ -59,7 +59,7 @@ namespace ti
 	static bool MakeScriptDialog(DialogType type, GtkWindow* window,
 		const gchar* message, const gchar* defaultPromptResponse,
 		char** promptResponse);
-	static inline bool GtkVersionSupportsWebViewTransparency();
+	static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
 
 	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
@@ -90,154 +90,128 @@ namespace ti
 		}
 	}
 
+	void GtkUserWindow::CreateWidgets()
+	{
+		this->gtkWindow = GTK_WINDOW(gtk_window_new(GTK_WINDOW_TOPLEVEL));
+		this->vbox = gtk_vbox_new(FALSE, 0);
+		this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
+
+		// By default the "container" is just the WebView. This will be packed
+		// directly into the window's vbox or into a scrolled window.
+		GtkWidget* webViewContainer = GTK_WIDGET(webView);
+		if (this->IsUsingScrollbars())
+		{
+			GtkWidget* scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
+			gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
+				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+			gtk_container_add(GTK_CONTAINER(scrolledWindow), GTK_WIDGET(webView));
+			webViewContainer = scrolledWindow;
+		}
+
+		gtk_box_pack_start(GTK_BOX(vbox), webViewContainer, TRUE, TRUE, 0);
+		gtk_container_add(GTK_CONTAINER(this->gtkWindow), vbox);
+
+		gtk_widget_set_name(GTK_WIDGET(this->gtkWindow), this->config->GetTitle().c_str());
+		gtk_window_set_title(this->gtkWindow, this->config->GetTitle().c_str());
+
+		if (this->IsToolWindow())
+		{
+			gtk_window_set_skip_taskbar_hint(this->gtkWindow, TRUE);
+			gtk_window_set_skip_pager_hint(this->gtkWindow, TRUE);
+		}
+
+		this->deleteCallbackId = g_signal_connect(
+			this->gtkWindow, "delete-event", G_CALLBACK(DeleteCallback), this);
+		g_signal_connect(this->gtkWindow, "event", G_CALLBACK(EventCallback), this);
+
+		g_object_connect(webView,
+			"signal::web-view-ready", G_CALLBACK(WebViewReadyCallback), this,
+			"signal::window-object-cleared", G_CALLBACK(WindowObjectClearedCallback), this,
+			"signal::new-window-policy-decision-requested", G_CALLBACK(NewWindowPolicyDecisionCallback), this,
+			"signal::populate-popup", G_CALLBACK(PopulatePopupCallback), this,
+			"signal::load-finished", G_CALLBACK(LoadFinishedCallback), this,
+			"signal::title-changed", G_CALLBACK(TitleChangedCallback), this,
+			"signal::notify::window-features", G_CALLBACK(FeaturesChangedCallback), this,
+			"signal::create-web-view", G_CALLBACK(CreateWebViewCallback), this,
+			"signal::script-alert", G_CALLBACK(ScriptAlertCallback), this->gtkWindow,
+			"signal::script-confirm", G_CALLBACK(ScriptConfirmCallback), this->gtkWindow,
+			"signal::script-prompt", G_CALLBACK(ScriptPromptCallback), this->gtkWindow,
+			"signal::close-web-view", G_CALLBACK(CloseWebViewCallback), this,
+			NULL);
+
+		WebKitWebInspector* inspector = webkit_web_view_get_inspector(webView);
+		g_object_connect(inspector,
+			"signal::inspect-web-view", G_CALLBACK(InspectWebViewCallback), this,
+			"signal::show-window", G_CALLBACK(InspectorShowWindowCallback), this,
+			NULL);
+	}
+
+	void GtkUserWindow::ShowWidgets()
+	{
+		WebKitWebSettings* settings = webkit_web_settings_new();
+		g_object_set(G_OBJECT(settings), 
+			"enable-developer-extras", TRUE,
+			"enable-universal-access-from-file-uris", TRUE,
+			"javascript-can-open-windows-automatically", TRUE,
+			NULL);
+		webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
+
+		// Get the default user agent, append the product name and version and
+		// then record the new user agent in the global object.
+		static std::string userAgent;
+		if (userAgent.empty())
+		{
+			gchar* cUserAgent = 0;
+			g_object_get(G_OBJECT(settings), "user-agent", &cUserAgent, NULL);
+			userAgent.append(cUserAgent);
+
+			// Force the inclusion of a version string. WebKit GTK does not do
+			// this by default and some misbehaving JavaScript code relies on it.
+			// https://appcelerator.lighthouseapp.com/projects/25719/tickets/149-windownavigator-is-undefined-when-running-on-linux
+			userAgent.append(" Version/4.0 "PRODUCT_NAME"/"PRODUCT_VERSION);
+			host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
+
+			g_free(cUserAgent);
+		}
+		g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
+
+		this->SetupTransparency();
+		gtk_widget_realize(GTK_WIDGET(this->gtkWindow));
+
+		this->SetupDecorations();
+		this->SetupSize();
+		this->SetupSizeLimits();
+		this->SetupMenu();
+		this->SetupIcon();
+		this->SetTopMost(config->IsTopMost());
+		this->SetCloseable(config->IsCloseable());
+		this->SetResizable(config->IsResizable());
+
+		gtk_widget_grab_focus(GTK_WIDGET(webView));
+		webkit_web_view_open(webView, this->config->GetURL().c_str());
+
+		if (this->IsVisible())
+			gtk_widget_show_all(GTK_WIDGET(this->gtkWindow));
+
+		this->SetupPosition();
+
+		if (this->config->IsFullscreen())
+			gtk_window_fullscreen(this->gtkWindow);
+
+		if (this->config->IsMaximized())
+			this->Maximize();
+
+		if (this->config->IsMinimized())
+			this->Minimize();
+
+		UserWindow::Open();
+		this->FireEvent(Event::OPENED);
+	}
+
 	void GtkUserWindow::Open()
 	{
-		if (this->gtkWindow == NULL)
-		{
-			this->webView = WEBKIT_WEB_VIEW(webkit_web_view_new());
-			g_object_set_data(G_OBJECT(this->webView), G_OBJECT_USER_WINDOW_KEY, this);
-
-			g_object_connect(G_OBJECT(webView),
-				"signal::window-object-cleared",
-				G_CALLBACK(WindowObjectClearedCallback), this,
-				"signal::new-window-policy-decision-requested",
-				G_CALLBACK(NewWindowPolicyDecisionCallback), this,
-				"signal::populate-popup",
-				G_CALLBACK(PopulatePopupCallback), this,
-				"signal::load-finished",
-				G_CALLBACK(LoadFinishedCallback), this,
-				"signal::title-changed",
-				G_CALLBACK(TitleChangedCallback), this,
-				"signal::notify::window-features",
-				G_CALLBACK(FeaturesChangedCallback), this,
-				"signal::create-web-view",
-				G_CALLBACK(CreateWebViewCallback), this,
-				"signal::script-alert",
-				G_CALLBACK(ScriptAlertCallback), this->gtkWindow,
-				"signal::script-confirm",
-				G_CALLBACK(ScriptConfirmCallback), this->gtkWindow,
-				"signal::script-prompt",
-				G_CALLBACK(ScriptPromptCallback), this->gtkWindow,
-				NULL);
-
-			WebKitWebSettings* settings = webkit_web_settings_new();
-			g_object_set(G_OBJECT(settings), 
-				"enable-developer-extras", TRUE,
-				"enable-universal-access-from-file-uris", TRUE,
-				"javascript-can-open-windows-automatically", TRUE,
-				NULL);
-			webkit_web_view_set_settings(WEBKIT_WEB_VIEW(webView), settings);
-
-			// Get the default user agent, append the product name and version and
-			// then record the new user agent in the global object.
-			static std::string userAgent;
-			if (userAgent.empty())
-			{
-				const char* cUserAgent = 0;
-				g_object_get(G_OBJECT(settings), "user-agent", &cUserAgent, NULL);
-				userAgent.append(cUserAgent);
-
-				// Force the inclusion of a version string. WebKit GTK does not do
-				// this by default and some misbehaving JavaScript code relies on it.
-				// https://appcelerator.lighthouseapp.com/projects/25719/tickets/
-				// 149-windownavigator-is-undefined-when-running-on-linux
-				userAgent.append(" Version/4.0 "PRODUCT_NAME"/"PRODUCT_VERSION);
-				host->GetGlobalObject()->Set("userAgent", Value::NewString(userAgent));
-			}
-			g_object_set(G_OBJECT(settings), "user-agent", userAgent.c_str(), NULL);
-
-			WebKitWebInspector *inspector = webkit_web_view_get_inspector(webView);
-			g_signal_connect(
-				G_OBJECT(inspector), "inspect-web-view",
-				G_CALLBACK(InspectWebViewCallback), this);
-			g_signal_connect(
-				G_OBJECT(inspector), "show-window",
-				G_CALLBACK(InspectorShowWindowCallback), this);
-
-			GtkWidget* view_container = NULL;
-			if (this->IsUsingScrollbars())
-			{
-				/* web view scroller */
-				GtkWidget* scrolledWindow = gtk_scrolled_window_new (NULL, NULL);
-				gtk_scrolled_window_set_policy(
-					GTK_SCROLLED_WINDOW(scrolledWindow),
-					GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-				gtk_container_add(
-					GTK_CONTAINER(scrolledWindow), GTK_WIDGET(webView));
-				view_container = scrolledWindow;
-			}
-			else // No scrollin' fer ya.
-			{
-				view_container = GTK_WIDGET(webView);
-			}
-	
-			/* main window vbox */
-			this->vbox = gtk_vbox_new(FALSE, 0);
-			gtk_box_pack_start(GTK_BOX(vbox), GTK_WIDGET(view_container), TRUE, TRUE, 0);
-
-			/* main window */
-			GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-			if (this->IsToolWindow())
-			{
-				gtk_window_set_skip_taskbar_hint(GTK_WINDOW(window), TRUE);
-				gtk_window_set_skip_pager_hint(GTK_WINDOW(window), TRUE);
-			}
-
-			gtk_widget_set_name(window, this->config->GetTitle().c_str());
-			gtk_window_set_title(GTK_WINDOW(window), this->config->GetTitle().c_str());
-
-			this->deleteCallbackId = g_signal_connect(
-				G_OBJECT(window), "delete-event", G_CALLBACK(DeleteCallback), this);
-			g_signal_connect(
-				G_OBJECT(window), "event", G_CALLBACK(EventCallback), this);
-
-			gtk_container_add(GTK_CONTAINER(window), vbox);
-	
-			this->gtkWindow = GTK_WINDOW(window);
-			this->SetupTransparency();
-
-			gtk_widget_realize(window);
-			this->SetupDecorations();
-			this->SetupSize();
-			this->SetupSizeLimits();
-			this->SetupPosition();
-			this->SetupMenu();
-			this->SetupIcon();
-			this->SetTopMost(config->IsTopMost());
-			this->SetCloseable(config->IsCloseable());
-			this->SetResizable(config->IsResizable());
-
-			gtk_widget_grab_focus(GTK_WIDGET(webView));
-			webkit_web_view_open(webView, this->config->GetURL().c_str());
-
-			if (this->IsVisible())
-			{
-				gtk_widget_show_all(window);
-			}
-	
-			if (this->config->IsFullscreen())
-			{
-				gtk_window_fullscreen(this->gtkWindow);
-			}
-	
-			if (this->config->IsMaximized())
-			{
-				this->Maximize();
-			}
-	
-			if (this->config->IsMinimized())
-			{
-				this->Minimize();
-			}
-
-			UserWindow::Open();
-			this->FireEvent(Event::OPENED);
-		}
-		else
-		{
-			this->Show();
-		}
+		this->CreateWidgets();
+		this->ShowWidgets();
 	}
 
 	static gboolean DeleteCallback(GtkWidget* widget, GdkEvent* event, gpointer data)
@@ -262,14 +236,14 @@ namespace ti
 			// Destroy the GTK bits, if we have them first, because
 			// we need to assume the GTK window is gone for  everything
 			// below (this method might be called by DeleteCallback)
-			if (this->gtkWindow != NULL)
+			if (this->gtkWindow)
 			{
 				// We don't want the destroy signal handler to fire after now.
 				g_signal_handler_disconnect(this->gtkWindow, this->deleteCallbackId);
 				gtk_widget_destroy(GTK_WIDGET(this->gtkWindow));
 
-				this->gtkWindow = NULL;
-				this->webView = NULL;
+				this->gtkWindow = 0;
+				this->webView = 0;
 			}
 			this->RemoveOldMenu(); // Cleanup old menu
 
@@ -281,7 +255,7 @@ namespace ti
 	
 	void GtkUserWindow::SetupTransparency()
 	{
-		if (this->gtkWindow && GtkVersionSupportsWebViewTransparency())
+		if (this->gtkWindow && this->HasTransparentBackground())
 		{
 			GdkScreen* screen = gtk_widget_get_screen(GTK_WIDGET(this->gtkWindow));
 			GdkColormap* colormap = gdk_screen_get_rgba_colormap(screen);
@@ -292,9 +266,11 @@ namespace ti
 				colormap = gdk_screen_get_rgb_colormap(screen);
 			}
 			gtk_widget_set_colormap(GTK_WIDGET(this->gtkWindow), colormap);
+
+			webkit_web_view_set_transparent(this->webView, TRUE);
 		}
 	}
-	
+
 	void GtkUserWindow::SetupDecorations()
 	{
 		if (this->gtkWindow != NULL)
@@ -382,55 +358,56 @@ namespace ti
 	
 	void GtkUserWindow::SetupPosition()
 	{
-		if (this->gtkWindow != NULL)
+		if (!this->gtkWindow)
+			return;
+
+		int x = this->config->GetX();
+		int y = this->config->GetY();
+	
+		GdkScreen* screen = gdk_screen_get_default();
+		if (x == UIBinding::CENTERED)
 		{
-			int x = this->config->GetX();
-			int y = this->config->GetY();
-	
-			GdkScreen* screen = gdk_screen_get_default();
-			if (x == UIBinding::CENTERED)
-			{
-				x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
-				this->config->SetX(x);
-			}
-			if (y == UIBinding::CENTERED)
-			{
-				y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
-				this->config->SetY(y);
-			}
-			gtk_window_move(this->gtkWindow, x, y);
-	
-			// Moving in GTK is asynchronous, so we prime the
-			// values here in hopes that things will turn out okay.
-			// Another alternative would be to block until a resize
-			// is detected, but that might leave the application in
-			// a funky state.
-			this->targetX = x;
-			this->targetY = y;
+			x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
+			this->config->SetX(x);
 		}
-	}
+		if (y == UIBinding::CENTERED)
+		{
+			y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
+			this->config->SetY(y);
+		}
+
+		gtk_window_move(this->gtkWindow, x, y);
 	
+		// Moving in GTK is asynchronous, so we prime the
+		// values here in hopes that things will turn out okay.
+		// Another alternative would be to block until a resize
+		// is detected, but that might leave the application in
+		// a funky state.
+		this->targetX = x;
+		this->targetY = y;
+		
+	}
+
 	void GtkUserWindow::SetupSize()
 	{
-		if (this->gtkWindow != NULL)
-		{
-			if (this->IsResizable())
-				gtk_window_resize(this->gtkWindow,
-					(int) this->config->GetWidth(),
-					(int) this->config->GetHeight());
-			else
-				this->SetupSizeLimits();
+		if (!this->gtkWindow)
+			return;
+
+		if (this->IsResizable())
+			gtk_window_resize(this->gtkWindow,
+				this->config->GetWidth(), this->config->GetHeight());
+		else
+			this->SetupSizeLimits();
 	
-			// Resizing in GTK is asynchronous, so we prime the
-			// values here in hopes that things will turn out okay.
-			// Another alternative would be to block until a resize
-			// is detected, but that might leave the application in
-			// a funky state.
-			this->targetWidth = this->config->GetWidth();
-			this->targetHeight = this->config->GetHeight();
-		}
+		// Resizing in GTK is asynchronous, so we prime the
+		// values here in hopes that things will turn out okay.
+		// Another alternative would be to block until a resize
+		// is detected, but that might leave the application in
+		// a funky state.
+		this->targetWidth = this->config->GetWidth();
+		this->targetHeight = this->config->GetHeight();
 	}
-	
+
 	void GtkUserWindow::SetupIcon()
 	{
 		if (this->gtkWindow == NULL)
@@ -458,8 +435,8 @@ namespace ti
 	}
 
 	static gboolean EventCallback(
-		GtkWidget *w,
-		GdkEvent *event,
+		GtkWidget* w,
+		GdkEvent* event,
 		gpointer data)
 	{
 		static int oldWidth = -1;
@@ -524,8 +501,17 @@ namespace ti
 			if ((oldX != -1 && c->x != oldX) || 
 				(oldY != -1 && c->y != oldY))
 			{
-				window->targetX = c->x;
-				window->targetY = c->y;
+				// Try to guess where the left and top edges of the window manager
+				// frame are. This is only a best-guess. Depending on the window manager,
+				// it may be incorrect.
+				GdkRectangle frameExtents;
+				if (GTK_WINDOW(w)->frame)
+					gdk_window_get_frame_extents(GTK_WINDOW(w)->frame, &frameExtents);
+				else
+					gdk_window_get_frame_extents(w->window, &frameExtents);
+
+				window->targetX = frameExtents.x;
+				window->targetY = frameExtents.y;
 				window->FireEvent(Event::MOVED);
 			}
 
@@ -546,26 +532,35 @@ namespace ti
 		return FALSE;
 	}
 
+	static gboolean WebViewReadyCallback(WebKitWebView*, gpointer data)
+	{
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+
+		// Once the window is open, it is in the open window list, so we
+		// need to remove the reference we took earlier to preserve this
+		// window.
+		userWindow->ShowWidgets();
+		userWindow->release();
+		return TRUE;
+	}
+
 	WebKitWebView* CreateWebViewCallback(WebKitWebView* webView,
 		WebKitWebFrame* frame, gpointer data)
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-		AutoUserWindow newWindow = userWindow->CreateWindow(new WindowConfig());
-		newWindow->Open();
+		AutoPtr<GtkUserWindow> newGtkWindow(
+			userWindow->CreateWindow(new WindowConfig()).cast<GtkUserWindow>());
 
-		AutoPtr<GtkUserWindow> gtkNewWindow = newWindow.cast<GtkUserWindow>();
-		if (!gtkNewWindow.isNull())
-		{
-			// We aren't saving a reference to this new window, but we don't
-			// want it to disappear either. We'll release this once the window
-			// is shown.
-			return gtkNewWindow->GetWebView();
-		}
-		else
-		{
-			// Don't you dare ever happen.
+		if (newGtkWindow.isNull()) // Bad.
 			return 0;
-		}
+
+		// The window isn't open yet, so we must save a reference to it here
+		// (it isn't in the open window list) or it will disappear. We'll
+		// remove this reference when the window finishes opening after
+		// web-view-ready is fired.
+		newGtkWindow->duplicate();
+		newGtkWindow->CreateWidgets();
+		return newGtkWindow->GetWebView();
 	}
 
 	static gint NewWindowPolicyDecisionCallback(WebKitWebView* webView,
@@ -636,14 +631,17 @@ namespace ti
 			"y", &y,
 			NULL);
 
+		Bounds b = userWindow->GetBounds();
 		if (width != -1)
-			userWindow->_SetWidth((double) width);
+			b.width = (double) width;
 		if (height != -1)
-			userWindow->_SetHeight((double) height);
+			b.height = (double) height;
 		if (x != -1)
-			userWindow->_SetX((double) x);
+			b.x = (double) x;
 		if (y != -1)
-			userWindow->_SetY((double) y);
+			b.y = (double) y;
+
+		userWindow->SetBounds(b);
 	}
 
 	static void WindowObjectClearedCallback(
@@ -722,8 +720,7 @@ namespace ti
 		return WEBKIT_WEB_VIEW(newWebView);
 	}
 
-	static gboolean InspectorShowWindowCallback(
-		WebKitWebInspector* inspector,
+	static gboolean InspectorShowWindowCallback(WebKitWebInspector* inspector,
 		gpointer data)
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
@@ -739,14 +736,11 @@ namespace ti
 		}
 	}
 
-	static inline bool GtkVersionSupportsWebViewTransparency()
+	static gboolean CloseWebViewCallback(WebKitWebView*, gpointer data)
 	{
-		// This is disabled until issues with
-		// WebKit and RGBA colormaps are solved.
-		return false;
-
-		//return gtk_major_version >= TRANSPARENCY_MAJOR_VERSION &&
-		//	gtk_minor_version >= TRANSPARENCY_MINOR_VERSION;
+		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
+		userWindow->Close();
+		return TRUE;
 	}
 
 	void GtkUserWindow::SetInspectorWindow(GtkWidget* inspectorWindow)
@@ -903,14 +897,7 @@ namespace ti
 			gtk_window_unfullscreen(this->gtkWindow);
 		}
 	}
-	
-	
-	std::string GtkUserWindow::GetId()
-	{
-		return this->config->GetID();
-	}
-	
-	
+
 	double GtkUserWindow::GetX()
 	{
 		return this->targetX;
@@ -991,17 +978,13 @@ namespace ti
 		this->SetupSizeLimits();
 	}
 
-	Bounds GtkUserWindow::GetBounds()
+	Bounds GtkUserWindow::GetBoundsImpl()
 	{
-		Bounds b;
-		b.width = targetWidth;
-		b.height = targetHeight;
-		b.x = targetX;
-		b.y = targetY;
+		Bounds b = {targetX, targetY, targetWidth, targetHeight };
 		return b;
 	}
-	
-	void GtkUserWindow::SetBounds(Bounds b)
+
+	void GtkUserWindow::SetBoundsImpl(Bounds b)
 	{
 		this->SetupPosition();
 		this->SetupSize();
@@ -1048,7 +1031,7 @@ namespace ti
 		return this->config->IsResizable();
 	}
 
-	void GtkUserWindow::SetResizable(bool resizable)
+	void GtkUserWindow::SetResizableImpl(bool resizable)
 	{
 		if (this->gtkWindow != NULL)
 		{
@@ -1097,17 +1080,14 @@ namespace ti
 	{
 		return this->config->GetTransparency();
 	}
-	
+
 	void GtkUserWindow::SetTransparency(double alpha)
 	{
-		if (this->gtkWindow != NULL)
-		{
-			gtk_window_set_opacity(this->gtkWindow, alpha);
-			if (GtkVersionSupportsWebViewTransparency())
-				webkit_web_view_set_transparent(this->webView, alpha < 1.0);
-		}
+		if (!this->gtkWindow)
+			return;
+		gtk_window_set_opacity(this->gtkWindow, alpha);
 	}
-	
+
 	bool GtkUserWindow::IsTopMost()
 	{
 		return this->config->IsTopMost();

@@ -276,7 +276,7 @@ namespace ti
 	void MenuItem::_Disable(const ValueList& args, KValueRef result)
 	{
 		this->enabled = false;
-		this->SetEnabledImpl(true);
+		this->SetEnabledImpl(false);
 	}
 
 	void MenuItem::_SetAutoCheck(const ValueList& args, KValueRef result)

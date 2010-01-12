@@ -25,8 +25,10 @@ public:
 	virtual HRESULT STDMETHODCALLTYPE createWebViewWithRequest(
 		/* [in] */ IWebView *sender,
 		/* [in] */ IWebURLRequest *request,
-		/* [in] */ IPropertyBag *features,
-		/* [retval][out] */ IWebView **newWebView);
+		/* [retval][out] */ IWebView **newWebView)
+	{
+		return createWebViewWithRequest(sender, request, 0, newWebView);
+	}
 
 	virtual HRESULT STDMETHODCALLTYPE webViewShow(
 		/* [in] */ IWebView *sender) { return E_NOTIMPL; }
@@ -299,8 +301,17 @@ public:
 		/* [in] */ HDC hDC,
 		/* [in] */ RECT rect) { return E_NOTIMPL; }
 
+	virtual HRESULT STDMETHODCALLTYPE newBackingStore(
+		/* [in] */ IWebView *webView,
+		/* [in] */ OLE_HANDLE bitmap);
+
 protected:
 	// IWebUIDelegatePrivate
+	virtual HRESULT STDMETHODCALLTYPE createWebViewWithRequest(
+		/* [in] */ IWebView *sender,
+		/* [in] */ IWebURLRequest *request,
+		/* [in] */ IPropertyBag *features,
+		/* [retval][out] */ IWebView **newWebView);
 
 	virtual HRESULT STDMETHODCALLTYPE unused1() { return E_NOTIMPL; }
 	virtual HRESULT STDMETHODCALLTYPE unused2() { return E_NOTIMPL; }

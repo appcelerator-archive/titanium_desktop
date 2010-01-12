@@ -21,7 +21,7 @@ using namespace ti;
 	WebViewDelegate* delegate;
 	BOOL requiresDisplay;
 	AutoPtr<OSXUserWindow>* userWindow;
-	WebInspector *inspector;
+	WebInspector* inspector;
 	BOOL fullscreen;
 	BOOL focused;
 	NSRect savedFrame;

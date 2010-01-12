@@ -4,9 +4,10 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #include "../ui_module.h"
+#include <math.h>
 #define ID_INPUT_FIELD 101
 
-namespace ti 
+namespace ti
 {
 	std::map<DWORD, Win32PopupDialog*> Win32PopupDialog::popups;
 
@@ -46,8 +47,8 @@ namespace ti
 		std::vector<BYTE> v;
 	};
 
-	Win32PopupDialog::Win32PopupDialog(HWND _windowHandle) :
-		windowHandle(_windowHandle),
+	Win32PopupDialog::Win32PopupDialog(HWND windowHandle) :
+		windowHandle(windowHandle),
 		showInputText(false),
 		showCancelButton(false),
 		result(IDNO)
@@ -67,10 +68,10 @@ namespace ti
 	}
 
 	/*static*/
-	void Win32PopupDialog::HandleOKClick(HWND hDlg)
+	void Win32PopupDialog::HandleOKClick(HWND dialog)
 	{
 		TCHAR textEntered[MAX_INPUT_LENGTH];
-		GetDlgItemText(hDlg, ID_INPUT_FIELD, textEntered, MAX_INPUT_LENGTH);
+		GetDlgItemText(dialog, ID_INPUT_FIELD, textEntered, MAX_INPUT_LENGTH);
 
 		Win32PopupDialog* popupDialog = popups[GetCurrentThreadId()];
 		if (popupDialog)
@@ -88,51 +89,52 @@ namespace ti
 	}
 
 	/*static*/
-	INT_PTR CALLBACK Win32PopupDialog::Callback(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
+	INT_PTR CALLBACK Win32PopupDialog::Callback(HWND dialog, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		switch (iMsg)
+		switch (message)
 		{
 			case WM_INITDIALOG:
 			{
 				Win32PopupDialog* popupDialog = popups[GetCurrentThreadId()];
-				HWND hwndOwner = (popupDialog == NULL ? NULL : popupDialog->windowHandle);
-				if (hwndOwner == NULL)
+				HWND parentWindow = (popupDialog == NULL ? NULL : popupDialog->windowHandle);
+				if (parentWindow == NULL)
 				{
-					hwndOwner = GetDesktopWindow();
+					parentWindow = GetDesktopWindow();
 				}
 
-				RECT rcOwner;
-				RECT rcDlg;
-				RECT rc;
-				GetWindowRect(hwndOwner, &rcOwner);
-				GetWindowRect(hDlg, &rcDlg);
-				CopyRect(&rc, &rcOwner);
+				RECT parentRect, dialogRect;
+				GetWindowRect(parentWindow, &parentRect);
+				GetWindowRect(dialog, &dialogRect);
+				int x = parentRect.left + (parentRect.right - parentRect.left) / 2;
+				int y = parentRect.top + (parentRect.bottom - parentRect.top) / 2;
+				x -= (dialogRect.right - dialogRect.left) / 2;
+				y -= (dialogRect.bottom - dialogRect.top) / 2;
+				
+				SetWindowPos(dialog, HWND_TOP, x, y, 0, 0, SWP_NOSIZE);
 
-				// Offset the owner and dialog box rectangles so that right and bottom
-				// values represent the width and height, and then offset the owner again
-				// to discard space taken up by the dialog box.
-				OffsetRect(&rcDlg, -rcDlg.left, -rcDlg.top);
-				OffsetRect(&rc, -rc.left, -rc.top);
-				OffsetRect(&rc, -rcDlg.right, -rcDlg.bottom);
-
-				SetWindowPos(hDlg,
-							HWND_TOP,
-							rcOwner.left + (rc.right / 2),
-							rcOwner.top + (rc.bottom / 2),
-							0, 0,							// Ignores size arguments.
-							SWP_NOSIZE);
-
+				if (popupDialog->showInputText)
+				{
+					if (GetDlgCtrlID((HWND) wParam) != ID_INPUT_FIELD)
+					{
+						HWND inputText = GetDlgItem(dialog, ID_INPUT_FIELD);
+						SetFocus(inputText);
+						SendMessage(inputText, EM_SETSEL,
+							0, popupDialog->inputText.length());
+						return FALSE;
+					}
+				}
+				
 				return TRUE;
 			}
 			case WM_COMMAND:
 				if(GET_WM_COMMAND_ID(wParam, lParam) == IDOK)
 				{
-					Win32PopupDialog::HandleOKClick(hDlg);
-					EndDialog(hDlg, 0);
+					Win32PopupDialog::HandleOKClick(dialog);
+					EndDialog(dialog, 0);
 				}
 				else if(GET_WM_COMMAND_ID(wParam, lParam) == IDCANCEL)
 				{
-					EndDialog(hDlg, 0);
+					EndDialog(dialog, 0);
 				}
 				break;
 		}
@@ -140,20 +142,20 @@ namespace ti
 		return FALSE;
 	}
 
-	int Win32PopupDialog::ParseMessage(std::string stringMsg, std::string stringSearch)
+	int Win32PopupDialog::CountMatches(std::string& message, const char *token)
 	{
-		int NumberOfOccurrences = 0;
-		size_t pos = 0; 
+		int matches = 0;
+		size_t pos = 0, tokenSize = strlen(token);
 		while (pos != std::string::npos) 
 		{
-			pos = stringMsg.find(stringSearch, pos);
-			if (pos!=std::string::npos)
+			pos = message.find(token, pos);
+			if (pos != std::string::npos)
 			{
-				NumberOfOccurrences++;
-				pos = pos+stringSearch.size();
+				matches++;
+				pos += tokenSize;
 			}
 		}
-		return NumberOfOccurrences;
+		return matches;
 	}
 	
 	BOOL Win32PopupDialog::ShowMessageBox(HWND hwnd)
@@ -163,78 +165,67 @@ namespace ti
 
 		if (hdc)
 		{
-			NONCLIENTMETRICSW ncm = { sizeof(ncm) };
-			if (SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, 0, &ncm, 0)) {
+			NONCLIENTMETRICSW nonClientMetrics = { sizeof(NONCLIENTMETRICSW) };
+			if (SystemParametersInfoW(
+				SPI_GETNONCLIENTMETRICS, 0, &nonClientMetrics, 0))
+			{
 				DialogTemplate tmp;
-				std::wstring ws;
+				std::wstring wideTitle(::UTF8ToWide(title));
+				std::wstring wideInputText;
+				if (this->showInputText)
+					wideInputText.assign(::UTF8ToWide(inputText));
 
 				int controlCount = 2;	// at minimum, static label and OK button
-				if(this->showCancelButton) controlCount++;
-				if(this->showInputText) controlCount++;
+				if (this->showCancelButton)
+					controlCount++;
+				if (this->showInputText)
+					controlCount++;
 
-				int NumberOfReturns = 0;
-				int NumberOfTabs = 0;
-				int NumberOfSpace = 0;
 				int messageLines = 0;
-				int messageHeight = 0;
-		
-				NumberOfReturns = ParseMessage(message, "\n");
-				NumberOfTabs    = ParseMessage(message, "\t");
-				NumberOfSpace   = ParseMessage(message, " ");
+				int newlines = CountMatches(message, "\n");
+				int tabs = CountMatches(message, "\t");
+				int spaces = CountMatches(message, " ");
 
-				if( (NumberOfReturns == 0) && (NumberOfTabs == 0) && (NumberOfSpace == 0) )
+				if (newlines == 0 && tabs == 0 && spaces == 0)
 				{
-					std::string tempMessage = message;
-					if(tempMessage.length() != 0)
+					std::string tempMessage(message);
+					if (tempMessage.length() != 0)
 					{
 						int insertAt = 60;
 						int count = 0;
 
-						std::string::iterator it;
-						for(it=tempMessage.begin();it < tempMessage.end(); it++)
+						std::string::iterator it = tempMessage.begin();
+						for (; it < tempMessage.end(); it++)
 						{
 							count++;
-							if(count == 60)
+							if (count == 60)
 							{	
 								count = 0;
-								message.insert(insertAt,"\n");
-								insertAt = insertAt + 60;
+								message.insert(insertAt, "\n");
+								insertAt += 60;
 							}
 						}
 					}
 				}
-
-				if( (NumberOfReturns != 0) && (NumberOfTabs != 0) )
-				{
-					messageLines = (message.length()/60) + NumberOfReturns + (NumberOfTabs/14) + 1;
-					messageHeight = (messageLines * 12);
-				}
-				else if(NumberOfReturns != 0)
-				{
-					messageLines = (message.length()/60) + NumberOfReturns + 1;
-					messageHeight = (messageLines * 12);
-
-				}
-				else if(NumberOfTabs != 0)
-				{
-					messageLines = (message.length()/60) + (NumberOfTabs/14) + 1;
-					messageHeight = (messageLines * 12);
-				}
-				else
-				{
-					messageLines = message.length()/60;
-					messageHeight = (messageLines * 12);
-				}
+				
+				std::wstring wideMessage(::UTF8ToWide(message));
+				messageLines = message.length() / 60;
+				messageLines += ((int) ceil((double)tabs / 14));
+				messageLines += newlines;
+				
+				if (tabs == 0 || newlines == 0)
+					messageLines++;
 
 				int labelHeight = 14;
-				int width = 400;
-				int height = messageHeight +  56; //ButtonHeight+Space; //90;
+				int width = 200;
 				int margin = 10;
 				int buttonWidth = 50;
 				int buttonHeight = 14;
 				int inputHeight = 14;
-
-				if(! this->showInputText)
+				int messageHeight = (messageLines * 12) + (messageLines * margin);
+				int height = messageHeight + 56;
+				
+				if (!this->showInputText)
 				{
 					height -= (inputHeight + margin);
 				}
@@ -244,7 +235,7 @@ namespace ti
 				tmp.Write<WORD>(0xFFFF); // extended dialog template
 				tmp.Write<DWORD>(0); // help ID
 				tmp.Write<DWORD>(0); // extended style
-				tmp.Write<DWORD>(WS_CAPTION | DS_ABSALIGN | DS_FIXEDSYS | DS_SETFONT | DS_MODALFRAME);	// DS_FIXEDSYS removes the close decoration
+				tmp.Write<DWORD>(WS_CAPTION | WS_BORDER | DS_ABSALIGN | DS_SETFONT);
 				tmp.Write<WORD>(controlCount); // number of controls
 				tmp.Write<WORD>(32); // X
 				tmp.Write<WORD>(32); // Y
@@ -253,19 +244,22 @@ namespace ti
 				tmp.WriteString(L""); // no menu
 				tmp.WriteString(L""); // default dialog class
 				//tmp.WriteString(pszTitle); // title
-				tmp.WriteString(ws.assign(title.begin(), title.end()).c_str()); // title
+				tmp.WriteString(wideTitle.c_str()); // title
 
 				// Next comes the font description.
 				// See text for discussion of fancy formula.
-				if (ncm.lfMessageFont.lfHeight < 0)
+				
+				if (nonClientMetrics.lfMessageFont.lfHeight < 0)
 				{
-					ncm.lfMessageFont.lfHeight = -MulDiv(ncm.lfMessageFont.lfHeight, 72, GetDeviceCaps(hdc, LOGPIXELSY));
+					int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+					nonClientMetrics.lfMessageFont.lfHeight =
+						-MulDiv(nonClientMetrics.lfMessageFont.lfHeight, 72, dpi);
 				}
-				tmp.Write<WORD>((WORD)ncm.lfMessageFont.lfHeight); // point
-				tmp.Write<WORD>((WORD)ncm.lfMessageFont.lfWeight); // weight
-				tmp.Write<BYTE>(ncm.lfMessageFont.lfItalic); // Italic
-				tmp.Write<BYTE>(ncm.lfMessageFont.lfCharSet); // CharSet
-				tmp.WriteString(ncm.lfMessageFont.lfFaceName);
+				tmp.Write<WORD>((WORD)nonClientMetrics.lfMessageFont.lfHeight); // point
+				tmp.Write<WORD>((WORD)nonClientMetrics.lfMessageFont.lfWeight); // weight
+				tmp.Write<BYTE>(nonClientMetrics.lfMessageFont.lfItalic); // Italic
+				tmp.Write<BYTE>(nonClientMetrics.lfMessageFont.lfCharSet); // CharSet
+				tmp.WriteString(nonClientMetrics.lfMessageFont.lfFaceName);
 
 				// First control - static label
 				tmp.AlignToDword();
@@ -280,7 +274,7 @@ namespace ti
 				tmp.Write<DWORD>(-1); // control ID
 				tmp.Write<DWORD>(0x0082FFFF); // static
 				//tmp.Write<DWORD>(SS_LEFT);
-				tmp.WriteString(ws.assign(message.begin(), message.end()).c_str()); // text
+				tmp.WriteString(wideMessage.c_str()); // text
 				tmp.Write<WORD>(0); // no extra data
 
 				// Second control - the OK button.
@@ -292,12 +286,12 @@ namespace ti
 				tmp.Write<WORD>(height - margin - buttonHeight); // y
 				tmp.Write<WORD>(buttonWidth); // width
 				tmp.Write<WORD>(buttonHeight); // height
-				tmp.Write<DWORD>(IDOK); // control ID
+				tmp.Write<DWORD>(IDCANCEL); // control ID
 				tmp.Write<DWORD>(0x0080FFFF); // button class atom
-				tmp.WriteString(L"OK"); // text
+				tmp.WriteString(L"Cancel"); // text
 				tmp.Write<WORD>(0); // no extra data
 
-				if(this->showCancelButton)
+				if (this->showCancelButton)
 				{
 					// The Cancel button
 					tmp.AlignToDword();
@@ -308,13 +302,13 @@ namespace ti
 					tmp.Write<WORD>(height - margin - buttonHeight); // y
 					tmp.Write<WORD>(buttonWidth); // width
 					tmp.Write<WORD>(buttonHeight); // height
-					tmp.Write<DWORD>(IDCANCEL); // control ID
+					tmp.Write<DWORD>(IDOK); // control ID
 					tmp.Write<DWORD>(0x0080FFFF); // button class atom
-					tmp.WriteString(L"Cancel"); // text
+					tmp.WriteString(L"OK"); // text
 					tmp.Write<WORD>(0); // no extra data
 				}
 
-				if(this->showInputText)
+				if (this->showInputText)
 				{
 					// The input field
 					tmp.AlignToDword();
@@ -326,13 +320,17 @@ namespace ti
 					tmp.Write<WORD>(width - (2 * margin)); // width
 					tmp.Write<WORD>(inputHeight); // height
 					tmp.Write<DWORD>(ID_INPUT_FIELD); // control ID
-					tmp.Write<DWORD>(0x0081FFFF); // edit class atom
-					tmp.WriteString(ws.assign(inputText.begin(), inputText.end()).c_str()); // text
+					tmp.Write<DWORD>(0x0081FFFF); // edit  class atom
+					tmp.WriteString(wideInputText.c_str()); // text
 					tmp.Write<WORD>(0); // no extra data
 				}
 
 				// Template is ready - go display it.
-				fSuccess = DialogBoxIndirect(GetModuleHandle(NULL), tmp.Template(), hwnd, &Win32PopupDialog::Callback) >= 0;
+				fSuccess = DialogBoxIndirect(
+					GetModuleHandle(NULL),
+					tmp.Template(),
+					hwnd,
+					&Win32PopupDialog::Callback) >= 0;
 			}
 			ReleaseDC(NULL, hdc); // fixed 11 May
 		}

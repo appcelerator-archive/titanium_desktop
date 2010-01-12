@@ -84,20 +84,38 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	this->SetMethod("setUsingChrome", &UserWindow::_SetUsingChrome);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.isToolWindow,since=0.7)
-	 * @tiapi Checks whether a window is a tool window or not.
-	 * @tiresult[bool] True if this window is a tool window, false otherwise.
+	 * @notiapi(method=True,name=UI.UserWindow.isToolWindow,since=0.7)
+	 * @notiapi Checks whether a window is a tool window or not.
+	 * @notiresult[bool] True if this window is a tool window, false otherwise.
 	 */
 	this->SetMethod("isToolWindow", &UserWindow::_IsToolWindow);
 
 	/**
-	 * @tiapi(method=True,name=UI.UserWindow.setToolWindow,since=0.7)
-	 * @tiapi Set whether or not this window is a tool window. The behavior of
-	 * @tiapi changing this setting after a window has been opened is undefined
-	 * @tiapi and likely will have no effect.
-	 * @tiarg[bool, toolWindow] Whether or not this window should be a tool window.
+	 * @notiapi(method=True,name=UI.UserWindow.setToolWindow,since=0.7)
+	 * @notiapi Set whether or not this window is a tool window. The behavior of
+	 * @notiapi changing this setting after a window has been opened is undefined
+	 * @notiapi and likely will have no effect.
+	 * @notiarg[bool, toolWindow] Whether or not this window should be a tool window.
 	 */
 	this->SetMethod("setToolWindow", &UserWindow::_SetToolWindow);
+
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.hasTransparentBackground,since=0.8)
+	 * @tiapi Checks whether a window has a transparent background or not. If a
+	 * @tiapi window has a transparent background, transparent colors on the page
+	 * @tiapi will show through to windows underneath.
+	 * @tiresult[bool] True if this window has a transparent background, false otherwise.
+	 */
+	this->SetMethod("hasTransparentBackground", &UserWindow::_HasTransparentBackground);
+
+	/**
+	 * @notiapi(method=True,name=UI.UserWindow.setTransparentBackground,since=0.8)
+	 * @notiapi Set whether or not this window has a transparent background. The behavior of
+	 * @notiapi changing this setting after a window has been opened is undefined
+	 * @notiapi and likely will have no effect.
+	 * @notiarg[bool, toolWindow] Whether or not this window has a transparent background.
+	 */
+	this->SetMethod("setTransparentBackground", &UserWindow::_SetTransparentBackground);
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.isFullscreen,since=0.5) Checks whether a window is in fullscreen
@@ -224,7 +242,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 * @tiarg(for=UI.UserWindow.setMinHeight,type=Number,name=height) the min-height value of the window
 	 */
 	this->SetMethod("setMinHeight", &UserWindow::_SetMinHeight);
-
+	
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.getBounds,since=0.2) Returns the window bounds
 	 * @tiresult(for=UI.UserWindow.getBounds,type=object) an object containing the value for the window bounds
@@ -352,13 +370,6 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	 */
 
 	this->SetMethod("setTransparency", &UserWindow::_SetTransparency);
-
-	/**
-	 * @tiapi(method=True,returns=String,name=UI.UserWindow.getTransparencyColor,since=0.2) Returns a transparency color for the window
-	 * @tiresult(for=UI.UserWindow.getTransparencyColor,type=String) the transparency color of the window
-	 */
-	this->SetMethod("getTransparencyColor", &UserWindow::_GetTransparencyColor);
-
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.setMenu,since=0.5)
@@ -719,6 +730,17 @@ void UserWindow::_SetToolWindow(const kroll::ValueList& args, kroll::KValueRef r
 {
 	args.VerifyException("setToolWindow", "b");
 	config->SetToolWindow(args.GetBool(0));
+}
+
+void UserWindow::_HasTransparentBackground(const kroll::ValueList& args, kroll::KValueRef result)
+{
+	result->SetBool(this->HasTransparentBackground());
+}
+
+void UserWindow::_SetTransparentBackground(const kroll::ValueList& args, kroll::KValueRef result)
+{
+	args.VerifyException("setTransparentBackground", "b");
+	config->SetTransparentBackground(args.GetBool(0));
 }
 
 void UserWindow::_SetTopMost(const kroll::ValueList& args, kroll::KValueRef result)
@@ -1112,25 +1134,26 @@ void UserWindow::_SetMaxHeight(const kroll::ValueList& args, kroll::KValueRef re
 
 void UserWindow::_GetBounds(const kroll::ValueList& args, kroll::KValueRef result)
 {
-	Bounds bounds;
-	if (this->active)
-	{
-		bounds = this->GetBounds();
-	}
-	else
-	{
-		bounds.x = this->config->GetX();
-		bounds.y = this->config->GetY();
-		bounds.width = this->config->GetWidth();
-		bounds.height = this->config->GetHeight();
-	}
-
-	kroll::StaticBoundObject *b = new kroll::StaticBoundObject();
-	b->Set("x", kroll::Value::NewInt(bounds.x));
-	b->Set("y", kroll::Value::NewInt(bounds.y));
-	b->Set("width", kroll::Value::NewInt(bounds.width));
-	b->Set("height", kroll::Value::NewInt(bounds.height));
+	Bounds bounds = this->GetBounds();
+	KObjectRef b(new StaticBoundObject());
+	b->SetInt("x", bounds.x);
+	b->SetInt("y", bounds.y);
+	b->SetInt("width", bounds.width);
+	b->SetInt("height", bounds.height);
 	result->SetObject(b);
+}
+
+Bounds UserWindow::GetBounds()
+{
+	if (this->active)
+		return this->GetBoundsImpl();
+
+	Bounds bounds;
+	bounds.x = this->config->GetX();
+	bounds.y = this->config->GetY();
+	bounds.width = this->config->GetWidth();
+	bounds.height = this->config->GetHeight();
+	return bounds;
 }
 
 void UserWindow::_SetBounds(const kroll::ValueList& args, kroll::KValueRef result)
@@ -1155,22 +1178,28 @@ void UserWindow::_SetBounds(const kroll::ValueList& args, kroll::KValueRef resul
 	double y = o->Get("y")->ToNumber();
 	double w = o->Get("width")->ToNumber();
 	double h = o->Get("height")->ToNumber();
-	w = Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
-	h = Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
+	
+	Bounds bounds;
+	bounds.x = x;
+	bounds.y = y;
+	bounds.width = w;
+	bounds.height = h;
 
-	this->config->SetX(x);
-	this->config->SetY(y);
+	this->SetBounds(bounds);
+}
+
+void UserWindow::SetBounds(Bounds b)
+{
+	double w = Constrain(b.width, config->GetMinWidth(), config->GetMaxWidth());
+	double h = Constrain(b.height, config->GetMinHeight(), config->GetMaxHeight());
+	this->config->SetX(b.x);
+	this->config->SetY(b.y);
 	this->config->SetWidth(w);
 	this->config->SetHeight(h);
 
 	if (this->active)
 	{
-		Bounds bounds;
-		bounds.x = x;
-		bounds.y = y;
-		bounds.width = w;
-		bounds.height = h;
-		this->SetBounds(bounds);
+		this->SetBoundsImpl(b);
 	}
 }
 
@@ -1250,11 +1279,15 @@ void UserWindow::_IsResizable(const kroll::ValueList& args, kroll::KValueRef res
 void UserWindow::_SetResizable(const kroll::ValueList& args, kroll::KValueRef result)
 {
 	args.VerifyException("setResizable", "b");
-	bool b = args.at(0)->ToBool();
-	this->config->SetResizable(b);
+	this->SetResizable(args.at(0)->ToBool());
+}
+
+void UserWindow::SetResizable(bool resizable)
+{
+	this->config->SetResizable(resizable);
 	if (this->active)
 	{
-		this->SetResizable(b);
+		this->SetResizableImpl(resizable);
 	}
 }
 
@@ -1386,12 +1419,6 @@ void UserWindow::_SetTransparency(const kroll::ValueList& args, kroll::KValueRef
 	{
 		this->SetTransparency(t);
 	}
-}
-
-void UserWindow::_GetTransparencyColor(const kroll::ValueList& args, kroll::KValueRef result)
-{
-	std::string color = this->GetTransparencyColor();
-	result->SetString(color);
 }
 
 void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::KValueRef result)

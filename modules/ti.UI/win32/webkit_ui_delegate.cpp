@@ -79,30 +79,27 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 		config->SetURL(url);
 	}
 
-	int fullscreen = PropertyBagGetIntProperty(features, L"fullscreen");
-	if (fullscreen != -1)
+	if (features)
 	{
-		config->SetFullscreen(fullscreen == 1);
-	}
-	int x = PropertyBagGetIntProperty(features, L"x");
-	if (x != -1)
-	{
-		config->SetX(x);
-	}
-	int y = PropertyBagGetIntProperty(features, L"y");
-	if (y != -1)
-	{
-		config->SetY(y);
-	}
-	int width = PropertyBagGetIntProperty(features, L"width");
-	if (width != -1)
-	{
-		config->SetWidth(width);
-	}
-	int height = PropertyBagGetIntProperty(features, L"height");
-	if (height != -1)
-	{
-		config->SetHeight(height);
+		int fullscreen = PropertyBagGetIntProperty(features, L"fullscreen");
+		if (fullscreen != -1)
+			config->SetFullscreen(fullscreen == 1);
+
+		int x = PropertyBagGetIntProperty(features, L"x");
+		if (x != -1)
+			config->SetX(x);
+
+		int y = PropertyBagGetIntProperty(features, L"y");
+		if (y != -1)
+			config->SetY(y);
+
+		int width = PropertyBagGetIntProperty(features, L"width");
+		if (width != -1)
+			config->SetWidth(width);
+
+		int height = PropertyBagGetIntProperty(features, L"height");
+		if (height != -1)
+			config->SetHeight(height);
 	}
 
 	AutoUserWindow parent = this->window->GetAutoPtr().cast<UserWindow>();
@@ -123,42 +120,36 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewClose(
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewFocus(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewFocus() called");
-	return E_NOTIMPL;
+	window->Focus();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewUnfocus(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewUnfocus() called");
-	return E_NOTIMPL;
+	window->Unfocus();
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::setStatusText(
 	/* [in] */ IWebView *sender,
 	/* [in] */ BSTR text)
 {
-	std::string s;
-
-	if(text)
-	{
-		s.append(_bstr_t(text));
-	}
-	logger->Debug("setStatusText() called '%s'", s.c_str());
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::setFrame(
 	/* [in] */ IWebView *sender,
 	/* [in] */ RECT *frame)
 {
-	Bounds b;
-	b.x = frame->left;
-	b.y = frame->top;
-	b.width = frame->right - frame->left;
-	b.height = frame->bottom - frame->top;
+	Bounds b =
+	{
+		frame->left,
+		frame->top,
+		frame->right - frame->left,
+		frame->bottom - frame->top,
+	};
 	window->SetBounds(b);
-
 	return S_OK;
 }
 
@@ -166,11 +157,11 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewFrame(
 	/* [in] */ IWebView *sender,
 	/* [retval][out] */ RECT *frame)
 {
-	frame->left = window->GetX();
-	frame->top = window->GetY();
-	frame->right = window->GetX() + window->GetWidth();
-	frame->bottom = window->GetY() + window->GetHeight();
-
+	Bounds b = window->GetBounds();
+	frame->left = b.x;
+	frame->top = b.y;
+	frame->right = b.x + b.width;
+	frame->bottom = b.y + b.height;
 	return S_OK;
 }
 
@@ -256,7 +247,6 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::runBeforeUnloadConfirmPanelWith
 	/* [in] */ IWebFrame *initiatedByFrame,
 	/* [retval][out] */ BOOL *result)
 {
-	logger->Debug("runBeforeUnloadConfirmPanelWithMessage() not implemented");
 	return E_NOTIMPL;
 }
 
@@ -318,47 +308,40 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::registerUndoWithTarget(
 	/* [in] */ BSTR actionName,
 	/* [in] */ IUnknown *actionArg)
 {
-	logger->Debug("registerUndoWithTarget() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::removeAllActionsWithTarget(
 	/* [in] */ IWebUndoTarget *target)
 {
-	logger->Debug("removeAllActionsWithTarget() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::setActionTitle(
 	/* [in] */ BSTR actionTitle)
 {
-	logger->Debug("setActionTitle() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::undo()
 {
-	logger->Debug("undo() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::redo()
 {
-	logger->Debug("redo() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::canUndo(
 	/* [retval][out] */ BOOL *result)
 {
-	logger->Debug("canUndo() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::canRedo(
 	/* [retval][out] */ BOOL *result)
 {
-	logger->Debug("canRedo() not implemented");
 	return E_NOTIMPL;
 }
 
@@ -369,7 +352,6 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewAddMessageToConsole(
 	/* [in] */ BSTR url,
 	/* [in] */ BOOL isError)
 {
-	logger->Debug("webViewAddMesageToConsole() not implemented");
 	return E_NOTIMPL;
 }
 
@@ -378,7 +360,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewReceivedFocus(
 {
 	window->FireEvent(Event::FOCUSED);
 	window->Focus(); // Focus the WebView and not the main window.
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewLostFocus(
@@ -386,7 +368,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewLostFocus(
 	/* [in] */ OLE_HANDLE loseFocusTo)
 {
 	window->FireEvent(Event::UNFOCUSED);
-	return E_NOTIMPL;
+	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::doDragDrop(
@@ -396,7 +378,6 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::doDragDrop(
 	/* [in] */ DWORD okEffect,
 	/* [retval][out] */ DWORD *performedEffect)
 {
-	logger->Debug("doDragDrop() not implemented");
 	return E_NOTIMPL;
 }
 
@@ -405,14 +386,12 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewGetDlgCode(
 	/* [in] */ UINT keyCode,
 	/* [retval][out] */ LONG_PTR *code)
 {
-	logger->Debug("webViewGetDlgCode() not implemented");
 	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewPainted(
 	/* [in] */ IWebView *sender)
 {
-	logger->Debug("webViewPainted() not implemented");
 	return E_NOTIMPL;
 }
 
@@ -422,9 +401,20 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::exceededDatabaseQuota(
 	/* [in] */ IWebSecurityOrigin *origin,
 	/* [in] */ BSTR databaseIdentifier)
 {
-	static const unsigned long long defaultQuota = 100 * 1024 * 1024; // 100MB
-	origin->setQuota(defaultQuota);
-	return S_OK;;
+	origin->setQuota(100 * 1024 * 1024); // 100MB
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::newBackingStore(
+	/* [in] */ IWebView *webView,
+	/* [in] */ OLE_HANDLE bitmapHandle)
+{
+	AutoPtr<Win32UserWindow> userWindow = Win32UserWindow::FromWebView(webView);
+	if (userWindow.isNull())
+		return S_OK;
+
+	userWindow->SetBitmap(reinterpret_cast<HBITMAP>(bitmapHandle));
+	return S_OK;
 }
 
 }

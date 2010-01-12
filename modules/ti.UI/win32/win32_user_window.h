@@ -13,7 +13,7 @@ namespace ti
 	{
 		public:
 		Win32UserWindow(WindowConfig* config, AutoUserWindow& parent);
-		virtual ~Win32UserWindow();
+		~Win32UserWindow();
 
 		void OpenFileChooserDialog(KMethodRef callback, bool multiple,
 			std::string& title, std::string& path, std::string& defaultName,
@@ -53,17 +53,16 @@ namespace ti
 		void SetMaxHeight(double height);
 		double GetMinHeight();
 		void SetMinHeight(double height);
-		Bounds GetBounds();
-		void SetBounds(Bounds bounds);
+		Bounds GetBoundsImpl();
+		void SetBoundsImpl(Bounds bounds);
 		void SetTitleImpl(std::string& title);
 		void SetURL(std::string& url);
-		void SetResizable(bool resizable);
+		void SetResizableImpl(bool resizable);
 		void SetMaximizable(bool maximizable);
 		void SetMinimizable(bool minimizable);
 		void SetCloseable(bool closeable);
 		bool IsVisible();
 		void SetTransparency(double transparency);
-		std::string GetTransparencyColor();
 		void SetFullscreen(bool fullscreen);
 		void SetUsingChrome(bool chrome);
 		void SetMenu(AutoMenu menu);
@@ -76,9 +75,9 @@ namespace ti
 		void SetTopMost(bool topmost);
 		void FrameLoaded();
 		void ShowInspector(bool console);
-		static void RegisterWindowClass(HINSTANCE hInstance);
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 		static Win32UserWindow* FromWindow(HWND hWnd);
+		static AutoPtr<Win32UserWindow> FromWebView(IWebView *webView);
+
 		void RedrawMenu();
 		static void RedrawAllMenus();
 		virtual void AppIconChanged();
@@ -95,7 +94,10 @@ namespace ti
 		bool IsUsingChrome() { return config->IsUsingChrome(); }
 		bool IsUsingScrollbars() { return config->IsUsingScrollbars(); }
 		bool IsFullscreen() { return config->IsFullscreen(); }
-		std::string GetId() { return config->GetID(); }
+		void SetBitmap(HBITMAP bitmap) { this->webkitBitmap = bitmap; }
+		UINT_PTR GetTimer() { return this->timer; }
+		void UpdateBitmap();
+		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
 
 		private:
 		kroll::Win32Host* win32Host;
@@ -105,38 +107,41 @@ namespace ti
 		Win32WebKitResourceLoadDelegate* resourceLoadDelegate;
 		Bounds restoreBounds;
 		long restoreStyles;
-		int chromeWidth, chromeHeight;
 		HWND windowHandle;
 		HWND viewWindowHandle;
+		HBITMAP webkitBitmap;
+		UINT_PTR timer;
 		IWebView* webView;
 		IWebFrame* mainFrame;
 		IWebInspector* webInspector;
+		Bounds chromeSize;
+
+		// Set this flag to indicate that when the frame is loaded we want to
+		// show the window - we do this to prevent white screen while the first
+		// URL loads in the WebView.
 		bool requiresDisplay;
 		AutoPtr<Win32Menu> menu; // The window-specific menu
 		AutoPtr<Win32Menu> activeMenu; // This window's active menu
 		HMENU nativeMenu; // This window's active native menu
 		AutoPtr<Win32Menu> contextMenu; // This window-specific context menu
 		std::string iconPath; // The path to this window's icon
-		HICON defaultIcon;
 
 		void RemoveOldMenu();
-		DWORD GetStyleFromConfig() const;
+		DWORD GetStyleFromConfig();
 		void InitWindow();
 		void InitWebKit();
-		void SetupBounds();
-		void SetupPosition();
-		void SetupSize();
+		void SetupFrame();
 		void SetupDecorations();
 		void SetupState();
 		void SetupMenu();
 		void SetupIcon();
+
 		KListRef SelectFile(
 			bool saveDialog, bool multiple, std::string& title,
 			std::string& path, std::string& defaultName,
 			std::vector<std::string>& types, std::string& typesDescription);
 		KListRef SelectDirectory(bool multiple, std::string& title,
 			std::string& path, std::string& defaultName);
-		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
 		static void ParseSelectedFiles(const wchar_t *s,
 			std::vector<std::string> &selectedFiles);
 		Logger* logger;

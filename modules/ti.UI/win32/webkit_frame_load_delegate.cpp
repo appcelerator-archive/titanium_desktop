@@ -32,8 +32,9 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didFinishLoadForFrame(
 	std::wstring wideURL(u);
 	std::string url(::WideToUTF8(wideURL));
 
-	window->PageLoaded(frame_global, url, context);
 	window->FrameLoaded();
+	window->PageLoaded(frame_global, url, context);
+	
 	return S_OK;
 }
 

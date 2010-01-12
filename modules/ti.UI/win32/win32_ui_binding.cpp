@@ -3,10 +3,12 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */
+
 #include "../ui_module.h"
 #define _WINSOCKAPI_
 #include <cstdlib>
 #include <sstream>
+#include <windows.h>
 
 using std::vector;
 namespace ti
@@ -142,19 +144,21 @@ namespace ti
 		UINT flags = LR_DEFAULTSIZE | LR_LOADFROMFILE |
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
-
 		HBITMAP h = 0;
-		if (ext ==  ".ico") {
-			HICON hicon = (HICON) LoadImageA(
-				NULL, path.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
+		if (ext ==  ".ico")
+		{
+			HICON hicon = (HICON) LoadImageA(NULL, path.c_str(), IMAGE_ICON,
+				sizeX, sizeY, LR_LOADFROMFILE);
 			h = Win32UIBinding::IconToBitmap(hicon, sizeX, sizeY);
 			DestroyIcon(hicon);
-
-		} else if (ext == ".bmp") {
+		}
+		else if (ext == ".bmp")
+		{
 			h = (HBITMAP) LoadImageA(
 				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
-
-		} else if (ext == ".png") {
+		}
+		else if (ext == ".png")
+		{
 			h = LoadPNGAsBitmap(path, sizeX, sizeY);
 		}
 
@@ -172,17 +176,20 @@ namespace ti
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
 		HICON h = 0;
-		if (ext ==  ".ico") {
+		if (ext ==  ".ico")
+		{
 			h = (HICON) LoadImageA(
 				NULL, path.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
-
-		} else if (ext == ".bmp") {
+		}
+		else if (ext == ".bmp")
+		{
 			HBITMAP bitmap = (HBITMAP) LoadImageA(
 				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
-
-		} else if (ext == ".png") {
+		}
+		else if (ext == ".png")
+		{
 			HBITMAP bitmap = LoadPNGAsBitmap(path, sizeX, sizeY);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
@@ -197,11 +204,6 @@ namespace ti
 	{
 		if (!bitmap)
 			return 0;
-
-		if (sizeX == 0)
-			sizeX = GetSystemMetrics(SM_CYSMICON);
-		if (sizeY == 0)
-			sizeY = GetSystemMetrics(SM_CYSMICON);
 
 		HBITMAP bitmapMask = CreateCompatibleBitmap(GetDC(NULL), sizeX, sizeY);
 		ICONINFO iconInfo = {0};
@@ -219,11 +221,6 @@ namespace ti
 	{
 		if (!icon)
 			return 0;
-
-		if (sizeX == 0)
-			sizeX = GetSystemMetrics(SM_CYSMICON);
-		if (sizeY == 0)
-			sizeY = GetSystemMetrics(SM_CYSMICON);
 
 		HDC hdc = GetDC(NULL);
 		HDC hdcmem = CreateCompatibleDC(hdc);
@@ -244,66 +241,86 @@ namespace ti
 	/*static*/
 	HBITMAP Win32UIBinding::LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY)
 	{
-		if (sizeX == 0)
-			sizeX = GetSystemMetrics(SM_CYSMICON);
-		if (sizeY == 0)
-			sizeY = GetSystemMetrics(SM_CYSMICON);
-
-		cairo_surface_t* insurface = cairo_image_surface_create_from_png(path.c_str());
-		cairo_t* pngcr = cairo_create(insurface);
-		if (cairo_status(pngcr) != CAIRO_STATUS_SUCCESS) {
+		cairo_surface_t* pngSurface = cairo_image_surface_create_from_png(path.c_str());
+		cairo_t* pngcr = cairo_create(pngSurface);
+		if (cairo_status(pngcr) != CAIRO_STATUS_SUCCESS)
 			return 0;
-		}
 
-		cairo_surface_t* pngsurface = ScaleCairoSurface(insurface, sizeX, sizeY);
+		BITMAPINFO bitmapInfo;
+		memset(&bitmapInfo, 0, sizeof(bitmapInfo));
+		bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bitmapInfo.bmiHeader.biWidth = sizeX;
+		bitmapInfo.bmiHeader.biHeight = -sizeY; // Bottom-up
+		bitmapInfo.bmiHeader.biPlanes = 1;
+		bitmapInfo.bmiHeader.biBitCount = 32;
+		bitmapInfo.bmiHeader.biCompression = BI_RGB;
+		bitmapInfo.bmiHeader.biSizeImage = 0;
+		bitmapInfo.bmiHeader.biXPelsPerMeter = 1000;
+		bitmapInfo.bmiHeader.biYPelsPerMeter = bitmapInfo.bmiHeader.biXPelsPerMeter;
+		bitmapInfo.bmiHeader.biClrUsed = 0;
+		bitmapInfo.bmiHeader.biClrImportant = 0;
 
-		HDC hdc = GetDC(NULL);
-		HDC hdcmem = CreateCompatibleDC(hdc);
-		HBITMAP bitmap = CreateCompatibleBitmap(hdc, sizeX, sizeY);
-		HBITMAP holdbitmap = (HBITMAP) SelectObject(hdcmem, bitmap);
+		void* pixels = NULL;
+		HDC hdc = ::GetDC(NULL);
+		HBITMAP out = CreateDIBSection(hdc, &bitmapInfo,
+			 DIB_RGB_COLORS, &pixels, NULL, 0);
+		::ReleaseDC(NULL, hdc);
 
-		cairo_surface_t* w32surface = cairo_win32_surface_create(hdcmem);
-		cairo_t *cr = cairo_create(w32surface);
-		cairo_set_source_surface(cr, pngsurface, 0, 0);
+		BITMAP info;
+		::GetObjectW(out, sizeof(info), &info);
+		cairo_surface_t* outSurface = cairo_image_surface_create_for_data(
+			(unsigned char*) pixels, CAIRO_FORMAT_ARGB32,
+			sizeX, sizeY, info.bmWidthBytes);
+		cairo_surface_t* scaledSurface = ScaleCairoSurface(pngSurface, sizeX, sizeY);
+
+		cairo_t *cr = cairo_create(outSurface);
+
+		cairo_save(cr);
+		cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cr);
+		cairo_restore(cr);
+
+		cairo_set_source_surface(cr, scaledSurface, 0, 0);
 		cairo_rectangle(cr, 0, 0, sizeX, sizeY);
 		cairo_fill(cr);
 
 		cairo_destroy(cr);
-		cairo_surface_destroy(w32surface);
-		cairo_surface_destroy(pngsurface);
+		cairo_surface_destroy(outSurface);
+		cairo_surface_destroy(scaledSurface);
 		cairo_destroy(pngcr);
-		cairo_surface_destroy(insurface);
-		
-		SelectObject(hdc, holdbitmap);
-		DeleteDC(hdcmem);
-		return bitmap;
+		cairo_surface_destroy(pngSurface);
+
+		return out;
 	}
 
 	cairo_surface_t* Win32UIBinding::ScaleCairoSurface(
-		cairo_surface_t *oldSurface, int newWidth, int newHeight)
+		cairo_surface_t* oldSurface, int newWidth, int newHeight)
 	{
-		int oldWidth = cairo_image_surface_get_width(oldSurface);
-		int oldHeight = cairo_image_surface_get_height(oldSurface);
+		cairo_matrix_t scaleMatrix;
+		cairo_matrix_init_scale(&scaleMatrix,
+			(double) cairo_image_surface_get_width(oldSurface) / (double) newWidth,
+			(double) cairo_image_surface_get_height(oldSurface) / (double) newHeight);
 
-		cairo_surface_t *newSurface = cairo_surface_create_similar(
+		cairo_pattern_t* surfacePattern = cairo_pattern_create_for_surface(oldSurface);
+		cairo_pattern_set_matrix(surfacePattern, &scaleMatrix);
+		cairo_pattern_set_filter(surfacePattern, CAIRO_FILTER_BEST);
+
+		cairo_surface_t* newSurface = cairo_surface_create_similar(
 			oldSurface, CAIRO_CONTENT_COLOR_ALPHA, newWidth, newHeight);
-		cairo_t *cr = cairo_create(newSurface);
-		
-		/* Scale *before* setting the source surface (1) */
-		cairo_scale(cr, (double) newWidth / oldWidth, (double) newHeight / oldHeight);
-		cairo_set_source_surface(cr, oldSurface, 0, 0);
-		
+		cairo_t* cr = cairo_create(newSurface);
+		cairo_set_source(cr, surfacePattern);
+
 		/* To avoid getting the edge pixels blended with 0 alpha, which would 
 		 * occur with the default EXTEND_NONE. Use EXTEND_PAD for 1.2 or newer (2) */
-		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_REFLECT); 
-		
+		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_REFLECT);
+
 		 /* Replace the destination with the source instead of overlaying */
 		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-		
+
 		/* Do the actual drawing */
 		cairo_paint(cr);
 		cairo_destroy(cr);
-		
+
 		return newSurface;
 	 }
 
