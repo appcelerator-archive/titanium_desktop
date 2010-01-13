@@ -10,18 +10,25 @@
 namespace ti
 {
 
+static SCNetworkReachabilityRef primaryTarget = 0;
+static SCNetworkReachabilityRef secondaryTarget = 0;
+
 void NetworkStatus::InitializeLoop()
 {
+	primaryTarget = SCNetworkReachabilityCreateWithName(0, "www.google.com");
+	secondaryTarget = SCNetworkReachabilityCreateWithName(0, "www.yahoo.com");
 }
 
 void NetworkStatus::CleanupLoop()
 {
+	if (primaryTarget)
+		CFRelease(primaryTarget);
+	if (secondaryTarget)
+		CFRelease(secondaryTarget);
 }
 
 bool NetworkStatus::GetStatus()
 {
-	static SCNetworkReachabilityRef primaryTarget = 
-		SCNetworkReachabilityCreateWithName(0, "www.google.com");
 	if (!primaryTarget)
 		return true;
 
@@ -31,8 +38,6 @@ bool NetworkStatus::GetStatus()
 		!(flags & kSCNetworkFlagsConnectionRequired))
 		return true;
 
-	static SCNetworkReachabilityRef secondaryTarget = 
-		SCNetworkReachabilityCreateWithName(0, "www.yahoo.com");
 	if (!secondaryTarget)
 		return true;
 
