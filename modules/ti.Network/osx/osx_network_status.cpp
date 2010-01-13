@@ -32,7 +32,7 @@ bool NetworkStatus::GetStatus()
 		return true;
 
 	static SCNetworkReachabilityRef secondaryTarget = 
-		SCNetworkReachabilityCreateWithName(0, "www.google.com");
+		SCNetworkReachabilityCreateWithName(0, "www.yahoo.com");
 	if (!secondaryTarget)
 		return true;
 
