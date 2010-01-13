@@ -6,6 +6,7 @@
 #include <kroll/kroll.h>
 #include <sstream>
 
+#include "network_status.h"
 #include "network_binding.h"
 #include "tcp_socket_binding.h"
 #include "ipaddress_binding.h"
@@ -149,30 +150,20 @@ namespace ti
 		// NOTE: this is only used internally and shouldn't be published
 		this->SetMethod("FireOnlineStatusChange",&NetworkBinding::FireOnlineStatusChange);
 
-#if defined(OS_LINUX)
-		this->net_status = new DBusNetworkStatus(this);
-		this->net_status->Start();
-#elif defined(OS_OSX)
-		KMethodRef delegate = this->Get("FireOnlineStatusChange")->ToMethod();
-		networkDelegate = [[NetworkReachability alloc] initWithDelegate:delegate];
-#endif
+		this->netStatus = new NetworkStatus(this);
+		this->netStatus->Start();
 	}
 
 	NetworkBinding::~NetworkBinding()
 	{
-#if defined(OS_OSX)
-		[networkDelegate release];
-		networkDelegate=nil;
-#else
-		delete this->net_status;
-#endif
+		delete this->netStatus;
 	}
+
 	void NetworkBinding::Shutdown()
 	{
-		PRINTD("NetworkBinding::Shutdown start");
 		listeners.clear();
-		PRINTD("NetworkBinding::Shutdown finish");
 	}
+
 	void NetworkBinding::_GetByHost(std::string hostname, KValueRef result)
 	{
 		AutoPtr<HostBinding> binding = new HostBinding(hostname);
@@ -182,6 +173,7 @@ namespace ti
 		}
 		result->SetObject(binding);
 	}
+
 	void NetworkBinding::GetHostByAddress(const ValueList& args, KValueRef result)
 	{
 		if (args.at(0)->IsObject())
@@ -223,10 +215,12 @@ namespace ti
 			this->_GetByHost(args.at(0)->ToString(),result);
 		}
 	}
+
 	void NetworkBinding::GetHostByName(const ValueList& args, KValueRef result)
 	{
 		this->_GetByHost(args.at(0)->ToString(),result);
 	}
+
 	void NetworkBinding::CreateIPAddress(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<IPAddressBinding> binding = new IPAddressBinding(args.at(0)->ToString());
@@ -236,33 +230,35 @@ namespace ti
 		}
 		result->SetObject(binding);
 	}
+
 	void NetworkBinding::CreateTCPSocket(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("createTCPSocket", "sn");
 		result->SetObject(new TCPSocketBinding(host,
 			args.GetString(0), args.GetInt(1)));
 	}
+
 	void NetworkBinding::CreateIRCClient(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<IRCClientBinding> irc = new IRCClientBinding(host);
 		result->SetObject(irc);
 	}
+
 	void NetworkBinding::CreateHTTPClient(const ValueList& args, KValueRef result)
 	{
 		result->SetObject(new HTTPClientBinding(host));
 	}
+
 	void NetworkBinding::CreateHTTPServer(const ValueList& args, KValueRef result)
 	{
-		// we hold the reference to this until we're done with it
-		// which happense when the binding impl calls remove
-		KObjectRef http = new HTTPServerBinding(host);
-		result->SetObject(http);
+		result->SetObject(new HTTPServerBinding(host));
 	}
+
 	void NetworkBinding::CreateHTTPCookie(const ValueList& args, KValueRef result)
 	{
-		KObjectRef cookie = new HTTPCookie();
-		result->SetObject(cookie);
+		result->SetObject(new HTTPCookie());
 	}
+
 	void NetworkBinding::AddConnectivityListener(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("addConnectivityListener", "m");
@@ -277,8 +273,7 @@ namespace ti
 	}
 
 	void NetworkBinding::RemoveConnectivityListener(
-		const ValueList& args,
-		KValueRef result)
+		const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("removeConnectivityListener", "n");
 		int id = args.at(0)->ToInt();
@@ -304,7 +299,8 @@ namespace ti
 
 	void NetworkBinding::NetworkStatusChange(bool online)
 	{
-		PRINTD("ti.Network: Online status changed ==> " << online);
+		static Logger* log = Logger::Get("NetworkStatus");
+		log->Debug("ti.Network: Online status changed ==> %i", online);
 		this->Set("online", Value::NewBool(online));
 
 		ValueList args = ValueList();
@@ -320,8 +316,7 @@ namespace ti
 			catch(ValueException& e)
 			{
 				SharedString ss = e.GetValue()->DisplayString();
-				std::cerr << "ti.Network.NetworkStatusChange callback failed: "
-				          << *ss << std::endl;
+				log->Error("Network.NetworkStatus callback failed: %s", ss->c_str());
 			}
 		}
 	}

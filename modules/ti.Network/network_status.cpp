@@ -3,9 +3,10 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
-#include "network_binding.h"
 
-#ifndef OS_OSX
+#include <kroll/thread_manager.h>
+#include "network_binding.h"
+#include "network_status.h"
 
 namespace ti
 {
@@ -24,9 +25,8 @@ namespace ti
 
 	void NetworkStatus::Start()
 	{
-		this->adapter = new RunnableAdapter<NetworkStatus>(
-			*this,
-			&NetworkStatus::StatusLoop);
+		this->adapter = new Poco::RunnableAdapter<NetworkStatus>(
+			*this, &NetworkStatus::StatusLoop);
 		this->thread = new Poco::Thread();
 		this->thread->start(*this->adapter);
 	}
@@ -44,6 +44,8 @@ namespace ti
 
 	void NetworkStatus::StatusLoop()
 	{
+		START_KROLL_THREAD;
+
 		this->InitializeLoop();
 
 		// We want to wake up and detect if we are running more
@@ -71,7 +73,7 @@ namespace ti
 		}
 
 		this->CleanupLoop();
+
+		END_KROLL_THREAD;
 	}
 }
-
-#endif
