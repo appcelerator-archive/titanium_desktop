@@ -45,6 +45,7 @@
 		ConfigurableDirectory="INSTALLDIR">
 		<ComponentRef Id="ProgramMenuDir" />
 		<MergeRef Id="CRT80" />
+		
 		${app_components}
 	</Feature>
 
