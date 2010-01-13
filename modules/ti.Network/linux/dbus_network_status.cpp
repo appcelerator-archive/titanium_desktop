@@ -4,17 +4,20 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #include "../network_status.h"
+#include <dbus/dbus.h>
+#include <dbus/dbus-glib.h>
+#include <gdk/gdk.h>
 
 namespace ti
 {
 
 static DBusGConnection* bus = 0;
 static DBusGProxy* wicdWiredProxy = 0;
-static DBusGProxy* wicdwirelessProxy = 0;
+static DBusGProxy* wicdWirelessProxy = 0;
 static DBusGProxy* networkManagerProxy = 0;
-static KMethod statusCheckWork(0);
+static KMethodRef statusCheckWork(0);
 
-void StatusCheckWork(const ValueList& args, KValueRef lresult)
+static KValueRef StatusCheckWork(const ValueList& args)
 {
 	GError* error = 0;
 	gchar* result = 0;
@@ -38,17 +41,16 @@ void StatusCheckWork(const ValueList& args, KValueRef lresult)
 	}
 	else if (result)
 	{
-		lresult->SetBool(true);
-		return;
+		return Value::NewBool(true);
 	}
 	if (wicdWiredProxy)
 		g_object_unref(wicdWiredProxy);
 
-	wicdwirelessProxy = dbus_g_proxy_new_for_name(bus, "org.wicd.daemon",
+	wicdWirelessProxy = dbus_g_proxy_new_for_name(bus, "org.wicd.daemon",
 		"/org/wicd/daemon", "org.wicd.daemon.wireless");
 	error = 0;
 
-	if (!dbus_g_proxy_call(wicdwirelessProxy, "GetWirelessIP", 
+	if (!dbus_g_proxy_call(wicdWirelessProxy, "GetWirelessIP", 
 		&error, G_TYPE_INVALID, G_TYPE_STRING, &result, G_TYPE_INVALID))
 	{
 		// 16 == interface not up
@@ -58,12 +60,11 @@ void StatusCheckWork(const ValueList& args, KValueRef lresult)
 	}
 	else if (result)
 	{
-		lresult->SetBool(true);
-		return;
+		return Value::NewBool(true);
 	}
 
-	if (!wicdwirelessProxy)
-		g_object_unref(wicdwirelessProxy);
+	if (!wicdWirelessProxy)
+		g_object_unref(wicdWirelessProxy);
 
 	networkManagerProxy = dbus_g_proxy_new_for_name(bus,
 		"org.freedesktop.NetworkManager",
@@ -82,8 +83,7 @@ void StatusCheckWork(const ValueList& args, KValueRef lresult)
 	}
 	else if (g_value_get_uint(&nm_state_val) == 3)
 	{
-		lresult->SetBool(true);
-		return;
+		return Value::NewBool(true);
 	}
 	else
 	{
@@ -93,9 +93,9 @@ void StatusCheckWork(const ValueList& args, KValueRef lresult)
 		g_object_unref(networkManagerProxy);
 
 	if (!foundNetworkManager)
-		lresult->SetBool(true);
+		return Value::NewBool(true);
 	else
-		lresult->SetBool(false);
+		return Value::NewBool(false);
 }
 
 
@@ -107,7 +107,7 @@ void NetworkStatus::InitializeLoop()
 	dbus_threads_init_default();
 
 	GError* error = 0;
-	>bus = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
+	bus = dbus_g_bus_get(DBUS_BUS_SYSTEM, &error);
 
 	if (!bus)
 	{
@@ -127,7 +127,7 @@ void NetworkStatus::CleanupLoop()
 		g_object_unref(wicdWiredProxy);
 }
 
-bool DBusNetworkStatus::GetStatus()
+bool NetworkStatus::GetStatus()
 {
 	if (!bus)
 		return true;
