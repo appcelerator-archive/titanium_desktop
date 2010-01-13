@@ -284,7 +284,7 @@ if __name__ == '__main__':
 		print "An example of running this command:"
 		print
 		print " Build and then run in the current directory from a project in ~/tmp/myproject"
-		print "	> tibuild.py -d . -s /Library/Application\ Support/Titanium -r ~/tmp/myproject -a /Library/Application\ Support/Titanium/sdk/osx/0.4.0"
+		print "	> tibuild.py -d . -s /Library/Application\ Support/Titanium -a /Library/Application\ Support/Titanium/sdk/osx/0.4.0 -r ~/tmp/myproject"
 		print
 		sys.exit(1)
 	appdir = os.path.abspath(os.path.expanduser(dequote(args[0])))
