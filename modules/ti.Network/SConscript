@@ -22,7 +22,7 @@ if build.is_win32():
 	env.Append(CCFLAGS=['/MD'])
 	env.Append(LIBS=['wsock32','ws2_32', 'ole32', 'comsuppw', 'wbemuuid'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
-	sources += Glob("win32/stub_network_status.cpp")
+	sources += Glob("win32/*.cpp")
 
 m = build.add_module('ti.Network', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tinetworkmodule', source = sources)
