@@ -60,13 +60,6 @@ class DesktopBuilder(object):
 			options.executable = os.path.join(self.executable_dir, self.appname)
 			shutil.copy(kboot, options.executable)
 
-		if options.platform == 'win32':
-			# copy msvcrt
-			msvcrt = os.path.join(self.executable_dir, 'Microsoft.VC80.CRT')
-			if not os.path.exists(msvcrt):
-				os.makedirs(msvcrt)
-			dir_util.copy_tree(os.path.join(options.runtime_dir,'Microsoft.VC80.CRT'), msvcrt)
-
 		# copy in the resources
 		rdir = os.path.join(options.appdir,'Resources')
 		dir_util.copy_tree(rdir, self.resources_dir, preserve_symlinks=True)

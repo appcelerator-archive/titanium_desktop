@@ -35,6 +35,8 @@
 
 		<Directory Id="DesktopFolder" Name="Desktop" />
 		
+		<Merge Id="CRT80" Language="${app_language}" SourceFile="${crt_msm}" DiskId="1" />
+		
 		${bundled_xml}
     </Directory>
 	
@@ -42,6 +44,7 @@
 	<Feature Id="Application" Title="${app_name}" Description="${app_description}" Level="1"
 		ConfigurableDirectory="INSTALLDIR">
 		<ComponentRef Id="ProgramMenuDir" />
+		<MergeRef Id="CRT80" />
 		${app_components}
 	</Feature>
 

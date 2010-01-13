@@ -40,10 +40,6 @@ class DesktopPackager(object):
 		builder.log("making win32 binary at %s, this will take a sec..." % exe)
 		zf = zipfile.ZipFile(exe, 'a', zipfile.ZIP_DEFLATED)
 
-		# add the shitty ass MSVCRT crap
-		for f in glob.glob(os.path.join(self.options.runtime_dir,'Microsoft.VC80.CRT')+'/*'):
-			zf.write(f,'Microsoft.VC80.CRT/'+os.path.basename(f))
-
 		kboot = os.path.join(builder.options.runtime_dir, 'template', 'kboot.exe')
 		installer = os.path.join(builder.options.runtime_dir, 'installer', 'Installer.exe')
 		

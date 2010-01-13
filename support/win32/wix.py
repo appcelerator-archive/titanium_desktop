@@ -308,6 +308,8 @@ def create_installer(builder):
 	banner_bmp = get_bmp('banner-bmp', default_banner_bmp)
 	
 	titanium_installer_dll = os.path.join(builder.options.assets_dir, "titanium_installer.dll")
+	crt_msm = os.path.join(builder.options.assets_dir, "Microsoft_VC80_CRT_x86.msm")
+	
 	app_version = builder.appversion
 	version_parts = len(app_version.split("."))
 	if version_parts < 3:
@@ -329,7 +331,8 @@ def create_installer(builder):
 		"license_rtf": license_rtf,
 		"dialog_bmp": dialog_bmp,
 		"banner_bmp": banner_bmp,
-		"titanium_installer_dll": titanium_installer_dll }
+		"titanium_installer_dll": titanium_installer_dll,
+		"crt_msm": crt_msm }
 	
 	update_args = common_args.copy()
 	update_args["manifest_guid"] = gen_guid()
