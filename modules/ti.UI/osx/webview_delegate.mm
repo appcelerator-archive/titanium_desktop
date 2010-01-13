@@ -444,20 +444,28 @@
 		[window userWindow]->Show();
 	}
 
+	// NSRunInformationalAlertPanel uses printf style formatting arguments,
+	// so pass in the message as an argument, which results in percent signs
+	// passing through untouched.
 	NSRunInformationalAlertPanel([window title], // title
-		message, // message
+		@"%@",
 		NSLocalizedString(@"OK", @""), // default button
 		nil, // alt button
-		nil); // other button
+		nil, // other button
+		message);
 }
 
 - (BOOL)webView:(WebView *)wv runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WebFrame *)frame 
 {
+	// NSRunInformationalAlertPanel uses printf style formatting arguments,
+	// so pass in the message as an argument, which results in percent signs
+	// passing through untouched.
 	int result = NSRunInformationalAlertPanel([window title], // title
-		message, // message
+		@"%@",
 		NSLocalizedString(@"OK", @""), // default button
 		NSLocalizedString(@"Cancel", @""), // alt button
-		nil);
+		nil,
+		message);
 
 	// only show if already visible
 	if ([window userWindow]->IsVisible())

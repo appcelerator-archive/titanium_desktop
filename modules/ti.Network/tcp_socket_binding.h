@@ -31,7 +31,6 @@
 #include <Poco/NObserver.h>
 #include <queue>
 
-using namespace Poco;
 using namespace Poco::Net;
 
 namespace ti
@@ -46,9 +45,9 @@ namespace ti
 		Host* ti_host;
 		std::string host;
 		int port;
-		StreamSocket socket;
-		SocketReactor reactor;
-		Thread thread;
+		Poco::Net::StreamSocket socket;
+		Poco::Net::SocketReactor reactor;
+		Poco::Thread thread;
 		bool opened;
 
 		std::queue<BlobRef> sendData;
@@ -62,10 +61,10 @@ namespace ti
 		KMethodRef onError;
 		KMethodRef onReadComplete;
 
-		NObserver<TCPSocketBinding, ReadableNotification> readObserver;
-		NObserver<TCPSocketBinding, WritableNotification> writeObserver;
-		NObserver<TCPSocketBinding, TimeoutNotification> timeoutObserver;
-		NObserver<TCPSocketBinding, ErrorNotification> errorObserver;
+		Poco::NObserver<TCPSocketBinding, ReadableNotification> readObserver;
+		Poco::NObserver<TCPSocketBinding, WritableNotification> writeObserver;
+		Poco::NObserver<TCPSocketBinding, TimeoutNotification> timeoutObserver;
+		Poco::NObserver<TCPSocketBinding, ErrorNotification> errorObserver;
 
 		void Connect(const ValueList& args, KValueRef result);
 		void Write(const ValueList& args, KValueRef result);
