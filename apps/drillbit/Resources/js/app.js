@@ -120,18 +120,6 @@ Titanium.AppCreator = {
 		var appExecutable = TFS.getFile(appDir, name + '.exe');
 		kboot.copy(appExecutable);
 		
-		// we also need to copy the MSVCRT for win xp
-		var runtimeMsvcrt = TFS.getFile(runtime, 'Microsoft.VC80.CRT');
-		var localMsvcrt = TFS.getFile(appDir, 'Microsoft.VC80.CRT');
-		localMsvcrt.createDirectory(true);
-		var msvcrtResources = runtimeMsvcrt.getDirectoryListing();
-		for (var r=0;r<msvcrtResources.length;r++) {
-			//Titanium.API.debug("copying " + mresource.name() + " to " + localMsvcrt.path() + "...");
-			var mresource = msvcrtResources[r];
-			mresource.copy(localMsvcrt);
-		}
-		
-		
 		// set our marker file
 		var marker = TFS.getFile(appDir,'.installed');
 		if (!install)
