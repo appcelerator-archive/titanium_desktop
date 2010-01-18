@@ -33,10 +33,10 @@ namespace ti
 		// Set the cert path for Curl so that HTTPS works properly.
 		// We are using _puetenv here since WebKit uses getenv internally 
 		// which is incompatible with the  Win32 envvar API.
-		std::string pemPath = FileUtils::Join(
-			uiModule->GetPath().c_str(), "cacert.pem", NULL);
-		std::string var = "CURL_CA_BUNDLE_PATH=" + pemPath;
-		_putenv(var.c_str());
+		std::wstring pemPath = ::UTF8ToWide(FileUtils::Join(
+			uiModule->GetPath().c_str(), "cacert.pem", NULL));
+		std::wstring var = L"CURL_CA_BUNDLE_PATH=" + pemPath;
+		_wputenv(var.c_str());
 
 		// Hook app:// and ti:// URL support to WebKit
 		setNormalizeURLCallback(NormalizeURLCallback);
@@ -138,26 +138,25 @@ namespace ti
 	/*static*/
 	HBITMAP Win32UIBinding::LoadImageAsBitmap(std::string& path, int sizeX, int sizeY)
 	{
-		std::string lcpath = path;
-		std::transform(lcpath.begin(), lcpath.end(), lcpath.begin(), tolower);
-		std::string ext = lcpath.substr(lcpath.size() - 4, 4);
+		std::string ext = path.substr(path.size() - 4, 4);
 		UINT flags = LR_DEFAULTSIZE | LR_LOADFROMFILE |
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
+		std::wstring widePath(::UTF8ToWide(path));
 		HBITMAP h = 0;
-		if (ext ==  ".ico")
+		if (_stricmp(ext.c_str(), ".ico") == 0)
 		{
-			HICON hicon = (HICON) LoadImageA(NULL, path.c_str(), IMAGE_ICON,
+			HICON hicon = (HICON) LoadImageW(NULL, widePath.c_str(), IMAGE_ICON,
 				sizeX, sizeY, LR_LOADFROMFILE);
 			h = Win32UIBinding::IconToBitmap(hicon, sizeX, sizeY);
 			DestroyIcon(hicon);
 		}
-		else if (ext == ".bmp")
+		else if (_stricmp(ext.c_str(), ".bmp") == 0)
 		{
-			h = (HBITMAP) LoadImageA(
-				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
+			h = (HBITMAP) LoadImageW(
+				NULL, widePath.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 		}
-		else if (ext == ".png")
+		else if (_stricmp(ext.c_str(), ".png") == 0)
 		{
 			h = LoadPNGAsBitmap(path, sizeX, sizeY);
 		}
@@ -169,26 +168,25 @@ namespace ti
 	/*static*/
 	HICON Win32UIBinding::LoadImageAsIcon(std::string& path, int sizeX, int sizeY)
 	{
-		std::string lcpath = path;
-		std::transform(lcpath.begin(), lcpath.end(), lcpath.begin(), tolower);
-		std::string ext = lcpath.substr(lcpath.size() - 4, 4);
+		std::string ext = path.substr(path.size() - 4, 4);
 		UINT flags = LR_DEFAULTSIZE | LR_LOADFROMFILE |
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
+		std::wstring widePath(::UTF8ToWide(path));
 		HICON h = 0;
-		if (ext ==  ".ico")
+		if (_stricmp(ext.c_str(), ".ico") == 0)
 		{
-			h = (HICON) LoadImageA(
-				NULL, path.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
+			h = (HICON) LoadImageW(NULL,
+				widePath.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
 		}
-		else if (ext == ".bmp")
+		else if (_stricmp(ext.c_str(), ".bmp") == 0)
 		{
-			HBITMAP bitmap = (HBITMAP) LoadImageA(
-				NULL, path.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
+			HBITMAP bitmap = (HBITMAP) LoadImageW(
+				NULL, widePath.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
 		}
-		else if (ext == ".png")
+		else if (_stricmp(ext.c_str(), ".png") == 0)
 		{
 			HBITMAP bitmap = LoadPNGAsBitmap(path, sizeX, sizeY);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
@@ -241,7 +239,10 @@ namespace ti
 	/*static*/
 	HBITMAP Win32UIBinding::LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY)
 	{
-		cairo_surface_t* pngSurface = cairo_image_surface_create_from_png(path.c_str());
+		std::string systemPath(UTF8ToSystem(path));
+		cairo_surface_t* pngSurface =
+			cairo_image_surface_create_from_png(systemPath.c_str());
+		
 		cairo_t* pngcr = cairo_create(pngSurface);
 		if (cairo_status(pngcr) != CAIRO_STATUS_SUCCESS)
 			return 0;
@@ -370,8 +371,8 @@ namespace ti
 			if (proxy->port != 0)
 				proxyEnv << ":" << proxy->port;
 
-			std::string proxyEnvStr(proxyEnv.str());
-			_putenv(proxyEnvStr.c_str());
+			std::wstring proxyEnvStr(::UTF8ToWide(proxyEnv.str()));
+			_wputenv(proxyEnvStr.c_str());
 		}
 	}
 

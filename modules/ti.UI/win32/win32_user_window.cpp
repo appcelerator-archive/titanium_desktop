@@ -352,7 +352,8 @@ void Win32UserWindow::InitWebKit()
 	privatePrefs->setLocalStorageEnabled(true);
 	privatePrefs->setOfflineWebApplicationCacheEnabled(true);
 	privatePrefs->setAllowUniversalAccessFromFileURLs(true);
-	_bstr_t dbPath(FileUtils::GetApplicationDataDirectory(appid).c_str());
+	
+	_bstr_t dbPath = ::UTF8ToWide(FileUtils::GetApplicationDataDirectory(appid)).c_str();
 	privatePrefs->setLocalStorageDatabasePath(dbPath.copy());
 	privatePrefs->Release();
 
@@ -948,9 +949,9 @@ static HICON GetDefaultIcon()
 
 	if (!defaultIcon)
 	{
-		char exePath[MAX_PATH];
-		GetModuleFileNameA(GetModuleHandle(NULL), exePath, MAX_PATH);
-		defaultIcon = ExtractIconA(Win32Host::Win32Instance()->GetInstanceHandle(), exePath, 0);
+		wchar_t exePath[MAX_PATH];
+		GetModuleFileNameW(GetModuleHandle(NULL), exePath, MAX_PATH);
+		defaultIcon = ExtractIconW(Win32Host::Win32Instance()->GetInstanceHandle(), exePath, 0);
 	}
 
 	return defaultIcon;
