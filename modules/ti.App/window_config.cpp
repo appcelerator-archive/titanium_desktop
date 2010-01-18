@@ -37,6 +37,57 @@ static bool CoerceBool(KObjectRef props, const char* name, bool defaultValue)
 	return defaultValue;
 }
 
+static void EnforceTransparentBackgroundSettings(WindowConfig* config)
+{
+	if (!config->HasTransparentBackground())
+		return;
+
+	config->SetCloseable(false);
+	config->SetResizable(false);
+	config->SetMinimizable(false);
+	config->SetMaximizable(false);
+	config->SetUsingChrome(false);
+}
+
+static void EnforceMaxMinConstraints(WindowConfig* config)
+{
+	if (config->GetMinWidth() <= 0)
+	{
+		config->SetMinWidth(-1);
+	}
+	else if (config->GetWidth() < config->GetMinWidth())
+	{
+		config->SetWidth(config->GetMinWidth());
+	}
+
+	if (config->GetMaxWidth() <= 0)
+	{
+		config->SetMaxWidth(-1);
+	}
+	else if (config->GetWidth() > config->GetMaxWidth())
+	{
+		config->SetWidth(config->GetMaxWidth());
+	}
+
+	if (config->GetMinHeight() <= 0)
+	{
+		config->SetMinHeight(-1);
+	}
+	else if (config->GetHeight() < config->GetMinHeight())
+	{
+		config->SetHeight(config->GetMinHeight());
+	}
+
+	if (config->GetMaxHeight() <= 0)
+	{
+		config->SetMaxHeight(-1);
+	}
+	else if (config->GetHeight() > config->GetMaxHeight())
+	{
+		config->SetHeight(config->GetMaxHeight());
+	}
+}
+
 void WindowConfig::SetDefaults()
 {
 	WindowConfig::windowCount++;
@@ -114,9 +165,12 @@ void WindowConfig::UseProperties(KObjectRef properties)
 	texturedBackground = properties->GetDouble("texturedBackground",
 		texturedBackground);
 #endif
+
+	EnforceMaxMinConstraints(this);
+	EnforceTransparentBackgroundSettings(this);
 }
 
-WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
+WindowConfig::WindowConfig(WindowConfig* config, std::string& url)
 {
 	this->SetDefaults();
 	this->url = url;
@@ -152,7 +206,7 @@ WindowConfig::WindowConfig(WindowConfig *config, std::string& url)
 
 WindowConfig::WindowConfig(void* data)
 {
-	xmlElementPtr element = (xmlElementPtr) data;
+	xmlElementPtr element = static_cast<xmlElementPtr>(data);
 	SetDefaults();
 
 	xmlNodePtr child = element->children;
@@ -293,41 +347,8 @@ WindowConfig::WindowConfig(void* data)
 		child = child->next;
 	}
 
-	if (minWidth <= 0)
-	{
-		minWidth = -1;
-	}
-	else if (width < minWidth)
-	{
-		width = minWidth;
-	}
-
-	if (maxWidth <= 0)
-	{
-		maxWidth = -1;
-	}
-	else if (width > maxWidth)
-	{
-		width = maxWidth;
-	}
-
-	if (minHeight <= 0)
-	{
-		minHeight = -1;
-	}
-	else if (height < minHeight)
-	{
-		height = minHeight;
-	}
-
-	if (maxHeight <= 0)
-	{
-		maxHeight = -1;
-	}
-	else if (height > maxHeight)
-	{
-		height = maxHeight;
-	}
+	EnforceMaxMinConstraints(this);
+	EnforceTransparentBackgroundSettings(this);
 }
 
 std::string WindowConfig::ToString()
