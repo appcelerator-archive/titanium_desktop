@@ -34,7 +34,7 @@ namespace ti
 			wideDir.assign(::UTF8ToWide(FileUtils::GetDirectory(name)));
 		}
 		
-		const wchar_t *dir = wideDir.size() > 0 ? wideDir.c_str() : NULL;
+		const wchar_t* dir = wideDir.size() > 0 ? wideDir.c_str() : NULL;
 		long response = (long)ShellExecuteW(NULL, L"open",
 			wideName.c_str(), NULL, dir,
 			SW_SHOWNORMAL);
@@ -99,7 +99,7 @@ namespace ti
 		DeleteObject(hBmp);
 	}
 
-	bool Win32Desktop::SaveBMPFile(const wchar_t *filename, HBITMAP bitmap, HDC bitmapDC, int width, int height) {
+	bool Win32Desktop::SaveBMPFile(const wchar_t* filename, HBITMAP bitmap, HDC bitmapDC, int width, int height) {
 		bool Success = false;
 		HDC SurfDC = NULL;						// GDI-compatible device context for the surface
 		HBITMAP OffscrBmp = NULL;				// bitmap that is converted to a DIB

@@ -432,7 +432,8 @@ namespace ti
 		Poco::Path path(directory);
 		path.makeDirectory();
 		
-		std::ofstream stream(zipFile.c_str(), std::ios::binary | std::ios::trunc);
+		std::ofstream stream(UTF8ToSystem(zipFile).c_str(),
+			std::ios::binary | std::ios::trunc);
 		Poco::Zip::Compress compressor(stream, true);
 		try
 		{
