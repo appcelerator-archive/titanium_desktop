@@ -11,6 +11,8 @@
 #include <shlobj.h>
 #include <string>
 
+using std::wstring;
+
 namespace ti
 {
 	Win32Desktop::Win32Desktop()
@@ -24,19 +26,28 @@ namespace ti
 	bool Win32Desktop::OpenApplication(std::string &name)
 	{
 		// this can actually open applications or documents (wordpad, notepad, file-test.txt, etc.)
-		char *dir = NULL;
-		if (FileUtils::IsFile(name))
+		wstring wideDir;
+		wstring wideName(::UTF8ToWide(name));
+		if (FileUtils::IsFile(wideName))
 		{
 			// start with the current working directory as the directory of the program
-			dir = (char*)FileUtils::GetDirectory(name).c_str();
+			wideDir.assign(::UTF8ToWide(FileUtils::GetDirectory(name)));
 		}
-		long response = (long)ShellExecuteA(NULL, "open", name.c_str(), NULL, dir, SW_SHOWNORMAL);
+		
+		const wchar_t *dir = wideDir.size() > 0 ? wideDir.c_str() : NULL;
+		long response = (long)ShellExecuteW(NULL, L"open",
+			wideName.c_str(), NULL, dir,
+			SW_SHOWNORMAL);
+		
 		return (response > 32);
 	}
 
 	bool Win32Desktop::OpenURL(std::string &url)
 	{
-		long response = (long)ShellExecuteA(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+		wstring wideURL(::UTF8ToWide(url));
+		long response = (long)ShellExecuteW(NULL, L"open",
+			wideURL.c_str(), NULL, NULL, SW_SHOWNORMAL);
+		
 		return (response > 32);
 	}
 
@@ -72,25 +83,23 @@ namespace ti
 		// copy from the screen to my bitmap
 		BitBlt(hDc, 0, 0, width, height, GetDC(0), x, y, SRCCOPY);
 
-		char tmpDir[MAX_PATH];
-		char tmpFile[MAX_PATH];
-		GetTempPathA(sizeof(tmpDir), tmpDir);
-		GetTempFileNameA(tmpDir, "ti_", 0, tmpFile);
+		wchar_t tmpDir[MAX_PATH];
+		wchar_t tmpFile[MAX_PATH];
+		GetTempPathW(sizeof(tmpDir), tmpDir);
+		GetTempFileNameW(tmpDir, L"ti_", 0, tmpFile);
 
 		bool saved = SaveBMPFile(tmpFile, hBmp, hDc, width, height);
-
-		std::cout << "SCREEN SHOT file " << tmpFile << std::endl;
-
 		if(saved)
 		{
-			CopyFileA(tmpFile, screenshotFile.c_str(), FALSE);
+			wstring wideScreenshotFile(::UTF8ToWide(screenshotFile));
+			CopyFileW(tmpFile, wideScreenshotFile.c_str(), FALSE);
 		}
 
 		// free the bitmap memory
 		DeleteObject(hBmp);
 	}
 
-	bool Win32Desktop::SaveBMPFile(const char *filename, HBITMAP bitmap, HDC bitmapDC, int width, int height) {
+	bool Win32Desktop::SaveBMPFile(const wchar_t *filename, HBITMAP bitmap, HDC bitmapDC, int width, int height) {
 		bool Success = false;
 		HDC SurfDC = NULL;						// GDI-compatible device context for the surface
 		HBITMAP OffscrBmp = NULL;				// bitmap that is converted to a DIB
@@ -152,7 +161,7 @@ namespace ti
 		}
 
 		// Create a file to save the DIB to:
-		if ((BmpFile = ::CreateFileA(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL)) == INVALID_HANDLE_VALUE)
+		if ((BmpFile = ::CreateFileW(filename, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,NULL)) == INVALID_HANDLE_VALUE)
 		{
 			return false;
 		}

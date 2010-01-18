@@ -27,7 +27,7 @@ namespace ti
 	private:
 		Win32Desktop();
 		~Win32Desktop();
-		static bool SaveBMPFile(const char *filename, HBITMAP bitmap, HDC bitmapDC, int width, int height);
+		static bool SaveBMPFile(const wchar_t *filename, HBITMAP bitmap, HDC bitmapDC, int width, int height);
 	};
 }
 
