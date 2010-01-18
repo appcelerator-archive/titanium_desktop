@@ -315,16 +315,19 @@ def create_installer(builder):
 	if version_parts < 3:
 		app_version += ('.0' * (version_parts-1))
 
+	app_guid = builder.options.manifest['guid'].upper()
+	upgrade_guid = str(uuid.uuid5(uuid.UUID(app_guid), "upgrade")).upper()
+	
 	common_args = {
 		"app_name": builder.appname,
 		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
 		"app_icon": get_app_icon(builder),
 		"app_id": builder.options.manifest['appid'],
-		"app_guid": builder.options.manifest['guid'].upper(),
+		"app_guid": app_guid,
 		"app_publisher": builder.options.manifest['publisher'],
 		"app_description": builder.options.manifest['desc'],
 		"app_version": app_version,
-		"upgrade_guid": gen_guid(), # TODO : we need to cache the upgrade guid and send it to the packaging server..
+		"upgrade_guid": upgrade_guid,
 		"program_menu_guid": gen_guid(),
 		"app_language": app_language,
 		"app_codepage": app_codepage,

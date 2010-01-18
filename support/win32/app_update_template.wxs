@@ -67,12 +67,13 @@
 	<WixVariable Id="WixUILicenseRtf" Value="${license_rtf}"/>
 	
     <Icon Id="${app_icon}" SourceFile="${app_exe}" />
+	<Property Id="APP_UPDATE_MANIFEST" Secure="yes" />
 	
 	<!-- the "immediate" setup action exists to initialize the progress bar with our job count -->
 	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstaller" DllEntry="NetInstallSetup"/>
 	<!-- ugly hack to pass in our dependenices and bundled modules/runtime into the deferred/async action -->
 	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="app_update;[APP_UPDATE_MANIFEST];[INSTALLDIR]"/>
-	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstaller" DllEntry="NetInstall" Execute="deferred"/>
+	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstaller" DllEntry="NetInstall" Execute="deferred" Impersonate="no"/>
 	<CustomAction Id="Clean" BinaryKey="TitaniumInstaller" DllEntry="Clean"/>
 	
 	<InstallExecuteSequence>

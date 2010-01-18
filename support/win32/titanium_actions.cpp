@@ -35,6 +35,25 @@ Split(const wstring& s, wchar_t delim, vector<wstring>& elems) {
 	return elems;
 }
 
+void ShowError(string msg)
+{
+	wstring wmsg = KrollUtils::UTF8ToWide(msg);
+	MessageBoxW(
+		GetDesktopWindow(),
+		wmsg.c_str(),
+		L"Installation Failed",
+		MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
+}
+
+void ShowError(wstring wmsg)
+{
+	MessageBoxW(
+		GetDesktopWindow(),
+		wmsg.c_str(),
+		L"Installation Failed",
+		MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
+}
+
 SharedApplication CreateApplication(MSIHANDLE hInstall)
 {
 	wstring params = MsiProperty(hInstall, L"CustomActionData");
@@ -230,16 +249,6 @@ NetInstallSetup(MSIHANDLE hInstall)
 	return ERROR_SUCCESS;
 }
 
-void ShowError(string msg)
-{
-	wstring wmsg = KrollUtils::UTF8ToWide(msg);
-	MessageBoxW(
-		GetDesktopWindow(),
-		wmsg.c_str(),
-		L"Installation Failed",
-		MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
-}
-
 typedef struct {
 	MSIHANDLE hInstall;
 	SharedDependency dependency;
@@ -350,7 +359,7 @@ bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency de
 	SharedApplication app = CreateApplication(hInstall);
 	wstring url(UTF8ToWide(app->GetURLForDependency(dependency)));
 	wstring outFilename(GetFilePath(dependency));
-
+	
 	WCHAR szDecodedUrl[INTERNET_MAX_URL_LENGTH];
 	DWORD cchDecodedUrl = INTERNET_MAX_URL_LENGTH;
 	WCHAR szDomainName[INTERNET_MAX_URL_LENGTH];
