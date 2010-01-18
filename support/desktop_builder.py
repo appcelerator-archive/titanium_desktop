@@ -10,6 +10,7 @@
 #
 #
 import os, shutil, distutils.dir_util as dir_util, sys
+SKIP_DIRECTORIES = ['.git', '.svn']
 
 class DesktopBuilder(object):
 	def __init__(self, options, log):
@@ -133,7 +134,17 @@ class DesktopBuilder(object):
 			out_file = open(os.path.join(self.contents_dir, 'Info.plist'), 'w')
 			out_file.write(plist)
 			out_file.close()
-	
+
+		self.remove_skipped_directories()
+
+	# TODO: do this during copying eventually.
+	def remove_skipped_directories(self):
+		for root, dirs, files in os.walk(self.options.destination):
+			for dir in dirs:
+				if dir in SKIP_DIRECTORIES:
+					shutil.rmtree(os.path.join(root, dir))
+					dirs.remove(dir)
+
 	def log(self,msg):
 		self.logger(self.options,msg)
 
