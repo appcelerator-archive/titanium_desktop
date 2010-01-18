@@ -835,22 +835,24 @@ namespace ti
 		}
 #elif defined(OS_WIN32)
 		HRESULT hResult;
-		IShellLink* psl;
+		IShellLinkW* psl;
 
 		if(from.length() == 0 || to.length() == 0) {
 			std::string ex = "Invalid arguments given to createShortcut()";
 			throw ValueException::FromString(ex);
 		}
 
-		hResult = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+		hResult = CoCreateInstance(CLSID_ShellLink, NULL,
+			CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
 
 		if(SUCCEEDED(hResult))
 		{
 			IPersistFile* ppf;
 
 			// set path to the shortcut target and add description
-			psl->SetPath(from.c_str());
-			psl->SetDescription("File shortcut");
+			std::wstring wideFrom(::UTF8ToWide(from));
+			psl->SetPath(wideFrom.c_str());
+			psl->SetDescription(L"File shortcut");
 
 			hResult = psl->QueryInterface(IID_IPersistFile, (LPVOID*) &ppf);
 
