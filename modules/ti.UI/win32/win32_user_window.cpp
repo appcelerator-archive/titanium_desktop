@@ -500,7 +500,8 @@ void Win32UserWindow::UpdateBitmap()
 	BLENDFUNCTION blendFunction;
 	blendFunction.BlendOp = AC_SRC_OVER;
 	blendFunction.BlendFlags = 0;
-	blendFunction.SourceConstantAlpha = floor(config->GetTransparency() * 255);
+	// TODO: Find another method to apply all-over transparency.
+	// blendFunction.SourceConstantAlpha = floor(config->GetTransparency() * 255);
 	blendFunction.AlphaFormat = AC_SRC_ALPHA;
 
 	POINT bitmapOrigin = {0, 0};
