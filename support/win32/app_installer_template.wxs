@@ -17,10 +17,8 @@
 
 	<Directory Id="TARGETDIR" Name="SourceDir">
 		<Directory Id="ProgramFilesFolder" Name="PFiles">
-			<Directory Id="${app_publisher}" Name="${app_publisher}">
-				<Directory Id="INSTALLDIR" Name="${app_name}">
-					${app_dirs}
-				</Directory>
+			<Directory Id="INSTALLDIR" Name="${app_name}">
+				${app_dirs}
 			</Directory>
 		</Directory>
 	

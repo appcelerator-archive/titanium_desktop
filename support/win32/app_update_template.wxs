@@ -21,22 +21,20 @@
 	<Directory Id="TARGETDIR" Name="SourceDir">
 		
 		<Directory Id="ProgramFilesFolder" Name="PFiles">
-			<Directory Id="${app_publisher}" Name="${app_publisher}">
-				<Directory Id="INSTALLDIR" Name="${app_name}">
-					<Component Id="manifest" Guid="${manifest_guid}">
-						<File Id="manifest" Source="${manifest_path}" KeyPath="yes"/>
-					</Component>
-					<Component Id="AppExe" Guid="${app_exe_guid}">
-						<File Id="AppExe" Source="${app_exe}" KeyPath="yes">
-						<Shortcut Id="startMenu.${app_id}" Directory="ProgramMenuDir" Name="${app_name}"
-							WorkingDirectory="INSTALLDIR" Icon="${app_icon}"
-							IconIndex="0" Advertise="yes" />
-						<Shortcut Id="desktop.${app_id}" Directory="DesktopFolder" Name="${app_name}"
-							WorkingDirectory="INSTALLDIR" Icon="${app_icon}"
-							IconIndex="0" Advertise="yes" />
-						</File>
-					</Component>
-				</Directory>
+			<Directory Id="INSTALLDIR" Name="${app_name}">
+				<Component Id="manifest" Guid="${manifest_guid}">
+					<File Id="manifest" Source="${manifest_path}" KeyPath="yes"/>
+				</Component>
+				<Component Id="AppExe" Guid="${app_exe_guid}">
+					<File Id="AppExe" Source="${app_exe}" KeyPath="yes">
+					<Shortcut Id="startMenu.${app_id}" Directory="ProgramMenuDir" Name="${app_name}"
+						WorkingDirectory="INSTALLDIR" Icon="${app_icon}"
+						IconIndex="0" Advertise="yes" />
+					<Shortcut Id="desktop.${app_id}" Directory="DesktopFolder" Name="${app_name}"
+						WorkingDirectory="INSTALLDIR" Icon="${app_icon}"
+						IconIndex="0" Advertise="yes" />
+					</File>
+				</Component>
 			</Directory>
 		</Directory>
 		
