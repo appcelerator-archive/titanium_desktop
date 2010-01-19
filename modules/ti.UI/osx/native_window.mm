@@ -297,4 +297,9 @@
 	[self invalidateShadow];
 }
 
+-(NSRect)windowWillUseStandardFrame:(NSWindow *)sender defaultFrame:(NSRect)defaultFrame
+{
+	return [[self screen] frame];
+}
+
 @end
