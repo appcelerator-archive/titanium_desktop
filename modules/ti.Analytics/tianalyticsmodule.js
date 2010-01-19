@@ -333,32 +333,26 @@
 			var oldPart = oldVersionParts[0];
 			var result = false;
 
-			Titanium.API.debug(newPart + "  vs.  " + oldPart);
 			// If both can't be parsed, compare them as strings.
 			if (isNaN(newPart) && isNaN(oldPart))
 			{
-				result = newVersionParts[0] > oldVersionParts[0];
-			}
-
-			// Unparsable integer is always < than an integer
-			else if (isNaN(oldPart))
-			{
-				Titanium.API.debug("oldPart == NaN");
-				return true;
-			}
-			else if (isNaN(newPart))
-			{
-				Titanium.API.debug("newPart == NaN");
-				return false;
+				if (newVersionParts[0] > oldVersionParts[0])
+					return 1;
+				else if (oldVersionParts[0] > newVersionParts[0])
+					return -1;
 			}
 			else if (newPart != oldPart)
 			{
-				Titanium.API.debug("comparing");
-				return newPart > oldPart;
+				// Unparsable integer is always < than an integer
+				if (isNaN(oldPart))
+					return 1;
+				else if (isNaN(newPart))
+					return -1;
+				else if (newPart > oldPart)
+					return 1;
+				else
+					return -1;
 			}
-
-			if (result)
-				return true;
 
 			newVersionParts.shift();
 			oldVersionParts.shift();
@@ -366,7 +360,7 @@
 
 		// If the new version has a longer array, return true,
 		// otherwise the old version is larger or equal.
-		return newVersionParts.length > oldVersionParts;
+		return newVersionParts.length - oldVersionParts.length;
 	}
 
 	function installAppUpdate(updateSpec)
@@ -536,7 +530,7 @@
 			updateCheck('app-update', Titanium.App.getVersion(), function(success, update)
 			{
 				if (success && Titanium.UpdateManager.compareVersions(
-					update.version,Titanium.App.getVersion()))
+					update.version,Titanium.App.getVersion()) > 0)
 				{
 					updateDetected(update);
 				}
