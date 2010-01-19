@@ -1,0 +1,16 @@
+#appname:Alloy
+#version:1.0
+#appid:com.titaniumapp.alloy
+#publisher:Appcelerator
+#image:default_app_logo.png
+#url:http://titaniumapp.com
+#guid:be69fe4c-966b-483c-b57c-7ba4a34fbf10
+#desc:Alloy shell
+runtime:0.7
+api:0.7
+javascript:0.7
+python:0.7
+ruby:0.7
+#php:0.7
+alloy
+tiapp:0.7

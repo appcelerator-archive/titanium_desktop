@@ -153,6 +153,14 @@ namespace ti
 		this->SetMethod("stderr", &AppBinding::StdErr);
 
 		/**
+		 * @tiapi(method=True,name=App.stdin,since=0.7) Reads from stdin
+		 * @tiapi(for=App.stdin,type=String,name=prompt,optional=True) text prompt (Default: no prompt)
+		 * @tiarg(for=App.stdin,type=String,name=delimiter,optional=True) Will continue reading stdin until the delimiter character is reached. (Default: newline)
+		 * @tiresult(for=App.stderr,type=String) data read from stdin
+		 */
+		this->SetMethod("stdin", &AppBinding::StdIn);
+		
+		/**
 		 * @tiapi(method=True,name=App.getSystemProperties,since=0.4)
 		 * @tiapi get the system properties defined in tiapp.xml
 		 * @tiapi (see App.Properties).
@@ -305,6 +313,26 @@ namespace ti
 			}
 		}
 		std::cerr << std::endl;
+	}
+
+	void AppBinding::StdIn(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("stdin", "?ss");
+		std::string input;
+		char delimiter = '\n';
+
+		if (args.size() >= 1)
+		{
+			std::cout << args.GetString(0);
+		}
+
+		if (args.size() >= 2)
+		{
+			delimiter = args.GetString(1).at(0);
+		}
+
+		getline(std::cin, input, delimiter);
+		result->SetString(input);
 	}
 
 	void AppBinding::GetStreamURL(const ValueList& args, KValueRef result)
