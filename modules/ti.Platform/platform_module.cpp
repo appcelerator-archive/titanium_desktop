@@ -13,19 +13,32 @@ using namespace ti;
 namespace ti
 {
 	KROLL_MODULE(PlatformModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
-	
+
 	void PlatformModule::Initialize()
 	{
-		// load our variables
-		this->binding = new PlatformBinding(host->GetGlobalObject());
+		this->binding = new PlatformBinding();
+		host->GetGlobalObject()->SetObject("Platform", this->binding);
+		host->GetGlobalObject()->SetObject("Desktop", this->binding);
+	}
 
-		// set our ti.Platform
-		KValueRef value = Value::NewObject(this->binding);
-		host->GetGlobalObject()->Set("Platform", value);
+	void PlatformModule::Start()
+	{
+		// Duplicate the network module address, macaddress and interfaces here for
+		// backward compatibility. The network module should be initialized when
+		// Start() is called.
+		if (!GlobalObject::GetInstance()->GetObject("Network").isNull())
+		{
+			KObjectRef network = GlobalObject::GetInstance()->GetObject("Network");
+			this->binding->Set("getAddress", network->Get("getAddress"));
+			this->binding->Set("getMACAddress", network->Get("getMACAddress"));
+			this->binding->Set("getInterfaces", network->Get("Interfaces"));
+		}
 	}
 
 	void PlatformModule::Stop()
 	{
+		host->GetGlobalObject()->SetNull("Platform");
+		host->GetGlobalObject()->SetNull("Desktop");
 	}
 	
 }

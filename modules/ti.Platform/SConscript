@@ -8,12 +8,17 @@ env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
 if build.is_win32():
-    env.Append(CCFLAGS=['/MD'])
-    env.Append(LIBS=['Advapi32', 'Iphlpapi'])
-    env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+	env.Append(CCFLAGS=['/MD'])
+	env.Append(LIBS=['Advapi32', 'Iphlpapi'])
+	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
 elif build.is_osx():
 	env.Append(FRAMEWORKS = ['AppKit'])
 
 m = build.add_module('ti.Platform', env=env)
-t = env.SharedLibrary(target = m.build_dir + '/tiplatformmodule', source = Glob('*.cpp'))
+sources = [
+	File('platform_module.cpp'),
+	File('platform_binding.cpp'),
+	File('platform_binding_%s.cpp' % build.os)]
+
+t = env.SharedLibrary(target=m.build_dir+'/tiplatformmodule', source=sources)
 build.mark_build_target(t)

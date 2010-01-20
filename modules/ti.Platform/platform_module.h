@@ -25,10 +25,12 @@ namespace ti
 {
 	class TITANIUM_PLATFORM_API PlatformModule : public kroll::Module
 	{
+	public:
 		KROLL_MODULE_CLASS(PlatformModule)
+		virtual void Start();
 
 	private:
-		kroll::KObjectRef binding;
+		KObjectRef binding;
 	};
 
 }

@@ -13,13 +13,27 @@ namespace ti
 	class PlatformBinding : public StaticBoundObject
 	{
 	public:
-		PlatformBinding(KObjectRef);
-	protected:
-		virtual ~PlatformBinding();
+		PlatformBinding();
+
 	private:
-		KObjectRef global;
-		
-		void CreateUUID(const ValueList& args, KValueRef result);
+		virtual ~PlatformBinding();
+		std::string GetVersionImpl();
+		int GetProcessorCountImpl();
+		bool OpenApplicationImpl(const std::string& path);
+		bool OpenURLImpl(const std::string& url);
+		void TakeScreenshotImpl(const std::string& targetFile);
+
+		void _GetType(const ValueList& args, KValueRef result);
+		void _GetName(const ValueList& args, KValueRef result);
+		void _GetProcessorCount(const ValueList& args, KValueRef result);
+		void _GetVersion(const ValueList& args, KValueRef result);
+		void _GetArchitecture(const ValueList& args, KValueRef result);
+		void _GetMachineId(const ValueList& args, KValueRef result);
+		void _GetUsername(const ValueList& args, KValueRef result);
+		void _CreateUUID(const ValueList& args, KValueRef result);
+		void _OpenURL(const ValueList& args, KValueRef result);
+		void _OpenApplication(const ValueList& args, KValueRef result);
+		void _TakeScreenshot(const ValueList& args, KValueRef result);
 	};
 }
 

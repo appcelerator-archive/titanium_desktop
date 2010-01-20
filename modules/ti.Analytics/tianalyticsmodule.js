@@ -388,10 +388,12 @@
 			var xhr = Titanium.Network.createHTTPClient();
 			xhr.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 			var qs = 'version=' + Titanium.Network.encodeURIComponent(version) +
-					'&name=' + Titanium.Network.encodeURIComponent(component) + 
-					'&mid=' + Titanium.Network.encodeURIComponent(Titanium.Platform.id) +
-					'&limit=' + limit +
-					'&guid=' + Titanium.Network.encodeURIComponent(Titanium.App.getGUID());
+				'&name=' + Titanium.Network.encodeURIComponent(component) + 
+				'&mid=' + Titanium.Network.encodeURIComponent(Titanium.Platform.id) +
+				'&limit=' + limit +
+				'&guid=' + Titanium.Network.encodeURIComponent(Titanium.App.getGUID()) +
+				'&os=' + Titanium.platform +
+				'&ostype=' + Titanium.Platform.ostype;
 			xhr.onreadystatechange = function()
 			{
 				if (this.readyState==4)
