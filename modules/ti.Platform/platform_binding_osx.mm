@@ -3,6 +3,8 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2010 Appcelerator, Inc. All Rights Reserved.
  */
+#include <Cocoa/Cocoa.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <kroll/kroll.h>
 #include <Poco/Environment.h>
 #include <Foundation/Foundation.h>
@@ -60,18 +62,18 @@ bool PlatformBinding::OpenApplicationImpl(const std::string& name)
 bool PlatformBinding::OpenURLImpl(const std::string& name)
 {
 	return [[NSWorkspace sharedWorkspace] openURL:
-		[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+		[NSURL URLWithString:[NSString stringWithUTF8String:name.c_str()]]];
 }
 
 void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 {
 	CFRef<CGImageRef> image(CGWindowListCreateImage(CGRectInfinite,
 		kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault));
-	NSURL* url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:targetFile.c_str()]]
+	NSURL* url = [NSURL fileURLWithPath:[NSString stringWithUTF8String:targetFile.c_str()]];
 
 	CFRef<CGImageDestinationRef> imageDestination(CGImageDestinationCreateWithURL(
-		(CFURL) url, kUTTypePNG, 1, 0));
-	if (!imageDestination)
+		(CFURLRef) url, kUTTypePNG, 1, 0));
+	if (!imageDestination.get())
 		throw ValueException::FromString("Could not save screenshot");
 
 	float resolution = 144.0;
@@ -86,8 +88,8 @@ void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 		&kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
 	CFRelease(values[0]);
 
-	CGImageDestinationAddImage(imageDestination, image, options.get());
-	CGImageDestinationFinalize(imageDestination);
+	CGImageDestinationAddImage(imageDestination.get(), image, options.get());
+	CGImageDestinationFinalize(imageDestination.get());
 }
 
 }

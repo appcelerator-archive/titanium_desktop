@@ -12,13 +12,14 @@ if build.is_win32():
 	env.Append(LIBS=['Advapi32', 'Iphlpapi'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
 elif build.is_osx():
-	env.Append(FRAMEWORKS = ['AppKit'])
+	env.Append(FRAMEWORKS = ['AppKit', 'Cocoa'])
 
 m = build.add_module('ti.Platform', env=env)
-sources = [
-	File('platform_module.cpp'),
-	File('platform_binding.cpp'),
-	File('platform_binding_%s.cpp' % build.os)]
+sources = [File('platform_module.cpp'), File('platform_binding.cpp')]
+if build.is_osx():
+	sources.append(File('platform_binding_%s.mm' % build.os))
+else:
+	sources.append(File('platform_binding_%s.cpp' % build.os))
 
 t = env.SharedLibrary(target=m.build_dir+'/tiplatformmodule', source=sources)
 build.mark_build_target(t)
