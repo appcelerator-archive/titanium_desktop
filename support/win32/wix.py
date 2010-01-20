@@ -263,8 +263,8 @@ def build_msi(template, args, basename, destdir):
 	light = os.path.join(wix_dir, "light.exe")
 	run_command([candle, wxsname, "-out", wxsname+".wixobj"])
 	run_command([light, wxsname+".wixobj", "-ext", "WixUIExtension", "-out", msi])
-	#os.unlink(wxsname)
-	#os.unlink(wxsname+".wixobj")
+	os.unlink(wxsname)
+	os.unlink(wxsname+".wixobj")
 	
 	return msi
 	
