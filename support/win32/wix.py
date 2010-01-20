@@ -68,7 +68,7 @@ def get_app_codepage(lang):
 	return None
 
 def get_app_icon(builder):
-	return (builder.appname+".exe").replace(" ", "_")
+	return (builder.appname+".exe").replace(" ", "_").replace("'", "").replace("?","").replace("-","_")
 
 class Shortcut:
 	@classmethod
@@ -116,6 +116,9 @@ class Directory:
 		self.dirs = []
 		self.is_root = is_root
 
+	def escape_path(self, path):
+		return path.replace('&', '&amp;')
+			
 	def add_file(self, relative_path, full_path, shortcuts=None):
 		self.files.append({
 			"guid": gen_guid(),
@@ -143,9 +146,9 @@ class Directory:
 			xml += component_template % {
 					"indent": ("\t" * indent),
 					"id": file["id"],
-					"filename": file["name"],
+					"filename": self.escape_path(file["name"]),
 					"guid": file["guid"],
-					"full_path": file["full_path"],
+					"full_path": self.escape_path(file["full_path"]),
 					"shortcuts": shortcuts_xml}
 		
 		for dir in self.dirs:
