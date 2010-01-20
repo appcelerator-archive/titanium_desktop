@@ -10,7 +10,7 @@
 
 namespace ti
 {
-	class PlatformBinding : public StaticBoundObject
+	class PlatformBinding : public KAccessorObject
 	{
 	public:
 		PlatformBinding();

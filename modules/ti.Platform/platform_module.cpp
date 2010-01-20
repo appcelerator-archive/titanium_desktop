@@ -31,7 +31,7 @@ namespace ti
 			KObjectRef network = GlobalObject::GetInstance()->GetObject("Network");
 			this->binding->Set("getAddress", network->Get("getAddress"));
 			this->binding->Set("getMACAddress", network->Get("getMACAddress"));
-			this->binding->Set("getInterfaces", network->Get("Interfaces"));
+			this->binding->Set("getInterfaces", network->Get("getInterfaces"));
 		}
 	}
 

@@ -15,7 +15,7 @@ namespace ti
 {
 
 PlatformBinding::PlatformBinding() :
-	StaticBoundObject("Platform")
+	KAccessorObject("Platform")
 {
 	/**
 	 * @tiapi(method=True,name=Platform.getOSType,since=0.9)

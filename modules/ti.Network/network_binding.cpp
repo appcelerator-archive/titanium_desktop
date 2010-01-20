@@ -44,7 +44,7 @@ namespace ti
 	}
 
 	NetworkBinding::NetworkBinding(Host* host) :
-		StaticBoundObject("Network"),
+		KAccessorObject("Network"),
 		host(host),
 		global(host->GetGlobalObject())
 	{
@@ -180,12 +180,12 @@ namespace ti
 		this->SetMethod("getInterfaces", &NetworkBinding::_GetInterfaces);
 
 		/**
-		 * @tiapi(method=True,name=Network.GetFirstIPAddress,since=0.9)
+		 * @tiapi(method=True,name=Network.getFirstIPAddress,since=0.9)
 		 * Get the first IPv4 address in this machine's list of interfaces.
 		 * @tiarg[String, address] The first IPv4 address in this system's list of interfaces.
 		 */ 
 		this->SetMethod("getFirstIPAddress", &NetworkBinding::_GetFirstIPAddress);
-		this->SetMethod("geAddress", &NetworkBinding::_GetFirstIPAddress); // COMPATBILITY
+		this->SetMethod("getAddress", &NetworkBinding::_GetFirstIPAddress); // COMPATBILITY
 
 		/**
 		 * @tiapi(method=True,name=Network.getFirstMACAddress,since=0.9)
