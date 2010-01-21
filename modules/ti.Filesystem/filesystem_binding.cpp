@@ -9,7 +9,6 @@
 #include "file.h"
 #include "async_copy.h"
 #include "filesystem_utils.h"
-#include "app_config.h"
 
 #ifdef OS_OSX
 #include <Cocoa/Cocoa.h>
@@ -232,10 +231,8 @@ namespace ti
 
 	void FilesystemBinding::GetApplicationDataDirectory(const ValueList& args, KValueRef result)
 	{
-		std::string appid = AppConfig::Instance()->GetAppID();
-		std::string dir = FileUtils::GetApplicationDataDirectory(appid);
-		ti::File* file = new ti::File(dir);
-		result->SetObject(file);
+		result->SetObject(new ti::File(
+			Host::GetInstance()->GetApplication()->GetDataPath()));
 	}
 
 	void FilesystemBinding::GetRuntimeHomeDirectory(const ValueList& args, KValueRef result)

@@ -2,15 +2,11 @@
 from os import path
 Import('build env module')
 
+env.Append(CPPDEFINES = ('TITANIUM_FILESYSTEM_API_EXPORT', 1))
+
 build.add_thirdparty(env, 'poco')
-env.Append(LIBS=['tiappmodule'])
-env.Append(LIBPATH=[build.get_module('tiapp').dir])
 if build.is_osx():
 	env.Append(FRAMEWORKS = ['Cocoa'])
-
-env.Append(CPPDEFINES = ('TITANIUM_FILESYSTEM_API_EXPORT', 1))
-env.Append(CPPPATH = ['%s/modules/ti.App' % build.titanium_source_dir])
-env.Append(LIBPATH=[path.join(build.dir, 'modules', 'ti.App')])
 
 if build.is_win32():
 	env.Append(CCFLAGS=['/MD'])
