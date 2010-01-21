@@ -38,8 +38,11 @@ elif build.is_osx():
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 
 m = build.add_module('ti.UI', env=env)
-s1 = env.SharedLibrary(target = m.build_dir + '/tiuimodule', source = sources)
-build.mark_build_target(s1)
+
+# Copy the support files the module build directory
+build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), m.build_dir)
+t = env.SharedLibrary(target = m.build_dir + '/tiuimodule', source = sources)
+build.mark_build_target(t)
 
 if build.is_osx():
 	if not(path.exists(build.dir + '/modules/tiui')):

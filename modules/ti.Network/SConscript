@@ -28,7 +28,5 @@ m = build.add_module('ti.Network', env=env)
 t = env.SharedLibrary(target = m.build_dir + '/tinetworkmodule', source = sources)
 build.mark_build_target(t)
 
-t = build.utils.CopyTree(Glob('*.js'), m.build_dir)
-build.mark_build_target(t)
-
-
+# Copy the support files the module build directory
+build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), m.build_dir)
