@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-Import('build')
-Import('run')
-Import('run_with')
+import effess
 import SCons.Variables
 import SCons.Environment
-import futils, os.path as path
+import os.path as path
 from SCons.Script import *
 from app import App
 from subprocess import Popen
 
+Import('build')
+Import('run')
+Import('run_with')
 def package_app_builder(target, source, env):
 
 	if not 'ID' in env:
@@ -46,12 +47,12 @@ def package_app_builder(target, source, env):
 
 	for s in source[1:]:
 		s = str(s)
-		futils.CopyToDir(s, app.contents)
+		effess.copy_to_dir(s, app.contents)
 
 	if 'RESOURCES' in env:
 		for f in env['RESOURCES']:
 			for dirname in os.listdir(f):
-				futils.CopyToDir(path.join(f,dirname), path.join(app.contents,'Resources'))
+				effess.copy_to_dir(path.join(f,dirname), path.join(app.contents,'Resources'))
 
 	if run:
 		if run_with:

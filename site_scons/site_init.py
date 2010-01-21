@@ -1,6 +1,5 @@
-import sys, os.path as path
-
-kroll_dir = path.join(path.abspath('.'),'kroll','site_scons')
-sys.path.append(kroll_dir)
-
+import sys
+import os.path as path
+sys.path.append(path.join(path.abspath('.'), 'kroll', 'site_scons'))
+sys.path.append(path.join(path.abspath('.'), 'kroll', 'tools'))
 import kroll

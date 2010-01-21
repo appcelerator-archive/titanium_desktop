@@ -1,5 +1,9 @@
 Import('build')
-import os.path as path, futils, os, zipfile, sys
+import os.path as path
+import effess
+import os
+import zipfile
+import sys
 
 # Network installable zip files for distribution. We must
 # encase this in a builder because the files necessary for zipping
@@ -12,12 +16,12 @@ def build_dist_zips(target, source, env):
 		os.makedirs(build.dist_dir)
 
 	print "Packing %s" % f
-	futils.ZipDir(build.runtime_build_dir, f, exclude=excludes)
+	effess.make_zip(build.runtime_build_dir, f, exclude=excludes)
 	
 	for m in build.modules:
 		f = path.join(build.dist_dir, 'module-%s-%s.zip' % (m.name, m.version))
 		print "Packing %s" % f
-		futils.ZipDir(m.build_dir, f, exclude=excludes)
+		effess.make_zip(m.build_dir, f, exclude=excludes)
 
 build.env.Append(BUILDERS = {'BuildDistZips' : Builder(action=build_dist_zips)})
 zips = build.env.BuildDistZips('#dummy-dist-zips', [])
@@ -33,17 +37,17 @@ def build_sdk(target, source, env):
 	def buildRuntimeZip(file):
 		relativePath = file.replace(build.runtime_build_dir, '')
 		zipPath = '/'.join(['runtime', build.os, build.version, relativePath])
-		futils.AddToZip(sdkZip, file, zipPath)
+		effess.add_to_zip(sdkZip, file, zipPath)
 		
-	futils.walk_dir(build.runtime_build_dir, buildRuntimeZip, exclude=excludes, dirs=True)
+	effess.walk_dir(build.runtime_build_dir, buildRuntimeZip, exclude=excludes, dirs=True)
 	
 	def buildModuleZip(file, module):
 		relativePath = file.replace(m.build_dir, '')
 		zipPath = '/'.join(['modules', build.os, module.name, build.version, relativePath])
-		futils.AddToZip(sdkZip, file, zipPath)
+		effess.add_to_zip(sdkZip, file, zipPath)
 	
 	for m in build.modules:
-		futils.walk_dir(m.build_dir, lambda f: buildModuleZip(f, m), exclude=excludes, dirs=True)
+		effess.walk_dir(m.build_dir, lambda f: buildModuleZip(f, m), exclude=excludes, dirs=True)
 
 	def sdkPath(*args):
 		return '/'.join(['sdk', build.os, build.version] + list(args))
@@ -71,7 +75,7 @@ def build_sdk(target, source, env):
 		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'), sdkPath('titanium_installer.dll'))
 		sdkZip.write(os.path.join(build.third_party, 'microsoft', 'Microsoft_VC80_CRT_x86.msm'), sdkPath('Microsoft_VC80_CRT_x86.msm'))
 
-	futils.ZipDir(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, build.version))
+	effess.make_zip(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, build.version))
 	sdkZip.close()
 
 build.env.Append(BUILDERS = {'BuildSDK' : Builder(action=build_sdk)})
