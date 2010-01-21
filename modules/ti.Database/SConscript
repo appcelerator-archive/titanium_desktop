@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-import os, os.path as path
-Import('build')
+from os import path
+Import('build env module')
 
-env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_DATABASE_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
-
-m = build.add_module('ti.Database', env=env)
-t = env.SharedLibrary(target = m.build_dir + '/tidatabasemodule', source = Glob('*.cpp'))
-build.mark_build_target(t)
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir, 'tidatabasemodule'), Glob('*.cpp')))
 

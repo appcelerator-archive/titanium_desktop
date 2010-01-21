@@ -1,16 +1,11 @@
 #!/usr/bin/env python
-import os, inspect, os.path as path, shutil
-import distutils.dir_util as dirutil
+from os import path
+Import('build env module')
 
-Import('build')
-
-env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_GROWL_API_EXPORT', 1))
-env.Append(CPPPATH = ['#kroll'])
 
 build.add_thirdparty(env, 'poco')
 sources = Glob('*.cpp')
-
 if build.is_osx():
 	env.Append(FRAMEWORKPATH=[build.tp('growl')])
 	env.Append(FRAMEWORKS=['Cocoa', 'Growl'])
@@ -25,6 +20,5 @@ elif build.is_linux():
 	sources += Glob('libnotify/*.cpp')
 	env.ParseConfig('pkg-config --cflags --libs libnotify')
 
-m = build.add_module('ti.Growl', env=env)
-t = env.SharedLibrary(target = m.build_dir + '/tigrowlmodule', source=sources)
-build.mark_build_target(t)
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir, 'tigrowlmodule'), sources))

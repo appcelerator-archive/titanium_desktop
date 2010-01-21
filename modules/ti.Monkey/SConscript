@@ -1,12 +1,8 @@
 #!/usr/bin/env python
-import os
-Import('build')
+from os import path
+Import('build env module')
 
-env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_MONKEY_API_EXPORT', 1))
-env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
-
-m = build.add_module('ti.Monkey', env=env)
-t = env.SharedLibrary(target = m.build_dir + '/timonkeymodule', source = Glob('*.cpp'))
-build.mark_build_target(t)
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir, 'timonkeymodule'), Glob('*.cpp')))

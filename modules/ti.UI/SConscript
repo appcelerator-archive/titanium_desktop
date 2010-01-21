@@ -1,12 +1,10 @@
 #!/usr/bin/env python
-import os, os.path as path
+from os import path
+Import('build env module')
 
-Import('build')
-
-env = build.env.Clone()
 env.Append(LIBPATH=[
-	build.get_module('tiapp').build_dir,
-	build.get_module('javascript').build_dir])
+	build.get_module('tiapp').dir,
+	build.get_module('javascript').dir])
 env.Append(CPPPATH = [
 	'%s/modules/javascript' % build.kroll_source_dir,
 	'%s/modules/ti.App' % build.titanium_source_dir])
@@ -37,12 +35,10 @@ elif build.is_osx():
 	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 
-m = build.add_module('ti.UI', env=env)
-
 # Copy the support files the module build directory
-build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), m.build_dir)
-t = env.SharedLibrary(target = m.build_dir + '/tiuimodule', source = sources)
-build.mark_build_target(t)
+build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), module.dir)
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir,'tiuimodule'), sources))
 
 if build.is_osx():
 	if not(path.exists(build.dir + '/modules/tiui')):
@@ -55,5 +51,5 @@ if build.is_osx():
 
 	for i in Glob('osx/*.xib'):
 		base = path.splitext(path.basename(str(i)))[0]
-		env.AddPostAction(s1, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile %s/%s.nib %s' % (m.build_dir, base, i))
+		env.AddPostAction(s1, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile %s/%s.nib %s' % (module.dir, base, i))
 		env.AddPostAction(s1, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile %s/%s.nib %s' % (template_dir, base, i))

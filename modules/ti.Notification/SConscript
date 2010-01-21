@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import os, os.path as path
+Import('build env module')
 
-Import('build')
-m = build.add_module('ti.Notification')
-build.utils.LightWeightCopy(build.cwd(),  m.build_dir)
+build.utils.LightWeightCopy(build.cwd(), module.dir)

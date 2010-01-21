@@ -1,25 +1,19 @@
 #!/usr/bin/env python
-import os
-import os.path as path
-Import('build')
+from os import path
+Import('build env module')
 
-env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_WORKER_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'webkit')
 
 env.Append(CPPPATH = ['%s/modules/javascript' % build.kroll_source_dir])
-env.Append(LIBPATH=[build.get_module('javascript').build_dir])
+env.Append(LIBPATH=[build.get_module('javascript').dir])
 env.Append(LIBS=['javascriptmodule'])
 
 if build.is_win32():
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
 
-m = build.add_module('ti.Worker', env=env)
-t = env.SharedLibrary(target = m.build_dir + '/tiworkermodule', source = Glob('*.cpp'))
-build.mark_build_target(t)
-
-t = build.utils.CopyTree(Glob('*.js'), m.build_dir)
-build.mark_build_target(t)
-
+build.mark_build_target(build.utils.CopyTree(Glob('*.js'), module.dir))
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir, 'tiworkermodule'), Glob('*.cpp')))

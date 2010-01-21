@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-import os
-Import('build')
+from os import path
+Import('build env module')
 
-env = build.env.Clone();
 env.Append(CPPDEFINES = ('TITANIUM_PLATFORM_API_EXPORT', 1))
 env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
@@ -14,12 +13,11 @@ if build.is_win32():
 elif build.is_osx():
 	env.Append(FRAMEWORKS = ['AppKit', 'Cocoa'])
 
-m = build.add_module('ti.Platform', env=env)
 sources = [File('platform_module.cpp'), File('platform_binding.cpp')]
 if build.is_osx():
 	sources.append(File('platform_binding_%s.mm' % build.os))
 else:
 	sources.append(File('platform_binding_%s.cpp' % build.os))
 
-t = env.SharedLibrary(target=m.build_dir+'/tiplatformmodule', source=sources)
-build.mark_build_target(t)
+build.mark_build_target(env.SharedLibrary(
+	path.join(module.dir, 'tiplatformmodule'), sources))
