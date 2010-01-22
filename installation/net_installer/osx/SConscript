@@ -34,7 +34,7 @@ build.mark_build_target(c)
 resources_out = p.join(contents, 'Resources', 'English.lproj')
 
 files = []
-files.append(p.join(build.titanium_support_dir, 'titanium.icns'))
+files.append(p.join(build.titanium_support_dir, 'osx', 'titanium.icns'))
 files.append(p.join(build.cwd(), 'dialog-warning.png'))
 c = build.utils.CopyToDir(files, resources_out)
 build.mark_build_target(c)

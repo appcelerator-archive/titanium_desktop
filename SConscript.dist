@@ -4,13 +4,16 @@ import effess
 import os
 import zipfile
 import sys
+from glob import glob
 
 # Network installable zip files for distribution. We must
 # encase this in a builder because the files necessary for zipping
 # don't exist when this file is processed.
-excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd', '.cpp', '.obj', '.pyc', 'SConscript']
+excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd', '.xib'
+	'.cpp', '.obj', '.pyc', 'SConscript', '.xib']
+sdk_dir = path.join(build.dir, 'sdk')
+
 def build_dist_zips(target, source, env):
-	
 	f = path.join(build.dist_dir, 'runtime-%s.zip' % build.version)
 	if not(path.isdir(build.dist_dir)):
 		os.makedirs(build.dist_dir)
@@ -21,12 +24,7 @@ def build_dist_zips(target, source, env):
 	for m in build.modules:
 		f = path.join(build.dist_dir, 'module-%s-%s.zip' % (m.name, m.version))
 		print "Packing %s" % f
-		effess.make_zip(m.build_dir, f, exclude=excludes)
-
-build.env.Append(BUILDERS = {'BuildDistZips' : Builder(action=build_dist_zips)})
-zips = build.env.BuildDistZips('#dummy-dist-zips', [])
-build.mark_dist_target(zips)
-
+		effess.make_zip(m.dir, f, exclude=excludes)
 
 def build_sdk(target, source, env):
 	sdkZipPath = path.join(build.dist_dir, 'sdk-%s.zip' % build.version)
@@ -42,12 +40,12 @@ def build_sdk(target, source, env):
 	effess.walk_dir(build.runtime_build_dir, buildRuntimeZip, exclude=excludes, dirs=True)
 	
 	def buildModuleZip(file, module):
-		relativePath = file.replace(m.build_dir, '')
+		relativePath = file.replace(m.dir, '')
 		zipPath = '/'.join(['modules', build.os, module.name, build.version, relativePath])
 		effess.add_to_zip(sdkZip, file, zipPath)
-	
+
 	for m in build.modules:
-		effess.walk_dir(m.build_dir, lambda f: buildModuleZip(f, m), exclude=excludes, dirs=True)
+		effess.walk_dir(m.dir, lambda f: buildModuleZip(f, m), exclude=excludes, dirs=True)
 
 	def sdkPath(*args):
 		return '/'.join(['sdk', build.os, build.version] + list(args))
@@ -60,30 +58,43 @@ def build_sdk(target, source, env):
 					absoluteFile = os.path.join(root, file)
 					fileExt = os.path.splitext(relativeFile)[1]
 					exclude = fileExt in excludes or file == fileExt
-					
+
 					if not exclude and path.isfile(absoluteFile):
 						zipPath = '/'.join(relativeFile.split(os.sep))
-						sdkZip.write(absoluteFile, sdkPath(zipPath))	
+						sdkZip.write(absoluteFile, sdkPath(zipPath))
 
-	supportDir = path.join(build.titanium_source_dir, 'support')
-	platformSupportDir = path.join(supportDir, build.os)
-	
-	bundleSupport(supportDir)
-	bundleSupport(platformSupportDir, recurse=True)
-
-	if build.is_win32():
-		sdkZip.write(os.path.join(build.dir, 'runtime', 'installer', 'titanium_installer.dll'), sdkPath('titanium_installer.dll'))
-		sdkZip.write(os.path.join(build.third_party, 'microsoft', 'Microsoft_VC80_CRT_x86.msm'), sdkPath('Microsoft_VC80_CRT_x86.msm'))
-
-	effess.make_zip(path.join(build.dir, 'include'), sdkZip, dest_path='sdk/%s/%s/include' % (build.os, build.version))
+	bundleSupport(sdk_dir, recurse=True)
 	sdkZip.close()
 
 build.env.Append(BUILDERS = {'BuildSDK' : Builder(action=build_sdk)})
-sdk_target = build.env.BuildSDK('#dummy-sdk', [])
+build.env.Append(BUILDERS = {'BuildDistZips' : Builder(action=build_dist_zips)})
+
+zips = build.env.BuildDistZips('#dummy-dist-zips', [])
+build.mark_dist_target(zips)
+AlwaysBuild(zips)
+
+sdk_target = build.env.BuildSDK('sdk', [])
 build.env.Depends(sdk_target, zips)
 build.mark_dist_target(sdk_target)
-
-AlwaysBuild(zips)
 AlwaysBuild(sdk_target)
 
-Alias('sdk', sdk_target)
+# Stage the SDK here
+if not(path.exists(sdk_dir)):
+	os.makedirs(sdk_dir)
+
+# Copy the support files to the SDK directory.
+effess.lightweight_copy_tree(
+	path.join(build.titanium_support_dir, 'support', build.os),
+	path.join(build.dir, 'sdk'))
+effess.copy_to_dir(glob(path.join(build.titanium_support_dir, "*.py")), sdk_dir)
+
+if build.is_osx():
+	os.system('ibtool --errors --warnings --notices ' + \
+		'--output-format human-readable-text --compile %s %s' % \
+		(path.join(build.titanium_support_dir, 'osx', 'MainMenu.xib'),
+		path.join(sdk_dir, 'MainMenu.nib')))
+
+if build.is_win32():
+	effess.copy_to_dir(build.tp('microsoft', 'Microsoft_VC80_CRT_x86.msm'),
+		path.join(sdk_dir, 'installer'))
+

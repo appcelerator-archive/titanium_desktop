@@ -32,29 +32,6 @@ class DesktopPackager(object):
 		sys.path.append(os.path.join(os.path.dirname(__file__), 'win32'))
 		import wix
 		return wix.create_installer(builder)
-	
-	def create_zip(self, builder):
-		extractor = os.path.join(self.options.assets_dir, 'self_extractor.exe')
-		exe = builder.options.executable
-		shutil.copy(extractor,exe)
-		builder.log("making win32 binary at %s, this will take a sec..." % exe)
-		zf = zipfile.ZipFile(exe, 'a', zipfile.ZIP_DEFLATED)
-
-		kboot = os.path.join(builder.options.runtime_dir, 'template', 'kboot.exe')
-		installer = os.path.join(builder.options.runtime_dir, 'installer', 'Installer.exe')
-		
-		zf.write(kboot,'template/kboot.exe')
-		zf.write(kboot, builder.appname + '.exe')
-		zf.write(installer, 'installer/Installer.exe')
-		for walk in os.walk(builder.base_dir):
-			for file in walk[2]:
-				file = os.path.join(walk[0], file)
-				if file != exe:
-					arcname = file.replace(builder.base_dir, "")
-					builder.log("Adding " + arcname)
-					zf.write(file, arcname)
-		zf.close()
-		return exe
 
 	def walk_dir(self, dir, callback):
 		files = os.walk(dir)
@@ -76,9 +53,9 @@ class DesktopPackager(object):
 	def folder_size_in_MB(self,folder,add_to_it=0):
 		folder_size = add_to_it
 		for (path, dirs, files) in os.walk(folder):
-		  for file in files:
-		    filename = os.path.join(path, file)
-		    folder_size += os.path.getsize(filename)
+			for file in files:
+				filename = os.path.join(path, file)
+				folder_size += os.path.getsize(filename)
 
 		return folder_size/(1024*1024.0)
 

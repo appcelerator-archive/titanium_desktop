@@ -19,7 +19,7 @@ build = BuildConfig(
 build.set_kroll_source_dir(path.abspath('kroll'))
 
 build.titanium_source_dir = path.abspath('.')
-build.titanium_support_dir = path.join(build.titanium_source_dir, 'support', build.os)
+build.titanium_support_dir = path.join(build.titanium_source_dir, 'support')
 
 # This should only be used for accessing various
 # scripts in the kroll build directory. All resources
@@ -67,8 +67,6 @@ if ARGUMENTS.get('test_crash', 0):
 ## Kroll *must not be required* for installation
 SConscript('kroll/SConscript.thirdparty')
 SConscript('installation/SConscript')
-if build.is_win32():
-	SConscript('support/win32/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be

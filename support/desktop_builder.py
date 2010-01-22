@@ -54,11 +54,11 @@ class DesktopBuilder(object):
 
 		# copy the boot
 		if options.platform == 'win32':
-			kboot = os.path.join(options.runtime_dir, 'template', 'kboot.exe')
+			kboot = os.path.join(options.assets_dir, 'kboot.exe')
 			options.executable = os.path.join(self.executable_dir, self.appname+'.exe')
 			shutil.copy(kboot, options.executable)
 		else:
-			kboot = os.path.join(options.runtime_dir, 'template', 'kboot')
+			kboot = os.path.join(options.assets_dir, 'kboot')
 			options.executable = os.path.join(self.executable_dir, self.appname)
 			shutil.copy(kboot, options.executable)
 
@@ -68,7 +68,7 @@ class DesktopBuilder(object):
 
 		if options.platform == 'osx':
 			shutil.copy(os.path.join(options.assets_dir, 'titanium.icns'), self.lproj)
-			shutil.copy(os.path.join(options.runtime_dir, 'template','MainMenu.nib'), self.lproj)
+			shutil.copy(os.path.join(options.assets_dir, 'MainMenu.nib'), self.lproj)
 			self.app_icns = os.path.join(self.lproj,'titanium.icns')
 			self.make_osx_icon(os.path.join(self.resources_dir,options.icon),self.app_icns)
 			if options.dmg_background:

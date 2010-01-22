@@ -8,12 +8,8 @@ support_dir = os.path.abspath(os.path.dirname(__file__))
 # some sane defaults
 default_app_language = "1033"
 default_app_codepage = "1252"
-default_license_rtf = os.path.join(support_dir, "LICENSE.rtf")
-default_dialog_bmp = os.path.join(support_dir, 'default_dialog.bmp')
-default_banner_bmp = os.path.join(support_dir, 'default_banner.bmp')
-
 def read_template(name):
-	return open(os.path.join(support_dir, name), 'r').read()
+	return open(os.path.join(installer_sdk_path, name), 'r').read()
 
 def gen_guid():
 	return str(uuid.uuid4()).upper()
@@ -272,8 +268,8 @@ def build_msi(template, args, basename, destdir):
 	return msi
 	
 def create_installer(builder):
-	app_installer_template = read_template('app_installer_template.wxs')
-	app_update_template = read_template('app_update_template.wxs')
+	app_installer_template = read_template(builder.options.assets_dir, 'app_installer_template.wxs')
+	app_update_template = read_template(builder.options.assets_dir, 'app_update_template.wxs')
 		
 	lang = get_from_tiapp(builder.options.tiapp, 'language', 'en-us')
 	app_language = get_app_language(lang)
@@ -281,17 +277,14 @@ def create_installer(builder):
 	if app_language is None or app_codepage is None:
 		invalid_language(lang)
 	
+	license_text = "This software was not shipped with a license."
 	license_file = get_from_tiapp(builder.options.tiapp,
 		'license', os.path.join(builder.options.appdir, 'LICENSE.txt'))
-	license_rtf = default_license_rtf
-	
 	if os.path.exists(license_file):
-		license_rtf = os.path.join(tempfile.gettempdir(),
-			builder.appname + '_license.rtf')
-		write_rtf(open(license_file, "r").read(), license_rtf)
-	else:
-		print >>sys.stderr, "Warning: No license file found, " + \
-			"reverting to default Apache Public License v2"
+		license_text = open(license_file, "r").read()
+	license_rtf = os.path.join(tempfile.gettempdir(),
+		builder.appname + '_license.rtf')
+		write_rtf(license_text, license_rtf)
 	
 	def get_bmp(tag, default_bmp):	
 		bmp = get_from_tiapp(builder.options.tiapp, tag, default_bmp)
@@ -306,12 +299,16 @@ def create_installer(builder):
 			else:
 				return new_bmp
 		return bmp
-	
+
+	sdk_path = builder.options.assets_dir
+	default_dialog_bmp = os.path.join(sdk_path, 'default_dialog.bmp')
+	default_banner_bmp = os.path.join(sdk_path, 'default_banner.bmp')
 	dialog_bmp = get_bmp('dialog-bmp', default_dialog_bmp)
 	banner_bmp = get_bmp('banner-bmp', default_banner_bmp)
 	
-	titanium_installer_dll = os.path.join(builder.options.assets_dir, "titanium_installer.dll")
-	crt_msm = os.path.join(builder.options.assets_dir, "Microsoft_VC80_CRT_x86.msm")
+	installer_sdk_path = os.path.join(sdk_path, 'installer')
+	titanium_installer_dll = os.path.join(installer_sdk_path, 'titanium_installer.dll')
+	crt_msm = os.path.join(installer_sdk_path, 'Microsoft_VC80_CRT_x86.msm')
 	
 	app_version = builder.appversion
 	version_parts = len(app_version.split("."))
