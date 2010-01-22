@@ -1,5 +1,0 @@
-#!/usr/bin/env python
-import os, os.path as p
-Import('build')
-
-SConscript(p.join('net_installer', 'SConscript'))

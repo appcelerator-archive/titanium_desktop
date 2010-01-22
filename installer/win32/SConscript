@@ -17,4 +17,4 @@ env['CCFLAGS'] = ccf
 env.Append(CPPPATH=[build.kroll_utils_dir])
 build.mark_build_target(env.SharedLibrary(
 	path.join(build.dir, 'sdk', 'installer', 'titanium_installer'),
-	Glob('*.cpp') + build.get_kroll_utils(path.join(build.dir, 'objs', 'netinstaller')))
+	Glob('*.cpp') + build.get_kroll_utils(path.join(build.dir, 'objs', 'installer')))

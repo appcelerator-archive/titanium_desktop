@@ -24,24 +24,19 @@ sources.extend(build.get_kroll_utils(p.join(build.dir, 'objs', 'netinstaller')))
 #	installer/Installer App.app/Contents/Resources/English.lproj/titanium.icns
 #	installer/Installer App.app/Contents/Info.plist
 #	see installation/distribution_guide.txt
-contents = p.join(build.runtime_build_dir, 'installer', 'Installer App.app', 'Contents')
+contents = p.join(build.dir, 'sdk', 'installer', 'Installer App.app', 'Contents')
 inst = Env.Program(p.join(contents, 'MacOS', 'Installer App'), sources)
+Env.AddPostAction(inst, 'strip -u -r "%s"' % str(inst[0]))
 build.mark_build_target(inst)
 
-c = build.utils.CopyToDir(Glob('*.plist'), contents)
-build.mark_build_target(c)
-
-resources_out = p.join(contents, 'Resources', 'English.lproj')
-
-files = []
-files.append(p.join(build.titanium_support_dir, 'osx', 'titanium.icns'))
-files.append(p.join(build.cwd(), 'dialog-warning.png'))
-c = build.utils.CopyToDir(files, resources_out)
-build.mark_build_target(c)
+build.mark_build_target(build.utils.CopyToDir(Glob('*.plist'), contents))
+build.mark_build_target(build.utils.CopyToDir([
+		p.join(build.titanium_support_dir, 'osx', 'titanium.icns'),
+		p.join(build.cwd(), 'dialog-warning.png')],
+	p.join(contents, 'Resources', 'English.lproj'))
 
 for f in Glob('English.lproj/*.xib'):
 	f = str(f)
 	out = p.join(resources_out, p.splitext(p.basename(f))[0] + '.nib')
 	Env.AddPostAction(inst, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile "%s" "%s"' % (out, f))
-	Env.AddPostAction(inst, 'strip -u -r "%s"' % str(inst[0]))
 

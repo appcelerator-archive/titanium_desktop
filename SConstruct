@@ -66,7 +66,7 @@ if ARGUMENTS.get('test_crash', 0):
 
 ## Kroll *must not be required* for installation
 SConscript('kroll/SConscript.thirdparty')
-SConscript('installation/SConscript')
+SConscript('installer/SConscript')
 
 # After Kroll builds, the environment will  link 
 # against libkroll, so anything that should not be
