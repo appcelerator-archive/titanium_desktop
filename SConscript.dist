@@ -84,15 +84,15 @@ if not(path.exists(sdk_dir)):
 
 # Copy the support files to the SDK directory.
 effess.lightweight_copy_tree(
-	path.join(build.titanium_support_dir, 'support', build.os),
+	path.join(build.titanium_support_dir, build.os),
 	path.join(build.dir, 'sdk'))
 effess.copy_to_dir(glob(path.join(build.titanium_support_dir, "*.py")), sdk_dir)
 
 if build.is_osx():
 	os.system('ibtool --errors --warnings --notices ' + \
 		'--output-format human-readable-text --compile %s %s' % \
-		(path.join(build.titanium_support_dir, 'osx', 'MainMenu.xib'),
-		path.join(sdk_dir, 'MainMenu.nib')))
+		(path.join(sdk_dir, 'MainMenu.nib'),
+		path.join(build.titanium_support_dir, 'osx', 'MainMenu.xib')))
 
 if build.is_win32():
 	effess.copy_to_dir(build.tp('microsoft', 'Microsoft_VC80_CRT_x86.msm'),

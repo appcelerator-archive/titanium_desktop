@@ -29,14 +29,14 @@ inst = Env.Program(p.join(contents, 'MacOS', 'Installer App'), sources)
 Env.AddPostAction(inst, 'strip -u -r "%s"' % str(inst[0]))
 build.mark_build_target(inst)
 
+lproj_dir = p.join(contents, 'Resources', 'English.lproj')
 build.mark_build_target(build.utils.CopyToDir(Glob('*.plist'), contents))
 build.mark_build_target(build.utils.CopyToDir([
 		p.join(build.titanium_support_dir, 'osx', 'titanium.icns'),
-		p.join(build.cwd(), 'dialog-warning.png')],
-	p.join(contents, 'Resources', 'English.lproj'))
+		p.join(build.cwd(), 'dialog-warning.png')], lproj_dir))
 
 for f in Glob('English.lproj/*.xib'):
 	f = str(f)
-	out = p.join(resources_out, p.splitext(p.basename(f))[0] + '.nib')
+	out = p.join(lproj_dir, p.splitext(p.basename(f))[0] + '.nib')
 	Env.AddPostAction(inst, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile "%s" "%s"' % (out, f))
 
