@@ -16,33 +16,34 @@ namespace ti
 
 static std::string GetFailureReason(long code)
 {
-	case 0:
-	case SE_ERR_OOM:
-		return "out of memory";
-	case ERROR_FILE_NOT_FOUND:
-	case SE_ERR_FNF:
-		return  "file not found";
-	case ERROR_PATH_NOT_FOUND:
-	case SE_ERR_PNF
-		return "path not found";
-	case ERROR_BAD_FORMAT:
-		return "bad format error";
-	case SE_ERR_ACCESSDENIED:
-		return "access denied";
-	case SE_ERR_ASSOCINCOMPLETE:
-		return "association incomplete";
-	case SE_ERR_DDEBUSY:
-		return "DDE busy";
-	case SE_ERR_DDEFAIL:
-		return "DDE failed";
-	case SE_ERR_DDETIMEOUT:
-		return "DDE timed out";
-	case SE_ERR_DLLNOTFOUND:
-		return "DLL not found";
-	case SE_ERR_NOASSOC
-		return "no application associated";
-	case SE_ERR_SHARE:
-		return "Sharing violation";
+	switch (code)
+	{
+		case 0:
+		case SE_ERR_OOM:
+			return "out of memory";
+		case SE_ERR_FNF:
+			return  "file not found";
+		case SE_ERR_PNF:
+			return "path not found";
+		case ERROR_BAD_FORMAT:
+			return "bad format error";
+		case SE_ERR_ACCESSDENIED:
+			return "access denied";
+		case SE_ERR_ASSOCINCOMPLETE:
+			return "association incomplete";
+		case SE_ERR_DDEBUSY:
+			return "DDE busy";
+		case SE_ERR_DDEFAIL:
+			return "DDE failed";
+		case SE_ERR_DDETIMEOUT:
+			return "DDE timed out";
+		case SE_ERR_DLLNOTFOUND:
+			return "DLL not found";
+		case SE_ERR_NOASSOC:
+			return "no application associated";
+		case SE_ERR_SHARE:
+			return "Sharing violation";
+	}
 	return "unknown";
 }
 
@@ -229,8 +230,8 @@ std::string PlatformBinding::GetVersionImpl()
 
 bool PlatformBinding::OpenApplicationImpl(const std::string& name)
 {
-	wstring wideName(::UTF8ToWide(name));
-	long response = static_cast<long>(ShellExecuteW(
+	std::wstring wideName(::UTF8ToWide(name));
+	long response = reinterpret_cast<long>(ShellExecuteW(
 		0, L"open", wideName.c_str(), 0, 0, SW_SHOWNORMAL));
 
 	if (response <= 32)
@@ -245,15 +246,16 @@ bool PlatformBinding::OpenApplicationImpl(const std::string& name)
 
 bool PlatformBinding::OpenURLImpl(const std::string& name)
 {
-	return this->OpenApplication(name);
+	return this->OpenApplicationImpl(name);
 }
 
 void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 {
 	// Ensure filename ends in .bmp.
 	// TODO: This seems broken.
-	if (targetFile.rfind(".") == std::string::npos)
-		targetFile.append(".bmp");
+	std::string screenshotFile = targetFile;
+	if (screenshotFile.rfind(".") == std::string::npos)
+		screenshotFile.append(".bmp");
 
 	HWND desktop = GetDesktopWindow();
 	RECT desktopRect;
@@ -283,7 +285,7 @@ void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 
 	if (SaveBMPFile(tmpFile, hBmp, hdc, width, height))
 	{
-		wstring wideScreenshotFile(::UTF8ToWide(screenshotFile));
+		std::wstring wideScreenshotFile(::UTF8ToWide(screenshotFile));
 		CopyFileW(tmpFile, wideScreenshotFile.c_str(), FALSE);
 	}
 

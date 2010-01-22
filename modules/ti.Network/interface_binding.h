@@ -9,6 +9,7 @@
 
 #include <kroll/kroll.h>
 #include <Poco/Net/NetworkInterface.h>
+#undef interface
 
 namespace ti
 {
