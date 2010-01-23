@@ -11,7 +11,8 @@ namespace ti
 	TrayItem::TrayItem(std::string& iconURL) : 
 		KEventObject("UI.TrayItem"),
 		iconURL(iconURL),
-		iconPath(URLUtils::URLToPath(iconURL))
+		iconPath(URLUtils::URLToPath(iconURL)),
+		removed(false)
 	{
 		/**
 		 * @tiapi(method=True,name=UI.Tray.setIcon,since=0.2) Sets a TrayItem's icon
@@ -73,7 +74,8 @@ namespace ti
 			this->iconPath = URLUtils::URLToPath(iconURL);
 		}
 
-		this->SetIcon(this->iconPath);
+		if (!removed)
+			this->SetIcon(this->iconPath);
 	}
 
 	void TrayItem::_GetIcon(const ValueList& args, KValueRef result)
@@ -84,12 +86,15 @@ namespace ti
 	void TrayItem::_SetMenu(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setMenu", "o|0");
-		AutoMenu menu = NULL; // A NULL value is an unset
+		AutoMenu menu(0); // A NULL value is an unset
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
 			menu = args.at(0)->ToObject().cast<Menu>();
 		}
-		this->SetMenu(menu);
+
+		if (!removed)
+			this->SetMenu(menu);
+
 		this->menu = menu;
 	}
 
@@ -105,7 +110,9 @@ namespace ti
 		if (args.size() > 0) {
 			hint = args.GetString(0);
 		}
-		this->SetHint(hint);
+
+		if (!removed)
+			this->SetHint(hint);
 	}
 
 	void TrayItem::_GetHint(const ValueList& args, KValueRef result)
@@ -115,7 +122,11 @@ namespace ti
 
 	void TrayItem::_Remove(const ValueList& args, KValueRef result)
 	{
+		if (removed)
+			return;
+
 		this->Remove();
 		UIBinding::GetInstance()->UnregisterTrayItem(this);
+		removed = true;
 	}
 }
