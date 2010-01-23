@@ -39,7 +39,6 @@
 +(NSString*)mimeTypeFromExtension:(NSString*)ext
 {
 	NSString* mime = @"application/octet-stream";
-	
 	if ([ext isEqualToString:@"png"])
 	{
 		mime = @"image/png";
@@ -88,6 +87,11 @@
 	{
 		mime = @"text/xml";
 	}
+	else if ([ext isEqualToString:@"pdf"])
+	{
+		mime = @"application/pdf";
+	}
+
 	return mime;
 }
 
@@ -132,9 +136,6 @@
 	static Logger* logger = Logger::Get("UI.TitaniumProtocols");
 	id<NSURLProtocolClient> client = [self client];
 	NSURL* url = [[self request] URL];
-	std::string urlString = [[url absoluteString] UTF8String];
-	std::string path = URLUtils::URLToPath(urlString);
-	
 
 	// First check if this is the non-canonical version of this request.
 	// If it is, we redirect to the canonical version.
@@ -155,6 +156,8 @@
 	
 
 	// This is a canonical request, so try to load the file it represents.
+	std::string urlString([[url absoluteString] UTF8String]);
+	std::string path(URLUtils::URLToPath(urlString));
 	NSError* error = nil;
 	NSData* data = nil;
 	NSString* mimeType = nil;
