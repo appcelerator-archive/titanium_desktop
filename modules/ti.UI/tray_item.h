@@ -36,7 +36,7 @@ namespace ti
 		std::string iconURL;
 		std::string iconPath;
 		std::string hint;
-
+		bool removed;
 	};
 }
 
