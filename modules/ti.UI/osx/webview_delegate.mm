@@ -280,6 +280,14 @@
 	}
 }
 
+-(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
+{
+	NSString* urlString = [[[dataSource request] URL] absoluteString];
+	logger->Error("didFailLoadingWithErrorFromDataSource (%s): %s",
+		[urlString UTF8String], [[error localizedDescription] UTF8String]);
+}
+
+
 - (void)webView:(WebView *)sender didClearWindowObject:(WebScriptObject *)windowScriptObject forFrame:(WebFrame*)frame 
 {
 	JSGlobalContextRef context = [frame globalContext];
@@ -417,13 +425,6 @@
 -(NSURLRequest *)webView:(WebView *)sender resource:(id)identifier willSendRequest:(NSURLRequest *)request redirectResponse:(NSURLResponse *)redirectResponse fromDataSource:(WebDataSource *)dataSource
 {
 	return request;
-}
-
--(void)webView:(WebView *)sender resource:(id)identifier didFailLoadingWithError:(NSError *)error fromDataSource:(WebDataSource *)dataSource
-{
-	NSString* urlString = [[[dataSource request] URL] absoluteString];
-	logger->Error("didFailLoadingWithError (%s): %s",
-		[urlString UTF8String], [[error localizedDescription] UTF8String]);
 }
 
 -(void)webView:(WebView *)sender resource:(id)identifier didFinishLoadingFromDataSource:(WebDataSource *)dataSource
@@ -570,7 +571,6 @@
 	}
 	return menuItems;
 }
-
 
 // return whether or not quota has been reached for a db (enabling db support)
 - (void)webView:(WebView*)webView
