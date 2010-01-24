@@ -2,7 +2,7 @@ var TFS = Titanium.Filesystem;
 
 Titanium.AppCreator = {
 	
-	osx: function(runtime,destination,name,appid,install)
+	osx: function(assetsDir,destination,name,appid,install)
 	{
 		var src = TFS.getFile(destination,name+'.app');
 		src.createDirectory(true);
@@ -15,17 +15,16 @@ Titanium.AppCreator = {
 		var lproj = TFS.getFile(resources,'English.lproj');
 		lproj.createDirectory(true);
 
-		var templates = TFS.getFile(runtime,'template');
-		var fromMacos = TFS.getFile(templates,'kboot');
+		var fromMacos = TFS.getFile(assetsDir,'kboot');
 		fromMacos.copy(macos);
 		var boot = TFS.getFile(macos,'kboot');
 		boot.rename(name);
 		boot.setExecutable(true);
 
-		var mainMenu = TFS.getFile(templates,'MainMenu.nib');
+		var mainMenu = TFS.getFile(assetsDir,'MainMenu.nib');
 		mainMenu.copy(lproj);
 
-		var icns = TFS.getFile(templates,'titanium.icns');
+		var icns = TFS.getFile(assetsDir,'titanium.icns');
 		icns.copy(lproj);
 
 		var plist = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"+
@@ -78,15 +77,14 @@ Titanium.AppCreator = {
 		};
 	},
 
-	linux: function(runtime,destination,name,appid,install)
+	linux: function(assetsDir,destination,name,appid,install)
 	{
 		var appDir = TFS.getFile(destination,name);
 		appDir.createDirectory(true);
 		var resources = TFS.getFile(appDir,'Resources');
 		resources.createDirectory(true);
 
-		var templates = TFS.getFile(runtime,'template');
-		var kboot = TFS.getFile(templates,'kboot');
+		var kboot = TFS.getFile(assetsDir,'kboot');
 		var appExecutable = TFS.getFile(appDir, name);
 		kboot.copy(appExecutable);
 
@@ -108,15 +106,14 @@ Titanium.AppCreator = {
 		};
 	},
 
-	win32: function(runtime,destination,name,appid,install)
+	win32: function(assetsDir,destination,name,appid,install)
 	{
 		var appDir = TFS.getFile(destination,name);
 		appDir.createDirectory(true);
 		var resources = TFS.getFile(appDir,'Resources');
 		resources.createDirectory(true);
 
-		var templates = TFS.getFile(runtime,'template');
-		var kboot = TFS.getFile(templates,'kboot.exe');
+		var kboot = TFS.getFile(assetsDir,'kboot.exe');
 		var appExecutable = TFS.getFile(appDir, name + '.exe');
 		kboot.copy(appExecutable);
 		
@@ -140,12 +137,32 @@ Titanium.AppCreator = {
 };
 
 
-Titanium.createApp = function(runtime,destination,name,appid,install)
+Titanium.createApp = function(runtimeComponent,destination,name,appid,install)
 {
+
+	// DRILLBIT ONLY: We just grab the bundled SDK here, since we know
+	// that's where the assets are.
+	var components = Titanium.API.getApplication().getComponents();
+	for (var i = 0; i < components.length; i++)
+	{
+		var c = components[i];
+		Titanium.API.debug(c.type);
+		if (c.getType() == Titanium.API.SDK)
+		{
+			assetsDir = TFS.getFile(components[i].getPath());
+			break;
+		}
+	}
+	
+	if (!assetsDir.exists())
+	{
+		Titanium.API.error("Could not find assets directory at: " + assetsDir);
+	}
 	install = (typeof(install)=='undefined') ? true : install;
+
 	var platform = Titanium.platform;
 	var fn = Titanium.AppCreator[platform];
-	return fn(runtime,destination,name,appid,install);
+	return fn(assetsDir,destination,name,appid,install);
 };
 
 Titanium.linkLibraries = function(runtimeDir)

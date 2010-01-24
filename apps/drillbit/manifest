@@ -6,6 +6,7 @@
 #url:http://titaniumapp.com
 #guid:D83B08F4-B43B-4909-9FEE-336CDB44750B
 #desc:Unit Test Driver
+sdk:0.4
 runtime:0.4
 api:0.4
 javascript:0.4

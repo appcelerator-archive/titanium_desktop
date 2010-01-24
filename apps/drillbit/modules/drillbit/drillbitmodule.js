@@ -193,7 +193,6 @@
 		this.setupTestHarness = function(harness_manifest)
 		{
 			var runtime_dir = TFS.getFile(Titanium.API.getEnvironment()['KR_RUNTIME']);
-			var modules_dir = TFS.getFile(TFS.getApplicationDirectory(),'modules');
 
 			// create the test harness directory
 			if (!this.test_harness_dir.exists())
@@ -204,7 +203,12 @@
 			this.require('app://js/app.js');
 			this.require('app://js/project.js');
 			// create app structure
-			app = Titanium.createApp(runtime_dir,this.test_harness_dir,'test_harness','CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4',false);
+			app = Titanium.createApp(
+				Titanium.API.application.runtime, // Runtime component
+				this.test_harness_dir, // staging directory
+				'test_harness', // app name
+				'CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4', // app guid
+				false);
 			tiapp_backup = TFS.getFile(app.base,'_tiapp.xml');
 			manifest_backup = TFS.getFile(app.base,'_manifest');
 
