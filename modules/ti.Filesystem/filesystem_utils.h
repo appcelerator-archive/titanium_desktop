@@ -8,29 +8,13 @@
 
 #include <kroll/kroll.h>
 
-#ifdef OS_WIN32
-#include <windows.h>
-#elif OS_OSX
-#import <Foundation/Foundation.h>
-#endif
-
-#include "file.h"
-#include <string>
-#include <Poco/FileStream.h>
-
 namespace ti
 {
-	class FileSystemUtils
+	namespace FilesystemUtils
 	{
-		public:
-			
-			static SharedString GetFileName(KValueRef);
-			static AutoPtr<File> ToFile(KObjectRef object);
-			
-		private:
-			FileSystemUtils();
-			virtual ~FileSystemUtils();
-	};
+		std::string FilenameFromValue(KValueRef);
+		std::string FilenameFromArguments(const ValueList& args);
+	}
 }
 
 #endif

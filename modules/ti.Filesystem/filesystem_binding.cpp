@@ -49,52 +49,52 @@ namespace ti
 		 * @tiapi(method=True,name=Filesystem.getFile) Returns a file path, optionally joining multiple arguments together in an OS specific way
 		 * @tiarg(for=Filesystem.getFile,name=pathname) a string that is used to form a path
 		 * @tiarg(for=Filesystem.getFile,optional=true,name=...) a variable length argument list of Strings that are concatinated with pathname to form a path
-		 * @tiresult(for=Filesystem.getFile,type=FileSystem.File) a File object referencing the file
+		 * @tiresult(for=Filesystem.getFile,type=Filesystem.File) a File object referencing the file
 		 */
 		this->SetMethod("getFile",&FilesystemBinding::GetFile);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getFileStream) Returns a Filestream object
-		 * @tiresult(for=Filesystem.getFileStream,type=FileSystem.Filestream) a Filestream object referencing the file
+		 * @tiresult(for=Filesystem.getFileStream,type=Filesystem.Filestream) a Filestream object referencing the file
 		 */
 		this->SetMethod("getFileStream",&FilesystemBinding::GetFileStream);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getProgramsDirectory) Returns the programs directory of the current system
-		 * @tiresult(for=Filesystem.getProgramsDirectory,type=FileSystem.File) a File object referencing the system programs directory
+		 * @tiresult(for=Filesystem.getProgramsDirectory,type=Filesystem.File) a File object referencing the system programs directory
 		 */
 		this->SetMethod("getProgramsDirectory",&FilesystemBinding::GetProgramsDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getApplicationDirectory) Returns the directory where the application resides
-		 * @tiresult(for=Filesystem.getApplicationDirectory,type=FileSystem.File) a File object referencing the directory where the application resides
+		 * @tiresult(for=Filesystem.getApplicationDirectory,type=Filesystem.File) a File object referencing the directory where the application resides
 		 */
 		this->SetMethod("getApplicationDirectory",&FilesystemBinding::GetApplicationDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getApplicationDataDirectory) Returns the data directory of the application
-		 * @tiresult(for=Filesystem.getApplicationDataDirectory,type=FileSystem.File) a File object referencing the data directory of the application
+		 * @tiresult(for=Filesystem.getApplicationDataDirectory,type=Filesystem.File) a File object referencing the data directory of the application
 		 */
 		this->SetMethod("getApplicationDataDirectory",&FilesystemBinding::GetApplicationDataDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getRuntimeHomeDirectory) Returns the directory of where the Titanium runtime files are stored
-		 * @tiresult(for=Filesystem.getRuntimeHomeDirectory,type=FileSystem.File) a File object referencing the directory where the Titanium runtime files are stored.
+		 * @tiresult(for=Filesystem.getRuntimeHomeDirectory,type=Filesystem.File) a File object referencing the directory where the Titanium runtime files are stored.
 		 */
 		this->SetMethod("getRuntimeHomeDirectory",&FilesystemBinding::GetRuntimeHomeDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getResourcesDirectory) Returns the resources directory of the application
-		 * @tiresult(for=Filesystem.getResourcesDirectory,type=FileSystem.File) a File object referencing the resources directory of the application
+		 * @tiresult(for=Filesystem.getResourcesDirectory,type=Filesystem.File) a File object referencing the resources directory of the application
 		 */
 		this->SetMethod("getResourcesDirectory",&FilesystemBinding::GetResourcesDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getDesktopDirectory) Returns the system desktop directory
-		 * @tiresult(for=Filesystem.getDesktopDirectory,type=FileSystem.File) a File object referencing the system desktop directory
+		 * @tiresult(for=Filesystem.getDesktopDirectory,type=Filesystem.File) a File object referencing the system desktop directory
 		 */
 		this->SetMethod("getDesktopDirectory",&FilesystemBinding::GetDesktopDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getDocumentsDirectory) Returns the system documents directory
-		 * @tiresult(for=Filesystem.getDocumentsDirectory,type=FileSystem.File) a File object referencing the system documents directory
+		 * @tiresult(for=Filesystem.getDocumentsDirectory,type=Filesystem.File) a File object referencing the system documents directory
 		 */
 		this->SetMethod("getDocumentsDirectory",&FilesystemBinding::GetDocumentsDirectory);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getUserDirectory) Returns the home directory of the current user
-		 * @tiresult(for=Filesystem.getUserDirectory,type=FileSystem.File) a File object referencing the home directory of the current user
+		 * @tiresult(for=Filesystem.getUserDirectory,type=Filesystem.File) a File object referencing the home directory of the current user
 		 */
 		this->SetMethod("getUserDirectory",&FilesystemBinding::GetUserDirectory);
 		/**
@@ -109,7 +109,7 @@ namespace ti
 		this->SetMethod("getSeparator",&FilesystemBinding::GetSeparator);
 		/**
 		 * @tiapi(method=True,name=Filesystem.getRootDirectories) Returns the system root directory
-		 * @tiresult(for=Filesystem.getRootDirectories,type=Array<FileSystem.File>) a File object referencing the system root directory
+		 * @tiresult(for=Filesystem.getRootDirectories,type=Array<Filesystem.File>) a File object referencing the system root directory
 		 */
 		this->SetMethod("getRootDirectories",&FilesystemBinding::GetRootDirectories);
 		/**
@@ -118,7 +118,7 @@ namespace ti
 		 * @tiarg Either a path or array of paths to copy from
 		 * @tiarg(for=Filesystem.asyncCopy,name=destination,type=Filesystem.File|String) either a string or file object to copy to
 		 * @tiarg(for=Filesystem.asyncCopy,name=callback,type=Function) callback to invoke on each copy completion operation
-		 * @tiresult(for=Filesystem.asyncCopy,type=FileSystem.AsyncCopy) async copy object
+		 * @tiresult(for=Filesystem.asyncCopy,type=Filesystem.AsyncCopy) async copy object
 		 */
 		this->SetMethod("asyncCopy",&FilesystemBinding::ExecuteAsyncCopy);
 
@@ -180,53 +180,20 @@ namespace ti
 		}
 	}
 
-	void FilesystemBinding::ResolveFileName(const ValueList& args, std::string& filename)
-	{
-		if (args.at(0)->IsList())
-		{
-			// you can pass in an array of parts to join
-			KListRef list = args.at(0)->ToList();
-			for (size_t c = 0; c < list->Size(); c++)
-			{
-				std::string arg = list->At(c)->ToString();
-				filename = kroll::FileUtils::Join(filename.c_str(), arg.c_str(), NULL);
-			}
-		}
-		else
-		{
-			// you can pass in vararg of strings which acts like  a join
-			for (size_t c = 0; c < args.size(); c++)
-			{
-				std::string arg = FileSystemUtils::GetFileName(args.at(c))->c_str();
-				filename = kroll::FileUtils::Join(filename.c_str(), arg.c_str(), NULL);
-			}
-		}
-		if (filename.empty())
-		{
-			throw ValueException::FromString("invalid file type");
-		}
-	}
 
 	void FilesystemBinding::GetFile(const ValueList& args, KValueRef result)
 	{
-		std::string filename;
-		this->ResolveFileName(args, filename);
-		ti::File* file = new ti::File(filename);
-		result->SetObject(file);
+		result->SetObject(new ti::File(FilesystemUtils::FilenameFromArguments(args)));
 	}
 
 	void FilesystemBinding::GetFileStream(const ValueList& args, KValueRef result)
 	{
-		std::string filename;
-		this->ResolveFileName(args, filename);
-		ti::FileStream* fs = new ti::FileStream(filename);
-		result->SetObject(fs);
+		result->SetObject(new ti::FileStream(FilesystemUtils::FilenameFromArguments(args)));
 	}
 
 	void FilesystemBinding::GetApplicationDirectory(const ValueList& args, KValueRef result)
 	{
-		ti::File* file = new ti::File(host->GetApplication()->path);
-		result->SetObject(file);
+		result->SetObject(new ti::File(host->GetApplication()->path));
 	}
 
 	void FilesystemBinding::GetApplicationDataDirectory(const ValueList& args, KValueRef result)
@@ -416,16 +383,15 @@ namespace ti
 			KListRef list = args.at(0)->ToList();
 			for (unsigned int c = 0; c < list->Size(); c++)
 			{
-				KValueRef v = list->At(c);
-				files.push_back(FileSystemUtils::GetFileName(v)->c_str());
+				files.push_back(FilesystemUtils::FilenameFromValue(list->At(c)));
 			}
 		}
 		else
 		{
-			files.push_back(FileSystemUtils::GetFileName(args.at(0))->c_str());
+			files.push_back(FilesystemUtils::FilenameFromValue(args.at(0)));
 		}
 		KValueRef v = args.at(1);
-		std::string destination(FileSystemUtils::GetFileName(v)->c_str());
+		std::string destination(FilesystemUtils::FilenameFromValue(v));
 		KMethodRef method = args.at(2)->ToMethod();
 		KObjectRef copier = new ti::AsyncCopy(this,host,files,destination,method);
 		result->SetObject(copier);

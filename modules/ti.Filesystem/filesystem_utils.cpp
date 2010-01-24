@@ -12,33 +12,54 @@
 
 namespace ti
 {
-	FileSystemUtils::FileSystemUtils() { }
-	FileSystemUtils::~FileSystemUtils() { }
-	
-	/*static*/
-	SharedString FileSystemUtils::GetFileName(KValueRef v)
+
+namespace FilesystemUtils
+{
+
+	std::string FilenameFromValue(KValueRef v)
 	{
 		if (v->IsString())
 		{
-			return new std::string(v->ToString());
+			return v->ToString();
 		}
 		else if (v->IsObject())
 		{
-			return v->ToObject()->DisplayString();
+			return *(v->ToObject()->DisplayString());
 		}
 		else
 		{
-			std::string message = "can't convert object of type ";
-			message += v->GetType();
-			message += " to filename: don't know what to do";
-			throw ValueException::FromString(message);
+			throw ValueException::FromFormat(
+				"Can't convert object of type %s to filename", v->GetType().c_str());
 		}
 	}
-	
-	/*static*/
-	AutoPtr<File> FileSystemUtils::ToFile(KObjectRef object)
+
+	std::string FilenameFromArguments(const ValueList& args)
 	{
-		AutoPtr<File> file = object.cast<File>();
-		return file;
+		std::string filename;
+		if (args.at(0)->IsList())
+		{
+			// you can pass in an array of parts to join
+			KListRef list(args.GetList(0));
+			for (size_t c = 0; c < list->Size(); c++)
+			{
+				filename = kroll::FileUtils::Join(
+					filename.c_str(), list->At(c)->ToString(), NULL);
+			}
+		}
+		else
+		{
+			// you can pass in vararg of strings which acts like  a join
+			for (size_t c = 0; c < args.size(); c++)
+			{
+				filename = kroll::FileUtils::Join(filename.c_str(),
+					FilenameFromValue(args.at(c)).c_str(), 0);
+			}
+		}
+
+		if (filename.empty())
+			throw ValueException::FromString("Could not construct filename from arguments");
+
+		return filename;
 	}
+}
 }
