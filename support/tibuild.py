@@ -158,7 +158,7 @@ def desktop_setup(options,appdir):
 
 	# try and find the assets directory
 	if options.assets_dir == None:
-		options.assets_dir = os.path.join(os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename)), options.platform)
+		options.assets_dir = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 
 	if not os.path.exists(options.assets_dir):
 		print("Couldn't find assets directory at %s" % options.assets_dir)
