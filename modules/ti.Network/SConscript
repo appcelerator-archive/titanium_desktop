@@ -18,7 +18,7 @@ if build.is_linux():
 	env.ParseConfig('pkg-config --libs --cflags gdk-2.0 dbus-glib-1')
 
 if build.is_win32():
-	env.Append(CCFLAGS=['/MD'])
+	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LIBS=['wsock32','ws2_32', 'ole32', 'comsuppw', 'wbemuuid'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
 	sources += Glob("win32/*.cpp")

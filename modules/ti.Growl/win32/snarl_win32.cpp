@@ -13,7 +13,7 @@ using namespace kroll;
 
 namespace ti
 {
-	UINT SnarlWin32::snarlWindowMessage = ::RegisterWindowMessage("TitaniumSnarlMessage");
+	UINT SnarlWin32::snarlWindowMessage = ::RegisterWindowMessageA("TitaniumSnarlMessage");
 	std::map<long, KMethodRef> SnarlWin32::snarlCallbacks;
 
 	SnarlWin32::SnarlWin32(KObjectRef global) :

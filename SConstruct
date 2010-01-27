@@ -3,9 +3,6 @@ import tools
 import distutils.dir_util as dir_util
 from kroll import BuildConfig
 
-EnsureSConsVersion(1,2,0)
-EnsurePythonVersion(2,5)
-
 build = BuildConfig(
 	PRODUCT_VERSION = tools.get_titanium_version(),
 	PRODUCT_NAME = 'Titanium',
@@ -16,6 +13,9 @@ build = BuildConfig(
 	DISTRIBUTION_URL = 'api.appcelerator.net',
 	CRASH_REPORT_URL = 'api.appcelerator.net/p/v1/app-crash-report'
 )
+EnsureSConsVersion(1,2,0)
+EnsurePythonVersion(2,5)
+
 build.set_kroll_source_dir(path.abspath('kroll'))
 
 build.titanium_source_dir = path.abspath('.')

@@ -250,11 +250,11 @@ namespace ti
 			bool isFile = file.isFile();
 			result->SetBool(isFile);
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -271,11 +271,11 @@ namespace ti
 			bool isDir = dir.isDirectory();
 			result->SetBool(isDir);
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -292,11 +292,11 @@ namespace ti
 			bool isHidden = file.isHidden();
 			result->SetBool(isHidden);
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -313,11 +313,11 @@ namespace ti
 			bool isLink = file.isLink();
 			result->SetBool(isLink);
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -333,11 +333,11 @@ namespace ti
 			Poco::File file(this->filename);
 			result->SetBool(file.canExecute());
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -367,11 +367,11 @@ namespace ti
 			}
 #endif
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -387,11 +387,11 @@ namespace ti
 			Poco::File file(this->filename);
 			result->SetBool(file.canWrite());
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -758,8 +758,9 @@ namespace ti
 		unsigned __int64 i64FreeBytesToCaller;
 		unsigned __int64 i64TotalBytes;
 		unsigned __int64 i64FreeBytes;
-		if (GetDiskFreeSpaceEx(
-			this->filename.c_str(),
+		std::wstring wideFilename(::UTF8ToWide(this->filename));
+		if (GetDiskFreeSpaceExW(
+			wideFilename.c_str(),
 			(PULARGE_INTEGER) &i64FreeBytesToCaller,
 			(PULARGE_INTEGER) &i64TotalBytes,
 			(PULARGE_INTEGER) &i64FreeBytes))
@@ -896,11 +897,11 @@ namespace ti
 			file.setExecutable(args.at(0)->ToBool());
 			result->SetBool(file.canExecute());
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -933,11 +934,11 @@ namespace ti
 			result->SetBool(!file.canRead());
 #endif		
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -954,11 +955,11 @@ namespace ti
 			file.setWriteable(args.at(0)->ToBool());
 			result->SetBool(file.canWrite());
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
@@ -1000,11 +1001,11 @@ namespace ti
 			kroll::FileUtils::Unzip(from_s,to_s);
 			result->SetBool(true);
 		}
-		catch (Poco::FileNotFoundException &fnf)
+		catch (Poco::FileNotFoundException&)
 		{
 			result->SetBool(false);
 		}
-		catch (Poco::PathNotFoundException &fnf)
+		catch (Poco::PathNotFoundException&)
 		{
 			result->SetBool(false);
 		}
