@@ -210,12 +210,12 @@ long SnarlInterface::snGetVersionEx()
 
 HWND SnarlInterface::snGetSnarlWindow()
 {
-	return FindWindow(NULL, "Snarl");
+	return FindWindowA(NULL, "Snarl");
 }
 
 long SnarlInterface::snGetGlobalMsg()
 {
-	return RegisterWindowMessage(SNARL_GLOBAL_MESSAGE.c_str());
+	return RegisterWindowMessageA(SNARL_GLOBAL_MESSAGE.c_str());
 }
 
 std::string SnarlInterface::snGetIconsPath()
@@ -229,7 +229,7 @@ std::string SnarlInterface::snGetAppPath()
 	DWORD cb;
 	std::string retVal;
 
-	if (RegOpenKey(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Snarl.exe", &hKey)) {
+	if (RegOpenKeyA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\Snarl.exe", &hKey)) {
 		return "";
 	}
 
@@ -274,7 +274,7 @@ LPSTR SnarlInterface::convertToMultiByte(std::wstring str, int *len)
 std::wstring SnarlInterface::convertTowstring(LPSTR str)
 {
 	std::wstring wstr;
-	int length = lstrlen(str) + 1;
+	int length = lstrlenA(str) + 1;
 	wchar_t* szTextW = new wchar_t[length];
 	MultiByteToWideChar(0, 0, str, -1, szTextW, length);
 	wstr = szTextW;

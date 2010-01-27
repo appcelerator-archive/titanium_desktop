@@ -12,6 +12,7 @@ if build.is_osx():
 	env.Append(CPPPATH=['/usr/include/libxml2'])
 
 if build.is_win32():
+	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(CPPPATH=[
 		build.tp('libxml', 'include'),
 		build.tp('icu','include')])
@@ -31,9 +32,6 @@ elif build.is_linux():
 	sources += Glob('linux/*.cpp')
 elif build.is_osx():
 	sources += Glob('osx/*.mm')
-
-if build.is_win32():
-	env.Append(CCFLAGS=['/DUNICODE', '/D_UNICODE'])
 
 build.mark_build_target(env.SharedLibrary(
 	path.join(module.dir, 'tiappmodule'), sources))
