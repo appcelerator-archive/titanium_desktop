@@ -502,6 +502,7 @@ void Win32UserWindow::UpdateBitmap()
 	blendFunction.BlendFlags = 0;
 	// TODO: Find another method to apply all-over transparency.
 	// blendFunction.SourceConstantAlpha = floor(config->GetTransparency() * 255);
+	blendFunction.SourceConstantAlpha = 0xFF;
 	blendFunction.AlphaFormat = AC_SRC_ALPHA;
 
 	POINT bitmapOrigin = {0, 0};
@@ -555,8 +556,8 @@ void Win32UserWindow::Show()
 		restoreStyles = GetWindowLong(windowHandle, GWL_STYLE);
 
 		ShowWindow(windowHandle, SW_SHOW);
-
 		UpdateWindow(this->windowHandle);
+		
 		if (this->windowHandle != viewWindowHandle)
 			UpdateWindow(viewWindowHandle);
 		SetFocus(viewWindowHandle);
