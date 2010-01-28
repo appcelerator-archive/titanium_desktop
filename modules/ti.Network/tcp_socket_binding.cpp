@@ -99,7 +99,7 @@ namespace ti
 		 */
 		this->SetMethod("onReadComplete",&TCPSocketBinding::SetOnReadComplete);
 
-		// Attach reactor event handlers
+		// Attach the reactor event handlers
 		this->reactor.addEventHandler(this->socket, readObserver);
 		this->reactor.addEventHandler(this->socket, writeObserver);
 		this->reactor.addEventHandler(this->socket, timeoutObserver);
@@ -108,7 +108,7 @@ namespace ti
 
 	TCPSocketBinding::~TCPSocketBinding()
 	{
-		// Attach reactor event handlers
+		// Remove the reactor event handlers
 		this->reactor.removeEventHandler(this->socket, readObserver);
 		this->reactor.removeEventHandler(this->socket, writeObserver);
 		this->reactor.removeEventHandler(this->socket, timeoutObserver);
@@ -168,7 +168,7 @@ namespace ti
 		{
 			SocketAddress a(this->host.c_str(),this->port);
 			this->reactor.setTimeout(Poco::Timespan(timeout, 0));
-			this->socket.connectNB(a);
+			this->socket.connect(a);
 			this->thread.start(this->reactor);
 			this->opened = true;
 			result->SetBool(true);
