@@ -26,7 +26,6 @@ namespace ti
 
 	protected:
 		NetworkBinding* binding;
-		bool previous_status;
 		bool running;
 
 		Poco::RunnableAdapter<NetworkStatus>* adapter;
