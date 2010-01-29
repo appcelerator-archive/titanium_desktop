@@ -752,7 +752,7 @@ namespace ti
 
 #ifdef OS_OSX
 		NSString *p = [NSString stringWithCString:this->filename.c_str() encoding:NSUTF8StringEncoding];
-		unsigned long avail = [[[[NSFileManager defaultManager] fileSystemAttributesAtPath:p] objectForKey:NSFilesystemFreeSize] longValue];
+		unsigned long avail = [[[[NSFileManager defaultManager] fileSystemAttributesAtPath:p] objectForKey:NSFileSystemFreeSize] longValue];
 		diskSize = (double)avail;
 #elif defined(OS_WIN32)
 		unsigned __int64 i64FreeBytesToCaller;
