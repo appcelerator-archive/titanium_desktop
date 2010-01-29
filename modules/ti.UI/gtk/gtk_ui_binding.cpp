@@ -36,6 +36,8 @@ namespace ti
 		std::string webInspectorPath(host->GetApplication()->runtime->path);
 		webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
 		webkit_titanium_set_inspector_url(webInspectorPath.c_str());
+
+		//webkit_set_cache_model(WEBKIT_CACHE_MODEL_DOCUMENT_VIEWER);
 	}
 
 	AutoUserWindow GtkUIBinding::CreateWindow(
