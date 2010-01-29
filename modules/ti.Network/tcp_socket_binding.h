@@ -29,9 +29,8 @@
 #include <Poco/Net/SocketReactor.h>
 #include <Poco/Net/SocketNotification.h>
 #include <Poco/NObserver.h>
+#include <Poco/RunnableAdapter.h>
 #include <queue>
-
-using namespace Poco::Net;
 
 namespace ti
 {
@@ -49,6 +48,7 @@ namespace ti
 		Poco::Net::SocketReactor reactor;
 		Poco::Thread thread;
 		bool opened;
+		Poco::Timespan timeout;
 
 		std::queue<BlobRef> sendData;
 		Poco::Mutex sendDataMutex;
@@ -61,12 +61,18 @@ namespace ti
 		KMethodRef onError;
 		KMethodRef onReadComplete;
 
-		Poco::NObserver<TCPSocketBinding, ReadableNotification> readObserver;
-		Poco::NObserver<TCPSocketBinding, WritableNotification> writeObserver;
-		Poco::NObserver<TCPSocketBinding, TimeoutNotification> timeoutObserver;
-		Poco::NObserver<TCPSocketBinding, ErrorNotification> errorObserver;
+		Poco::NObserver<TCPSocketBinding, Poco::Net::ReadableNotification> readObserver;
+		Poco::NObserver<TCPSocketBinding, Poco::Net::WritableNotification> writeObserver;
+		Poco::NObserver<TCPSocketBinding, Poco::Net::TimeoutNotification> timeoutObserver;
+		Poco::NObserver<TCPSocketBinding, Poco::Net::ErrorNotification> errorObserver;
+		bool writeReadyHandlerInstalled;
+
+		Poco::Thread connectThread;
+		Poco::RunnableAdapter<TCPSocketBinding>* connectAdapter;
+
 
 		void Connect(const ValueList& args, KValueRef result);
+		void ConnectThread();
 		void Write(const ValueList& args, KValueRef result);
 		void Close(const ValueList& args, KValueRef result);
 		void IsClosed(const ValueList& args, KValueRef result);
@@ -76,10 +82,10 @@ namespace ti
 		void SetOnError(const ValueList& args, KValueRef result);
 		void SetOnReadComplete(const ValueList& args, KValueRef result);
 
-		void ReadyForRead(const Poco::AutoPtr<ReadableNotification>& n);
-		void ReadyForWrite(const Poco::AutoPtr<WritableNotification>& n);
-		void OnTimeout(const Poco::AutoPtr<TimeoutNotification>& n);
-		void OnError(const Poco::AutoPtr<ErrorNotification>& n);
+		void ReadyForRead(const Poco::AutoPtr<Poco::Net::ReadableNotification>& n);
+		void ReadyForWrite(const Poco::AutoPtr<Poco::Net::WritableNotification>& n);
+		void OnTimeout(const Poco::AutoPtr<Poco::Net::TimeoutNotification>& n);
+		void OnError(const Poco::AutoPtr<Poco::Net::ErrorNotification>& n);
 	};
 }
 
