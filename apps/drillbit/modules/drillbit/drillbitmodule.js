@@ -28,7 +28,6 @@
 		var specific_tests = null;
 		var executing_tests = [];
 		
-		this.test_harness_dir = TFS.getFile(TA.appURLToPath('app://test_harness'));
 		this.results_dir = TFS.getFile(TA.appURLToPath('app://test_results'));
 		var app_dir = TFS.getApplicationDirectory();
 		var drillbit_funcs = TFS.getFile(TA.appURLToPath('app://drillbit_func.js')).read();
@@ -192,20 +191,12 @@
 	
 		this.setupTestHarness = function(harness_manifest)
 		{
-			var runtime_dir = TFS.getFile(Titanium.API.getEnvironment()['KR_RUNTIME']);
-
-			// create the test harness directory
-			if (!this.test_harness_dir.exists())
-			{
-				this.test_harness_dir.createDirectory();
-			}
-
 			this.require('app://js/app.js');
 			this.require('app://js/project.js');
 			// create app structure
 			app = Titanium.createApp(
 				Titanium.API.application.runtime, // Runtime component
-				this.test_harness_dir, // staging directory
+				Titanium.API.application.getResourcesPath(), // Stage in Resources directory
 				'test_harness', // app name
 				'CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4', // app guid
 				false);
