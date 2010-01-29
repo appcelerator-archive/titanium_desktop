@@ -25,11 +25,12 @@ wstring MsiProperty(MSIHANDLE hInstall, const wchar_t* property)
 	return wstring(buffer, bufferLength);
 }
 
-vector<wstring>&
-Split(const wstring& s, wchar_t delim, vector<wstring>& elems) {
+vector<wstring>& Split(const wstring& s, wchar_t delim, vector<wstring>& elems)
+{
 	wstringstream ss(s);
 	wstring item;
-	while(getline(ss, item, delim)) {
+	while(getline(ss, item, delim))
+	{
 		elems.push_back(item);
 	}
 	return elems;
@@ -354,6 +355,29 @@ static HWND GetInstallerHWND()
 	return hwnd;
 }
 
+static void ShowLastDownloadEror()
+{
+	DWORD bufferSize = 1024, error;
+	wchar_t staticErrorBuffer[1024];
+	wchar_t* errorBuffer = staticErrorBuffer;
+	BOOL success = InternetGetLastResponseInfo(&error, errorBuffer, &bufferSize);
+
+	if (!success && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+	{
+		errorBuffer = new wchar_t[bufferSize];
+		success = InternetGetLastResponseInfo(&error, errorBuffer, &bufferSize);
+	}
+
+	std::wstring errorString(L"Download failed: Unknown error");
+	if (success)
+		errorString = std::wstring(L"Download failed:") + errorBuffer;
+
+	ShowError(::WideToSystem(errorString));
+
+	if (errorBuffer != staticErrorBuffer)
+		delete [] errorBuffer;
+}
+
 bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency dependency)
 {
 	SharedApplication app = CreateApplication(hInstall);
@@ -499,11 +523,7 @@ bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency de
 	if (!success)
 	{
 		if (showError)
-		{
-			string error = Win32Utils::QuickFormatMessage(GetLastError());
-			error = string("Download failed: ") + error;
-			ShowError(error);
-		}
+			ShowLastDownloadEror();
 
 		CancelIo(file);
 		CloseHandle(file);
