@@ -138,27 +138,31 @@ namespace ti
 	/*static*/
 	HBITMAP Win32UIBinding::LoadImageAsBitmap(std::string& path, int sizeX, int sizeY)
 	{
-		std::string ext = path.substr(path.size() - 4, 4);
 		UINT flags = LR_DEFAULTSIZE | LR_LOADFROMFILE |
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
 		std::wstring widePath(::UTF8ToWide(path));
+		const char* ext = path.c_str() + path.size() - 4;
 		HBITMAP h = 0;
-		if (_stricmp(ext.c_str(), ".ico") == 0)
+		if (_stricmp(ext, ".ico") == 0)
 		{
 			HICON hicon = (HICON) LoadImageW(NULL, widePath.c_str(), IMAGE_ICON,
 				sizeX, sizeY, LR_LOADFROMFILE);
 			h = Win32UIBinding::IconToBitmap(hicon, sizeX, sizeY);
 			DestroyIcon(hicon);
 		}
-		else if (_stricmp(ext.c_str(), ".bmp") == 0)
+		else if (_stricmp(ext, ".bmp") == 0)
 		{
 			h = (HBITMAP) LoadImageW(
 				NULL, widePath.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
 		}
-		else if (_stricmp(ext.c_str(), ".png") == 0)
+		else if (_stricmp(ext, ".png") == 0)
 		{
 			h = LoadPNGAsBitmap(path, sizeX, sizeY);
+		}
+		else
+		{
+			throw ValueException::FromFormat("Unsupported image file: %s", path);
 		}
 
 		loadedBMPs.push_back(h);
@@ -168,29 +172,33 @@ namespace ti
 	/*static*/
 	HICON Win32UIBinding::LoadImageAsIcon(std::string& path, int sizeX, int sizeY)
 	{
-		std::string ext = path.substr(path.size() - 4, 4);
 		UINT flags = LR_DEFAULTSIZE | LR_LOADFROMFILE |
 			LR_LOADTRANSPARENT | LR_CREATEDIBSECTION;
 
+		const char* ext = path.c_str() + path.size() - 4;
 		std::wstring widePath(::UTF8ToWide(path));
 		HICON h = 0;
-		if (_stricmp(ext.c_str(), ".ico") == 0)
+		if (_stricmp(ext, ".ico") == 0)
 		{
-			h = (HICON) LoadImageW(NULL,
-				widePath.c_str(), IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
+			h = (HICON) LoadImageW(0, widePath.c_str(),
+				IMAGE_ICON, sizeX, sizeY, LR_LOADFROMFILE);
 		}
-		else if (_stricmp(ext.c_str(), ".bmp") == 0)
+		else if (_stricmp(ext, ".bmp") == 0)
 		{
-			HBITMAP bitmap = (HBITMAP) LoadImageW(
-				NULL, widePath.c_str(), IMAGE_BITMAP, sizeX, sizeY, flags);
+			HBITMAP bitmap = (HBITMAP) LoadImageW(0, widePath.c_str(),
+				IMAGE_BITMAP, sizeX, sizeY, flags);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
 		}
-		else if (_stricmp(ext.c_str(), ".png") == 0)
+		else if (_stricmp(ext, ".png") == 0)
 		{
 			HBITMAP bitmap = LoadPNGAsBitmap(path, sizeX, sizeY);
 			h = Win32UIBinding::BitmapToIcon(bitmap, sizeX, sizeY);
 			DeleteObject(bitmap);
+		}
+		else
+		{
+			throw ValueException::FromFormat("Unsupported image file: %s", path);
 		}
 
 		loadedICOs.push_back(h);
@@ -203,7 +211,7 @@ namespace ti
 		if (!bitmap)
 			return 0;
 
-		HBITMAP bitmapMask = CreateCompatibleBitmap(GetDC(NULL), sizeX, sizeY);
+		HBITMAP bitmapMask = CreateCompatibleBitmap(GetDC(0), sizeX, sizeY);
 		ICONINFO iconInfo = {0};
 		iconInfo.fIcon = TRUE;
 		iconInfo.hbmMask = bitmapMask;
