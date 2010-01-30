@@ -1,4 +1,4 @@
-/**s
+/**
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
@@ -28,7 +28,9 @@ namespace ti
 		notifyIconData->uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
 		notifyIconData->uCallbackMessage = trayClickedMessage;
 
-		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
+		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath,
+			GetSystemMetrics(SM_CXSMICON),
+			GetSystemMetrics(SM_CYSMICON));
 		notifyIconData->hIcon = icon;
 
 		lstrcpy(notifyIconData->szTip, L"Titanium Application");
@@ -45,12 +47,14 @@ namespace ti
 	
 	void Win32TrayItem::SetIcon(std::string& iconPath)
 	{
-		if (this->trayIconData)
-		{
-			HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath);
-			this->trayIconData->hIcon = icon;
-			Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
-		}
+		if (!this->trayIconData)
+			return;
+
+		HICON icon = Win32UIBinding::LoadImageAsIcon(iconPath,
+			GetSystemMetrics(SM_CXSMICON),
+			GetSystemMetrics(SM_CYSMICON));
+		this->trayIconData->hIcon = icon;
+		Shell_NotifyIcon(NIM_MODIFY, this->trayIconData);
 	}
 	
 	void Win32TrayItem::SetMenu(AutoMenu menu)
