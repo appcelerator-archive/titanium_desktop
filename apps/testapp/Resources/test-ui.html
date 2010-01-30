@@ -16,14 +16,25 @@
 
 				menu = Titanium.UI.createMenu();
 				
-				var identm = menu.addSubMenu(ident);
-				var file = menu.addSubMenu("File");
-				var edit = menu.addSubMenu("Edit");
-				var rap = menu.addSubMenu("Rap", "app://fonts.png");
+				var identItem = menu.addItem(ident);
+				var identm = Titanium.UI.createMenu();
+				identItem.setSubmenu(identm);
 
-				var open = file.addItem("Open", function () {alert("open called"); }, "app://open.png");
+				var fileItem = menu.addItem("File");
+				var file = Titanium.UI.createMenu();
+				fileItem.setSubmenu(file);
+
+				var editItem = menu.addItem("Edit");
+				var edit = Titanium.UI.createMenu();
+				editItem.setSubmenu(edit);
+
+				var rapItem = menu.addItem("Rap");
+				var rap = Titanium.UI.createMenu();
+				rapItem.setSubmenu(rap);
+
+				var open = file.addItem("Open", function () {alert("open called"); }, "app://fonts.png");
 				file.addItem("Open As...", function () {alert("open as called"); });
-				file.addSeparator();
+				file.addSeparatorItem();
 				file.addItem("Close", function () {alert("close called"); });
 				file.addItem("Exit - forreal", function () { Titanium.App.exit(); });
 
@@ -122,18 +133,12 @@
 				{
 					alert("What...you think you can just click any old jaz disk you see?");
 				}
-				if (Titanium.platform == 'win32')
-				{
-					trayIcon = Titanium.UI.addTray("app://tray.ico", cb);
-				}
-				else
-				{
-					trayIcon = Titanium.UI.addTray("app://tray.png", cb);
-				}
+				trayIcon = Titanium.UI.addTray("app://tray.png", cb);
 				trayIcon.setHint("Hinty McHints");
 				addTrayIconMenu();
 			}
-			function addTrayIconMenu() {
+			function addTrayIconMenu()
+			{
 				if(trayIcon) {
 					var menu = preBakedMenu("TrayMenu " + timestamp());
 					trayIcon.setMenu(menu);
