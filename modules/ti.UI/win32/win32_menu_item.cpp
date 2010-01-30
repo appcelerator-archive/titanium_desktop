@@ -139,7 +139,8 @@ namespace ti
 			}
 			else if (!this->iconPath.empty())
 			{
-				HBITMAP bitmap = Win32UIBinding::LoadImageAsBitmap(iconPath, 0, 0);
+				HBITMAP bitmap = Win32UIBinding::LoadImageAsBitmap(iconPath,
+					GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON));
 				if (bitmap)
 				{
 					itemInfo->fMask = itemInfo->fMask | MIIM_BITMAP;
