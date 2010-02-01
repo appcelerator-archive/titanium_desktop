@@ -217,9 +217,10 @@ namespace ti
 		 */
 		this->SetMethod("setWriteable",&File::SetWriteable);
 		/**
-		 * @tiapi(method=True,name=Filesystem.File.unzip,since=0.3) Unzips a zip into a directory directory
-		 * @tiarg(for=Filesystem.File.unzip,type=Filesystem.File|String,name=destination) destination to unzip to
-		* @tiresult(for=Filesystem.File.unzip,type=Boolean) returns true if successful
+		 * @tiapi(method=True,name=Filesystem.File.unzip,since=0.3)
+		 * @tiapi If this file is s zip file, unzip it into the given destination directory.
+		 * @tiarg[Filesystem.File|String,destination] Directory to unzip the file to.
+		 * @tiresult[Boolean] True if the operation was succesful, false otherwise.
 		 */
 		this->SetMethod("unzip",&File::Unzip);
 	}
