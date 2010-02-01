@@ -266,16 +266,17 @@ def dequote(s):
 	
 if __name__ == '__main__':
 	parser = OptionParser(usage="%prog [options] appdir", version="%prog " + VERSION)
-	parser.add_option("-d","--dest",dest="destination",help="destination folder for output",metavar="FILE") 
-	parser.add_option("-s","--src",dest="source",help="source folder which contains dist files",metavar="FILE") 
-	parser.add_option("-v","--verbose",action="store_true",dest="verbose",default=False,help="turn on verbose logging") 
-	parser.add_option("-o","--os",dest="platform",default=None,help="platform if different than %s" % get_platform())	
-	parser.add_option("-t","--type",dest="type",default="network",help="package type: network or bundle")	
-	parser.add_option("-a","--assets",dest="assets_dir",default=None,help="location of platform assets",metavar="FILE") 
-	parser.add_option("-l","--license",dest="license_file",default=None,help="location of application license",metavar="FILE")	
-	parser.add_option("-n","--noinstall",action="store_true",dest="no_install",default=False,help="don't include installer dialog in packaged app") 
-	parser.add_option("-r","--run",action="store_true",dest="run",default=False,help="run the packaged app after building") 
-	parser.add_option("-p","--package",dest="package",default=True,help="build the installation package")	
+	parser.add_option("-d","--dest",dest="destination",help="destination folder for output",metavar="FILE")
+	parser.add_option("-s","--src",dest="source",help="source folder which contains dist files",metavar="FILE")
+	parser.add_option("-v","--verbose",action="store_true",dest="verbose",default=False,help="turn on verbose logging")
+	parser.add_option("-o","--os",dest="platform",default=None,help="platform if different than %s" % get_platform())
+	parser.add_option("-t","--type",dest="type",default="network",help="package type: network or bundle")
+	parser.add_option("-a","--assets",dest="assets_dir",default=None,help="location of platform assets",metavar="FILE")
+	parser.add_option("-l","--license",dest="license_file",default=None,help="location of application license",metavar="FILE")
+	parser.add_option("-n","--noinstall",action="store_true",dest="no_install",default=False,help="don't include installer dialog in packaged app")
+	parser.add_option("-r","--run",action="store_true",dest="run",default=False,help="run the packaged app after building")
+	parser.add_option("-p","--package",dest="package",default=True,help="build the installation package")
+	parser.add_option("-i","--ignore",dest="ignore_patterns",default="",help="patterns to ignore when packaging, seperated by comma (default: .git,.svn,.gitignore,.cvsignore)")
 	(options, args) = parser.parse_args()
 	options.packager = False
 	if len(args) == 0:

@@ -9,8 +9,8 @@
 # Original author: Jeff Haynie 04/02/09
 #
 #
-import os, shutil, distutils.dir_util as dir_util, sys
-SKIP_DIRECTORIES = ['.git', '.svn']
+import os, shutil, distutils.dir_util as dir_util, sys, copy
+default_ignore_patterns = ['.git', '.svn', '.gitignore', '.cvsignore']
 
 class DesktopBuilder(object):
 	def __init__(self, options, log):
@@ -62,9 +62,69 @@ class DesktopBuilder(object):
 			options.executable = os.path.join(self.executable_dir, self.appname)
 			shutil.copy(kboot, options.executable)
 
-		# copy in the resources
 		rdir = os.path.join(options.appdir,'Resources')
-		dir_util.copy_tree(rdir, self.resources_dir, preserve_symlinks=True)
+		
+		# ignore some common file/directory patterns
+		ignore_patterns = copy.copy(default_ignore_patterns)
+		if len(options.ignore_patterns) > 0:
+			ignore_patterns += options.ignore_patterns.split(",")
+
+		# this is a copy of shutil.copytree, with a check
+		# that ignores when the top level dir already exists		
+		def copytree(src, dst, symlinks=False, ignore=None):
+			names = os.listdir(src)
+			if ignore is not None:
+				ignored_names = ignore(src, names)
+			else:
+				ignored_names = set()
+			
+			if not os.path.exists(dst): os.makedirs(dst)
+			errors = []
+			for name in names:
+				if name in ignored_names:
+					continue
+				srcname = os.path.join(src, name)
+				dstname = os.path.join(dst, name)
+				try:
+					if symlinks and os.path.islink(srcname):
+						linkto = os.readlink(srcname)
+						os.symlink(linkto, dstname)
+					elif os.path.isdir(srcname):
+						copytree(srcname, dstname, symlinks, ignore)
+					else:
+						shutil.copy2(srcname, dstname)
+					# XXX What about devices, sockets etc.?
+				except (IOError, os.error), why:
+					errors.append((srcname, dstname, str(why)))
+				# catch the Error from the recursive copytree so that we can
+				# continue with other files
+				except Error, err:
+					errors.extend(err.args[0])
+			try:
+				shutil.copystat(src, dst)
+			except WindowsError:
+				# can't copy file access times on Windows
+				pass
+			except OSError, why:
+				errors.extend((src, dst, str(why)))
+			if errors:
+				raise Error(errors)
+				
+ 
+		def ignore_callback(dir, files):
+			# return a list of files to ignore.
+			# if the dir is ignored return the full list
+			if dir in ignore_patterns:
+				return files
+			
+			file_list = copy.copy(files)
+			for file in files:
+				if file not in ignore_patterns:
+					file_list.remove(file)
+			return file_list
+		
+		# copy in the resources	
+		copytree(rdir, self.resources_dir, symlinks=True, ignore=ignore_callback)
 
 		if options.platform == 'osx':
 			shutil.copy(os.path.join(options.assets_dir, 'titanium.icns'), self.lproj)
@@ -134,16 +194,6 @@ class DesktopBuilder(object):
 			out_file = open(os.path.join(self.contents_dir, 'Info.plist'), 'w')
 			out_file.write(plist)
 			out_file.close()
-
-		self.remove_skipped_directories()
-
-	# TODO: do this during copying eventually.
-	def remove_skipped_directories(self):
-		for root, dirs, files in os.walk(self.options.destination):
-			for dir in dirs:
-				if dir in SKIP_DIRECTORIES:
-					shutil.rmtree(os.path.join(root, dir))
-					dirs.remove(dir)
 
 	def log(self,msg):
 		self.logger(self.options,msg)
