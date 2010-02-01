@@ -246,9 +246,6 @@ void Win32UserWindow::InitWindow()
 
 	SetWindowUserData(this->windowHandle, reinterpret_cast<void*>(this));
 
-	if (this->HasTransparentBackground())
-		this->timer = ::SetTimer(this->windowHandle, MEANING_OF_LIFE, 1000/40, NULL);
-
 	if (!this->windowHandle)
 	{
 		throw ValueException::FromFormat("Error Creating Window: %s",
@@ -483,8 +480,14 @@ void Win32UserWindow::UpdateBitmap()
 	if (!this->HasTransparentBackground())
 		return;
 
+	// FIXME: Sometimes the WebView will initialize and not do an initial
+	// paint. We need to force the initial paint in WebKit instead of forcing
+	// it here.
 	if (!this->webkitBitmap)
+	{
+		SendMessage(windowHandle, WM_PAINT, 0, 0);
 		return;
+	}
 
 	HDC hdcScreen = GetDC(NULL);
 	HDC hdcMem = CreateCompatibleDC(hdcScreen);
@@ -561,6 +564,14 @@ void Win32UserWindow::Show()
 		if (this->windowHandle != viewWindowHandle)
 			UpdateWindow(viewWindowHandle);
 		SetFocus(viewWindowHandle);
+
+		// TODO: Start the transparent-background update timer here,
+		// because UpdateBitmap sometimes needs to force the WebView
+		// to paint by sending a WM_PAINT message. Once that bug is
+		// fixed in WebKit, we can move this back to InitWindow.
+		if (this->HasTransparentBackground())
+			this->timer = ::SetTimer(this->windowHandle,
+				MEANING_OF_LIFE, 1000/40, 0);
 	}
 	else
 	{
@@ -1302,11 +1313,8 @@ KListRef Win32UserWindow::SelectFile(
 	return results;
 }
 
-KListRef Win32UserWindow::SelectDirectory(
-	bool multiple,
-	std::string& title,
-	std::string& path,
-	std::string& defaultName)
+KListRef Win32UserWindow::SelectDirectory(bool multiple, std::string& title,
+	std::string& path, std::string& defaultName)
 {
 	KListRef results = new StaticBoundList();
 
