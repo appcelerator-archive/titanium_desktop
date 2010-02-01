@@ -10,38 +10,36 @@
 namespace ti
 {
 
-static SCNetworkReachabilityRef primaryTarget = 0;
-static SCNetworkReachabilityRef secondaryTarget = 0;
-
 void NetworkStatus::InitializeLoop()
 {
-	primaryTarget = SCNetworkReachabilityCreateWithName(0, "www.google.com");
-	secondaryTarget = SCNetworkReachabilityCreateWithName(0, "www.yahoo.com");
 }
 
 void NetworkStatus::CleanupLoop()
 {
-	if (primaryTarget)
-		CFRelease(primaryTarget);
-	if (secondaryTarget)
-		CFRelease(secondaryTarget);
 }
 
 bool NetworkStatus::GetStatus()
 {
-	if (!primaryTarget)
+	// The SCNetworkReachability object must be created each time,
+	// otherwise it cannot properly transition from initially offline
+	// to online.
+	CFRef<SCNetworkReachabilityRef> primaryTarget(
+		SCNetworkReachabilityCreateWithName(0, "www.google.com"));
+	if (!primaryTarget.get())
 		return true;
 
 	SCNetworkConnectionFlags flags;
-	SCNetworkReachabilityGetFlags(primaryTarget, &flags);
+	SCNetworkReachabilityGetFlags(primaryTarget.get(), &flags);
 	if ((flags & kSCNetworkFlagsReachable) && 
 		!(flags & kSCNetworkFlagsConnectionRequired))
 		return true;
 
-	if (!secondaryTarget)
+	CFRef<SCNetworkReachabilityRef> secondaryTarget(
+		SCNetworkReachabilityCreateWithName(0, "www.yahoo.com"));
+	if (!secondaryTarget.get())
 		return true;
 
-	SCNetworkReachabilityGetFlags(secondaryTarget, &flags);
+	SCNetworkReachabilityGetFlags(secondaryTarget.get(), &flags);
 	if ((flags & kSCNetworkFlagsReachable) && 
 		!(flags & kSCNetworkFlagsConnectionRequired))
 		return true;

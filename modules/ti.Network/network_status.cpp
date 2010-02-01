@@ -13,7 +13,6 @@ namespace ti
 	NetworkStatus::NetworkStatus(NetworkBinding* binding) :
 		StaticBoundObject("Network.NetworkStatus"),
 		binding(binding),
-		previous_status(false),
 		running(true)
 	{
 	}
@@ -52,14 +51,17 @@ namespace ti
 		// often than we want to test reachability, so we only
 		// test reachability every 25 * .2s
 		int count = 0;
+		bool firedAtAll = false;
+		bool previousStatus = false;
 		while (this->running)
 		{
 			if (count == 0)
 			{
 				bool online = this->GetStatus();
-				if (online != this->previous_status)
+				if (!firedAtAll || online != previousStatus)
 				{
-					this->previous_status = online;
+					firedAtAll = true;
+					previousStatus = online;
 					binding->NetworkStatusChange(online);
 				}
 			}
