@@ -422,6 +422,11 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	logger = Logger::Get("UI.Win32UserWindow");
 }
 
+AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+{
+	return new Win32UserWindow(config, parent);
+}
+
 Win32UserWindow::~Win32UserWindow()
 {
 	if (webView)

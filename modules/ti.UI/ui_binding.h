@@ -19,9 +19,8 @@ namespace ti
 		UIBinding(Host *host);
 		virtual ~UIBinding();
 		Host* GetHost();
-		virtual void CreateMainWindow(WindowConfig*);
-		virtual AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent) = 0;
 
+		void CreateMainWindow(WindowConfig* config);
 		std::vector<AutoUserWindow>& GetOpenWindows();
 		void AddToOpenWindows(AutoUserWindow);
 		void RemoveFromOpenWindows(AutoUserWindow);
@@ -29,6 +28,7 @@ namespace ti
 		void UnregisterTrayItem(TrayItem*);
 		void _GetOpenWindows(const ValueList& args, KValueRef result);
 		void _GetMainWindow(const ValueList& args, KValueRef result);
+		void _CreateWindow(const ValueList& args, KValueRef result);
 		void _CreateMenu(const ValueList& args, KValueRef result);
 		void _CreateMenuItem(const ValueList& args, KValueRef result);
 		void _CreateCheckMenuItem(const ValueList& args, KValueRef result);
@@ -46,7 +46,7 @@ namespace ti
 		void _AddTray(const ValueList& args, KValueRef result);
 		void _ClearTray(const ValueList& args, KValueRef result);
 		void _GetIdleTime(const ValueList& args, KValueRef result);
-		
+
 		/* OS X specific callbacks */
 		void _SetDockIcon(const ValueList& args, KValueRef result);
 		void _SetDockMenu(const ValueList& args, KValueRef result);

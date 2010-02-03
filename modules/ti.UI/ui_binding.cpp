@@ -151,20 +151,41 @@ namespace ti
 		 */
 		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
 
-		this->Set("Clipboard", Value::NewObject(new Clipboard()));
+		/**
+		 * @tiapi(method=True,name=UI.createWindow,since=0.8.1)
+		 * @tiapi Create a new top-level window or a child of the current window if called
+		 * @tiapi from the context of an existing window.
+		 * @tiarg[type=String|Object,options,optional=True]
+		 * @tiarg A string containing a url of the new window or an object
+		 * @tiarg containing properties for the new window
+		 * @tiresult[UI.UserWindow] The new UserWindow object.
+		 */
+		this->SetMethod("createWindow", &UIBinding::_CreateWindow);
 
-		KObjectRef global = host->GetGlobalObject();
-		KValueRef ui_binding_val = Value::NewObject(this);
-		global->Set("UI", ui_binding_val);
-
+		this->SetObject("Clipboard", new Clipboard());
 		Logger::AddLoggerCallback(&UIBinding::Log);
 	}
 
 	void UIBinding::CreateMainWindow(WindowConfig* config)
 	{
-		AutoPtr<UserWindow> no_parent = NULL;
-		this->mainWindow = this->CreateWindow(config, no_parent);
+		this->mainWindow = UserWindow::CreateWindow(config, 0);
 		this->mainWindow->Open();
+	}
+
+	void UIBinding::_CreateWindow(const ValueList& args, KValueRef result)
+	{
+		if (args.size() > 0 && args.at(0)->IsObject())
+		{
+			result->SetObject(UserWindow::CreateWindow(args.GetObject(0), 0));
+		}
+		else if (args.size() > 0 && args.at(0)->IsString())
+		{
+			result->SetObject(UserWindow::CreateWindow(args.GetString(0), 0));
+		}
+		else
+		{
+			result->SetObject(UserWindow::CreateWindow(new WindowConfig(), 0));
+		}
 	}
 
 	void UIBinding::ErrorDialog(std::string msg)

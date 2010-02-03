@@ -18,7 +18,6 @@ namespace ti
 		public:
 		GtkUIBinding(Host* host);
 
-		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
 		AutoMenuItem CreateSeparatorMenuItem();

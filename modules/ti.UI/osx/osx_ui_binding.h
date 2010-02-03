@@ -17,8 +17,6 @@ namespace ti
 		OSXUIBinding(Host *host);
 		~OSXUIBinding();
 
-		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
 		AutoMenuItem CreateCheckMenuItem();

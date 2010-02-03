@@ -39,6 +39,11 @@ namespace ti
 		// by calling Open(...)
 	}
 
+	AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+	{
+		return new OSXUserWindow(config, parent);
+	}
+
 	void OSXUserWindow::Open()
 	{
 		NSRect frame;

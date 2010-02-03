@@ -82,6 +82,11 @@ namespace ti
 	{
 	}
 
+	AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+	{
+		return new GtkUserWindow(config, parent);
+	}
+
 	GtkUserWindow::~GtkUserWindow()
 	{
 		if (this->active)
@@ -548,8 +553,8 @@ namespace ti
 		WebKitWebFrame* frame, gpointer data)
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
-		AutoPtr<GtkUserWindow> newGtkWindow(
-			userWindow->CreateWindow(new WindowConfig()).cast<GtkUserWindow>());
+		AutoPtr<GtkUserWindow> newGtkWindow(UserWindow::CreateWindow(
+			new WindowConfig(), AutoUserWindow(userWindow, true)).cast<GtkUserWindow>());
 
 		if (newGtkWindow.isNull()) // Bad.
 			return 0;
