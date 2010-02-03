@@ -40,14 +40,6 @@ namespace ti
 		//webkit_set_cache_model(WEBKIT_CACHE_MODEL_DOCUMENT_VIEWER);
 	}
 
-	AutoUserWindow GtkUIBinding::CreateWindow(
-		WindowConfig* config,
-		AutoUserWindow& parent)
-	{
-		UserWindow* w = new GtkUserWindow(config, parent);
-		return AutoUserWindow(w, true);
-	}
-
 	AutoMenu GtkUIBinding::CreateMenu()
 	{
 		return new GtkMenu();

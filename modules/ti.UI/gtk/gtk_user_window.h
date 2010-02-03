@@ -130,8 +130,6 @@ namespace ti
 		::GtkMenuBar* nativeMenu; // The widget this window uses for a menu.
 		std::string iconPath; // The path to this window's icon
 		GtkWidget *inspectorWindow; // This window's web inspector window
-
-		void _FileChooserWork(const ValueList&, KValueRef);
 	};
 
 }

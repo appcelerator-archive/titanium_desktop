@@ -50,14 +50,6 @@ namespace ti
 	{
 	}
 
-	AutoUserWindow Win32UIBinding::CreateWindow(
-		WindowConfig* config,
-		AutoUserWindow& parent)
-	{
-		UserWindow* w = new Win32UserWindow(config, parent);
-		return AutoUserWindow(w, true);
-	}
-
 	AutoMenu Win32UIBinding::CreateMenu()
 	{
 		return new Win32Menu();
