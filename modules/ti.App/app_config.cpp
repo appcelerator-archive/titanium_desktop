@@ -200,7 +200,7 @@ WindowConfig* AppConfig::GetWindowByURL(const std::string& url)
 			return windows[i];
 		}
 	}
-	return NULL;
+	return new WindowConfig();
 }
 
 WindowConfig* AppConfig::GetMainWindow()

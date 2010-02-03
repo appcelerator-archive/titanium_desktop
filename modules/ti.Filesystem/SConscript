@@ -16,7 +16,7 @@ env.Append(LIBPATH=[path.join(build.dir, 'modules', 'ti.App')])
 
 
 if build.is_win32():
-	env.Append(CCFLAGS=['/MD'])
+	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LIBS=['shell32', 'user32', 'comdlg32', 'ole32'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
 

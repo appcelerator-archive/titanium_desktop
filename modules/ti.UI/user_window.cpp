@@ -505,8 +505,9 @@ AutoUserWindow UserWindow::CreateWindow(const std::string& url, AutoUserWindow p
 {
 	if (!url.empty())
 	{
-		return UserWindow::CreateWindow(new WindowConfig(
-			AppConfig::Instance()->GetWindowByURL(URLUtils::NormalizeURL(url))), parent);
+		std::string normalizedURL = URLUtils::NormalizeURL(url);
+		return UserWindow::CreateWindow(
+			AppConfig::Instance()->GetWindowByURL(normalizedURL), parent);
 	}
 	else
 	{
@@ -1873,6 +1874,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
+	KJSUtil::ProtectGlobalContext(context);
 
 	// Get the global object as a KKJSObject
 	KObjectRef frameGlobal = new KKJSObject(context, globalObject);

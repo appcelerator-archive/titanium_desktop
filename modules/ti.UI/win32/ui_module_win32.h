@@ -10,7 +10,6 @@ namespace ti
 {
 	class Win32Menu;
 	class Win32MenuItem;
-	class Win32UserWindow;
 }
 
 #include <windows.h>
@@ -38,14 +37,14 @@ namespace ti
 #include "../url/url.h"
 #include "popup_dialog.h"
 #include "../../../kroll/modules/javascript/javascript_module.h"
-#include "win32_menu.h"
-#include "win32_menu_item.h"
-#include "win32_tray_item.h"
-#include "win32_ui_binding.h"
+#include "../../../kroll/host/win32/host.h"
 #include "webkit_frame_load_delegate.h"
 #include "webkit_policy_delegate.h"
 #include "webkit_ui_delegate.h"
 #include "webkit_resource_load_delegate.h"
-#include "../../../kroll/host/win32/host.h"
 #include "win32_user_window.h"
+#include "win32_menu.h"
+#include "win32_menu_item.h"
+#include "win32_tray_item.h"
+#include "win32_ui_binding.h"
 #endif

@@ -759,8 +759,8 @@ namespace ti
 		unsigned __int64 i64FreeBytesToCaller;
 		unsigned __int64 i64TotalBytes;
 		unsigned __int64 i64FreeBytes;
-		if (GetDiskFreeSpaceEx(
-			this->filename.c_str(),
+		if (GetDiskFreeSpaceExW(
+			::UTF8ToWide(this->filename).c_str(),
 			(PULARGE_INTEGER) &i64FreeBytesToCaller,
 			(PULARGE_INTEGER) &i64TotalBytes,
 			(PULARGE_INTEGER) &i64FreeBytes))

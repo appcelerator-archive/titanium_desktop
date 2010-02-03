@@ -103,11 +103,11 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 	}
 
 	AutoUserWindow parent = this->window->GetAutoPtr().cast<UserWindow>();
-	AutoUserWindow window(UserWindow::CreateWindow(new WindowConfig(),
-		AutoUserWindow(userWindow, true)));
-	window->Open();
+	AutoUserWindow newWindow(UserWindow::CreateWindow(new WindowConfig(),
+		AutoUserWindow(window, true)));
+	newWindow->Open();
 
-	*newWebView = window.cast<Win32UserWindow>()->GetWebView();
+	*newWebView = newWindow.cast<Win32UserWindow>()->GetWebView();
 	return S_OK;
 }
 
