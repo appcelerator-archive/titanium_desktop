@@ -20,7 +20,7 @@ elif build.is_win32():
 	libs = [
 		'user32', 'shell32', 'kernel32', 'shlwapi',
 		'strmiids','ole32', 'comdlg32', 'comctl32',
-		'oleaut32', 'comsuppw', 'khost']
+		'oleaut32', 'comsuppw']
 	env.Append(LIBS = libs)
 	env.Append(CPPPATH=[build.tp('microsoft', 'include')])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
