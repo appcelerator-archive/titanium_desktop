@@ -6,7 +6,7 @@
 
 #include "snarl_win32.h"
 #include "SnarlInterface.h"
-#include "../../../kroll/host/win32/host.h"
+#include <kroll/win32/host.h>
 
 using namespace ti;
 using namespace kroll;

@@ -5,7 +5,6 @@
  */
 #ifndef _WIN32_UI_BINDING_H_
 #define _WIN32_UI_BINDING_H_
-#include "../ui_module.h"
 
 #define WEB_INSPECTOR_MENU_ITEM_ID 7500
 #define NEXT_ITEM_ID_BEGIN 7501
@@ -15,11 +14,7 @@ namespace ti
 	class Win32UIBinding : public UIBinding
 	{
 		public:
-		static AutoUserWindow CreateWindow(WindowConfig* config, AutoUserWindow parent)
-		{
-			return new Win32UserWindow(config, parent);
-		}
-
+		Win32UIBinding(Module* uiModule, Host *host);
 		~Win32UIBinding();
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
@@ -53,8 +48,6 @@ namespace ti
 		std::string iconPath;
 		static std::vector<HICON> loadedICOs;
 		static std::vector<HBITMAP> loadedBMPs;
-
-		Win32UIBinding(Module* uiModule, Host *host);
 	};
 }
 

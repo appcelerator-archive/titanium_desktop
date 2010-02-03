@@ -8,7 +8,7 @@
 #include <comutil.h>
 #include <stdlib.h>
 #include <math.h>
-#include "../../../kroll/host/win32/host.h"
+#include <kroll/win32/host.h>
 
 namespace ti
 {

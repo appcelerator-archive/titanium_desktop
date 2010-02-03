@@ -1,7 +1,7 @@
 /**
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2008-2010 Appcelerator, Inc. All Rights Reserved.
  */
 
 #ifndef __TI_WIN32_USER_WINDOW_H
@@ -11,7 +11,7 @@ namespace ti
 {
 	class Win32UserWindow : public UserWindow
 	{
-		public:
+	public:
 		Win32UserWindow(WindowConfig* config, AutoUserWindow& parent);
 		~Win32UserWindow();
 
@@ -99,7 +99,7 @@ namespace ti
 		void UpdateBitmap();
 		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
 
-		private:
+	private:
 		kroll::Win32Host* win32Host;
 		Win32WebKitFrameLoadDelegate* frameLoadDelegate;
 		Win32WebKitUIDelegate* uiDelegate;
