@@ -6,7 +6,7 @@
 #include "ui_module.h"
 
 using namespace ti;
-UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
+UserWindow::UserWindow(WindowConfig* config, AutoUserWindow parent) :
 	KEventObject("UI.UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
@@ -426,7 +426,7 @@ UserWindow::UserWindow(WindowConfig *config, AutoUserWindow& parent) :
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.createWindow,since=0.2) Creates a new window as a child of the current window
 	 * @tiarg[type=String|Object,options, optional=True] A string containing a url of the new window or an object containing properties for the new window
-	 * @tiresult(for=UI.UserWindow.createWindow,type=object) a UserWindow object
+	 * @tiresult[UI.UserWindow] The new UserWindow object.
 	 */
 	this->SetMethod("createWindow", &UserWindow::_CreateWindow);
 
@@ -489,6 +489,28 @@ UserWindow::~UserWindow()
 	if (this->active)
 	{
 		this->Close();
+	}
+}
+
+/*static*/
+AutoUserWindow UserWindow::CreateWindow(KObjectRef properties, AutoUserWindow parent)
+{
+	WindowConfig* newConfig = new WindowConfig();
+	newConfig->UseProperties(properties);
+	return UserWindow::CreateWindow(newConfig, parent);
+}
+
+/*static*/
+AutoUserWindow UserWindow::CreateWindow(const std::string& url, AutoUserWindow parent)
+{
+	if (!url.empty())
+	{
+		return UserWindow::CreateWindow(new WindowConfig(
+			AppConfig::Instance()->GetWindowByURL(URLUtils::NormalizeURL(url))), parent);
+	}
+	else
+	{
+		return UserWindow::CreateWindow(new WindowConfig(), parent);
 	}
 }
 
@@ -1528,51 +1550,21 @@ void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::KValueRef res
 
 void UserWindow::_CreateWindow(const ValueList& args, KValueRef result)
 {
-	KObjectRef newWindow = 0;
-
 	if (args.size() > 0 && args.at(0)->IsObject())
 	{
-		KObjectRef properties = args.GetObject(0);
-		newWindow = this->CreateWindow(properties);
+		result->SetObject(UserWindow::CreateWindow(
+			args.GetObject(0), AutoUserWindow(this, true)));
 	}
 	else if (args.size() > 0 && args.at(0)->IsString())
 	{
-		std::string url = args.at(0)->ToString();
-		newWindow = this->CreateWindow(url);
+		result->SetObject(UserWindow::CreateWindow(
+			args.GetString(0), AutoUserWindow(this, true)));
 	}
 	else
 	{
-		newWindow = this->CreateWindow(new WindowConfig());
+		result->SetObject(UserWindow::CreateWindow(
+			new WindowConfig(), AutoUserWindow(this, true)));
 	}
-
-	result->SetObject(newWindow);
-}
-
-AutoUserWindow UserWindow::CreateWindow(KObjectRef properties)
-{
-	WindowConfig* newConfig = new WindowConfig();
-	newConfig->UseProperties(properties);
-	return this->CreateWindow(newConfig);
-}
-
-AutoUserWindow UserWindow::CreateWindow(std::string& url)
-{
-	if (!url.empty())
-	{
-		WindowConfig* matchedConfig = AppConfig::Instance()->GetWindowByURL(url);
-		url = URLUtils::NormalizeURL(url);
-		return this->CreateWindow(new WindowConfig(matchedConfig, url));
-	}
-	else
-	{
-		return this->CreateWindow(new WindowConfig());
-	}
-}
-
-AutoUserWindow UserWindow::CreateWindow(WindowConfig* newConfig)
-{
-	AutoUserWindow autothis = AutoUserWindow(this, true);
-	return this->binding->CreateWindow(newConfig, autothis);
 }
 
 void UserWindow::UpdateWindowForURL(std::string url)
@@ -1881,7 +1873,6 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 {
 	JSObjectRef globalObject = JSContextGetGlobalObject(context);
 	KJSUtil::RegisterGlobalContext(globalObject, context);
-	KJSUtil::ProtectGlobalContext(context);
 
 	// Get the global object as a KKJSObject
 	KObjectRef frameGlobal = new KKJSObject(context, globalObject);
@@ -1891,7 +1882,6 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// that loads on a page will follow this same code path.
 	if (IsMainFrame(context, globalObject))
 		this->domWindow = frameGlobal->GetObject("window", 0);
-
 
 	// Only certain pages should get the Titanium object. This is to prevent
 	// malicious sites from always getting access to the user's system. This

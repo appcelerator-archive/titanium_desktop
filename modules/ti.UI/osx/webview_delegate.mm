@@ -339,7 +339,8 @@
 	}
 
 	newWindow = [window userWindow]->CreateWindow(config);
-	AutoPtr<OSXUserWindow> osxWindow(newWindow.cast<OSXUserWindow>());
+	AutoPtr<OSXUserWindow> newGtkWindow(UserWindow::CreateWindow(
+			new WindowConfig(), AutoUserWindow(userWindow, true)).cast<OSXUserWindow>());
 	osxWindow->Open();
 	return [osxWindow->GetNative() webView];
 }

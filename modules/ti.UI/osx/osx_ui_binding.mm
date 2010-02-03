@@ -66,14 +66,6 @@ namespace ti
 		[savedDockView release];
 	}
 
-	AutoUserWindow OSXUIBinding::CreateWindow(
-		WindowConfig* config,
-		AutoUserWindow& parent)
-	{
-		UserWindow* w = new OSXUserWindow(config, parent);
-		return AutoUserWindow(w, true);
-	}
-
 	AutoMenu OSXUIBinding::CreateMenu()
 	{
 		return new OSXMenu();

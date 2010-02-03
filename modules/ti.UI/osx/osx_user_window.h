@@ -15,42 +15,18 @@ namespace ti
 		public:
 			OSXUserWindow(WindowConfig* config, AutoUserWindow& parent);
 			~OSXUserWindow();
-		public:
 
-			void OpenChooserDialog(
-				bool files,
-				KMethodRef callback,
-				bool multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
+			void OpenChooserDialog(bool files, KMethodRef callback, bool multiple,
+				std::string& title, std::string& path, std::string& defaultName,
+				std::vector<std::string>& types, std::string& typesDescription);
+			void OpenFileChooserDialog(KMethodRef callback, bool multiple,
+				std::string& title, std::string& path, std::string& defaultName,
+				std::vector<std::string>& types, std::string& typesDescription);
+			void OpenFolderChooserDialog(KMethodRef callback, bool multiple,
+				std::string& title, std::string& path, std::string& defaultName);
+			void OpenSaveAsDialog(KMethodRef callback, std::string& title,
+				std::string& path, std::string& defaultName, std::vector<std::string>& types,
 				std::string& typesDescription);
-			
-			void OpenFileChooserDialog(
-				KMethodRef callback,
-				bool multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription);
-
-			void OpenFolderChooserDialog(
-				KMethodRef callback,
-				bool multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName);
-
-			void OpenSaveAsDialog(
-				KMethodRef callback,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription);
-
 			void Hide();
 			void Show();
 			void Minimize();

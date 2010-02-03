@@ -28,18 +28,21 @@ namespace ti
 		double height;
 	} Bounds;
 
-	class UserWindow : public KEventObject {
+	class UserWindow : public KEventObject
+	{
 		public:
-			UserWindow(WindowConfig *config, AutoUserWindow& parent);
+			static AutoUserWindow CreateWindow(const std::string& url, AutoUserWindow parent);
+			static AutoUserWindow CreateWindow(KObjectRef properties, AutoUserWindow parent);
+
+			// Platform-specific implementation.
+			static AutoUserWindow CreateWindow(WindowConfig* config, AutoUserWindow parent);
+
 			virtual SharedString DisplayString(int levels=3);
 			virtual ~UserWindow();
 			void UpdateWindowForURL(std::string url);
 			void RegisterJSContext(JSGlobalContextRef);
 			void InsertAPI(KObjectRef frameGlobal);
 			void PageLoaded(KObjectRef scope, std::string &url, JSGlobalContextRef context);
-			AutoUserWindow CreateWindow(WindowConfig* config);
-			AutoUserWindow CreateWindow(std::string& url);
-			AutoUserWindow CreateWindow(KObjectRef properties);
 			inline KObjectRef GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
 			inline bool IsToolWindow() {return this->config->IsToolWindow(); }
@@ -131,30 +134,15 @@ namespace ti
 			void _IsTopMost(const kroll::ValueList&, kroll::KValueRef);
 			void _SetTopMost(const kroll::ValueList&, kroll::KValueRef);
 			virtual void _ShowInspector(const ValueList& args, KValueRef result);
-
-			virtual void OpenFileChooserDialog(
-				KMethodRef callback,
-				bool multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription) = 0;
-	
-			virtual void OpenFolderChooserDialog(
-				KMethodRef callback,
-				bool multiple,
-				std::string& title,
-				std::string& path,
+			virtual void OpenFileChooserDialog(KMethodRef callback, bool multiple,
+				std::string& title, std::string& path, std::string& defaultName,
+				std::vector<std::string>& types, std::string& typesDescription) = 0;
+			virtual void OpenFolderChooserDialog( KMethodRef callback,
+				bool multiple, std::string& title, std::string& path,
 				std::string& defaultName) = 0;
-	
-			virtual void OpenSaveAsDialog(
-				KMethodRef callback,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription) = 0;
+			virtual void OpenSaveAsDialog(KMethodRef callback, std::string& title,
+				std::string& path, std::string& defaultName,
+				std::vector<std::string>& types, std::string& typesDescription) = 0;
 	
 			virtual void Hide() = 0;
 			virtual void Show() = 0;
@@ -235,17 +223,13 @@ namespace ti
 			bool initialized;
 			std::string iconURL;
 
+			UserWindow(WindowConfig* config, AutoUserWindow parent);
 			virtual AutoUserWindow GetParent();
 			virtual void AddChild(AutoUserWindow);
 			virtual void RemoveChild(AutoUserWindow);
-			void ReadChooserDialogObject(
-				KObjectRef o,
-				bool& multiple,
-				std::string& title,
-				std::string& path,
-				std::string& defaultName,
-				std::vector<std::string>& types,
-				std::string& typesDescription);
+			void ReadChooserDialogObject(KObjectRef o, bool& multiple,
+				std::string& title, std::string& path, std::string& defaultName,
+				std::vector<std::string>& types, std::string& typesDescription);
 			static void LoadUIJavaScript(JSGlobalContextRef context);
 
 		private:

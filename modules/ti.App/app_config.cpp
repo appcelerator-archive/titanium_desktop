@@ -184,7 +184,7 @@ WindowConfig* AppConfig::GetWindow(std::string& id)
 	return NULL;
 }
 
-WindowConfig* AppConfig::GetWindowByURL(std::string url)
+WindowConfig* AppConfig::GetWindowByURL(const std::string& url)
 {
 	for (size_t i = 0; i < windows.size(); i++)
 	{

@@ -14,13 +14,13 @@ namespace ti
 {
 	class Win32UIBinding : public UIBinding
 	{
-
 		public:
-		Win32UIBinding(Module* uiModule, Host *host);
+		static AutoUserWindow CreateWindow(WindowConfig* config, AutoUserWindow parent)
+		{
+			return new Win32UserWindow(config, parent);
+		}
+
 		~Win32UIBinding();
-
-		AutoUserWindow CreateWindow(WindowConfig*, AutoUserWindow& parent);
-
 		AutoMenu CreateMenu();
 		AutoMenuItem CreateMenuItem();
 		AutoMenuItem CreateSeparatorMenuItem();
@@ -51,9 +51,10 @@ namespace ti
 		AutoPtr<Win32Menu> menu;
 		AutoPtr<Win32Menu> contextMenu;
 		std::string iconPath;
-
 		static std::vector<HICON> loadedICOs;
 		static std::vector<HBITMAP> loadedBMPs;
+
+		Win32UIBinding(Module* uiModule, Host *host);
 	};
 }
 

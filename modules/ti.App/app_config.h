@@ -29,7 +29,7 @@ public:
 	~AppConfig();
 
 	WindowConfig* GetWindow(std::string &id);
-	WindowConfig* GetWindowByURL(std::string url);
+	WindowConfig* GetWindowByURL(const std::string& url);
 	WindowConfig* GetMainWindow();
 
 	std::string& GetAppName() { return appName; }
