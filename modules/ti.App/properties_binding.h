@@ -1,20 +1,15 @@
 /**
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2008-2010 Appcelerator, Inc. All Rights Reserved.
  */
 
 #ifndef PROPERTIES_BINDING_H_
 #define PROPERTIES_BINDING_H_
 
 #include <kroll/kroll.h>
-#include <string>
-#include <vector>
 #include <Poco/AutoPtr.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
-#include "app_config.h"
-
-using namespace kroll;
 
 namespace ti
 {

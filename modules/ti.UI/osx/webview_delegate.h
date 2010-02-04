@@ -13,13 +13,14 @@
 #import <WebKit/WebPreferencesPrivate.h>
 
 @class NativeWindow;
-@interface WebViewDelegate : NSObject {
-	NativeWindow *window;
-	Host *host;
-	WebInspector *inspector;
+@interface WebViewDelegate : NSObject
+{
+	NativeWindow* window;
+	Host* host;
+	WebInspector* inspector;
 	BOOL initialDisplay;
-	std::map<WebFrame*, KObjectRef> *frameToGlobalObject;
-	Logger *logger;
+	std::map<WebFrame*, KObjectRef>* frameToGlobalObject;
+	Logger* logger;
 }
 -(id)initWithWindow:(NativeWindow*)window;
 -(void)setupPreferences;

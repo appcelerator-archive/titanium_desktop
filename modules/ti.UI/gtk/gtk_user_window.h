@@ -11,7 +11,7 @@ namespace ti
 	class GtkUserWindow : public UserWindow
 	{
 	public:
-		GtkUserWindow(WindowConfig*, AutoUserWindow&);
+		GtkUserWindow(AutoPtr<WindowConfig>, AutoUserWindow&);
 		virtual ~GtkUserWindow();
 		void CreateWidgets();
 		void ShowWidgets();

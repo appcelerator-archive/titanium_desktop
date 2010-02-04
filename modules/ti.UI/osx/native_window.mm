@@ -21,9 +21,9 @@
 	userWindow = inUserWindow;
 }
 
-- (void)setupDecorations:(WindowConfig*)inConfig;
+- (void)setupDecorations:
 {
-	config = inConfig;
+	Autoptr<WindowConfig> config(userWindow->GetConfig());
 
 	[self setTitle:[NSString stringWithUTF8String:config->GetTitle().c_str()]];
 	[self setHasShadow:true];
@@ -73,7 +73,6 @@
 	[self setDelegate:self];
 	[self setTransparency:config->GetTransparency()];
 	[self setInitialFirstResponder:webView];
-	[self setShowsResizeIndicator:config->IsResizable()];
 	[self setContentView:webView];
 }
 
@@ -131,7 +130,6 @@
 		[inspector release];
 		inspector = nil;
 	}
-	config->SetVisible(false);
 }
 
 - (NSSize)windowWillResize:(NSWindow *) window toSize:(NSSize)newSize
@@ -241,7 +239,7 @@
 		fullscreen = NO;
 		[self setFrame:savedFrame display:display animate:display];
 		SetSystemUIMode(kUIModeNormal,0);
-		[self setShowsResizeIndicator:config->IsResizable()];
+		[self setShowsResizeIndicator:userWindow->IsResizable()];
 		(*userWindow)->FireEvent(Event::UNFULLSCREENED);
 	}
 	if (display)
@@ -256,24 +254,18 @@
 	return webView;
 }
 
-- (WindowConfig*)config
-{
-	return config;
-}
-
 - (void)open
 {
 	// Wait until the frame has loaded to show the window. This prevents
 	// showing an unloaded WebView (a white screen).
 	requiresDisplay = YES;
 
-	if (config->IsFullscreen())
+	if (userWindow->IsFullscreen())
 		[self setFullscreen:YES];
 
-	std::string url(kroll::URLUtils::NormalizeURL(config->GetURL()));
+	std::string url(kroll::URLUtils::NormalizeURL(userWindow->GetURL()));
 	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
 	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
-	
 }
 
 - (void)close

@@ -13,7 +13,7 @@ namespace ti
 	class OSXUserWindow : public UserWindow
 	{
 		public:
-			OSXUserWindow(WindowConfig* config, AutoUserWindow& parent);
+			OSXUserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent);
 			~OSXUserWindow();
 
 			void OpenChooserDialog(bool files, KMethodRef callback, bool multiple,

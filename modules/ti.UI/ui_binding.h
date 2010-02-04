@@ -20,7 +20,7 @@ namespace ti
 		virtual ~UIBinding();
 		Host* GetHost();
 
-		void CreateMainWindow(WindowConfig* config);
+		void CreateMainWindow(AutoPtr<WindowConfig> config);
 		std::vector<AutoUserWindow>& GetOpenWindows();
 		void AddToOpenWindows(AutoUserWindow);
 		void RemoveFromOpenWindows(AutoUserWindow);
@@ -71,7 +71,6 @@ namespace ti
 		virtual void SetBadge(std::string& badgeLabel) {}
 		virtual void SetBadgeImage(std::string& badgeImagePath) {}
 
-		static int CENTERED;
 		static void ErrorDialog(std::string);
 		static inline UIBinding* GetInstance() { return instance; }
 

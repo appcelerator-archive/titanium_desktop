@@ -10,17 +10,14 @@ namespace ti
 {
 	UIBinding* UIBinding::instance = NULL;
 
-	// Module constants
-	int UIBinding::CENTERED = WindowConfig::DEFAULT_POSITION;
-
-	UIBinding::UIBinding(Host *host) :
+	UIBinding::UIBinding(Host* host) :
 		KAccessorObject("UI"),
 		host(host)
 	{
 		instance = this;
 
 		// @tiproperty[Number, UI.CENTERED, since=0.6] The CENTERED event constant
-		this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
+		this->Set("CENTERED", Value::NewInt(DEFAULT_POSITION));
 
 		/**
 		 * @tiapi(method=True,name=UI.createMenu,since=0.6)
@@ -166,7 +163,7 @@ namespace ti
 		Logger::AddLoggerCallback(&UIBinding::Log);
 	}
 
-	void UIBinding::CreateMainWindow(WindowConfig* config)
+	void UIBinding::CreateMainWindow(AutoPtr<WindowConfig> config)
 	{
 		this->mainWindow = UserWindow::CreateWindow(config, 0);
 		this->mainWindow->Open();
@@ -174,18 +171,27 @@ namespace ti
 
 	void UIBinding::_CreateWindow(const ValueList& args, KValueRef result)
 	{
+		AutoPtr<WindowConfig> config(0);
 		if (args.size() > 0 && args.at(0)->IsObject())
 		{
-			result->SetObject(UserWindow::CreateWindow(args.GetObject(0), 0));
+			config = WindowConfig::FromProperties(args.GetObject(0));
 		}
 		else if (args.size() > 0 && args.at(0)->IsString())
 		{
-			result->SetObject(UserWindow::CreateWindow(args.GetString(0), 0));
+			std::string url(args.GetString(0));
+			config = AppConfig::Instance()->GetWindowByURL(url);
+			if (config.isNull())
+			{
+				config = WindowConfig::Default();
+				config->SetURL(url);
+			}
 		}
-		else
-		{
-			result->SetObject(UserWindow::CreateWindow(new WindowConfig(), 0));
-		}
+
+		// If we still do not have a configuration, just use the default.
+		if (config.isNull())
+			config = WindowConfig::Default();
+
+		result->SetObject(UserWindow::CreateWindow(config, 0));
 	}
 
 	void UIBinding::ErrorDialog(std::string msg)

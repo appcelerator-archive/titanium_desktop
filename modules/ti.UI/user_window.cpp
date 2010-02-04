@@ -5,8 +5,9 @@
  */
 #include "ui_module.h"
 
-using namespace ti;
-UserWindow::UserWindow(WindowConfig* config, AutoUserWindow parent) :
+namespace ti
+{
+UserWindow::UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent) :
 	KEventObject("UI.UserWindow"),
 	logger(Logger::Get("UI.UserWindow")),
 	binding(UIModule::GetInstance()->GetUIBinding()),
@@ -27,9 +28,6 @@ UserWindow::UserWindow(WindowConfig* config, AutoUserWindow parent) :
 	// This is an undocumented method which allows other modules to manually
 	// insert this window's Titanium object into a KObject.
 	this->SetMethod("insertAPI", &UserWindow::_InsertAPI);
-
-	// @tiproperty[Number, UI.UserWindow.CENTERED,since=0.3,deprecated=true] The CENTERED event constant
-	this->Set("CENTERED", Value::NewInt(UIBinding::CENTERED));
 
 	/**
 	 * @tiapi(method=True,name=UI.UserWindow.hide,since=0.2) Hides a window
@@ -489,28 +487,6 @@ UserWindow::~UserWindow()
 	if (this->active)
 	{
 		this->Close();
-	}
-}
-
-/*static*/
-AutoUserWindow UserWindow::CreateWindow(KObjectRef properties, AutoUserWindow parent)
-{
-	WindowConfig* newConfig = new WindowConfig();
-	newConfig->UseProperties(properties);
-	return UserWindow::CreateWindow(newConfig, parent);
-}
-
-/*static*/
-AutoUserWindow UserWindow::CreateWindow(const std::string& url, AutoUserWindow parent)
-{
-	if (!url.empty())
-	{
-		return UserWindow::CreateWindow(new WindowConfig(
-			AppConfig::Instance()->GetWindowByURL(URLUtils::NormalizeURL(url))), parent);
-	}
-	else
-	{
-		return UserWindow::CreateWindow(new WindowConfig(), parent);
 	}
 }
 
@@ -1550,35 +1526,39 @@ void UserWindow::_GetChildren(const kroll::ValueList& args, kroll::KValueRef res
 
 void UserWindow::_CreateWindow(const ValueList& args, KValueRef result)
 {
+	AutoPtr<WindowConfig> config(0);
 	if (args.size() > 0 && args.at(0)->IsObject())
 	{
-		result->SetObject(UserWindow::CreateWindow(
-			args.GetObject(0), AutoUserWindow(this, true)));
+		config = WindowConfig::FromProperties(args.GetObject(0));
 	}
 	else if (args.size() > 0 && args.at(0)->IsString())
 	{
-		result->SetObject(UserWindow::CreateWindow(
-			args.GetString(0), AutoUserWindow(this, true)));
+		std::string url(args.GetString(0));
+		config = AppConfig::Instance()->GetWindowByURL(url);
+		if (config.isNull())
+		{
+			config = WindowConfig::Default();
+			config->SetURL(url);
+		}
 	}
-	else
-	{
-		result->SetObject(UserWindow::CreateWindow(
-			new WindowConfig(), AutoUserWindow(this, true)));
-	}
+
+	// If we still do not have a configuration, just use the default.
+	if (config.isNull())
+		config = WindowConfig::Default();
+
+	result->SetObject(UserWindow::CreateWindow(config, AutoUserWindow(this, true)));
 }
 
 void UserWindow::UpdateWindowForURL(std::string url)
 {
-	WindowConfig* config = AppConfig::Instance()->GetWindowByURL(url);
-	if (!config)
-	{
-		// no need to update window
+	AutoPtr<WindowConfig> config(AppConfig::Instance()->GetWindowByURL(url));
+
+	// If no configuration regex matched, don't change
+	// the properties of the window at all.
+	if (config.isNull())
 		return;
-	}
 
-	// copy the config object
-	config = new WindowConfig(config, url);
-
+	// TODO: This should set up more properties than those listed here.
 	Bounds b;
 	b.x = config->GetX();
 	b.y = config->GetY();
@@ -1928,4 +1908,6 @@ void UserWindow::PageLoaded(
 	event->SetObject("scope", globalObject);
 	event->SetString("url", url);
 	this->FireEvent(event);
+}
+
 }

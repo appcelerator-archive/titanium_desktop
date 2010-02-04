@@ -69,7 +69,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 	/* [in] */ IPropertyBag *features,
 	/* [retval][out] */ IWebView **newWebView)
 {
-	WindowConfig *config = new WindowConfig();
+	AutoPtr<WindowConfig> config(WindowConfig::Default());
 	BSTR burl;
 	request->URL(&burl);
 	std::string url = _bstr_t(burl);
@@ -102,9 +102,8 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 			config->SetHeight(height);
 	}
 
-	AutoUserWindow parent = this->window->GetAutoPtr().cast<UserWindow>();
-	AutoUserWindow window(UserWindow::CreateWindow(new WindowConfig(),
-		AutoUserWindow(window, true)));
+	AutoUserWindow window(UserWindow::CreateWindow(config,
+		this->window->GetAutoPtr().cast<UserWindow>()));
 	window->Open();
 
 	*newWebView = window.cast<Win32UserWindow>()->GetWebView();

@@ -397,7 +397,7 @@ static void GetChromeSize(Bounds& chromeSize, DWORD windowStyle)
 	chromeSize.height = rect.bottom - rect.top - 100;
 }
 
-Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
+Win32UserWindow::Win32UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent) :
 	UserWindow(config, parent),
 	win32Host(Win32Host::Win32Instance()),
 	frameLoadDelegate(0),
@@ -422,7 +422,7 @@ Win32UserWindow::Win32UserWindow(WindowConfig* config, AutoUserWindow& parent) :
 	logger = Logger::Get("UI.Win32UserWindow");
 }
 
-AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+AutoUserWindow UserWindow::CreateWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent)
 {
 	return new Win32UserWindow(config, parent);
 }
@@ -788,12 +788,12 @@ void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 	RECT desktopRect, boundsRect;
 
 	GetWindowRect(desktop, &desktopRect);
-	if (bounds.x == UIBinding::CENTERED)
+	if (bounds.x == DEFAULT_POSITION)
 	{
 		bounds.x = (desktopRect.right - bounds.width) / 2;
 		this->config->SetX(bounds.x);
 	}
-	if (bounds.y == UIBinding::CENTERED)
+	if (bounds.y == DEFAULT_POSITION)
 	{
 		bounds.y = (desktopRect.bottom - bounds.height) / 2;
 		this->config->SetY(bounds.y);

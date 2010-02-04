@@ -78,12 +78,10 @@
 	[self setupPreferences];
 
 	// This stuff adjusts the webview/window for chromeless windows.
-	WindowConfig *o = [window config];
-	if (o->IsUsingScrollbars()) {
+	if ([window userWindow]->IsUsingScrollbars())
 		[[[webView mainFrame] frameView] setAllowsScrolling:YES];
-	} else {
+	else
 		[[[webView mainFrame] frameView] setAllowsScrolling:NO];
-	}
 
 	[webView setBackgroundColor:[NSColor clearColor]];
 	[webView setAutoresizingMask:NSViewHeightSizable | NSViewWidthSizable];
@@ -91,7 +89,7 @@
 
 	// TI-303 we need to add safari UA to our UA to resolve broken
 	// sites that look at Safari and not WebKit for UA
-	NSString *appName = [NSString stringWithFormat:
+	NSString* appName = [NSString stringWithFormat:
 		@"Version/4.0 Safari/528.16 %s/%s", PRODUCT_NAME, PRODUCT_VERSION];
 	[webView setApplicationNameForUserAgent:appName];
 
@@ -112,8 +110,6 @@
 
 -(void)show
 {
-	WindowConfig *config = [window config];
-	config->SetVisible(true);
 	[window makeKeyAndOrderFront:nil];
 }
 
@@ -302,13 +298,11 @@
 {
 	AutoUserWindow newWindow(0);
 	NSString* url = [[request URL] absoluteString];
-	WindowConfig* config = new WindowConfig();
+	AutoPtr<WindowConfig> config(WindowConfig::FromWindowConfig(0));
 	
 	if ([url length] > 0)
 	{
-		std::string urlStr = [url UTF8String];
-		logger->Debug("creating new webView window with url: %s", urlStr.c_str());
-		config->SetURL(urlStr);
+		config->SetURL([url UTF8String]);
 	}
 	// webkit and firefox both ignore the 'resizable' flag
 	// see WebCore/page/WindowFeatures.cpp line 133
@@ -338,11 +332,10 @@
 		config->SetHeight([(NSNumber*)height intValue]);
 	}
 
-	newWindow = [window userWindow]->CreateWindow(config);
-	AutoPtr<OSXUserWindow> newGtkWindow(UserWindow::CreateWindow(
-			new WindowConfig(), AutoUserWindow(userWindow, true)).cast<OSXUserWindow>());
-	osxWindow->Open();
-	return [osxWindow->GetNative() webView];
+	AutoPtr<OSXUserWindow> newOSXWindow(UserWindow::CreateWindow(
+		config, AutoUserWindow([window userWindow], true)));
+	newOSXWindow->Open();
+	return [newOSXWindow->GetNative() webView];
 }
 
 - (void)webViewShow:(WebView *)sender
@@ -382,7 +375,7 @@
 
 - (BOOL)webViewIsResizable:(WebView *)wv
 {
-	return [window config]->IsResizable();
+	return [window userWindow]->IsResizable();
 }
 
 - (void)webView:(WebView *)wv setResizable:(BOOL)resizable;
@@ -561,7 +554,7 @@
 {
 	NSMutableArray *menuItems = [[[NSMutableArray alloc] init] autorelease];
 
-	UserWindow *uw = [window userWindow];
+	UserWindow* uw = [window userWindow];
 	AutoPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
 	if (menu.isNull()) {
 		menu = UIBinding::GetInstance()->GetContextMenu().cast<OSXMenu>();
