@@ -17,7 +17,6 @@
 	var sid = null;
 	var debug = false;
 	var initialized = false;
-	var window = null;
 	var refresh_components = true;
 	var update_check_timer = null;
 	var analytics_spec_version = 2;
@@ -271,10 +270,10 @@
 		};
 		
 		// schedule the timer to fire
-		var timer = window.setInterval(runCheck,interval);
+		var timer = Titanium.setInterval(runCheck,interval);
 
 		// go ahead and schedule
-		window.setTimeout(runCheck,1000);
+		Titanium.setTimeout(runCheck,1000);
 		
 		return timer;
 	});
@@ -285,7 +284,7 @@
 	 */
 	Titanium.API.set("UpdateManager.cancelMonitor", function(id)
 	{
-		window.clearInterval(id);
+		Titanium.clearInterval(id);
 	});
 
 	/**
@@ -400,7 +399,7 @@
 				{
 					try
 					{
-						var json = window.Titanium.JSON.parse(this.responseText);
+						var json = Titanium.JSON.parse(this.responseText);
 						if (!json.success)
 						{
 							Titanium.API.error("Error response from update service: "+json.message);
@@ -478,7 +477,7 @@
 		}
 	
 		// ok, we'll handle it then...
-		window.Titanium.UI.showDialog({
+		Titanium.UI.showDialog({
 			'url': 'ti://tianalytics/update.html',
 			'width': width,
 			'height': height,
@@ -563,12 +562,11 @@
 	{
 		if (update_check_timer)
 		{
-			window.clearTimeout(update_check_timer);
+			Titanium.clearTimeout(update_check_timer);
 			update_check_timer=null;
 		}
 		if (initialized)
 		{
-			window = null;
 			initialized = false;
 			send({'event':'ti.end',type:'ti.end'},false,5000);
 		}
@@ -591,16 +589,13 @@
 				return;
 			}
 			
-			// map in our window scope
-			window = event.scope;
-			
 			guid = Titanium.App.getGUID();
 			sid = Titanium.Platform.createUUID();
 			
 			send({'event':'ti.start',type:'ti.start'});
 			
 			// schedule the update check
-			update_check_timer = window.setTimeout(function(){
+			update_check_timer = Titanium.setTimeout(function(){
 				checkForUpdate();
 			}, UPDATE_CHECK_TIMER_INTERVAL);
 		}
