@@ -160,7 +160,7 @@ AutoPtr<WindowConfig> WindowConfig::FromProperties(KObjectRef properties)
 	c->SetTransparency(properties->GetDouble("transparency", c->GetTransparency()));
 
 #ifdef OS_OSX
-	c->SetTexturedBackground(properties->GetDouble("texturedBackground", c->GetTexturedBackground()));
+	c->SetTexturedBackground(properties->GetDouble("texturedBackground", c->HasTexturedBackground()));
 #endif
 
 	EnforceMaxMinConstraints(c);

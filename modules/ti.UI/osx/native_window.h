@@ -27,7 +27,7 @@ using namespace ti;
 	NSRect savedFrame;
 }
 - (void)setUserWindow:(AutoPtr<OSXUserWindow>*)inUserWindow;
-- (void)setupDecorations
+- (void)setupDecorations:(AutoPtr<WindowConfig>)config;
 - (void)setTransparency:(double)transparency;
 - (void)setFullscreen:(BOOL)yn;
 - (void)close;
@@ -35,7 +35,6 @@ using namespace ti;
 - (void)open;
 - (void)frameLoaded;
 - (WebView*)webView;
-- (WindowConfig*)config;
 - (UserWindow*)userWindow;
 - (void)showInspector:(BOOL)console;
 @end

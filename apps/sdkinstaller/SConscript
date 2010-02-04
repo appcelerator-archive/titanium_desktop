@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os.path as p
+import effess
 from app import App
 Import('build')
 
@@ -30,13 +31,13 @@ def package_developer(target, source, env):
 	if package_dist:
 		# Copy the zip files from the dist directory to developer.contents/dist
 		print "    -> Copying sdk zip from %s to %s" % (build.dist_dir, p.join(developer.contents, 'dist'))
-		futils.CopyToDir(p.join(build.dist_dir, "sdk-" + build.version + ".zip"), p.join(developer.contents, 'dist'))
+		effess.copy_to_dir(p.join(build.dist_dir, "sdk-" + build.version + ".zip"), p.join(developer.contents, 'dist'))
 
 	# The SDK installer application is staged.
 	# -- so now we do pre-package processing
 	to_copy = ['tiapp.xml', 'LICENSE.txt']
 	for item in to_copy:
-		futils.CopyToDir(p.join(cwd, item), developer.contents)
+		effess.copy_to_dir(p.join(cwd, item), developer.contents)
 
 	# Don't mark this application as installed, because we want
 	# the appinstaller to run when it is first executed

@@ -333,7 +333,7 @@
 	}
 
 	AutoPtr<OSXUserWindow> newOSXWindow(UserWindow::CreateWindow(
-		config, AutoUserWindow([window userWindow], true)));
+		config, AutoUserWindow([window userWindow], true)).cast<OSXUserWindow>());
 	newOSXWindow->Open();
 	return [newOSXWindow->GetNative() webView];
 }
