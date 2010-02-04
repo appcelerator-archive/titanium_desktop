@@ -555,7 +555,7 @@ namespace ti
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
 		AutoPtr<GtkUserWindow> newGtkWindow(UserWindow::CreateWindow(
 			WindowConfig::FromWindowConfig(0),
-			AutoUserWindow(userWindow, true)));
+			AutoUserWindow(userWindow, true)).cast<GtkUserWindow>());
 
 		if (newGtkWindow.isNull()) // Bad.
 			return 0;
