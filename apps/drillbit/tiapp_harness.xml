@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <ti:app xmlns:ti='http://ti.appcelerator.org'>
+<analytics>false</analytics>
 <id>com.titaniumapp.unittest</id>
 <name>UnitTest Harness</name>
 <version>1.0</version>
