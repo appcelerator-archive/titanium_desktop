@@ -11,8 +11,8 @@ namespace ti
 {
 	class Win32UserWindow : public UserWindow
 	{
-		public:
-		Win32UserWindow(WindowConfig* config, AutoUserWindow& parent);
+	public:
+		Win32UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent);
 		~Win32UserWindow();
 
 		void OpenFileChooserDialog(KMethodRef callback, bool multiple,

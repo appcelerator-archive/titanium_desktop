@@ -61,7 +61,7 @@ namespace ti
 		char** promptResponse);
 	static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
 
-	GtkUserWindow::GtkUserWindow(WindowConfig* config, AutoUserWindow& parent) :
+	GtkUserWindow::GtkUserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
 		targetWidth(-1),
 		targetHeight(-1),
@@ -82,7 +82,7 @@ namespace ti
 	{
 	}
 
-	AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+	AutoUserWindow UserWindow::CreateWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent)
 	{
 		return new GtkUserWindow(config, parent);
 	}
@@ -370,12 +370,12 @@ namespace ti
 		int y = this->config->GetY();
 	
 		GdkScreen* screen = gdk_screen_get_default();
-		if (x == UIBinding::CENTERED)
+		if (x == DEFAULT_POSITION)
 		{
 			x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
 			this->config->SetX(x);
 		}
-		if (y == UIBinding::CENTERED)
+		if (y == DEFAULT_POSITION)
 		{
 			y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
 			this->config->SetY(y);
@@ -554,7 +554,8 @@ namespace ti
 	{
 		GtkUserWindow* userWindow = static_cast<GtkUserWindow*>(data);
 		AutoPtr<GtkUserWindow> newGtkWindow(UserWindow::CreateWindow(
-			new WindowConfig(), AutoUserWindow(userWindow, true)).cast<GtkUserWindow>());
+			WindowConfig::FromWindowConfig(0),
+			AutoUserWindow(userWindow, true)));
 
 		if (newGtkWindow.isNull()) // Bad.
 			return 0;

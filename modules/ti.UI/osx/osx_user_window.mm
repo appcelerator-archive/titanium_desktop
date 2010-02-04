@@ -7,7 +7,7 @@
 
 namespace ti
 {
-	static unsigned int toWindowMask(WindowConfig* config)
+	static unsigned int toWindowMask(AutoPtr<WindowConfig> config)
 	{
 		unsigned int mask = 0;
 		if (!config->HasTransparentBackground() && config->HasTexturedBackground())
@@ -26,7 +26,7 @@ namespace ti
 		return mask;
 	}
 
-	OSXUserWindow::OSXUserWindow(WindowConfig* config, AutoUserWindow& parent) :
+	OSXUserWindow::OSXUserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent) :
 		UserWindow(config, parent),
 		nativeWindow(nil),
 		nativeWindowMask(toWindowMask(config)),
@@ -39,7 +39,7 @@ namespace ti
 		// by calling Open(...)
 	}
 
-	AutoUserWindow UserWindow::CreateWindow(WindowConfig* config, AutoUserWindow parent)
+	AutoUserWindow UserWindow::CreateWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent)
 	{
 		return new OSXUserWindow(config, parent);
 	}
@@ -271,12 +271,12 @@ namespace ti
 
 		// Center frame, if requested
 		NSRect screenFrame = [this->GetWindowScreen() frame];
-		if (y == UIBinding::CENTERED)
+		if (y == DEFAULT_POSITION)
 		{
 			y = (screenFrame.size.height - contentFrame.size.height) / 2;
 			config->SetY(y);
 		}
-		if (x == UIBinding::CENTERED)
+		if (x == DEFAULT_POSITION)
 		{
 			x = (screenFrame.size.width - contentFrame.size.width) / 2;
 			config->SetX(x);

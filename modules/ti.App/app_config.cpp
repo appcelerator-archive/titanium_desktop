@@ -9,17 +9,22 @@
 #include "config_utils.h"
 #include "properties_binding.h"
 
-#include "Poco/RegularExpression.h"
+#include <Poco/RegularExpression.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <string>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+#include <sstream>
 
 using Poco::Util::PropertyFileConfiguration;
 
 namespace ti
 {
 
-static void ParsePropertyNode(xmlNodePtr node, 
+static void ParsePropertyNode(xmlNodePtr node,
 	AutoPtr<PropertyFileConfiguration> config)
 {
 	std::string name(ConfigUtils::GetPropertyValue(node, "name"));
@@ -144,7 +149,7 @@ AppConfig::AppConfig(std::string& xmlfile)
 		}
 		else if (nodeName == "window")
 		{
-			this->windows.push_back(new WindowConfig((void *) node));
+			this->windows.push_back(WindowConfig::FromXMLNode(node));
 		}
 		else if (nodeName == "analytics")
 		{
@@ -168,47 +173,63 @@ AppConfig::AppConfig(std::string& xmlfile)
 	xmlCleanupParser();
 }
 
-AppConfig::~AppConfig()
+AutoPtr<WindowConfig> AppConfig::GetWindowByURL(const std::string& url)
 {
-}
+	AutoPtr<WindowConfig> config(0);
 
-WindowConfig* AppConfig::GetWindow(std::string& id)
-{
+	// First try matching the URL exactly.
 	for (size_t i = 0; i < windows.size(); i++)
 	{
-		if (windows[i]->GetID() == id)
+		if (windows[i]->GetURL() == url)
 		{
-			return windows[i];
+			config = windows[i];
+			break;
 		}
 	}
-	return NULL;
-}
 
-WindowConfig* AppConfig::GetWindowByURL(const std::string& url)
-{
-	for (size_t i = 0; i < windows.size(); i++)
+	// If we didn't find a matching window URL, try matching
+	// against the url-regex parameter of the windows configs.
+	if (config.isNull())
 	{
-		std::string urlRegex(windows[i]->GetURLRegex());
-
-		Poco::RegularExpression::Match match;
-		Poco::RegularExpression regex(urlRegex);
-
-		regex.match(url, match);
-
-		if (match.length != 0)
+		for (size_t i = 0; i < windows.size(); i++)
 		{
-			return windows[i];
+			if (windows[i]->GetURLRegex().empty())
+				continue;
+
+			std::string urlRegex(windows[i]->GetURLRegex());
+			Poco::RegularExpression::Match match;
+			Poco::RegularExpression regex(windows[i]->GetURLRegex());
+			regex.match(url, match);
+			if (match.length != 0)
+			{
+				config = windows[i];
+				break;
+			}
 		}
 	}
-	return new WindowConfig();
+
+	// Return NULL here, because callers need to know whether
+	// or not a configuration was matched.
+	if (config.isNull())
+		return config;
+	
+	// Return a copy here, so that the original configuration
+	// is preserved when this is mutated
+	config = WindowConfig::FromWindowConfig(config);
+	config->SetURL(url);
+	return config;
 }
 
-WindowConfig* AppConfig::GetMainWindow()
+AutoPtr<WindowConfig> AppConfig::GetMainWindow()
 {
-	if (windows.size() > 0)
-		return windows[0];
-	else
-		return NULL;
+	// WindowConfig::FromWindowConfig should just return
+	// the default configuration given a NULL config.
+	if (windows.empty())
+		return WindowConfig::FromWindowConfig(0);
+
+	// Return a copy here, so that the original configuration
+	// is preserved when this is mutated
+	return WindowConfig::FromWindowConfig(windows[0]);
 }
 
 } // namespace ti

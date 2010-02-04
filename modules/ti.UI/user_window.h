@@ -31,11 +31,8 @@ namespace ti
 	class UserWindow : public KEventObject
 	{
 		public:
-			static AutoUserWindow CreateWindow(const std::string& url, AutoUserWindow parent);
-			static AutoUserWindow CreateWindow(KObjectRef properties, AutoUserWindow parent);
-
 			// Platform-specific implementation.
-			static AutoUserWindow CreateWindow(WindowConfig* config, AutoUserWindow parent);
+			static AutoUserWindow CreateWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent);
 
 			virtual SharedString DisplayString(int levels=3);
 			virtual ~UserWindow();
@@ -216,14 +213,14 @@ namespace ti
 			AutoUIBinding binding;
 			KObjectRef domWindow;
 			Host* host;
-			WindowConfig* config;
+			AutoPtr<WindowConfig> config;
 			AutoUserWindow parent;
 			std::vector<AutoUserWindow> children;
 			bool active;
 			bool initialized;
 			std::string iconURL;
 
-			UserWindow(WindowConfig* config, AutoUserWindow parent);
+			UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent);
 			virtual AutoUserWindow GetParent();
 			virtual void AddChild(AutoUserWindow);
 			virtual void RemoveChild(AutoUserWindow);

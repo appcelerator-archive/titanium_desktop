@@ -41,17 +41,9 @@ namespace ti
 			return;
 		}
 
-		WindowConfig* mainWindowConfig = config->GetMainWindow();
-		if (!mainWindowConfig)
-		{
-			std::string msg = "Error loading tiapp.xml. Your application "
-				"window is not properly configured or packaged.";
-			this->uiBinding->ErrorDialog(msg);
-			throw ValueException::FromString(msg.c_str());
-			return;
-		}
-
-		this->uiBinding->CreateMainWindow(mainWindowConfig);
+		// If there is no main window configuration, this just
+		// AppConfig::GetMainWindow returns a default configuration.
+		this->uiBinding->CreateMainWindow(config->GetMainWindow());
 
 		try
 		{
