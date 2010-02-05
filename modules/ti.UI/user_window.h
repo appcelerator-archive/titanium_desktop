@@ -40,6 +40,7 @@ namespace ti
 			void RegisterJSContext(JSGlobalContextRef);
 			void InsertAPI(KObjectRef frameGlobal);
 			void PageLoaded(KObjectRef scope, std::string &url, JSGlobalContextRef context);
+			inline AutoPtr<WindowConfig> GetConfig() { return this->config; }
 			inline KObjectRef GetDOMWindow() { return this->domWindow; }
 			inline Host* GetHost() { return this->host; }
 			inline bool IsToolWindow() {return this->config->IsToolWindow(); }

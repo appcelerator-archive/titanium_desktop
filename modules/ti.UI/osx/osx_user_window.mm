@@ -84,7 +84,7 @@ namespace ti
 		this->SetCloseable(config->IsCloseable());
 		this->SetMaximizable(config->IsMaximizable());
 		this->SetMinimizable(config->IsMinimizable());
-		[nativeWindow setupDecorations:config];
+		[nativeWindow setupDecorations];
 		this->SetTopMost(config->IsTopMost());
 
 		if (config->IsMaximized())
@@ -518,12 +518,14 @@ namespace ti
 
 	std::string OSXUserWindow::GetURL()
 	{
-		if (nativeWindow) {
-			NSString* url = [[nativeWindow webView] mainFrameURL];
-			return [url UTF8String];
-		} else {
+		if (!nativeWindow)
 			return this->config->GetURL();
-		}
+
+		NSString* url = [[nativeWindow webView] mainFrameURL];
+		if (!url)
+			return this->config->GetURL();
+
+		return [url UTF8String];
 	}
 
 	void OSXUserWindow::SetURL(std::string& url)
