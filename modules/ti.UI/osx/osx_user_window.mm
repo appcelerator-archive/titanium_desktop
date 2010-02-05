@@ -520,10 +520,11 @@ namespace ti
 	{
 		if (nativeWindow) {
 			NSString* url = [[nativeWindow webView] mainFrameURL];
-			return [url UTF8String];
-		} else {
-			return this->config->GetURL();
+			if (url) {
+				return [url UTF8String];
+			}
 		}
+		return this->config->GetURL();
 	}
 
 	void OSXUserWindow::SetURL(std::string& url)
