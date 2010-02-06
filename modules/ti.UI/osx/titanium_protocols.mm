@@ -6,6 +6,22 @@
 #import <WebKit/WebKit.h>
 #include "../ui_module.h"
 
+static NSString* GetRegisteredMimeTypeFromExtension(NSString* ext)
+{
+	CFRef<CFStringRef> uti(UTTypeCreatePreferredIdentifierForTag(
+		kUTTagClassFilenameExtension, (CFStringRef)ext, 0));
+	if (!uti.get())
+		return nil;
+
+	CFStringRef registeredType = UTTypeCopyPreferredTagWithClass(
+		uti.get(), kUTTagClassMIMEType);
+	if (!registeredType)
+		return nil;
+
+	NSString* mimeType = NSMakeCollectable(registeredType);
+	return [mimeType autorelease];
+}
+
 @implementation TitaniumProtocols
 
 +(BOOL)canInitWithRequest:(NSURLRequest*)theRequest 
@@ -38,61 +54,44 @@
 
 +(NSString*)mimeTypeFromExtension:(NSString*)ext
 {
-	NSString* mime = @"application/octet-stream";
-	if ([ext isEqualToString:@"png"])
-	{
-		mime = @"image/png";
-	}
-	else if ([ext isEqualToString:@"gif"])
-	{
-		mime = @"image/gif"; 
-	}
-	else if ([ext isEqualToString:@"jpg"])
-	{
-		mime = @"image/jpeg";
-	}
-	else if ([ext isEqualToString:@"jpeg"])
-	{
-		mime = @"image/jpeg";
-	}
-	else if ([ext isEqualToString:@"ico"])
-	{
-		mime = @"image/x-icon";
-	}
-	else if ([ext isEqualToString:@"html"])
-	{
-		mime = @"text/html";
-	}
-	else if ([ext isEqualToString:@"htm"])
-	{
-		mime = @"text/html";
-	}
-	else if ([ext isEqualToString:@"text"])
-	{
-		mime = @"text/plain";
-	}
-	else if ([ext isEqualToString:@"js"])
-	{
-		mime = @"text/javascript";
-	}
-	else if ([ext isEqualToString:@"json"])
-	{
-		mime = @"application/json";
-	}
-	else if ([ext isEqualToString:@"css"])
-	{
-		mime = @"text/css";
-	}
-	else if ([ext isEqualToString:@"xml"])
-	{
-		mime = @"text/xml";
-	}
-	else if ([ext isEqualToString:@"pdf"])
-	{
-		mime = @"application/pdf";
-	}
+	NSString* mimeType = GetRegisteredMimeTypeFromExtension(ext);
+	if (mimeType)
+		return mimeType;
 
-	return mime;
+	if ([ext isEqualToString:@"png"])
+		return @"image/png";
+	else if ([ext isEqualToString:@"gif"])
+		return @"image/gif"; 
+	else if ([ext isEqualToString:@"jpg"])
+		return @"image/jpeg";
+	else if ([ext isEqualToString:@"jpeg"])
+		return @"image/jpeg";
+	else if ([ext isEqualToString:@"ico"])
+		return @"image/x-icon";
+	else if ([ext isEqualToString:@"html"])
+		return @"text/html";
+	else if ([ext isEqualToString:@"htm"])
+		return @"text/html";
+	else if ([ext isEqualToString:@"text"])
+		return @"text/plain";
+	else if ([ext isEqualToString:@"js"])
+		return @"text/javascript";
+	else if ([ext isEqualToString:@"json"])
+		return @"application/json";
+	else if ([ext isEqualToString:@"css"])
+		return @"text/css";
+	else if ([ext isEqualToString:@"xml"])
+		return @"text/xml";
+	else if ([ext isEqualToString:@"pdf"])
+		return @"application/pdf";
+	else if ([ext isEqualToString:@"m4v"] )
+		return @"video/x-m4v";
+	else if([ext isEqualToString:@"m4p"])
+		return @"audio/x-m4p";
+	else if([ext isEqualToString:@"swf"])
+		return @"application/x-shockwave-flash";
+	else
+		return @"application/octet-stream";
 }
 
 -(NSData*)preprocessRequest:(const char*)url returningMimeType:(NSString**)mimeType
