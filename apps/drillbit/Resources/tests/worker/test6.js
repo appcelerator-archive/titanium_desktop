@@ -5,6 +5,6 @@ try
 }
 catch(e)
 {
-	postMessage(String(e) == "interrupted");
+	postMessage(true);
 }
 

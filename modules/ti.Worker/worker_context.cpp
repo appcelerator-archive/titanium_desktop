@@ -4,124 +4,196 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */	
 #include "worker_context.h"
+#include "worker.h"
+#include "../../kroll/modules/javascript/javascript_module.h"
+#include "../../kroll/modules/javascript/javascript_module.h"
+#include <JavaScriptCore/JSContextRef.h>
 
 namespace ti
 {
-	WorkerContext::WorkerContext(Host *host, KObjectRef worker) :
-		KEventObject("Worker.WorkerContext"),
-		host(host),
-		worker(worker)
+	static Logger* GetLogger()
 	{
-		// NOTE: don't really doc these since they are injected into the
-		// scope of the worker script and exposed that way
-		this->SetMethod("postMessage", &WorkerContext::PostMessage);
+		static Logger* logger = Logger::Get("WorkerContext");
+		return logger;
+	}
 
-		// this is just a convenience map
-		this->SetMethod("importScript", &WorkerContext::ImportScripts); 
-		this->SetMethod("importScripts", &WorkerContext::ImportScripts);
-		this->SetMethod("sleep", &WorkerContext::Sleep);
+	WorkerContext::WorkerContext(Worker* worker) :
+		KEventObject("Worker.WorkerContext"),
+		worker(worker),
+		jsContext(0),
+		running(false)
+	{
 	}
 
 	WorkerContext::~WorkerContext()
 	{
-		worker = NULL;
-		host = NULL;
 	}
 
-	void WorkerContext::Terminate()
+	static JSGlobalContextRef CreateGlobalContext(WorkerContext* context)
 	{
-		// if we're blocked in a sleep, signal him to wake up
-		condition.signal();
+		JSGlobalContextRef jsContext = KJSUtil::CreateGlobalContext();
+		JSGlobalContextRetain(jsContext);
+
+		KObjectRef global(new KKJSObject(jsContext,
+			JSContextGetGlobalObject(jsContext)));
+
+		global->SetMethod("postMessage", StaticBoundMethod::FromMethod<WorkerContext>(
+			context, &WorkerContext::_PostMessage));
+		global->SetMethod("importScript", StaticBoundMethod::FromMethod<WorkerContext>(
+			context, &WorkerContext::_ImportScripts));
+		global->SetMethod("importScripts", StaticBoundMethod::FromMethod<WorkerContext>(
+			context, &WorkerContext::_ImportScripts));
+		global->SetMethod("sleep", StaticBoundMethod::FromMethod<WorkerContext>(
+			context, &WorkerContext::_Sleep));
+
+		return jsContext;
 	}
 
-	void WorkerContext::Yield()
+	static void DestroyGlobalContext(JSGlobalContextRef jsContext)
 	{
-		// This method will block until sleeping has stopped.
-		Poco::ScopedLock<Poco::Mutex> lock(condmutex);
+		KJSUtil::UnregisterGlobalContext(jsContext);
+		JSGlobalContextRelease(jsContext);
 	}
 
-	void WorkerContext::SendQueuedMessages()
+	void WorkerContext::StartWorker(const std::string& code)
 	{
-		Logger *logger = Logger::Get("WorkerContext");
-		logger->Debug("SendQueuedMessages called");
-
-		if (messages.size() <= 0)
-			return;
-
-		KValueRef onMessageValue = worker->Get("onmessage");
-		if (!onMessageValue->IsMethod())
-			return;
-
-		KMethodRef onMessage(onMessageValue->ToMethod());
-		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		std::list<KValueRef>::iterator i = messages.begin();
-		while (i != messages.end())
-		{
-			KValueRef message(*i++);
-			this->CallOnMessageCallback(onMessage, message);
-		}
-		messages.clear();
-	}
-
-	void WorkerContext::CallOnMessageCallback(KMethodRef onMessage, KValueRef message)
-	{
-		static Logger* logger = Logger::Get("Worker");
-		AutoPtr<Event> event(this->CreateEvent("worker.message"));
-		event->Set("message", message);
-		ValueList args(Value::NewObject(event));
+		// Stay alive until the thread is gone.
+		this->duplicate();
+		this->jsContext = CreateGlobalContext(this);
+		this->running = true;
 
 		try
 		{
-			RunOnMainThread(onMessage, args, false);
+			// Lock the mutex here, so that the Sleep method is ready for use.
+			// Only one thread will ever be waiting on this condition, so we
+			// don't have to worry too much about locking and unlocking it.
+			wakeupConditionMutex.lock();
+			KJSUtil::Evaluate(jsContext, code.c_str());
 		}
-		catch(ValueException& e)
+		catch (ValueException& e)
 		{
-			logger->Error("Exception while during onMessage callback: %s",
+			GetLogger()->Error("Error executing worker: %s\n", e.ToString().c_str());
+			worker->Error(e.GetValue());
+			DestroyGlobalContext(jsContext);
+			return;
+		}
+
+		this->MessageLoop();
+
+		DestroyGlobalContext(jsContext);
+		this->running = false;
+		this->release();
+	}
+
+	void WorkerContext::MessageLoop()
+	{
+		while (this->running)
+		{
+			// Handle messages first, because we are about to go to sleep
+			// until more messages arrive.
+			while (this->Get("onmessage")->IsMethod() && !inbox.empty())
+			{
+				KValueRef message(0);
+				{
+					Poco::Mutex::ScopedLock lock(inboxLock);
+					message = inbox.front();
+					inbox.pop();
+				}
+
+				this->DeliverMessage(message);
+			}
+
+			// Wait until the main thread signals us into action. This means there
+			// are messages to process or this worker has been killed from the outside.
+			messageCondition.wait(wakeupConditionMutex);
+			if (!this->running)
+				break;
+		}
+	}
+
+	void WorkerContext::DeliverMessage(KValueRef message)
+	{
+		AutoPtr<Event> event(this->CreateEvent("worker.message"));
+		event->Set("message", message);
+
+		try
+		{
+			this->Get("onmessage")->ToMethod()->Call(Value::NewObject(event));
+		}
+		catch (ValueException& e)
+		{
+			GetLogger()->Error("Exception while during onMessage callback: %s",
 				e.ToString().c_str());
 		}
 	}
 
-	void WorkerContext::PostMessage(const ValueList &args, KValueRef result)
+	void WorkerContext::Terminate()
 	{
-		Logger *logger = Logger::Get("WorkerContext");
-		KValueRef message(args.at(0));
-
-		logger->Debug("PostMessage called with %s", message->DisplayString()->c_str());
-		{
-			Poco::ScopedLock<Poco::Mutex> lock(mutex);
-			messages.push_back(message);
-		}
-		SendQueuedMessages();
+		// Wake up the worker no matter if it's in the message loop or sleeping.
+		this->running = false;
+		messageCondition.signal();
+		terminateCondition.signal();
 	}
 
-	void WorkerContext::Sleep(const ValueList &args, KValueRef result)
+	void WorkerContext::SendMessageToWorker(KValueRef message)
 	{
-		Logger *logger = Logger::Get("WorkerContext");
-		long ms = args.at(0)->ToInt();
-		logger->Debug("worker is sleeping for %d ms", ms);
-		condmutex.lock();
-		if (condition.tryWait(condmutex, ms))
 		{
-			logger->Debug("worker sleep was interrupted");
-			condmutex.unlock();
-			throw ValueException::FromString("interrupted");
-			return;
+			Poco::Mutex::ScopedLock lock(inboxLock);
+			inbox.push(message);
 		}
-		condmutex.unlock();
-		logger->Debug("worker sleep completed");
+
+		// Wake up the worker thread, if it's waiting in the message queue.
+		messageCondition.signal();
 	}
 
-	void WorkerContext::ImportScripts(const ValueList &args, KValueRef result)
+	void WorkerContext::_PostMessage(const ValueList &args, KValueRef result)
 	{
-		Logger *logger = Logger::Get("WorkerContext");
-		AutoPtr<Worker> _worker = worker.cast<Worker>();
-		JSGlobalContextRef context = KJSUtil::GetGlobalContext(_worker->GetGlobalObject());
+		worker->SendMessageToMainThread(args.GetValue(0));
+	}
 
+	void WorkerContext::_Sleep(const ValueList &args, KValueRef result)
+	{
+		args.VerifyException("sleep", "i");
+
+		long time = args.GetInt(0);
+		GetLogger()->Debug("Worker will sleep for up to %ld milliseconds", time);
+		terminateCondition.tryWait(wakeupConditionMutex, time);
+
+		if (!this->running)
+		{
+			// The main thread has requested that the worker be terminated,
+			// so toss an exception here to try to finish up quickly.
+			throw ValueException::FromString("Worker sleep was interrupted.");
+		}
+	}
+
+	void WorkerContext::_ImportScripts(const ValueList &args, KValueRef result)
+	{
 		for (size_t c = 0; c < args.size(); c++)
 		{
 			std::string path(URLUtils::URLToPath(args.GetString(c)));
-			logger->Debug("Attempting to import worker script = %s", path.c_str());
-			KJSUtil::EvaluateFile(context, path.c_str());
+			GetLogger()->Debug("Attempting to import worker script = %s", path.c_str());
+			KJSUtil::EvaluateFile(this->jsContext, path.c_str());
 		}
+	}
+
+	KValueRef WorkerContext::Get(const char* name)
+	{
+		if (!jsContext)
+			return Value::Undefined;
+
+		KObjectRef global(new KKJSObject(jsContext,
+			JSContextGetGlobalObject(jsContext)));
+		return global->Get(name);
+	}
+
+	void WorkerContext::Set(const char* name, KValueRef value)
+	{
+		if (!jsContext)
+			return;
+
+		KObjectRef global(new KKJSObject(jsContext,
+			JSContextGetGlobalObject(jsContext)));
+		global->Set(name, value);
 	}
 }

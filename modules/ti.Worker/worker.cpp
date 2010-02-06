@@ -4,279 +4,153 @@
  * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
  */	
 #include "worker.h"
+#include "worker_context.h"
 #include <kroll/thread_manager.h>
 
 namespace ti
 {
-	Worker::Worker(Host* host, kroll::KObjectRef global, std::string& code) :
+	static Logger* GetLogger()
+	{
+		static Logger* logger = Logger::Get("WorkerContext");
+		return logger;
+	}
+
+	Worker::Worker(std::string& code) :
 		KEventObject("Worker.Worker"),
-		host(host),
-		global_object(0),
 		code(code),
-		stopped(true),
-		context(0)
+		workerContext(new WorkerContext(this)),
+		adapter(0)
 	{
 		/**
 		 * @tiapi(method=True,name=Worker.Worker.start,since=0.6)
 		 * @tiapi Start the worker thread
 		 */
-		this->SetMethod("start",&Worker::Start);
+		this->SetMethod("start", &Worker::_Start);
+
 		/**
 		 * @tiapi(method=True,name=Worker.Worker.terminate,since=0.6)
 		 * @tiapi Terminate the worker thread. The thread can be restarted with Worker.start()
 		 */
-		this->SetMethod("terminate",&Worker::Terminate);
+		this->SetMethod("terminate", &Worker::_Terminate);
+
 		/**
 		 * @tiapi(method=True,name=Worker.Worker.postMessage,since=0.6)
 		 * @tiapi Post a message (async) into the worker thread's queue to be handled by onmessage
 		 * @tiarg[any, data] Any JSON serializable type to pass to the child.
 		 */
-		this->SetMethod("postMessage",&Worker::PostMessage);
+		this->SetMethod("postMessage", &Worker::_PostMessage);
+
+		this->adapter = new Poco::RunnableAdapter<Worker>(*this, &Worker::Run);
 	}
 
 	Worker::~Worker()
 	{
-		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		if (!this->stopped)
-		{
-			this->stopped=true;
-			this->condition.signal();
-		}
-		if (this->thread.isRunning())
-		{
-			try
-			{
-				this->thread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				Logger *logger = Logger::Get("Worker");
-				logger->Error(
-					"Exception while try to join with thread: %s",
-					e.displayText().c_str());
-			}
-		}
+		KValueRef result(0);
+		this->_Terminate(ValueList(), result);
 		delete this->adapter;
+	}
+
+	void Worker::Error(KValueRef error)
+	{
+		KValueRef onError = this->Get("onerror");
+		if (!onError->IsMethod())
+			return;
+
+		RunOnMainThread(onError->ToMethod(), ValueList(error), false);
+	}
+
+	void Worker::_Start(const ValueList& args, KValueRef result)
+	{
+		if (this->thread.isRunning())
+			throw ValueException::FromString("Worker already started");
+
+		this->thread.start(*adapter);
 	}
 
 	void Worker::Run()
 	{
 		START_KROLL_THREAD;
 
-		Logger *logger = Logger::Get("Worker");
-
-		bool error = false;
-		JSGlobalContextRef context = NULL;
-		try
-		{
-			// create a new global context
-			this->global_object = KJSUtil::CreateNewGlobalContext(this->host);
-			
-			// bind the worker context properties
-			KJSUtil::BindProperties(global_object,this->context);
-			
-			// evaluate the script
-			context = KJSUtil::GetGlobalContext(global_object);
-			KJSUtil::Evaluate(context, (char*) this->code.c_str());
-		}
-		catch(ValueException& e)
-		{
-			error = true;
-			logger->Error("Error loading worker: %s\n", e.ToString().c_str());
-			KValueRef onerror = this->Get("onerror");
-			if (onerror->IsMethod())
-			{
-				KMethodRef method = onerror->ToMethod();
-				ValueList args(e.GetValue());
-				RunOnMainThread(method, args, false);
-			}
-		}
-
-		AutoPtr<WorkerContext> wc = this->context.cast<WorkerContext>();
-		
-		if (!error)
-		{
-			// run this thread and wait for pending messages 
-			// or to be woken up to stop
-			for(;;)
-			{
-				// Wait for the code inside the worker to stop sleeping.
-				wc->Yield();
-
-				bool wait = true;
-				{
-					Poco::ScopedLock<Poco::Mutex> lock(mutex);
-					if (!this->messages.empty())
-							wait = false;
-				}
-
-				if (wait)
-				{
-					condmutex.lock(); // will unlock in wait
-					condition.wait(condmutex);
-					condmutex.unlock();
-				}
-
-				// check to see if the worker wants to receive messages - we do this 
-				// each time since they could define at any time
-				KValueRef mv = KJSUtil::GetProperty(global_object, "onmessage");
-				if (mv->IsMethod())
-				{
-					KMethodRef onMessage(mv->ToMethod());
-					// we have to make a copy since calling the onmessage could be re-entrant
-					// which would cause the postMessage to deadlock. we hold the lock to 
-					// make a copy of the contents of the list and then iterate w/o lock
-					std::list<KValueRef> copy;
-					{
-						// lock inside block only to make copy
-						Poco::ScopedLock<Poco::Mutex> lock(mutex);
-						if (this->messages.size()>0)
-						{
-							std::list<KValueRef>::iterator i = this->messages.begin();
-							while (i!=this->messages.end())
-							{
-								KValueRef message = (*i++);
-								copy.push_back(message);
-							}
-							this->messages.clear();
-						}
-					}
-					if (copy.size()>0)
-					{
-						std::list<KValueRef>::iterator i = copy.begin();
-						while (i != copy.end())
-						{
-							KValueRef message(*i++);
-							this->CallOnMessageCallback(onMessage, message);
-						}
-					}
-				}
-
-				// hold lock while we check to make sure we're stopped
-				Poco::ScopedLock<Poco::Mutex> lock(mutex);
-				if (stopped) 
-				{
-					logger->Debug("worker thread stopped detected, exiting...");
-					break;
-				}
-			}
-		}
-
-		// terminate the context waking up any threads that might be waiting
-		wc->Terminate();
-		
-		// go ahead and log while we cleanup
-		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		
-		// make sure we unregister our global so we don't leak
-		if (global_object!=NULL)
-		{
-			KJSUtil::UnregisterGlobalContext(global_object);
-		}
-		
-		this->global_object = NULL;
-		this->stopped = true;
-		
-		logger->Debug("exiting Worker thread");
+		// The worker manages the lifetime of the worker context, so we
+		// can just pass a pointer to ourselves instead of an AutoPtr.
+		workerContext->StartWorker(this->code);
 
 		END_KROLL_THREAD;
 	}
 
-	void Worker::Start(const ValueList& args, KValueRef result)
+	void Worker::SendMessageToMainThread(KValueRef message)
 	{
-		Logger *logger = Logger::Get("Worker");
-		logger->Debug("Start called");
-		Poco::ScopedLock<Poco::Mutex> lock(mutex);
-		if (!stopped)
 		{
-			throw ValueException::FromString("Worker already started");
-			return;
+			Poco::Mutex::ScopedLock lock(inboxLock);
+			inbox.push(message);
 		}
-		this->stopped = false;
-		this->context = new WorkerContext(host,this);
-		this->adapter = new Poco::RunnableAdapter<Worker>(*this, &Worker::Run);
-		this->thread.start(*adapter);
+
+		HandleInbox();
 	}
 
-	void Worker::Terminate(const ValueList& args, KValueRef result)
+	void Worker::HandleInbox()
 	{
-		Logger *logger = Logger::Get("Worker");
-		logger->Debug("Terminate called");
-		
-		// don't hold the lock after checking
+		while (this->Get("onmessage")->IsMethod() && !inbox.empty())
 		{
-			Poco::ScopedLock<Poco::Mutex> lock(mutex);
-			if (!stopped)
+			KValueRef message(0);
 			{
-				stopped=true;
+				Poco::Mutex::ScopedLock lock(inboxLock);
+				message = inbox.front();
+				inbox.pop();
 			}
-		}
-		
-		// cause the worker context to terminate if blocked in sleep
-		AutoPtr<WorkerContext> c = this->context.cast<WorkerContext>();
-		c->Terminate();
-		
-		this->condition.signal();
-		if (this->thread.isRunning())
-		{
-			logger->Debug("Waiting for Worker Thread to finish");
-			try
-			{
-				this->thread.join();
-			}
-			catch (Poco::Exception& e)
-			{
-				Logger *logger = Logger::Get("Worker");
-				logger->Error("Exception while try to join with thread: %s",
-					e.displayText().c_str());
-			}
-			logger->Debug("Worker Thread finished");
-		}
-		else
-		{
-			logger->Debug("Worker Thread already finished");
+
+			this->DeliverMessage(message);
 		}
 	}
 
-	void Worker::CallOnMessageCallback(KMethodRef onMessage, KValueRef message)
+	void Worker::DeliverMessage(KValueRef message)
 	{
-		static Logger* logger = Logger::Get("Worker");
 		AutoPtr<Event> event(this->CreateEvent("worker.message"));
 		event->Set("message", message);
-		ValueList args(Value::NewObject(event));
 
 		try
 		{
-			RunOnMainThread(onMessage, args, false);
+			RunOnMainThread(this->Get("onmessage")->ToMethod(), 
+				ValueList(Value::NewObject(event)), false);
 		}
-		catch(ValueException& e)
+		catch (ValueException& e)
 		{
-			logger->Error("Exception while during onMessage callback: %s",
+			GetLogger()->Error("Exception while during onMessage callback: %s",
 				e.ToString().c_str());
 		}
 	}
 
-	void Worker::PostMessage(const ValueList& args, KValueRef result)
+	void Worker::_Terminate(const ValueList& args, KValueRef result)
 	{
-		// store the message in our queue (waiting for the lock) and
-		// then signal the thread to wake up to process the message
-		KValueRef message = args.at(0);
+		if (!this->thread.isRunning())
+			return;
+
+		this->workerContext->Terminate();
+
+		try
 		{
-			Poco::ScopedLock<Poco::Mutex> lock(mutex);
-			this->messages.push_back(message);
+			this->thread.join();
 		}
-		this->condition.signal();
+		catch (Poco::Exception& e)
+		{
+			GetLogger()->Error("Exception while try to join with thread: %s",
+				e.displayText().c_str());
+			throw ValueException::FromString(e.displayText());
+		}
 	}
 
-	void Worker::Bound(const char *name, KValueRef value)
+	void Worker::_PostMessage(const ValueList& args, KValueRef result)
 	{
-		std::string n = name;
-		
-		if (this->context && n == "onmessage")
-		{
-			AutoPtr<WorkerContext> c = this->context.cast<WorkerContext>();
-			c->SendQueuedMessages();
-			this->condition.signal();
-		}
+		workerContext->SendMessageToWorker(args.GetValue(0));
+	}
+
+	void Worker::Set(const char* name, KValueRef value)
+	{
+		KEventObject::Set(name, value);
+
+		// We now have an onMessage target. Send all our queued
+		// messages to this method.
+		if (std::string(name) == "onmessage")
+			this->HandleInbox();
 	}
 }

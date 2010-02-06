@@ -13,42 +13,35 @@
 #include <Poco/Condition.h>
 #include <Poco/Mutex.h>
 #include <Poco/ScopedLock.h>
-
-#include "worker_context.h"
-#include "javascript_module.h"
+#include <queue>
 
 namespace ti
 {
+	class WorkerContext;
+
 	class Worker : public KEventObject
 	{
 	public:
-		Worker(Host *host, kroll::KObjectRef global, std::string& code);
-		virtual ~Worker();
-
-		inline JSObjectRef GetGlobalObject() { return global_object; }
+		Worker(std::string& code);
+		~Worker();
+		void Error(KValueRef value);
+		void SendMessageToMainThread(KValueRef message);
+		virtual void Set(const char* name, KValueRef value);
 
 	private:
-		kroll::Host *host;
-		kroll::KObjectRef global;
-		JSObjectRef global_object;
 		std::string code;
-		bool stopped;
-
+		AutoPtr<WorkerContext> workerContext;
 		Poco::Thread thread;
 		Poco::RunnableAdapter<Worker>* adapter;
-		Poco::Condition condition;
-		Poco::Mutex condmutex;
-		Poco::Mutex mutex;
-		std::list<KValueRef> messages;
-		kroll::KObjectRef context;
+		std::queue<KValueRef> inbox;
+		Poco::Mutex inboxLock;
 
 		void Run();
-		void Bound(const char *name, KValueRef value);
-		void Start(const ValueList& args, KValueRef result);
-		void Terminate(const ValueList& args, KValueRef result);
-		void PostMessage(const ValueList& args, KValueRef result);
-		void CallOnMessageCallback(KMethodRef onMessage, KValueRef message);
-
+		void HandleInbox();
+		void DeliverMessage(KValueRef message);
+		void _Start(const ValueList& args, KValueRef result);
+		void _Terminate(const ValueList& args, KValueRef result);
+		void _PostMessage(const ValueList& args, KValueRef result);
 	};
 }
 

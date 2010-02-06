@@ -7,42 +7,43 @@
 #ifndef _WORKER_CONTEXT_H_
 #define _WORKER_CONTEXT_H_
 
-#include <kroll/base.h>
-#include <Poco/Mutex.h>
-#include <Poco/ScopedLock.h>
 #include <kroll/kroll.h>
-
-#ifdef OS_WIN32
-# undef Yield
-#endif
-
-#include "worker.h"
+#include <Poco/Thread.h>
+#include <Poco/RunnableAdapter.h>
+#include <Poco/Condition.h>
+#include <Poco/Mutex.h>
+#include <JavaScriptCore/JSBase.h>
+#include <queue>
 
 namespace ti
 {
+	class Worker;
 	class WorkerContext : public KEventObject
 	{
 	public:
-		WorkerContext(Host *host, KObjectRef worker);
-		virtual ~WorkerContext();
+		WorkerContext(Worker* worker);
+		~WorkerContext();
+		virtual KValueRef Get(const char*);
+		virtual void Set(const char*, KValueRef);
+		void StartWorker(const std::string& code);
 		void Terminate();
-		void Yield();
+		void SendMessageToWorker(KValueRef message);
+		void _PostMessage(const ValueList &args, KValueRef result);
+		void _ImportScripts(const ValueList &args, KValueRef result);
+		void _Sleep(const ValueList &args, KValueRef result);
 
 	private:
-		Host *host;
-		KObjectRef worker;
-		std::list<KValueRef> messages;
-		Poco::Mutex mutex;
-		Poco::Condition condition;
-		Poco::Mutex condmutex;
+		Worker* worker;
+		JSGlobalContextRef jsContext;
+		bool running;
+		std::queue<KValueRef> inbox;
+		Poco::Mutex inboxLock;
+		Poco::Condition messageCondition;
+		Poco::Condition terminateCondition;
+		Poco::Mutex wakeupConditionMutex;
 
-		void SendQueuedMessages();
-		void PostMessage(const ValueList &args, KValueRef result);
-		void ImportScripts(const ValueList &args, KValueRef result);
-		void Sleep(const ValueList &args, KValueRef result);
-		void CallOnMessageCallback(KMethodRef onMessage, KValueRef message);
-
-		friend class Worker;
+		void DeliverMessage(KValueRef message);
+		void MessageLoop();
 	};
 }
 

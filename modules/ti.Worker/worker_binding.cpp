@@ -11,10 +11,8 @@
 
 namespace ti
 {
-	WorkerBinding::WorkerBinding(Host *host, KObjectRef global) :
-		StaticBoundObject("Worker"),
-		host(host),
-		global(global)
+	WorkerBinding::WorkerBinding() :
+		StaticBoundObject("Worker")
 	{
 		/**
 		 * @tiapi(method=True,name=Worker.createWorker,since=0.6) 
@@ -24,61 +22,49 @@ namespace ti
 		 * @tiarg a string containing JavaScript source.
 		 * @tiresult[Worker.Worker] The newly-created worker instance
 		 */
-		this->SetMethod("createWorker",&WorkerBinding::CreateWorker);
+		this->SetMethod("createWorker", &WorkerBinding::_CreateWorker);
 	}
+
 	WorkerBinding::~WorkerBinding()
 	{
 	}
-	void WorkerBinding::CreateWorker(const ValueList& args, KValueRef result)
+
+	static std::string GetCodeFromMethod(KMethodRef method)
 	{
-		if (args.size()!=2)
-		{
-			throw ValueException::FromString("invalid argument specified");
-		}
-		
-		bool is_function = args.at(1)->ToBool();
-		
+		// Call the toString method on this JavaScript Function.
+		if (!method->HasProperty("toString") || !method->Get("toString")->IsMethod())
+			throw ValueException::FromString("Worker method must be a JavaScript method with a toString function.");
+
+		KValueRef toStringResult(method->Get("toString")->ToMethod()->Call());
+		if (!toStringResult->IsString())
+			throw ValueException::FromString("Worker method toString did not return a string.");
+
+		std::string result("(");
+		result.append(toStringResult->ToString());
+		result.append(")()");
+		return result;
+	}
+
+	void WorkerBinding::_CreateWorker(const ValueList& args, KValueRef result)
+	{
+		static Logger* logger = Logger::Get("Worker");
+		args.VerifyException("createWorker", "m|s");
+
 		std::string code;
-		Logger *logger = Logger::Get("Worker");
-		
-		if (is_function)
+		if (args.at(0)->IsMethod())
 		{
-			// convert the function to a string block 
-			code.append("(");
-			code.append(args.GetString(0));
-			code.append(")()");
+			code = GetCodeFromMethod(args.at(0)->ToMethod());
 		}
 		else 
 		{
-			// We assume this is a URL corresponding to a local path, we should
-			// probably check that this isn't a remote URL.
+			// TODO: We assume this is a URL corresponding to a local path, we
+			// should probably check that this isn't a remote URL.
 			std::string path(URLUtils::URLToPath(args.GetString(0)));
-			logger->Debug("worker file path = '%s' '%s'", path.c_str(), args.GetString(0).c_str());
-
-			std::ios::openmode flags = std::ios::in;
-			Poco::FileInputStream *fis = new Poco::FileInputStream(path, flags);
-			std::stringstream ostr;
-			char buf[8096];
-			int count = 0;
-			while(!fis->eof())
-			{
-				fis->read((char*)&buf,8095);
-				std::streamsize len = fis->gcount();
-				if (len>0)
-				{
-					buf[len]='\0';
-					count+=len;
-					ostr << buf;
-				}
-				else break;
-			}
-			fis->close();
-			code = std::string(ostr.str());
+			logger->Debug("Loading Worker from file at: '%s'", path.c_str());
+			code = FileUtils::ReadFile(path);
 		}
-		
-		logger->Debug("Worker script code = %s", code.c_str());
-		
-		KObjectRef worker = new Worker(host,global,code);
-		result->SetObject(worker);
+
+		printf("worker code: %s\n", code.c_str());
+		result->SetObject(new Worker(code));
 	}
 }

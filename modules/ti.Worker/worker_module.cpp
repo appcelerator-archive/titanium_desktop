@@ -16,16 +16,11 @@ namespace ti
 {
 	void WorkerModule::Initialize()
 	{
-		// load our variables
-		this->binding = new WorkerBinding(host,host->GetGlobalObject());
-
-		// set our ti.Worker
-		KValueRef value = Value::NewObject(this->binding);
-		host->GetGlobalObject()->Set("Worker", value);
+		GlobalObject::GetInstance()->SetObject("Worker", new WorkerBinding());
 	}
 
 	void WorkerModule::Stop()
 	{
+		GlobalObject::GetInstance()->SetNull("Worker");
 	}
-	
 }
