@@ -260,10 +260,6 @@
 
 	if ((*userWindow)->IsFullscreen())
 		[self setFullscreen:YES];
-
-	std::string url(kroll::URLUtils::NormalizeURL((*userWindow)->GetURL()));
-	NSURL* nsurl = [NSURL URLWithString: [NSString stringWithUTF8String:url.c_str()]];
-	[[webView mainFrame] loadRequest:[NSURLRequest requestWithURL:nsurl]];
 }
 
 - (void)close

@@ -33,6 +33,10 @@ public:
 	void SetTitle(const std::string& title_) { title = title_; }
 	std::string& GetID() { return winid; }
 	void SetID(const std::string id_) { winid = id_; }
+	std::string& GetContents() { return contents; }
+	void SetContents(const std::string contents_) { contents = contents_; }
+	std::string& GetBaseURL() { return baseURL; }
+	void SetBaseURL(const std::string baseURL_) { baseURL = baseURL_; }
 
 	int GetX() { return x; }
 	void SetX(int x_) { x = x_; }
@@ -90,7 +94,8 @@ private:
 	std::string url;
 	std::string urlRegex;
 	std::string title;
-
+	std::string contents;
+	std::string baseURL;
 	int x;
 	int y;
 	int width;
@@ -99,9 +104,7 @@ private:
 	int minHeight;
 	int maxWidth;
 	int maxHeight;
-
 	float transparency;
-
 	bool visible;
 	bool maximizable;
 	bool minimizable;

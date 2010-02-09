@@ -480,6 +480,16 @@ UserWindow::UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent) :
 	 */
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
 
+	/**
+	 * @tiapi(method=True,name=UI.UserWindow.setContents,since=0.9)
+	 * Set the contents of the UserWindow, given an HTML string and a base URL.
+	 * Relative links in the HTML will be resolved relatively to the base URL.
+	 * @tiarg[String, contents] The HTML string to inject into the UserWindow.
+	 * @tiarg[String, baseURL, optional=True] The base URL of the URL string. If
+	 * @tiarg omitted URLs will be resolved relative to the root of the app resources directory.
+	 */
+	this->SetMethod("setContents", &UserWindow::_SetContents);
+
 	this->FireEvent(Event::CREATED);
 }
 
@@ -529,6 +539,12 @@ void UserWindow::Open()
 
 	this->initialized = true;
 	this->active = true;
+
+	if (!this->config->GetContents().empty())
+		this->SetContents(this->config->GetContents(),
+			 this->config->GetBaseURL());
+	else
+		this->SetURL(this->config->GetURL());
 }
 
 bool UserWindow::Close()
@@ -1726,6 +1742,28 @@ void UserWindow::_ShowInspector(const ValueList& args, KValueRef result)
 	{
 		this->ShowInspector();
 	}
+}
+
+void UserWindow::_SetContents(const ValueList& args, KValueRef result)
+{
+	args.VerifyException("setContents", "s ?s");
+	this->SetContents(args.GetString(0), args.GetString(1));
+}
+
+void UserWindow::SetContents(const std::string& content, const std::string& baseURL)
+{
+	std::string normalizedURL(baseURL);
+	if (baseURL.empty())
+		normalizedURL = "app://_blank_.html";
+	normalizedURL = URLUtils::NormalizeURL(normalizedURL);
+
+	this->config->SetContents(content);
+	this->config->SetBaseURL(normalizedURL);
+
+	if (!this->active)
+		return;
+
+	this->SetContentsImpl(content, normalizedURL);
 }
 
 AutoUserWindow UserWindow::GetParent()

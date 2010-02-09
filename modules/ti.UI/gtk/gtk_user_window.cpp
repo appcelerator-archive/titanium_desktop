@@ -193,7 +193,6 @@ namespace ti
 		this->SetResizable(config->IsResizable());
 
 		gtk_widget_grab_focus(GTK_WIDGET(webView));
-		webkit_web_view_open(webView, this->config->GetURL().c_str());
 
 		if (this->IsVisible())
 			gtk_widget_show_all(GTK_WIDGET(this->gtkWindow));
@@ -1017,7 +1016,7 @@ namespace ti
 	
 	void GtkUserWindow::SetURL(std::string& uri)
 	{
-		if (this->gtkWindow != NULL && this->webView != NULL)
+		if (this->gtkWindow && this->webView)
 			webkit_web_view_open(this->webView, uri.c_str());
 	}
 	
@@ -1457,6 +1456,14 @@ namespace ti
 
 		gtk_widget_destroy(dialog);
 		return toReturn;
+	}
+
+	void GtkUserWindow::SetContentsImpl(const std::string& content, const std::string& baseURL)
+	{
+		if (!this->webView)
+			return;
+
+		webkit_web_view_load_string(content.c_str(), "text/html", "utf-8", baseURL.c_str);
 	}
 }
 

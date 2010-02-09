@@ -82,6 +82,7 @@ namespace ti
 		static void RedrawAllMenus();
 		virtual void AppIconChanged();
 		virtual void AppMenuChanged();
+		void SetContentsImpl(const std::string&, const std::string&);
 
 		IWebView* GetWebView() { return webView; };
 		std::string GetTitle() { return config->GetTitle(); }

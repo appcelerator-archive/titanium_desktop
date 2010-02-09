@@ -131,6 +131,8 @@ namespace ti
 			void _IsTopMost(const kroll::ValueList&, kroll::KValueRef);
 			void _SetTopMost(const kroll::ValueList&, kroll::KValueRef);
 			virtual void _ShowInspector(const ValueList& args, KValueRef result);
+			void _SetContents(const ValueList& args, KValueRef result);
+			void SetContents(const std::string& content, const std::string& baseURL);
 			virtual void OpenFileChooserDialog(KMethodRef callback, bool multiple,
 				std::string& title, std::string& path, std::string& defaultName,
 				std::vector<std::string>& types, std::string& typesDescription) = 0;
@@ -140,7 +142,7 @@ namespace ti
 			virtual void OpenSaveAsDialog(KMethodRef callback, std::string& title,
 				std::string& path, std::string& defaultName,
 				std::vector<std::string>& types, std::string& typesDescription) = 0;
-	
+
 			virtual void Hide() = 0;
 			virtual void Show() = 0;
 			virtual void Minimize() = 0;
@@ -207,6 +209,7 @@ namespace ti
 			virtual void ShowInspector(bool console=false) = 0;
 			virtual void AppIconChanged() {};
 			virtual void AppMenuChanged() {};
+			virtual void SetContentsImpl(const std::string& content,  const std::string& baseURL) = 0;
 
 		protected:
 			Logger* logger;

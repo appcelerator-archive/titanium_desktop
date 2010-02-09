@@ -695,15 +695,9 @@ namespace ti
 		}
 	}
 
-	void OSXUserWindow::OpenChooserDialog(
-		bool files,
-		KMethodRef callback,
-		bool multiple,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName,
-		std::vector<std::string>& types,
-		std::string& typesDescription)
+	void OSXUserWindow::OpenChooserDialog(bool files, KMethodRef callback,
+		bool multiple, std::string& title, std::string& path, std::string& defaultName,
+		std::vector<std::string>& types, std::string& typesDescription)
 	{
 		KListRef results = new StaticBoundList();
 		NSOpenPanel* openDlg = [NSOpenPanel openPanel];
@@ -765,12 +759,8 @@ namespace ti
 			title, path, defaultName, types, typesDescription);
 	}
 
-	void OSXUserWindow::OpenFolderChooserDialog(
-		KMethodRef callback,
-		bool multiple,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName)
+	void OSXUserWindow::OpenFolderChooserDialog(KMethodRef callback, bool multiple,
+		std::string& title, std::string& path, std::string& defaultName)
 	{
 		std::vector<std::string> types;
 		std::string typesDescription;
@@ -779,12 +769,8 @@ namespace ti
 			title, path, defaultName, types, typesDescription);
 	}
 
-	void OSXUserWindow::OpenSaveAsDialog(
-		KMethodRef callback,
-		std::string& title,
-		std::string& path,
-		std::string& defaultName,
-		std::vector<std::string>& types,
+	void OSXUserWindow::OpenSaveAsDialog(KMethodRef callback, std::string& title,
+		std::string& path, std::string& defaultName, std::vector<std::string>& types,
 		std::string& typesDescription)
 	{
 		int runResult;
@@ -826,5 +812,12 @@ namespace ti
 	{
 		[nativeWindow showInspector:console];
 	}
+
+	void OSXUserWindow::SetContentsImpl(const std::string& content, const std::string& baseURL)
+	{
+		[[[nativeWindow webView] mainFrame]
+			loadHTMLString: [NSString stringWithUTF8String:content.c_str()]
+			baseURL: [NSURL URLWithString:
+				[NSString stringWithUTF8String:baseURL.c_str()]]];
+	}
 }
-    

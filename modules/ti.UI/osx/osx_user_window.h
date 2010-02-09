@@ -92,6 +92,7 @@ namespace ti
 			void Focused();
 			void Unfocused();
 			virtual void ShowInspector(bool console=false);
+			void SetContentsImpl(const std::string&, const std::string&);
 
 		private:
 			NativeWindow* nativeWindow;

@@ -642,11 +642,9 @@ void Win32UserWindow::Open()
 	this->InitWindow();
 	this->SetupDecorations();
 	this->InitWebKit();
-
 	this->SetupIcon();
 
 	UserWindow::Open();
-	this->SetURL(this->config->GetURL());
 	this->SetupFrame();
 
 	FireEvent(Event::OPENED);
@@ -1443,3 +1441,12 @@ void Win32UserWindow::RedrawAllMenus()
 	}
 }
 
+void Win32UserWindow::SetContentsImpl(const std::string& content, const std::string& baseURL)
+{
+	if (!this->mainFrame)
+		return;
+
+	_bstr_t bContent(::UTF8ToWide(content).c_str());
+	_bstr_t bBaseURL(::UTF8ToWide(baseURL).c_str());
+	mainFrame->loadHTMLString(bContent, bBaseURL);
+}

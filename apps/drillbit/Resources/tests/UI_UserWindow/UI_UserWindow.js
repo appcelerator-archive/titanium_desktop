@@ -122,6 +122,82 @@ describe("Window specific stuff",
 		{
 			verify();
 			w.close();
-		},500);
+		}, 500);
 	},
+	test_set_contents_as_async: function(callback)
+	{
+		var w = Titanium.UI.createWindow();
+		var one = '<html><body><div id="content">Hello.</div>' +
+			'<script>Titanium.WindowContentsTest.phaseOne(document.getElementById("content").innerText);</script>' +
+			'</body></html>';
+		var two = '<html><body><div id="content">Hello.</div>' +
+			'<script>Titanium.WindowContentsTest.success();</script>' +
+			'</body></html>';
+
+		Titanium.WindowContentsTest = {
+			phaseOne: function(text)
+			{
+				if (text != "Hello.")
+					callback.failed("Incorrect text passed: " + text);
+				w.setContents(two);
+			},
+			success: function()
+			{
+				callback.passed();
+			}
+		};
+
+		w.setContents(one);
+		w.open();
+
+		setTimeout(function()
+		{
+			callback.failed("Test timed out");
+			w.close();
+		}, 5000);
+	},
+	test_set_self_contents_as_async: function(callback)
+	{
+		Titanium.WindowContentsTest = {
+			success: function() { callback.passed(); },
+			nextPage: "<html><body><script>Titanium.WindowContentsTest.success();</script></body></html>"
+		};
+		var w = Titanium.UI.createWindow();
+		var contents = '<html><body><div id="content">Hello.</div>' +
+			'<script>\n' +
+			'Titanium.UI.currentWindow.setContents(Titanium.WindowContentsTest.nextPage);\n' +
+			'</script></body></html>';
+		w.setContents(contents);
+		w.open();
+
+		setTimeout(function()
+		{
+			callback.failed("Test timed out");
+			w.close();
+		}, 5000);
+	},
+	test_set_contents_relative_urls: function(callback)
+	{
+		Titanium.WindowContentsTest = {
+			success: function(text) {
+				if (text == "foo")
+					callback.passed();
+				else
+					callback.failed("Incorrect text passed: " + text);
+			}
+		};
+
+		var w = Titanium.UI.createWindow();
+		w.setContents(
+			'<html><head>' +
+			'<meta http-equiv="refresh" content="1;URL=relative.html">' + 
+			'</head><body>redirect</body></html>',
+			'app://subdir/page.html');
+		w.open();
+		setTimeout(function()
+		{
+			callback.failed("Test timed out");
+			w.close();
+		}, 5000);
+	}
 });
