@@ -176,7 +176,7 @@ describe("Window specific stuff",
 			w.close();
 		}, 5000);
 	},
-	test_set_contents_relative_urls: function(callback)
+	test_set_contents_relative_urls_as_async: function(callback)
 	{
 		Titanium.WindowContentsTest = {
 			success: function(text) {

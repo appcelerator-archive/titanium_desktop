@@ -1463,7 +1463,8 @@ namespace ti
 		if (!this->webView)
 			return;
 
-		webkit_web_view_load_string(content.c_str(), "text/html", "utf-8", baseURL.c_str);
+		webkit_web_view_load_string(this->webView, content.c_str(),
+			"text/html", "utf-8", baseURL.c_str());
 	}
 }
 
