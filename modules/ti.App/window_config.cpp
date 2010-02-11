@@ -7,6 +7,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
+#include <sstream>
 
 #include "app_config.h"
 #include "window_config.h"
