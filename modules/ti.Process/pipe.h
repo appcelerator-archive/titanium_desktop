@@ -22,8 +22,8 @@ namespace ti
 		public:
 		Pipe(const char *type = "Process.Pipe");
 		virtual ~Pipe();
-		virtual int Write(BlobRef data);
-		virtual void CallWrite(KObjectRef target, BlobRef data);
+		virtual int Write(BytesRef data);
+		virtual void CallWrite(KObjectRef target, BytesRef data);
 		virtual void Close();
 		virtual void CallClose(KObjectRef target);
 		virtual void Flush();
@@ -31,7 +31,7 @@ namespace ti
 		void Detach(KObjectRef object);
 		bool IsAttached();
 		AutoPipe Clone();
-		std::vector<BlobRef> readData;
+		std::vector<BytesRef> readData;
 		static void FireEventAsynchronously(AutoPtr<Event> event);
 
 		protected:

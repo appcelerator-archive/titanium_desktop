@@ -180,7 +180,7 @@ namespace ti
 		}
 		else
 		{
-			result->SetObject(new Blob(buf,count));
+			result->SetObject(new Bytes(buf,count));
 		}
 		delete [] buf;
 	}

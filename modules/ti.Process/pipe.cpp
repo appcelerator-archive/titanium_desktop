@@ -40,7 +40,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Process.Pipe.write,since=0.5)
 		 * @tiapi Write data to this pipe
-		 * @tiarg[Blob|String, data] a Blob object or String to write to this pipe
+		 * @tiarg[Bytes|String, data] a Bytes object or String to write to this pipe
 		 * @tiresult[Number] The number of bytes actually written on this pipe
 		 */
 		SetMethod("write", &Pipe::_Write);
@@ -48,7 +48,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Process.Pipe.attach,since=0.5)
 		 * @tiapi Attach an IO object to this pipe. An IO object is an object that
-		 * @tiapi implements a public "write(Blob)". In Titanium, this include
+		 * @tiapi implements a public "write(Bytes)". In Titanium, this include
 		 * @tiapi FileStreams, and Pipes. You may also use your own custom IO implementation
 		 * @tiapi here.
 		 */
@@ -159,22 +159,22 @@ namespace ti
 	{
 		args.VerifyException("write", "o|s");
 		
-		BlobRef blob = new Blob();
+		BytesRef bytes = new Bytes();
 		if (args.at(0)->IsObject())
 		{
-			blob = args.at(0)->ToObject().cast<Blob>();
+			bytes = args.at(0)->ToObject().cast<Bytes>();
 		}
 		else if (args.at(0)->IsString())
 		{
-			blob = new Blob(args.at(0)->ToString());
+			bytes = new Bytes(args.at(0)->ToString());
 		}
 		
-		if (blob.isNull())
+		if (bytes.isNull())
 		{
-			throw ValueException::FromString("Pipe.write argument should be a Blob or string");
+			throw ValueException::FromString("Pipe.write argument should be a Bytes or string");
 		}
 
-		int written = this->Write(blob);
+		int written = this->Write(bytes);
 		result->SetInt(written);
 	}
 
@@ -188,11 +188,11 @@ namespace ti
 		this->Close();
 	}
 
-	int Pipe::Write(BlobRef blob)
+	int Pipe::Write(BytesRef bytes)
 	{
 		{ // Start the callbacks
 			Poco::Mutex::ScopedLock lock(pipesNeedingReadEventsMutex);
-			readData.push_back(blob);
+			readData.push_back(bytes);
 
 			this->duplicate();
 			pipesNeedingReadEvents.push(this);
@@ -205,14 +205,14 @@ namespace ti
 			Poco::Mutex::ScopedLock lock(attachedMutex);
 			for (size_t i = 0; i < attachedObjects.size(); i++)
 			{
-				this->CallWrite(attachedObjects.at(i), blob);
+				this->CallWrite(attachedObjects.at(i), bytes);
 			}
 		}
 
-		return blob->Length();
+		return bytes->Length();
 	}
 
-	void Pipe::CallWrite(KObjectRef target, BlobRef blob)
+	void Pipe::CallWrite(KObjectRef target, BytesRef bytes)
 	{
 		KMethodRef writeMethod = target->GetMethod("write");
 
@@ -226,7 +226,7 @@ namespace ti
 		{
 			try
 			{
-				writeMethod->Call(ValueList(Value::NewObject(blob)));
+				writeMethod->Call(ValueList(Value::NewObject(bytes)));
 			}
 			catch (ValueException &e)
 			{
@@ -333,7 +333,7 @@ namespace ti
 
 					if (pipe->readData.size() > 0)
 					{
-						BlobRef glob(Blob::GlobBlobs(pipe->readData));
+						BytesRef glob(Bytes::GlobBytes(pipe->readData));
 						AutoPtr<Event> event = new ReadEvent(pipe, glob);
 						readEvents.push(event);
 						pipe->readData.clear();

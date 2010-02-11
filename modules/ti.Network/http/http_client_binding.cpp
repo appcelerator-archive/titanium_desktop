@@ -38,7 +38,7 @@ namespace ti
 		curlHandle(0),
 		thread(0),
 		requestStream(0),
-		requestBlob(0),
+		requestBytes(0),
 		responseStream(0),
 		requestContentLength(0),
 		requestDataSent(0),
@@ -228,7 +228,7 @@ namespace ti
 
 		/**
 		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseData, since=0.8)
-		 * @tiapi The response of an HTTP request as a Blob. Currently this property
+		 * @tiapi The response of an HTTP request as a Bytes. Currently this property
 		 * @tiapi is only valid after the request has been completed.
 		 */
 		this->SetNull("responseData");
@@ -598,7 +598,7 @@ namespace ti
 		this->responseDataReceived = 0;
 		this->responseCookies.clear();
 		this->aborted = false;
-		this->requestBlob = 0;
+		this->requestBytes = 0;
 		this->requestStream = 0;
 		this->responseData.clear();
 
@@ -614,26 +614,26 @@ namespace ti
 		if (sendData->IsObject())
 		{
 			KObjectRef dataObject(sendData->ToObject());
-			BlobRef blob(dataObject.cast<Blob>());
-			if (blob.isNull())
+			BytesRef bytes(dataObject.cast<Bytes>());
+			if (bytes.isNull())
 			{
 				this->BeginWithFileLikeObject(dataObject);
 			}
 			else
 			{
-				this->requestBlob = blob;
+				this->requestBytes = bytes;
 			}
 		}
 		else if (sendData->IsString())
 		{
 			const char* sendChars = sendData->ToString();
 			this->requestContentLength = strlen(sendChars);
-			this->requestBlob = new Blob(sendChars, this->requestContentLength);
+			this->requestBytes = new Bytes(sendChars, this->requestContentLength);
 		}
 		else // Sending no data
 		{
 			this->requestStream = 0;
-			this->requestBlob = 0;
+			this->requestBytes = 0;
 			this->requestContentLength = 0;
 		}
 
@@ -759,15 +759,15 @@ namespace ti
 			if (requestStream->eof())
 				requestStream->close();
 		}
-		else if (!requestBlob.isNull())
+		else if (!requestBytes.isNull())
 		{
 			size_t toSend = bufferSize;
-			if (requestBlob->Length() - requestDataSent < bufferSize)
-				toSend = requestBlob->Length() - requestDataSent;
+			if (requestBytes->Length() - requestDataSent < bufferSize)
+				toSend = requestBytes->Length() - requestDataSent;
 
 			if (toSend > 0)
 			{
-				memcpy(buffer, requestBlob->Get() + requestDataSent, toSend);
+				memcpy(buffer, requestBytes->Get() + requestDataSent, toSend);
 				bytesSent = toSend;
 			}
 		}
@@ -865,8 +865,8 @@ namespace ti
 	void HTTPClientBinding::DataReceived(char* buffer, size_t bufferSize)
 	{
 		// Pass data to handler on main thread
-		BlobRef blob(new Blob(buffer, bufferSize, true));
-		responseData.push_back(blob);
+		BytesRef bytes(new Bytes(buffer, bufferSize, true));
+		responseData.push_back(bytes);
 
 		if (this->responseStream)
 		{
@@ -879,7 +879,7 @@ namespace ti
 		if (this->outputHandler)
 		{
 			RunOnMainThread(this->outputHandler, GetAutoPtr(),
-				ValueList(Value::NewObject(blob)));
+				ValueList(Value::NewObject(bytes)));
 		}
 
 		responseDataReceived += bufferSize;
@@ -1101,7 +1101,7 @@ namespace ti
 			this->Set("connected", Value::NewBool(false));
 
 			if (!responseData.empty())
-				this->SetObject("responseData", Blob::GlobBlobs(this->responseData));
+				this->SetObject("responseData", Bytes::GlobBytes(this->responseData));
 
 			this->ChangeState(4); // Done
 		}

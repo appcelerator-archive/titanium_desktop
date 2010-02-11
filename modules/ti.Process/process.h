@@ -24,7 +24,7 @@ namespace ti
 		static AutoProcess CreateProcess();
 		virtual KObjectRef CloneEnvironment();
 		virtual void LaunchAsync();
-		virtual BlobRef LaunchSync();
+		virtual BytesRef LaunchSync();
 		virtual void ExitMonitorAsync();
 		virtual void ExitMonitorSync();
 		std::string ArgumentsToString();
@@ -58,7 +58,7 @@ namespace ti
 		virtual void SendSignal(int signal) = 0;
 		virtual void ForkAndExec() = 0;
 		virtual void MonitorAsync() = 0;
-		virtual BlobRef MonitorSync() = 0;
+		virtual BytesRef MonitorSync() = 0;
 		virtual int Wait() = 0;
 		virtual void RecreateNativePipes() = 0;
 		virtual AutoPtr<NativePipe> GetNativeStdin() = 0;

@@ -99,12 +99,12 @@ namespace ti
 		this->SetMethod("resolve",&File::Resolve);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.write,since=0.2) Writes data to the file
-		 * @tiarg(for=Filesystem.File.write,type=String|Blob,name=data) data to write
+		 * @tiarg(for=Filesystem.File.write,type=String|Bytes,name=data) data to write
 		 */
 		this->SetMethod("write",&File::Write);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.read,since=0.2) Reads a file and returns the content as a string
-		 * @tiresult(for=Filesystem.File.read,type=Blob) The contents of the file as a blob
+		 * @tiresult(for=Filesystem.File.read,type=Bytes) The contents of the file as a Bytes object.
 		 */
 		this->SetMethod("read",&File::Read);
 		/**

@@ -22,7 +22,7 @@ namespace ti
 		void StartMonitor();
 		void StartMonitor(KMethodRef readCallback);
 		virtual void StopMonitors();
-		virtual int Write(BlobRef blob);
+		virtual int Write(BytesRef bytes);
 		void PollForWriteIteration();
 		virtual void Close();
 		virtual void CloseNative();
@@ -41,11 +41,11 @@ namespace ti
 		KMethodRef readCallback;
 		Logger* logger;
 		Poco::Mutex buffersMutex;
-		std::queue<BlobRef> buffers;
+		std::queue<BytesRef> buffers;
 
 		void PollForReads();
 		void PollForWrites();
-		virtual void RawWrite(BlobRef blob);
+		virtual void RawWrite(BytesRef bytes);
 		virtual int RawRead(char *buffer, int size) = 0;
 		virtual int RawWrite(const char *buffer, int size) = 0;
 	};

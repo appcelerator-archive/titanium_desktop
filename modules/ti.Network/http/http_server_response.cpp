@@ -63,7 +63,7 @@ namespace ti
 		
 		/**
 		 * @tiapi(method=True,name=Network.HTTPServerResponse.write,since=0.3) write content into this response
-		 * @tiarg(for=Network.HTTPServerResponse.write,type=String,name=data) content to write (can be string or blob content)
+		 * @tiarg(for=Network.HTTPServerResponse.write,type=String,name=data) content to write (can be string or bytes content)
 		 */
 		SetMethod("write",&HttpServerResponse::Write);
 	}
@@ -138,10 +138,10 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			AutoPtr<Blob> blob = args.at(0)->ToObject().cast<Blob>();
-			if (!blob.isNull())
+			AutoPtr<Bytes> bytes = args.at(0)->ToObject().cast<Bytes>();
+			if (!bytes.isNull())
 			{
-				const char *data = blob->Get();
+				const char *data = bytes->Get();
 				ostr << data;
 				ostr.flush();
 				return;

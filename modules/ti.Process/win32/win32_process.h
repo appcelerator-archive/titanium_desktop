@@ -29,7 +29,7 @@ namespace ti
 		virtual void SendSignal(int signal);
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual BlobRef MonitorSync();
+		virtual BytesRef MonitorSync();
 		virtual int Wait();
 		virtual std::string ArgumentsToString();
 		void ReadCallback(const ValueList& args, KValueRef result);
@@ -44,7 +44,7 @@ namespace ti
 		Poco::Mutex mutex;
 		
 		Poco::Mutex processOutputMutex;
-		std::vector<BlobRef> processOutput;
+		std::vector<BytesRef> processOutput;
 		
 		int pid;
 		HANDLE process;

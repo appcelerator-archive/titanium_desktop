@@ -124,7 +124,7 @@ namespace ti
 		nativeErr->StartMonitor();
 	}
 
-	BlobRef PosixProcess::MonitorSync()
+	BytesRef PosixProcess::MonitorSync()
 	{
 		KMethodRef readCallback =
 			StaticBoundMethod::FromMethod<PosixProcess>(
@@ -144,10 +144,10 @@ namespace ti
 		nativeOut->SetReadCallback(0);
 		nativeErr->SetReadCallback(0);
 
-		BlobRef output = 0;
+		BytesRef output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
-			output = Blob::GlobBlobs(processOutput);
+			output = Bytes::GlobBytes(processOutput);
 		}
 		return output;
 	}
@@ -174,11 +174,11 @@ namespace ti
 	{
 		if (args.at(0)->IsObject())
 		{
-			BlobRef blob = args.GetObject(0).cast<Blob>();
-			if (!blob.isNull() && blob->Length() > 0)
+			BytesRef bytes = args.GetObject(0).cast<Bytes>();
+			if (!bytes.isNull() && bytes->Length() > 0)
 			{
 				Poco::Mutex::ScopedLock lock(processOutputMutex);
-				processOutput.push_back(blob);
+				processOutput.push_back(bytes);
 			}
 		}
 	}

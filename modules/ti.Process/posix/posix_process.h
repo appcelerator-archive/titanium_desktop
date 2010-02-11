@@ -27,7 +27,7 @@ namespace ti
 
 		virtual void ForkAndExec();
 		virtual void MonitorAsync();
-		virtual BlobRef MonitorSync();
+		virtual BytesRef MonitorSync();
 		virtual int Wait();
 		virtual void RecreateNativePipes();
 		virtual void SetArguments(KListRef args);
@@ -44,9 +44,9 @@ namespace ti
 		AutoPtr<PosixPipe> nativeErr;
 
 		// For synchronous process execution store
-		// process output as a vector of blobs for speed.
+		// process output as a vector of Bytes for speed.
 		Poco::Mutex processOutputMutex;
-		std::vector<BlobRef> processOutput;
+		std::vector<BytesRef> processOutput;
 		void StartProcess();
 	};
 }

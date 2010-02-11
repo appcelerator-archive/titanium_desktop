@@ -74,7 +74,7 @@ namespace ti
 		}
 		else
 		{
-			throw ValueException::FromString("Error writing blob data to pipe");
+			throw ValueException::FromString("Error writing Bytes data to pipe");
 		}
 	}
 

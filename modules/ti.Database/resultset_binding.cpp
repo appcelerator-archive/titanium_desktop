@@ -64,14 +64,14 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.field,since=0.4) Returns the contents of the specified field in the current row
 		 * @tiarg(for=Database.ResultSet.field,type=Number,name=fieldIndex) the zero-based index of the desired field
-		 * @tiresult(for=Database.ResultSet.field,type=Boolean|String|Number|Blob) The content of the specified field in the current row
+		 * @tiresult(for=Database.ResultSet.field,type=Boolean|String|Number|Bytes) The content of the specified field in the current row
 		 */
 		this->SetMethod("field",&ResultSetBinding::Field);
 
 		/**
 		 * @tiapi(method=True,name=Database.ResultSet.fieldByName,since=0.4) Returns the contents of the specified field in the current row using the name of the field as an identifier
 		 * @tiarg(for=Database.ResultSet.fieldByName,type=String,name=name) the name of the desired field
-		 * @tiresult(for=Database.ResultSet.fieldByName,type=Boolean|String|Number|Blob) The content of the specified field in the current row
+		 * @tiresult(for=Database.ResultSet.fieldByName,type=Boolean|String|Number|Bytes) The content of the specified field in the current row
 		 */
 		this->SetMethod("fieldByName",&ResultSetBinding::FieldByName);
 	}

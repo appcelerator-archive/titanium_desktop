@@ -189,11 +189,11 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			KObjectRef b = args.at(0)->ToObject();
-			AutoPtr<Blob> blob = b.cast<Blob>();
-			if (!blob.isNull())
+			AutoPtr<Bytes> bytes = b.cast<Bytes>();
+			if (!bytes.isNull())
 			{
-				text = (char*)blob->Get();
-				size = (int)blob->Length();
+				text = (char*)bytes->Get();
+				size = (int)bytes->Length();
 			}
 		}
 		else if (args.at(0)->IsString())
@@ -289,7 +289,7 @@ namespace ti
 				else break;
 			}
 
-			result->SetObject(new Blob(&(buffer[0]), buffer.size()));
+			result->SetObject(new Bytes(&(buffer[0]), buffer.size()));
 		}
 		catch (Poco::Exception& exc)
 		{
@@ -345,13 +345,13 @@ namespace ti
 					}
 					else
 					{
-						// this is an empty line, just empty blob
-						result->SetObject(new Blob());
+						// this is an empty line, just empty Bytes object.
+						result->SetObject(new Bytes());
 					}
 				}
 				else
 				{
-					result->SetObject(new Blob((std::string)line));
+					result->SetObject(new Bytes((std::string)line));
 				}
 			}
 		}
@@ -373,11 +373,11 @@ namespace ti
 		if (args.at(0)->IsObject())
 		{
 			KObjectRef b = args.at(0)->ToObject();
-			AutoPtr<Blob> blob = b.cast<Blob>();
-			if (!blob.isNull())
+			AutoPtr<Bytes> bytes = b.cast<Bytes>();
+			if (!bytes.isNull())
 			{
-				text = (char*)blob->Get();
-				size = (int)blob->Length();
+				text = (char*)bytes->Get();
+				size = (int)bytes->Length();
 			}
 		}
 		else if (args.at(0)->IsString())

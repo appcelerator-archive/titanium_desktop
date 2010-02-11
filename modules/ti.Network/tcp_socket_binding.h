@@ -50,7 +50,7 @@ namespace ti
 		bool opened;
 		Poco::Timespan timeout;
 
-		std::queue<BlobRef> sendData;
+		std::queue<BytesRef> sendData;
 		Poco::Mutex sendDataMutex;
 		size_t currentSendDataOffset;
 		bool readStarted;

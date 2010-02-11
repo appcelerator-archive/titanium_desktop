@@ -55,7 +55,7 @@ describe("Codec Tests",{
 	{
 		value_of(Titanium.Codec.checksum("abc")).should_be(891568578);
 		value_of(Titanium.Codec.checksum("abc",Titanium.Codec.CRC32)).should_be(891568578);
-		var blob = Titanium.API.createBlob("abc");
+		var blob = Titanium.API.createBytes("abc");
 		value_of(Titanium.Codec.checksum(blob,Titanium.Codec.CRC32)).should_be(891568578);
 	},
 	
@@ -63,7 +63,7 @@ describe("Codec Tests",{
 	{
 		value_of(Titanium.Codec.checksum("abc",Titanium.Codec.ADLER32)).should_be(38600999);
 
-		var blob = Titanium.API.createBlob("abc");
+		var blob = Titanium.API.createBytes("abc");
 		value_of(Titanium.Codec.checksum(blob,Titanium.Codec.ADLER32)).should_be(38600999);
 	},
 	

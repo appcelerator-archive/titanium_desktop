@@ -57,7 +57,7 @@ namespace ti
 		Pipe::Close();
 	}
 
-	int NativePipe::Write(BlobRef blob)
+	int NativePipe::Write(BytesRef bytes)
 	{
 		if (isReader)
 		{
@@ -70,10 +70,10 @@ namespace ti
 			// right now.
 			if (!readCallback.isNull())
 			{
-				readCallback->Call(Value::NewObject(blob));
+				readCallback->Call(Value::NewObject(bytes));
 			}
 
-			return Pipe::Write(blob);
+			return Pipe::Write(bytes);
 		}
 		else
 		{
@@ -82,10 +82,10 @@ namespace ti
 			// data to be written to the native pipe (blocking operation) by
 			// our writer thread.:
 			Poco::Mutex::ScopedLock lock(buffersMutex);
-			buffers.push(blob);
+			buffers.push(bytes);
 		}
 
-		return blob->Length();
+		return bytes->Length();
 	}
 
 	void NativePipe::StartMonitor()
@@ -111,8 +111,8 @@ namespace ti
 
 		while (bytesRead > 0)
 		{
-			BlobRef blob = new Blob(buffer, bytesRead);
-			this->Write(blob);
+			BytesRef bytes = new Bytes(buffer, bytesRead);
+			this->Write(bytes);
 			bytesRead = this->RawRead(buffer, length);
 		}
 
@@ -123,7 +123,7 @@ namespace ti
 	{
 		KObjectRef save(this, true);
 
-		BlobRef blob = 0;
+		BytesRef bytes = 0;
 		while (!closed || buffers.size() > 0)
 		{
 			PollForWriteIteration();
@@ -135,27 +135,27 @@ namespace ti
 
 	void NativePipe::PollForWriteIteration()
 	{
-		BlobRef blob = 0;
+		BytesRef bytes = 0;
 		while (buffers.size() > 0)
 		{
 			{
 				Poco::Mutex::ScopedLock lock(buffersMutex);
-				blob = buffers.front();
+				bytes = buffers.front();
 				buffers.pop();
 			}
-			if (!blob.isNull())
+			if (!bytes.isNull())
 			{
-				this->RawWrite(blob);
-				blob = 0;
+				this->RawWrite(bytes);
+				bytes = 0;
 			}
 		}
 	}
 
-	void NativePipe::RawWrite(BlobRef blob)
+	void NativePipe::RawWrite(BytesRef bytes)
 	{
 		try
 		{
-			this->RawWrite((char*) blob->Get(), blob->Length());
+			this->RawWrite((char*) bytes->Get(), bytes->Length());
 		}
 		catch (Poco::Exception& e)
 		{

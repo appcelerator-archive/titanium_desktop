@@ -33,8 +33,8 @@ namespace ti
 		void SetText(std::string& newText);
 		bool HasText();
 		void ClearText();
-		BlobRef GetImage(std::string& mimeType);
-		void SetImage(std::string& mimeType, BlobRef newImage);
+		BytesRef GetImage(std::string& mimeType);
+		void SetImage(std::string& mimeType, BytesRef newImage);
 		bool HasImage();
 		void ClearImage();
 		std::vector<std::string>& GetURIList();
@@ -46,8 +46,8 @@ namespace ti
 		void SetTextImpl(std::string& newText);
 		bool HasTextImpl();
 		void ClearTextImpl();
-		BlobRef GetImageImpl(std::string& mimeType);
-		void SetImageImpl(std::string& mimeType, BlobRef image);
+		BytesRef GetImageImpl(std::string& mimeType);
+		void SetImageImpl(std::string& mimeType, BytesRef image);
 		bool HasImageImpl();
 		void ClearImageImpl();
 		std::vector<std::string>& GetURIListImpl();

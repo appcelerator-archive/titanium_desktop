@@ -57,7 +57,7 @@ namespace ti
 		// This variables must be reset on each send()
 		SharedPtr<Poco::Thread> thread;
 		SharedPtr<std::ifstream> requestStream;
-		BlobRef requestBlob;
+		BytesRef requestBytes;
 		SharedPtr<std::ostringstream> responseStream;
 		int requestContentLength;
 		bool aborted;
@@ -65,7 +65,7 @@ namespace ti
 		size_t requestDataSent;
 		size_t responseDataReceived;;
 		bool sawHTTPStatus;
-		std::vector<BlobRef> responseData;
+		std::vector<BytesRef> responseData;
 
 		void run(); // Poco Thread implementation.
 		bool BeginRequest(KValueRef sendData);

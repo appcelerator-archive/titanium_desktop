@@ -235,8 +235,8 @@ namespace ti
 			{
 				data[size] = '\0';
 
-				BlobRef blob(new Blob(data, size));
-				ValueList args(Value::NewObject(blob));
+				BytesRef bytes(new Bytes(data, size));
+				ValueList args(Value::NewObject(bytes));
 				RunOnMainThread(this->onRead, args, false);
 			}
 		}
@@ -272,7 +272,7 @@ namespace ti
 		if (sendData.empty())
 			return;
 
-		BlobRef buffer(0);
+		BytesRef buffer(0);
 		{
 			Poco::Mutex::ScopedLock lock(sendDataMutex);
 			buffer = sendData.front();
@@ -285,7 +285,7 @@ namespace ti
 
 		if (currentSendDataOffset == (size_t) buffer->Length())
 		{
-			// Only send the onWrite message when we've exhausted a Blob.
+			// Only send the onWrite message when we've exhausted a Bytes.
 			if (!this->onWrite.isNull())
 			{
 				ValueList args(Value::NewInt(buffer->Length()));
@@ -334,20 +334,20 @@ namespace ti
 		if (!this->opened && !this->connectThread.isRunning())
 			throw ValueException::FromString(eprefix +  "Socket is not open");
 
-		BlobRef data(0);
+		BytesRef data(0);
 		if (args.at(0)->IsString())
 		{
 			std::string sendString(args.GetString(0));
-			data = new Blob(sendString.c_str(), sendString.size());
+			data = new Bytes(sendString.c_str(), sendString.size());
 		}
 		else if (args.at(0)->IsObject())
 		{
 			KObjectRef dataObject(args.GetObject(0));
-			data = dataObject.cast<Blob>();
+			data = dataObject.cast<Bytes>();
 		}
 
 		if (data.isNull())
-			throw ValueException::FromString("Cannot send non-Blob object");
+			throw ValueException::FromString("Cannot send non-Bytes object");
 
 		{
 			Poco::Mutex::ScopedLock lock(sendDataMutex);

@@ -108,7 +108,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Process.Process.setOnRead,since=0.5)
 		 * @tiapi Set an onRead event handler for this process stdout and stderr
-		 * @tiarg[Function, onRead] a handler that is passed an event, with a "data" Blob full of data read from the pipe
+		 * @tiarg[Function, onRead] a handler that is passed an event, with a "data" Bytes full of data read from the pipe
 		 */
 		SetMethod("setOnRead", &Process::_SetOnRead);
 		
@@ -255,14 +255,14 @@ namespace ti
 		this->exitMonitorThread.start(*exitMonitorAdapter);
 	}
 
-	BlobRef Process::LaunchSync()
+	BytesRef Process::LaunchSync()
 	{
 		this->running = true;
 		this->exitCode = Value::Null;
 
 		this->AttachPipes(false);
 		ForkAndExec();
-		BlobRef output = MonitorSync();
+		BytesRef output = MonitorSync();
 
 		// Manually fire read events here so that
 		// we can be precise about the ordering.
@@ -451,7 +451,7 @@ namespace ti
 
 	KValueRef Process::Call(const ValueList& args)
 	{
-		BlobRef output = LaunchSync();
+		BytesRef output = LaunchSync();
 		return Value::NewObject(output);
 	}
 

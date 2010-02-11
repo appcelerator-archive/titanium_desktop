@@ -102,23 +102,23 @@ namespace ti
 		}
 	}
 
-	static BlobRef ValueToBlob(KValueRef value)
+	static BytesRef ValueToBytes(KValueRef value)
 	{
 		if (value->IsObject())
 		{
-			BlobRef blob = value->ToObject().cast<Blob>();
-			if (blob.isNull())
-				blob = new Blob("", 0);
-			return blob;
+			BytesRef bytes = value->ToObject().cast<Bytes>();
+			if (bytes.isNull())
+				bytes = new Bytes("", 0);
+			return bytes;
 		}
 		else if (value->IsString())
 		{
 			const char* data = value->ToString();
-			return new Blob(data, strlen(data));
+			return new Bytes(data, strlen(data));
 		}
 		else
 		{
-			throw ValueException::FromString("Need a Blob or a String");
+			throw ValueException::FromString("Need a Bytes or a String");
 		}
 	}
 
@@ -202,8 +202,8 @@ namespace ti
 		}
 		else if (type == IMAGE)
 		{
-			BlobRef imageBlob(ValueToBlob(args.at(1)));
-			this->SetImage(mimeType, imageBlob);
+			BytesRef imageBytes(ValueToBytes(args.at(1)));
+			this->SetImage(mimeType, imageBytes);
 		}
 		else
 		{
@@ -327,12 +327,12 @@ namespace ti
 		return this->HasTextImpl();
 	}
 
-	BlobRef Clipboard::GetImage(std::string& mimeType)
+	BytesRef Clipboard::GetImage(std::string& mimeType)
 	{
 		return this->GetImageImpl(mimeType);
 	}
 
-	void Clipboard::SetImage(std::string& mimeType, BlobRef newImage)
+	void Clipboard::SetImage(std::string& mimeType, BytesRef newImage)
 	{
 		this->SetImageImpl(mimeType, newImage);
 	}

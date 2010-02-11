@@ -36,8 +36,8 @@ namespace ti
 		global(global)
 	{
 		/**
-		 * @tiapi(method=True,name=Codec.encodeBase64,since=0.7) encode a string or blob into base64
-		 * @tiarg(for=Codec.encodeBase64,name=data,type=String|Blob) data to encode
+		 * @tiapi(method=True,name=Codec.encodeBase64,since=0.7) encode a string or Bytes into base64
+		 * @tiarg(for=Codec.encodeBase64,name=data,type=String|Bytes) data to encode
 		 * @tiresult(for=Codec.encodeBase64,type=string) returns base64 encoded string
 		 */
 		this->SetMethod("encodeBase64", &CodecBinding::EncodeBase64);
@@ -50,9 +50,9 @@ namespace ti
 		this->SetMethod("decodeBase64", &CodecBinding::DecodeBase64);
 
 		/**
-		 * @tiapi(method=True,name=Codec.digestToHex,since=0.7) encode a string or blob using a digest algorithm
+		 * @tiapi(method=True,name=Codec.digestToHex,since=0.7) encode a string or Bytes using a digest algorithm
 		 * @tiarg(for=Codec.digestToHex,name=type,type=int) encoding type: currently supports MD2, MD4, MD5, SHA1
-		 * @tiarg(for=Codec.digestToHex,name=data,type=String|Blob) data to encode
+		 * @tiarg(for=Codec.digestToHex,name=data,type=String|Bytes) data to encode
 		 * @tiresult(for=Codec.digestToHex,type=string) returns encoded string
 		 */
 		this->SetMethod("digestToHex", &CodecBinding::DigestToHex);
@@ -67,8 +67,8 @@ namespace ti
 		this->SetMethod("digestHMACToHex", &CodecBinding::DigestHMACToHex);
 
 		/**
-		 * @tiapi(method=True,name=Codec.encodeHexBinary,since=0.7) encode a string or blob into hex binary
-		 * @tiarg(for=Codec.encodeHexBinary,name=data,type=String|Blob) data to encode
+		 * @tiapi(method=True,name=Codec.encodeHexBinary,since=0.7) encode a string or Bytes into hex binary
+		 * @tiarg(for=Codec.encodeHexBinary,name=data,type=String|Bytes) data to encode
 		 * @tiresult(for=Codec.encodeHexBinary,type=string) returns hex binary encoded string
 		 */
 		this->SetMethod("encodeHexBinary", &CodecBinding::EncodeHexBinary);
@@ -136,10 +136,10 @@ namespace ti
 		}
 		else
 		{
-			AutoPtr<Blob> blob(value->ToObject().cast<Blob>());
-			if (!blob.isNull())
+			AutoPtr<Bytes> bytes(value->ToObject().cast<Bytes>());
+			if (!bytes.isNull())
 			{
-				data = std::string(blob->Get(), blob->Length());
+				data = std::string(bytes->Get(), bytes->Length());
 			}
 			else
 			{
@@ -218,10 +218,10 @@ namespace ti
 		}
 		else
 		{
-			AutoPtr<Blob> blob(args.GetObject(1).cast<Blob>());
-			if (!blob.isNull())
+			AutoPtr<Bytes> bytes(args.GetObject(1).cast<Bytes>());
+			if (!bytes.isNull())
 			{
-				engine->update(blob->Get(), blob->Length());
+				engine->update(bytes->Get(), bytes->Length());
 			}
 		}
 		std::string data = Poco::DigestEngine::digestToHex(engine->digest()); 
@@ -347,13 +347,13 @@ namespace ti
 		}
 		else if (args.at(0)->IsObject())
 		{
-			BlobRef blobData = args.at(0)->ToObject().cast<Blob>();
-			if (blobData.isNull())
+			BytesRef bytes = args.at(0)->ToObject().cast<Bytes>();
+			if (bytes.isNull())
 			{
 				delete checksum;
 				throw ValueException::FromString("unsupported data type passed as argument 1");
 			}
-			checksum->update(blobData->Get(),blobData->Length());
+			checksum->update(bytes->Get(),bytes->Length());
 			result->SetInt(checksum->checksum());
 		}
 		else
