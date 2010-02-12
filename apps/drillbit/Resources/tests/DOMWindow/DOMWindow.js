@@ -178,6 +178,11 @@ describe("UI Window Tests",{
 		}, 1000);
 		setTimeout(function() {test.failed("Didn't get unfocused message"); }, 4000);
 	},
+	test_window_utf8_encoding: function(test)
+	{
+		var contents = document.getElementById("unicode").innerText;
+		value_of(contents).should_be("\u6F22");
+	}
 	//test_data_uri_non_base64_encoded_as_async: function(test)
 	//{
 	//	var path = Titanium.App.appURLToPath("app://rel.html");
