@@ -12,7 +12,9 @@ def make_large_file():
 		out += random.choice(ascii)
 	out += '\n'
 
-	f = open(filepath, 'w')
+	# Open in binary mode so that '\n' doesn't produce a
+	# carriage return on Windows.
+	f = open(filepath, 'wb')
 	f.write(out)
 	f.close()
 
