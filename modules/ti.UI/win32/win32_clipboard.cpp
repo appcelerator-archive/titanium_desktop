@@ -20,7 +20,7 @@ namespace ti
 			return;
 		}
 
-		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		HWND eventWindow = Host::GetInstance()->GetEventWindow();
 		if (!OpenClipboard(eventWindow))
 		{
 			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
@@ -68,7 +68,7 @@ namespace ti
 	std::string& Clipboard::GetTextImpl()
 	{
 		static std::string clipboardText;
-		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		HWND eventWindow = Host::GetInstance()->GetEventWindow();
 		if (!OpenClipboard(eventWindow))
 		{
 			std::string error(Win32Utils::QuickFormatMessage(GetLastError()));
@@ -128,7 +128,7 @@ namespace ti
 
 	void Clipboard::ClearTextImpl()
 	{
-		HWND eventWindow = Win32Host::Win32Instance()->GetEventWindow();
+		HWND eventWindow = Host::GetInstance()->GetEventWindow();
 
 		// TODO(mrobinson): If possible we need to clear only the text portion here.
 		if (!OpenClipboard(eventWindow))

@@ -8,7 +8,6 @@
 #include <comutil.h>
 #include <stdlib.h>
 #include <math.h>
-#include <kroll/win32/host.h>
 
 namespace ti
 {
@@ -46,7 +45,7 @@ namespace ti
 		if (FAILED(hr))
 			throw ValueException::FromString("Failed querying IMediaSeeking for sound");
 
-		HWND hwnd = Win32Host::Win32Instance()->AddMessageHandler(
+		HWND hwnd = Host::GetInstance()->AddMessageHandler(
 			&Win32Sound::StaticGraphCallback);
 		mediaEventEx->SetNotifyWindow((OAHWND) hwnd, graphNotifyMessage,
 			reinterpret_cast<LONG_PTR>(this));

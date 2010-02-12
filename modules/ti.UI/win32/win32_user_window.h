@@ -101,7 +101,6 @@ namespace ti
 		void GetMinMaxInfo(MINMAXINFO* minMaxInfo);
 
 	private:
-		kroll::Win32Host* win32Host;
 		Win32WebKitFrameLoadDelegate* frameLoadDelegate;
 		Win32WebKitUIDelegate* uiDelegate;
 		Win32WebKitPolicyDelegate* policyDelegate;

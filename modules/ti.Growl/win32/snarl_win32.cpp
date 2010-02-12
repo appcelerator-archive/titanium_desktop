@@ -6,7 +6,6 @@
 
 #include "snarl_win32.h"
 #include "SnarlInterface.h"
-#include <kroll/win32/host.h>
 
 using namespace ti;
 using namespace kroll;
@@ -46,7 +45,7 @@ namespace ti
 			wideIconPath.append(::UTF8ToWide(iconPath));
 		}
 
-		HWND replyWindow = Win32Host::Win32Instance()->AddMessageHandler(
+		HWND replyWindow = Host::GetInstance()->AddMessageHandler(
 			&SnarlWin32::MessageHandler);
 		long id = snarlInterface.snShowMessage(wideTitle, wideText, timeout,
 			wideIconPath, replyWindow, SnarlWin32::snarlWindowMessage);

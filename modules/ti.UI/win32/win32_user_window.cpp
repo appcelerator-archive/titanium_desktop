@@ -237,12 +237,13 @@ DWORD Win32UserWindow::GetStyleFromConfig()
 
 void Win32UserWindow::InitWindow()
 {
-	RegisterWindowClass(win32Host->GetInstanceHandle());
+	HINSTANCE hInstance = Host::GetInstance()->GetInstanceHandle();
+	RegisterWindowClass(hInstance);
 
 	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
 	this->windowHandle = CreateWindowExW(GetStyleFromConfig(), USERWINDOW_WINDOW_CLASS,
 		titleW.c_str(), 0, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
-		NULL, NULL, win32Host->GetInstanceHandle(), (LPVOID)this);
+		0, 0, hInstance, (LPVOID)this);
 
 	SetWindowUserData(this->windowHandle, reinterpret_cast<void*>(this));
 
@@ -399,7 +400,6 @@ static void GetChromeSize(Bounds& chromeSize, DWORD windowStyle)
 
 Win32UserWindow::Win32UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow& parent) :
 	UserWindow(config, parent),
-	win32Host(Win32Host::Win32Instance()),
 	frameLoadDelegate(0),
 	uiDelegate(0),
 	policyDelegate(0),
@@ -967,7 +967,7 @@ static HICON GetDefaultIcon()
 	{
 		wchar_t exePath[MAX_PATH];
 		GetModuleFileNameW(GetModuleHandle(NULL), exePath, MAX_PATH);
-		defaultIcon = ExtractIconW(Win32Host::Win32Instance()->GetInstanceHandle(), exePath, 0);
+		defaultIcon = ExtractIconW(Host::GetInstance()->GetInstanceHandle(), exePath, 0);
 	}
 
 	return defaultIcon;

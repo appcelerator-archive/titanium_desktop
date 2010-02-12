@@ -18,7 +18,7 @@ namespace ti
 	{
 		this->AddEventListener(Event::CLICKED, cbSingleClick);
 
-		HWND hwnd = Win32Host::Win32Instance()->AddMessageHandler(
+		HWND hwnd = Host::GetInstance()->AddMessageHandler(
 			&Win32TrayItem::MessageHandler);
 
 		NOTIFYICONDATA* notifyIconData = new NOTIFYICONDATA;
