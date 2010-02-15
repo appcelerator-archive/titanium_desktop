@@ -299,9 +299,9 @@ def create_installer(builder):
 			new_bmp = os.path.join(builder.options.appdir,
 				bmp.replace("/", "\\"))
 			if not os.path.exists(new_bmp):
-				print >>sys.stderr, "Warning: specified %s '%s'" + \
-					"wasn't found at %s, reverting to default" % \
-					(tag, bmp, new_bmp)
+				error = "Warning: specified %s '%s'" + \
+					"wasn't found at %s, reverting to default"
+				print >>sys.stderr, error % (tag, bmp, new_bmp)
 				return default_bmp
 			else:
 				return new_bmp
