@@ -115,7 +115,7 @@ void PlatformBinding::_GetType(const ValueList& args, KValueRef result)
 
 void PlatformBinding::_GetProcessorCount(const ValueList& args, KValueRef result)
 {
-	result->SetInt(GetProcessorCountImpl());
+	result->SetInt(PlatformUtils::GetProcessorCount());
 }
 
 void PlatformBinding::_GetArchitecture(const ValueList& args, KValueRef result)

@@ -6,7 +6,6 @@
 #include <kroll/kroll.h>
 #include <Poco/Environment.h>
 #include <Poco/Process.h>
-#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -15,11 +14,6 @@
 
 namespace ti
 {
-
-int PlatformBinding::GetProcessorCountImpl()
-{
-	return sysconf(_SC_NPROCESSORS_ONLN);
-}
 
 std::string PlatformBinding::GetVersionImpl()
 {

@@ -18,7 +18,6 @@ namespace ti
 	private:
 		virtual ~PlatformBinding();
 		std::string GetVersionImpl();
-		int GetProcessorCountImpl();
 		bool OpenApplicationImpl(const std::string& path);
 		bool OpenURLImpl(const std::string& url);
 		void TakeScreenshotImpl(const std::string& targetFile);

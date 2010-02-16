@@ -16,15 +16,6 @@
 
 namespace ti
 {
-
-int PlatformBinding::GetProcessorCountImpl()
-{
-	if (![NSProcessInfo instancesRespondToSelector:@selector(processorCount)])
-		return 1; // Shucks!
-
-	return [[NSProcessInfo processInfo] processorCount];
-}
-
 std::string PlatformBinding::GetVersionImpl()
 {
 	// Do not use /System/Library/CoreServices/SystemVersion.plist.

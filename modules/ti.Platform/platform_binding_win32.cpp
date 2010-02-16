@@ -215,14 +215,6 @@ static bool SaveBMPFile(const wchar_t* filename, HBITMAP bitmap, HDC bitmapDC,
 	return true;
 }
 
-int PlatformBinding::GetProcessorCountImpl()
-{
-	SYSTEM_INFO systemInfo;
-	ZeroMemory(&systemInfo, sizeof(SYSTEM_INFO));
-	GetSystemInfo(&systemInfo) ;
-	return systemInfo.dwNumberOfProcessors;
-}
-
 std::string PlatformBinding::GetVersionImpl()
 {
 	return Poco::Environment::osVersion();
