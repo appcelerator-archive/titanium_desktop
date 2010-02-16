@@ -36,7 +36,8 @@ static void AddQueryParameter(std::string& url, const std::string& key,
 AnalyticsBinding::AnalyticsBinding() :
 	KEventObject("Network.Analytics"),
 	running(true),
-	curlHandle(0)
+	curlHandle(0),
+	startCallback(0)
 {
 	SharedApplication app(Host::GetInstance()->GetApplication());
 	this->url = app->GetStreamURL("https") + "/app-track";
@@ -65,7 +66,29 @@ AnalyticsBinding::AnalyticsBinding() :
 		-(Poco::Timezone::utcOffset() + Poco::Timezone::dst()) / 60));
 
 	this->SetMethod("_sendEvent", &AnalyticsBinding::_SendEvent);
+
+	// When curl_easy_perform is called with an HTTPS address on Windows,
+	// it seems to block the UI thread until the request initializes. This
+	// causes a multi-second lag before the first page display. The most
+	// important thing is to show the page as soon as possible, so we defer
+	// starting the Analytics thread until the first page has loaded.
+	// TODO: Figure out what is causing the blocking behavior in curl_easy_perform.
+	this->startCallback = StaticBoundMethod::FromMethod(
+		this, &AnalyticsBinding::_StartAnalyticsThread);
+	GlobalObject::GetInstance()->AddEventListener(
+		Event::PAGE_LOADED, this->startCallback);
+}
+
+void AnalyticsBinding::_StartAnalyticsThread(const ValueList &args, KValueRef result)
+{
+	// If we've already started the Analytics thread, bail out.
+	if (this->startCallback.isNull())
+		return;
+
 	this->thread.start(*this);
+	GlobalObject::GetInstance()->RemoveEventListener(
+		Event::PAGE_LOADED, this->startCallback);
+	this->startCallback = 0;
 }
 
 AnalyticsBinding::~AnalyticsBinding()
