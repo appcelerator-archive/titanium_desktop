@@ -1,4 +1,4 @@
-/*!(c) 2008-2009 Appcelerator, Inc. http://appcelerator.org
+/*!(c) 2008-2010 Appcelerator, Inc. http://appcelerator.org
  * Licensed under the Apache License, Version 2.0. Please visit
  * http://license.appcelerator.com for full copy of the License.
  **/
@@ -11,6 +11,7 @@
 //
 (function()
 {
+
 	// ensure that the window.opener property is set when we open a native 
 	// window in the same domain as this window (assuming this window is a child)
 	if (Titanium.UI.getCurrentWindow().getParent())
@@ -22,66 +23,9 @@
 			window.opener = Titanium.UI.getCurrentWindow().getParent().window;
 		}
 	}
-	
+
 	window.onload=function()
 	{
-		// Add app:// support to jquery's http success function
-		if (window.jQuery) 
-		{
-			var originalHttpSuccess = jQuery.httpSuccess;
-			jQuery.extend({
-				httpSuccess: function(r){
-					if (location.protocol == 'app:' && r.status === 0) {
-						return true;
-					}
-					return originalHttpSuccess.call(this,r);
-				}
-			}); 
-		}
-		
-		// Add app:// support to MooTool's Request class
-		if (window.MooTools && typeof(Request) == "function")
-		{
-			Request.prototype.isSuccess = function()
-			{
-				return (((this.status >= 200) && (this.status < 300))
-					|| (!!(window.Titanium) && (this.status == 0)));
-			};
-		}
-		
-		// adjust background transparency for window if needed
-		if (Titanium.platform == "win32" &&
-			Titanium.UI.currentWindow.getTransparency() < 1)
-		{
-			var color = "#" + Titanium.UI.currentWindow.getTransparencyColor();
-			if (document.body.style.background == "transparent")
-			{
-				document.body.style.background = color;
-			}
-			if (document.body.style.backgroundColor == "transparent")
-			{
-				document.body.style.backgroundColor = color;
-			}
-			// also check external stylesheets, but still modify the DOM (hurray)
-			for (var i = 0; i < document.styleSheets.length; i++)
-			{
-				for (var j = 0; j < document.styleSheets[i].cssRules.length; j++)
-				{
-					var rule = document.styleSheets[i].cssRules[j];
-					if (rule.selectorText != "body") continue;
-					
-					if (rule.style.background == "transparent")
-					{
-						document.body.style.background = color;
-					}
-					if (rule.style.backgroundColor == "transparent")
-					{
-						document.body.style.backgroundColor = color;
-					}
-				}
-			}
-		}
-
 		// append the platform (osx, linux, win32) to the body so we can dynamically
 		// use platform specific CSS such as body.win32 div { } 
 		var cn = (document.body.className || '');
@@ -167,29 +111,6 @@
 		}
 
 		return _oldOpenFunction.apply(window, newArgs);
-	}
-
-	/**
-	 * convenience for opening windows from code that reference inline HTML instead of forcing the use of URLs. this
-	 * is useful when you need to create programmatic windows from within code. uses data URIs feature of WebKit.
-	 */
-	var _oldCreateWindow = Titanium.UI.createWindow;
-	Titanium.UI.createWindow = function(properties)
-	{
-		var p = typeof(properties)=='undefined' ? {} : properties;
-		var w = _oldCreateWindow(p);
-		if (typeof(p)=='object' && typeof(p.html)=='string')
-		{
-			w.setURL('data:text/html;charset=utf-8,'+encodeURIComponent(p.html));
-		}
-		return w;
-	};
-
-	// This is a work-around for Linux, until we can update the/ version of WebKit
-	// we are shipping to one with the proper delegate method.
-	if (Titanium.platform == "linux")
-	{
-		window.close = Titanium.UI.currentWindow.close;
 	}
 
 	//
