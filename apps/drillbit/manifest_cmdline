@@ -7,8 +7,6 @@
 #url: http://appcelerator.org
 #loglevel: ERROR
 runtime: 0.4.4
-api:0.4.4
-javascript:0.4.4
 tiapp:0.4.4
 tinetwork:0.4.4
 tifilesystem:0.4.4

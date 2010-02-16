@@ -6,9 +6,6 @@
 #guid:CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4
 #desc:Unit Test Harness
 runtime:0.4
-api:0.4
-javascript:0.4
-tianalytics:0.4
 tiapp:0.4
 tifilesystem:0.4
 tiplatform:0.4
