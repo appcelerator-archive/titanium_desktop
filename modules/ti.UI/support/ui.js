@@ -259,13 +259,13 @@
 	};
 	
 	/**
-	 * @tiapi(method=True,name=JSON.stringify,since=0.4) Convert a Javascript object to a JSON string
-	 * @tiarg(for=JSON.stringify,name=object,type=Object) Javascript object to convert
+	 * @tiapi(method=True,name=JSON.stringify,since=0.4) Convert a JavaScript object to a JSON string
+	 * @tiarg(for=JSON.stringify,name=object,type=Object) JavaScript object to convert
 	 * @tiresult(for=JSON.stringify,type=String) Returns the string representation of the object in JSON format
 	 */
 	
 	/**
-	 * @tiapi(method=True,name=JSON.parse,since=0.4) Convert a JSON string to a Javascript object
+	 * @tiapi(method=True,name=JSON.parse,since=0.4) Convert a JSON string to a JavaScript object
 	 * @tiarg(for=JSON.parse,name=json,type=String) JSON string to convert
 	 * @tiresult(for=JSON.parse,type=Object) Returns the object representation of the string 
 	 */

@@ -17,7 +17,7 @@ namespace ti
 		/**
 		 * @tiapi(method=True,name=Worker.createWorker,since=0.6) 
 		 * @tiapi Create a worker thread instance
-		 * @tiarg[String|Function, source] Either a Javascript function (does not 
+		 * @tiarg[String|Function, source] Either a JavaScript function (does not 
 		 * @tiarg support closures), the URL of a JavaScript file, or
 		 * @tiarg a string containing JavaScript source.
 		 * @tiresult[Worker.Worker] The newly-created worker instance

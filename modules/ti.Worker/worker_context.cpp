@@ -5,8 +5,7 @@
  */	
 #include "worker_context.h"
 #include "worker.h"
-#include "../../kroll/modules/javascript/javascript_module.h"
-#include "../../kroll/modules/javascript/javascript_module.h"
+#include <kroll/javascript/javascript_module.h>
 #include <JavaScriptCore/JSContextRef.h>
 
 namespace ti

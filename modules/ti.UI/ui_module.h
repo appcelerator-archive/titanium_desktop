@@ -27,7 +27,7 @@ namespace ti {
 #include <JavaScriptCore/JSContextRef.h>
 
 #include <iostream>
-#include "javascript_module.h"
+#include <kroll/javascript/javascript_module.h>
 #include "window_config.h"
 #include "user_window.h"
 #include "menu.h"

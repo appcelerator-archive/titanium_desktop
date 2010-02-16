@@ -4,7 +4,7 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #include "ui_module.h"
-#include "../../kroll/modules/javascript/javascript_module_instance.h"
+#include <kroll/javascript/javascript_module_instance.h>
 
 namespace ti
 {
@@ -1921,7 +1921,7 @@ void UserWindow::RegisterJSContext(JSGlobalContextRef context)
 	// The page location has changed, but JavaScriptCore may have references
 	// to old DOMs still in memory waiting on garbage collection. Force a GC
 	// here so that memory usage stays reasonable.
-	JavascriptModuleInstance::GarbageCollect();
+	JavaScriptModuleInstance::GarbageCollect();
 }
 
 void UserWindow::LoadUIJavaScript(JSGlobalContextRef context)

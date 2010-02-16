@@ -6,10 +6,6 @@ env.Append(CPPDEFINES = ('TITANIUM_WORKER_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'webkit')
 
-env.Append(CPPPATH = ['%s/modules/javascript' % build.kroll_source_dir])
-env.Append(LIBPATH=[build.get_module('javascript').dir])
-env.Append(LIBS=['javascriptmodule'])
-
 if build.is_win32():
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])

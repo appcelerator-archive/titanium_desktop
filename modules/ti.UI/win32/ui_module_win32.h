@@ -34,7 +34,6 @@ namespace ti
 #include <WebKit/WebKitTitanium.h>
 #include <cairo/cairo.h>
 #include <cairo/cairo-win32.h>
-#include "../../../kroll/modules/javascript/javascript_module.h"
 #include "../url/url.h"
 #include "popup_dialog.h"
 #include "webkit_frame_load_delegate.h"
