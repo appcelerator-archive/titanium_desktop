@@ -15,7 +15,6 @@ for dir in [
 	'ti.Process',
 	'ti.Notification',
 	'ti.Monkey',
-	'ti.Analytics',
 	'ti.Database',
 	'ti.Worker',
 	'ti.Codec'

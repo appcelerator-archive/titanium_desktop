@@ -28,6 +28,7 @@ namespace ti
 		void NetworkStatusChange(bool online);
 		Host* GetHost();
 		void Shutdown();
+		static const std::string& GetFirstIPAddress();
 
 	private:
 		Host* host;

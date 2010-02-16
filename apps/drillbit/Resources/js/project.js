@@ -5,7 +5,7 @@ var TFS = Titanium.Filesystem;
 
 Titanium.Project = 
 {
-	requiredModulesList: ['api','tiapp','tifilesystem','tiplatform','tiui','javascript','tianalytics'],
+	requiredModulesList: ['api','tiapp','tifilesystem','tiplatform','tiui','javascript'],
 	requiredModules:[],
 	optionalModules:[],
 	runtimeDir:null,

@@ -10,7 +10,6 @@ sdk:0.4
 runtime:0.4
 api:0.4
 javascript:0.4
-tianalytics:0.4
 tiapp:0.4
 tifilesystem:0.4
 tiplatform:0.4

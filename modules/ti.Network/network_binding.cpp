@@ -23,7 +23,7 @@ using Poco::Net::NetworkInterface;
 namespace ti
 {
 	static KListRef interfaceList(0);
-	static std::string firstIPv4Address;
+	static std::string firstIPv4Address = "127.0.0.1";
 
 	static void GetInterfaceList()
 	{
@@ -474,10 +474,14 @@ namespace ti
 
 	void NetworkBinding::_GetFirstIPAddress(const ValueList& args, KValueRef result)
 	{
-		if (firstIPv4Address.empty())
-			result->SetString("127.0.0.1");
-		else
-			result->SetString(firstIPv4Address.c_str());
+		static std::string address(NetworkBinding::GetFirstIPAddress());
+		result->SetString(address.c_str());
+	}
+
+	/*static*/
+	const std::string& NetworkBinding::GetFirstIPAddress()
+	{
+		return firstIPv4Address;
 	}
 
 	void NetworkBinding::_GetInterfaces(const ValueList& args, KValueRef result)

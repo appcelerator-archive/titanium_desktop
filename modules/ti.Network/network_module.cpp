@@ -4,8 +4,6 @@
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
 #include "network_module.h"
-#include "network_binding.h"
-
 #include <Poco/Mutex.h>
 
 using namespace kroll;
@@ -52,12 +50,10 @@ namespace ti
 
 		modulePath = GetPath();
 
-		// load our variables
-		this->variables = new NetworkBinding(host);
-
-		// set our ti.Network
-		KValueRef value = Value::NewObject(this->variables);
-		host->GetGlobalObject()->Set("Network", value);
+		this->networkBinding = new NetworkBinding(host);
+		this->analyticsBinding = new AnalyticsBinding();
+		GlobalObject::GetInstance()->SetObject("Network", this->networkBinding);
+		GlobalObject::GetInstance()->SetObject("Analytics", this->analyticsBinding);
 
 		curlShareHandle = curl_share_init();
 		curl_share_setopt(curlShareHandle, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
@@ -68,8 +64,8 @@ namespace ti
 
 	void NetworkModule::Stop()
 	{
-		AutoPtr<NetworkBinding> b = this->variables.cast<NetworkBinding>();
-		b->Shutdown();
+		networkBinding->Shutdown();
+		analyticsBinding->Shutdown();
 	}
 
 	/*static*/
