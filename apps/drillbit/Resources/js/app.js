@@ -146,7 +146,6 @@ Titanium.createApp = function(runtimeComponent,destination,name,appid,install)
 	for (var i = 0; i < components.length; i++)
 	{
 		var c = components[i];
-		Titanium.API.debug(c.type);
 		if (c.getType() == Titanium.API.SDK)
 		{
 			assetsDir = TFS.getFile(components[i].getPath());
