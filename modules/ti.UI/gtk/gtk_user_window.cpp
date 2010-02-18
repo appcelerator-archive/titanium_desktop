@@ -238,6 +238,9 @@ namespace ti
 		// indicates an event listener has cancelled this close event.
 		if (!this->active)
 		{
+			// Remove the old menu first, so that GTK+ doesn't destroy it first.
+			this->RemoveOldMenu(); // Cleanup old menu
+
 			// Destroy the GTK bits, if we have them first, because
 			// we need to assume the GTK window is gone for  everything
 			// below (this method might be called by DeleteCallback)
@@ -250,7 +253,6 @@ namespace ti
 				this->gtkWindow = 0;
 				this->webView = 0;
 			}
-			this->RemoveOldMenu(); // Cleanup old menu
 
 			this->Closed();
 		}
