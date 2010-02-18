@@ -25,8 +25,6 @@ namespace ti
 		void SetNativeItemSubmenu(::GtkMenuItem* nativeItem, AutoMenu newSubmenu);
 		::GtkMenuItem* CreateNative(bool registerNative);
 		void DestroyNative(::GtkMenuItem* nativeItem);
-		static void BlockSignal(::GtkMenuItem* nativeItem, MenuItem* item);
-		static void UnblockSignal(::GtkMenuItem* nativeItem, MenuItem* item);
 
 	private:
 		std::vector< ::GtkMenuItem* > nativeItems;
