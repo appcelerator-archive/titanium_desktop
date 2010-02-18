@@ -23,7 +23,7 @@ function TitaniumNotification(window)
 		id:'notification_' + (notification_windows++),
 		visible:false,
 		topMost:true,
-		url:'app://blank'
+		url:'app://__blank__.html'
 	});
 	mywindow.open();
 
