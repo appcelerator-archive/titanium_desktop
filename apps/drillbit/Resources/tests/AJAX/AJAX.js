@@ -84,13 +84,33 @@ describe("WebKit AJAX",
 			},
 			error: function()
 			{
+				clearTimeout(timer);
 				callback.passed();
+			}
+		});
+	},
+	local_file_using_app_as_async:function(callback)
+	{
+		// fail test after 2s
+		var timer = setTimeout(function() { callback.failed('ajax request timed out after 30s'); },2000);
+
+		$.ajax({
+			url: 'app://test1.js',
+			success: function(data)
+			{
+				clearTimeout(timer);
+				callback.passed();
+			},
+			error: function()
+			{
+				clearTimeout(timer);
+				callback.failed("Request failed");
 			}
 		});
 	},
 	test_query_string_as_async: function(callback)
 	{
-		var timer = 0;
+		var timer = setTimeout(function() { callback.failed('ajax request timed out after 30s'); },2000);
 		$.getJSON('app://test.js?q=1', function(data)
 		{
 			clearTimeout(timer);
@@ -106,10 +126,5 @@ describe("WebKit AJAX",
 				callback.failed(e);
 			}
 		});
-		
-		timer = setTimeout(function()
-		{
-			callback.failed('ajax request timed out after 2s');
-		},2000);
 	}
 });
