@@ -154,7 +154,7 @@ void AnalyticsBinding::SendEventToAPIServer(std::string& eventData)
 {
 	std::string postData(baseData + "&" + eventData);
 	SET_CURL_OPTION(this->curlHandle, CURLOPT_POSTFIELDSIZE, postData.length());
-	SET_CURL_OPTION(this->curlHandle, CURLOPT_COPYPOSTFIELDS, postData.c_str());
+	SET_CURL_OPTION(this->curlHandle, CURLOPT_POSTFIELDS, postData.c_str());
 
 	CURLcode result = curl_easy_perform(this->curlHandle);
 	if (result == CURLE_OPERATION_TIMEDOUT)
