@@ -263,11 +263,11 @@ def build_msi(template, args, basename, destdir):
 	light = os.path.join(wix_dir, "light.exe")
 	run_command([candle, wxsname, "-out", wxsname+".wixobj"])
 	run_command([light, wxsname+".wixobj", "-ext", "WixUIExtension", "-out", msi])
+
 	os.unlink(wxsname)
 	os.unlink(wxsname+".wixobj")
-	
 	return msi
-	
+
 def create_installer(builder):
 	sdk_path = builder.options.assets_dir
 	installer_sdk_path = os.path.join(sdk_path, 'installer')
@@ -416,5 +416,7 @@ def create_installer(builder):
 	
 	install_msi = build_msi(app_installer_template, app_template_args,
 		builder.appname, builder.options.destination)
-	
+
+	os.unlink(license_rtf)
+
 	return install_msi
