@@ -1,11 +1,10 @@
-#appname:Drillbit
-#version:0.5.0
-#appid:com.titaniumapp.unittest.driver
+#appname:Testapp
+#version:0.1.0
+#appid:com.titaniumapp.testapp
 #publisher:Appcelerator
-#image:default_app_logo.png
 #url:http://titaniumapp.com
-#guid:D83B08F4-B43B-4909-9FEE-336CDB44750B
-#desc:Unit Test Driver
+#guid:D36DD8BA-D092-4F20-9073-EB613BFB8F46
+#desc:Testapp
 sdk:
 runtime:
 tiapp:

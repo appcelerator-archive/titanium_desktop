@@ -195,7 +195,6 @@
 			this.require('app://js/project.js');
 			// create app structure
 			app = Titanium.createApp(
-				Titanium.API.application.runtime, // Runtime component
 				Titanium.API.application.getResourcesPath(), // Stage in Resources directory
 				'test_harness', // app name
 				'CF0D2CB7-B4BD-488F-9F8E-669E6B53E0C4', // app guid

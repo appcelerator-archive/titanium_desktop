@@ -3,6 +3,7 @@ import effess
 import SCons.Variables
 import SCons.Environment
 import os.path as path
+import sys
 from SCons.Script import *
 from app import App
 from subprocess import Popen
@@ -10,78 +11,27 @@ from subprocess import Popen
 Import('build')
 Import('run')
 Import('run_with')
+
 def package_app_builder(target, source, env):
+	# Wait until the initial build is finished to do this import.
+	import sdk.env
 
-	if not 'ID' in env:
-		env['ID'] = 'com.titaniumapp.' + env['FULLNAME'].replace(' ', '_').lower()
-	if not 'GUID' in env:
-		env['GUID'] = 'DEADBEEF-E695-4280-9F1F-96126F3D2C2A'
-	if not 'VERSION' in env:
-		env['VERSION'] = build.version
-	if not 'PUBLISHER' in env:
-		env['PUBLISHER'] = 'Appcelerator'
-	if not 'URL' in env:
-		env['URL'] = 'http://appcelerator.org'
-
-	installed = False
-	if 'INSTALLED' in env:
-		installed = env['INSTALLED']
-
-	app = App(
-		build,
-		fullname=env['FULLNAME'],
-		id=env['ID'],
-		version=env['VERSION'],
-		guid=env['GUID'],
-		publisher=env['PUBLISHER'],
-		url=env['URL'])
-
-	if 'MODULES' in env:
-		app.set_modules(env['MODULES'])
-
-	app.stage(path.join(build.dir, env['FULLNAME']), src_resources=str(source[0]))
-
-	# Mark these applications as installed
-	if installed:
-		app.installed()
-
-	for s in source[1:]:
-		s = str(s)
-		effess.copy_to_dir(s, app.contents)
-
-	if 'RESOURCES' in env:
-		for f in env['RESOURCES']:
-			for dirname in os.listdir(f):
-				effess.copy_to_dir(path.join(f,dirname), path.join(app.contents,'Resources'))
-
-	if run:
-		if run_with:
-			sys.exit(os.system('"' + app.exe + '" ' + run_with))
-		else:
-			sys.exit(os.system('"%s"' % app.exe))
+	pkg_env = sdk.env.PackagingEnvironment(build.version, build.os, 'titanium')
+	app = pkg_env.App(pkg_env, env['PATH'])
+	app.stage(path.join(build.dir, app.name), bundle=True)
 
 build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 	action=package_app_builder,
 	target_factory=SCons.Node.FS.default_fs.Entry,
 	multi=0)
 
-SConscript('testapp/SConscript')
-SConscript('drillbit/SConscript')
-SConscript('alloy/SConscript')
-SConscript('sdkinstaller/SConscript')
+def make_app_target(name, path):
+	t = build.env.PackageApp('#titanium-app-' + name, [], PATH=path)
+	Depends(t, build.build_targets + build.staging_targets)
+	Alias(name, t)
 
-developer_dir = path.normpath("%s/../../titanium_developer" % build.cwd())
-resources_dir = "%s/Resources" % developer_dir
-tiapp_xml = "%s/tiapp.xml" % developer_dir
-t = build.env.PackageApp('#titanium-developer-target',
-	[Dir(resources_dir), tiapp_xml],
-	FULLNAME='Titanium Developer',
-	ID='com.titaniumapp.titanium_developer_test',
-	GUID='0830db0d-b1a1-49cc-b3fe-27d6f7c0025c',
-	PUBLISHER='Appcelerator, Inc.',
-	URL='http://www.titaniumapp.com',
-	VERSION=build.version,
-	INSTALLED=True)
-Depends(t, build.build_targets + build.staging_targets)
-Alias('developer', t)
+make_app_target('developer', path.normpath("%s/../../titanium_developer" % build.cwd()))
+make_app_target('testapp', path.join(build.cwd(), 'testapp'))
+make_app_target('drillbit', path.join(build.cwd(), 'drillbit'))
+make_app_target('alloy', path.join(build.cwd(), 'alloy'))
 

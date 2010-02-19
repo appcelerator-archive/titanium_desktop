@@ -26,7 +26,6 @@
 		}
 
 		// Send the event natively and asynchronously.
-		Titanium.API.log(queryString);
 		Titanium.Analytics._sendEvent(queryString);
 	};
 	

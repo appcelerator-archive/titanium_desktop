@@ -6,13 +6,13 @@
 #publisher: Appcelerator
 #url: http://appcelerator.org
 #loglevel: ERROR
-runtime: 0.4.4
-tiapp:0.4.4
-tinetwork:0.4.4
-tifilesystem:0.4.4
-tiplatform:0.4.4
-tiprocess:0.4.4
-timonkey:0.4.4
-tidatabase:0.4.4
-drillbit:0.1
-drillbit_cmd:0.1
+runtime:0.x
+tiapp:0.x
+tinetwork:0.x
+tifilesystem:0.x
+tiplatform:0.x
+tiprocess:0.x
+timonkey:0.x
+tidatabase:0.x
+drillbit:0.x
+drillbit_cmd:0.x

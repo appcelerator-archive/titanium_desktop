@@ -159,7 +159,7 @@ Titanium.Project =
 			var dist = TFS.getFile(project.dir,'dist',Titanium.platform);
 			dist.createDirectory(true);
 
-			var app = Titanium.createApp(assetsDir,dist,project.name,project.appid,install);
+			var app = Titanium.createApp(dist,project.name,project.appid,install);
 
 			// write out new manifest
 			var app_manifest = TFS.getFile(app.base,'manifest');

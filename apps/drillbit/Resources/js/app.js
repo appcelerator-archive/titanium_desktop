@@ -137,12 +137,13 @@ Titanium.AppCreator = {
 };
 
 
-Titanium.createApp = function(runtimeComponent,destination,name,appid,install)
+Titanium.createApp = function(destination,name,appid,install)
 {
 
 	// DRILLBIT ONLY: We just grab the bundled SDK here, since we know
 	// that's where the assets are.
 	var components = Titanium.API.getApplication().getComponents();
+	var assetsDir = null;
 	for (var i = 0; i < components.length; i++)
 	{
 		var c = components[i];
