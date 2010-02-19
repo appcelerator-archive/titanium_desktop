@@ -95,7 +95,7 @@ describe("WebKit AJAX",
 		var timer = setTimeout(function() { callback.failed('ajax request timed out after 30s'); },2000);
 
 		$.ajax({
-			url: 'app://test1.js',
+			url: 'app://test.js',
 			success: function(data)
 			{
 				clearTimeout(timer);
