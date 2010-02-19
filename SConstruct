@@ -1,10 +1,10 @@
 import os.path as path
-import tools
+import sdk
 import distutils.dir_util as dir_util
 from kroll import BuildConfig
 
 build = BuildConfig(
-	PRODUCT_VERSION = tools.get_titanium_version(),
+	PRODUCT_VERSION = sdk.get_titanium_version(),
 	PRODUCT_NAME = 'Titanium',
 	GLOBAL_NS_VARNAME = 'Titanium',
 	CONFIG_FILENAME = 'tiapp.xml',
@@ -19,7 +19,7 @@ EnsurePythonVersion(2,5)
 build.set_kroll_source_dir(path.abspath('kroll'))
 
 build.titanium_source_dir = path.abspath('.')
-build.titanium_support_dir = path.join(build.titanium_source_dir, 'support')
+build.titanium_sdk_dir = path.join(build.titanium_source_dir, 'sdk')
 
 # This should only be used for accessing various
 # scripts in the kroll build directory. All resources

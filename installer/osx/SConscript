@@ -32,7 +32,7 @@ build.mark_build_target(inst)
 lproj_dir = p.join(contents, 'Resources', 'English.lproj')
 build.mark_build_target(build.utils.CopyToDir(Glob('*.plist'), contents))
 build.mark_build_target(build.utils.CopyToDir([
-		p.join(build.titanium_support_dir, 'osx', 'titanium.icns'),
+		p.join(build.titanium_sdk_dir, 'osx', 'titanium.icns'),
 		p.join(build.cwd(), 'dialog-warning.png')], lproj_dir))
 
 for f in Glob('English.lproj/*.xib'):

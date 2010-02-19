@@ -73,26 +73,26 @@ zips = build.env.BuildDistZips('#dummy-dist-zips', [])
 build.mark_dist_target(zips)
 AlwaysBuild(zips)
 
-sdk_target = build.env.BuildSDK('sdk', [])
+sdk_target = build.env.BuildSDK('build-sdk', [])
 build.env.Depends(sdk_target, zips)
 build.mark_dist_target(sdk_target)
 AlwaysBuild(sdk_target)
 
-# Stage the SDK here
+# Copy the SDK files to the SDK build directory.
 if not(path.exists(sdk_dir)):
 	os.makedirs(sdk_dir)
-
-# Copy the support files to the SDK directory.
-effess.lightweight_copy_tree(
-	path.join(build.titanium_support_dir, build.os),
-	path.join(build.dir, 'sdk'))
-effess.copy_to_dir(glob(path.join(build.titanium_support_dir, "*.py")), sdk_dir)
+effess.lightweight_copy_tree(path.join(build.titanium_sdk_dir, build.os),
+	sdk_dir, exclude=excludes)
+effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "*.py")),
+	sdk_dir, exclude=excludes)
+effess.copy_to_dir(glob(path.join(build.kroll_source_dir, 'tools', "effess.py")),
+	sdk_dir, exclude=excludes)
 
 if build.is_osx():
 	os.system('ibtool --errors --warnings --notices ' + \
 		'--output-format human-readable-text --compile %s %s' % \
 		(path.join(sdk_dir, 'MainMenu.nib'),
-		path.join(build.titanium_support_dir, 'osx', 'MainMenu.xib')))
+		path.join(build.titanium_sdk_dir, 'osx', 'MainMenu.xib')))
 
 if build.is_win32():
 	effess.copy_to_dir(build.tp('microsoft', 'Microsoft_VC80_CRT_x86.msm'),
