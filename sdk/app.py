@@ -159,15 +159,16 @@ class Win32App(App):
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot.exe to %s' % contents);
-		effess.copy(p.join(sdk_dir, 'kboot.exe'),
+		effess.copy(p.join(self.env.get_sdk_dir(self.runtime_version), 'kboot.exe'),
 			p.join(contents, '%s.exe' % self.name))
 
 class LinuxApp(App):
 	def stage(self, stage_dir, bundle):
 		App.stage(self, stage_dir, bundle=bundle)
 
+		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot to %s' % contents)
-		effess.copy(p.join(sdk_dir, 'kboot'),
+		effess.copy(p.join(self.env.get_sdk_dir(self.runtime_version), 'kboot'),
 			p.join(contents, self.name))
 
 class OSXApp(App):

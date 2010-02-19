@@ -69,7 +69,6 @@ class PackagingEnvironment(object):
 			'.git', '.gitignore', '.cvsignore']
 
 	def get_component(self, type, name, version):
-		print self.components_dir
 		# First try the build directory.
 		if self.components_dir:
 			target = p.join(self.components_dir, type)
