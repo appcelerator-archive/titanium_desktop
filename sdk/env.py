@@ -1,4 +1,5 @@
 import app
+import osx_app
 import os
 import platform
 import sys
@@ -10,7 +11,7 @@ class PackagingEnvironment(object):
 		if target_os is 'linux':
 			self.App = app.LinuxApp
 		if target_os is 'osx':
-			self.App = app.OSXApp
+			self.App = osx_app.OSXApp
 		if target_os is 'win32':
 			self.App = app.Win32App
 
@@ -105,6 +106,6 @@ class PackagingEnvironment(object):
 			raise Exception(u'Could not find module %s-%s' % module)
 		return c
 
-	def launch(self, command):
+	def run(self, command):
 		self.log(u'Launching: %s' % command)
 		os.system(command)

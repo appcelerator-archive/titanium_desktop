@@ -2,10 +2,6 @@
 import os.path as p
 import codecs
 import effess
-import glob
-import shutil
-import types
-import zipfile
 import xml.etree.ElementTree
 from xml.etree.ElementTree import ElementTree
 
@@ -22,6 +18,10 @@ class App(object):
 		for attr in ['name', 'id', 'guid', 'version', 'runtime_version']:
 			if not hasattr(self, attr):
 				raise Exception('Neither the tiapp.xml nor the manifest defined "%s"' % attr)
+
+		# Cache the SDK directory for the runtime here, because we'll
+		# need it quite a bit if we do staging and packaging.
+		self.sdk_dir = self.env.get_sdk_dir(self.runtime_version)
 
 	def read_manifest(self):
 		manifest_path = p.join(self.source_dir, "manifest")
@@ -58,23 +58,24 @@ class App(object):
 				else:
 					self.modules.append((key, value))
 
+	def get_tiapp_element_as_prop(self, element_name, prop):
+		t = self.tiapp.findtext(element_name)
+		if t: self.__setattr__(prop, unicode(t))
+
 	def read_tiapp(self):
 		tiapp_path = p.join(self.source_dir, "tiapp.xml")
 		if not p.exists(tiapp_path):
 			raise Exception("Could not find tiapp.xml at %s" % tiapp_path)
 
-		tiapp = self.tiapp = ElementTree()
-		def get_element(element_name, prop):
-			t = tiapp.findtext(element_name)
-			if t: self.__setattr__(prop, unicode(t))
-		tiapp.parse(tiapp_path)
-		get_element('name', 'name')
-		get_element('id', 'id')
-		get_element('version', 'version')
-		get_element('icon', 'image')
-		get_element('publisher', 'publisher')
-		get_element('url', 'url')
-		get_element('log-level', 'loglevel')
+		self.tiapp = ElementTree()
+		self.tiapp.parse(tiapp_path)
+		self.get_tiapp_element_as_prop('name', 'name')
+		self.get_tiapp_element_as_prop('id', 'id')
+		self.get_tiapp_element_as_prop('version', 'version')
+		self.get_tiapp_element_as_prop('icon', 'image')
+		self.get_tiapp_element_as_prop('publisher', 'publisher')
+		self.get_tiapp_element_as_prop('url', 'url')
+		self.get_tiapp_element_as_prop('log-level', 'loglevel')
 
 	def write_manifest(self, path):
 		f = codecs.open(p.join(path, 'manifest'), 'wb', 'utf-8')
@@ -82,7 +83,8 @@ class App(object):
 		f.write(u'#appid: ' + self.id + '\n')
 		f.write(u'#guid: ' + self.guid + '\n')
 		f.write(u'#version: ' + self.version + '\n')
-		f.write(u'#image: ' + self.image + '\n')
+		if hasattr(self, 'image'):
+			f.write(u'#image: ' + self.image + '\n')
 		if hasattr(self, 'publisher'):
 			f.write(u'#publisher: ' + self.publisher + '\n')
 		if hasattr(self, 'url'):
@@ -112,12 +114,12 @@ class App(object):
 	def stage(self, stage_dir, bundle=False):
 		print('Staging %s' % self.name)
 		self.stage_dir = stage_dir
-		contents = self.get_contents_dir()
+		contents = self.contents = self.get_contents_dir()
 
 		self.env.log(u'Copying contents from %s to %s' % (self.source_dir, contents))
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
 
-		installer_source = p.join(self.env.get_sdk_dir(self.runtime_version), 'installer')
+		installer_source = p.join(self.sdk_dir, 'installer')
 		self.env.log(u'Copying installer from %s to %s' % (installer_source, contents))
 		effess.copy_to_dir(installer_source, contents)
 
@@ -131,8 +133,8 @@ class App(object):
 
 			if hasattr(self, 'sdk_version'):
 				self.env.log(u'Copying SDK to %s' % contents)
-				effess.copy_to_dir(self.env.get_sdk_dir(self.sdk_version),
-					contents, exclude=self.env.get_excludes())
+				effess.copy_to_dir(self.sdk_dir, contents,
+					exclude=self.env.get_excludes())
 
 			# We don't bundle the MobileSDK currently.
 			#if hasattr(self, 'mobilesdk_version'):
@@ -159,7 +161,7 @@ class Win32App(App):
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot.exe to %s' % contents);
-		effess.copy(p.join(self.env.get_sdk_dir(self.runtime_version), 'kboot.exe'),
+		effess.copy(p.join(self.sdk_dir, 'kboot.exe'),
 			p.join(contents, '%s.exe' % self.name))
 
 class LinuxApp(App):
@@ -168,46 +170,5 @@ class LinuxApp(App):
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot to %s' % contents)
-		effess.copy(p.join(self.env.get_sdk_dir(self.runtime_version), 'kboot'),
+		effess.copy(p.join(self.sdk_dir, 'kboot'),
 			p.join(contents, self.name))
-
-class OSXApp(App):
-	def get_contents_dir(self):
-		return p.join(self.stage_dir, 'Contents')
-
-	def stage(self, stage_dir, bundle):
-		if not stage_dir.endswith('.app'):
-			stage_dir += '.app'
-
-		App.stage(self, stage_dir, bundle=bundle)
-		contents = self.get_contents_dir()
-		sdk_dir = self.env.get_sdk_dir(self.runtime_version)
-
-		self.env.log(u'Copying kboot to %s' % contents)
-		effess.copy(p.join(sdk_dir, 'kboot'),
-			p.join(contents, 'MacOS', self.name))
-
-		self.env.log(u'Copying Mac resources to %s' % contents)
-		# Copy Info.plist to Contents
-		plist_file = p.join(contents, 'Info.plist')
-		effess.copy(p.join(sdk_dir, 'Info.plist'), plist_file)
-		effess.replace_vars(plist_file, {
-			'APPEXE': self.name,
-			'APPNAME': self.name,
-			'APPICON': 'titanium.icns',
-			'APPID': self.id,
-			'APPNIB': 'MainMenu',
-			'APPVER': self.version
-		})
-
-		lproj_dir = p.join(contents, 'Resources', 'English.lproj')
-		effess.copy_to_dir(p.join(sdk_dir, 'MainMenu.nib'), lproj_dir)
-
-		# If there is an icon defined, create a custom titanium.icns file
-		if hasattr(self, 'image'):
-			self.env.launch('"%s" -in "%s" -out "%s"' % (
-				p.join(sdk_dir, 'makeicns'),
-				p.join(contents, 'Resources', self.image),
-				p.join(lproj_dir, 'titanium.icns')))
-		else:
-			effess.copy_to_dir(p.join(sdk_dir, 'titanium.icns'), lproj_dir)
