@@ -508,7 +508,7 @@ namespace ti
 		return this->config->GetTitle();
 	}
 
-	void OSXUserWindow::SetTitleImpl(std::string& newTitle)
+	void OSXUserWindow::SetTitleImpl(const std::string& newTitle)
 	{
 		if (nativeWindow != nil)
 		{

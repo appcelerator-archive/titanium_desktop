@@ -619,11 +619,12 @@ namespace ti
 		gchar* newTitle, gpointer data)
 	{
 		GtkUserWindow* userWindow = (GtkUserWindow*) data;
-		if (NULL == webkit_web_frame_get_parent(frame))
-		{
-			std::string newTitleString = newTitle;
-			userWindow->SetTitle(newTitleString);
-		}
+
+		// Only change the window title if the main frame's title changed.
+		if (webkit_web_frame_get_parent(frame))
+			return;
+
+		userWindow->SetTitle(newTitle);
 	}
 
 	static void FeaturesChangedCallback(WebKitWebView* view, GParamSpec *pspec, gpointer data)
@@ -1003,7 +1004,7 @@ namespace ti
 		return this->config->GetTitle();
 	}
 	
-	void GtkUserWindow::SetTitleImpl(std::string& title)
+	void GtkUserWindow::SetTitleImpl(const std::string& title)
 	{
 		if (this->gtkWindow != NULL)
 		{
