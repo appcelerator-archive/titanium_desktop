@@ -113,19 +113,6 @@
 	[window makeKeyAndOrderFront:nil];
 }
 
--(DOMElement*)findAnchor:(DOMNode*)node
-{
-	while (node)
-	{
-		if ([node nodeType] == 1 && [[node nodeName] isEqualToString:@"A"])
-		{
-			return (DOMElement*)node;
-		}
-		node = [node parentNode];
-	}
-	return nil;
-}
-
 #pragma mark -
 #pragma mark WebPolicyDelegate
 
@@ -335,6 +322,7 @@
 	AutoPtr<OSXUserWindow> newOSXWindow(UserWindow::CreateWindow(
 		config, AutoUserWindow([window userWindow], true)).cast<OSXUserWindow>());
 	newOSXWindow->Open();
+
 	return [newOSXWindow->GetNative() webView];
 }
 

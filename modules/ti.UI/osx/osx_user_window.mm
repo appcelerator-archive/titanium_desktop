@@ -544,19 +544,18 @@ namespace ti
 
 	void OSXUserWindow::SetResizableImpl(bool resizable)
 	{
-		if (nativeWindow != nil)
+		if (!nativeWindow)
+			return;
+
+		[nativeWindow setShowsResizeIndicator:resizable];
+		if (resizable)
 		{
-			[nativeWindow setShowsResizeIndicator:resizable];
-			if (resizable)
-			{
-				[nativeWindow setContentMinSize: NSMakeSize(config->GetMinWidth(), config->GetMinHeight())];
-				[nativeWindow setContentMaxSize: NSMakeSize(config->GetMaxWidth(), config->GetMaxHeight())];
-			}
-			else
-			{
-				[nativeWindow setMinSize: [nativeWindow frame].size];
-				[nativeWindow setMaxSize: [nativeWindow frame].size];
-			}
+			this->ReconfigureWindowConstraints();
+		}
+		else
+		{
+			[nativeWindow setMinSize: [nativeWindow frame].size];
+			[nativeWindow setMaxSize: [nativeWindow frame].size];
 		}
 	}
 
