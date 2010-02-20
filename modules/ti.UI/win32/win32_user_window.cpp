@@ -1355,6 +1355,16 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	if (!minMaxInfo)
 		return;
 
+
+	// If we are in fullscreen mode, minimum and maximum constraints
+	// should not apply, so just send the defaults back.
+	if (this->IsFullscreen())
+	{
+		minMaxInfo->ptMaxTrackSize.x = minMaxInfo->ptMaxTrackSize.y = INT_MAX;
+		minMaxInfo->ptMinTrackSize.x = minMaxInfo->ptMinTrackSize.y = 0;
+		return;
+	}
+
 	int maxWidth = (int) GetMaxWidth();
 	int minWidth = (int) GetMinWidth();
 	int maxHeight = (int) GetMaxHeight();
