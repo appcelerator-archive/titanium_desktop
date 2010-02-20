@@ -95,7 +95,7 @@
 	[super dealloc];
 }
 
-- (UserWindow*)userWindow
+- (OSXUserWindow*)userWindow
 {
 	return userWindow->get();
 }

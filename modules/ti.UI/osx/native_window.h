@@ -35,7 +35,7 @@ using namespace ti;
 - (void)open;
 - (void)frameLoaded;
 - (WebView*)webView;
-- (UserWindow*)userWindow;
+- (OSXUserWindow*)userWindow;
 - (void)showInspector:(BOOL)console;
 @end
 
