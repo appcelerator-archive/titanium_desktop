@@ -209,8 +209,11 @@
 
 - (void)webView:(WebView *)sender didReceiveTitle:(NSString *)title forFrame:(WebFrame *)frame
 {
-	std::string newTitle = [title UTF8String];
-	[window userWindow]->SetTitle(newTitle);
+	// Only set the title when the main frame title changes.
+	if ([frame parentFrame])
+		return;
+
+	[window userWindow]->SetTitle([title UTF8String]);
 }
 
 - (void)webView:(WebView *)sender didFinishLoadForFrame:(WebFrame *)frame

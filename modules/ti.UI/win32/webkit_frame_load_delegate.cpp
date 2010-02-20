@@ -75,17 +75,28 @@ ULONG STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::Release()
 }
 
 HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didReceiveTitle(
-	/* [in] */ IWebView *webView,
+	/* [in] */ IWebView* webView,
 	/* [in] */ BSTR title,
-	/* [in] */ IWebFrame *frame)
+	/* [in] */ IWebFrame* frame)
 {
-	Win32UserWindow* userWindow = this->window;
+	// Only change the title if the new title was received for the main frame.
+	IWebFrame* mainFrame;
+	hr = webView->mainFrame(&mainFrame);
+	if (FAILED(hr))
+	{
+		Logger::Get("FrameLoadDelegate")->Error("Could not fetch main "
+			"frame in didReceiveTitle delegate method");
+		return S_OK;
+	}
+	if (frame != mainFrame)
+		return S_OK;
 
 	if (title)
 	{
 		std::string newTitle;
 		newTitle.append(bstr_t(title));
-		userWindow->SetTitle(newTitle);
+		this->window->SetTitle(newTitle);
 	}
 	return S_OK;
-}
+serw
+l}

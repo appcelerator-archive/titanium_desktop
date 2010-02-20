@@ -817,7 +817,7 @@ void Win32UserWindow::SetBoundsImpl(Bounds bounds)
 	MoveWindow(windowHandle, bounds.x, bounds.y, bounds.width, bounds.height, TRUE);
 }
 
-void Win32UserWindow::SetTitleImpl(std::string& title)
+void Win32UserWindow::SetTitleImpl(const std::string& title)
 {
 	std::wstring titleW = ::UTF8ToWide(title);
 	SetWindowTextW(windowHandle, titleW.c_str());

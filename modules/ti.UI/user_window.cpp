@@ -1239,7 +1239,7 @@ void UserWindow::_SetTitle(const kroll::ValueList& args, kroll::KValueRef result
 	this->SetTitle(newTitle);
 }
 
-void UserWindow::SetTitle(std::string& newTitle)
+void UserWindow::SetTitle(const std::string& newTitle)
 {
 	this->config->SetTitle(newTitle);
 	if (this->active)
