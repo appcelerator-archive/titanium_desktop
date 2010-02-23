@@ -1,59 +1,55 @@
 /**
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2009 Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2009-2010 Appcelerator, Inc. All Rights Reserved.
  */
 #include <kroll/utils/utils.h>
+using namespace KrollUtils;
+using KrollUtils::Application;
+using KrollUtils::SharedApplication;
+using KrollUtils::KComponentType;
+using std::wstring;
+using std::string;
+
 #include <msi.h>
 #include <msiquery.h>
-#include <sstream>
 #include <Wininet.h>
-#include <math.h>
+#include <cmath>
+#include <sstream>
+#include "common.h"
 
 #pragma comment(linker, "/EXPORT:NetInstallSetup=_NetInstallSetup@4")
 #pragma comment(linker, "/EXPORT:NetInstall=_NetInstall@4")
 #pragma comment(linker, "/EXPORT:Clean=_Clean@4")
 
-using namespace KrollUtils;
-using namespace std;
 wstring MsiProperty(MSIHANDLE hInstall, const wchar_t* property)
 {
 	wchar_t buffer[4096];
 	DWORD bufferLength = 4096;
 	MsiGetProperty(hInstall, property, buffer, &bufferLength);
-
 	return wstring(buffer, bufferLength);
 }
 
 vector<wstring>& Split(const wstring& s, wchar_t delim, vector<wstring>& elems)
 {
-	wstringstream ss(s);
+	std::wstringstream ss(s);
 	wstring item;
-	while(getline(ss, item, delim))
+	while (getline(ss, item, delim))
 	{
 		elems.push_back(item);
 	}
 	return elems;
 }
 
-void ShowError(string msg)
+HWND GetInstallerHWND()
 {
-	wstring wmsg = KrollUtils::UTF8ToWide(msg);
-	MessageBoxW(
-		GetDesktopWindow(),
-		wmsg.c_str(),
-		L"Installation Failed",
-		MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
+	HWND hwnd = FindWindowW(L"MsiDialogCloseClass", NULL);
+	if (!hwnd)
+		hwnd = GetActiveWindow();
+
+	return hwnd;
 }
 
-void ShowError(wstring wmsg)
-{
-	MessageBoxW(
-		GetDesktopWindow(),
-		wmsg.c_str(),
-		L"Installation Failed",
-		MB_OK | MB_SYSTEMMODAL | MB_ICONEXCLAMATION);
-}
 
 SharedApplication CreateApplication(MSIHANDLE hInstall)
 {
@@ -61,36 +57,27 @@ SharedApplication CreateApplication(MSIHANDLE hInstall)
 	vector<wstring> tokens;
 	Split(params, L';', tokens);
 
-	if (tokens[0] == L"app_update")
+	wstring dependencies(tokens[0]);
+	vector<pair<string, string> > manifest;
+	Split(dependencies, L'&', tokens);
+	for (size_t i = 0; i < tokens.size(); i++)
 	{
-		wstring updateManifest = tokens[1];
-		wstring appPath = tokens[2];
+		wstring token = tokens[i];
+		wstring key = token.substr(0, token.find(L"="));
+		wstring value = token.substr(token.find(L"=")+1);
 
-		return Application::NewApplication(
-			WideToUTF8(updateManifest), WideToUTF8(appPath));
+		manifest.push_back(pair<string,string>(
+			WideToUTF8(key), WideToUTF8(value)));
 	}
-	else
-	{
-		wstring dependencies(tokens[0]);
-		vector<pair<string, string> > manifest;
-		Split(dependencies, L'&', tokens);
-		for (size_t i = 0; i < tokens.size(); i++)
-		{
-			wstring token = tokens[i];
-			wstring key = token.substr(0, token.find(L"="));
-			wstring value = token.substr(token.find(L"=")+1);
 
-			manifest.push_back(pair<string,string>(
-				WideToUTF8(key), WideToUTF8(value)));
-		}
-
-		return Application::NewApplication(manifest);
-	}
+	return Application::NewApplication(manifest);
 }
 
-vector<SharedDependency>
-FindUnresolvedDependencies(MSIHANDLE hInstall)
+vector<SharedDependency> FindUnresolvedDependencies(MSIHANDLE hInstall)
 {
+	// Tell the installer to check the installation state and execute
+	// the code needed during the rollback, acquisition, or
+	// execution phases of the installation.
 	vector<SharedDependency> unresolved;
 	vector<SharedComponent> components;
 	vector<SharedComponent>& installedComponents =
@@ -100,8 +87,7 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 		components.push_back(installedComponents.at(i));
 	}
 
-	wstring dependencies, bundledModules, bundledRuntime;
-	wstring updateManifest, installDir;
+	wstring dependencies, bundledModules, bundledRuntime, installDir;
 	vector<wstring> tokens;
 	// deferred / async mode, get from the hacked "CustomActionData" property
 	if (MsiGetMode(hInstall, MSIRUNMODE_SCHEDULED) == TRUE)
@@ -109,17 +95,10 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 		wstring params = MsiProperty(hInstall, L"CustomActionData");
 		Split(params, L';', tokens);
 
-		if (tokens[0] == L"app_update")
-		{
-			updateManifest.assign(tokens[1]);
-			installDir.assign(tokens[2]);
-		}
-		else
-		{
-			dependencies.assign(tokens[0]);
-			if (tokens.size() > 1) bundledModules.assign(tokens[1]);
-			if (tokens.size() > 2) bundledRuntime.assign(tokens[2]);
-		}
+		dependencies.assign(tokens[0]);
+		if (tokens.size() > 1) bundledModules.assign(tokens[1]);
+		if (tokens.size() > 2) bundledRuntime.assign(tokens[2]);
+		
 	}
 	else // immediate mode, get from actual properties.. god this sucks
 	{
@@ -141,20 +120,10 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 			RUNTIME, "runtime", "", "", true));
 	}
 
-	if (updateManifest.size() > 0)
-	{
-		SharedApplication app = Application::NewApplication(
-			WideToUTF8(updateManifest), WideToUTF8(installDir));
 
-
-		unresolved = app->ResolveDependencies();
-		if (FileUtils::Basename(WideToUTF8(updateManifest)) == ".update")
-		{
-			unresolved.push_back(Dependency::NewDependencyFromValues(
-				APP_UPDATE, "app_update", app->version));
-		}
-	}
-
+	// We cannot resolve dependencies in the normal way, since bundled modules
+	// are still packed into the MSI and won't be found. Instead, go through
+	// the unbundled modules line-by-line and try to resolve them like that.
 	tokens.clear();
 	Split(dependencies, L'&', tokens);
 	for (size_t i = 0; i < tokens.size(); i++)
@@ -169,8 +138,7 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 
 		SharedDependency dependency = Dependency::NewDependencyFromManifestLine(
 			WideToUTF8(key), WideToUTF8(value));
-		SharedComponent c = BootUtils::ResolveDependency(dependency, components);
-		if (c.isNull())
+		if (BootUtils::ResolveDependency(dependency, components).isNull())
 		{
 			unresolved.push_back(dependency);
 		}
@@ -179,448 +147,134 @@ FindUnresolvedDependencies(MSIHANDLE hInstall)
 	return unresolved;
 }
 
-// a helper function that sends a progress message to the installer
-UINT Progress(MSIHANDLE hInstall, SharedDependency dependency,
-	const wchar_t *intro, int percent)
+
+// A helper function that sends a progress message to the installer, returns
+// false if the user has cancelled the action.
+static int currentProgress = 0;
+static MSIHANDLE installHandle;
+static bool isDownloading = false;
+bool Progress(SharedDependency dependency, int percentage)
 {
-	static int oldPercent = -1;
-	if (oldPercent == percent) // prevent updating too often / flickering
-		return IDOK;
+	// The download step represents the first 50% of the download+extract
+	// action, so divide the progress in half here.
+	if (isDownloading)
+		percentage = percentage / 2;
 
-	oldPercent = percent;
-
-	wstring message(intro);
-	if (dependency->type == MODULE)
-	{
-		message += L"Module \"";
-		message += UTF8ToWide(dependency->name);
-		message += L"\" ";
-	}
-	else if (dependency->type == SDK)
-	{
-		message += L"SDK ";
-	}
-	else if (dependency->type == MOBILESDK)
-	{
-		message += L"Mobile SDK ";
-	}
-	else if (dependency->type == APP_UPDATE)
-	{
-		message += L"Application Update ";
-	}
-	else
-	{
-		message += L"Runtime ";
-	}
-	message += UTF8ToWide(dependency->version);
-	message += L" (";
-	wchar_t buffer[8];
-	_itow(percent, buffer, 10);
-	message += buffer;
-	message += L"%)";
+	// If the progress hasn't increased, just bail here.
+	if (percentage <= currentProgress)
+		return true;
 
 	PMSIHANDLE actionRecord = MsiCreateRecord(3);
+	MsiRecordSetInteger(actionRecord, 1, percentage); // Current percentage.
+	MsiRecordSetInteger(actionRecord, 2, 0); // Unused
+	MsiRecordSetInteger(actionRecord, 3, 0); // Unused
+	UINT result = MsiProcessMessage(installHandle, INSTALLMESSAGE_ACTIONDATA, actionRecord);
+	if (result == IDCANCEL)
+		return false;
 
-	MsiRecordSetString(actionRecord, 1, L"NetInstall");
-	MsiRecordSetString(actionRecord, 2, message.c_str());
-	MsiRecordSetString(actionRecord, 3, L"Downloading..");
+	MsiRecordSetInteger(actionRecord, 1, 2); // Type of message: Increment the bar
+	MsiRecordSetInteger(actionRecord, 2, currentProgress - percentage); // Number of ticks the bar has moved.
+	MsiRecordSetInteger(actionRecord, 3, 0); // Unused
+	result = MsiProcessMessage(installHandle, INSTALLMESSAGE_PROGRESS, actionRecord);
+	if (result == IDCANCEL)
+		return false;
 
-	return MsiProcessMessage(hInstall, INSTALLMESSAGE_ACTIONSTART, actionRecord);
+	currentProgress = percentage;
+	return true;
 }
 
-extern "C" UINT __stdcall
-NetInstallSetup(MSIHANDLE hInstall)
+extern "C" UINT __stdcall NetInstallSetup(MSIHANDLE hInstall)
 {
-	// Installer is generating the installation script of the
-	// custom action.
-
-	// Tell the installer to increase the value of the final total
-	// length of the progress bar by the total number of ticks in
-	// the custom action.
-	vector<SharedDependency> unresolved = FindUnresolvedDependencies(hInstall);
-	PMSIHANDLE hProgressRec = MsiCreateRecord(2);
-
-	MsiRecordSetInteger(hProgressRec, 1, 3);
-	MsiRecordSetInteger(hProgressRec, 2, unresolved.size());
-
-	UINT iResult = MsiProcessMessage(
-		hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
-	if ((iResult == IDCANCEL))
-		return ERROR_INSTALL_USEREXIT;
+	// No-op
 	return ERROR_SUCCESS;
 }
 
-typedef struct {
-	MSIHANDLE hInstall;
-	SharedDependency dependency;
-} UnzipProgressData;
-
-bool UnzipProgress(char *message, int current, int total, void *data)
+bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependency dependency)
 {
-	UnzipProgressData* progressData = (UnzipProgressData*) data;
+	// Wow, this is convoluted and easy to get wrong. It feels like a
+	// scene out of Fear and Loathing in Las Vegas. Essentially we've been
+	// consuming mind-altering substances for the better part of a day
+	// (coffee, of course) and now we're in bat country.
 
-	int percent = total == 0 ? 0 : floor(((double)current/(double)total)*100);
-	UINT result = Progress(progressData->hInstall,
-		progressData->dependency, L"Extracting ", percent);
+	// All the information on these magic numbers can be found here:
+	// http://msdn.microsoft.com/en-us/library/aa370354(VS.85).aspx
+	// If that page disappears, we're basically all screwed, but you might
+	// have luck Binging or whatever for: INSTALLMESSAGE_PROGRESS.
+
+	// I pity you, I really do, if you need to change this code. Rest assured
+	// though, if you add code here without documenting what every single
+	// magic number does, I will build a time machine, travel into the future/past
+	// as appropriate and engage in the most heinous psychological torture that
+	// our busted legal system affords. Yes, that is a threat.
+
+	// Tell the installer to use explicit progress messages and reset the progress bar.
+	PMSIHANDLE record = MsiCreateRecord(3);
+	MsiRecordSetInteger(record, 1, 1); // Type of message: Information about progress.
+	MsiRecordSetInteger(record, 2, 1); // Number of ticks to move per message.
+	MsiRecordSetInteger(record, 3, 0); // We will send explicit progress message.
+	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
 	if (result == IDCANCEL)
-		return false;
-	return true;
-}
+		return ERROR_INSTALL_USEREXIT;
+	MsiRecordSetInteger(record, 1, 0); // Type of message: Reset progress bar.
+	MsiRecordSetInteger(record, 2, 100); // Total number of ticks to use.
+	MsiRecordSetInteger(record, 3, 0); // Left-to-right progress bar.
+	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
+	if (result == IDCANCEL)
+		return ERROR_INSTALL_USEREXIT;
 
-wstring GetFilePath(SharedDependency dependency)
-{
-	wstring outFilename;
-	string filename;
-	switch (dependency->type)
-	{
-		case MODULE: filename = "module-"; break;
-		case RUNTIME: filename = "runtime-"; break;
-		case MOBILESDK:filename = "mobilesdk-"; break;
-		case APP_UPDATE: filename = "appupdate-"; break;
-		case SDK: filename = "sdk-"; break;
-	}
-	filename.append(dependency->name);
-	filename.append("-");
-	filename.append(dependency->version);
-	filename.append(".zip");
-	static string tempdir;
-	if (tempdir.empty())
-	{
-		tempdir.assign(FileUtils::GetTempDirectory());
-		FileUtils::CreateDirectory(tempdir);
-	}
-
-	return UTF8ToWide(FileUtils::Join(tempdir.c_str(), filename.c_str(), 0));
-}
-
-bool Install(MSIHANDLE hInstall, SharedDependency dependency)
-{
-	string componentInstallPath = FileUtils::GetSystemRuntimeHomeDirectory();
-	string destination, updateFile;
+	// Set up the custom action description and template.
+	wstring description(L"Downloading and extracting the");
 	if (dependency->type == MODULE)
-	{
-		destination = FileUtils::Join(
-			componentInstallPath.c_str(), "modules", OS_NAME,
-			dependency->name.c_str(), dependency->version.c_str(), 0);
-	}
-	else if (dependency->type == RUNTIME)
-	{
-		destination = FileUtils::Join(
-			componentInstallPath.c_str(), "runtime", OS_NAME,
-			dependency->version.c_str(), 0);
-	}
-	else if (dependency->type == SDK || dependency->type == MOBILESDK)
-	{
-		destination = componentInstallPath;
-	}
+		description.append(UTF8ToWide(dependency->name) + L" module");
+	else if (dependency->type == SDK)
+		description.append(L" SDK");
+	else if (dependency->type == MOBILESDK)
+		description.append(L" Mobile SDK");
 	else if (dependency->type == APP_UPDATE)
-	{
-		wstring params = MsiProperty(hInstall, L"CustomActionData");
-		vector<wstring> tokens;
-		Split(params, L';', tokens);
-
-		updateFile = WideToUTF8(tokens[1]);
-		destination = WideToUTF8(tokens[2]);
-	}
+		description.append(L" application update");
 	else
-	{
+		description.append(L" runtime");
+	description += L" (" + UTF8ToWide(dependency->version) + L")";
+	wstring plate(L"[1]\% complete...");
+
+	// Update the install message display. We've basically set up a template
+	// above that looks like '[1]% complete". When we sent the INSTALLMESSAGE_ACTIONDATA
+	// message, the '[1]' will turn into the value in the first message field.
+	// We aren't using the other fields right now, but we may in the future.
+	MsiRecordSetString(record, 1, L"NetInstall"); // Custom action name
+	MsiRecordSetString(record, 2, description.c_str()); // Description.
+	MsiRecordSetString(record, 3, plate.c_str()); // Template for action data messages.
+	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_ACTIONSTART, record);
+	if (result == IDCANCEL)
+		return ERROR_INSTALL_USEREXIT;
+
+	currentProgress = 0;
+	installHandle = hInstall;
+	isDownloading = true;
+	if (!DownloadDependency(app, dependency))
 		return false;
-	}
 
-	// Recursively create directories
-	UnzipProgressData *data = new UnzipProgressData();
-	data->hInstall = hInstall;
-	data->dependency = dependency;
-	FileUtils::CreateDirectory(destination, true);
-
-	string utf8Path = WideToUTF8(GetFilePath(dependency));
-	bool success = FileUtils::Unzip(
-		utf8Path, destination, &UnzipProgress, (void*)data);
-
-	if (success && dependency->type == APP_UPDATE)
-	{
-		FileUtils::DeleteFile(updateFile);
-	}
-
-	//delete data;
-	return success;
-}
-
-static HWND GetInstallerHWND()
-{
-	HWND hwnd = FindWindowW(L"MsiDialogCloseClass", NULL);
-	if (!hwnd)
-		hwnd = GetActiveWindow();
-
-	return hwnd;
-}
-
-static void ShowLastDownloadEror()
-{
-	DWORD bufferSize = 1024, error;
-	wchar_t staticErrorBuffer[1024];
-	wchar_t* errorBuffer = staticErrorBuffer;
-	BOOL success = InternetGetLastResponseInfo(&error, errorBuffer, &bufferSize);
-
-	if (!success && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-	{
-		errorBuffer = new wchar_t[bufferSize];
-		success = InternetGetLastResponseInfo(&error, errorBuffer, &bufferSize);
-	}
-
-	std::wstring errorString(L"Download failed: Unknown error");
-	if (success)
-		errorString = std::wstring(L"Download failed:") + errorBuffer;
-
-	ShowError(::WideToSystem(errorString));
-
-	if (errorBuffer != staticErrorBuffer)
-		delete [] errorBuffer;
-}
-
-bool DownloadDependency(MSIHANDLE hInstall, HINTERNET hINet, SharedDependency dependency)
-{
-	SharedApplication app = CreateApplication(hInstall);
-	wstring url(UTF8ToWide(app->GetURLForDependency(dependency)));
-	wstring outFilename(GetFilePath(dependency));
-	
-	WCHAR szDecodedUrl[INTERNET_MAX_URL_LENGTH];
-	DWORD cchDecodedUrl = INTERNET_MAX_URL_LENGTH;
-	WCHAR szDomainName[INTERNET_MAX_URL_LENGTH];
-
-	// parse the URL
-	HRESULT hr = CoInternetParseUrl(url.c_str(), PARSE_DECODE,
-		URL_ENCODING_NONE, szDecodedUrl, INTERNET_MAX_URL_LENGTH,
-		&cchDecodedUrl, 0);
-	if (hr != S_OK)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not decode URL: ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	// figure out the domain/hostname
-	hr = CoInternetParseUrl(szDecodedUrl, PARSE_DOMAIN,
-		0, szDomainName, INTERNET_MAX_URL_LENGTH, &cchDecodedUrl, 0);
-	if (hr != S_OK)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not parse domain: ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	// start the HTTP fetch
-	HINTERNET hConnection = InternetConnectW(hINet, szDomainName,
-		80, L" ", L" ", INTERNET_SERVICE_HTTP, 0, 0 );
-	if (!hConnection)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not start connection: ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	wstring wurl(szDecodedUrl);
-	wstring path = wurl.substr(wurl.find(szDomainName)+wcslen(szDomainName));
-	HINTERNET hRequest = HttpOpenRequestW(hConnection, L"GET", path.c_str(),
-		0, 0, 0,
-		INTERNET_FLAG_IGNORE_CERT_CN_INVALID | // Disregard TLS certificate errors.
-		INTERNET_FLAG_IGNORE_CERT_DATE_INVALID |
-		INTERNET_FLAG_KEEP_CONNECTION | // Needed for NTLM authentication.
-		INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_RELOAD | // Always get the latest.
-		INTERNET_FLAG_NO_COOKIES, 0);
-
-	resend:
-	HttpSendRequest(hRequest, 0, 0, 0, 0);
-
-	DWORD dwErrorCode = hRequest ? ERROR_SUCCESS : GetLastError();
-	if (InternetErrorDlg(GetInstallerHWND(), hRequest, dwErrorCode,
-		FLAGS_ERROR_UI_FILTER_FOR_ERRORS |
-		FLAGS_ERROR_UI_FLAGS_CHANGE_OPTIONS |
-		FLAGS_ERROR_UI_FLAGS_GENERATE_DATA,
-		0) == ERROR_INTERNET_FORCE_RETRY)
-		goto resend;
-
-	CHAR buffer[2048];
-	DWORD bytesRead;
-	DWORD contentLength = 0;
-	DWORD statusCode = 0;
-	DWORD size = sizeof(contentLength);
-	BOOL success = HttpQueryInfo(hRequest,
-		HTTP_QUERY_STATUS_CODE | HTTP_QUERY_FLAG_NUMBER,
-		(LPDWORD) &statusCode, (LPDWORD) &size, 0);
-	if (!success || statusCode != 200)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		if (success)
-		{
-			ostringstream str;
-			str << "Invalid HTTP Status Code (" << statusCode << ")";
-			error = str.str();
-		}
-		error = string("Could not query info: ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	success = HttpQueryInfo(hRequest,
-		HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
-		(LPDWORD)&contentLength, (LPDWORD)&size, 0);
-	if (!success)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not determine content length: ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	// now stream the resulting HTTP into a file
-	HANDLE file = CreateFileW(outFilename.c_str(), GENERIC_WRITE,
-		0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	if (file == INVALID_HANDLE_VALUE)
-	{
-		string error = Win32Utils::QuickFormatMessage(GetLastError());
-		error = string("Could not open output file (") + WideToUTF8(outFilename) +
-			string("): ") + error;
-		ShowError(error);
-		return false;
-	}
-
-	// Keep reading from InternetReadFile as long as it's successful and the number
-	// of bytes read is greater than zero.
-	bool showError = true;
-	DWORD total = 0;
-	while ((success = InternetReadFile(hRequest, buffer, 2047, &bytesRead)) && bytesRead > 0)
-	{
-		// Be sure to Write the entire buffer into to the file.
-		DWORD bytesWritten = 0;
-		while (bytesWritten < bytesRead)
-		{
-			if (!WriteFile(file, buffer + bytesWritten,
-				bytesRead - bytesWritten, &bytesWritten, 0))
-			{
-				showError = success = false;
-				string error = Win32Utils::QuickFormatMessage(GetLastError());
-				error = string("Could write data to output file (") + WideToUTF8(outFilename) +
-					string("): ") + error;
-				ShowError(error);
-				break;
-			}
-		}
-
-		total += bytesRead;
-		UINT result = Progress(hInstall, dependency, L"Downloading ",
-			floor(((double)total/(double)contentLength)*100));
-		if (result == IDCANCEL)
-		{
-			showError = success = false;
-			break;
-		}
-	}
-
-	if (!success)
-	{
-		if (showError)
-			ShowLastDownloadEror();
-
-		CancelIo(file);
-		CloseHandle(file);
-		DeleteFileW(outFilename.c_str());
-	}
-	else
-	{
-		CloseHandle(file);
-	}
-
-	InternetCloseHandle(hRequest);
-	return success;
-}
-
-bool ProcessDependency(MSIHANDLE hInstall, PMSIHANDLE hProgressRec,
-	HINTERNET hINet, SharedDependency dependency)
-{
-	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
-	if ((result == IDCANCEL))
-		return false;
-	if (!DownloadDependency(hInstall, hINet, dependency))
-		return false;
-	if (!Install(hInstall, dependency))
+	isDownloading = false;
+	if (!InstallDependency(app, dependency))
 		return false;
 
 	return true;
 }
 
-// inspired by http://msdn.microsoft.com/en-us/library/aa367525(VS.85).aspx
-// also see http://msdn.microsoft.com/en-us/library/aa370354(VS.85).aspx for INSTALLMESSAGE_PROGRESS message values
-extern "C" UINT __stdcall
-NetInstall(MSIHANDLE hInstall)
+extern "C" UINT __stdcall NetInstall(MSIHANDLE hInstall)
 {
-	// Tell the installer to check the installation state and execute
-	// the code needed during the rollback, acquisition, or
-	// execution phases of the installation.
+	// If the SDK is listed, we need to ignore other non-SDK components below.
+	SharedApplication app(CreateApplication(hInstall));
 	vector<SharedDependency> unresolved = FindUnresolvedDependencies(hInstall);
-
-	PMSIHANDLE hActionRec = MsiCreateRecord(3);
-	PMSIHANDLE hProgressRec = MsiCreateRecord(3);
-
-	// Installer is executing the installation script. Set up a
-	// record specifying appropriate templates and text for
-	// messages that will inform the user about what the custom
-	// action is doing. Tell the installer to use this template and
-	// text in progress messages.
-
-	MsiRecordSetString(hActionRec, 1, TEXT("NetInstall"));
-	MsiRecordSetString(hActionRec, 2, TEXT("Downloading dependencies..."));
-	MsiRecordSetString(hActionRec, 3, TEXT("Downloading [4] [5] ([1] of [2]...)"));
-	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_ACTIONSTART, hActionRec);
-	if ((result == IDCANCEL))
-		return ERROR_INSTALL_USEREXIT;
-
-	// Tell the installer to use explicit progress messages.
-	MsiRecordSetInteger(hProgressRec, 1, 1);
-	MsiRecordSetInteger(hProgressRec, 2, 1);
-	MsiRecordSetInteger(hProgressRec, 3, 0);
-	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
-	if ((result == IDCANCEL))
-		return ERROR_INSTALL_USEREXIT;
-
-	//Specify that an update of the progress bar's position in
-	//this case means to move it forward by one increment.
-	MsiRecordSetInteger(hProgressRec, 1, 2);
-	MsiRecordSetInteger(hProgressRec, 2, 1);
-	MsiRecordSetInteger(hProgressRec, 3, 0);
-
-	// The following loop sets up the record needed by the action
-	// messages and tells the installer to send a message to update
-	// the progress bar.
-
-	MsiRecordSetInteger(hActionRec, 2, unresolved.size());
-
-	// Initialize the Interent DLL
-	HINTERNET hINet = InternetOpenW(
-		L"Mozilla/5.0 (compatible; Titanium_Downloader/0.1; Win32)",
-		INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
-	if (!hINet)
-	{
-		string error(Win32Utils::QuickFormatMessage(GetLastError()));
-		error = string("Could not open Internet connection: ") + error;
-		ShowError(error);
-		return ERROR_INSTALL_FAILURE;
-	}
-
-	// Install app updates and SDKs first.
-	// If the (non-mobile) SDK is listed, we need to ignore runtime+modules below
 	bool sdkInstalled = false;
 	for (size_t i = 0; i < unresolved.size(); i++)
 	{
 		SharedDependency dep = unresolved.at(i);
-		if (dep->type == SDK || dep->type == MOBILESDK || dep->type == APP_UPDATE)
+		if (dep->type == SDK || dep->type == MOBILESDK)
 		{
-			if (!ProcessDependency(hInstall, hProgressRec, hINet, dep))
+			if (!ProcessDependency(hInstall, app, dep))
 			{
-				InternetCloseHandle(hINet);
+				ShutdownNetConnection();
 				return ERROR_INSTALL_USEREXIT;
 			}
 
@@ -637,21 +291,20 @@ NetInstall(MSIHANDLE hInstall)
 			if (dep->type != SDK && dep->type != MOBILESDK &&
 				dep->type != APP_UPDATE && !sdkInstalled)
 			{
-				if (!ProcessDependency(hInstall, hProgressRec, hINet, dep))
+				if (!ProcessDependency(hInstall, app, dep))
 				{
-					InternetCloseHandle(hINet);
+					ShutdownNetConnection();
 					return ERROR_INSTALL_USEREXIT;
 				}
 			}
 		}
 	}
 
-	InternetCloseHandle(hINet);
+	ShutdownNetConnection();
 	return ERROR_SUCCESS;
 }
 
-extern "C" UINT __stdcall
-Clean(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Clean(MSIHANDLE hInstall)
 {
 	wchar_t dir[MAX_PATH];
 	DWORD dirSize = MAX_PATH;
