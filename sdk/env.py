@@ -1,5 +1,6 @@
 import app
 import osx_app
+import linux_app
 import os
 import platform
 import sys
@@ -9,9 +10,9 @@ class PackagingEnvironment(object):
 	def __init__(self, version, target_os, product_name="kroll"):
 		self.target_os = target_os
 		if target_os is 'linux':
-			self.App = app.LinuxApp
+			self.App = linux_app.LinuxApp
 		if target_os is 'osx':
-			self.App = osx_app.OSXApp
+			self.App = osx_app.App
 		if target_os is 'win32':
 			self.App = app.Win32App
 
