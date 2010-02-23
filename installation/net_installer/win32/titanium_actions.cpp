@@ -235,7 +235,7 @@ bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependen
 	else
 		description.append(L" runtime");
 	description += L" (" + UTF8ToWide(dependency->version) + L")";
-	wstring plate(L"[1]\% complete...");
+	wstring plate(L"About [1]\% complete...");
 
 	// Update the install message display. We've basically set up a template
 	// above that looks like '[1]% complete". When we sent the INSTALLMESSAGE_ACTIONDATA
@@ -263,6 +263,21 @@ bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependen
 
 extern "C" UINT __stdcall NetInstall(MSIHANDLE hInstall)
 {
+	// If we are in the script generation phase, set up the progress bar and return.
+	if (MsiGetMode(hInstall, MSIRUNMODE_SCHEDULED) != TRUE)
+	{
+		// Tell the installer to increase the value of the final total
+		// length of the progress bar by the total number of ticks in
+		// the custom action.
+		PMSIHANDLE hProgressRec = MsiCreateRecord(2);
+		MsiRecordSetInteger(hProgressRec, 1, 3); // Enable this action to add ticks to the progress bar
+		MsiRecordSetInteger(hProgressRec, 2, 100); // Number of ticks to add.
+		UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
+		if (result == ID_CANCEL)
+			return ERROR_INSTALL_USEREXIT;
+		return ERROR_SUCCESS;
+	}
+
 	// If the SDK is listed, we need to ignore other non-SDK components below.
 	SharedApplication app(CreateApplication(hInstall));
 	vector<SharedDependency> unresolved = FindUnresolvedDependencies(hInstall);
