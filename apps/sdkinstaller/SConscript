@@ -18,11 +18,6 @@ def package_developer(target, source, env):
 		url='http://appcelerator.org',
 		sdk=True)
 
-	# Create the basic application shell
-	package_dist = True
-	if 'PACKAGE_DIST' in env:
-		package_dist = env['PACKAGE_DIST']
-
 	destdir = p.join(build.dir, 'Titanium SDK Installer')
 	if build.is_osx(): destdir += ".app"
 
@@ -38,21 +33,6 @@ def package_developer(target, source, env):
 	to_copy = ['tiapp.xml', 'LICENSE.txt']
 	for item in to_copy:
 		effess.copy_to_dir(p.join(cwd, item), developer.contents)
-
-	# Don't mark this application as installed, because we want
-	# the appinstaller to run when it is first executed
-	#futils.Touch(p.join(developer.contents, '.installed'))
-
-	if not build.nopackage:
-		developer.package(
-			out_dir=build.dist_dir,
-			# osx options
-			app_name="Titanium SDK Installer",
-			vol_name="Titanium",
-			dmg_name='titanium-sdkinstaller-' + build.version,
-			icns_file=p.join(cwd, 'osx', 'VolumeIcon.icns'),
-			ds_store_file=p.join(cwd, 'osx', 'installer_DS_Store'),
-			ds_store_extras=[p.join(cwd, 'osx', 'background.jpg')])
 
 build.env.Append(BUILDERS = {'PackageSDK' : Builder(action=package_developer)})
 developer_bundled = build.env.PackageSDK("#dummy-target", [])
