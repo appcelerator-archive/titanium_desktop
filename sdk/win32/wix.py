@@ -271,10 +271,8 @@ def build_msi(template, args, basename, destdir):
 def create_installer(builder):
 	sdk_path = builder.options.assets_dir
 	installer_sdk_path = os.path.join(sdk_path, 'installer')
-
 	app_installer_template = read_template(sdk_path, 'app_installer_template.wxs')
-	app_update_template = read_template(sdk_path, 'app_update_template.wxs')
-		
+
 	lang = get_from_tiapp(builder.options.tiapp, 'language', 'en-us')
 	app_language = get_app_language(lang)
 	app_codepage = get_app_codepage(lang)
@@ -338,13 +336,6 @@ def create_installer(builder):
 		"banner_bmp": banner_bmp,
 		"titanium_installer_dll": titanium_installer_dll,
 		"crt_msm": crt_msm }
-	
-	update_args = common_args.copy()
-	update_args["manifest_guid"] = gen_guid()
-	update_args["manifest_path"] = os.path.join(builder.base_dir, "manifest")
-	update_args["app_exe_guid"] = gen_guid()
-	update_msi = build_msi(app_update_template, update_args,
-		builder.appname, os.path.join(builder.base_dir, 'installer'))
 	
 	installed_file = os.path.join(builder.base_dir, ".installed")
 	open(installed_file, "a").close() #touch
