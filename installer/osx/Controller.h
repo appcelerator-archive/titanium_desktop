@@ -68,11 +68,6 @@ SharedApplication app;
 -(void)install:(Job*)job;
 -(void)downloadJob:(Job*)job atIndex:(int)index;
 -(void)createInstallerMenu:(NSString*)applicationName;
--(void)showIntroDialog: (NSString*)appName
-	path:(NSString*)appPath
-	version:(NSString*)appVersion
-	publisher:(NSString*)appPublisher
-	url:(NSString*)appURL
-	image:(NSString*)appImage;
+-(void)showIntroDialog:(SharedApplication)app;
 
 @end

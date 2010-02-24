@@ -568,41 +568,9 @@ static int totalJobs = 0;
 	}
 	else
 	{
-		quiet = YES; // An update will happen silently
 		app = Application::NewApplication([updateFile UTF8String], [appPath UTF8String]);
 		NSString* updateURL = [NSString stringWithUTF8String:app->GetUpdateURL().c_str()];
 		[jobs addObject:[[Job alloc] initUpdate:updateURL]];
-	}
-	NSString *appName, *appVersion, *appPublisher, *appURL, *appImage;
-	appName = appVersion = appPublisher = appURL = @"Unknown";
-	appImage = nil;
-
-	if (!app->name.empty())
-	{
-		appName = [NSString stringWithUTF8String:app->name.c_str()];
-	}
-
-	if (!app->version.empty() && updateFile == nil)
-	{
-		appVersion = [NSString stringWithUTF8String:app->version.c_str()];
-	}
-	else if (!app->version.empty())
-	{
-		appVersion = [NSString stringWithUTF8String:app->version.c_str()];
-		appVersion = [appVersion stringByAppendingString:@" (Update)"];
-	}
-
-	if (!app->publisher.empty())
-	{
-		appPublisher = [NSString stringWithUTF8String:app->publisher.c_str()];
-	}
-	if (!app->url.empty())
-	{
-		appURL = [NSString stringWithUTF8String:app->url.c_str()];
-	}
-	if (!app->image.empty())
-	{
-		appImage = [NSString stringWithUTF8String:app->image.c_str()];
 	}
 
 	std::string tempDir = FileUtils::GetTempDirectory();
@@ -636,26 +604,35 @@ static int totalJobs = 0;
 	}
 	else
 	{
-		[self showIntroDialog:appName
-			path:appPath
-			version:appVersion
-			publisher:appPublisher
-			url:appURL
-			image:appImage];
+		[self showIntroDialog:app];
 	}
-
-	[progressWindow makeKeyAndOrderFront:progressWindow];
-	[NSApp activateIgnoringOtherApps:YES];
-	
 }
 
--(void)showIntroDialog: (NSString*)appName
-	path:(NSString*)appPath
-	version:(NSString*)appVersion
-	publisher:(NSString*)appPublisher
-	url:(NSString*)appURL
-	image:(NSString*)appImage
+-(void)showIntroDialog:(SharedApplication)app
 {
+	NSString* appName = @"Unknown";
+	if (!app->name.empty())
+		appName = [NSString stringWithUTF8String:app->name.c_str()];
+
+	NSString* appVersion = @"Unknown";
+	if (!app->version.empty() && updateFile == nil)
+	{
+		appVersion = [NSString stringWithUTF8String:app->version.c_str()];
+	}
+	else if (!app->version.empty())
+	{
+		appVersion = [NSString stringWithUTF8String:app->version.c_str()];
+		appVersion = [appVersion stringByAppendingString:@" (Update)"];
+	}
+
+	NSString* appPublisher = @"Unknown";
+	if (!app->publisher.empty())
+		appPublisher = [NSString stringWithUTF8String:app->publisher.c_str()];
+
+	NSString* appURL = @"Unknown";
+	if (!app->url.empty())
+		appURL = [NSString stringWithUTF8String:app->url.c_str()];
+
 	[self createInstallerMenu:appName];
 	[progressAppName setStringValue:appName];
 	[introAppName setStringValue:appName];
@@ -670,10 +647,10 @@ static int totalJobs = 0;
 	[introAppPublisher setFont:[NSFont boldSystemFontOfSize:12]];
 	[introAppURL setFont:[NSFont boldSystemFontOfSize:12]];
 
-
-	if (appImage != nil)
+	if (!app->image.empty())
 	{
-		NSImage* img = [[NSImage alloc] initWithContentsOfFile:appImage];
+		NSImage* img = [[NSImage alloc] initWithContentsOfFile:
+			[NSString stringWithUTF8String:app->image.c_str()]];
 		if ([img isValid])
 		{
 			[progressImage setImage:img];
@@ -681,12 +658,13 @@ static int totalJobs = 0;
 		}
 	}
 
-	NSString* licensePath = [appPath stringByAppendingPathComponent: @LICENSE_FILENAME];
-	NSFileManager *fm = [NSFileManager defaultManager];
+	string licensePathString(FileUtils::Join(app->path.c_str(), LICENSE_FILENAME, 0));
+	NSString* licensePath = [NSString stringWithUTF8String:licensePathString.c_str()];
+	NSFileManager* fm = [NSFileManager defaultManager];
 	if ([fm fileExistsAtPath:licensePath])
 	{
 		NSString* licenseText = [NSString
-			stringWithContentsOfFile: licensePath
+			stringWithContentsOfFile:licensePath
 			encoding:NSUTF8StringEncoding
 			error:nil];
 		NSAttributedString* licenseAttrText = [[NSAttributedString alloc] initWithString:licenseText];
@@ -743,22 +721,25 @@ static int totalJobs = 0;
 
 -(IBAction)continueIntro:(id)sender;
 {
-	if (quiet == NO)
-	{
+	if (!quiet)
 		[introWindow orderOut:self];
-		[progressText setStringValue:@"Connecting to download site..."];
-		[progressBar setUsesThreadedAnimation:NO];
-		[progressBar setIndeterminate:NO];
-		[progressBar setMinValue:0.0];
-		[progressBar setMaxValue:100.0];
-		[progressBar setDoubleValue:0.0];
 
-		[progressWindow center];
-		if ([jobs count] > 0)
-		{
-			[progressWindow orderFront:self];
-		}
+	// Always show the progress view, even if we are in quiet mode. Otherwise
+	// the user won't know what is going on and won't be able to cancel.
+	[progressText setStringValue:@"Connecting to download site..."];
+	[progressBar setUsesThreadedAnimation:NO];
+	[progressBar setIndeterminate:NO];
+	[progressBar setMinValue:0.0];
+	[progressBar setMaxValue:100.0];
+	[progressBar setDoubleValue:0.0];
+
+	[progressWindow center];
+	if ([jobs count] > 0)
+	{
+		[progressWindow makeKeyAndOrderFront:progressWindow];
+		[NSApp activateIgnoringOtherApps:YES];
 	}
+
 	[NSThread detachNewThreadSelector:@selector(downloadAndInstall:) toTarget:self withObject:self];
 }
 
