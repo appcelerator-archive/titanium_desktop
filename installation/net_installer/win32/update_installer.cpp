@@ -90,6 +90,8 @@ static bool HandleAllJobs(SharedApplication app, vector<SharedDependency>& jobs)
 		if (!InstallDependency(app, dep))
 			return false;
 	}
+
+	return true;
 }
 
 void ParseCommandLineDependencies(wstring toSearch, vector<SharedDependency>& jobs)
@@ -180,7 +182,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			APP_UPDATE, "appupdate", app->version));
 	}
 
-	if (jobs.empty())
+	// This is a legacy action for Windows, but if the install file didn't
+	// exist just write it out and finish up.
+	string installFile(FileUtils::Join(app->GetDataPath().c_str(), ".installed", 0));
+	bool installFileExisted = FileUtils::IsFile(installFile);
+	if (!installFileExisted)
+	{
+		FileUtils::WriteFile(installFile, "");
+	}
+
+	if (jobs.empty() && installFileExisted)
 		ExitWithError("The installer was not given any work to do.", __LINE__);
 
 	if (CoInitialize(0) != S_OK)
