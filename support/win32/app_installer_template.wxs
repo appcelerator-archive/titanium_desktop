@@ -63,19 +63,19 @@
 	<CustomAction Id="NoDowngrade" Error="A later version of [ProductName] is already installed." />
 	
 	<!-- the "immediate" setup action exists to initialize the progress bar with our job count -->
-	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstaller" DllEntry="NetInstallSetup"/>
 	<!-- ugly hack to pass in our dependenices and bundled modules/runtime into the deferred/async action -->
 	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="[AppDependencies];[AppBundledModules];[AppBundledRuntime]"/>
-	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstaller" DllEntry="NetInstall" Execute="deferred"/>
+	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="immediate"/>
+	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="deferred"/>
 	
 	<InstallExecuteSequence>
 		<Custom Action="NoDowngrade" After="FindRelatedProducts">NEWERFOUND</Custom>
-		<Custom Action="NetInstall.Setup" After="InstallInitialize">NOT Installed</Custom>
-		<Custom Action="NetInstall.Params" After="NetInstall.Setup">NOT Installed</Custom>
-		<Custom Action="NetInstall" After="NetInstall.Params">NOT Installed</Custom>
+		<Custom Action="NetInstall.Params" After="InstallFiles">NOT Installed</Custom>
+		<Custom Action="NetInstall.Setup" After="NetInstall.Params">NOT Installed</Custom>
+		<Custom Action="NetInstall" After="NetInstall.Setup">NOT Installed</Custom>
 	</InstallExecuteSequence>
 		
-	<Binary Id="TitaniumInstaller" SourceFile="${titanium_installer_dll}"/>
+	<Binary Id="TitaniumInstallerDll" SourceFile="${titanium_installer_dll}"/>
 	<Binary Id="BannerBmp" SourceFile="${banner_bmp}"/>
 	
 	<UIRef Id="WixUI_Common" />

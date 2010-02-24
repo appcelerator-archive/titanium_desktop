@@ -18,7 +18,6 @@ using std::string;
 #include <sstream>
 #include "common.h"
 
-#pragma comment(linker, "/EXPORT:NetInstallSetup=_NetInstallSetup@4")
 #pragma comment(linker, "/EXPORT:NetInstall=_NetInstall@4")
 #pragma comment(linker, "/EXPORT:Clean=_Clean@4")
 
@@ -157,8 +156,9 @@ bool Progress(SharedDependency dependency, int percentage)
 {
 	// The download step represents the first 50% of the download+extract
 	// action, so divide the progress in half here.
-	if (isDownloading)
-		percentage = percentage / 2;
+	percentage = percentage / 2;
+	if (!isDownloading)
+		percentage += 50;
 
 	// If the progress hasn't increased, just bail here.
 	if (percentage <= currentProgress)
@@ -173,7 +173,7 @@ bool Progress(SharedDependency dependency, int percentage)
 		return false;
 
 	MsiRecordSetInteger(actionRecord, 1, 2); // Type of message: Increment the bar
-	MsiRecordSetInteger(actionRecord, 2, currentProgress - percentage); // Number of ticks the bar has moved.
+	MsiRecordSetInteger(actionRecord, 2, (percentage - currentProgress)); // Number of ticks the bar has moved.
 	MsiRecordSetInteger(actionRecord, 3, 0); // Unused
 	result = MsiProcessMessage(installHandle, INSTALLMESSAGE_PROGRESS, actionRecord);
 	if (result == IDCANCEL)
@@ -183,68 +183,44 @@ bool Progress(SharedDependency dependency, int percentage)
 	return true;
 }
 
-extern "C" UINT __stdcall NetInstallSetup(MSIHANDLE hInstall)
-{
-	// No-op
-	return ERROR_SUCCESS;
-}
-
 bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependency dependency)
 {
-	// Wow, this is convoluted and easy to get wrong. It feels like a
-	// scene out of Fear and Loathing in Las Vegas. Essentially we've been
-	// consuming mind-altering substances for the better part of a day
-	// (coffee, of course) and now we're in bat country.
-
-	// All the information on these magic numbers can be found here:
-	// http://msdn.microsoft.com/en-us/library/aa370354(VS.85).aspx
-	// If that page disappears, we're basically all screwed, but you might
-	// have luck Binging or whatever for: INSTALLMESSAGE_PROGRESS.
-
-	// I pity you, I really do, if you need to change this code. Rest assured
-	// though, if you add code here without documenting what every single
-	// magic number does, I will build a time machine, travel into the future/past
-	// as appropriate and engage in the most heinous psychological torture that
-	// our busted legal system affords. Yes, that is a threat.
-
-	// Tell the installer to use explicit progress messages and reset the progress bar.
-	PMSIHANDLE record = MsiCreateRecord(3);
-	MsiRecordSetInteger(record, 1, 1); // Type of message: Information about progress.
-	MsiRecordSetInteger(record, 2, 1); // Number of ticks to move per message.
-	MsiRecordSetInteger(record, 3, 0); // We will send explicit progress message.
-	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
-	if (result == IDCANCEL)
-		return ERROR_INSTALL_USEREXIT;
-	MsiRecordSetInteger(record, 1, 0); // Type of message: Reset progress bar.
-	MsiRecordSetInteger(record, 2, 100); // Total number of ticks to use.
-	MsiRecordSetInteger(record, 3, 0); // Left-to-right progress bar.
-	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
-	if (result == IDCANCEL)
-		return ERROR_INSTALL_USEREXIT;
 
 	// Set up the custom action description and template.
-	wstring description(L"Downloading and extracting the");
+	wstring description(L"Downloading and extracting the ");
 	if (dependency->type == MODULE)
 		description.append(UTF8ToWide(dependency->name) + L" module");
 	else if (dependency->type == SDK)
-		description.append(L" SDK");
+		description.append(L"SDK");
 	else if (dependency->type == MOBILESDK)
-		description.append(L" Mobile SDK");
+		description.append(L"Mobile SDK");
 	else if (dependency->type == APP_UPDATE)
-		description.append(L" application update");
+		description.append(L"application update");
 	else
-		description.append(L" runtime");
+		description.append(L"runtime");
 	description += L" (" + UTF8ToWide(dependency->version) + L")";
-	wstring plate(L"About [1]\% complete...");
 
+	// TODO: The WIX GUI seems to ignore this line.
+	wstring plate(L"About [1]% complete...");
+
+	// See the long comment below about modifying this code.
 	// Update the install message display. We've basically set up a template
 	// above that looks like '[1]% complete". When we sent the INSTALLMESSAGE_ACTIONDATA
 	// message, the '[1]' will turn into the value in the first message field.
 	// We aren't using the other fields right now, but we may in the future.
+	PMSIHANDLE record = MsiCreateRecord(3);
 	MsiRecordSetString(record, 1, L"NetInstall"); // Custom action name
 	MsiRecordSetString(record, 2, description.c_str()); // Description.
 	MsiRecordSetString(record, 3, plate.c_str()); // Template for action data messages.
-	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_ACTIONSTART, record);
+	UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_ACTIONSTART, record);
+	if (result == IDCANCEL)
+		return ERROR_INSTALL_USEREXIT;
+
+	// Excplicitly set the progress bar back to zero.
+	MsiRecordSetInteger(record, 1, 0); // Type of message: Reset progress bar.
+	MsiRecordSetInteger(record, 2, 100); // Total number of ticks to use.
+	MsiRecordSetInteger(record, 3, 0); // Left-to-right progress bar.
+	result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
 	if (result == IDCANCEL)
 		return ERROR_INSTALL_USEREXIT;
 
@@ -263,17 +239,43 @@ bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependen
 
 extern "C" UINT __stdcall NetInstall(MSIHANDLE hInstall)
 {
-	// If we are in the script generation phase, set up the progress bar and return.
-	if (MsiGetMode(hInstall, MSIRUNMODE_SCHEDULED) != TRUE)
+	// Wow, this is convoluted and easy to get wrong. It feels like a
+	// scene out of Fear and Loathing in Las Vegas. Essentially we've been
+	// consuming mind-altering substances for the better part of a day
+	// (coffee, of course) and now we're in bat country.
+	
+	// All the information on these magic numbers can be found here:
+	// http://msdn.microsoft.com/en-us/library/aa370354(VS.85).aspx
+	// If that page disappears, we're basically all screwed, but you might
+	// have luck Binging or whatever for: INSTALLMESSAGE_PROGRESS.
+	
+	// I pity you, I really do, if you need to change this code. Rest assured
+	// though, if you add code here without documenting what every single
+	// magic number does, I will build a time machine, travel into the future/past
+	// as appropriate and engage in the most heinous psychological torture that
+	// our busted legal system affords. Yes, that is a threat.
+	
+	// Tell the installer to use explicit progress messages and reset the progress bar.
+	// Tell the installer to increase the value of the final total
+	// length of the progress bar by the total number of ticks in
+	// the custom action.
+	if (MsiGetMode(hInstall, MSIRUNMODE_SCHEDULED) == TRUE)
 	{
-		// Tell the installer to increase the value of the final total
-		// length of the progress bar by the total number of ticks in
-		// the custom action.
+		PMSIHANDLE record = MsiCreateRecord(3);
+		MsiRecordSetInteger(record, 1, 1); // Type of message: Information about progress.
+		MsiRecordSetInteger(record, 2, 1); // Number of ticks to move per message.
+		MsiRecordSetInteger(record, 3, 0); // We will send explicit progress message.
+		UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, record);
+		if (result == IDCANCEL)
+			return ERROR_INSTALL_USEREXIT;
+	}
+	else
+	{
 		PMSIHANDLE hProgressRec = MsiCreateRecord(2);
-		MsiRecordSetInteger(hProgressRec, 1, 3); // Enable this action to add ticks to the progress bar
+		MsiRecordSetInteger(hProgressRec, 1, 3); // Type of messaeg: Enable this action to add ticks to the progress bar
 		MsiRecordSetInteger(hProgressRec, 2, 100); // Number of ticks to add.
 		UINT result = MsiProcessMessage(hInstall, INSTALLMESSAGE_PROGRESS, hProgressRec);
-		if (result == ID_CANCEL)
+		if (result == IDCANCEL)
 			return ERROR_INSTALL_USEREXIT;
 		return ERROR_SUCCESS;
 	}
@@ -331,3 +333,34 @@ extern "C" UINT __stdcall Clean(MSIHANDLE hInstall)
 
 	return ERROR_SUCCESS;
 }
+
+bool WcaProgressMessage(MSIHANDLE installHandle, __in UINT uiCost, __in BOOL fExtendProgressBar)
+{
+    static BOOL fExplicitProgressMessages = FALSE;
+    MSIHANDLE hRec = ::MsiCreateRecord(3);
+    if (!fExtendProgressBar && !fExplicitProgressMessages)
+    {
+        ::MsiRecordSetInteger(hRec, 1, 1);
+        ::MsiRecordSetInteger(hRec, 2, 1);
+        ::MsiRecordSetInteger(hRec, 3, 0);
+
+		UINT er = ::MsiProcessMessage(installHandle, INSTALLMESSAGE_PROGRESS, hRec);
+        if (IDABORT == er || IDCANCEL == er)
+			return false;
+
+        fExplicitProgressMessages = TRUE;
+    }
+
+    // send the progress message
+    ::MsiRecordSetInteger(hRec, 1, (fExtendProgressBar) ? 3 : 2);
+    ::MsiRecordSetInteger(hRec, 2, uiCost);
+    ::MsiRecordSetInteger(hRec, 3, 0);
+
+	UINT er = ::MsiProcessMessage(installHandle, INSTALLMESSAGE_PROGRESS, hRec);
+    if (IDABORT == er || IDCANCEL == er)
+        return false;
+
+    return true;
+}
+
+
