@@ -9,7 +9,13 @@
 # Original author: Jeff Haynie 04/02/09
 #
 #
-import os, shutil, distutils.dir_util as dir_util, sys, copy
+import copy
+import os
+import shutil
+import sys
+import tempfile
+import distutils.dir_util as dir_util
+
 default_ignore_patterns = ['.git', '.svn', '.gitignore', '.cvsignore']
 
 class DesktopBuilder(object):
@@ -136,9 +142,7 @@ class DesktopBuilder(object):
 				if os.path.exists(bg):
 					self.dmg_background = bg
 					log(options,"Found custom DMG background at %s" % bg)
-					
-		# copy the installer
-		if options.platform == 'osx':
+
 			installer = os.path.join(self.contents_dir,'installer','Installer App.app')
 			if not os.path.exists(installer):
 				os.makedirs(installer)
@@ -146,12 +150,25 @@ class DesktopBuilder(object):
 			dir_util.copy_tree(netinstaller,installer,preserve_symlinks=True)
 			# copy in the custom app icon into the net installer
 			shutil.copy(self.app_icns,os.path.join(installer,'Contents','Resources','English.lproj'))
+
 		elif options.platform == 'linux':
 			installer = os.path.join(self.contents_dir,'installer')
 			if not os.path.exists(installer):
 				os.makedirs(installer)
 			netinstaller = os.path.join(options.runtime_dir, 'installer', 'installer')
 			shutil.copy(netinstaller, installer)
+
+		elif options.platform == "win32":
+			icon_path = os.path.abspath(os.path.join(self.resources_dir, options.icon))
+			if (os.path.exists(icon_path)):
+				if not(icon_path.lower().endswith('.ico')):
+					new_ico_file = os.path.abspath(os.path.join(self.resources_dir, "_converted_icon.ico"))
+					self.build_ico_from_image(icon_path, new_ico_file)
+					icon_path = new_ico_file
+
+				self.invoke('%s "%s" "%s"' %
+					(os.path.join(self.options.assets_dir, 'ReplaceVistaIcon.exe'),
+					options.executable, icon_path))
 
 		# if selected, write in the .installed file
 		if options.no_install:
@@ -204,6 +221,7 @@ class DesktopBuilder(object):
 			self.invoke('"%s" -in "%s" -out "%s"' % (makeicns,icon,dest))
 
 	def invoke(self,cmd):
+		print cmd
 		if self.options.verbose:
 			self.log("Executing: %s" % cmd)
 			os.system(cmd)
@@ -213,4 +231,18 @@ class DesktopBuilder(object):
 			else:
 				os.system("%s >/dev/null" % cmd)
 
-				
+	def build_ico_from_image(self, image_file, target_ico):
+		temp_dir = tempfile.mkdtemp()
+		convert = os.path.join(self.options.assets_dir, 'magick', 'convert.exe')
+		self.invoke(convert + ' -resize 128x128^ -gravity center -background transparent -extent 128x128 "%s" "%s\\128.png"' %
+			(image_file, temp_dir))
+		self.invoke(convert + ' -resize 64x64^ -gravity center -background transparent -extent 64x64 "%s" "%s\\64.png"' %
+			(image_file, temp_dir))
+		self.invoke(convert + ' -resize 32x32^ -gravity center -background transparent -extent 32x32 "%s" "%s\\32.png"' %
+			(image_file, temp_dir))
+		self.invoke(convert + ' -resize 16x16^ -gravity center -background transparent -extent 16x16 "%s" "%s\\16.png"' %
+			(image_file, temp_dir))
+		self.invoke('%s "%s" "%s\\128.png" "%s\\64.png" "%s\\32.png" "%s\\16.png"' %
+			(os.path.join(self.options.assets_dir, 'png2ico.exe'),
+			target_ico, temp_dir, temp_dir, temp_dir, temp_dir))
+

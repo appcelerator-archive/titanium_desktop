@@ -273,7 +273,6 @@ def build_msi(template, args, basename, destdir):
 
 def create_installer(builder):
 	app_installer_template = read_template('app_installer_template.wxs')
-	print app_installer_template
 		
 	lang = get_from_tiapp(builder.options.tiapp, 'language', 'en-us')
 	app_language = get_app_language(lang)
