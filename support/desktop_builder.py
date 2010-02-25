@@ -167,7 +167,7 @@ class DesktopBuilder(object):
 					icon_path = new_ico_file
 
 				self.invoke('%s "%s" "%s"' %
-					(os.path.join(self.options.assets_dir, 'ReplaceVistaIcon.exe'),
+					(os.path.join(self.options.assets_dir, '..', 'ReplaceVistaIcon.exe'),
 					options.executable, icon_path))
 
 		# if selected, write in the .installed file
@@ -233,7 +233,10 @@ class DesktopBuilder(object):
 
 	def build_ico_from_image(self, image_file, target_ico):
 		temp_dir = tempfile.mkdtemp()
-		convert = os.path.join(self.options.assets_dir, 'magick', 'convert.exe')
+
+		# Assume that GraphicsMagick is on the path for now. This will change
+		# once the packaging server setup has been improved (running on drive C:\)
+		convert = "gm.exe convert"
 		self.invoke(convert + ' -resize 128x128^ -gravity center -background transparent -extent 128x128 "%s" "%s\\128.png"' %
 			(image_file, temp_dir))
 		self.invoke(convert + ' -resize 64x64^ -gravity center -background transparent -extent 64x64 "%s" "%s\\64.png"' %
@@ -243,6 +246,6 @@ class DesktopBuilder(object):
 		self.invoke(convert + ' -resize 16x16^ -gravity center -background transparent -extent 16x16 "%s" "%s\\16.png"' %
 			(image_file, temp_dir))
 		self.invoke('%s "%s" "%s\\128.png" "%s\\64.png" "%s\\32.png" "%s\\16.png"' %
-			(os.path.join(self.options.assets_dir, 'png2ico.exe'),
+			(os.path.join(self.options.assets_dir, '..', 'png2ico.exe'),
 			target_ico, temp_dir, temp_dir, temp_dir, temp_dir))
 
