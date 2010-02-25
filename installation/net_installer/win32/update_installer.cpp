@@ -59,16 +59,24 @@ static void ExitWithError(const std::string& message, int exitCode)
 
 static wstring GetDependencyDescription(SharedDependency d)
 {
+	string result;
+
 	if (d->type == MODULE)
-		return UTF8ToWide(d->name) + L" module";
+		result = d->name + " module";
 	else if (d->type == SDK)
-		return L" SDK";
+		result = " SDK";
 	else if (d->type == MOBILESDK)
-		return L" Mobile SDK";
+		result = " Mobile SDK";
 	else if (d->type == APP_UPDATE)
-		return L" application update";
+		result = " application update";
 	else
-		return L" runtime";
+		result = " runtime";
+
+	result.append(" (");
+	result.append(d->version);
+	result.append(")");
+
+	return UTF8ToWide(result);
 }
 
 static bool HandleAllJobs(SharedApplication app, vector<SharedDependency>& jobs)
@@ -78,7 +86,7 @@ static bool HandleAllJobs(SharedApplication app, vector<SharedDependency>& jobs)
 		SharedDependency dep(jobs.at(i));
 		wstring description(GetDependencyDescription(dep));
 
-		wstring text(L"Downloading the ");
+		wstring text(L"Downloading the");
 		text.append(description);
 		dialog->SetLineText(2, text, false);
 		if (!DownloadDependency(app, dep))
@@ -165,22 +173,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		string utf8Update(WideToUTF8(updateFile));
 		app = Application::NewApplication(utf8Update, utf8Path);
 
-		// Always delete the update file as soon as possible. That
-		// way the application can continue booting even if the update
-		// cannot be downloaded.
+		//// Always delete the update file as soon as possible. That
+		//// way the application can continue booting even if the update
+		//// cannot be downloaded.
 		FileUtils::DeleteFile(utf8Update);
+
+		// If this is an application update, add a job for the update to
+		// this list of necessary jobs.
+		jobs.push_back(Dependency::NewDependencyFromValues(
+			APP_UPDATE, "appupdate", app->version));
 	}
  
 	if (app.isNull())
 		ExitWithError("The installer could not read the application manifest.", __LINE__);
-
-	// If this is an application update, add a job for the update to
-	// this list of necessary jobs.
-	if (!updateFile.empty())
-	{
-		jobs.push_back(Dependency::NewDependencyFromValues(
-			APP_UPDATE, "appupdate", app->version));
-	}
 
 	// This is a legacy action for Windows, but if the install file didn't
 	// exist just write it out and finish up.
