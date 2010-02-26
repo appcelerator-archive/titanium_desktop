@@ -8,9 +8,8 @@ Env = build.env.Clone()
 Env.Append(FRAMEWORKS=['Cocoa'])
 sources = Glob('*.m') + Glob('*.mm')
 
-# Turn off debugging for the installer to try to save space
-ccflags = Env['CCFLAGS']
-if '-g' in ccflags: ccflags.remove('-g')
+# Optimize the installer for size.
+ccflags = list(Env['CCFLAGS'])
 ccflags.append('-Oz')
 Env['CCFLAGS'] = ccflags
 
