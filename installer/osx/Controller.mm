@@ -93,6 +93,25 @@ static int totalJobs = 0;
 
 @implementation Controller
 
+-(void)dealloc
+{
+	[jobs release];
+	[installDirectory release];
+
+	if (temporaryDirectory)
+	{
+		[[NSFileManager defaultManager] 
+			removeFileAtPath:temporaryDirectory handler:nil];
+		[temporaryDirectory release];
+	}
+
+	if (updateFile)
+		[updateFile release];
+
+	[super dealloc];
+}
+
+
 -(NSProgressIndicator*)progressBar
 {
 	return progressBar;
@@ -117,7 +136,7 @@ static int totalJobs = 0;
 -(void)bailWithMessage:(NSString*)errorString;
 {
 	NSLog(@"Bailing with error: %@", errorString);
-	NSRunCriticalAlertPanel(nil, errorString, @"Cancel", nil, nil);
+	NSRunCriticalAlertPanel(@"Error", errorString, @"Cancel", nil, nil);
 	exit(1);
 }
 
@@ -288,6 +307,7 @@ static int totalJobs = 0;
 
 -(void)downloadAndInstall:(Controller*)controller 
 {
+	printf("downloading jobs: %i\n", [jobs count]);
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
 	// Download only those jobs which actually need to be downloaded
@@ -326,26 +346,14 @@ static int totalJobs = 0;
 	[NSApp terminate:self];
 }
 
-- (BOOL)isVolumeReadOnly
-{  
-  struct statfs statfs_info;
-  statfs([[[NSBundle mainBundle] bundlePath] fileSystemRepresentation], &statfs_info);
-  return (statfs_info.f_flags & MNT_RDONLY);
-}
-
 -(void)finishInstallation
 {
 	// Write the .installed file
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString* ifile = [NSString stringWithUTF8String:app->GetDataPath().c_str()];
-	ifile  = [ifile stringByAppendingPathComponent:@".installed"];
-	[fm createFileAtPath:ifile contents:[NSData data] attributes:nil];
-
-	// Remove the update file if it exists
-	if (updateFile != nil)
-	{
-		[fm removeFileAtPath:updateFile handler:nil];
-	}
+	std::string filePath(FileUtils::Join(app->GetDataPath().c_str(), ".installed", 0));
+	[[NSFileManager defaultManager]
+		createFileAtPath:[NSString stringWithUTF8String:filePath.c_str()]
+		contents:[NSData data]
+		attributes:nil];
 }
 
 -(void)downloadJob:(Job*)job atIndex:(int)index
@@ -384,27 +392,6 @@ static int totalJobs = 0;
 		[job setPath:path];
 		[downloader release];
 	}
-}
-
--(void)dealloc
-{
-
-	[jobs release];
-	[installDirectory release];
-
-	if (temporaryDirectory != nil)
-	{
-		NSFileManager *fm = [NSFileManager defaultManager];
-		[fm removeFileAtPath:temporaryDirectory handler:nil];
-		[temporaryDirectory release];
-	}
-
-	if (updateFile != nil)
-	{
-		[updateFile release];
-	}
-
-	[super dealloc];
 }
 
 -(void)createInstallerMenu: (NSString*)applicationName
@@ -525,87 +512,6 @@ static int totalJobs = 0;
 -(void)awakeFromNib
 { 
 	[NSApp setDelegate:self];
-
-	quiet = NO;;
-	updateFile = nil;
-	NSString *appPath = nil;
-	jobs = [[NSMutableArray alloc] init];
-
-	NSArray* args = [[NSProcessInfo processInfo] arguments];
-	int count = [args count];
-	for (int i = 1; i < count; i++)
-	{
-		NSString* arg = [args objectAtIndex:i];
-		if ([arg isEqual:@"-appPath"] && count > i+1)
-		{
-			appPath = [args objectAtIndex:i+1];
-			i++;
-		}
-		else if ([arg isEqual:@"-updateFile"] && count > i+1)
-		{
-			updateFile = [args objectAtIndex:i+1];
-			[updateFile retain];
-			i++;
-		}
-		else if ([arg isEqual:@"-quiet"])
-		{
-			quiet = YES;
-		}
-		else
-		{
-			[jobs addObject:[[Job alloc] init:arg]];
-		}
-	}
-
-	if (appPath == nil)
-	{
-		[self bailWithMessage:@"Sorry, but the installer was not given enough information to continue."];
-	}
-
-	if (updateFile == nil)
-	{
-		app = Application::NewApplication([appPath UTF8String]);
-	}
-	else
-	{
-		app = Application::NewApplication([updateFile UTF8String], [appPath UTF8String]);
-		NSString* updateURL = [NSString stringWithUTF8String:app->GetUpdateURL().c_str()];
-		[jobs addObject:[[Job alloc] initUpdate:updateURL]];
-	}
-
-	std::string tempDir = FileUtils::GetTempDirectory();
-	temporaryDirectory = [NSString stringWithUTF8String:tempDir.c_str()];
-	[self createDirectory: temporaryDirectory];
-	[temporaryDirectory retain];
-
-	// Check to see if we can write to the system install location -- if so install there
-	std::string systemRuntimeHome = FileUtils::GetSystemRuntimeHomeDirectory();
-	std::string userRuntimeHome = FileUtils::GetUserRuntimeHomeDirectory();
-
-	installDirectory = [NSString stringWithUTF8String:systemRuntimeHome.c_str()];
-	if ((!FileUtils::IsDirectory(systemRuntimeHome) && 
-			[[NSFileManager defaultManager] isWritableFileAtPath:[installDirectory stringByDeletingLastPathComponent]]) ||
-		[[NSFileManager defaultManager] isWritableFileAtPath:installDirectory])
-	{
-		installDirectory = [NSString stringWithUTF8String:systemRuntimeHome.c_str()];
-	}
-	else
-	{
-		// Cannot write to system-wide install location -- install to user directory
-		installDirectory = [NSString stringWithUTF8String:userRuntimeHome.c_str()];
-	}
-	[installDirectory retain];
-	
-
-	if (quiet)
-	{
-		[self continueIntro:self];
-		return;
-	}
-	else
-	{
-		[self showIntroDialog:app];
-	}
 }
 
 -(void)showIntroDialog:(SharedApplication)app
@@ -683,7 +589,11 @@ static int totalJobs = 0;
 		[introWindow setShowsResizeIndicator:NO];
 		[introWindow setFrame:frame display:YES];
 	}
-	[NSApp arrangeInFront:introWindow];
+
+	// Hide the progress Window.
+	[progressWindow orderOut:self];
+	[introWindow center];
+	[introWindow makeKeyAndOrderFront:self];
 }
 
 - (BOOL)canBecomeKeyWindow
@@ -698,11 +608,92 @@ static int totalJobs = 0;
 
 -(void)applicationDidFinishLaunching:(NSNotification *) notif
 {
-	if (updateFile == nil && quiet == NO)
+	jobs = [[NSMutableArray alloc] init];
+	skipIntroDialog = NO;;
+	updateFile = nil;
+	NSString *appPath = nil;
+
+	NSArray* args = [[NSProcessInfo processInfo] arguments];
+	int count = [args count];
+	for (int i = 1; i < count; i++)
 	{
-		[introWindow center];
-		[progressWindow orderOut:self];
-		[introWindow makeKeyAndOrderFront:self];
+		NSString* arg = [args objectAtIndex:i];
+		if ([arg isEqual:@"-appPath"] && count > i+1)
+		{
+			appPath = [args objectAtIndex:i+1];
+			i++;
+		}
+		else if ([arg isEqual:@"-updateFile"] && count > i+1)
+		{
+			updateFile = [args objectAtIndex:i+1];
+			[updateFile retain];
+			i++;
+		}
+		else if ([arg isEqual:@"-quiet"])
+		{
+			skipIntroDialog = YES;
+		}
+		else
+		{
+			[jobs addObject:[[Job alloc] init:arg]];
+		}
+	}
+
+	if (!appPath)
+		[self bailWithMessage:@"Sorry, but the installer was not given the application path."];
+
+	if (!updateFile)
+	{
+		app = Application::NewApplication([appPath UTF8String]);
+	}
+	else
+	{
+		if (!FileUtils::IsFile([updateFile UTF8String]))
+			[self bailWithMessage:@"Could not find specified update file."];
+
+		skipIntroDialog = YES;
+		app = Application::NewApplication([updateFile UTF8String], [appPath UTF8String]);
+		[jobs addObject:[[Job alloc]
+			initUpdate:[NSString stringWithUTF8String:app->GetUpdateURL().c_str()]]];
+
+		// Remove the update file as soon as possible, so that if the installation
+		// fails the application will still start. We can always fetch the update
+		// later.
+		[[NSFileManager defaultManager] removeFileAtPath:updateFile handler:nil];
+	}
+
+	std::string tempDir = FileUtils::GetTempDirectory();
+	temporaryDirectory = [NSString stringWithUTF8String:tempDir.c_str()];
+	[self createDirectory: temporaryDirectory];
+	[temporaryDirectory retain];
+
+	// Check to see if we can write to the system install location -- if so install there
+	std::string systemRuntimeHome = FileUtils::GetSystemRuntimeHomeDirectory();
+	std::string userRuntimeHome = FileUtils::GetUserRuntimeHomeDirectory();
+
+	installDirectory = [NSString stringWithUTF8String:systemRuntimeHome.c_str()];
+	if ((!FileUtils::IsDirectory(systemRuntimeHome) && 
+			[[NSFileManager defaultManager] isWritableFileAtPath:[installDirectory stringByDeletingLastPathComponent]]) ||
+		[[NSFileManager defaultManager] isWritableFileAtPath:installDirectory])
+	{
+		installDirectory = [NSString stringWithUTF8String:systemRuntimeHome.c_str()];
+	}
+	else
+	{
+		// Cannot write to system-wide install location -- install to user directory
+		installDirectory = [NSString stringWithUTF8String:userRuntimeHome.c_str()];
+	}
+	[installDirectory retain];
+	
+
+	if (skipIntroDialog)
+	{
+		[self continueIntro:self];
+		return;
+	}
+	else
+	{
+		[self showIntroDialog:app];
 	}
 }
 
@@ -721,11 +712,12 @@ static int totalJobs = 0;
 
 -(IBAction)continueIntro:(id)sender;
 {
-	if (!quiet)
+	if (!skipIntroDialog)
 		[introWindow orderOut:self];
 
-	// Always show the progress view, even if we are in quiet mode. Otherwise
-	// the user won't know what is going on and won't be able to cancel.
+	// Always show the progress view, even if we skip the intro dialog.
+	// Otherwise the user won't know what is going on or be able to cancel
+	// the download.
 	[progressText setStringValue:@"Connecting to download site..."];
 	[progressBar setUsesThreadedAnimation:NO];
 	[progressBar setIndeterminate:NO];
@@ -740,7 +732,9 @@ static int totalJobs = 0;
 		[NSApp activateIgnoringOtherApps:YES];
 	}
 
-	[NSThread detachNewThreadSelector:@selector(downloadAndInstall:) toTarget:self withObject:self];
+	[NSThread detachNewThreadSelector:@selector(downloadAndInstall:) 
+		toTarget:self
+		withObject:self];
 }
 
 @end
