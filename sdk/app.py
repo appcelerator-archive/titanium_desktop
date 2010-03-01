@@ -121,7 +121,7 @@ class App(object):
 
 		installer_source = p.join(self.sdk_dir, 'installer')
 		self.env.log(u'Copying installer from %s to %s' % (installer_source, contents))
-		effess.copy_to_dir(installer_source, contents)
+		effess.copy_to_dir(installer_source, contents, exclude=self.env.get_excludes() + ['.dll'])
 
 		self.write_manifest(contents)
 		self.write_tiapp(contents)
