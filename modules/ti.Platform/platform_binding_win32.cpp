@@ -51,13 +51,13 @@ static bool SaveBMPFile(const wchar_t* filename, HBITMAP bitmap, HDC bitmapDC,
 	int width, int height)
 {
 	bool Success = false;
-	HDC SurfDC = NULL;						// GDI-compatible device context for the surface
-	HBITMAP OffscrBmp = NULL;				// bitmap that is converted to a DIB
-	HDC OffscrDC = NULL;					// offscreen DC that we can select OffscrBmp into
-	LPBITMAPINFO lpbi = NULL;				// bitmap format info; used by GetDIBits
-	LPVOID lpvBits = NULL;					// pointer to bitmap bits array
+	HDC SurfDC = NULL;			// GDI-compatible device context for the surface
+	HBITMAP OffscrBmp = NULL;		// bitmap that is converted to a DIB
+	HDC OffscrDC = NULL;			// offscreen DC that we can select OffscrBmp into
+	LPBITMAPINFO lpbi = NULL;		// bitmap format info; used by GetDIBits
+	LPVOID lpvBits = NULL;			// pointer to bitmap bits array
 	HANDLE BmpFile = INVALID_HANDLE_VALUE;	// destination .bmp file
-	BITMAPFILEHEADER bmfh;					// .bmp file header
+	BITMAPFILEHEADER bmfh;			// .bmp file header
 
 	// We need an HBITMAP to convert it to a DIB:
 	if ((OffscrBmp = CreateCompatibleBitmap(bitmapDC, width, height)) == NULL)
@@ -270,19 +270,12 @@ void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 	// copy from the screen to my bitmap
 	BitBlt(hdc, 0, 0, width, height, GetDC(0), x, y, SRCCOPY);
 
-	wchar_t tmpDir[MAX_PATH];
-	wchar_t tmpFile[MAX_PATH];
-	GetTempPathW(sizeof(tmpDir), tmpDir);
-	GetTempFileNameW(tmpDir, L"ti_", 0, tmpFile);
+	std::wstring wideScreenshotFile(::UTF8ToWide(screenshotFile));
+	bool success = SaveBMPFile(wideScreenshotFile.c_str(), hBmp, hdc, width, height);
 
-	if (SaveBMPFile(tmpFile, hBmp, hdc, width, height))
-	{
-		std::wstring wideScreenshotFile(::UTF8ToWide(screenshotFile));
-		CopyFileW(tmpFile, wideScreenshotFile.c_str(), FALSE);
-	}
-
-	// free the bitmap memory
 	DeleteObject(hBmp);
+	if (!success)
+		throw ValueException::FromString("Could not save screenshot.");
 }
 
 }
