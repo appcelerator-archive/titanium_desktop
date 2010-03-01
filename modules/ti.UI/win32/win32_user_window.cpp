@@ -172,21 +172,22 @@ static LRESULT CALLBACK UserWindowWndProc(HWND hWnd, UINT message, WPARAM wParam
 		return handled;
 }
 
-static void RegisterWindowClass(HINSTANCE hInstance)
+static void RegisterWindowClass()
 {
 	static bool classInitialized = false;
 	if (!classInitialized)
 	{
+		HINSTANCE instanceHandle = GetModuleHandle(NULL);
 		WNDCLASSEXW wcex;
 		wcex.cbSize = sizeof(WNDCLASSEXW);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
 		wcex.lpfnWndProc = UserWindowWndProc;
 		wcex.cbClsExtra = 0;
 		wcex.cbWndExtra = 4;
-		wcex.hInstance = hInstance;
+		wcex.hInstance = instanceHandle;
 		wcex.hIcon = 0;
 		wcex.hIconSm = 0;
-		wcex.hCursor = LoadCursor(hInstance, IDC_ARROW);
+		wcex.hCursor = LoadCursor(instanceHandle, IDC_ARROW);
 		wcex.hbrBackground = 0;
 		wcex.lpszMenuName = L"";
 		wcex.lpszClassName = USERWINDOW_WINDOW_CLASS;
@@ -237,13 +238,11 @@ DWORD Win32UserWindow::GetStyleFromConfig()
 
 void Win32UserWindow::InitWindow()
 {
-	HINSTANCE hInstance = Host::GetInstance()->GetInstanceHandle();
-	RegisterWindowClass(hInstance);
-
+	RegisterWindowClass();
 	std::wstring titleW = ::UTF8ToWide(config->GetTitle());
 	this->windowHandle = CreateWindowExW(GetStyleFromConfig(), USERWINDOW_WINDOW_CLASS,
 		titleW.c_str(), 0, CW_USEDEFAULT, 0, CW_USEDEFAULT, 0,
-		0, 0, hInstance, (LPVOID)this);
+		0, 0, GetModuleHandle(NULL), (LPVOID)this);
 
 	SetWindowUserData(this->windowHandle, reinterpret_cast<void*>(this));
 
@@ -965,9 +964,10 @@ static HICON GetDefaultIcon()
 
 	if (!defaultIcon)
 	{
+		static HINSTANCE instanceHandle = GetModuleHandle(NULL);
 		wchar_t exePath[MAX_PATH];
-		GetModuleFileNameW(GetModuleHandle(NULL), exePath, MAX_PATH);
-		defaultIcon = ExtractIconW(Host::GetInstance()->GetInstanceHandle(), exePath, 0);
+		GetModuleFileNameW(instanceHandle, exePath, MAX_PATH);
+		defaultIcon = ExtractIconW(instanceHandle, exePath, 0);
 	}
 
 	return defaultIcon;
