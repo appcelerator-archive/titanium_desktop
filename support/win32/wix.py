@@ -410,6 +410,7 @@ def create_installer(builder):
 	install_msi = build_msi(app_installer_template, app_template_args,
 		builder.appname, builder.options.destination)
 
-	os.unlink(license_rtf)
+	if license_rtf != default_license_rtf:
+		os.unlink(license_rtf)
 
 	return install_msi
