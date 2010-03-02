@@ -27,8 +27,7 @@
 				html+="<ul>";
 				for (var c=0;c<result.length;c++)
 				{
-					var row = result[c];
-					html+="<li>"+row+"</li>";
+					html+='<li>"'+result[c]+'"</li>';
 				}
 				html+="</ul>";
 				el.innerHTML = html;
@@ -84,6 +83,7 @@
 					types:['js', 'html'],
 					typesDescription: 'Web Files'
 				});
+				
 			}
 			function openSaveAs()
 			{
