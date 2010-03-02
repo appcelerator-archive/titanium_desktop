@@ -10,8 +10,12 @@
 #define UnsetFlag(x,flag) (x &= ~flag)=
 #define USERWINDOW_WINDOW_CLASS L"Win32UserWindow"
 #define MEANING_OF_LIFE 42
+#define MAX_FILE_DIALOG_STRING 1024
 
 using namespace ti;
+
+static void ParseMultipleSelectedFiles(OPENFILENAME* ofn,
+	std::vector<std::wstring>& files);
 
 static void* SetWindowUserData(HWND hwnd, void* userData)
 {
@@ -1153,14 +1157,9 @@ void Win32UserWindow::ShowInspector(bool console)
 	}
 }
 
-void Win32UserWindow::OpenFileChooserDialog(
-	KMethodRef callback,
-	bool multiple,
-	std::string& title,
-	std::string& path,
-	std::string& defaultName,
-	std::vector<std::string>& types,
-	std::string& typesDescription)
+void Win32UserWindow::OpenFileChooserDialog(KMethodRef callback, bool multiple,
+	std::string& title, std::string& path, std::string& defaultName,
+	std::vector<std::string>& types, std::string& typesDescription)
 {
 
 	KListRef results = this->SelectFile(
@@ -1168,37 +1167,24 @@ void Win32UserWindow::OpenFileChooserDialog(
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
-void Win32UserWindow::OpenFolderChooserDialog(
-	KMethodRef callback,
-	bool multiple,
-	std::string& title,
-	std::string& path,
-	std::string& defaultName)
+void Win32UserWindow::OpenFolderChooserDialog(KMethodRef callback, bool multiple,
+	std::string& title, std::string& path, std::string& defaultName)
 {
 	KListRef results = SelectDirectory(multiple, title, path, defaultName);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
-void Win32UserWindow::OpenSaveAsDialog(
-	KMethodRef callback,
-	std::string& title,
-	std::string& path,
-	std::string& defaultName,
-	std::vector<std::string>& types,
-	std::string& typesDescription)
+void Win32UserWindow::OpenSaveAsDialog(KMethodRef callback, std::string& title,
+	std::string& path, std::string& defaultName,
+	std::vector<std::string>& types, std::string& typesDescription)
 {
-	KListRef results = SelectFile(
-		true, false, title, path, defaultName, types, typesDescription);
+	KListRef results = SelectFile(true, false, title, path, defaultName,
+		 types, typesDescription);
 	callback->Call(ValueList(Value::NewList(results)));
 }
 
-KListRef Win32UserWindow::SelectFile(
- 	bool saveDialog,
-	bool multiple,
-	std::string& title,
-	std::string& path,
-	std::string& defaultName,
-	std::vector<std::string>& types,
+KListRef Win32UserWindow::SelectFile(bool saveDialog, bool multiple, std::string& title,
+	std::string& path, std::string& defaultName, std::vector<std::string>& types,
 	std::string& typesDescription)
 {
 	std::wstring filter;
@@ -1231,25 +1217,24 @@ KListRef Win32UserWindow::SelectFile(
 	}
 
 	OPENFILENAME ofn;
-	wchar_t filenameW[1024];
-	wcscpy(filenameW, ::UTF8ToWide(defaultName).c_str());
-	
-	// init OPENFILE
+
 	std::wstring pathW = ::UTF8ToWide(path);
 	ZeroMemory(&ofn, sizeof(ofn));
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = this->windowHandle;
+
+	// Windows may not null-terminate the string it puts here, so we zero it.
+	wchar_t filenameW[MAX_FILE_DIALOG_STRING];
+	ZeroMemory(&filenameW, MAX_FILE_DIALOG_STRING * sizeof(wchar_t));
+	wcscpy(filenameW, ::UTF8ToWide(defaultName).c_str());
 	ofn.lpstrFile = filenameW;
-	if (wcslen(filenameW) == 0)
-	{
-		ofn.lpstrFile[0] = L'\0';
-	}
-	ofn.nMaxFile = 1024;
-	ofn.lpstrFilter = (LPWSTR) (filter.size() == 0 ? NULL : filter.c_str());
+
+	ofn.nMaxFile = MAX_FILE_DIALOG_STRING;
+	ofn.lpstrFilter = (LPWSTR) (filter.size() == 0 ? 0 : filter.c_str());
 	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
+	ofn.lpstrFileTitle = 0;
 	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = (LPWSTR) (pathW.length() == 0 ? NULL : pathW.c_str());
+	ofn.lpstrInitialDir = (LPWSTR) (pathW.length() == 0 ? 0 : pathW.c_str());
 	ofn.Flags = OFN_EXPLORER;
 
 	std::wstring titleW;
@@ -1269,10 +1254,8 @@ KListRef Win32UserWindow::SelectFile(
 		ofn.Flags |= OFN_ALLOWMULTISELECT;
 	}
 
-	KListRef results = new StaticBoundList();
-	// display the open dialog box
+	
 	BOOL result;
-
 	if (saveDialog)
 	{
 		result = ::GetSaveFileName(&ofn);
@@ -1282,37 +1265,40 @@ KListRef Win32UserWindow::SelectFile(
 		result = ::GetOpenFileName(&ofn);
 	}
 
-	if (result)
+	// A zero-return value here indicates either an error or that the user
+	// cancelled the action (CommDlgExtendedError returns 0). We should
+	// return a helpful exception if it's an error.
+	if (!result)
 	{
-		// if the user selected multiple files, ofn.lpstrFile is a NULL-separated list of filenames
-		// if the user only selected one file, ofn.lpstrFile is a normal string
+		DWORD code = CommDlgExtendedError();
+		if (code == 0)
+			return new StaticBoundList();
 
-		std::vector<std::string> selectedFiles;
-		ParseSelectedFiles(ofn.lpstrFile, selectedFiles);
-		
-		if (selectedFiles.size() == 1)
+		throw ValueException::FromFormat(
+			"File dialog action failed with error code: %i", code);
+	}
+
+	// From:  http://msdn.microsoft.com/en-us/library/ms646839(VS.85).aspx
+	// If multiple files have been selected there will be two '\0' characters
+	// at the end of this array of characters, so if we enabled multiple file
+	// selected, just check for that second '\0'.
+	KListRef results = new StaticBoundList();
+	if (multiple && ofn.lpstrFile[ofn.nFileOffset - 1] == L'\0')
+	{
+		std::vector<std::wstring> files;
+		ParseMultipleSelectedFiles(&ofn, files);
+		for (size_t i = 0; i < files.size(); i++)
 		{
-			results->Append(Value::NewString(selectedFiles.at(0)));
-		}
-		else if (selectedFiles.size() > 1)
-		{
-			std::string directory(selectedFiles.at(0));
-			for (int i = 1; i < selectedFiles.size(); i++)
-			{
-				std::string n;
-				n.append(directory.c_str());
-				n.append("\\");
-				n.append(selectedFiles.at(i).c_str());
-				results->Append(Value::NewString(n));
-			}
+			results->Append(Value::NewString(
+				::WideToUTF8(files[i])));
 		}
 	}
 	else
 	{
-		DWORD error = CommDlgExtendedError();
-		std::string errorMessage = Win32Utils::QuickFormatMessage(error);
-		Logger::Get("UI.Win32UserWindow")->Error("Error while opening files: %s", errorMessage.c_str());
+		results->Append(Value::NewString(::WideToUTF8(
+			ofn.lpstrFile)));
 	}
+
 	return results;
 }
 
@@ -1388,46 +1374,37 @@ void Win32UserWindow::GetMinMaxInfo(MINMAXINFO* minMaxInfo)
 	}
 }
 
-/*static*/
-void Win32UserWindow::ParseSelectedFiles(const wchar_t *s,
-	std::vector<std::string> &selectedFiles)
+static void ParseMultipleSelectedFiles(OPENFILENAME* ofn,
+	std::vector<std::wstring>& files)
 {
-	std::string selectedFile;
-	
-	// input string is expected to be composed of single-NULL-separated tokens, and double-NULL terminated
-	int i = 0;
-	while (true)
+	// From: http://msdn.microsoft.com/en-us/library/ms646839(VS.85).aspx
+	// If the OFN_ALLOWMULTISELECT flag is set and the user selects
+	// multiple files, the buffer contains the current directory followed
+	// by the file names of the selected files. For Explorer-style dialog
+	// boxes, the directory and file name strings are NULL separated, with
+	// an extra NULL character after the last file name. 
+	std::wstring containingDirectory(ofn->lpstrFile);
+
+	size_t offset = ofn->nFileOffset;
+	std::wstring filename(&ofn->lpstrFile[offset]);
+	files.push_back(filename);
+
+	// The offset of the start of the next string should be the
+	// size of the previous filename plus one. When this becomes
+	// NULL we are finished reading the filenames.
+	offset += filename.size() + 1;
+	while (ofn->lpstrFile[offset] != L'\0')
 	{
-		wchar_t c;
+		filename = &ofn->lpstrFile[offset];
+		files.push_back(filename);
+		offset += filename.size() + 1;
+	}
 
-		c = s[i++];
-
-		if (c == L'\0')
-		{
-			// finished reading a token, save it in tokens vectory
-			selectedFiles.push_back(selectedFile);
-			selectedFile.clear();
-
-			if (!FileUtils::IsDirectory(selectedFiles.at(0)) && selectedFiles.size() == 1)
-			{
-				// The first entry is a file, and not a directory
-				// This means we should only have 1 file in this selection
-				break;
-			}
-			c = s[i]; // don't increment index because next token loop needs to read this char again
-
-			// if next char is NULL, then break out of the while loop
-			if (c == L'\0')
-			{
-				break; // out of while loop
-			}
-			else
-			{
-				continue; // read next token
-			}
-		}
-
-		selectedFile.push_back(c);
+	// Now we need to construct the full path to these files.
+	for (size_t i = 0; i< files.size(); i++)
+	{
+		files[i] = FileUtils::Join(containingDirectory.c_str(),
+			files[i].c_str(), 0);
 	}
 }
 
