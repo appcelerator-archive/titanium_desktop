@@ -514,7 +514,7 @@ static int totalJobs = 0;
 	[NSApp setDelegate:self];
 }
 
--(void)showIntroDialog:(SharedApplication)app
+-(void)setupDialogs
 {
 	NSString* appName = @"Unknown";
 	if (!app->name.empty())
@@ -563,7 +563,10 @@ static int totalJobs = 0;
 			[introImage setImage:img];
 		}
 	}
+}
 
+-(void)showIntroDialog
+{
 	string licensePathString(FileUtils::Join(app->path.c_str(), LICENSE_FILENAME, 0));
 	NSString* licensePath = [NSString stringWithUTF8String:licensePathString.c_str()];
 	NSFileManager* fm = [NSFileManager defaultManager];
@@ -684,8 +687,8 @@ static int totalJobs = 0;
 		installDirectory = [NSString stringWithUTF8String:userRuntimeHome.c_str()];
 	}
 	[installDirectory retain];
-	
 
+	[self setupDialogs];
 	if (skipIntroDialog)
 	{
 		[self continueIntro:self];
@@ -693,7 +696,7 @@ static int totalJobs = 0;
 	}
 	else
 	{
-		[self showIntroDialog:app];
+		[self showIntroDialog];
 	}
 }
 

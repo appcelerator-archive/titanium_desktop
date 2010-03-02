@@ -67,7 +67,8 @@ SharedApplication app;
 -(void)downloadAndInstall:(Controller*)controller;
 -(void)install:(Job*)job;
 -(void)downloadJob:(Job*)job atIndex:(int)index;
+-(void)setupDialogs;
 -(void)createInstallerMenu:(NSString*)applicationName;
--(void)showIntroDialog:(SharedApplication)app;
+-(void)showIntroDialog;
 
 @end
