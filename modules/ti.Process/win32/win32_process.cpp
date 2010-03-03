@@ -152,8 +152,8 @@ namespace ti
 			NULL,
 			NULL,
 			TRUE,
-			0,
-			NULL,
+			CREATE_NO_WINDOW, // If this is a console application,
+            NULL,             // don't open a console window.
 			NULL,
 			&startupInfo,
 			&processInfo);
