@@ -113,6 +113,11 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::createWebViewWithRequest(
 HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewClose(
 	/* [in] */ IWebView *sender)
 {
+	// UserWindow::Close expects us to be holding a reference to
+	// the UserWindow. So hold it here -- it may be freed after
+	// this delegate finishes.
+	AutoUserWindow keep(window, true);
+
 	window->Close();
 	return S_OK;
 }
