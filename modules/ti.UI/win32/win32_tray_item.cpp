@@ -104,8 +104,11 @@ namespace ti
 		this->oldNativeMenu = win32menu->CreateNative(false);
 		POINT pt;
 		GetCursorPos(&pt);
+		
+		SetForegroundWindow(this->trayIconData->hWnd);	
 		TrackPopupMenu(this->oldNativeMenu, TPM_BOTTOMALIGN, 
 			pt.x, pt.y, 0, this->trayIconData->hWnd, NULL);
+		PostMessage(this->trayIconData->hWnd, WM_NULL, 0, 0);
 	}
 
 	void Win32TrayItem::HandleLeftClick()
