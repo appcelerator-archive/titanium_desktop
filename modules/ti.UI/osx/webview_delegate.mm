@@ -37,6 +37,7 @@
 	[webPrefs setLocalStorageEnabled:YES];
 	[webPrefs setDOMPasteAllowed:YES];
 	[webPrefs setUserStyleSheetEnabled:NO];
+	[webPrefs setShouldPrintBackgrounds:YES];
 
 	// Setup the DB to store it's DB under our data directory for the app
 	NSString* datadir = [NSString stringWithUTF8String:
@@ -393,6 +394,25 @@
 {
 	return NO;
 }
+
+- (void)webView:(WebView *)sender printFrameView:(WebFrameView *)frameView
+{
+	// First see if the frame view can handle the printing operation iself. See:
+	// http://devworld.apple.com/mac/library/documentation/Cocoa/Reference/WebKit/Protocols/WebUIDelegate_Protocol/Reference/Reference.html#//apple_ref/occ/instm/NSObject/webView:printFrameView:
+	if ([frameView documentViewShouldHandlePrint])
+	{
+		[frameView printDocumentView];
+	}
+	else
+	 {
+		NSPrintOperation* printOperation = [frameView 
+			printOperationWithPrintInfo:[NSPrintInfo sharedPrintInfo]];
+		[printOperation setCanSpawnSeparateThread:YES];
+		[printOperation runOperationModalForWindow:window
+			delegate:nil didRunSelector:0 contextInfo:0];
+	}
+}
+
 
 // WebResourceLoadDelegate Methods
 #pragma mark -
