@@ -95,7 +95,7 @@ static void NotificationClicked(CFNotificationCenterRef center,
 static CFRef<CFStringRef> appName(0);
 static CFRef<CFStringRef> appId(0);
 static CFStringRef notificationName = CFSTR("tiNotification");
-static CFNotificationCenterRef distCenter;
+static CFNotificationCenterRef distCenter = CFNotificationCenterGetDistributedCenter();
 static NSConnection* connection = 0;
 
 /*static*/
@@ -177,6 +177,14 @@ void Notification::ShutdownImpl()
 
 void Notification::CreateImpl()
 {
+}
+
+void Notification::DestroyImpl()
+{
+}
+
+bool Notification::ShowImpl()
+{
 	int priority = 0;
 	CFRef<CFUUIDRef> uuid(CFUUIDCreate(kCFAllocatorDefault));
 	CFRef<CFStringRef> clickContext(CFUUIDCreateString(kCFAllocatorDefault, uuid));
@@ -231,15 +239,8 @@ void Notification::CreateImpl()
 			(CFStringRef) GROWL_NOTIFICATION, NULL, notificationInfo,
 			kCFNotificationPostToAllSessions);
 	}
-}
 
-void Notification::DestroyImpl()
-{
-}
-
-bool Notification::ShowImpl()
-{
-	return false;
+	return true;
 }
 
 bool Notification::HideImpl()
