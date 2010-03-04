@@ -12,7 +12,7 @@ class PackagingEnvironment(object):
 		if target_os is 'linux':
 			self.App = linux_app.LinuxApp
 		if target_os is 'osx':
-			self.App = osx_app.App
+			self.App = osx_app.OSXApp
 		if target_os is 'win32':
 			self.App = app.Win32App
 
