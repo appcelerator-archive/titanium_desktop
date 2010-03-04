@@ -9,6 +9,7 @@
 
 #include <kroll/kroll.h>
 #include "menu_item.h"
+#include "notification.h"
 
 namespace ti
 {
@@ -29,6 +30,7 @@ namespace ti
 		void _GetOpenWindows(const ValueList& args, KValueRef result);
 		void _GetMainWindow(const ValueList& args, KValueRef result);
 		void _CreateWindow(const ValueList& args, KValueRef result);
+		void _CreateNotification(const ValueList& args, KValueRef result);
 		void _CreateMenu(const ValueList& args, KValueRef result);
 		void _CreateMenuItem(const ValueList& args, KValueRef result);
 		void _CreateCheckMenuItem(const ValueList& args, KValueRef result);

@@ -15,11 +15,9 @@ tiui:
 python:
 ruby:
 php:
-tigrowl:
 timedia:
 timonkey:
 tinetwork:
-tinotification:
 tiprocess:
 tidatabase:
 tiworker:

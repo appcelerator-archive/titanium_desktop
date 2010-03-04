@@ -1,22 +1,10 @@
 /**
  * Appcelerator Titanium - licensed under the Apache Public License 2
  * see LICENSE in the root folder for details on the license.
- * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
+ * Copyright (c) 2010 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "growl_osx.h"
-#include <Foundation/Foundation.h>
-#include <Cocoa/Cocoa.h>
-#include <Growl/GrowlApplicationBridge.h>
-#include <Growl/GrowlDefines.h>
-#include <Growl/GrowlDefinesInternal.h>
-#include <Growl/GrowlPathway.h>
-#include <Growl/CFGrowlAdditions.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-using namespace kroll;
-using namespace ti;
+#include "../notification.h"
 
 namespace ti
 {
@@ -95,16 +83,29 @@ static void NotificationClicked(CFNotificationCenterRef center,
 
 }
 
-GrowlOSX::GrowlOSX(KObjectRef global) :
-	GrowlBinding(global),
-	app(Host::GetInstance()->GetApplication()),
-	appName(UTF8ToCFString(app->name)),
-	appId(UTF8ToCFString(app->id)),
-	notificationName(CFSTR("tiNotification")),
-	distCenter(CFNotificationCenterGetDistributedCenter()),
-	connection(0)
+static CFRef<CFStringRef> appName(0);
+static CFRef<CFStringRef> appId(0);
+static CFStringRef notificationName = CFSTR("tiNotification");
+static CFNotificationCenterRef distCenter;
+static NSConnection* connection = 0;
+
+static CFDataRef GetAppIcon(SharedApplication app)
 {
-	this->connection = [NSConnection 
+	return (CFDataRef) [[[NSApplication sharedApplication]
+		applicationIconImage] TIFFRepresentation];
+}
+
+void Notification::InitializeImpl()
+{
+
+	if (![GrowlApplicationBridge isGrowlRunning])
+		return false;
+
+	SharedApplication app(Host::GetInstance()->GetApplication());
+	appName = UTF8ToCFString(app->name);
+	appId = UTF8ToCFString(app->id);
+
+	connection = [NSConnection
 		connectionWithRegisteredName:@"GrowlApplicationBridgePathway"
 		host:nil];
 
@@ -128,7 +129,7 @@ GrowlOSX::GrowlOSX(KObjectRef global) :
 		registerKeys, registerValues, 4 , &kCFTypeDictionaryKeyCallBacks,
 		&kCFTypeDictionaryValueCallBacks));
 
-	if (this->connection)
+	if (connection)
 	{
 		@try
 		{
@@ -140,6 +141,7 @@ GrowlOSX::GrowlOSX(KObjectRef global) :
 		{
 			Logger::Get("Notification.Notification")->Error(
 				"Could not register application for Growl notifications");
+			return false;
 		}
 	}
 	else
@@ -161,14 +163,15 @@ GrowlOSX::GrowlOSX(KObjectRef global) :
 	CFNotificationCenterAddObserver(distCenter, NULL,
 		NotificationTimedOut, notificationName.get(), NULL,
 		CFNotificationSuspensionBehaviorCoalesce);
+
+	return true;
 }
 
-GrowlOSX::~GrowlOSX()
+void Notification::ShutdownImpl()
 {
 }
 
-void GrowlOSX::ShowNotification(std::string& title, std::string& description,
-	std::string& iconURL, int timeout, KMethodRef callback)
+void Notification::CreateImpl()
 {
 	int priority = 0;
 	CFRef<CFUUIDRef> uuid(CFUUIDCreate(kCFAllocatorDefault));
@@ -176,11 +179,11 @@ void GrowlOSX::ShowNotification(std::string& title, std::string& description,
 	CFRef<CFNumberRef> priorityNumber(CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &priority));
 	CFRef<CFMutableDictionaryRef> notificationInfo(CFDictionaryCreateMutable(kCFAllocatorDefault,
 		9, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-	CFRef<CFStringRef> cftitle(UTF8ToCFString(title));
-	CFRef<CFStringRef> cfdescription(UTF8ToCFString(description));
+	CFRef<CFStringRef> cftitle(UTF8ToCFString(this->title));
+	CFRef<CFStringRef> cfdescription(UTF8ToCFString(this->description));
 
 	CFDataRef icon = 0;
-	if (!iconURL.empty())
+	if (!this->iconURL.empty())
 	{
 		// Convert all app:// and ti:// URLs to paths and then
 		// back to file:// URLs. If a path is passed in, it
@@ -228,8 +231,19 @@ void GrowlOSX::ShowNotification(std::string& title, std::string& description,
 	}
 }
 
-bool GrowlOSX::IsRunning()
+void Notification::DestroyImpl()
 {
-	return [GrowlApplicationBridge isGrowlRunning];
 }
+
+bool Notification::ShowImpl()
+{
+	return false;
 }
+
+bool Notification::HideImpl()
+{
+	return false;
+}
+
+}
+

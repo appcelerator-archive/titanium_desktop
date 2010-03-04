@@ -1,4 +1,0 @@
-#!/usr/bin/env python
-Import('build env module')
-
-build.utils.LightWeightCopy(build.cwd(), module.dir)

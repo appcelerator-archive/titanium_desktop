@@ -193,5 +193,136 @@
 	if (!Titanium.JSON)
 		Titanium.JSON = window.JSON;
 
+	// Enable titanium notifications as a fallback when platform
+	// native notifications are not available.
+	if (Titanium.UI.nativeNotifications == false)
+	{
+		var notification_windows = 1;
+
+		function TitaniumNotification(window)
+		{
+			var self = this;
+			var width = 300;
+			var height = 80;
+			var showing = false;
+			var hideTimer = null;
+
+			var properties = {
+				title: '',
+				message: '',
+				icon: '',
+				callback: null,
+				delay: 3000,
+			};
+
+			var mywindow = Titanium.UI.mainWindow.createWindow(
+			{
+				width:width,
+				height:height,
+				transparentBackground:true,
+				usingChrome:false,
+				toolWindow:true,
+				id:'notification_' + (notification_windows++),
+				visible:false,
+				topMost:true,
+				url:'app://blank'
+			});
+			mywindow.open();
+
+			this.setTitle = function(value)
+			{
+				properties.title = value;
+			};
+
+			this.setMessage = function(value)
+			{
+				properties.message = value;
+			};
+
+			this.setIcon = function(value)
+			{
+				properties.icon = value;
+			};
+
+			this.setDelay = function(value)
+			{
+				properties.delay = value;
+			};
+			this.setTimeout = this.setDelay;
+
+			this.setCallback = function(value)
+			{
+				properties.callback = value;
+			};
+
+			this.show = function(animate,autohide)
+			{
+				showing = true;
+				if (hideTimer)
+				{
+					window.clearTimeout(hideTimer);
+				}
+				animate = (animate==null) ? true : animate;
+				autohide = (autohide==null) ? true : autohide;
+				mywindow.setX(window.screen.availWidth-width-20);
+				if (Titanium.platform == "osx" || Titanium.platform == 'linux') {
+					mywindow.setY(25);
+				} else if (Titanium.platform == "win32") {
+					mywindow.setY(window.screen.availHeight-height-10);
+				}
+
+				var notificationClicked = function ()
+				{
+					if (properties.callback)
+						properties.callback();
+					self.hide();
+				};
+
+				mywindow.callback = notificationClicked;
+				mywindow.setURL('ti://tiui/tinotification.html?'
+				 + 'title=' + encodeURIComponent(properties.title)
+				 + '&message=' + encodeURIComponent(properties.message)
+				 + '&icon=' + encodeURIComponent(properties.icon));
+
+				mywindow.show();
+				if (autohide)
+				{
+					hideTimer = window.setTimeout(function()
+					{
+						self.hide();
+					},properties.delay + (animate ? 1000 : 0));
+				}
+			};
+
+			this.hide = function(animate)
+			{
+				animate = (animate==null) ? true : animate;
+				showing = false;
+				if (hideTimer)
+				{
+					window.clearTimeout(hideTimer);
+					hideTimer=null;
+				}
+				mywindow.hide(animate);
+				mywindow.getParent().focus();
+			};
+
+			this.configure = function(props)
+			{
+				for (attr in props) properties[attr] = props[attr];
+			};
+		};
+
+		Titanium.UI.createNotification = function()
+		{
+			var window = Titanium.UI.mainWindow.getDOMWindow();
+			if (!window)
+				throw "Unable to get main window DOM!"
+			var n = new TitaniumNotification(window);
+			if (arguments.length == 1)
+				n.configure(arguments[0]);
+			return n;
+		}
+	}
 })();
  

@@ -29,6 +29,7 @@ namespace ti
 		this->uiBinding = new GtkUIBinding(host);
 #endif
 		host->GetGlobalObject()->SetObject("UI", this->uiBinding);
+		host->GetGlobalObject()->SetObject("Notification", this->uiBinding);
 
 		ScriptEvaluator::Initialize();
 		AppConfig* config = AppConfig::Instance();
