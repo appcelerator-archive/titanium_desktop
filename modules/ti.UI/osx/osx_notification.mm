@@ -5,6 +5,15 @@
  */
 
 #include "../notification.h"
+#include <Foundation/Foundation.h>
+#include <Cocoa/Cocoa.h>
+#include <Growl/GrowlApplicationBridge.h>
+#include <Growl/GrowlDefines.h>
+#include <Growl/GrowlDefinesInternal.h>
+#include <Growl/GrowlPathway.h>
+#include <Growl/CFGrowlAdditions.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 namespace ti
 {
@@ -41,7 +50,7 @@ static void IsValueClickContext(const void* key,
 	}
 }
 
-std::string GetClickContext(CFDictionaryRef dictionary)
+static std::string GetClickContext(CFDictionaryRef dictionary)
 {
 	CFStringRef cfcontext = 0;
 	CFDictionaryApplyFunction(dictionary, IsValueClickContext, &cfcontext);
@@ -89,21 +98,16 @@ static CFStringRef notificationName = CFSTR("tiNotification");
 static CFNotificationCenterRef distCenter;
 static NSConnection* connection = 0;
 
-static CFDataRef GetAppIcon(SharedApplication app)
-{
-	return (CFDataRef) [[[NSApplication sharedApplication]
-		applicationIconImage] TIFFRepresentation];
-}
-
-void Notification::InitializeImpl()
+/*static*/
+bool Notification::InitializeImpl()
 {
 
 	if (![GrowlApplicationBridge isGrowlRunning])
 		return false;
 
 	SharedApplication app(Host::GetInstance()->GetApplication());
-	appName = UTF8ToCFString(app->name);
-	appId = UTF8ToCFString(app->id);
+	appName.reset(UTF8ToCFString(app->name));
+	appId.reset(UTF8ToCFString(app->id));
 
 	connection = [NSConnection
 		connectionWithRegisteredName:@"GrowlApplicationBridgePathway"
@@ -179,8 +183,8 @@ void Notification::CreateImpl()
 	CFRef<CFNumberRef> priorityNumber(CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &priority));
 	CFRef<CFMutableDictionaryRef> notificationInfo(CFDictionaryCreateMutable(kCFAllocatorDefault,
 		9, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks));
-	CFRef<CFStringRef> cftitle(UTF8ToCFString(this->title));
-	CFRef<CFStringRef> cfdescription(UTF8ToCFString(this->description));
+	CFRef<CFStringRef> cfTitle(UTF8ToCFString(this->title));
+	CFRef<CFStringRef> cfMessage(UTF8ToCFString(this->message));
 
 	CFDataRef icon = 0;
 	if (!this->iconURL.empty())
@@ -198,29 +202,27 @@ void Notification::CreateImpl()
 	}
 
 	if (!icon)
-		icon = GetAppIcon(app);
+		icon = GetAppIcon(Host::GetInstance()->GetApplication());
 
 	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_NAME, notificationName);
 	CFDictionarySetValue(notificationInfo.get(), GROWL_APP_NAME, appName.get());
-	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_TITLE, cftitle.get());
-	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_DESCRIPTION, cfdescription.get());
+	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_TITLE, cfTitle.get());
+	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_DESCRIPTION, cfMessage.get());
 	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_STICKY, kCFBooleanFalse);
 	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_ICON, icon);
 	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_PRIORITY, priorityNumber.get());
 	CFDictionarySetValue(notificationInfo.get(), GROWL_NOTIFICATION_CLICK_CONTEXT, clickContext.get());
 
-	if (!callback.isNull())
+	if (!clickedCallback.isNull())
 	{
 		Poco::Mutex::ScopedLock lock(callbackMapMutex);
 		std::string clickContextString(CFStringToUTF8(clickContext.get()));
-		callbackMap[clickContextString] = callback;
+		callbackMap[clickContextString] = clickedCallback;
 	}
 
-	this->connection = [NSConnection 
-		connectionWithRegisteredName:@"GrowlApplicationBridgePathway" host:nil];
-	if (this->connection)
+	if (connection)
 	{
-		id<GrowlNotificationProtocol> proxy = GetGrowlProxy(this->connection);
+		id<GrowlNotificationProtocol> proxy = GetGrowlProxy(connection);
 		[proxy postNotificationWithDictionary:(NSDictionary *) notificationInfo.get()];
 	}
 	else

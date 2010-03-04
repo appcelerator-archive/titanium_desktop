@@ -14,6 +14,9 @@ typedef struct _NotifyNotification NotifyNotification;
 typedef NotifyNotification* PlatformNotification;
 #elif defined(OS_WIN32)
 typedef long PlatformNotification;
+#elif defined(OS_OSX)
+// Unused.
+typedef char PlatformNotification;
 #endif
 
 namespace ti

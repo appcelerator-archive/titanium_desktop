@@ -3,14 +3,14 @@
  * see LICENSE in the root folder for details on the license.
  * Copyright (c) 2008 Appcelerator, Inc. All Rights Reserved.
  */
+#include "app_config.h"
+#include "window_config.h"
+#include "config_utils.h"
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xpath.h>
-
-#include "app_config.h"
-#include "window_config.h"
-#include "config_utils.h"
+#include <sstream>
 
 static size_t windowCount = 0;
 

@@ -42,7 +42,7 @@
 	NSString* datadir = [NSString stringWithUTF8String:
 		Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
 	[webPrefs _setLocalStorageDatabasePath:[NSString stringWithUTF8String:
-		Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
+		Host::GetInstance()->GetApplication()->GetDataPath().c_str()]];
 	[[window webView] setPreferences:webPrefs];
 	[webPrefs release];
 

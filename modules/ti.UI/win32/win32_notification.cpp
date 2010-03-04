@@ -71,8 +71,8 @@ bool Notification::ShowImpl()
 		::UTF8ToWide(this->message), timeout, ::UTF8ToWide(iconPath),
 		 replyWindow, snarlWindowMessage);
 
-	if (!callback.isNull())
-		SnarlWin32::snarlCallbacks[id] = callback;
+	if (!clickedCallback.isNull())
+		SnarlWin32::snarlCallbacks[id] = clickedCallback;
 }
 
 bool Notification::HideImpl()

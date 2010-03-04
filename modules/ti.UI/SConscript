@@ -27,7 +27,7 @@ elif build.is_win32():
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO', '/OPT:REF'])
 
 elif build.is_osx():
--	env.Append(FRAMEWORKPATH=[build.tp('growl')])
+	env.Append(FRAMEWORKPATH=[build.tp('growl')])
 	env.Append(FRAMEWORKS=['Cocoa','Carbon', 'IOKit', 'Growl'])
 	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
