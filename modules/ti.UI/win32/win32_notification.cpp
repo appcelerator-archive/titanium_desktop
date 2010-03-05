@@ -13,9 +13,9 @@ namespace ti
 /*static*/
 bool Notification::InitializeImpl()
 {
-	SnarlInterface snarlInterface;
-	int major, minor;
-	return snarlInterface.snGetVersion(&major, &minor);
+	Snarl::SnarlInterface snarlInterface;
+	WORD major, minor;
+	return snarlInterface.GetVersion(&major, &minor);
 }
 
 /*static*/
@@ -35,11 +35,11 @@ static bool MessageHandler(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 
 	if (i != snarlCallbacks.end())
 	{
-		if (wParam == SnarlInterface::SNARL_NOTIFICATION_CLICKED)
+		if (wParam == Snarl::SNARL_NOTIFICATION_CLICKED)
 		{
 			RunOnMainThread(i->second, ValueList(), false);
 		}
-		else if (wParam == SnarlInterface::SNARL_NOTIFICATION_TIMED_OUT)
+		else if (wParam == Snarl::SNARL_NOTIFICATION_TIMED_OUT)
 		{
 			snarlCallbacks.erase(i);
 		}
@@ -59,20 +59,21 @@ void Notification::DestroyImpl()
 
 bool Notification::ShowImpl()
 {
-	SnarlInterface snarlInterface;
+	Snarl::SnarlInterface snarlInterface;
 
 	std::string iconPath;
 	if (!iconURL.empty())
 		iconPath = URLUtils::URLToPath(iconURL);
 
-	HWND replyWindow = Host::GetInstance()->AddMessageHandler(
-		&SnarlWin32::MessageHandler);
-	long id = snarlInterface.snShowMessage(::UTF8ToWide(this->title),
-		::UTF8ToWide(this->message), timeout, ::UTF8ToWide(iconPath),
-		 replyWindow, snarlWindowMessage);
+	HWND replyWindow = Host::GetInstance()->AddMessageHandler(&MessageHandler);
+	long id = snarlInterface.ShowMessage(::UTF8ToWide(this->title).c_str(),
+		::UTF8ToWide(this->message).c_str(), this->timeout,
+		 ::UTF8ToWide(iconPath).c_str(), replyWindow, snarlWindowMessage);
 
 	if (!clickedCallback.isNull())
-		SnarlWin32::snarlCallbacks[id] = clickedCallback;
+		snarlCallbacks[id] = clickedCallback;
+
+	return true;
 }
 
 bool Notification::HideImpl()
@@ -80,6 +81,7 @@ bool Notification::HideImpl()
 	if (this->notification == -1)
 		return true;
 
-	return snHideMessage(this->notification);
+	Snarl::SnarlInterface snarlInterface;
+	return snarlInterface.HideMessage(this->notification);
 }
 }

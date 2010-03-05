@@ -54,7 +54,7 @@ bool Notification::ShowImpl()
 		iconPath.c_str(),
 		NULL);
 
-	int timeout = (this->delay > 0) ? this->delay * 1000 : this->delay;
+	int timeout = (this->timeout > 0) ? this->timeout * 1000 : this->timeout;
 	notify_notification_set_timeout(this->notification, timeout);
 
 	return notify_notification_show(this->notification, NULL);

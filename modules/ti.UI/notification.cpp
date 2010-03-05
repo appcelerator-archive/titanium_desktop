@@ -10,7 +10,7 @@ namespace ti
 {
 
 Notification::Notification() : KAccessorObject("Notification"),
-	delay(-1)
+	timeout(-1)
 {
 	/**
 	 * @tiapi(method=True,name=Notification.Notification.setTitle,since=0.9)
@@ -36,7 +36,7 @@ Notification::Notification() : KAccessorObject("Notification"),
 	/**
 	 * @tiapi(method=True,name=Notification.Notification.setTimeout,platforms=win32|linux,since=0.9)
 	 * @tiapi Set the timeout before the notification expires.
-	 * @tiarg[Integer, timeout] delay in seconds. (-1 = use system default, 0 = never expire)
+	 * @tiarg[Integer, timeout] Timeout in seconds. (-1 = use system default, 0 = never expire)
 	 */
 	SetMethod("setTimeout", &Notification::_SetTimeout);
 	SetMethod("setDelay", &Notification::_SetTimeout);
@@ -92,7 +92,7 @@ void Notification::_SetIcon(const ValueList& args, KValueRef result)
 void Notification::_SetTimeout(const ValueList& args, KValueRef result)
 {
 	args.VerifyException("setTimeout", "i");
-	this->delay = args.GetInt(0);
+	this->timeout = args.GetInt(0);
 }
 
 void Notification::_SetCallback(const ValueList& args, KValueRef result)
@@ -116,7 +116,7 @@ void Notification::Configure(KObjectRef properties)
 	this->title = properties->GetString("title");
 	this->message = properties->GetString("message");
 	this->iconURL = properties->GetString("icon");
-	this->delay = properties->GetInt("delay", -1);
+	this->timeout = properties->GetInt("timeout", -1);
 	this->clickedCallback = properties->GetMethod("callback");
 }
 

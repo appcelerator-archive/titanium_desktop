@@ -40,7 +40,7 @@ private:
 	std::string title;
 	std::string message;
 	std::string iconURL;
-	int delay;
+	int timeout;
 	KMethodRef clickedCallback;
 	PlatformNotification notification;
 
