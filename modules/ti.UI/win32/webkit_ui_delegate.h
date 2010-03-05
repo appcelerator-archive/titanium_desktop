@@ -228,7 +228,7 @@ public:
 
 	virtual HRESULT STDMETHODCALLTYPE printFrame(
 		/* [in] */ IWebView *webView,
-		/* [in] */ IWebFrame *frame) { return E_NOTIMPL; }
+		/* [in] */ IWebFrame *frame);
 
 	virtual HRESULT STDMETHODCALLTYPE ftpDirectoryTemplatePath(
 		/* [in] */ IWebView *webView,
@@ -256,7 +256,7 @@ public:
 
 	virtual HRESULT STDMETHODCALLTYPE webViewPrintingMarginRect(
 		/* [in] */ IWebView *webView,
-		/* [retval][out] */ RECT *rect) { return E_NOTIMPL; }
+		/* [retval][out] */ RECT *rect);
 
 	virtual HRESULT STDMETHODCALLTYPE canRunModal(
 		/* [in] */ IWebView *webView,

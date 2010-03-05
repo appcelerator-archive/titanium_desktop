@@ -5,6 +5,7 @@
  */
 #include "../ui_module.h"
 #include <comutil.h>
+#define MARGIN 20
 
 namespace ti
 {
@@ -200,12 +201,6 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::runJavaScriptConfirmPanelWithMe
 	std::wstring msg;
 	if (message)
 		msg.append(bstr_t(message));
-
-	//Win32PopupDialog popupDialog(handle);
-	//popupDialog.SetTitle(title);
-	//popupDialog.SetMessage(msg);
-	//popupDialog.SetShowCancelButton(true);
-	//int r = popupDialog.Show();
 
 	int r = MessageBox(0, msg.c_str(), title.c_str(), MB_ICONINFORMATION | MB_OKCANCEL);
 	*result = (r == IDOK);
@@ -419,6 +414,132 @@ HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::newBackingStore(
 		return S_OK;
 
 	userWindow->SetBitmap(reinterpret_cast<HBITMAP>(bitmapHandle));
+	return S_OK;
+}
+
+static BOOL CALLBACK AbortProc(HDC hdc, int error)
+{
+	// TODO: It might be night to show a dialog allowing users
+	// to cancel print jobs.
+	MSG msg;
+	while (::PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	{
+		::TranslateMessage(&msg);
+		::DispatchMessage(&msg);
+	}
+
+	return TRUE;
+}
+
+HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::printFrame(
+	/* [in] */ IWebView *webView,
+	/* [in] */ IWebFrame *frame)
+{
+	// This code is originally based on the PrintView function in
+	// the WinLauncher code of WebKit. We should periodically check
+	// there to ensure that this doesn't become obsolete.
+
+	// Open a printing dialog to fetch the HDC of the desired printer.
+	PRINTDLG dialog;
+	ZeroMemory(&dialog, sizeof(PRINTDLG));
+	dialog.lStructSize = sizeof(PRINTDLG);
+	dialog.Flags = PD_PRINTSETUP | PD_RETURNDC;
+	BOOL dialogResult = ::PrintDlg(&dialog);
+
+	if (!dialogResult) // Error or cancel.
+	{
+		DWORD reason = CommDlgExtendedError();
+		if (!reason) // User cancelled.
+			return S_OK;
+
+		logger->Error("Could not print page, dialog error code: %i",
+			reason);
+		return E_FAIL;
+	}
+
+	HDC hdc = dialog.hDC;
+	if (!hdc)
+	{
+		logger->Error("Could not fetch printer HDC.");
+		return E_FAIL;
+	}
+
+	if (::SetAbortProc(hdc, AbortProc) == SP_ERROR)
+	{
+		logger->Error("Could not set printer AbortProc.");
+		return E_FAIL;
+	}
+	
+	IWebFrame* mainFrame = 0;
+	if (FAILED(webView->mainFrame(&mainFrame)))
+	{
+		return E_POINTER;
+	}
+
+	IWebFramePrivate* framePrivate = 0;
+	if (FAILED(mainFrame->QueryInterface(&framePrivate)))
+	{
+		mainFrame->Release();
+		return E_POINTER;
+	}
+
+	framePrivate->setInPrintingMode(TRUE, hdc);
+	UINT pageCount = 0;
+	framePrivate->getPrintedPageCount(hdc, &pageCount);
+
+	DOCINFO docInfo;
+	ZeroMemory(&docInfo, sizeof(DOCINFO));
+	docInfo.cbSize = sizeof(DOCINFO);
+	docInfo.lpszDocName = _T("Titanium Document");
+	::StartDoc(hdc, &docInfo);
+
+	void* graphicsContext = 0;
+	for (size_t page = 1; page <= pageCount; page++)
+	{
+		::StartPage(hdc);
+		framePrivate->spoolPages(hdc, page, page, graphicsContext);
+		::EndPage(hdc);
+	}
+
+	framePrivate->setInPrintingMode(FALSE, hdc);
+
+	::EndDoc(hdc);
+	::DeleteDC(hdc);
+
+	if (mainFrame)
+		mainFrame->Release();
+	if (framePrivate)
+		framePrivate->Release();
+
+}
+
+HRESULT STDMETHODCALLTYPE Win32WebKitUIDelegate::webViewPrintingMarginRect(
+	/* [in] */ IWebView *webView,
+	/* [retval][out] */ RECT *rect)
+{
+
+	if (!webView || !rect)
+		return E_POINTER;
+
+	IWebFrame* mainFrame = 0;
+	if (FAILED(webView->mainFrame(&mainFrame)))
+		return E_FAIL;
+
+	IWebFramePrivate* framePrivate = 0;
+	if (FAILED(mainFrame->QueryInterface(&framePrivate))) {
+		mainFrame->Release();
+		return E_FAIL;
+	}
+
+	framePrivate->frameBounds(rect);
+	rect->left += MARGIN;
+	rect->top += MARGIN;
+	rect->right -= MARGIN;
+	rect->bottom -= MARGIN;
+
+	framePrivate->Release();
+	mainFrame->Release();
+
 	return S_OK;
 }
 

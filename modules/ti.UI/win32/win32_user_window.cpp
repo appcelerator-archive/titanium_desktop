@@ -342,6 +342,7 @@ void Win32UserWindow::InitWebKit()
 	prefs->setJavaScriptEnabled(true);
 	prefs->setJavaScriptCanOpenWindowsAutomatically(true);
 	prefs->setDOMPasteAllowed(true);
+	prefs->setShouldPrintBackgrounds(true);
 
 	IWebPreferencesPrivate* privatePrefs = NULL;
 	hr = prefs->QueryInterface(IID_IWebPreferencesPrivate, (void**) &privatePrefs);
