@@ -112,22 +112,12 @@ namespace ti
 		 * @tiapi Override application proxy autodetection with a proxy URL.
 		 * @tiarg[String, hostname] The full proxy hostname.
 		 */
-		/**
-		 * @tiapi(method=True,name=Network.setProxy,since=0.2, deprecated=True)
-		 * @tiapi Override HTTP application proxy autodetection with a proxy URL.
-		 * @tiarg[String, hostname] The full proxy hostname.
-		 */
 		this->SetMethod("setHTTPProxy", &NetworkBinding::SetHTTPProxy);
 		this->SetMethod("setProxy", &NetworkBinding::SetHTTPProxy);
 
 		/**
 		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.7) 
 		 * @tiapi Return the proxy override, if one is set.
-		 * @tiresult[String|null] The full proxy override URL or null if none is set.
-		 */
-		/**
-		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.2,deprecated=True) 
-		 * @tiapi Return the HTTP proxy override, if one is set.
 		 * @tiresult[String|null] The full proxy override URL or null if none is set.
 		 */
 		this->SetMethod("getHTTPProxy", &NetworkBinding::GetHTTPProxy);
@@ -141,7 +131,7 @@ namespace ti
 		this->SetMethod("setHTTPSProxy", &NetworkBinding::SetHTTPSProxy);
 
 		/**
-		 * @tiapi(method=True,name=Network.getHTTPProxy,since=0.7)
+		 * @tiapi(method=True,name=Network.getHTTPSProxy,since=0.7)
 		 * @tiapi Return the proxy override, if one is set.
 		 * @tiresult[String|null] The full proxy override URL or null if none is set.
 		 */
