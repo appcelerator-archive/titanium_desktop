@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Blob.byteAt
+type: method
+description: Return the character code (or byte value) at the given index in a Blob
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: Number
+parameters: 
+    - [Number, index, The index to look for a character code at]

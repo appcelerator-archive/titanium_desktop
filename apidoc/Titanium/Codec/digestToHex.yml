@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Codec.digestToHex
+type: method
+description: encode a string or blob using a digest algorithm
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: string
+parameters: 
+    - [int, type, "encoding type: currently supports MD2, MD4, MD5, SHA1"]
+    - [String|Blob, data, data to encode]

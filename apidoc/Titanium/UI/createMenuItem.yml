@@ -1,0 +1,11 @@
+---
+namespace: Titanium.UI.createMenuItem
+type: method
+description: Create a new menu item.
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: UI.MenuItem
+parameters: 
+    - [String, label, The label for this menu item]
+    - [Function, eventListener, (optional) An event listener for this menu item]
+    - [String, iconURL, (optional) A URL to an icon to use for this menu item]

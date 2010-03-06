@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Process.SIGILL
+type: property
+description: 
+since: 0.5.0
+platforms: ['win32', 'osx', 'linux']
+returns: String

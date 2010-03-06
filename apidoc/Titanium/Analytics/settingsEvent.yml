@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Analytics.settingsEvent
+type: method
+description: Sends an analytics event associated with application settings or configuration
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, name, settings name]
+    - [Object, data, (optional) event data]

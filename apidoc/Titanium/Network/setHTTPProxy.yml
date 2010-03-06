@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.setHTTPProxy
+type: method
+description: Override application proxy autodetection with a proxy URL.
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, hostname, The full proxy hostname.]

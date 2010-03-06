@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Codec.checksum
+type: method
+description: compute checksum
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: int
+parameters: 
+    - [String, data, data to checksum (as string)]
+    - [int, type, "(optional) checksum type: currently supports CRC32 (default) and ADLER32"]

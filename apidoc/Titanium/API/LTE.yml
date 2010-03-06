@@ -1,0 +1,7 @@
+---
+namespace: Titanium.API.LTE
+type: property
+description: a constant representing a less-than-or-equal dependency
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

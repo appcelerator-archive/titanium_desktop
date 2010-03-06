@@ -1,0 +1,7 @@
+---
+namespace: Titanium.EXIT
+type: property
+description: The EXIT event constant
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

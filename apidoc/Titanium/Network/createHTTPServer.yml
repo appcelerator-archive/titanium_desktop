@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.createHTTPServer
+type: method
+description: Creates an HTTPServer object
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: Network.HTTPServer
+parameters: []

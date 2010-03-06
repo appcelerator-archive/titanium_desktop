@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.addEventListener
+type: method
+description: Register a root event listener
+since: 0.5.0
+platforms: ['osx', 'linux', 'win32']
+returns: Number
+parameters: 
+    - [String, eventName, The event name to listen for]
+    - [Function, callback, The callback to invoke when this message occurs]

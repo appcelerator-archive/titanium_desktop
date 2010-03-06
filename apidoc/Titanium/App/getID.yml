@@ -1,0 +1,8 @@
+---
+namespace: Titanium.App.getID
+type: method
+description: Return the application id.
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: []

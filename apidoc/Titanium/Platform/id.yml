@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Platform.id
+type: property
+description: The unique machine id of the system
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.decodeURIComponent
+type: method
+description: Decodes a URI component
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, value, value to decode]

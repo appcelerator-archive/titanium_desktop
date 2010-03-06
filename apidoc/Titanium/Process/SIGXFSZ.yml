@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Process.SIGXFSZ
+type: property
+description: 
+since: 0.5.0
+platforms: ['osx', 'linux']
+returns: String

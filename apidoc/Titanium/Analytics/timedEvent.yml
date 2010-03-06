@@ -1,0 +1,13 @@
+---
+namespace: Titanium.Analytics.timedEvent
+type: method
+description: Sends an analytics event tracking the duration of an application action
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, event, event name]
+    - [Date, start, (optional) event start time (optional if duration is specified)]
+    - [Date, stop, (optional) event stop time (optional if duration is specified)]
+    - [String, duration, (optional) event duration in seconds (optional if both start and stop are specified)]
+    - [Object, data, (optional) event data]

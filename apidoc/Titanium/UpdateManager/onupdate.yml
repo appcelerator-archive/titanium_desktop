@@ -1,0 +1,7 @@
+---
+namespace: Titanium.UpdateManager.onupdate
+type: property
+description: Set the update handler implementation function that will be invoked when an update is detected
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

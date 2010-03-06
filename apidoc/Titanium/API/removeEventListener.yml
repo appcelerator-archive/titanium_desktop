@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.removeEventListener
+type: method
+description: Remove a root event listener
+since: 0.5.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number|Function, id, The id or callback of the event listener to remove]

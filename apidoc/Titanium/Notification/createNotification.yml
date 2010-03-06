@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.createNotification
+type: method
+description: Creates a new Notification object
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Notification.Notification
+parameters: 
+    - [DOMWindow, window, (optional) The window object to use]

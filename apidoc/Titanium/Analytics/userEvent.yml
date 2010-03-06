@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Analytics.userEvent
+type: method
+description: Sends an analytics event not covered by the other interfaces
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, event, event name]
+    - [Object, data, (optional) event data]

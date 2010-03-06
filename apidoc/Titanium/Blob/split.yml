@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Blob.split
+type: method
+description: "Split a blob as if it were a string given a delimiter. This method returns empty matches. For instance: <pre><code>\"abc,def,,\".split(\",\") --> ['abc', 'def', '', '']</code></pre>"
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: Array<String>
+parameters: 
+    - [String, delimiter, The index to look for a character at]
+    - [Number, limit, (optional) The maximum number of matches to return]

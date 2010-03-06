@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.online
+type: property
+description: Whether or not the system is connected to the internet
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Boolean

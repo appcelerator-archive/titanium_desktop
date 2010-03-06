@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.createCheckMenuItem
+type: method
+description: Create a new CheckMenuItem object.
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: UI.CheckMenuItem
+parameters: 
+    - [String, label, The label for this menu item]
+    - [Function, eventListener, (optional) An event listener for this menu item]

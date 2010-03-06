@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.createKList
+type: method
+description: create a Kroll list.
+since: 0.5.0
+platforms: ['osx', 'linux', 'win32']
+returns: Array
+parameters: 
+    - [Array, toWrap, (optional) A function to wrap in a new KMethod]

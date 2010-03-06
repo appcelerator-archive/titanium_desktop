@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.log
+type: method
+description: Log a statement with a given severity
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number, type, the severity of this log statement]
+    - [String, statement, the statement to log]

@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.runOnMainThread
+type: method
+description: Execute the method on the main thread
+since: 0.5.0
+platforms: ['osx', 'linux', 'win32']
+returns: any
+parameters: 
+    - [Function, method, The method to execute]
+    - [any, ..., A variable-length list of arguments to pass to the method]

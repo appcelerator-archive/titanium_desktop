@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.createWindow
+type: method
+description: Create a new top-level window or a child of the current window if called from the context of an existing window.
+since: 0.8.1
+platforms: ['osx', 'linux', 'win32']
+returns: UI.UserWindow
+parameters: 
+    - [String|Object, options, (optional) A string containing a url of the new window or an object containing properties for the new window]

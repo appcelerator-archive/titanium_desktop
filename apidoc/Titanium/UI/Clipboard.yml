@@ -1,0 +1,5 @@
+---
+namespace: Titanium.UI.Clipboard
+type: object
+description: 
+since: 0.8.0

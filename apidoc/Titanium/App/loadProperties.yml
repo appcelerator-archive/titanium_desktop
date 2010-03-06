@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.loadProperties
+type: method
+description: Loads a properties list from a file path
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Array<App.Properties>
+parameters: 
+    - [String, path, Path to a properties file.]

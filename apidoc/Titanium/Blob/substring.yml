@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Blob.substring
+type: method
+description: Return a substring of a Blob given a start index and end index If no end index is given, return all characters from the start index to the end of the string. If startIndex > endIndex, the indexes are swapped.
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number, startIndex, The starting index]
+    - [Number, endIndex, (optional) The ending index]

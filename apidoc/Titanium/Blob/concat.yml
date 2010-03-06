@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Blob.concat
+type: method
+description: Concatenate multiple Blob and/or strings into one Blob
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: Blob
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.getApplication
+type: method
+description: Get the currently running application
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: API.Application
+parameters: []

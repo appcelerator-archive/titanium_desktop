@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Blob.lastIndexOf
+type: method
+description: Return the last index of a String within this Blob
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: Number
+parameters: 
+    - [String, needle, The String to search for]

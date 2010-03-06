@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.createKMethod
+type: method
+description: create a Kroll method.
+since: 0.5.0
+platforms: ['osx', 'linux', 'win32']
+returns: Function
+parameters: 
+    - [Function, toWrap, (optional) A function to wrap in a new KMethod]

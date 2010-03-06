@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.getInstalledRuntimes
+type: method
+description: Get a list of the currently installed Kroll runtime components
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: Array<API.Component>
+parameters: []

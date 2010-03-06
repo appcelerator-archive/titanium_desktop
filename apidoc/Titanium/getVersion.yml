@@ -1,0 +1,8 @@
+---
+namespace: Titanium.getVersion
+type: method
+description: Return the Titanium runtime version.
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: []

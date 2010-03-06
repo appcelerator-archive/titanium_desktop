@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.getFile
+type: method
+description: Returns a file path, optionally joining multiple arguments together in an OS specific way
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: FileSystem.File
+parameters: 
+    - [object, pathname, a string that is used to form a path]
+    - [object, ..., (optional) a variable length argument list of Strings that are concatinated with pathname to form a path]

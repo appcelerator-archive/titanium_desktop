@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Blob.charAt
+type: method
+description: Return a character representing a byte at the given index in a Blob
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number, index, The index to look for a character at]

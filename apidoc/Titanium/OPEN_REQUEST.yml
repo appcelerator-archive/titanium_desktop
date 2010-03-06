@@ -1,0 +1,7 @@
+---
+namespace: Titanium.OPEN_REQUEST
+type: property
+description: The OPEN request event constant.
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

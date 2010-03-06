@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.getDocumentsDirectory
+type: method
+description: Returns the system documents directory
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: FileSystem.File
+parameters: []

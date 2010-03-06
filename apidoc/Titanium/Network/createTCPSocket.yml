@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.createTCPSocket
+type: method
+description: Creates a TCPSocket object
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Network.TCPSocket
+parameters: 
+    - [String, host, the hostname to connect to]
+    - [Number, port, the port to use]

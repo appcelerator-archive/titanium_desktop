@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.getDesktopDirectory
+type: method
+description: Returns the system desktop directory
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: FileSystem.File
+parameters: []

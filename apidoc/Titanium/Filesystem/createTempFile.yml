@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.createTempFile
+type: method
+description: Creates a temporary file
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: Filesystem.File
+parameters: []

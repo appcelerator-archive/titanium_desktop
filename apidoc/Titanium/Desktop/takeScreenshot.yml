@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Desktop.takeScreenshot
+type: method
+description: Takes a screenshot of the users desktop and saves it to a file
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, file, file to write the output]

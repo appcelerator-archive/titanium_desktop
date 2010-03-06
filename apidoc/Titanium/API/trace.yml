@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.trace
+type: method
+description: Log a statement with TRACE severity
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, statement, the statement to log]

@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Analytics.navEvent
+type: method
+description: Sends an analytics event associated with application navigation
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, from, "navigation starting point, the context we're leaving"]
+    - [String, to, "navigation ending point, the context to which we're going"]
+    - [String, name, (optional) event name]
+    - [Object, data, (optional) event data]
