@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.setIcon
+type: method
+description: "Set the application's icon"
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, menu, path to the icon]

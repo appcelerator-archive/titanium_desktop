@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.DB
+type: method
+description: 
+since: 0.8.0
+returns: Database.ResultSet
+parameters: 
+    - [String, sql, the SQL query to execute.]

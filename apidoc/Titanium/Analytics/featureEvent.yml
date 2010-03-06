@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Analytics.featureEvent
+type: method
+description: Send an analytics event associated with application feature functionality
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, name, Feature name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]

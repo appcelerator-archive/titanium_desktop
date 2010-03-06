@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.stdout
+type: method
+description: Writes to stdout
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [any, data, data to write]

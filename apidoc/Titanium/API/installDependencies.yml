@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.installDependencies
+type: method
+description: Invoke the installer to find and install a list of dependencies
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Array<API.Dependency>, dependencies, a list of API.Dependency to find and install]
+    - [method, callback, a callback to invoke when the installer is finished (may finish unsuccessfully)]

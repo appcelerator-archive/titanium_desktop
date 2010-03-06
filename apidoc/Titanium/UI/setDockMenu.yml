@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.setDockMenu
+type: method
+description: Set the dock menu
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [UI.Menu, menu, The new menu for the dock]

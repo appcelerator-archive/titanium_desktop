@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Filesystem.MODE_WRITE
+type: property
+description: File write constant
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

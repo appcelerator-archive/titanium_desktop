@@ -1,0 +1,7 @@
+---
+namespace: Titanium.HTTP_STATE_CHANGED
+type: property
+description: HTTP state has changed.
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

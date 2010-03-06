@@ -1,0 +1,7 @@
+---
+namespace: Titanium.APP_EXIT
+type: property
+description: The APP_EXIT event constant, fired during host application exit.
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

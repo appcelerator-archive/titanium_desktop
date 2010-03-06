@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPServerResponse
+type: method
+description: 
+since: 0.8.0
+returns: String
+parameters: 
+    - [String, status, "the status, i.e \"200\""]
+    - [String, reason, "the reason, i.e \"OK\""]

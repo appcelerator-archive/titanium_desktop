@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.removeConnectivityListener
+type: method
+description: Removes a connectivity change listener
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number, id, the callback id of the method]

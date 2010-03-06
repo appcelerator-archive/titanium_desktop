@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerRequest
+type: method
+description: 
+since: 0.8.0
+returns: Boolean
+parameters: 
+    - [String, header, the header of the request to check]

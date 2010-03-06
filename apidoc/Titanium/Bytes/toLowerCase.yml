@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Bytes.toLowerCase
+type: method
+description: Convert characters in the Bytes to lower case as if it were a string.
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: []

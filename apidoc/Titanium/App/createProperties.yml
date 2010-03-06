@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.createProperties
+type: method
+description: create a new properties object
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: App.Properties
+parameters: 
+    - [App.Properties, properties, (optional) Initial properties for the new Properties object.]

@@ -1,0 +1,11 @@
+---
+namespace: Titanium.UpdateManager.startMonitor
+type: method
+description: Check the update service for a new version
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: Number
+parameters: 
+    - [String, component, Name of the component]
+    - [Function, callback, Function callback to call when completed]
+    - [Number, interval, Interval in milliseconds for how often to check for an update]

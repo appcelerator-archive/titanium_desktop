@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.createIPAddress
+type: method
+description: Creates an IPAddress object
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Network.IPAddress
+parameters: 
+    - [String, address, the IP address]

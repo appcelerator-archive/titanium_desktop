@@ -1,0 +1,7 @@
+---
+namespace: Titanium.OPENED
+type: property
+description: The OPENED event constant
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

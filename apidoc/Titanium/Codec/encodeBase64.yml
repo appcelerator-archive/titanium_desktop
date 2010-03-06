@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Codec.encodeBase64
+type: method
+description: encode a string or Bytes into base64
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: string
+parameters: 
+    - [String|Bytes, data, data to encode]

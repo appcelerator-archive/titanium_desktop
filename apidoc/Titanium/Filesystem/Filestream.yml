@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.Filestream
+type: method
+description: 
+since: 0.8.0
+returns: Boolean
+parameters: 
+    - [String, data, data to write]

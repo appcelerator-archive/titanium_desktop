@@ -1,0 +1,7 @@
+---
+namespace: Titanium.CLOSE
+type: property
+description: The CLOSE event constant
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Platform.getName
+type: method
+description: 
+since: 0.9.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: []

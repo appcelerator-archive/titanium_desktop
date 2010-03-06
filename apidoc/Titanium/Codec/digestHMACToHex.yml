@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Codec.digestHMACToHex
+type: method
+description: digest a encoded string in HMAC
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: string
+parameters: 
+    - [int, type, "encoding type: currently supports MD2, MD4, MD5, SHA1"]
+    - [String, data, data to encode]
+    - [String, data, key to us for HMAC]

@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Bytes.substr
+type: method
+description: Return a substring of a Bytes given a start index and a length If no length is given, all characters from the start to the end of the string are returned.
+since: 0.3.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Number, startIndex, The starting index]
+    - [Number, length, (optional) The length of the substring]

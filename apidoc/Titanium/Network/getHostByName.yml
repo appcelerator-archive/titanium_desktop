@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.getHostByName
+type: method
+description: Returns a Host object using a hostname
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: Network.Host
+parameters: 
+    - [String, name, the hostname]

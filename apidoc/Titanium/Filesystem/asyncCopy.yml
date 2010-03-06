@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Filesystem.asyncCopy
+type: method
+description: Executes an async copy operation
+since: 0.8.0
+platforms: ['osx', 'linux', 'win32']
+returns: Filesystem.AsyncCopy
+parameters: 
+    - [Array<String|Filesystem.File>|Filesystem.File, paths, ]
+    - [Filesystem.File|String, destination, either a string or file object to copy to]
+    - [Function, callback, callback to invoke on each copy completion operation]

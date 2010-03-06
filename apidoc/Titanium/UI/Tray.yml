@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Tray
+type: method
+description: 
+since: 0.8.0
+returns: String
+parameters: 
+    - [String, hint, (optional) tooltip value or null to unset]

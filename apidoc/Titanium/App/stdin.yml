@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.stdin
+type: method
+description: Reads from stdin
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, prompt, "(optional) text prompt (Default: no prompt)"]
+    - [String, delimiter, "(optional) Will continue reading stdin until the delimiter character is reached. (Default: newline)"]

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.getStreamURL
+type: method
+description: "Return the stream URL for the application's updates."
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [String, ..., Any number of String arguments which will be appended as path components of the stream URL.]

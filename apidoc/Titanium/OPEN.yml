@@ -1,0 +1,7 @@
+---
+namespace: Titanium.OPEN
+type: property
+description: The OPEN event constant
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

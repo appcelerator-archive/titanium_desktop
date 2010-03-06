@@ -1,0 +1,7 @@
+---
+namespace: Titanium.HTTP_DONE
+type: property
+description: The request has completed.
+since: 0.7.0
+platforms: ['osx', 'linux', 'win32']
+returns: String

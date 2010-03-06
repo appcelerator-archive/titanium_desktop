@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Worker.createWorker
+type: method
+description: Create a worker thread instance
+since: 0.6.0
+platforms: ['osx', 'linux', 'win32']
+returns: Worker.Worker
+parameters: 
+    - [String|Function, source, Either a JavaScript function (does not support closures), the URL of a JavaScript file, or a string containing JavaScript source.]

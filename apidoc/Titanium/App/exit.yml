@@ -1,0 +1,8 @@
+---
+namespace: Titanium.App.exit
+type: method
+description: Exit the application.
+since: 0.2.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: []

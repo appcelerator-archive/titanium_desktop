@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.showDialog
+type: method
+description: create a UI dialog
+since: 0.4.0
+platforms: ['osx', 'linux', 'win32']
+returns: UI.Dialog
+parameters: 
+    - [Object, params, options to pass in to create window]
