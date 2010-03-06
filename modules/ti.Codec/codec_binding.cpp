@@ -102,7 +102,7 @@ namespace ti
 		 */
 		this->SetInt("MD2", CODEC_MD2);
 		/**
-		 * @tiapi(property=True,name=Codec.MD2,since=0.7) MD4 property
+		 * @tiapi(property=True,name=Codec.MD4,since=0.7) MD4 property
 		 */
 		this->SetInt("MD4", CODEC_MD4);
 		/**

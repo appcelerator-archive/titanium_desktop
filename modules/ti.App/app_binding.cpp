@@ -154,7 +154,7 @@ namespace ti
 
 		/**
 		 * @tiapi(method=True,name=App.stdin,since=0.7) Reads from stdin
-		 * @tiapi(for=App.stdin,type=String,name=prompt,optional=True) text prompt (Default: no prompt)
+		 * @tiarg(for=App.stdin,type=String,name=prompt,optional=True) text prompt (Default: no prompt)
 		 * @tiarg(for=App.stdin,type=String,name=delimiter,optional=True) Will continue reading stdin until the delimiter character is reached. (Default: newline)
 		 * @tiresult(for=App.stderr,type=String) data read from stdin
 		 */
