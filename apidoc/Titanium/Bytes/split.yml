@@ -1,10 +1,21 @@
 ---
 namespace: Titanium.Bytes.split
 type: method
-description: "Split a bytes as if it were a string given a delimiter. This method returns empty matches. For instance: <pre><code>\"abc,def,,\".split(\",\") --> ['abc', 'def', '', '']</code></pre>"
+description: |
+    Split a bytes as if it were a String given a delimiter. The Bytes object is
+    expected to contain a UTF-8 encoded String. That means that the first NUL
+    character in the string will be the end of the string.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: Array<String>
 parameters: 
     - [String, delimiter, The index to look for a character at]
     - [Number, limit, (optional) The maximum number of matches to return]
+examples:
+    - |
+        <code>
+            // Bytes.split returns empty matches. For example:
+            // list should be ['abc', 'def', '', '']
+            var bytes = API.createBytes("abc,def,,");
+            var list = bytes.split(",");
+        </code>

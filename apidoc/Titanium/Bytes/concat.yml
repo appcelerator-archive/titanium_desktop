@@ -1,8 +1,9 @@
 ---
 namespace: Titanium.Bytes.concat
 type: method
-description: Concatenate multiple Bytes and/or strings into one Bytes
+description: Concatenate multiple Bytes and Strings into one Bytes.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: Bytes
-parameters: []
+parameters: 
+    - [Byte|String, '...', A variable-length list of Bytes or Strings to concatenate to this Bytes object.]

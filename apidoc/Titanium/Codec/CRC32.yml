@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Codec.CRC32
 type: property
-description: CRC32 property
+description: Constant specifying the CRC32 checksum algorithm.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

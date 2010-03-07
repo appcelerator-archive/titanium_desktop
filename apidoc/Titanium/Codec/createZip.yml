@@ -1,11 +1,21 @@
 ---
 namespace: Titanium.Codec.createZip
 type: function
-description: Asynchronously write the contents of a directory to a zip file
+description: Asynchronously write the contents of a directory to a zip file.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-    - [Filesystem.File|String, directory, A directory root to write to the zip stream]
-    - [Filesystem.File|String, zipFile, The destination zip file]
-    - [Function, onComplete, "A function callback that receives the zip file when writing is finished: function onComplete(destFile) {}"]
+    - [Filesystem.File|String, root, A directory root to write to the zip stream.]
+    - [Filesystem.File|String, zipFile, The path or File object of the destination zip file.]
+    - [Function, onComplete, A function callback that receives the zip file when writing is finished]
+examples:
+    - |
+        <code>
+            var root = Titanium.Filesystem.getFile(Titanium.App.getHome());
+            var dest = Titanium.Filesystem.getFile(
+                Titanium.Filesystem.getApplicationDataDirectory(), "app.zip");
+            Titanium.Codec.createZip(root, dest, function(destFile) {
+                alert("Wrote zip file: " + destFile);
+            });
+        </code>

@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.Bytes.lastIndexOf
 type: method
-description: Return the last index of a String within this Bytes
+description: |
+    Return the last index of a String within this Bytes. The String will first
+    be converted to UTF-8 before this method searches the Bytes object.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: Number

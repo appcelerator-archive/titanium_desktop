@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Codec.MD5
 type: property
-description: MD5 property
+description: Constant specifying the MD5 hash algorithm.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

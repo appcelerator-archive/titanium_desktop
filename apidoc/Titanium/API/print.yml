@@ -2,7 +2,7 @@
 namespace: Titanium.API.print
 type: function
 description: |
-    Print a raw string to stdout without a trailing newline
+    Print a String to stdout without a trailing newline
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: void
