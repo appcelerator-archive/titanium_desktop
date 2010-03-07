@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.Properties.setString
+type: method
+description: Set a String property value given the name and value.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [String, name, The name of the property to set.]
+    - [String, value, The value to set the given property to.]

@@ -1,9 +1,10 @@
 ---
 namespace: Titanium.App.stdout
 type: function
-description: Writes to stdout
+description: |
+    Print a String to stdout including a trailing newline.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [any, data, data to write]
+    - [Any, data, The data to print. If not a String, it will be converted using the equivalent of <tt>String(data);</tt>]

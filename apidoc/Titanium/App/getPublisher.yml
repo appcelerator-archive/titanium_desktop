@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.App.getPublisher
 type: function
-description: Return the application publisher.
+description: Return the application publisher information specifiedi in the tiapp.xml file.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

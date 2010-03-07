@@ -1,8 +1,12 @@
 ---
 namespace: Titanium.App.exit
 type: function
-description: Exit the application.
+description: |
+    Cause the application to exit after firing the Titanium.EXIT
+    event. The application isn't gauaranteed to exit when this
+    method is called, because an event handler may cancel the
+    EXIT event by calling preventDefault or stopPropagation on it.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: []

@@ -1,9 +1,18 @@
 ---
 namespace: Titanium.App.createProperties
 type: function
-description: create a new properties object
+description: Create a new App.Properties object.
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: App.Properties
 parameters: 
-    - [App.Properties, properties, (optional) Initial properties for the new Properties object.]
+    - [Object, properties, (optional) Initial properties for the new App.Properties object.]
+examples:
+    - |
+        <code>
+            var properties = Titanium.App.createProperties({
+                'name': 'McDuck',
+                'position': 'Fisherman',
+                'age': 3
+            });
+        </code>

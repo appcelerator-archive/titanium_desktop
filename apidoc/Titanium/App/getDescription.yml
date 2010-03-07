@@ -1,8 +1,14 @@
 ---
 namespace: Titanium.App.getDescription
 type: function
-description: Return the application description.
+description: |
+    Return the application's description, defined in the tiapp.xml file.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: []
+examples:
+    - |
+        <code>
+            document.write(Titanium.App.getDescription());
+        </code>

@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.App.getIcon
 type: function
-description: Return the path to the application icon.
+description: |
+    Return the full path to the application icon. The application icon path
+    is specified in the application manifest and tiapp.xml relative to the
+    application Resources directory.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

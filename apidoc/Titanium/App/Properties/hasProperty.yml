@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.Properties.hasProperty.
+type: method
+description: Query whether or not a given property exists in this Property object.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String, name, The name of the property to query.]

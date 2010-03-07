@@ -1,8 +1,20 @@
 ---
 namespace: Titanium.App.appURLToPath
 type: function
-description: "Return the full path equivalent of an app: protocol path"
+description: |
+    Convert the given app URL to a filesystem path. App URLs generally have
+    the form 'app://subdir/resource.html' and resolve to a fileystem path
+    rooted in the application resources directory.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: []
+examples:
+    - |
+        <code>
+            var path = Titanium.Filesystem.getFile(
+                Titanium.App.appURLToPath("app://index.html"));
+            var path2 = Titanium.Filesystem.getFile(
+                Titanium.App.getHome(), "Resources", "index.html")
+            // At this point path and path2 should refer to the same file.
+        </code>

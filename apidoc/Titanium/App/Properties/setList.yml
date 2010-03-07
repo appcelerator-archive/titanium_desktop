@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.Properties.setList
+type: method
+description: Set a list property value given the name and array of Strings.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [String, name, The name of the property to set.]
+    - [Array<String>, value, The value to set the given property to.]
