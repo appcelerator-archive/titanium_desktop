@@ -1,9 +1,11 @@
 ---
 namespace: Titanium.API.removeEventListener
-type: method
-description: Remove a root event listener
+type: function
+description: |
+    Remove a root event listener. If no listener with the given id or
+    funtion is registered for this object, the call will do nothing.
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [Number|Function, id, The id or callback of the event listener to remove]
+    - [Number|Function, id, The id or the Function of the event listener to remove.]

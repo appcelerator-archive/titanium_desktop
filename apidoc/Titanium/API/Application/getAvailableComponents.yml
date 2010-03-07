@@ -1,7 +1,12 @@
 ---
 namespace: Titanium.API.Application.getAvailableComponents
 type: method
-description: Return a list of all available (installed and bundled) components for this application
+description: |
+    Return a list of all available (installed and bundled) components
+    for this application. This is simply the list returned by
+    API.getInstalledComponents() plus any components bundled with the
+    application. Note that bundled components do not have a version
+    currently.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: Array<API.Component>

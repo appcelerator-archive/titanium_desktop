@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Component.getName
 type: method
-description: Get the name of this component
+description: Get the name of this component.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

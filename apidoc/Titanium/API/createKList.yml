@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.createKList
-type: method
+type: function
 description: Create a Kroll list given an optional JavaScript array. This method is mainly used for testing.
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']

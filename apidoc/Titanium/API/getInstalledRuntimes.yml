@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.getInstalledRuntimes
-type: method
+type: function
 description: |
     Get a list of the currently installed Titanium runtime components.
     An installed component is one that has been found on the list of paths

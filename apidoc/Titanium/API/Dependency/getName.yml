@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Dependency.getName
 type: method
-description: Get the name of this dependency
+description: Get the name of this dependency.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

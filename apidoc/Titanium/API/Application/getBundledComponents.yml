@@ -1,7 +1,16 @@
 ---
 namespace: Titanium.API.Application.getBundledComponents
 type: method
-description: Return a list of all components bundled with this application
+description: |
+    Return a list of all bundled components for this for this application.
+    Bundled components currently live inside the application contents directory
+    in the following directories:
+    <ul>
+        <li>My App.app/Contents/modules</li>
+        <li>My App.app/Contents/runtime</li>
+        <li>My App.app/Contents/sdk</li>
+        <li>My App.app/Contents/mobilesdk</li>
+    </ul>
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: Array<API.Component>

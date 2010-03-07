@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.getComponentSearchPaths
-type: method
+type: function
 description: Get a list of the paths on which Titanium searches for installed components. This does not include paths of bundled components.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

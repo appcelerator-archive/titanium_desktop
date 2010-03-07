@@ -8,6 +8,7 @@ description: |
         <li>TRACE</li>
         <li>DEBUG</li>
         <li>INFO</li>
+        <li>NOTICE</li>
         <li>WARN</li>
         <li>ERROR</li>
         <li>CRITICAL</li>
@@ -15,6 +16,6 @@ description: |
     </ol>
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
-parameters: 
+returns: void
+parameters:
     - [String, statement, The String to send to the logger.]

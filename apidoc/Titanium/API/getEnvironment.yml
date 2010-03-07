@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.getEnvironment
-type: method
+type: function
 description: |
     Get the system environment object, which can be queried and updated
     just by accessing or setting its properties.

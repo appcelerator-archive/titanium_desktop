@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Application.getVersion
 type: method
-description: "Get this application's version"
+description: "Get this application's version."
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.createBytes
-type: method
+type: function
 description: |
     Create a Kroll Bytes object given a String. A Bytes object is a generic
     way of holding a String of bytes.

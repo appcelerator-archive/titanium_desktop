@@ -1,8 +1,0 @@
----
-namespace: Titanium.API.Component.getManifest
-type: method
-description: "Get the contents of this components's manifest"
-since: 0.4.0
-platforms: ['android', 'iphone']
-returns: Array<Array<String>>
-parameters: []

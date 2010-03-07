@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Application.isCurrent
 type: method
-description: Returns whether or not this is the currently running application
+description: Returns whether or not this is the currently running application.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: Boolean

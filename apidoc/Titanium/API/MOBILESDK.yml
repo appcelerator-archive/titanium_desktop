@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.MOBILESDK
 type: property
-description: a constant representing a mobile SDK component type
+description: a constant representing a Mobile SDK component type.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

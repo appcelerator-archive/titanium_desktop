@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Component.getPath
 type: method
-description: Get the path to this component
+description: Get the path to this component.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

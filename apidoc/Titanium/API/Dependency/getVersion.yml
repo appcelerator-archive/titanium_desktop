@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.Dependency.getVersion
 type: method
-description: Get the version of this dependency
+description: Get the version part of this dependency.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

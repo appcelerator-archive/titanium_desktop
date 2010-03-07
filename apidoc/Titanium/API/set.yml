@@ -1,10 +1,10 @@
 ---
 namespace: Titanium.API.set
-type: method
+type: function
 description: Set an attribute in the global object
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
     - [String, key, Key of the attribute to set]
     - [String, value, New value of the attribute]

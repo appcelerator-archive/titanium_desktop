@@ -1,9 +1,22 @@
 ---
 namespace: Titanium.API.setLogLevel
-type: method
-description: Set the log level of the root logger
+type: function
+description: |
+    Set the log level threshold of the Titanium logger. The logger
+    will log statements with this severity or one that is more severe.
+    The severity levels in order from least severe to most severe are:
+    <ol>
+        <li>TRACE</li>
+        <li>DEBUG</li>
+        <li>INFO</li>
+        <li>NOTICE</li>
+        <li>WARN</li>
+        <li>ERROR</li>
+        <li>CRITICAL</li>
+        <li>FATAL</li>
+    </ol>
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [Number, level, the threshold of severity to log]
+    - [Number, level, The threshold of severity to log.]

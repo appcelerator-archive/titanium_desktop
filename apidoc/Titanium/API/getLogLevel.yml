@@ -1,14 +1,15 @@
 ---
 namespace: Titanium.API.getLogLevel
-type: method
+type: function
 description: |
-    Get the log level filter of the Titanium logger. The logger
+    Get the log level threshold of the Titanium logger. The logger
     will log statements with this severity or one that is more severe.
     The severity levels in order from least severe to most severe are:
     <ol>
         <li>TRACE</li>
         <li>DEBUG</li>
         <li>INFO</li>
+        <li>NOTICE</li>
         <li>WARN</li>
         <li>ERROR</li>
         <li>CRITICAL</li>

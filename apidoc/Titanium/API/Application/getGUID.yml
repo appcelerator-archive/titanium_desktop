@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.API.Application.getGUID
 type: method
-description: "Get this application's GUID"
+description: |
+    Get this application globally unique identifier. This is
+    currently defined in the application manifest.
 since: 0.4.0
 platforms: ['android', 'iphone']
 returns: String

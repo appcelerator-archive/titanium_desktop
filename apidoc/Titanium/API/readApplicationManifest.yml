@@ -1,10 +1,12 @@
 ---
 namespace: Titanium.API.readApplicationManifest
-type: method
-description: Read an application manifest at a given path
+type: function
+description: |
+    Read an application manifest at a given path and return an
+    Titanium.API.Application object representing the application.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: API.Application
 parameters: 
-    - [String, manifestPath, the path to the manifest to read]
-    - [String, applicationPath, (optional) an optional application path override]
+    - [String, manifestPath, The path to the manifest to read.]
+    - [String, applicationPath, (optional) An optional application path override, which can be used if the manifest and the application are in different paths.]

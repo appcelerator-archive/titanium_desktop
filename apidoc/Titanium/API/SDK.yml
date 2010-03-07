@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.SDK
 type: property
-description: a constant representing an SDK component type
+description: a constant representing an SDK component type.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

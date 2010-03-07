@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.API.LTE
 type: property
-description: a constant representing a less-than-or-equal dependency
+description: |
+    A constant representing an less-than-or-equal-to dependency.
+    This is used to specify resolutions to Titanium application dependencies.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

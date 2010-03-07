@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.API.createDependency
-type: method
+type: function
 description: A constructor for API.Dependency objects.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
