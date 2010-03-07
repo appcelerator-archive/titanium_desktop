@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.DB.execute
+type: function
+description: Executes an SQL query on the database.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

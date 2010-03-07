@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.ResultSet.isValidRow
+type: method
+description: Checks whether you can call data extraction methods
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

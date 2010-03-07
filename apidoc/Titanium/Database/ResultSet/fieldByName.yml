@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.ResultSet.fieldByName
+type: method
+description: Returns the contents of the specified field in the current row using the name of the field as an identifier
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []
