@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.getApplicationDirectory
-type: method
+type: function
 description: Returns the directory where the application resides
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

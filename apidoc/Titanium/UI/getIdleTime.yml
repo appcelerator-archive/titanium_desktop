@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.getIdleTime
-type: method
+type: function
 description: "Returns the user's idle time (for the desktop, not just the application)"
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

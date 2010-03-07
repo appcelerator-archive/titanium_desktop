@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.getMainWindow
-type: method
+type: function
 description: "Return the application's main window"
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']

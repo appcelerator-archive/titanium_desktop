@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.appURLToPath
-type: method
+type: function
 description: "Return the full path equivalent of an app: protocol path"
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

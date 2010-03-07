@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getVersion
-type: method
+type: function
 description: Return the application version.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

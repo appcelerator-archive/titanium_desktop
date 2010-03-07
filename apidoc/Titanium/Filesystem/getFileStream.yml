@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.getFileStream
-type: method
+type: function
 description: Returns a Filestream object
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UpdateManager.installAppUpdate
-type: method
+type: function
 description: Install an application update received from update monitor. This method will cause the process to first be restarted for the update to begin.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

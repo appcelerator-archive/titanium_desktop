@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.getMenu
-type: method
+type: function
 description: "Returns the application's main MenuItem"
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

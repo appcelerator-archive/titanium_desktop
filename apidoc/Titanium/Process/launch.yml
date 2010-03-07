@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Process.launch
-type: method
+type: function
 description: This method is deprecated. See Process.Process.createProcess()
 since: 0.2.0
 deprecated: Since 0.8.5 or ealier.

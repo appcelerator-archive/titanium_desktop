@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Platform.getUsername
-type: method
+type: function
 description: 
 since: 0.9.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getHome
-type: method
+type: function
 description: Return the full path to the application home directory.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

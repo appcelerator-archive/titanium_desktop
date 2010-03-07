@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.getContextMenu
-type: method
+type: function
 description: Returns the application context menu
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

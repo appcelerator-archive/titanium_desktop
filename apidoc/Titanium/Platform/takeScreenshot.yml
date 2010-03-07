@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Platform.takeScreenshot
-type: method
+type: function
 description: 
 since: 0.4.0
 platforms: ['win32', 'osx']

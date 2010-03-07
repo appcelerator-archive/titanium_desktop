@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.createHTTPCookie
-type: method
+type: function
 description: Creates a new HTTPCookie object
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

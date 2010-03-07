@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Platform.openURL
-type: method
+type: function
 description: 
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

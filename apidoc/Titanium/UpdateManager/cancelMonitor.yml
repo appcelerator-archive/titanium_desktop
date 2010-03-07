@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UpdateManager.cancelMonitor
-type: method
+type: function
 description: Check the update service for a new version
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

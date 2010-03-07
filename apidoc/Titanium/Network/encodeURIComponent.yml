@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.encodeURIComponent
-type: method
+type: function
 description: Encodes a URI Component
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']

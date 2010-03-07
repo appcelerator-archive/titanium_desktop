@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Codec.digestHMACToHex
-type: method
+type: function
 description: digest a encoded string in HMAC
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

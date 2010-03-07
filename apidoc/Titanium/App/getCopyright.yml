@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getCopyright
-type: method
+type: function
 description: "Return the application's copyright information"
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.JSON.parse
-type: method
+type: function
 description: Convert a JSON string to a JavaScript object
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.createMenuItem
-type: method
+type: function
 description: Create a new menu item.
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']

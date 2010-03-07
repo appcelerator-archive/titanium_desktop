@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Platform.createUUID
-type: method
+type: function
 description: 
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']

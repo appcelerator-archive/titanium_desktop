@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.getHostByAddress
-type: method
+type: function
 description: Returns a Host object using an address
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

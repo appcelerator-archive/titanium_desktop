@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.setDockMenu
-type: method
+type: function
 description: Set the dock menu
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

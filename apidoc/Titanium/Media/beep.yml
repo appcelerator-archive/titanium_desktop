@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Media.beep
-type: method
+type: function
 description: Causes the system to beep
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

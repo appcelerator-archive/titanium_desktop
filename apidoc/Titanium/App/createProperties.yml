@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.createProperties
-type: method
+type: function
 description: create a new properties object
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']

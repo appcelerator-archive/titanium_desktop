@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Codec.decodeBase64
-type: method
+type: function
 description: decode a string from base64
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

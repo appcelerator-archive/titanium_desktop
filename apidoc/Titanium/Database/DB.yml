@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Database.DB
-type: method
+type: function
 description: 
 since: 0.8.0
 returns: Database.ResultSet

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.createHTTPClient
-type: method
+type: function
 description: Creates an HTTPClient object
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']

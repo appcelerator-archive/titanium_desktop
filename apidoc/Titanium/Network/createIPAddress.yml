@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.createIPAddress
-type: method
+type: function
 description: Creates an IPAddress object
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

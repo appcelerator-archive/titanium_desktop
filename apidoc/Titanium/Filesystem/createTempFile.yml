@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.createTempFile
-type: method
+type: function
 description: Creates a temporary file
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

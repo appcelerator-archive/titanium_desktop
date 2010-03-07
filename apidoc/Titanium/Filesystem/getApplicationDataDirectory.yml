@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.getApplicationDataDirectory
-type: method
+type: function
 description: Returns the data directory of the application
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

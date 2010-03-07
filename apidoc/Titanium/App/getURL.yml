@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getURL
-type: method
+type: function
 description: Return the application URL.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

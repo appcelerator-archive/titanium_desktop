@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.getLineEnding
-type: method
+type: function
 description: Returns the line ending used by the operating system
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

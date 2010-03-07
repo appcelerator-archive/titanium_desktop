@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getIcon
-type: method
+type: function
 description: Return the path to the application icon.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

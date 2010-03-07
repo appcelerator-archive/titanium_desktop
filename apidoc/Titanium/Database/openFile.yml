@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Database.openFile
-type: method
+type: function
 description: Opens a database, given a path to an sqlite file.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

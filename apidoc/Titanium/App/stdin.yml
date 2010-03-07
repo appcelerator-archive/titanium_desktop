@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.stdin
-type: method
+type: function
 description: Reads from stdin
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

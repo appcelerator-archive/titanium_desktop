@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getSystemProperties
-type: method
+type: function
 description: get the system properties defined in tiapp.xml (see App.Properties).
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

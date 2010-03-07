@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.setMenu
-type: method
+type: function
 description: Set a menu for the application
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Codec.checksum
-type: method
+type: function
 description: compute checksum
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

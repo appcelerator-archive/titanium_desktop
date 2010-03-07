@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Filesystem.getProgramsDirectory
-type: method
+type: function
 description: Returns the programs directory of the current system
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']

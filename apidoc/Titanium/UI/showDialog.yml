@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.showDialog
-type: method
+type: function
 description: create a UI dialog
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
