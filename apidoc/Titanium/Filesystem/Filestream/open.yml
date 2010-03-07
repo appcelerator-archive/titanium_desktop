@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.Filestream.open
+type: method
+description: Opens the file
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

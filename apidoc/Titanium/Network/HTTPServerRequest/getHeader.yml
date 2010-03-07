@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerRequest.getHeader
+type: method
+description: get an HTTP header value from this request
+since: 0.3.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

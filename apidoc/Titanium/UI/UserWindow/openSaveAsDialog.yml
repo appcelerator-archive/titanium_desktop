@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.openSaveAsDialog
+type: method
+description: Displays the save as file dialog
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

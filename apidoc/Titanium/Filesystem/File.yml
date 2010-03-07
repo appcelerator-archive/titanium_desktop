@@ -1,8 +1,5 @@
 ---
 namespace: Titanium.Filesystem.File
-type: method
-description: 
-since: 0.8.0
-returns: Boolean
-parameters: 
-    - [String, destination, destination to copy to]
+type: object
+description: No description provided.
+since: 0.8.5 or earlier

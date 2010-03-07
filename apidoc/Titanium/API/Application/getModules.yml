@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getModules
+type: method
+description: Return a list of resolved modules for this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

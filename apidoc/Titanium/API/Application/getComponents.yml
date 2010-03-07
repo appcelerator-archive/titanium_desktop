@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getComponents
+type: method
+description: Return a list of resolved components for this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

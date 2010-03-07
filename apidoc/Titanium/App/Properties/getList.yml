@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.Properties.getList
+type: method
+description: Returns a property value as a list
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: list
+parameters: 
+    - [list, name, The name of the property to return]
+    - [list, default, The value to return if this property is not set]

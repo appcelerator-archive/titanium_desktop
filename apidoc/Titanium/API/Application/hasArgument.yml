@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Application.hasArgument
+type: method
+description: Determine if the given argument is in the argument list
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Boolean
+parameters: 
+    - [String, argument, The argument to search for]

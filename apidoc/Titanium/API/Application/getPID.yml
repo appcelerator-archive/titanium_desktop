@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getPID
+type: method
+description: Retrieve the process identifier of this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

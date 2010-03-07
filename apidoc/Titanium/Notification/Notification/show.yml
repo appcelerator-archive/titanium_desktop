@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Notification.Notification.show
+type: method
+description: Display the notification
+since: 0.9.0
+platforms: ['android', 'iphone']
+returns: Boolean
+parameters: []

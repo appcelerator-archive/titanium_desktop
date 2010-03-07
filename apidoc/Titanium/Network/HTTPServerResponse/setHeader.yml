@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.setHeader
+type: method
+description: set an HTTP header of this response
+since: 0.3.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

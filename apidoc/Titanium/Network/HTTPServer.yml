@@ -1,10 +1,5 @@
 ---
 namespace: Titanium.Network.HTTPServer
-type: method
-description: 
-since: 0.8.0
-returns: Boolean
-parameters: 
-    - [Number, port, port to bind on]
-    - [String, address, (optional) address to bind to]
-    - [Method, callback, callback for server logic (in seperate thread)]
+type: object
+description: No description provided.
+since: 0.8.5 or earlier

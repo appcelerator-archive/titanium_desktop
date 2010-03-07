@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.Properties.getDouble
+type: method
+description: Returns a property value as double
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: Number
+parameters: 
+    - [String, name, The name of the property to return]
+    - [Number, default, The value to return if this property is not set]

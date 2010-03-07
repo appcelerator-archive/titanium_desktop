@@ -3,7 +3,7 @@ namespace: Titanium.Filesystem.asyncCopy
 type: method
 description: Executes an async copy operation
 since: 0.8.0
-platforms: ['osx', 'linux', 'win32']
+platforms: ['android', 'iphone']
 returns: Filesystem.AsyncCopy
 parameters: 
     - [Array<String|Filesystem.File>|Filesystem.File, paths, ]

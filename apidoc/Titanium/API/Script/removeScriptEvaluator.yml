@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Script.removeScriptEvaluator
+type: method
+description: Removes a script evalutor
+since: 0.7.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: 
+    - [Object, evaluator, The evaluator to remove]

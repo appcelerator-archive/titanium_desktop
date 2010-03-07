@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getDataPath
+type: method
+description: "Get the path to this application's user data directory"
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

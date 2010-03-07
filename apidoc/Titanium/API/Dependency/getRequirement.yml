@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Dependency.getRequirement
+type: method
+description: Get the requirement for this dependency (eg API.LTE)
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

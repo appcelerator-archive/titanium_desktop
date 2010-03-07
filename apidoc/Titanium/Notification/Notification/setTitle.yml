@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setTitle
+type: method
+description: Set the notification title
+since: 0.9.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: 
+    - [String, title, notification title text]

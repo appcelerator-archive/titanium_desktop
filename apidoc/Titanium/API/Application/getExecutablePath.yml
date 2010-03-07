@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getExecutablePath
+type: method
+description: "Get this application's executable"
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

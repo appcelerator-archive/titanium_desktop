@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPCookie.getComment
+type: method
+description: Get the cookie comment text
+since: 0.7.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

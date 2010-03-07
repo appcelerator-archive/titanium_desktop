@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setCallback
+type: method
+description: "Set a callback function fired when notification is clicked. NOTE: not all platforms support this feature"
+since: 0.9.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: 
+    - [Function, callback, function to execute when notification is clicked]

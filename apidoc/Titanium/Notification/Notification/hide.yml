@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Notification.Notification.hide
+type: method
+description: Hide the notification
+since: 0.9.0
+platforms: ['android', 'iphone']
+returns: Boolean
+parameters: []

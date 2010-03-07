@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Application.getArgumentValue
+type: method
+description: "Find the value for a given argument. This method tries to be a little smart about finding the argument. If you pass \"param\" or \"--param\" as argument it will find value for --param=<value>"
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: 
+    - [String, argument, The argument to search for]

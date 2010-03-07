@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getResourcesPath
+type: method
+description: "Get the path to this application's resources directory"
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

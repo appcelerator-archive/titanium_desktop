@@ -1,7 +1,5 @@
 ---
 namespace: Titanium.App.Properties
-type: property
-description: 
-since: 0.8.0
-platforms: ['osx', 'linux', 'win32']
-returns: Array<String>
+type: object
+description: No description provided.
+since: 0.8.5 or earlier

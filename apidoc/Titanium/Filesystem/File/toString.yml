@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.toString
+type: method
+description: "Return a string representation of the File object's URL"
+since: 0.7.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.addCookie
+type: method
+description: add a cookie to this response
+since: 0.3.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

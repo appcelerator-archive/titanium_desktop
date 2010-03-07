@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Script.addScriptEvaluator
+type: method
+description: "Adds a script evalutor Script evaluators are responsible for matching and evaluating custom <script> types, and preprocessing URLs. The rules for evaluation/preprocessing are as follows: - When a <script type=\"text/language\"> tag is seen, the first evaluator that returns true to canEvaluate(\"text/language\") will evaluate that script. - When a URLRequest is received, the first evaluator that returns true to canPreprocess(URL) will preprocess that URL. Evaluators should follow this API: - canEvaluate(String mimeType), returns true or false. - canPreprocess(String mimeType), returns true or false. - evaluate(String mimeType, String name, String sourceCode, Object scope), returns result of evaluation - preprocess(String url, Object scope), returns preprocessed content."
+since: 0.7.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: 
+    - [Object, evaluator, The evaluator to add]

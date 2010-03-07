@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.setMaxWidth
+type: method
+description: "Sets a window's max-width"
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

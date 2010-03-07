@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getBundledModules
+type: method
+description: Return a list of all modules bundled with this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

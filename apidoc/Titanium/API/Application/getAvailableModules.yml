@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getAvailableModules
+type: method
+description: Return a list of all available (installed and bundled) modules for this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

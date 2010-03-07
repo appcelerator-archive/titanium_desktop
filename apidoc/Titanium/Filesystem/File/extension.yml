@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.extension
+type: method
+description: Returns the extension of a file
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getRuntime
+type: method
+description: Return the resolved runtime for this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

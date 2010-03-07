@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Dependency.getType
+type: method
+description: Get the type of this dependency (eg API.MODULE)
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Number
+parameters: []

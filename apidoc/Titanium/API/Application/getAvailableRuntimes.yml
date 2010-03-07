@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getAvailableRuntimes
+type: method
+description: Return a list of all available (installed and bundled) runtimes for this application
+since: 0.4.0
+platforms: ['android', 'iphone']
+returns: Array<API.Component>
+parameters: []

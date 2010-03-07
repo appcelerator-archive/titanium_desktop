@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.resolve
+type: method
+description: Resolves a File object to a file path
+since: 0.2.0
+platforms: ['android', 'iphone']
+returns: String
+parameters: []
