@@ -3,7 +3,7 @@ namespace: Titanium.Notification.Notification.setIcon
 type: method
 description: Set the notification icon image
 since: 0.9.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [String, icon, path to the icon image]

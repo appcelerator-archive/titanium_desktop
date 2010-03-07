@@ -12,6 +12,6 @@ description: |
         <li>My App.app/Contents/mobilesdk</li>
     </ul>
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Array<API.Component>
 parameters: []

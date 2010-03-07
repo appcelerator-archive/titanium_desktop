@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.File.getDirectoryListing
 type: method
 description: Returns a list containing the names of items inside a directory.
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

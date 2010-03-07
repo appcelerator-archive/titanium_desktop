@@ -3,6 +3,6 @@ namespace: Titanium.App.Properties.setDouble
 type: method
 description: Sets a double property value
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

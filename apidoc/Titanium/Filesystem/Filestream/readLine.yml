@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.Filestream.readLine
 type: method
 description: Reads one line from the file
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

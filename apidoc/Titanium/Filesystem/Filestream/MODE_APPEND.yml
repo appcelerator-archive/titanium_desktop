@@ -3,5 +3,5 @@ namespace: Titanium.Filesystem.Filestream.MODE_APPEND
 type: property
 description: Mode to indicate appending
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String

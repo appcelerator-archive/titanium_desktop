@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.setMinHeight
 type: method
 description: "Sets a window's min height"
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

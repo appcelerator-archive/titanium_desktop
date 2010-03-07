@@ -7,6 +7,6 @@ description: |
     which should not be written to) and is suitable for storing any
     application files.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

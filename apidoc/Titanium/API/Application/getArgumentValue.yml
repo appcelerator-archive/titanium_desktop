@@ -6,7 +6,7 @@ description: |
     'param' or '--param' and this method will find the command-line
     value for '--param=<value>'.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [String, argument, The name of the argument to find the value for.]

@@ -3,7 +3,7 @@ namespace: Titanium.Network.HTTPClient.sendFile
 type: method
 description: Sends the contents of a file as body content
 since: 0.3.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [Titanium.Filesystem.File, file, the File object to send]

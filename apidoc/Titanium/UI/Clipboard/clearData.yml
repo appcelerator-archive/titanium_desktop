@@ -3,6 +3,6 @@ namespace: Titanium.UI.Clipboard.clearData
 type: method
 description: Clear the text portion of the clipboard.
 since: 0.7.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

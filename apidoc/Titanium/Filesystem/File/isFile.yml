@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.File.isFile
 type: method
 description: Checks whether a File object references a file
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

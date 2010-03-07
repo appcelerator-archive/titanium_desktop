@@ -3,7 +3,7 @@ namespace: Titanium.Network.HTTPClient.getCookie
 type: method
 description: Get a HTTP cookie from the response.
 since: 0.7.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Network.HTTPCookie
 parameters: 
     - [String, name, name of the cookie to get]

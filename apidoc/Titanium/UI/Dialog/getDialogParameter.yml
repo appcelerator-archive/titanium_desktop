@@ -3,7 +3,7 @@ namespace: Titanium.UI.Dialog.getDialogParameter
 type: method
 description: Get an incoming UI dialog parameter
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: any
 parameters: 
     - [string, name, Name of the parameter]

@@ -6,6 +6,6 @@ description: |
     should be accessible through API.Application.getComponents afterward. Note that
     the currently running applicaiton should already have all of its dependencies resolved.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Array<API.Dependency>
 parameters: []

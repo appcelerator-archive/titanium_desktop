@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.File.read
 type: method
 description: Reads a file and returns the content as a string
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

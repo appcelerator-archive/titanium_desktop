@@ -3,6 +3,6 @@ namespace: Titanium.Network.HTTPServerRequest.hasHeader
 type: method
 description: check to see if this request has an HTTP header
 since: 0.3.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

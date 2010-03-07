@@ -5,6 +5,6 @@ description: |
     Get this application globally unique identifier. This is
     currently defined in the application manifest.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

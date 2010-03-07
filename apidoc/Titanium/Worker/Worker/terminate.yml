@@ -3,6 +3,6 @@ namespace: Titanium.Worker.Worker.terminate
 type: method
 description: Terminate the worker thread. The thread can be restarted with Worker.start()
 since: 0.6.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

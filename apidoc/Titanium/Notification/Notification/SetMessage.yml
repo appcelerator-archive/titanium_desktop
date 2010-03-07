@@ -3,7 +3,7 @@ namespace: Titanium.Notification.Notification.SetMessage
 type: method
 description: Set the notification message
 since: 0.9.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [String, message, notification message text]

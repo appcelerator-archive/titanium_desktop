@@ -3,6 +3,6 @@ namespace: Titanium.Media.Sound.reload
 type: method
 description: Reload this sound from the original URL.
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

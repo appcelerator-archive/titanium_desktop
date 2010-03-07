@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.maximize
 type: method
 description: Maximizes a window
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

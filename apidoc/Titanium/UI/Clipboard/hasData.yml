@@ -3,7 +3,7 @@ namespace: Titanium.UI.Clipboard.hasData
 type: method
 description: Return true if there is any content of the given mime-type on the clipboard.
 since: 0.7.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Boolean
 parameters: 
     - [String, type, (optional) The mime-type of the data to check.]

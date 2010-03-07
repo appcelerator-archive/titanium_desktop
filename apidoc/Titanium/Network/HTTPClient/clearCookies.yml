@@ -3,6 +3,6 @@ namespace: Titanium.Network.HTTPClient.clearCookies
 type: method
 description: Clear any cookies set on the request
 since: 0.7.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

@@ -3,7 +3,7 @@ namespace: Titanium.UI.MenuItem.setState
 type: method
 description: Sets the state of this check item This method is only available for check items.
 since: 0.6.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [Boolean, state, A True state is checked, while a False state in unchecked]

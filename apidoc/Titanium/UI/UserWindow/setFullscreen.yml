@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.setFullscreen
 type: method
 description: Makes a window fullscreen
 since: 0.5.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

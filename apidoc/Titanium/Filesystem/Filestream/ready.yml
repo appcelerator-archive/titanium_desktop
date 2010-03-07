@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.Filestream.ready
 type: method
 description: Checks to see if file is ready for IO operations
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

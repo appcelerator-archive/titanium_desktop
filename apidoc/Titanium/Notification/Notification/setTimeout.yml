@@ -3,7 +3,7 @@ namespace: Titanium.Notification.Notification.setTimeout
 type: method
 description: Set the timeout before the notification expires.
 since: 0.9.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [Integer, timeout, Timeout in seconds. (-1 = use system default, 0 = never expire)]

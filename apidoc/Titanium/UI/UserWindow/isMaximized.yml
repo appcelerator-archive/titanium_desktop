@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.isMaximized
 type: method
 description: Checks whether a window is maximized
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

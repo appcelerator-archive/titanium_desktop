@@ -3,6 +3,6 @@ namespace: Titanium.UI.MenuItem.getIcon
 type: method
 description: "Get this item's icon URL This method is not available for separator or check items."
 since: 0.6.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String|null
 parameters: []

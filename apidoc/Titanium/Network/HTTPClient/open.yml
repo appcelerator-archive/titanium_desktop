@@ -3,7 +3,7 @@ namespace: Titanium.Network.HTTPClient.open
 type: method
 description: Opens an HTTP connection
 since: 0.3.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Boolean
 parameters: 
     - [String, method, The HTTP method to use e.g. POST]

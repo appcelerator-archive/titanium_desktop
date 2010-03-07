@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.setBounds
 type: method
 description: Sets the window bounds
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

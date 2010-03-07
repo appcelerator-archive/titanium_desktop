@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.File.extension
 type: method
 description: Returns the extension of a file
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

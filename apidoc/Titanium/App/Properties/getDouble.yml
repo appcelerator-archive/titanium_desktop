@@ -3,7 +3,7 @@ namespace: Titanium.App.Properties.getDouble
 type: method
 description: Returns a property value as double
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Number
 parameters: 
     - [String, name, The name of the property to return]

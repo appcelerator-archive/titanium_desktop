@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.Filestream.writeLine
 type: method
 description: Writes a line into the file
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

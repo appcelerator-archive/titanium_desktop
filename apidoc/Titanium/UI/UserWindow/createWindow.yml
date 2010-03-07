@@ -3,7 +3,7 @@ namespace: Titanium.UI.UserWindow.createWindow
 type: method
 description: Creates a new window as a child of the current window
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: UI.UserWindow
 parameters: 
     - [String|Object, options, (optional) A string containing a url of the new window or an object containing properties for the new window]

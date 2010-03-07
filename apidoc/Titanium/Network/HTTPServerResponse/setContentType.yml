@@ -3,6 +3,6 @@ namespace: Titanium.Network.HTTPServerResponse.setContentType
 type: method
 description: set the content type of this response
 since: 0.3.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

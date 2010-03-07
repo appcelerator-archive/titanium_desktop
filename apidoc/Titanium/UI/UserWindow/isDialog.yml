@@ -3,5 +3,5 @@ namespace: Titanium.UI.UserWindow.isDialog
 type: property
 description: True if this window is a Titanium.UI.Dialog window.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: Boolean

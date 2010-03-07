@@ -3,6 +3,6 @@ namespace: Titanium.UI.UserWindow.isResizable
 type: method
 description: Checks whether a window is resizable
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

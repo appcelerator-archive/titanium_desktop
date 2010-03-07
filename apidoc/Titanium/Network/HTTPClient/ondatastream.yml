@@ -3,5 +3,5 @@ namespace: Titanium.Network.HTTPClient.ondatastream
 type: property
 description: The handler function that will be fired as stream data is received from an HTTP request
 since: 0.3.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String

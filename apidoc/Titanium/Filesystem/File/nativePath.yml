@@ -3,6 +3,6 @@ namespace: Titanium.Filesystem.File.nativePath
 type: method
 description: Returns the full native path of a file or directory
 since: 0.2.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

@@ -3,5 +3,5 @@ namespace: Titanium.Network.HTTPClient.url
 type: property
 description: The request URL. This value will be updated on redirect events.
 since: 0.7.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String

@@ -5,6 +5,6 @@ description: |
     Get this human readable id currently defined in both the
     application manifest and the application's tiapp.xml file.
 since: 0.4.0
-platforms: ['android', 'iphone']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []
