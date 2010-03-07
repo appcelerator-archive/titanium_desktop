@@ -1,12 +1,15 @@
 ---
 namespace: Titanium.API.createDependency
 type: method
-description: A constructor for dependency objects
+description: A constructor for API.Dependency objects.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: API.Dependency
 parameters: 
-    - [Number, type, the type of this dependency (eg API.MODULE)]
-    - [String, name, the name of this dependency]
-    - [String, version, the version requirement for this dependency]
-    - [Number, requirement, (optional) the requirement for this dependency]
+    - [Number, type, The type of this dependency. This is usually one of the component type constants (e.g. API.MODULE).]
+    - [String, name, The name of this dependency.]
+    - [String, version, The version requirement for this dependency.]
+    - - Number
+      - requirement
+      - (optional) The requirement for this dependency. This is one of the requirement
+        specification constants from the API module such as API.LT (less-than)]

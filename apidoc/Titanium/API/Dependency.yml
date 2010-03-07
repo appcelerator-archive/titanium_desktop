@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.API.Dependency
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: An object representing a Titanium application dependency.
+since: 0.4.0

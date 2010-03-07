@@ -6,13 +6,13 @@ since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: void
 parameters: 
-	- [String, name, Feature name.]
-	- [Object, data, Extra event data to pass along. This will be converted to JSON.]
+    - [String, name, Feature name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples:
-	- |
-		<code>
-			Titanium.Analytics.featureEvent('user.login', {
-				'username': username,
-				'time':(new Date()).toString()
-			});
-		</code>
+    - |
+        <code>
+            Titanium.Analytics.featureEvent('user.login', {
+                'username': username,
+                'time':(new Date()).toString()
+            });
+        </code>

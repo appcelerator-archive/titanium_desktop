@@ -1,9 +1,16 @@
 ---
 namespace: Titanium.API.createBytes
 type: method
-description: Create a Kroll Bytes object.
+description: |
+    Create a Kroll Bytes object given a String. A Bytes object is a generic
+    way of holding a String of bytes.
 since: 0.9.0
 platforms: ['osx', 'linux', 'win32']
 returns: Bytes
 parameters: 
-    - [String, contents, (optional) The contents of the new Bytes. The blob will be empty if none are given.]
+    - - String
+      - contents
+      - |
+        (optional) The contents of the new Bytes. The String will be converted to a
+        UTF-8 String before populating the Bytes object. If no String is given the
+        object will be empty.

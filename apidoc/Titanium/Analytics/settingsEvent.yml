@@ -6,13 +6,13 @@ since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-	- [String, name, Setting name.]
-	- [Object, data, Extra event data to pass along. This will be converted to JSON.]
+    - [String, name, Setting name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
-	- |
-		<code>
-			Titanium.Analytics.settingsEvent('profile', {
-				'nickname': nickname,
-				'location': location,
-			});
-		</code>
+    - |
+        <code>
+            Titanium.Analytics.settingsEvent('profile', {
+                'nickname': nickname,
+                'location': location,
+            });
+        </code>

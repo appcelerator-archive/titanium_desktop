@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.API.getApplication
 type: method
-description: Get the currently running application
+description: |
+    Get the currently running application. This application will
+    should have all of its dependencies resolved.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: API.Application

@@ -1,7 +1,11 @@
 ---
 namespace: Titanium.API.getInstalledMobileSDKs
 type: method
-description: Get a list of the currently installed Kroll Mobile SDK components
+description: |
+    Get a list of the currently installed Titanium Mobile SDK components.
+    An installed component is one that has been found on the list of paths
+    returned by Titanium.API.getComponentSearchPaths. This list does not
+    include bundled components.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: Array<API.Component>

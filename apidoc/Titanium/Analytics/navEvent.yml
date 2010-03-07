@@ -6,13 +6,13 @@ since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: void
 parameters: 
-	- [String, from, "Navigation starting point, the context we're leaving."]
-	- [String, to, "Navigation ending point, the context to which we're going."]
-	- [String, name, Event name.]
-	- [Object, data, Extra event data to pass along. This will be converted to JSON.]
+    - [String, from, "Navigation starting point, the context we're leaving."]
+    - [String, to, "Navigation ending point, the context to which we're going."]
+    - [String, name, Event name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
-	- |
-		<code>
-			Titanium.Analytics.featureEvent('tab.places', 'tab.settings');
-		</code>
+    - |
+        <code>
+            Titanium.Analytics.featureEvent('tab.places', 'tab.settings');
+        </code>
 

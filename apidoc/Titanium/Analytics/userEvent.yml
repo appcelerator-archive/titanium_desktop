@@ -6,14 +6,14 @@ since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-	- [String, name, Event name.]
-	- [Object, data, Extra event data to pass along. This will be converted to JSON.]
+    - [String, name, Event name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
-	- |
-		<code>
-			Titanium.Analytics.userEvent('hairstyling.event', {
-				'type': 'Mohawk',
-				'color': 'pink',
-				'location': 'Times Square'
-			});
-		</code>
+    - |
+        <code>
+            Titanium.Analytics.userEvent('hairstyling.event', {
+                'type': 'Mohawk',
+                'color': 'pink',
+                'location': 'Times Square'
+            });
+        </code>

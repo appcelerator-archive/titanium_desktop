@@ -1,8 +1,19 @@
 ---
 namespace: Titanium.API.getEnvironment
 type: method
-description: Get the system environment
+description: |
+    Get the system environment object, which can be queried and updated
+    just by accessing or setting its properties.
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
 returns: API.Environment
 parameters: []
+examples:
+    - |
+        <code>
+            var environment = Titanium.API.getEnvironment();
+            if (environment['PATH'] !== undefined)
+            {
+                environment['PATH'] += ":/opt/local/bin";
+            }
+        </code>

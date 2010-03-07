@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.API.EQ
 type: property
-description: a constant representing an equality dependency
+description: |
+    A constant representing an equality dependency.
+    This is used to specify resolutions to Titanium application dependencies.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

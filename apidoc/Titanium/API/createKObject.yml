@@ -1,9 +1,9 @@
 ---
 namespace: Titanium.API.createKObject
 type: method
-description: Create a Kroll object.
+description: Create a Kroll object given an existing JavaScript Object. This method is mainly used for testing.
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
 returns: Object
 parameters: 
-    - [Object, toWrap, (optional) An object to wrap in a new KObject.]
+    - [Object, toWrap, (optional) An Object to wrap in a new KObject.]

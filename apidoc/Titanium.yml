@@ -2,13 +2,13 @@
 namespace: Titanium
 type: module
 description: |
-	This is the top-level Titanium module, containing all Titanium APIs.
-	Titanium API objects generally follow the setProperty()/getProperty()
-	pattern, but you may also use accessors for most operations For example:
+    This is the top-level Titanium module, containing all Titanium APIs.
+    Titanium API objects generally follow the setProperty()/getProperty()
+    pattern, but you may also use accessors for most operations For example:
 
-	<code>
-		var window = Titanium.UI.currentWindow;
-		window.setHeight(300); // Set the window height to 300 pixels.
-		window.height = 300; // The same.
-	</code>
+    <code>
+        var window = Titanium.UI.currentWindow;
+        window.setHeight(300); // Set the window height to 300 pixels.
+        window.height = 300; // The same.
+    </code>
 since: 0.8.5 or earlier
