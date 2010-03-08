@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Filesystem.Filestream
 type: object
-description: No description provided.
+description: A object for writing data to a file.
 since: 0.8.5 or earlier

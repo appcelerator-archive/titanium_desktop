@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Filesystem.getRootDirectories
 type: function
-description: Returns the system root directory
+description: |
+    Return the system root directories. On Unix systems there is at
+    most one root directory '/' while on Windows active drive letters
+    are considered system root directories.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Array<Filesystem.File>

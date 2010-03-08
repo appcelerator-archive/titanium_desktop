@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Filesystem.MODE_READ
 type: property
-description: File read constant
+description: A constant representing read mode for file access.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

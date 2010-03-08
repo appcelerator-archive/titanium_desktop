@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Filesystem.MODE_APPEND
 type: property
-description: File append constant
+description: A constant representing append mode for file access.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

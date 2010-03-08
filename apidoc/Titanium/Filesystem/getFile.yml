@@ -1,10 +1,34 @@
 ---
 namespace: Titanium.Filesystem.getFile
 type: function
-description: Returns a file path, optionally joining multiple arguments together in an OS specific way
+description: |
+    Create a Filesystem.File object given a variable-length argument list
+    of Filesystem.File or a path strings. The list will be joined together
+    to form one long path string.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Filesystem.File
 parameters: 
-    - [object, pathname, a string that is used to form a path]
-    - [object, ..., (optional) a variable length argument list of Strings that are concatinated with pathname to form a path]
+    - [Filesystem.File|String, base, The base to this file. This may be a file or directory.]
+    - [Filesystem.File|String, ..., (optional) A variable length argument list of Files or paths that are joined to the base in an platform-specific way.]
+examples:
+    - |
+        <code>
+            var sampleContents = "This is the contents of a sample file called sample.txt";
+
+            // Instead of building paths manually like so and making sure we use the proper
+            // Separator, we can pass multiple arguments to getFile and allow Titanium to do
+            // the work
+            // var sep = Titanium.Filesystem.getSeparator();
+            // var mySampleFile = Titanium.Filesystem.getFile(homeDir + sep + 'sample.txt');
+            var homeDir = Titanium.Filesystem.getUserDirectory();
+            var mySampleFile = Titanium.Filesystem.getFile(homeDir, 'sample.txt');
+
+            if (mySampleFile.exists()) {
+                alert('A file called sample.txt already exists in your home directory.');
+                alert(mySampleFile.read());
+            } else {
+                mySampleFile.write("These is the contents of a sample file called sample.txt");
+                alert("Created sample.txt");
+            }
+        </code>

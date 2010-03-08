@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Filesystem.getApplicationDataDirectory
 type: function
-description: Returns the data directory of the application
+description: |
+    Return the data directory of the application. The data directory is per-user
+    directory for storing application data. It is guaranteed to be writable and
+    stable between releases.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Filesystem.File

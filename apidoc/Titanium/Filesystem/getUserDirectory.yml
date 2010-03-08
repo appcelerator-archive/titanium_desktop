@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Filesystem.getUserDirectory
 type: function
-description: Returns the home directory of the current user
+description: Return the home directory of the current user.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Filesystem.File

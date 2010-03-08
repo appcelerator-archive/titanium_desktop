@@ -1,8 +1,11 @@
 ---
 namespace: Titanium.Filesystem.File.spaceAvailable
 type: method
-description: Returns the space available on the filesystem
+description: 
+    Return the space available on the filesystem containing the
+    path specified by this Filesystem.File object in number of
+    bytes.. 
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: Number
 parameters: []

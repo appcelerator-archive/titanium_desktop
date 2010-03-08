@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.Filesystem.File.isReadonly
 type: method
-description: Checks whether a file or directory is read-only
+description: |
+    Return true if the path specified by this Filesystem.File refers
+    to a read-only file.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

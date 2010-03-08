@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Filesystem.File
 type: object
-description: No description provided.
+description: An object which represents a path to a file or directory. A Filesystem.File is not guaranteed to be a valid path.
 since: 0.8.5 or earlier

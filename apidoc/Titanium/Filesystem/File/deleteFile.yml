@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Filesystem.File.deleteFile
 type: method
-description: Deletes a file
+description: |
+    Remove the file or directory specified by this Filesystem.File,
+    this method never removes directories recursively.
+    Return true if removal succeeded and false otherwise.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

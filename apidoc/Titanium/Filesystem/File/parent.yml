@@ -1,8 +1,8 @@
 ---
 namespace: Titanium.Filesystem.File.parent
 type: method
-description: Returns the parent directory of a file or directory
+description: Return the parent directory of this File.Filesystem object.
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: Filesystem.File
 parameters: []

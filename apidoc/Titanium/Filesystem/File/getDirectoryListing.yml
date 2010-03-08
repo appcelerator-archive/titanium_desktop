@@ -1,8 +1,11 @@
 ---
 namespace: Titanium.Filesystem.File.getDirectoryListing
 type: method
-description: Returns a list containing the names of items inside a directory.
+description: |
+    If this Filesystem.File specifies the path to a directory,
+    return an Array of items inside this directory. If this path
+    does not exist or is not a directory, return null.
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: Array<Filesystem.File>
 parameters: []

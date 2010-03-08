@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Filesystem.MODE_WRITE
 type: property
-description: File write constant
+description: A constant representing write mode for file access.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number
