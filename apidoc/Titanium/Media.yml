@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Media
-type: object
+type: module
 description: A module for dealing with media.
 since: 0.2.0
