@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Platform.getMachineId
 type: function
-description: 
+description: Get the per-user machine identifier of this session.
 since: 0.9.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

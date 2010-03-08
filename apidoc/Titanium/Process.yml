@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Process
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: A module for creating processes.
+since: 0.5.0

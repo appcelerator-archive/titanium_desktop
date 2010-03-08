@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Analytics
 type: module
-description: No description provided.
-since: 0.8.5 or earlier
+description: The Titanium Analytics module used for recording analytics events.
+since: 0.7.0

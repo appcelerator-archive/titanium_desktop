@@ -10,3 +10,10 @@ platforms: ['osx', 'linux', 'win32']
 returns: Media.Sound
 parameters: 
     - [String, path, The path or url to the sound file to play.]
+examples:
+    - |
+        <code>
+            // The "app://" points to the Resources folder of your Titanium application.
+            var soundObj = Titanium.Media.createSound('app://path/to/file.mp3');
+            soundObj.play();
+        </code>

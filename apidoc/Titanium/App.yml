@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.App
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: A module for holding currently running application specific functionality.
+since: 0.2.0

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.ALL
 type: property
-description: The ALL event constant
+description: The ALL event constant. This can be used for listening for all events.
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

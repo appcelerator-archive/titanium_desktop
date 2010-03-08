@@ -4,5 +4,5 @@ type: function
 description: "Empty the tray of all this application's tray items"
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: []

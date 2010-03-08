@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.UI.UserWindow
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: An object representing a top-level Titanium window.
+since: 0.2.0

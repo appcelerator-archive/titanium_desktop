@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Process.Pipe
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: An object representing an IO pipe.
+since: 0.5.0

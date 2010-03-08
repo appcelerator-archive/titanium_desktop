@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Platform.getArchitecture
 type: function
-description: 
+description: Get a String representation of the current system's architecture.
 since: 0.9.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
