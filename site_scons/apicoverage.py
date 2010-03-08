@@ -12,11 +12,7 @@ import traceback
 cwd = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 sys.path.append(path.join(cwd,"../build"))
 
-import titanium_version
-baseVersion = titanium_version.version
-t = baseVersion.split(".")
-defaultVersion = "%s.%s" % (t[0],t[1])
-
+defaultVersion = "0.8.5"
 default_platforms = ["osx", "win32", "linux"]
 
 class GlobDirectoryWalker:
