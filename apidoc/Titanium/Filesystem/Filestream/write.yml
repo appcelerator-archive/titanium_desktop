@@ -1,8 +1,11 @@
 ---
 namespace: Titanium.Filesystem.Filestream.write
 type: method
-description: Writes data into the file
+description: |
+    Writes a line to this Filesystem.Filestream. Return true if this
+    operation succeeds and false otherwise.
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
-parameters: []
+returns: Boolean
+parameters: 
+    - [String|Bytes|Number, data, The data to write to this Filesystem.Filestream.]

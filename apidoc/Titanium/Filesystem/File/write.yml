@@ -9,4 +9,4 @@ since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
 parameters: []
-    - [String|Bytes|Number, data, The data to write to this Filsystem.File.]
+    - [String|Bytes|Number, data, The data to write to this Filesystem.File.]
