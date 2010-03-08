@@ -42,8 +42,7 @@
 	// Setup the DB to store it's DB under our data directory for the app
 	NSString* datadir = [NSString stringWithUTF8String:
 		Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
-	[webPrefs _setLocalStorageDatabasePath:[NSString stringWithUTF8String:
-		Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
+	[webPrefs _setLocalStorageDatabasePath:datadir];
 	[[window webView] setPreferences:webPrefs];
 	[webPrefs release];
 

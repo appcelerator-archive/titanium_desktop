@@ -63,7 +63,7 @@ namespace ti
 			Bounds GetBoundsImpl();
 			void SetBoundsImpl(Bounds bounds);
 			std::string GetTitle();
-			void SetTitleImpl(std::string& title);
+			void SetTitleImpl(const std::string& title);
 			std::string GetURL();
 			void SetURL(std::string& url);
 			bool IsResizable();
