@@ -12,9 +12,9 @@ parameters:
     - [Function, callback, The callback to invoke when this message occurs.]
 examples:
     - |
-        <code>
+        <pre><code>
             Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
             {
                     alert("Got page initialized event!");
             });
-        </code>
+        </code></pre>

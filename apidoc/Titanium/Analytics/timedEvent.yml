@@ -13,7 +13,7 @@ parameters:
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
     - |
-        <code>
+        <pre><code>
             // This may be used with Date() objects
             Titanium.Analytics.timedEvent('mile.run',
                 startTime, // A Date object.
@@ -28,4 +28,4 @@ examples: |
                 356, // Number of seconds.
                 {'location':'park.grounds'}
             });
-        </code>
+        </code></pre>

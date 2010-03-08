@@ -10,10 +10,10 @@ returns: API.Environment
 parameters: []
 examples:
     - |
-        <code>
+        <pre><code>
             var environment = Titanium.API.getEnvironment();
             if (environment['PATH'] !== undefined)
             {
                 environment['PATH'] += ":/opt/local/bin";
             }
-        </code>
+        </code></pre>

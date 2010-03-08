@@ -13,7 +13,7 @@ parameters:
     - [String, path, Path to an SQLite file to store the database in. If the file does not exist, it will be created.]
 examples:
     - |
-        <code>
+        <pre><code>
             var db = Titanium.Database.open('database-name');
             db.execute("select * from table");
-        </code>
+        </code></pre>

@@ -7,4 +7,4 @@ platforms: ['osx', 'linux', 'win32']
 returns: Number
 parameters: 
     - [String, data, The string to compute the checksum on. The checksum will be computed on the UTF-8 version of this String.]
-    - [int, checksumType, "(optional) The checksum algorithm to use. Either Codec.CRC32 (default) or Codec.ADLER32]
+    - [int, checksumType, (optional) The checksum algorithm to use. Either Codec.CRC32 (default) or Codec.ADLER32]

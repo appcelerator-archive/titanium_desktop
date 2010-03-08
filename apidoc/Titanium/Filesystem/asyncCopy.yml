@@ -17,7 +17,7 @@ parameters:
             number of files in the list.
 examples:
     - |
-        <code>
+        <pre><code>
             var parent = Titanium.Filesystem.getApplicationDataDirectory();
 
             var target = Titanium.Filesystem.getFile(parent, "subdir");
@@ -36,4 +36,4 @@ examples:
                 // original array.
                 alert("Copied " + index + "of " + total + "files.");
             });
-        </code>
+        </code></pre>

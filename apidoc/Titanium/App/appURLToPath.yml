@@ -11,10 +11,10 @@ returns: String
 parameters: []
 examples:
     - |
-        <code>
+        <pre><code>
             var path = Titanium.Filesystem.getFile(
                 Titanium.App.appURLToPath("app://index.html"));
             var path2 = Titanium.Filesystem.getFile(
                 Titanium.App.getHome(), "Resources", "index.html")
             // At this point path and path2 should refer to the same file.
-        </code>
+        </code></pre>

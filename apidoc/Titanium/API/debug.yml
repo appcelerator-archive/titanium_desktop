@@ -21,6 +21,6 @@ parameters:
     - [String, statement, The String to send to the logger.]
 examples:
     - |
-        <code>
+        <pre><code>
             Titanium.API.debug("This is a debug message");
-        </code>
+        </code></pre>
