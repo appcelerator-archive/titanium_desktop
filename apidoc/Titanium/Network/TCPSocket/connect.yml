@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.TCPSocket.connect
+type: method
+description: Connect the Socket object to the host specified during creation. The connection will be made asynchronously. Use onError to detect failures.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

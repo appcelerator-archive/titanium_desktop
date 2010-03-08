@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.ResultSet.close
+type: method
+description: Releases the memory associated with this Database.ResultSet.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: []

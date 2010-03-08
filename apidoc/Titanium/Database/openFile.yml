@@ -1,9 +1,9 @@
 ---
 namespace: Titanium.Database.openFile
 type: method
-description: Opens a database, given a path to an sqlite file.
+description: Open a database, given a path to an sqlite file.
 since: 0.8.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: Database.DB
 parameters: 
     - [String, path, Path to an SQLite file to store the database in. If the file does not exist, it will be created.]

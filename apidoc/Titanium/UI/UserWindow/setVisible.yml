@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setVisible
+type: method
+description: Sets the visibility of the window
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, visible, true if the window should be visible, false if otherwise]

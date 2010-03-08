@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Dependency.getRequirement
+type: method
+description: Get the requirement for this dependency. Dependency requirement types are defined as constants on the API module. Currently the installer only support API.EQ dependency types.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

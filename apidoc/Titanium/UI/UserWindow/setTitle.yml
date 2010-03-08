@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setTitle
+type: method
+description: Sets the title of a window
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [object, title, the title of the window]

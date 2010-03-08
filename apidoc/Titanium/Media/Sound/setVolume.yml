@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Media.Sound.setVolume
+type: method
+description: |
+    Set the volume of this sound. Sound volumes should be between
+    0.0 and 1.0. Values outside of this range will be clipped to
+    0.0 or 1.0.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [Number, volume, The new volume value of the sound between 0.0 to 1.0]

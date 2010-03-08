@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Worker.Worker.start
+type: method
+description: Start the worker thread
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

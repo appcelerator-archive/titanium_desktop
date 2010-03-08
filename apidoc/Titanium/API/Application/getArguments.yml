@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.Application.getArguments
+type: method
+description: |
+    Retrieve a list of command-line arguments passed to this application. This
+    list will include the first argument, which is the path to the executable.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<String>
+parameters: []

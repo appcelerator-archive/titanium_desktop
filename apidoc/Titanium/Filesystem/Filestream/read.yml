@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Filesystem.Filestream.read
+type: method
+description: |
+    Read an entire Filesystem.Filestream into a Blob object
+    and return it. This method will throw an exception if the
+    operation fails.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Blob
+parameters: []

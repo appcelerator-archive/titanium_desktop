@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.getParent
+type: method
+description: Returns the parent window
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: UI.UserWindow|null
+parameters: []

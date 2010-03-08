@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPClient.send
+type: method
+description: Sends data through the HTTP connection
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [Object|String|null, data, (optional) Data to send to the server.]

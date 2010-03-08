@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Filesystem.createTempDirectory
-type: method
-description: Creates a temporary directory
+type: function
+description: |
+    Create a temporary directory. This directory is guaranteed to be
+    writable. If it still exists when the application exits, it
+    will be deleted.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Filesystem.File

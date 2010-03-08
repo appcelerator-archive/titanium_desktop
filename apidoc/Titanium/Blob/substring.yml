@@ -1,10 +1,34 @@
 ---
 namespace: Titanium.Blob.substring
 type: method
-description: Return a substring of a Blob given a start index and end index If no end index is given, return all characters from the start index to the end of the string. If startIndex > endIndex, the indexes are swapped.
+description: |
+    Return a substring of a Blob given a start index and end index. This
+    assumes that Blob contains a UTF-8 string. This means that the first
+    NUL character in the Blob object will signify the end of the string.
+    If no end index is given, return all characters from the start index
+    to the end of the string. If startIndex &gt; endIndex, the indices are swapped.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
     - [Number, startIndex, The starting index]
     - [Number, endIndex, (optional) The ending index]
+examples:
+    - |
+        <code>
+            // Originally from: https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/Substring
+            function replaceString(oldS, newS, fullS)
+            {
+                // Replaces oldS with newS in the string fullS
+                for (var i = 0; i < fullS.length; i++)
+                {
+                    if (fullS.substring(i, i + oldS.length) == oldS)
+                    {
+                        fullS = fullS.substring(0, i) + newS + fullS.substring(i + oldS.length, fullS.length);
+                    }
+                }
+                return fullS;
+            }
+
+            replaceString("World", "Web", API.createBlob("Brave New World"));
+        </code>

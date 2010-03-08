@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.Filestream.writeLine
+type: method
+description: |
+    Writes a line to this Filesystem.Filestream. The data will be followed
+    by the platform dependent line-ending sequence. Return true if this
+    operation succeeds and false otherwise.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String|Blob|Number, data, The data to write to this Filesystem.Filestream.]

@@ -1,8 +1,11 @@
 ---
 namespace: Titanium.Filesystem.getDocumentsDirectory
-type: method
-description: Returns the system documents directory
+type: function
+description: |
+    Return the documents directory for the current user. OS X and Windows will
+    always have a valid Documents directory. Some Linux systems may not have one,
+    in which case the home directory will be returned.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.File
+returns: Filesystem.File
 parameters: []

@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Database.DB.remove
+type: method
+description: |
+    Remove a Database.DB. This method will close the database
+    if it is open and remove the file from the filesystem.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: []

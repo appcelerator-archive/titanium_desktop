@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setTransparency
+type: method
+description: "Sets a window's transparency value"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, url, the transparency value of the window]

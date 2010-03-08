@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setX
+type: method
+description: "Sets a window's horizontal (X-axis) position"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, x, the horizontal position]

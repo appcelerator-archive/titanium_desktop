@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.App.getID
-type: method
-description: Return the application id.
+type: function
+description: |
+    Get this human readable id defined in both the
+    application manifest and the application's tiapp.xml file.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

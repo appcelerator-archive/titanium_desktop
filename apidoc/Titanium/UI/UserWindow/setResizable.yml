@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setResizable
+type: method
+description: Sets whether a window could be resized or not
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, resizable, true if the window could be resized, false if otherwise]

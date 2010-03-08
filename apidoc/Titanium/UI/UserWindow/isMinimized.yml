@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.isMinimized
+type: method
+description: Checks whether a window is minimized
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.IPAddress.isWellKnownMC
+type: method
+description: Check whether an IPAddress object is a well-known multicast address.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

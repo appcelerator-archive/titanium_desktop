@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.getCurrentWindow
-type: method
+type: function
 description: Returns the current window
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']

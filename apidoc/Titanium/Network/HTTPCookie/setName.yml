@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPCookie.setName
+type: method
+description: Set the cookie name
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, name, name of the cookie]

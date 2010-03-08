@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Tray.setIcon
+type: method
+description: "Sets a TrayItem's icon"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, icon, (optional) path to the icon or null to unset]

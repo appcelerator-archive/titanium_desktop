@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.connected
+type: property
+description: Whether an HTTPClient object is connected or not
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

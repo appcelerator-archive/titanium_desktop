@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Filesystem.File.deleteDirectory
+type: method
+description: |
+    Remove the file or directory specified by this Filesystem.File.
+    Return true if removal succeeded and false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [Boolean, recursive, If this Filesystem.File is a directory, remove it recursively.]

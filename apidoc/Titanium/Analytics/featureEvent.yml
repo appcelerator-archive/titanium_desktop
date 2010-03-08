@@ -1,10 +1,18 @@
 ---
 namespace: Titanium.Analytics.featureEvent
-type: method
-description: Sends an analytics event associated with application feature functionality
+type: function
+description: Send an analytics event associated with application feature functionality.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [String, name, feature name]
-    - [Object, data, (optional) event data]
+    - [String, name, Feature name.]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
+examples:
+    - |
+        <code>
+            Titanium.Analytics.featureEvent('user.login', {
+                'username': username,
+                'time':(new Date()).toString()
+            });
+        </code>

@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.setHeader
+type: method
+description: set an HTTP header of this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, name, the header name]
+    - [String, value, the header value]

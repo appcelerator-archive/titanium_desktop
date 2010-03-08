@@ -1,10 +1,14 @@
 ---
 namespace: Titanium.API.runOnMainThread
-type: method
-description: Execute the method on the main thread
+type: function
+description: |
+    Execute the method asynchronously on the main thread. This should be
+    used when attempting to run JavaScript methods from non-JavaScript threads.
+    This method blocks until the function finishes executing and returns
+    the return value of the method passed.
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
-returns: any
+returns: Any
 parameters: 
-    - [Function, method, The method to execute]
-    - [any, ..., A variable-length list of arguments to pass to the method]
+    - [Function, method, The method to execute.]
+    - [Any, ..., A variable-length list of arguments to pass to the method.]

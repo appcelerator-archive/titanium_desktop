@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Process.Process
 type: object
-description: 
-since: 0.8.0
+description: An object representing a process instance.
+since: 0.5.0

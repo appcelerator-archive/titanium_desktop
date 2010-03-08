@@ -1,8 +1,9 @@
 ---
 namespace: Titanium.Filesystem.getRuntimeHomeDirectory
-type: method
-description: Returns the directory of where the Titanium runtime files are stored
+type: function
+description: |
+    Return the directory of the current Titanium runtime files.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.File
+returns: Filesystem.File
 parameters: []

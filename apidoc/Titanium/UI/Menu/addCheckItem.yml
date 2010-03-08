@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.Menu.addCheckItem
+type: method
+description: Add a check item to this menu with the given attributes.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: UI.MenuItem
+parameters: 
+    - [String, label, The label for the new item]
+    - [Function, listener, (optional) An event listener callback for the item]

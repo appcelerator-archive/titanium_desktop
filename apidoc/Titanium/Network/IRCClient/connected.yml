@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.IRCClient.connected
+type: property
+description: The connected property of an IRCClient object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String

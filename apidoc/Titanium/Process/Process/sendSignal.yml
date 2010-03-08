@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Process.Process.sendSignal
+type: method
+description: "Send a signal (e.g. Process.SIGHUP) to this Process NOTE: this method does nothing in Windows"
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number|String, signal, The name of the signal to send.]

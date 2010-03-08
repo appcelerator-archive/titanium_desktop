@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getArgumentValue
+type: method
+description: |
+    Find the value for a given argument. You may either pass 
+    'param' or '--param' and this method will find the command-line
+    value for '--param=<value>'.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, argument, The name of the argument to find the value for.]

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.isTopMost
+type: method
+description: Checks whether a window is top most
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

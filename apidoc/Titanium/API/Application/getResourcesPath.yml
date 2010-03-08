@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.Application.getResourcesPath
+type: method
+description: |
+    Return the path to this application's resources directory. This directory
+    is the 'Resources' subdirectory of the application contents directory.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

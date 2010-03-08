@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.isFullscreen
+type: method
+description: Checks whether a window is in fullscreen
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, chrome, true if the window is in fullscreen, false if otherwise]

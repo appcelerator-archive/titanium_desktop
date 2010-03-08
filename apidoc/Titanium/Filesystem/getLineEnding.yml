@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Filesystem.getLineEnding
-type: method
-description: Returns the line ending used by the operating system
+type: function
+description: |
+    Return the line ending most commonly used by the current operating system.
+    This is useful for writing files with the platform compatibility in mind.
+    File.Filestream.writeLine will use this value when completing lines.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Filesystem.File.read
+type: method
+description: |
+    Return the entire contents of a file as a Blob object.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Blob
+parameters: []

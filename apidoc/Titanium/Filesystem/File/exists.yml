@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.File.exists
+type: method
+description: 
+    Return true if a file or directory exists at the path
+    specified by this Filesystem.File.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

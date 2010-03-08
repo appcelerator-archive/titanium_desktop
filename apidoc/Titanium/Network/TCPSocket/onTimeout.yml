@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.TCPSocket.onTimeout
+type: method
+description: Set the callback that will be fired when an operation times out on the Socket.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onTimeout, Function to be called when an operation times out.]

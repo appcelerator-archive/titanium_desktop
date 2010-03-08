@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Blob.toString
 type: method
-description: Return a string representation of a blob
+description: |
+    Return a string representation of a Byte object.
+    This method assumes that Blob contains a UTF-8 string. This means that the first
+    NUL character in the Blob object will signify the end of the string.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

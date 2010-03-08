@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Process.Process.setOnExit
+type: method
+description: Set an onExit event handler for this process
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onExit, a function]

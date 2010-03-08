@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerRequest.getURI
+type: method
+description: get the URI of this request
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

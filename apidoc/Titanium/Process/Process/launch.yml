@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Process.Process.launch
+type: method
+description: "Launch this process asynchronously (not waiting for it's exit)"
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

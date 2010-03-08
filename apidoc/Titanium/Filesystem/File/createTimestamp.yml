@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Filesystem.File.createTimestamp
+type: method
+description: |
+    Return the timestamp for when this file or directory was created.
+    The return value of this function will be microseconds since the
+    epoch at the time this file was created.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

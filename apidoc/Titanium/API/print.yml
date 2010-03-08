@@ -1,9 +1,10 @@
 ---
 namespace: Titanium.API.print
-type: method
-description: print a raw string to stdout (no newlines are appended)
+type: function
+description: |
+    Print a String to stdout without a trailing newline
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [Any, data, data to print]
+    - [Any, data, The data to print. If not a String, it will be converted using the equivalent of <tt>String(data);</tt>]

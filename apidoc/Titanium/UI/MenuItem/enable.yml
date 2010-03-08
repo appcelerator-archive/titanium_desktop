@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.MenuItem.enable
+type: method
+description: Enable this item i.e. make it clickable. This method is not available for separator items.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

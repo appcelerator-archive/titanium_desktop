@@ -1,8 +1,11 @@
 ---
 namespace: Titanium.Filesystem.getProgramsDirectory
-type: method
-description: Returns the programs directory of the current system
+type: function
+description: |
+    Return the directory commonly used for storing applications on this
+    platform. On Linux systems, there can be many places for storing
+    executables, so it is not recommended using this value to locate them.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.File
+returns: Filesystem.File
 parameters: []

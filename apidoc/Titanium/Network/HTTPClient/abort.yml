@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPClient.abort
+type: method
+description: Aborts an in progress connection
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

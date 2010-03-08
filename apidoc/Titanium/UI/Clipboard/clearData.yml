@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Clipboard.clearData
+type: method
+description: Clear data of the given mime-type from the clipboard. If no mime-type is given, clear all data from the clipboard.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, type, (optional) The mime-type of the data to clear.]

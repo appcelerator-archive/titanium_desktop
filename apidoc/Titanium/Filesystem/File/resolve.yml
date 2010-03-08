@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.resolve
+type: method
+description: |
+    Resolves a given relative path against the path specified by this
+    Filesystem.File object. If the given path is absolute, the absolute
+    path is returned.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Filesystem.File
+parameters: []
+    - [String, subPath, The subPath to resolve against this Filesystem.File object.]

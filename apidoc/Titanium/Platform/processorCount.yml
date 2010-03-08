@@ -3,5 +3,5 @@ namespace: Titanium.Platform.processorCount
 type: property
 description: The number of processors for the machine
 since: 0.2.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: String

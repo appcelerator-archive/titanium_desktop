@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.TCPSocket.onRead
+type: method
+description: Set a callback that will be fired when data is received on the Socket.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onRead, Function to be called when data is received.]

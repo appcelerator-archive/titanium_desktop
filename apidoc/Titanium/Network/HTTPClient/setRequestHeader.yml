@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.HTTPClient.setRequestHeader
+type: method
+description: Sets a request header for the connection
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, header, request header name]
+    - [String, value, request header value]

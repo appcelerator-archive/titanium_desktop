@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPCookie.setPath
+type: method
+description: Set the subset of URLs to which this cookie applies
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, path, the path to set]

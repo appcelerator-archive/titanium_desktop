@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.Script.preprocess
+type: method
+description: Runs an app URL through preprocessing, returning the result as a string
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, URL, the URL for this resource (app, ti, and file URLs are accepted)]
+    - [Object, scope, global variable scope to expose into the preprocessed file]

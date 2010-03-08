@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.createTCPSocket
-type: method
+type: function
 description: Creates a TCPSocket object
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

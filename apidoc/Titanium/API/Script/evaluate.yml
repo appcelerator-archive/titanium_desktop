@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Script.evaluate
+type: method
+description: Evaluates a string of code
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: Any
+parameters: 
+    - [String, mimeType, "The code's mime type (i.e. \"text/ruby\", \"text/php\")"]
+    - [String, name, "The name of the code's origin (usually a filename, or URL)"]
+    - [String, code, The actual code]
+    - [Object, scope, "global variable scope (i.e. \"window\")"]

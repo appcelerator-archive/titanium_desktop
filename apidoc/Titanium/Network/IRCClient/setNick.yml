@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.IRCClient.setNick
+type: method
+description: Sets the nick name for the connection
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, nick, nickname to use]

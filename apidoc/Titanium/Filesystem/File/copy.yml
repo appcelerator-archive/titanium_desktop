@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.copy
+type: method
+description: |
+    Copies a file to the specified location. If the target is a directory
+    the file will be written to that directory. If the target is a file,
+    the file will be written to that file.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters:
+    - [String|Filesystem.File, target, The target of this move operation.]

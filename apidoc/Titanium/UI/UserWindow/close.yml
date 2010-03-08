@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.close
+type: method
+description: Closes a window
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

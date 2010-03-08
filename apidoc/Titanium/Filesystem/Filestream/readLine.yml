@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.Filestream.readLine
+type: method
+description: |
+    Reads one line from this Filesystem.Filestream. The stream must
+    be open before using this method (or an exception will be thrown).
+    Each call will return a Blob object until the end of the stream,
+    when null will be returned.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Blob|null
+parameters: []

@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.readyState
+type: property
+description: The ready-state status for the connection
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

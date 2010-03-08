@@ -1,0 +1,14 @@
+---
+namespace: Titanium.App.Properties.getDouble
+type: method
+description: |
+    Returns a property value as double.
+    Throws an exception if this value can not be found and no default is
+    provided or the value stored in the properties file could not be
+    converted to the appropriate type.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: 
+    - [String, name, The name of the property to return.]
+    - [Number, default, The value to return if this property is not set.]

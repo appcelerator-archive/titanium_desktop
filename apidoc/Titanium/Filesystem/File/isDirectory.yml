@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.File.isDirectory
+type: method
+description: |
+    Return true if the path specified by this Filesystem.File refers
+    to a directory or false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.unzip
+type: method
+description: |
+    If this file is a zip file, unzip it into the given destination directory.
+    Return true if the operation was successful or false otherwise. This operation
+    will block the main thread.
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [Filesystem.File|String, destination, Directory to unzip the file to.]

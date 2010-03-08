@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setContextMenu
+type: method
+description: "Set this window's context menu"
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [UI.Menu|null, menu, The Menu object to use as the context menu or null to unset]

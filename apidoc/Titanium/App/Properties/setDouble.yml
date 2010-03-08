@@ -1,0 +1,10 @@
+---
+namespace: Titanium.App.Properties.setDouble
+type: method
+description: Set a double property value given the name and value.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [String, name, The name of the property to set.]
+    - [Number, value, The value to set the given property to.]

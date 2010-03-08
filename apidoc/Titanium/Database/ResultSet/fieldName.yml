@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Database.ResultSet.fieldName
+type: method
+description: |
+    Return the name of the specified field in the Database.ResultSet given its index.
+    The index of a field is determined by the original SQL query that generated this
+    Database.ResultSet.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, fieldIndex, The zero-based index of the field to query.]

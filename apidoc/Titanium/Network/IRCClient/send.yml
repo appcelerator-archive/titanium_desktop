@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.IRCClient.send
+type: method
+description: Sends data to the IRC connection
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, channel, the channel to send the data to]
+    - [String, message, message to send]

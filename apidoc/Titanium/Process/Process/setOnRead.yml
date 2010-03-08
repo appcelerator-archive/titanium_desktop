@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Process.Process.setOnRead
+type: method
+description: Set an onRead event handler for this process stdout and stderr
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onRead, "a handler that is passed an event, with a \"data\" Blob full of data read from the pipe"]

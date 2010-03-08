@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Media.Sound.isPlaying
+type: method
+description: Return true if this Media.Sound is playing and false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

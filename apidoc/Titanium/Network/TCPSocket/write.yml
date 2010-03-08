@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.TCPSocket.write
+type: method
+description: "Write data to the Socket's connection, if open."
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String, data, The data to write to the connection.]

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Database.ResultSet.rowCount
+type: method
+description: Return the number of rows in this Database.ResultSet.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

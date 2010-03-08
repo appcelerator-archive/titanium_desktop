@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.isHidden
+type: method
+description: |
+    Return true if the path specified by this Filesystem.File refers
+    to a hidden file. On Windows this means that the file has the hidden
+    attribute and on Linux and OS X this means that the basename of
+    this path begins with a period.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

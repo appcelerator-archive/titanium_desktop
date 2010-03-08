@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getRuntime
+type: method
+description: |
+    Return the resolved runtime for this for this application.
+    Resolved components may either be installed or bundled components.
+    Note that currently bundled components returned from this method
+    do not have a version.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: API.Component
+parameters: []

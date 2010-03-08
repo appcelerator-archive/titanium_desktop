@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.TCPSocket.onReadComplete
+type: method
+description: Set the callback function that will be fired when a read finishes. A read is considered finished if some bytes have been read and a subsequent call to read returns zero bytes.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onReadComplete, Function be called when a read completes.]

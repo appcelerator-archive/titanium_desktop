@@ -1,9 +1,11 @@
 ---
 namespace: Titanium.App.stderr
-type: method
-description: Writes to stderr
+type: function
+description: 
+    Print a raw string to stderr without a trailing newline.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-    - [any, data, data to write]
+parameters: 
+    - [Any, data, The data to print. If not a String, it will be converted using the equivalent of <tt>String(data);</tt>]

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setIcon
+type: method
+description: Sets the icon of a Notification object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, icon, The path of the icon for the Notification object]

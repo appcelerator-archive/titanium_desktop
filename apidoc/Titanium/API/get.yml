@@ -1,9 +1,9 @@
 ---
 namespace: Titanium.API.get
-type: method
+type: function
 description: Get an attribute in the global object
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
-returns: any
+returns: Any
 parameters: 
     - [String, key, Key of the attribute to get]

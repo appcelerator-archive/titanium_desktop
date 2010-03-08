@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.Filestream.close
+type: method
+description: |
+    Close this Filsystem.Filstream. Return true if the stream closed
+    without any problems and false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

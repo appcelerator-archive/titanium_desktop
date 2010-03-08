@@ -1,10 +1,16 @@
 ---
 namespace: Titanium.API.installDependencies
-type: method
-description: Invoke the installer to find and install a list of dependencies
+type: function
+description: |
+    Invoke the installer to find and install a list of dependencies. When
+    the installer is finished running, it will call the given callback.
+    The only way to determine whether or not the installation was successful
+    at this point is to try to resolve the dependencies that were passed
+    to the installer. <em>Currently the installer only supports Titanium.API.EQ
+    dependencies.</em>
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [Array<API.Dependency>, dependencies, a list of API.Dependency to find and install]
-    - [method, callback, a callback to invoke when the installer is finished (may finish unsuccessfully)]
+    - [Array<API.Dependency>, dependencies, A list of API.Dependency to find and install.]
+    - [Function, callback, A callback to invoke when the installer is finished.]

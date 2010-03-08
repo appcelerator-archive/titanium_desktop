@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Menu.insertItemAt
+type: method
+description: Insert a menu item before the given index. This method will throw an exception if the index of out of range.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, index, The index for this menu item]

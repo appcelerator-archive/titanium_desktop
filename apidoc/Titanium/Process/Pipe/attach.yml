@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Process.Pipe.attach
+type: method
+description: "Attach an IO object to this pipe. An IO object is an object that implements a public \"write(Blob)\". In Titanium, this include FileStreams, and Pipes. You may also use your own custom IO implementation here."
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

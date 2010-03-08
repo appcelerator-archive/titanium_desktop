@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getComponents
+type: method
+description: |
+    Return a list of all resolved components for this for this application.
+    Resolved components may either be installed or bundled components.
+    Note that currently bundled components returned in this list do not have
+    a version.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<API.Component>
+parameters: []

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.API.APP_UPDATE
 type: property
-description: a constant representing an app update component type
+description: A constant representing an application update component type.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

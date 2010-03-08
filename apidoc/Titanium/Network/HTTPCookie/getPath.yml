@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPCookie.getPath
+type: method
+description: Get the subset of URLs to which this cookie applies
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

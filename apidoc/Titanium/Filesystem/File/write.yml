@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.write
+type: method
+description: |
+    Write data to the file at the path specified by this Filesystem.File
+    object. Returns true if any data was written to the file or false
+    otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []
+    - [String|Blob|Number, data, The data to write to this Filesystem.File.]

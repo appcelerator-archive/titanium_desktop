@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.MenuItem.addCheckItem
+type: method
+description: "Add a check item to this menu item's submenu with the given attributes. If this menu item does not have a submenu, it will be created. This method is not available for separator items."
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: UI.MenuItem
+parameters: 
+    - [String, label, The label for the new item]
+    - [Function, listener, (optional) An event listener callback for the item]

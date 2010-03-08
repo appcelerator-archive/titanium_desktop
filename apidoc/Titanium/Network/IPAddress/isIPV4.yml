@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.IPAddress.isIPV4
+type: method
+description: Check whether an IPAddress object is an IPv4 address.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

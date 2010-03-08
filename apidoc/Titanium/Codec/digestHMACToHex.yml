@@ -1,11 +1,13 @@
 ---
 namespace: Titanium.Codec.digestHMACToHex
-type: method
-description: digest a encoded string in HMAC
+type: function
+description: |
+    Digest a String into a hex binary HMAC.
+    String data will first be converted to UTF-8 data.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: string
+returns: String
 parameters: 
-    - [int, type, "encoding type: currently supports MD2, MD4, MD5, SHA1"]
-    - [String, data, data to encode]
-    - [String, data, key to us for HMAC]
+    - [int, hashType, The hash type of the HMAC, which should be one Codec.MD2, Codec.MD4, Codec.MD5, or Codec.SHA1.]
+    - [String, data, The data to encode.]
+    - [String, data, The key to us for the HMAC.]

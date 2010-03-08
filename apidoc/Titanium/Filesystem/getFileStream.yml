@@ -1,8 +1,12 @@
 ---
 namespace: Titanium.Filesystem.getFileStream
-type: method
-description: Returns a Filestream object
+type: function
+description: |
+    Create a Filesystem.Filestream object given a Filesystem.File or a path. 
+    Filesystem.Filestream is the preferred way of writing to files.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.Filestream
+returns: Filesystem.Filestream
 parameters: []
+parameters: 
+    - [Filesystem.File|String, file, A file or path used for the construction of this Filesystem.Filestream.]

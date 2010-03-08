@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Process.Process.setEnvironment
+type: method
+description: Set an environment variable for this process
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, key, an environment key]
+    - [String, value, the value]

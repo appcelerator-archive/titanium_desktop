@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Clipboard.getData
+type: method
+description: Get the data on the clipboard from the portion which contains data of the given mime-type.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, type, The mime-type of the data to get.]

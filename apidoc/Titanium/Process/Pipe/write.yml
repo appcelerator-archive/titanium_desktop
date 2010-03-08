@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Process.Pipe.write
+type: method
+description: Write data to this pipe
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: 
+    - [Blob|String, data, a Blob object or String to write to this pipe]

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.setReason
+type: method
+description: set the reason of this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, reason, "the reason, i.e \"OK\""]

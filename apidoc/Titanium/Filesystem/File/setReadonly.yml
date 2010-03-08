@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.setReadonly
+type: method
+description: |
+    Remove the wrtiable bit and ensure there is a readable bit on the file
+    or directory at the path specified by this Filesystem.File object. Return
+    true if the file or directory at this path is read-only after the operation
+    completes.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getPID
+type: method
+description: Retrieve the process identifier of this application
+description: |
+    Retrieve the process identifier of this application. If this application
+    is not the currently running application, this method will returned
+    <tt>undefined</tt>.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

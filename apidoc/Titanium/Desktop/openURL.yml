@@ -3,7 +3,7 @@ namespace: Titanium.Desktop.openURL
 type: method
 description: Opens a URL in the default system browser
 since: 0.2.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [String, url, the url]

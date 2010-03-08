@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.dataSent
+type: property
+description: Amount of data sent to server so far. Updated on HTTP_DATA_SENT event.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String

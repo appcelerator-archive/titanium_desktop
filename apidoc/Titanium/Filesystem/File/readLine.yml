@@ -1,0 +1,14 @@
+---
+namespace: Titanium.Filesystem.File.readLine
+type: method
+description: |
+    Return one line from the file specified by this Filesystem.File object.
+    This method will return null when it finishes reading the file or if
+    it encounters and error. The file object will remain in an open state until
+    the entire file has been read via Filestream.File.readLine. It is recommended
+    that new applications use Filesystem.Filestream to read files instead, which
+    allow for explicit control over the native file handles.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServer.close
+type: method
+description: close this server
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.showInspector
+type: method
+description: 
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, console, (optional) Open the console along with the inspector (defaults to false).]

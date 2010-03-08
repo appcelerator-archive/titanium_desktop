@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setMessage
+type: method
+description: Sets the message of a Notification object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, message, The message of the Notification object]

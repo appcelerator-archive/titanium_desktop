@@ -1,0 +1,9 @@
+---
+namespace: Titanium.App.Properties.listProperties
+type: method
+description: Save this App.Properties object to file at the given path.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [String, path, The path to the file to save this App.Properties object to.]

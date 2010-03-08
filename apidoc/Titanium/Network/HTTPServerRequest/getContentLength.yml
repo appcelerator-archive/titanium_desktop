@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPServerRequest.getContentLength
+type: method
+description: the content length of this request
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

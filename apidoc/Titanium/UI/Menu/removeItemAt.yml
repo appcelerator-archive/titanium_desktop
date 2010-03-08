@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Menu.removeItemAt
+type: method
+description: Remove the item in this menu at the given index. This method will throw an exception if the index is out of range.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, index, The index of the item to remove]

@@ -1,0 +1,18 @@
+---
+namespace: Titanium.Filesystem.Filestream.open
+type: method
+description: |
+    Open this Filesystem.Filestream. Return true if the operation is
+    successful or false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters:
+    - - Number
+      - mode
+      - |
+        (optional) The mode to use for opening this Filesystem.Filestream. This
+        is either Filesystem.MODE_READ or Filesystem.MODE_WRITE. If not supplied
+        the stream will be open in MODE_READ.
+   - [Boolean, binary, (optional) Whether or not to open this stream in binary mode. If not supplied this will be false.]
+   - [Boolean, append, (optional) Whether or not to open this stream in append mode. If not supplied this will be false.]

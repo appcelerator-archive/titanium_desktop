@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPCookie.toString
+type: method
+description: return a string representation of the cookie
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.MenuItem.getState
+type: method
+description: Gets the state of this check item This method is only available for check items.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

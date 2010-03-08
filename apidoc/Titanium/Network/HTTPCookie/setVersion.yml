@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPCookie.setVersion
+type: method
+description: "Set the state management specifiction version the cookie conforms. (Default: 0)"
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Integer, version, cookie version (0 or 1)]

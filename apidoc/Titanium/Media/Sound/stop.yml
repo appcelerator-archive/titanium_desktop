@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Media.Sound.stop
+type: method
+description: Stop a currently playing sound.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: []

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setMinWidth
+type: method
+description: "Sets a window's min-width"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, width, the min-width value of the window]

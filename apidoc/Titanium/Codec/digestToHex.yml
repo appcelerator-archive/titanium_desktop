@@ -1,10 +1,12 @@
 ---
 namespace: Titanium.Codec.digestToHex
-type: method
-description: encode a string or blob using a digest algorithm
+type: function
+description: |
+    Encode some data using a digest algorithm to a hex binary String.
+    String data will first be converted to UTF-8 data.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: string
+returns: String
 parameters: 
-    - [int, type, "encoding type: currently supports MD2, MD4, MD5, SHA1"]
-    - [String|Blob, data, data to encode]
+    - [int, hashType, The hash type of the digest, which should be one Codec.MD2, Codec.MD4, Codec.MD5, or Codec.SHA1.]
+    - [String|Blob, data, The data to encode.]

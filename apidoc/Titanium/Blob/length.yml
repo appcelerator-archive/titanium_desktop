@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Blob.length
 type: property
-description: The number of bytes in this blob
+description: The number of bytes in this Blob object.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

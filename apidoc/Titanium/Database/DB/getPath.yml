@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Database.DB.getPath
+type: method
+description: |
+    Get the full filesystem path to the database. If this database was
+    opened via Datbase.openFile this path will be the originally path
+    used, otherwise it will be the path to a WebKit database in the
+    application data directory.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

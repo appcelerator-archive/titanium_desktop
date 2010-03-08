@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.Host.getAliases
+type: method
+description: Returns the list of aliases for a Host object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Array<String>
+parameters: []

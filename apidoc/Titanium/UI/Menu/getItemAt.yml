@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Menu.getItemAt
+type: method
+description: Get an item from this menu at the given index. This method will throw an exception if the index is out of range.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: UI.MenuItem
+parameters: 
+    - [Number, index, The index of the item to get]

@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Filesystem.File.isExecutable
+type: method
+description: |
+    Return true if the directory or file at the path specified by
+    this Filesystem.File object has the executable bit set. If the
+    file does not exists, this method will return false.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

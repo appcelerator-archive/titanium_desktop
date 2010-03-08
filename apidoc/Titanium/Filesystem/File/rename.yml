@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.File.rename
+type: method
+description: |
+    Renames a file to the given path.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []
+    - [String, newPath, The new path of the file]

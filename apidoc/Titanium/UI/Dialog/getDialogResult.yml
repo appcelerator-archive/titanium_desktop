@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Dialog.getDialogResult
+type: method
+description: get results from UI dialog
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

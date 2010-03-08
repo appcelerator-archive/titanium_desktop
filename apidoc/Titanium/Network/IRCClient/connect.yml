@@ -1,0 +1,15 @@
+---
+namespace: Titanium.Network.IRCClient.connect
+type: method
+description: Connects an IRC to the host specified during creation of the IRCClient object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, hostname, the hostname]
+    - [Number, port, the port]
+    - [String, nick, the users nickname]
+    - [String, name, the users full name]
+    - [String, user, the users login name]
+    - [String, pass, the users password]
+    - [Function, callback, a callback function to recieve IRC events.]

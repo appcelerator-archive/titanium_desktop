@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getBundledModules
+type: method
+description: Return a list of all modules bundled with this application
+description: |
+    Return a list of all bundled modules for this for this application.
+    Bundled modules currently live inside the application contents directory
+    in the "My App.app/Contents/modules" directory.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<API.Component>
+parameters: []

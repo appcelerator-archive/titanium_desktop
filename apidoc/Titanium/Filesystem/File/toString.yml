@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.toString
+type: method
+description: Return the path of this Filesystem.File object as a String.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

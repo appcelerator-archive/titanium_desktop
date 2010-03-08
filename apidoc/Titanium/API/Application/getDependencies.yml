@@ -1,0 +1,10 @@
+---
+namespace: Titanium.API.Application.getDependencies
+type: method
+description: |
+    Get a list of this application's dependencies. Dependencies
+    are defined in the application manifest file.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<API.Dependency>
+parameters: []

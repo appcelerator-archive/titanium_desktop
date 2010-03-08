@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setUsingChrome
+type: method
+description: Sets whether a window should use system chrome
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, chrome, set to true to use system chrome, false if otherwise]

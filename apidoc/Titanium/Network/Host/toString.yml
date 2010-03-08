@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.Host.toString
+type: method
+description: Returns a string representation of a Host object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

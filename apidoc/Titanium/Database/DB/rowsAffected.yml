@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Database.DB.rowsAffected
+type: property
+description: The number of rows affected by the last execute call.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Number

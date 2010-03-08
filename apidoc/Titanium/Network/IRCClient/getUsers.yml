@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.IRCClient.getUsers
+type: method
+description: Returns a list of users for the channel
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Array<String>
+parameters: []

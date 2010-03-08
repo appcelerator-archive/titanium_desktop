@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.LOADING
+type: property
+description: The LOADING readyState property
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

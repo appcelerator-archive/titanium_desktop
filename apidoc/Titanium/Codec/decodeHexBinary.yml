@@ -1,9 +1,9 @@
 ---
 namespace: Titanium.Codec.decodeHexBinary
-type: method
-description: decode a string from hex binary
+type: function
+description: Decode a hex binary-encoded String.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: string
+returns: String
 parameters: 
-    - [String, data, data to decode]
+    - [String, data, String to decode.]

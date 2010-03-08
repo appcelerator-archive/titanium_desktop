@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Filesystem.AsyncCopy.running
+type: property
+description: True if this asynchronous copy operation is active, false otherwise.
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Boolean

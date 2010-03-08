@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setBounds
+type: method
+description: Sets the window bounds
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [object, bounds, an object containing the value for the window bounds]

@@ -1,8 +1,5 @@
 ---
 namespace: Titanium.Filesystem.File
-type: method
-description: 
-since: 0.8.0
-returns: Boolean
-parameters: 
-    - [String, destination, destination to copy to]
+type: object
+description: An object which represents a path to a file or directory. A Filesystem.File is not guaranteed to be a valid path.
+since: 0.2.0

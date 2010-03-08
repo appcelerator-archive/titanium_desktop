@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.size
+type: method
+description: Return the size of the file in number of bytes.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

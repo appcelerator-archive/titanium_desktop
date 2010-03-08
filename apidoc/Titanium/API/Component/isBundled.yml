@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Component.isBundled
+type: method
+description: Whether or not this component is bundled with an application.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

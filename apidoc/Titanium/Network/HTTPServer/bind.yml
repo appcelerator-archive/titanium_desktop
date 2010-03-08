@@ -1,0 +1,11 @@
+---
+namespace: Titanium.Network.HTTPServer.bind
+type: method
+description: bind this server to a port on a specific interface
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, port, port to bind on]
+    - [String, address, (optional) address to bind to]
+    - [Method, callback, callback for server logic (in seperate thread)]

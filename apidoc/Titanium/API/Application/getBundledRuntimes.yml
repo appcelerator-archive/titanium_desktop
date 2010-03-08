@@ -1,0 +1,11 @@
+---
+namespace: Titanium.API.Application.getBundledRuntimes
+type: method
+description: |
+    Return a list of all bundled runtimes for this for this application.
+    A bundled runtime currently live inside the application contents directory
+    in the "My App.app/Contents/runtime" directory.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<API.Component>
+parameters: []

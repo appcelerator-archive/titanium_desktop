@@ -1,9 +1,26 @@
 ---
 namespace: Titanium.API.debug
-type: method
-description: Log a statement with DEBUG severity
+type: function
+description: |
+    Log a statement with DEBUG severity. The severity levels in order from
+    least severe to most severe are:
+    <ol>
+        <li>TRACE</li>
+        <li>DEBUG</li>
+        <li>INFO</li>
+        <li>NOTICE</li>
+        <li>WARN</li>
+        <li>ERROR</li>
+        <li>CRITICAL</li>
+        <li>FATAL</li>
+    </ol>
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [String, statement, the statement to log]
+    - [String, statement, The String to send to the logger.]
+examples:
+    - |
+        <code>
+            Titanium.API.debug("This is a debug message");
+        </code>

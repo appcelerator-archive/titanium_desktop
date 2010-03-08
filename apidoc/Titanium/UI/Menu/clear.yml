@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Menu.clear
+type: method
+description: Remove all items from this menu.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,8 +1,10 @@
 ---
 namespace: Titanium.Filesystem.getResourcesDirectory
-type: method
-description: Returns the resources directory of the application
+type: function
+description: |
+    Return the path to this application's resources directory. This diretory
+    is the 'Resources' subdirectory of the application contents directory.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.File
+returns: Filesystem.File
 parameters: []

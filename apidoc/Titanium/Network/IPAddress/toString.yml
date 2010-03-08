@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.IPAddress.toString
+type: method
+description: Return a string representation of an IPAddress object.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.setBadgeImage
-type: method
+type: function
 description: "Set the application icon's badge image."
 since: 0.2.0
 platforms: ['osx']

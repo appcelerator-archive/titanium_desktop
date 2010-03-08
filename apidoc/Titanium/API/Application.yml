@@ -1,5 +1,7 @@
 ---
 namespace: Titanium.API.Application
 type: object
-description: 
-since: 0.8.0
+description: |
+    An object representing a Titanium application, either the currently running
+    application or one on disk.
+since: 0.4.0

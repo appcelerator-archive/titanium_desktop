@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Application.getExecutablePath
+type: method
+description: |
+    Get the path to this application's executable.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -3,6 +3,6 @@ namespace: Titanium.Platform.createUUID
 type: method
 description: Creates a globally unique id
 since: 0.3.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: String
 parameters: []

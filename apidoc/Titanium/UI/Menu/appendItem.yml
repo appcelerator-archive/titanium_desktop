@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Menu.appendItem
+type: method
+description: Append a MenuItem object to a menu.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [UI.MenuItem, item, Append an item to this menu]

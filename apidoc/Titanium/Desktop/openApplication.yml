@@ -3,7 +3,7 @@ namespace: Titanium.Desktop.openApplication
 type: method
 description: Opens an application on the users system
 since: 0.2.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: String
 parameters: 
     - [String, path, the name or path to the application to open]

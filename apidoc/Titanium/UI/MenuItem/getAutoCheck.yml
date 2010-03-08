@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.MenuItem.getAutoCheck
+type: method
+description: This method is only available for check items.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, autocheck, Whether or not this item should is an autocheck]

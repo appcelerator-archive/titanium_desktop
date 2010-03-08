@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Blob
 type: module
-description: No description provided.
-since: 0.8.5 or earlier
+description: An object for holding arrays of bytes.
+since: 0.7.0

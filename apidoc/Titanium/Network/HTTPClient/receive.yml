@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.HTTPClient.receive
+type: method
+description: Sends a request to the server and receive data with the provided handler.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [Object|Function, handler, A handler to receive the response data. handler can either be Titanium.Filesystem.File or a Function.]
+    - [Object|String|null, data, (optional) Data to send to the server.]

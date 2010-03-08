@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.IRCClient.isOp
+type: method
+description: Checks whether a user has OP status
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

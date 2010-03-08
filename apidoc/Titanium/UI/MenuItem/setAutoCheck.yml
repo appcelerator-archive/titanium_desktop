@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.MenuItem.setAutoCheck
+type: method
+description: Set whether or not this check item is an autocheck item. An autocheck item (the default) will automatically flip the state of the check on a a click event. Turning off this behavior makes the check item more useful as a radio button. This method is only available for check items.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, autocheck, Whether or not this item should be an autocheck]

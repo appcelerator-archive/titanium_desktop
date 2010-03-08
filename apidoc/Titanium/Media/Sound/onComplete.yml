@@ -1,0 +1,13 @@
+---
+namespace: Titanium.Media.Sound.onComplete
+type: method
+description: |
+    Set a callback to invoke once this sound is finished playing. If
+    the sound is looping, this callback will be invoked after each
+    iteration of the loop. Passing null as the argument to this function
+    will unset the onComplete callback.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [Function, callback|null, The new callback function or null to unset it.]

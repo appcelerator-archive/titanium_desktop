@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPClient.setMaxRedirects
+type: method
+description: Set the maximum number of redirects to follow. The default is -1, which means that there is no maximum limit to the number of redirects to follow.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, amount, the number of redirects to follow.]

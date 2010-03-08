@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Network.HTTPClient.setCookie
+type: method
+description: Set a HTTP cookie in the request.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, name, the cookie name]
+    - [String, value, the cookie value]

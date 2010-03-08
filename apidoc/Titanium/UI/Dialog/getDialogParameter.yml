@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.Dialog.getDialogParameter
+type: method
+description: Get an incoming UI dialog parameter
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: any
+parameters: 
+    - [String, name, Name of the parameter]
+    - [Any, defaultValue, Default value of the parameter]

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setCallback
+type: method
+description: Sets the callback function fired when a Notification object is clicked
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, callback, The callback function]

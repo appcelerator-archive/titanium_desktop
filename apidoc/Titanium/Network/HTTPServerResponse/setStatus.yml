@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.setStatus
+type: method
+description: set the status of this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, status, "the status, i.e \"200\""]

@@ -1,13 +1,31 @@
 ---
 namespace: Titanium.Analytics.timedEvent
 type: method
-description: Sends an analytics event tracking the duration of an application action
+description: Send an analytics event tracking the duration of an application action
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-    - [String, event, event name]
-    - [Date, start, (optional) event start time (optional if duration is specified)]
-    - [Date, stop, (optional) event stop time (optional if duration is specified)]
-    - [String, duration, (optional) event duration in seconds (optional if both start and stop are specified)]
-    - [Object, data, (optional) event data]
+    - [String, event, Event name]
+    - [Date, start, Event start time (optional if duration is specified).]
+    - [Date, stop, Event stop time (optional if duration is specified).]
+    - [Number, duration, Duration in seconds (optional if both start and stop are specified)]
+    - [Object, data, Extra event data to pass along. This will be converted to JSON.]
+examples: |
+    - |
+        <code>
+            // This may be used with Date() objects
+            Titanium.Analytics.timedEvent('mile.run',
+                startTime, // A Date object.
+                new Date(), // The finishing time.
+                null, // Not used if dates are present.
+                {'location':'park.grounds'}
+            });
+
+            // ...or just my specifying a number of seconds.
+            Titanium.Analytics.timedEvent('mile.run',
+                null, null, // Dates are null.
+                356, // Number of seconds.
+                {'location':'park.grounds'}
+            });
+        </code>

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Process.Pipe.detach
+type: method
+description: Detach an IO object from this pipe. see Process.Pipe.attach.
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Process.Process.setOnReadLine
+type: method
+description: 
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, fn, a callback that is called with every line of output received from this process]

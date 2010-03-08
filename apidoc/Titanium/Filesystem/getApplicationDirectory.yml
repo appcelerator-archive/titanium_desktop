@@ -1,8 +1,12 @@
 ---
 namespace: Titanium.Filesystem.getApplicationDirectory
-type: method
-description: Returns the directory where the application resides
+type: function
+description: |
+    Return the directory containing the application. The application directory
+    may contain the application contents directory (OS X) or be the application
+    contents directory (Windows and Linux). The application directory may not
+    be writable and applications should not attempt to write to it.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
-returns: FileSystem.File
+returns: Filesystem.File
 parameters: []

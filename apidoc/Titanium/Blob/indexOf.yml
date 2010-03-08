@@ -1,9 +1,11 @@
 ---
 namespace: Titanium.Blob.indexOf
 type: method
-description: Return the index of a String within this Blob
+description: |
+    Return the index of a String within this Blob. The String will first
+    be converted to UTF-8 before this method searches the Blob object.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: Number
 parameters: 
-    - [String, needle, The String to search for]
+    - [String, needle, The String to search for.]

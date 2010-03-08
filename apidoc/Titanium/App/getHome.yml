@@ -1,7 +1,12 @@
 ---
 namespace: Titanium.App.getHome
-type: method
-description: Return the full path to the application home directory.
+type: function
+description: |
+    Return the full path to the application home directory. The application
+    home or contents directory is the subdirectory within the application which
+    contains the application Resources directory and bundled components. On OS X
+    this is the directory "My App.app/Contents" and on Windows and Linux it is
+    simply the path to the application.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

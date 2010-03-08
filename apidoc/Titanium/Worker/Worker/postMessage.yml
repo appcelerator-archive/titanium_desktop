@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Worker.Worker.postMessage
+type: method
+description: "Post a message (async) into the worker thread's queue to be handled by onmessage"
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [any, data, Any JSON serializable type to pass to the child.]

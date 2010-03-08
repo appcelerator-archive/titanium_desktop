@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.hide
+type: method
+description: Hides a notification object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, animate, Whether or not to animate the notification, defaults to true]

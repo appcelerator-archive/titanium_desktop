@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Application.getName
+type: method
+description: "Get this application's name."
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

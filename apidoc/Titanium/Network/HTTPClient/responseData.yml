@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.responseData
+type: property
+description: The response of an HTTP request as a Blob. Currently this property is only valid after the request has been completed.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: String

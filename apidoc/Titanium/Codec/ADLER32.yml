@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Codec.ADLER32
 type: property
-description: ADLER32 property
+description: Constant specifying the Adler-32 checksum algorithm.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

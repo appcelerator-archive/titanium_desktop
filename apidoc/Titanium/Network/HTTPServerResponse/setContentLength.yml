@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.setContentLength
+type: method
+description: set the content length of this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, length, the content length, i.e 100]

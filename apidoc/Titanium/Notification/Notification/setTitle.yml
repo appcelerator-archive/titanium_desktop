@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setTitle
+type: method
+description: Sets the title of a Notification object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, title, The title of the Notification object]

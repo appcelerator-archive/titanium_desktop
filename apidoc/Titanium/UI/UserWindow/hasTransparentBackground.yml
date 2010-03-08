@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.hasTransparentBackground
+type: method
+description: Checks whether a window has a transparent background or not. If a window has a transparent background, transparent colors on the page will show through to windows underneath.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: bool
+parameters: []

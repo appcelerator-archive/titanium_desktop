@@ -1,0 +1,11 @@
+---
+namespace: Titanium.API.Application.getPath
+type: method
+description: |
+    Get this application's path. Note that this is the top-level path of
+    application, not the path to the application contents directory. On
+    OS X currently, the application contents directory is "[app path]/Contents"
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.hasArgument
+type: method
+description: |
+    Determine if the given argument is in the argument list.
+    You may either pass 'param' or '--param' and this method will
+    find the command-line argument.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String, argument, The name of the argument to search for.]

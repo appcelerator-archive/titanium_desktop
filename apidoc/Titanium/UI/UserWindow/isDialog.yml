@@ -1,0 +1,7 @@
+---
+namespace: Titanium.UI.UserWindow.isDialog
+type: property
+description: true if this window is a UI Dialog
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean

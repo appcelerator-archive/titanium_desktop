@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.responseXML
+type: property
+description: The response of an HTTP request as parsable XML
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

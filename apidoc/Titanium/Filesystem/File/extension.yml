@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Filesystem.File.extension
+type: method
+description: Return the extension of this Filesystem.File.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

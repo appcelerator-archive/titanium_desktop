@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setMaximizable
+type: method
+description: Sets whether a window could be maximized or not
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, maximizable, true if the window could be maximized, false if otherwise]

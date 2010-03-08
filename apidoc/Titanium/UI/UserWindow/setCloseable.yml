@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setCloseable
+type: method
+description: Sets whether a window could be closed or not
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, closeable, true if the window could be closed, false if otherwise]

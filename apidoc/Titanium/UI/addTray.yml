@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.UI.addTray
-type: method
+type: function
 description: Create and add a tray icon
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

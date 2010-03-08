@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Notification.Notification.setTimeout
+type: method
+description: Set amount of time in milliseconds before the notification disappears. This feature is currently unsupported on OS X. The default value is 3 seconds.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, timeout, The timeout in milliseconds.]

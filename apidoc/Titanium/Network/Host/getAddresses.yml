@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.Host.getAddresses
+type: method
+description: Returns the list of address for a Host object
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Array<Network.IPAddress>
+parameters: []

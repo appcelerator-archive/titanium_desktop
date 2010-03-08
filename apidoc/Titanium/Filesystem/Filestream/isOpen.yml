@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Filesystem.Filestream.isOpen
+type: method
+description: |
+    Return true if this Fileystem.Filestream is open and false otherwise.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

@@ -1,9 +1,16 @@
 ---
 namespace: Titanium.API.createBlob
-type: method
-description: Create a Kroll Blob object.
-since: 0.5.0
+type: function
+description: |
+    Create a Kroll Blob object given a String. A Blob object is a generic
+    way of holding a String of bytes.
+since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Blob
 parameters: 
-    - [String, contents, (optional) The contents of the new Blob. The blob will be empty if none are given.]
+    - - String
+      - contents
+      - |
+        (optional) The contents of the new Blob. The String will be converted to a
+        UTF-8 String before populating the Blob object. If no String is given the
+        object will be empty.

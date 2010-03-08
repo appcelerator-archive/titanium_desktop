@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPClient.getTimeout
+type: method
+description: 
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

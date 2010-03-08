@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Component.getVersion
+type: method
+description: Get the version of this component. Note that bundled components do not currently have a version.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

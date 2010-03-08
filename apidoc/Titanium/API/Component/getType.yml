@@ -1,0 +1,8 @@
+---
+namespace: Titanium.API.Component.getType
+type: method
+description: Get the type of this component. Component types are defined as constants on the API module.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

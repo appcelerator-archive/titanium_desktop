@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Media.beep
-type: method
-description: Causes the system to beep
+type: function
+description: Activate the system bell. Some systems may have disabled the system bell.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

@@ -1,0 +1,11 @@
+---
+namespace: Titanium.API.Application.getManifest
+type: method
+description: |
+    Get the contents of this application's manifest as an array
+    of string pairs (array of size 2). Each entry in the manifest
+    is a simple key-value pair. Comments are ignored.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Array<Array<String>>
+parameters: []

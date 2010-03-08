@@ -1,0 +1,9 @@
+---
+namespace: Titanium.API.Script.canEvaluate
+type: method
+description: 
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: bool
+parameters: 
+    - [Object, evaluator, The mimeType to check]

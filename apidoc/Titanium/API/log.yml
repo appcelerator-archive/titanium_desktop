@@ -1,10 +1,22 @@
 ---
 namespace: Titanium.API.log
-type: method
-description: Log a statement with a given severity
+type: function
+description: |
+    Log a statement with a given severity level. The severity levels are
+    defined as constants on the API module. 
+    In order from least severe to most severe, they are:
+    <ol>
+        <li>TRACE</li>
+        <li>DEBUG</li>
+        <li>INFO</li>
+        <li>WARN</li>
+        <li>ERROR</li>
+        <li>CRITICAL</li>
+        <li>FATAL</li>
+    </ol>
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: void
 parameters: 
-    - [Number, type, the severity of this log statement]
-    - [String, statement, the statement to log]
+    - [Number, type, The severity of this log statement.]
+    - [String, statement, The String to pass to the logger.]

@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.getHTTPSProxy
-type: method
+type: function
 description: Return the proxy override, if one is set.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']

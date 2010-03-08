@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Tray.setMenu
+type: method
+description: Set the menu for this TrayItem
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [UI.Menu|null, menu, The Menu to use for this TrayItem or null to unset]

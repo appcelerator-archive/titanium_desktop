@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPClient.getResponseHeaders
+type: method
+description: Return all response headers as an array of two element arrays.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: Array<Array<String, String>>
+parameters: []

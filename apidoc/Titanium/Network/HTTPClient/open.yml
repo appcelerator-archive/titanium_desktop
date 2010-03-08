@@ -1,0 +1,13 @@
+---
+namespace: Titanium.Network.HTTPClient.open
+type: method
+description: Opens an HTTP connection
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String, method, The HTTP method to use e.g. POST]
+    - [String, url, The url to connect to]
+    - [Boolean, asynchronous, "(optional) Whether or not the request should be asynchronous (default: True)"]
+    - [String, username, (optional) The HTTP username to use]
+    - [String, password, (optional) The HTTP password to use]

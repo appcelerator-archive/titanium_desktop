@@ -1,10 +1,27 @@
 ---
 namespace: Titanium.Blob.substr
 type: method
-description: Return a substring of a Blob given a start index and a length If no length is given, all characters from the start to the end of the string are returned.
+description: |
+    Return a substring of a Blob given a start index and a length. This
+    assumes that Blob contains a UTF-8 string. This means that the first
+    NUL character in the Blob object will signify the end of the string.
+    If no length index is given, return all characters from the start index
+    to the end of the string.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
     - [Number, startIndex, The starting index]
     - [Number, length, (optional) The length of the substring]
+examples:
+    - |
+        <code>
+            // Originally from: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/String/substr
+            var bytes = API.createBlob("abcdefghij");
+            print("(1,2): "    + str.substr(1,2)); // bc
+            print("(-3,2): "   + str.substr(-3,2)); // hi
+            print("(-3): "     + str.substr(-3)); // hij
+            print("(1): "      + str.substr(1)); // bcdefghij
+            print("(-20, 2): " + str.substr(-20,2)); // ab
+            print("(20, 2): "  + str.substr(20,2)); // ''
+        </code>

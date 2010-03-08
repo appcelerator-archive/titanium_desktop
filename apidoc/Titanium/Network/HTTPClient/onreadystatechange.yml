@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.onreadystatechange
+type: property
+description: The handler function that will be fired when the readyState code of an HTTPClient object changes.
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

@@ -1,0 +1,7 @@
+---
+namespace: Titanium.Network.HTTPClient.status
+type: property
+description: The response status code of an HTTP request
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String

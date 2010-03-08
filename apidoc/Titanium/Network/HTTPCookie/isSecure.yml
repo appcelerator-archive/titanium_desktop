@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPCookie.isSecure
+type: method
+description: Check if the secure flag is set on the cookie
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

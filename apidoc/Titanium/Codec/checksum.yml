@@ -1,10 +1,10 @@
 ---
 namespace: Titanium.Codec.checksum
-type: method
-description: compute checksum
+type: function
+description: Compute the checksum of the given String with the given checksum algorithm.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
-returns: int
+returns: Number
 parameters: 
-    - [String, data, data to checksum (as string)]
-    - [int, type, "(optional) checksum type: currently supports CRC32 (default) and ADLER32"]
+    - [String, data, The string to compute the checksum on. The checksum will be computed on the UTF-8 version of this String.]
+    - [int, checksumType, "(optional) The checksum algorithm to use. Either Codec.CRC32 (default) or Codec.ADLER32]

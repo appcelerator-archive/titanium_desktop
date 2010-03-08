@@ -1,8 +1,15 @@
 ---
 namespace: Titanium.App.getCopyright
-type: method
-description: "Return the application's copyright information"
+type: function
+description: |
+    Return the application's copyright information, defined in the tiapp.xml file.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: []
+examples:
+    - |
+        <code>
+            document.write("The application copyright is: " +
+                Titanium.App.getCopyright());
+        </code>

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.getDOMWindow
+type: method
+description: 
+since: 0.5.0
+platforms: [osx, linux, win32]
+returns: Object|null
+parameters: []

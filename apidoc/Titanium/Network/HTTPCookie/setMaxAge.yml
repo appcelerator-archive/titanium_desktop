@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPCookie.setMaxAge
+type: method
+description: Set the lifetime of the cookie, in seconds.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Integer, lifetime, the lifetime in seconds. 0 = discard, -1 = never expire]

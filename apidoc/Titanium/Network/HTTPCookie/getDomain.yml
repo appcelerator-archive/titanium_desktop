@@ -1,0 +1,8 @@
+---
+namespace: Titanium.Network.HTTPCookie.getDomain
+type: method
+description: Get the domain for which the cookie is valid
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Worker.Worker
 type: object
-description: 
-since: 0.8.0
+description: An object representing a Titanium Worker.
+since: 0.8.5 or earlier

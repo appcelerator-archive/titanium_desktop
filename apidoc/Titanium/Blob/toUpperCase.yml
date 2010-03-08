@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Blob.toUpperCase
 type: method
-description: Convert characters in the Blob to upper case as if it were a string.
+description: |
+    Convert characters in the Blob to upper-case as if it it were a String.
+    This method assumes that Blob contains a UTF-8 string. This means that the first
+    NUL character in the Blob object will signify the end of the string.
 since: 0.3.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

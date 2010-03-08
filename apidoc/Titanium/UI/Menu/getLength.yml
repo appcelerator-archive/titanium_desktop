@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Menu.getLength
+type: method
+description: Get the length of this menu.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

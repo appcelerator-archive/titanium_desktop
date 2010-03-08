@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Network.addConnectivityListener
-type: method
+type: function
 description: Adds a connectivity change listener that fires when the system connects or disconnects from the internet
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

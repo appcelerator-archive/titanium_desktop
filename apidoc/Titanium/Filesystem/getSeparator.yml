@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Filesystem.getSeparator
-type: method
-description: Returns the path separator used by the operating system
+type: function
+description: Return the path separator used by the operating system.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

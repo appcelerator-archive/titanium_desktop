@@ -1,5 +1,0 @@
----
-namespace: Titanium.getPlatform.returns
-type: module
-description: The current platform.
-since: 0.8.5 or earlier

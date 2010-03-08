@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPCookie.setHTTPOnly
+type: method
+description: Set the http only flag on the cookie
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, enableHTTPOnly, if True sets the http only flag]

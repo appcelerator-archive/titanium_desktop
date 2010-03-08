@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Database.ResultSet.next
+type: method
+description: |
+    Move the Database.ResultSet iterator to the next row of this
+    result set. When the iterator has gone past the last entry in
+    the Database.ResultSet, the <tt>isValidRow</tt> method will return
+    false.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: []

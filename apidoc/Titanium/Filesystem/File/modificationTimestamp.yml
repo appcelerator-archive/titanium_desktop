@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Filesystem.File.modificationTimestamp
+type: method
+description: Return the modification timestamp of a file or directory
+description: |
+    Return the timestamp for when this file or directory was modified.
+    The return value of this function will be microseconds since the
+    epoch at the last time this file was modified.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

@@ -1,7 +1,8 @@
 ---
 namespace: Titanium.App.getGUID
-type: method
-description: "Return the application's globally unique id."
+type: function
+description: |
+    Return the application's GUID, defined in the application manifest.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

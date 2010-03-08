@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.TCPSocket.onError
+type: method
+description: Set the callback that will be fired when the Socket encounters an error.
+since: 0.8.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Function, onError, Function to be called when an error happens.]

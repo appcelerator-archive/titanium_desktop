@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.isVisible
+type: method
+description: Checks whether a window is visible
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

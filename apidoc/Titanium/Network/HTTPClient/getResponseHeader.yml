@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPClient.getResponseHeader
+type: method
+description: "Return the value of a response header, given it's name. If the given name occurs multiple times, this method will only return one occurence."
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, name, The response header name.]

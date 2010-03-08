@@ -1,0 +1,13 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.addCookie
+type: method
+description: add a cookie to this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, name, the cookie name]
+    - [String, value, the cookie value]
+    - [Number, maxAge, "(optional) the cookie's maximum age"]
+    - [String, domain, "(optional) the cookie's domain"]
+    - [String, path, "(optional) the cookie's path"]

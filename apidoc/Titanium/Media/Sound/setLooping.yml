@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Media.Sound.setLooping
+type: method
+description: Set whether or not this sound should loop.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: void
+parameters: 
+    - [Boolean, looping, True if the sound should loop, false otherwise.]

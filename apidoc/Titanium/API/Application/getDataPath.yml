@@ -1,0 +1,12 @@
+---
+namespace: Titanium.API.Application.getDataPath
+type: method
+description: |
+    Get the path to the application's user data directory. This path is
+    guaranteed to be writable (as opposed to the application directory
+    which should not be written to) and is suitable for storing any
+    application files.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

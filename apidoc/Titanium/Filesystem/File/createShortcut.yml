@@ -1,0 +1,13 @@
+---
+namespace: Titanium.Filesystem.File.createShortcut
+type: method
+description: |
+    Creates a shortcut to a file or directory at this Filesystem.File's
+    path. On Windows this will create a Win32 style shortcut. On Linux
+    and OS X this will create a symlink. If the operation is successful
+    this method will return true and false otherwise.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: 
+    - [String|Filesystem.File, target, The target of this shortcut.]

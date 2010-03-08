@@ -1,8 +1,20 @@
 ---
 namespace: Titanium.App.getArguments
-type: method
-description: Return the command-line arguments passed to this application, excluding the first -- which is generally the path to the application executable.
+type: function
+description: | 
+    Return the command-line arguments passed to this application,
+    excluding the first which is the path to the application executable.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Array<String>
 parameters: []
+examples:
+    - |
+        <code>
+            var args = Titanium.App.getArguments();
+            for (var i = 0; i < args.length; i++)
+            {
+                alert(args[i]);
+            }
+        </code>
+

@@ -1,0 +1,8 @@
+---
+namespace: Titanium.App.Properties.listProperties
+type: method
+description: Returns an Array of all property names in this App.Properties object.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Array<String>
+parameters: []

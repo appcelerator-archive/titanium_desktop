@@ -1,0 +1,9 @@
+---
+namespace: Titanium.Network.HTTPServerResponse.write
+type: method
+description: write content into this response
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, data, content to write (can be string or bytes content)]

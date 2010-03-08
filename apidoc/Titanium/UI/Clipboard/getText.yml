@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Clipboard.getText
+type: method
+description: Get the current text on the clipboard.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

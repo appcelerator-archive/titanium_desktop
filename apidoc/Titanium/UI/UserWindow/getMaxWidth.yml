@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.UserWindow.getMaxWidth
+type: method
+description: "Returns a window's max-width"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Number
+parameters: []

@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setTopMost
+type: method
+description: Sets whether a window is top most (above other windows)
+since: 0.3.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Boolean, topmost, true if top most, false if otherwise]

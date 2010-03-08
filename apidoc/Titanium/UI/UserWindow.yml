@@ -1,8 +1,5 @@
 ---
 namespace: Titanium.UI.UserWindow
-type: method
-description: 
-since: 0.8.0
-returns: Number
-parameters: 
-    - [Number, height, the max-height value of the window]
+type: object
+description: An object representing a top-level Titanium window.
+since: 0.2.0

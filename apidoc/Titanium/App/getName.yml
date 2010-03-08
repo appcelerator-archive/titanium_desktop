@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.App.getName
-type: method
+type: function
 description: Return the application name.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']

@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.UserWindow.openFileChooserDialog
+type: method
+description: Displays the file chooser dialog
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [method, callback, a callback function to fire after the user closes the dialog]
+    - [object, options, (optional) additional options for the dialog]

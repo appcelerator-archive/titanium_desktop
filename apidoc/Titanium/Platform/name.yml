@@ -3,5 +3,5 @@ namespace: Titanium.Platform.name
 type: property
 description: The operating system name
 since: 0.2.0
-platforms: ['osx', 'linux', 'win32']
+platforms: [osx, linux, win32]
 returns: String

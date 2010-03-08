@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.MenuItem.setLabel
+type: method
+description: Set the label for this item. This method is not available for separator items.
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, label, The new label for this item]

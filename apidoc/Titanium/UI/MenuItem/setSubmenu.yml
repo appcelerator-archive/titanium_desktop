@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.MenuItem.setSubmenu
+type: method
+description: "Set this item's submenu. This method is not available for separator items."
+since: 0.6.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [UI.Menu|null, menu, The submenu to use for this item or null to unset it]

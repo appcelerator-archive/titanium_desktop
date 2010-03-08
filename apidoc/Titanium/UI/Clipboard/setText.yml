@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.Clipboard.setText
+type: method
+description: Set the text on the clipboard. This will overwrite the current contents of the clipboard.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, newText, The new clipboard text. If the text is an empty string, the text portion of the clipboard will be cleared.]

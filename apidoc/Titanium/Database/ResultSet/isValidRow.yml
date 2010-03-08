@@ -1,0 +1,12 @@
+---
+namespace: Titanium.Database.ResultSet.isValidRow
+type: method
+description: | 
+    Check whether the current row of this Datbase.ResultSet is valid. Reasons
+    for the current row not being valid include an error in the original SQL
+    statement, a query that returned no results or iterating to the end of
+    the Database.ResultSet.
+since: 0.4.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

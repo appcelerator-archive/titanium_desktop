@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.API.GTE
 type: property
-description: a constant representing a greather-than-or-equal dependency
+description: |
+    A constant representing an greater-than-or-equal-to dependency. 
+    This is used to specify resolutions to Titanium application dependencies.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
-returns: String
+returns: Number

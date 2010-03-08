@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setMaxWidth
+type: method
+description: "Sets a window's max-width"
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [Number, width, the max-width value of the window]
