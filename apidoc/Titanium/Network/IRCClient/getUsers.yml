@@ -4,5 +4,5 @@ type: method
 description: Returns a list of users for the channel
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: Array<String>
 parameters: []

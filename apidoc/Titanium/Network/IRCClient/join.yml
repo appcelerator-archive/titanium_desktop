@@ -5,4 +5,5 @@ description: Joins a channel
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [String, channel, channel to join to]

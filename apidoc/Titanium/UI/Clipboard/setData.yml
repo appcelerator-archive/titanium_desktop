@@ -1,0 +1,10 @@
+---
+namespace: Titanium.UI.Clipboard.setData
+type: method
+description: Set the data on the clipboard given a mime-type and the new data. This method will set data on the appropriate portion of the clipboard for the given mime-type.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: 
+    - [String, type, The mime-type of the data to set.]
+    - [String, data, The new clipboard text.]

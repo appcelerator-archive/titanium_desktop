@@ -4,5 +4,5 @@ type: method
 description: Checks whether a user has VOICE status
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: Boolean
 parameters: []

@@ -5,4 +5,6 @@ description: set the status and reason of this response
 since: 0.3.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [String, status, "the status, i.e \"200\""]
+    - [String, reason, "the reason, i.e \"OK\""]

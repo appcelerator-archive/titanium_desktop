@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Database.DB.remove
-type: function
+type: method
 description: Removes a database
 since: 0.4.0
 platforms: [osx, linux, win32]

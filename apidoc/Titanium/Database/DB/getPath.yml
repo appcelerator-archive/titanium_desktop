@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Database.DB.getPath
-type: function
+type: method
 description: Get the full filesystem path to the database.
 since: 0.8.0
 platforms: [osx, linux, win32]

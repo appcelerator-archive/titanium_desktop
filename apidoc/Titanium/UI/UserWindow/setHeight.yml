@@ -5,4 +5,5 @@ description: "Sets a window's height"
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [Number, height, the height value of the window]

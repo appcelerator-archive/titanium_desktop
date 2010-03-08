@@ -1,0 +1,8 @@
+---
+namespace: Titanium.UI.Clipboard.clearText
+type: method
+description: Clear the text portion of the clipboard.
+since: 0.7.0
+platforms: [osx, linux, win32]
+returns: String
+parameters: []

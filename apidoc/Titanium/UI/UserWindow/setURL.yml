@@ -5,4 +5,5 @@ description: Sets the url for a window
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [String, url, the url for the window]

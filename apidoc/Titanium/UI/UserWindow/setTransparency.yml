@@ -5,4 +5,5 @@ description: "Sets a window's transparency value"
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [Number, url, the transparency value of the window]

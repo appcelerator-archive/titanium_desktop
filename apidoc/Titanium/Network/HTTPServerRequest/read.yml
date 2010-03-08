@@ -5,4 +5,5 @@ description: read content from this request
 since: 0.3.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [Number, length, (optional) the number of bytes to read (default 8096)]

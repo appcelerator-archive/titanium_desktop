@@ -1,6 +1,6 @@
 ---
 namespace: Titanium.Database.DB.close
-type: function
+type: method
 description: Closes an open database
 since: 0.4.0
 platforms: [osx, linux, win32]

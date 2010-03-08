@@ -5,4 +5,5 @@ description: Makes a window fullscreen
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters: 
+    - [Boolean, fullscreen, set to true for fullscreen, false if otherwise]
