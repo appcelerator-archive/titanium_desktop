@@ -51,7 +51,7 @@ namespace ti
 		 */
 		this->SetMethod("toString",&File::ToString);
 		/**
-		 * @tiapi(method=True,name=Filesystem.File.toString,since=0.7)
+		 * @tiapi(method=True,name=Filesystem.File.toURL,since=0.7)
 		 * @tiapi Return a string representation of the File object's URL
 		 * @tiresult[String] A string containing the file:// URL to this file.
 		 */
