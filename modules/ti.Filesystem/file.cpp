@@ -90,7 +90,8 @@ namespace ti
 		 * @tiapi(method=True,name=Filesystem.File.isWriteable,since=0.2) Checks whether a file or directory is writeable
 		 * @tiresult(for=Filesystem.File.isWriteable,type=Boolean) true if the file or directory is writeable, false if otherwise
 		 */
-		this->SetMethod("isWriteable",&File::IsWriteable);
+		this->SetMethod("isWriteable",&File::IsWritable);
+		this->SetMethod("isWritable",&File::IsWritable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.resolve,since=0.2) Resolves a File object to a file path
 		 * @tiarg(for=Filesystem.File.resolve,name=path) path to resolve
@@ -215,7 +216,8 @@ namespace ti
 		 * @tiapi(method=True,name=Filesystem.File.setWriteable,since=0.2) Makes the file or directory writeable
 		 * @tiresult(for=Filesystem.File.setWriteable,type=Boolean) returns true if successful
 		 */
-		this->SetMethod("setWriteable",&File::SetWriteable);
+		this->SetMethod("setWriteable",&File::SetWritable);
+		this->SetMethod("setWrieable",&File::SetWritable);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.unzip,since=0.3)
 		 * @tiapi If this file is s zip file, unzip it into the given destination directory.
@@ -381,7 +383,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::IsWriteable(const ValueList& args, KValueRef result)
+	void File::IsWritable(const ValueList& args, KValueRef result)
 	{
 		try
 		{
@@ -947,7 +949,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
-	void File::SetWriteable(const ValueList& args, KValueRef result)
+	void File::SetWritable(const ValueList& args, KValueRef result)
 	{
 		try
 		{

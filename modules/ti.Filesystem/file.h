@@ -45,7 +45,7 @@ namespace ti
 		void IsSymbolicLink(const ValueList& args, KValueRef result);
 		void IsExecutable(const ValueList& args, KValueRef result);
 		void IsReadonly(const ValueList& args, KValueRef result);
-		void IsWriteable(const ValueList& args, KValueRef result);
+		void IsWritable(const ValueList& args, KValueRef result);
 		void Resolve(const ValueList& args, KValueRef result);
 		void Write(const ValueList& args, KValueRef result);
 		void Read(const ValueList& args, KValueRef result);
@@ -70,7 +70,7 @@ namespace ti
 		void CreateShortcut(const ValueList& args, KValueRef result);
 		void SetExecutable(const ValueList& args, KValueRef result);
 		void SetReadonly(const ValueList& args, KValueRef result);
-		void SetWriteable(const ValueList& args, KValueRef result);
+		void SetWritable(const ValueList& args, KValueRef result);
 		void Unzip(const ValueList& args, KValueRef result);
 	};
 }
