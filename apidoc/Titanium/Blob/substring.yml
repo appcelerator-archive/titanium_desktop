@@ -15,7 +15,7 @@ parameters:
     - [Number, endIndex, (optional) The ending index]
 examples:
     - |
-        <code>
+        <pre><code>
             // Originally from: https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/Substring
             function replaceString(oldS, newS, fullS)
             {
@@ -31,4 +31,4 @@ examples:
             }
 
             replaceString("World", "Web", API.createBlob("Brave New World"));
-        </code>
+        </code></pre>

@@ -10,10 +10,10 @@ parameters:
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
     - |
-        <code>
+        <pre><code>
             Titanium.Analytics.userEvent('hairstyling.event', {
                 'type': 'Mohawk',
                 'color': 'pink',
                 'location': 'Times Square'
             });
-        </code>
+        </code></pre>

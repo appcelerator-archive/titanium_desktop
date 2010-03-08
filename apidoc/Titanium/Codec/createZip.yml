@@ -11,11 +11,11 @@ parameters:
     - [Function, onComplete, A function callback that receives the zip file when writing is finished]
 examples:
     - |
-        <code>
+        <pre><code>
             var root = Titanium.Filesystem.getFile(Titanium.App.getHome());
             var dest = Titanium.Filesystem.getFile(
                 Titanium.Filesystem.getApplicationDataDirectory(), "app.zip");
             Titanium.Codec.createZip(root, dest, function(destFile) {
                 alert("Wrote zip file: " + destFile);
             });
-        </code>
+        </code></pre>

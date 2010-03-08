@@ -9,7 +9,7 @@ returns: String
 parameters: []
 examples:
     - |
-        <code>
+        <pre><code>
             document.write("The application copyright is: " +
                 Titanium.App.getCopyright());
-        </code>
+        </code></pre>

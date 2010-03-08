@@ -9,6 +9,6 @@ returns: String
 parameters: []
 examples:
     - |
-        <code>
+        <pre><code>
             document.write(Titanium.App.getDescription());
-        </code>
+        </code></pre>

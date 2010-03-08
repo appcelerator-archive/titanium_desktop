@@ -9,10 +9,10 @@ parameters:
     - [Object, properties, (optional) Initial properties for the new App.Properties object.]
 examples:
     - |
-        <code>
+        <pre><code>
             var properties = Titanium.App.createProperties({
                 'name': 'McDuck',
                 'position': 'Fisherman',
                 'age': 3
             });
-        </code>
+        </code></pre>

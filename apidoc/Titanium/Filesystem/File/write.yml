@@ -8,5 +8,5 @@ description: |
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String
-parameters: []
+parameters:
     - [String|Blob|Number, data, The data to write to this Filesystem.File.]

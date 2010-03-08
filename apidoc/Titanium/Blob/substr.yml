@@ -15,7 +15,7 @@ parameters:
     - [Number, length, (optional) The length of the substring]
 examples:
     - |
-        <code>
+        <pre><code>
             // Originally from: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/String/substr
             var bytes = API.createBlob("abcdefghij");
             print("(1,2): "    + str.substr(1,2)); // bc
@@ -24,4 +24,4 @@ examples:
             print("(1): "      + str.substr(1)); // bcdefghij
             print("(-20, 2): " + str.substr(-20,2)); // ab
             print("(20, 2): "  + str.substr(20,2)); // ''
-        </code>
+        </code></pre>

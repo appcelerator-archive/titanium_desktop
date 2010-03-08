@@ -12,7 +12,7 @@ parameters:
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples: |
     - |
-        <code>
+        <pre><code>
             Titanium.Analytics.featureEvent('tab.places', 'tab.settings');
-        </code>
+        </code></pre>
 

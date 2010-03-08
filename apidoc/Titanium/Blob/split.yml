@@ -13,9 +13,9 @@ parameters:
     - [Number, limit, (optional) The maximum number of matches to return]
 examples:
     - |
-        <code>
+        <pre><code>
             // Blob.split returns empty matches. For example:
             // list should be ['abc', 'def', '', '']
             var bytes = API.createBlob("abc,def,,");
             var list = bytes.split(",");
-        </code>
+        </code></pre>

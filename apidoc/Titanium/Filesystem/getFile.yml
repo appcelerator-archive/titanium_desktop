@@ -13,7 +13,7 @@ parameters:
     - [Filesystem.File|String, ..., (optional) A variable length argument list of Files or paths that are joined to the base in an platform-specific way.]
 examples:
     - |
-        <code>
+        <pre><code>
             var sampleContents = "This is the contents of a sample file called sample.txt";
 
             // Instead of building paths manually like so and making sure we use the proper
@@ -31,4 +31,4 @@ examples:
                 mySampleFile.write("These is the contents of a sample file called sample.txt");
                 alert("Created sample.txt");
             }
-        </code>
+        </code></pre>

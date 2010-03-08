@@ -8,5 +8,5 @@ description: |
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Filesystem.File
-parameters: []
+parameters:
     - [String, subPath, The subPath to resolve against this Filesystem.File object.]
