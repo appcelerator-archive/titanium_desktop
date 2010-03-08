@@ -63,6 +63,7 @@ namespace ti
 		CopyMemory(data, wideString.c_str(), length);
 		::GlobalUnlock(clipboardData);
 		SetClipboardData(CF_UNICODETEXT, clipboardData);
+		CloseClipboard();
 	}
 
 	std::string& Clipboard::GetTextImpl()
