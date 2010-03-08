@@ -6,6 +6,7 @@ since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: UI.Menu
 parameters: []
+examples:
     - |
         <pre><code>
             var menu = Titanium.UI.createMenu();
