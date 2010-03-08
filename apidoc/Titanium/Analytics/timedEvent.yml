@@ -11,7 +11,7 @@ parameters:
     - [Date, stop, Event stop time (optional if duration is specified).]
     - [Number, duration, Duration in seconds (optional if both start and stop are specified)]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
-examples: |
+examples:
     - |
         <pre><code>
             // This may be used with Date() objects

@@ -9,3 +9,21 @@ parameters:
     - [String, label, The label for this menu item]
     - [Function, eventListener, (optional) An event listener for this menu item]
     - [String, iconURL, (optional) A URL to an icon to use for this menu item]
+examples:
+    - |
+        <pre><code>
+            // Creating a menu item with no callback.
+            var file = Titanium.UI.createMenuItem('File', function() {
+                alert('File activated');
+            });
+            menu.appendItem(file); // This item has no callback.
+
+            // Creating a menu item without a callback and adding one later.
+            var help = Titanium.UI.createMenuItem('Help');
+            menu.appendItem(help);
+
+            help.addEventListener(Titanium.CLICKED, function(event)
+            {
+                alert("Help activated");
+            });
+        </pre></codee>

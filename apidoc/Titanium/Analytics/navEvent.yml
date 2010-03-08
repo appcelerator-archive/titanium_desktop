@@ -10,7 +10,7 @@ parameters:
     - [String, to, "Navigation ending point, the context to which we're going."]
     - [String, name, Event name.]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
-examples: |
+examples:
     - |
         <pre><code>
             Titanium.Analytics.featureEvent('tab.places', 'tab.settings');

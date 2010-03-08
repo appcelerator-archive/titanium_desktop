@@ -8,7 +8,7 @@ returns: String
 parameters: 
     - [String, name, Event name.]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
-examples: |
+examples:
     - |
         <pre><code>
             Titanium.Analytics.userEvent('hairstyling.event', {

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.HTTP_DATA_RECEIVED
 type: property
-description: Data has been received from server.
+description: The HTTP data received event constant.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

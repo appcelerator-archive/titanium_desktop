@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Network.IPAddress.isLinkLocal
 type: method
-description: 
+description: Check whether an IPAddress object is a link-local address.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Boolean

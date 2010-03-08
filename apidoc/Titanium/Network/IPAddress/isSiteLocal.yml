@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Network.IPAddress.isSiteLocal
 type: method
-description: 
+description: Check whether an IPAddrss object is a site-local address.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Boolean

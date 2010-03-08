@@ -1,8 +1,12 @@
 ---
 namespace: Titanium.UI.UserWindow.getDOMWindow
 type: method
-description: 
+description: |
+    Return the WebKit DOMWindow of the page loaded in this window if
+    one exists, otherwise return null. A DOMWindow object will not
+    be available until a UI.UserWindow's PAGE_INITIALIZED event has
+    fired.
 since: 0.5.0
 platforms: [osx, linux, win32]
-returns: Object|null
+returns: DOMWindow|null
 parameters: []
