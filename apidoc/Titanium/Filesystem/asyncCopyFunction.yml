@@ -1,0 +1,39 @@
+---
+namespace: Titanium.Filesystem.asyncCopy
+type: function
+description: Executes an asynchronous copy operation and returns an AsyncCopy object.
+since: 0.2.0
+platforms: [osx, linux, win32]
+returns: Filesystem.AsyncCopy
+parameters: 
+    - [Array<String|Filesystem.File>|String|Filesystem.File, paths, The source paths to include in the copy operation.]
+    - [Filesystem.File|String, destination, A path or a File object representing the destination directory of the asynchronous copy.]
+    - - Function
+      - callback
+      - |
+            Callback invoked after every successful file copy. Filesystem.AsyncCopy
+            will pass this callback two arguments, the first will be the index
+            in the original list of source arguments, the second will be the total
+            number of files in the list.
+examples:
+    - |
+        <pre><code>
+            var parent = Titanium.Filesystem.getApplicationDataDirectory();
+
+            var target = Titanium.Filesystem.getFile(parent, "subdir");
+            if (!target.exists())
+                target.createDirectory();
+
+            Titanium.Filesystem.asyncCopy([
+                Titanium.Filesystem.getFile(parent, "one.txt"),
+                Titanium.Filesystem.getFile(parent, "two.txt"),
+                Titanium.Filesystem.getFile(parent, "three.txt")],
+            target,
+            function(index, total)
+            {
+                // Even if one of the original array was a directory,
+                // the index will only advance for every member of the
+                // original array.
+                alert("Copied " + index + "of " + total + "files.");
+            });
+        </code></pre>
