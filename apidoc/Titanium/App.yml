@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.App
-type: object
+type: module
 description: A module for holding currently running application specific functionality.
 since: 0.2.0

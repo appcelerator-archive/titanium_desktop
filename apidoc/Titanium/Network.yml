@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Network
-type: object
+type: module
 description: A module for network functionality.
 since: 0.2.0

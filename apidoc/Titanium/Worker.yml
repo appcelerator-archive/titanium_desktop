@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Worker
-type: object
+type: module
 description: A module for creating Worker threads.
 since: 0.6.0

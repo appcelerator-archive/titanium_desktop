@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Notification
-type: object
+type: module
 description: A module for displaying desktop notifications.
 since: 0.4.0
