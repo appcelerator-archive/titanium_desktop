@@ -2,4 +2,4 @@
 namespace: Titanium.Filesystem.AsyncCopy
 type: object
 description: A representation of an asynchronous copy operation created via calling Filesystem.asyncCopy.
-since: 0.2.0 or earlier
+since: 0.2.0

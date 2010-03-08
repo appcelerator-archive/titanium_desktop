@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Network.IRCClient
-type: object
-description: No description provided.
-since: 0.8.5 or earlier
+type: module
+description: An object representing an IRC client connection.
+since: 0.2.0
