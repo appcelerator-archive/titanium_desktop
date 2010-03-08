@@ -1,5 +1,5 @@
 ---
-namespace: Titanium.Filesystem.File.isWriteable
+namespace: Titanium.Filesystem.File.isWritable
 type: method
 description: |
     Return true if the path specified by this Filesystem.File refers

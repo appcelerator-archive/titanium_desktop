@@ -1,10 +1,10 @@
 ---
-namespace: Titanium.Filesystem.File.setWriteable
+namespace: Titanium.Filesystem.File.setWritable
 type: method
 description: |
-    Set the wrtiable bit on the file or directory at the path specified
+    Set the write bit on the file or directory at the path specified
     by this Filesystem.File object. Return true if the file or directory
-    at this path is executable after the operation completes.
+    at this path is writable after the operation completes.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Boolean
