@@ -1,9 +1,11 @@
 ---
 namespace: Titanium.Database.DB.execute
 type: method
-description: Executes an SQL query on the database.
+description: |
+    Executes an SQL query on this Database.DB. Currently all queries must
+    be valid SQLite-style SQL.
 since: 0.4.0
 platforms: [osx, linux, win32]
 returns: Database.ResultSet
 parameters: 
-    - [String, sql, the SQL query to execute.]
+    - [String, query, The SQL query to execute on this Database.DB.]

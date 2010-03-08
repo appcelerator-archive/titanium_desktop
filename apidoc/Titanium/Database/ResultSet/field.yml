@@ -1,9 +1,11 @@
 ---
 namespace: Titanium.Database.ResultSet.field
 type: method
-description: Returns the contents of the specified field in the current row
+description: |
+    Return the value of a field in the current row of this Database.ResultSet, given
+    its index in the original SQL query.
 since: 0.4.0
 platforms: [osx, linux, win32]
 returns: Boolean|String|Number|Bytes
 parameters: 
-    - [Number, fieldIndex, the zero-based index of the desired field]
+    - [Number, fieldIndex, The zero-based index of the field to query.]
