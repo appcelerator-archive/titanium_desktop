@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.UI
-type: object
+type: module
 description: A module for controlling the user interface.
 since: 0.2.0
