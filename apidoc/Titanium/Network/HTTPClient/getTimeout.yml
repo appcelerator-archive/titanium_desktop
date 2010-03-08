@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Network.HTTPClient.getTimeout
 type: method
-description: 
+description: |
+        Return the current timeout setting of this Network.HTTPClient
+        object in milliseconds. Thie value may be -1 to indicate no
+        timeout. The default timeout value is five minutes.
 since: 0.8.0
 platforms: [osx, linux, win32]
 returns: Number

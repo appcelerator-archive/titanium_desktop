@@ -9,6 +9,7 @@ platforms: [osx, linux, win32]
 returns: Database.ResultSet
 parameters: 
     - [String, query, The SQL query to execute on this Database.DB.]
+    - [Any, ..., (optional) A variable-length argument list of values to use with the given query]
 examples:
     - |
         <pre><code>
@@ -19,7 +20,9 @@ examples:
             DB.db = Titanium.Database.open("mydb");
             alert('db is: ' + DB.db);
             var rc = DB.db.execute('CREATE TABLE IF NOT EXISTS images (file_number INTEGER, title TEXT, description TEXT)');
-            rc = DB.db.execute("INSERT INTO images (title, description) VALUES ('test', 'caption')");
+            rc = DB.db.execute(
+                "INSERT INTO images (title, description) VALUES (?, ?)",
+                'test', 'a nice description');
             var rows = DB.db.execute("select * from images");
             alert('result set is: ' + rows.fieldByName('title') + ' : ' + rows.fieldByName('description'));
         </code></pre>

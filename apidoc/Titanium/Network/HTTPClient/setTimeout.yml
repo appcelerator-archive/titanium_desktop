@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Network.HTTPClient.setTimeout
 type: method
-description: 
+description: |
+        Set the timeout setting of this Network.HTTPClient.
+        Thie value may be -1 to indicate no timeout. The default
+        timeout value is five minutes.
 since: 0.4.0
 platforms: [osx, linux, win32]
 returns: String

@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.UI.UserWindow.getY
 type: method
-description: "Returns a window's vertical (Y-axis) position"
+description: |
+    Return a UI.UserWindow's vertical (Y-axis) position on the screen. The
+    origin of the screen is considered to be the top-left on all platforms.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number

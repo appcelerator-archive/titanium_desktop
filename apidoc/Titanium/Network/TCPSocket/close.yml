@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.Network.TCPSocket.close
 type: method
-description: 
+description: |
+        Close this Network.TCPSocket connection. If there is no open
+        connection then do nothing. Return true if the connection was
+        closed and false otherwise.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Boolean

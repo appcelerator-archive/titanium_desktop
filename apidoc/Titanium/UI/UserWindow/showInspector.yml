@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.showInspector
 type: method
-description: 
+description: Show a UI.UserWindow's web inspector.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: String
