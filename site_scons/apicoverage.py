@@ -12,9 +12,12 @@ import traceback
 cwd = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 sys.path.append(path.join(cwd,"../build"))
 
-# Instead of making the default version be the current version,
-# which is likely inaccurate -- we should print a warning when
-# an API doesn't have a 'since=" value  correct it.
+import titanium_version
+baseVersion = titanium_version.version
+t = baseVersion.split(".")
+defaultVersion = "%s.%s" % (t[0],t[1])
+
+default_platforms = ["osx", "win32", "linux"]
 
 class GlobDirectoryWalker:
 	# a forward iterator that traverses a directory tree
@@ -85,7 +88,7 @@ class Module(object):
 
 	def add_api(self, api):
 		print ">> adding api = %s" % api.name
-		if api.name in self.api_points_map.keys() and force==False:
+		if api.name in self.api_points_map.keys():
 			raise Exception("Tried to add %s API twice!" % api.name)
 		else:
 			self.api_points.append(api)
@@ -106,29 +109,21 @@ class Module(object):
 	
 	@staticmethod
 	def all_as_dict():
-		d = {}
+		all_dict = {}
 		for m in Module.modules.values():
-			c = {}
-			for k in m.api_points_map:
-				v=m.api_points_map[k]
-				if k.find(".")!=-1:
-					a,b = k.split('.',1)
-					if c.has_key(a):
-						obj = c[a]
-						for kk in v:
-							obj[kk] = v[kk]
-					else:
-						c[a]=v
-					if c.has_key("description"):
-						del c["description"]	
-					if c.has_key("deprecated"):
-						del c["deprecated"]
-					if not c.has_key("object"):
-						c["object"]=True
+			module_dict = {}
+			all_dict[m.name] = module_dict
+
+			for (api_name, api_value) in m.api_points_map.items():
+				if api_name.find(".") != -1:
+					object_name, api_name = api_name.split('.', 1)
+
+					if not object_name in module_dict:
+						module_dict[object_name] = {'object': True}
+					module_dict[object_name][api_name] = api_value
 				else:
-					c[k]=v
-			d[m.name] = c
-		return d
+					module_dict[api_name] = api_value
+		return all_dict
 
 	
 class API(dict):
@@ -142,37 +137,23 @@ class API(dict):
 		else:
 			module_name, api_name = fullName.strip().split('.', 1)
 			module = Module.get_with_name(module_name)
-			if api_name.find(".")!=-1:
-				sub_module_name, sub_api_name = api_name.split('.',1)
-				if module.api_points_map.has_key(api_name):
-					sub_module_api = module.api_points_map[api_name]
-				else:
-					sub_module_api = API(sub_module_name,module)
-					module.api_points_map[api_name]=sub_module_api
-				api = API(sub_api_name)
-				sub_module_api.add_object(api)
-				return api
-			else:
-				api = API(api_name, module)
-		
-		module.add_api(api)
+			api = API(api_name, module)
+			module.add_api(api)
 
-		print "adding %s -- %s" % (api.module.name, api.name)
 		return api
 	
 	@staticmethod
 	def get_with_full_name(fullName):
 		module_name, api_name = fullName.strip().split('.', 1)
 		module = Module.get_with_name(module_name)
-		api = module.get_api_with_name(api_name)
-		return api
+		return module.get_api_with_name(api_name)
 	
 	def __init__(self, name, module=None):
 		API.count += 1
 		self.name = self['name'] = name.strip()
 		self.module = module
 		self['deprecated'] = False
-		self['since'] = "unknown"
+		self['since'] = defaultVersion
 		self['description'] = ''
 	
 	def add_object(self,obj):
@@ -197,7 +178,7 @@ class API(dict):
 				platforms[osname]=[]
 			self['platforms'] = platforms
 		else:
-			self['platforms'] = {"win23":[""], "linux":[""], "osx": [""]}	
+			self['platforms'] = default_platforms	
 		if self.has_key('method') == False and self.has_key('property') == False:
 			raise Exception("invalid metadata for %s - missing either 'property' or 'method'"  % self.name) 
 	
@@ -206,9 +187,12 @@ class API(dict):
 	
 	def add_argument(self,arg):
 		try:
+			if not self.has_key('method'): 
+				self['method']=True
+				self['arguments']=[]
 			self['arguments'].append(arg)
-		except:
-			print "Invalid type: %s" % self
+		except Exception, e:
+			raise Exception("Invalid type on add_argument: %s, Error was: %s, Object is: %s" % (self.name,e,self))
 		
 	def set_return_type(self,return_type):
 		self['returns'] = return_type
@@ -392,25 +376,28 @@ def generate_api_coverage(dirs,fs):
 					metadata = parse_key_value_pairs(m.group(1).strip(), {})
 					api = API.get_with_full_name(metadata['for'])
 					api.set_deprecated(description, metadata['version'])
+					
 			except Exception, e:
-				print"Exception parsing API metadata in file: %s" % filename
+				print "Exception parsing API metadata in file: %s, Exception: %s" % (filename,e)
+				print "Line was: %s" % line
 				raise
 
-	j = Module.all_as_dict()
-
-	#global should just be top-level keys
-	g = j["<global>"]
-	for key in g:
-		j[key.strip()]=g[key]
-	del j["<global>"]
-	fs.write(json.dumps(j, sort_keys=True, indent=4))
+	all = Module.all_as_dict()
+	toplevel = all["<global>"]
+	for (key, value) in toplevel.items():
+		all[key] = value
+	del all["<global>"]
+	fs.write(json.dumps(all, sort_keys=True, indent=4))
 
 	print "Found %i APIs for %i modules in %i files" % (API.count, len(Module.modules), len(files_with_matches))
 
 if __name__ == '__main__':
-	if len(sys.argv)!=3:
-		print "Usage: %s <dir> <outfile>" % os.path.basename(sys.argv[0])
+	if len(sys.argv)<3:
+		print "Usage: %s <dir> <outfile> [platform]" % os.path.basename(sys.argv[0])
 		sys.exit(1)
+	if len(sys.argv)==4:
+		if sys.argv[3]=='mobile': 
+			default_platforms = default_mobile_platforms
 	f = open(os.path.expanduser(sys.argv[2]), 'w')
 	dirs = []
 	dirs.append(os.path.abspath(os.path.expanduser(sys.argv[1])))
