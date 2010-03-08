@@ -1,9 +1,9 @@
 ---
 namespace: Titanium.JSON.stringify
 type: function
-description: Convert a JavaScript object to a JSON string
+description: Serialize a JavaScript value into a JSON string.
 since: 0.4.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-    - [Object, object, JavaScript object to convert]
+    - [any, value, The JavaScript value to serialize into a JSON string.]

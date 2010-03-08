@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.Media.Sound.getVolume
 type: method
-description: 
+description: |
+    Return the current volume of this Media.Sound object. Volume
+    values will be between 0.0 and 1.0.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number

@@ -4,5 +4,5 @@ type: method
 description: Play a sound object. If the sound is paused, it will resume from the current location.
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: void
 parameters: []

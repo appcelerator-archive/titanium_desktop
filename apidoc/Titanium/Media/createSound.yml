@@ -1,9 +1,12 @@
 ---
 namespace: Titanium.Media.createSound
 type: function
-description: Creates a sound object
+description: |
+    Factory method for Sound objects, created given a path or a URL to a sound file.
+    The types of sound files that can be played depend on the codecs installed on the
+    user's system.
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: Media.Sound
 parameters: 
-    - [String, path, path or url to the sound file]
+    - [String, path, The path or url to the sound file to play.]
