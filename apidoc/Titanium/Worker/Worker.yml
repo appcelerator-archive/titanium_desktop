@@ -2,4 +2,4 @@
 namespace: Titanium.Worker.Worker
 type: object
 description: An object representing a Titanium Worker.
-since: 0.8.5 or earlier
+since: 0.6.0
