@@ -183,7 +183,7 @@ namespace ti
 
 	void OSXUserWindow::Maximize()
 	{
-		if (nativeWindow)
+		if (nativeWindow && ![nativeWindow isZoomed])
 		{
 			[nativeWindow zoom:nativeWindow];
 		}
