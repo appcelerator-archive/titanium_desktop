@@ -1,7 +1,20 @@
 ---
 namespace: Titanium.Process.createProcess
 type: function
-description: "Create a Process object. There are two main ways to use this function: With an options object (preferred): Titanium.Process.createProcess({args: ['mycmd', 'arg1', 'arg2'], env: {'PATH': '/something'}, stdin: pipeIn, stdout: pipeOut, stderr: pipeErr}); OR Titanium.Process.createProcess(args[, environment, stdin, stdout, stderr]);"
+description: |
+    Create a Process object. There are two main ways to use this function:
+    <pre><code>
+        Titanium.Process.createProcess({
+            args: ['mycmd', 'arg1', 'arg2'],
+            env: {'PATH': '/something'},
+            stdin: pipeIn,
+            stdout: pipeOut,
+             stderr: pipeErr
+        });
+    </code></pre>
+    <code><pre>
+        Titanium.Process.createProcess(args, environment, stdin, stdout, stderr);
+    </code></pre>
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
 returns: Process.Process

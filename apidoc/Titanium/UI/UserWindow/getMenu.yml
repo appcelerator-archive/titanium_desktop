@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getMenu
 type: method
-description: 
+description: Return the window menu set on this UI.UserWindow if one is set, otherwise return null.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: UI.Menu|null

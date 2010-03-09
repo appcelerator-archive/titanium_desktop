@@ -5,4 +5,4 @@ description: |
     An object holding a group of properties. Properties may either be defined
     in tiapp.xml (read-only) or in any other file on the filesystem. Titanium
     Properties offer an alternative to traditional HTML5 DOM storage.
-since: 0.8.5 or earlier
+since: 0.2.0

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.HTTP_TIMEOUT
 type: property
-description: Request has timed out.
+description: The HTTP request timeout event constant.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

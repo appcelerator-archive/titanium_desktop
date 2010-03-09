@@ -1,7 +1,11 @@
 ---
 namespace: Titanium.UI.UserWindow.getChildren
 type: method
-description: 
+description: |
+    Get all children of this UI.UserWindow. All windows open
+    from the context of this window are considered children.
+    When a window is closed all of its children will also
+    be closed automatically.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: Array<UI.UserWindow>

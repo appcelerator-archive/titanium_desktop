@@ -1,5 +1,5 @@
 ---
 namespace: Titanium.Network.HTTPCookie
 type: object
-description: No description provided.
-since: 0.8.5 or earlier
+description: An object representing an HTTP cookie.
+since: 0.7.0

@@ -236,7 +236,7 @@ namespace ti
 
 	void MenuItem::_SetSubmenu(const ValueList& args, KValueRef result)
 	{
-		args.VerifyException("setCallback", "o|0");
+		args.VerifyException("setSubmenu", "o|0");
 		AutoMenu newSubmenu = NULL;
 
 		if (args.at(0)->IsObject())

@@ -2,4 +2,4 @@
 namespace: Titanium.UI.Tray
 type: object
 description: An object representing a TrayItem.
-since: 0.6.0 or earlier
+since: 0.6.0

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Network.HTTPClient.UNSENT
 type: property
-description: 
+description: The UNSENT readyState property.
 since: 0.3.0
 platforms: [osx, linux, win32]
 returns: String

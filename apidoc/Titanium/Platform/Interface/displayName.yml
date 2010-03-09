@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Platform.Interface.displayName
 type: property
-description: The interface display name of the current system
+description: The display name of this network interface.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

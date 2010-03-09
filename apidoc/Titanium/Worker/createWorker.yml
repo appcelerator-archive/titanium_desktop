@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Worker.createWorker
 type: function
-description: Create a worker thread instance
+description: Create a worker thread instance.
 since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: Worker.Worker

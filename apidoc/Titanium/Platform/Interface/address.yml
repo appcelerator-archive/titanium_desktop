@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Platform.Interface.address
 type: property
-description: The IP address of the current system
+description: The IP address of this network interface.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

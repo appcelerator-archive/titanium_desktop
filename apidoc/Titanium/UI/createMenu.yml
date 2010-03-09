@@ -6,3 +6,12 @@ since: 0.6.0
 platforms: ['osx', 'linux', 'win32']
 returns: UI.Menu
 parameters: []
+examples:
+    - |
+        <pre><code>
+            var menu = Titanium.UI.createMenu();
+            var file = Titanium.UI.createMenuItem("File");
+            file.addItem("Quit");
+            menu.appendItem(file);
+            Titanium.UI.setMenu(menu);
+        </pre></codee>

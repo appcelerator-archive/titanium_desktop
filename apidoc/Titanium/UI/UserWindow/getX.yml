@@ -2,6 +2,9 @@
 namespace: Titanium.UI.UserWindow.getX
 type: method
 description: "Returns a window's horizontal (X-axis) position"
+description: |
+    Return a UI.UserWindow's horizontal (X-axis) position on the screen. The
+    origin of the screen is considered to be the top-left on all platforms.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number

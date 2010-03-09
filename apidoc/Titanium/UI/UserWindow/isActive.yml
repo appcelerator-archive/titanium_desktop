@@ -1,7 +1,9 @@
 ---
 namespace: Titanium.UI.UserWindow.isActive
 type: method
-description: 
+description: |
+    Return true if this window is active. An active window is one
+    that has finished opening, but has not yet been closed.
 since: 0.7.0
 platforms: [osx, linux, win32]
 returns: Boolean

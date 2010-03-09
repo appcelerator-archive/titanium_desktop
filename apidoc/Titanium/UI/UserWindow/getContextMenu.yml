@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getContextMenu
 type: method
-description: 
+description: Return the context menu set on this UI.Userwindow or null if none is set.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: UI.Menu|null
