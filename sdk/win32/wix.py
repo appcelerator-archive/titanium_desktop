@@ -180,7 +180,7 @@ component_ref_template = """
 """
 shortcut_template = """
 %(indent)s<Shortcut Id="%(id)s" Directory="%(directory)s" Name="%(name)s"
-%(indent)s	WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon"
+%(indent)s	WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon.exe"
 %(indent)s	IconIndex="0" Advertise="%(advertise)s" />
 """
 
