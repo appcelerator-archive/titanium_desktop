@@ -81,8 +81,7 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didReceiveTitle(
 {
 	// Only change the title if the new title was received for the main frame.
 	IWebFrame* mainFrame;
-	hr = webView->mainFrame(&mainFrame);
-	if (FAILED(hr))
+	if (FAILED(webView->mainFrame(&mainFrame)))
 	{
 		Logger::Get("FrameLoadDelegate")->Error("Could not fetch main "
 			"frame in didReceiveTitle delegate method");
@@ -98,5 +97,5 @@ HRESULT STDMETHODCALLTYPE Win32WebKitFrameLoadDelegate::didReceiveTitle(
 		this->window->SetTitle(newTitle);
 	}
 	return S_OK;
-serw
-l}
+}
+
