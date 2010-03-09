@@ -235,5 +235,14 @@ describe("php tests",
 	test_curl: function()
 	{
 		value_of(php_test_curl()).should_be_true();
+	},
+	test_array_getArrayCopy: function()
+	{
+		var arr = php_test_array_getArrayCopy([1, 2, 3, 4]);
+		value_of(arr.length).should_be(4);
+		value_of(arr[0]).should_be(1);
+		value_of(arr[1]).should_be(2);
+		value_of(arr[2]).should_be(3);
+		value_of(arr[3]).should_be(4);
 	}
 });
