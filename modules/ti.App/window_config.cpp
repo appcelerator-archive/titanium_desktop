@@ -343,7 +343,7 @@ AutoPtr<WindowConfig> WindowConfig::FromXMLNode(xmlNodePtr element)
 			config->SetTopMost(ConfigUtils::GetNodeValueAsBool(child));
 		}
 #ifdef OS_OSX
-		else if (nodeName == "texturedBackground")
+		else if (nodeName == "texturedBackground" || nodeName == "textured-background")
 		{
 			config->SetTexturedBackground(ConfigUtils::GetNodeValueAsBool(child));
 		}
