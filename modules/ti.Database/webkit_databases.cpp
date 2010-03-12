@@ -27,7 +27,11 @@ using Poco::Data::now;
 
 namespace ti
 {
-	static Logger* logger = Logger::Get("Database.WebKitDatabases");
+	static Logger* GetLogger()
+	{
+		static Logger* logger = Logger::Get("Database.DB");
+		return logger;
+	}
 
 	static std::string& GetApplicationSecurityOrigin()
 	{
@@ -63,16 +67,16 @@ namespace ti
 		session(0)
 	{
 		std::string dbPath = FileUtils::Join(GetDataPath().c_str(), "Databases.db", NULL);
-		logger->Debug("DB Path = %s", dbPath.c_str());
+		GetLogger()->Debug("DB Path = %s", dbPath.c_str());
 		this->session = new Session("SQLite", dbPath);
 
 		Statement select(*this->session);
-		logger->Debug("Creating table Origins");
+		GetLogger()->Debug("Creating table Origins");
 		select << "CREATE TABLE IF NOT EXISTS Origins (origin TEXT UNIQUE ON "
 			"CONFLICT REPLACE, quota INTEGER NOT NULL ON CONFLICT FAIL)", now;
 
 		Statement select2(*this->session);
-		logger->Debug("Creating table Databases");
+		GetLogger()->Debug("Creating table Databases");
 		select2 << "CREATE TABLE IF NOT EXISTS Databases (guid INTEGER PRIMARY KEY "
 			"AUTOINCREMENT, origin TEXT, name TEXT, displayName TEXT, estimatedSize "
 			"INTEGER, path TEXT)", now;
@@ -94,7 +98,7 @@ namespace ti
 		++seq;
 
 		std::string filename = Poco::format("%016u.db", (unsigned int) seq);
-		logger->Debug("Creating new db: %s", filename.c_str());
+		GetLogger()->Debug("Creating new db: %s", filename.c_str());
 
 		Statement select2(*this->session);
 		select2 << "INSERT INTO Databases (origin, name, path) VALUES (:origin,:name,:path)",
@@ -114,12 +118,12 @@ namespace ti
 		// Create the path for this application's origin, if necessary.
 		if (!FileUtils::IsDirectory(originPath))
 		{
-			logger->Debug("Creating new database directory: %s", originPath.c_str());
+			GetLogger()->Debug("Creating new database directory: %s", originPath.c_str());
 			FileUtils::CreateDirectory(originPath);
 		}
 
 		std::string filePath(FileUtils::Join(originPath.c_str(), filename.c_str(), NULL));
-		logger->Debug("path to new database: %s", filePath.c_str());
+		GetLogger()->Debug("path to new database: %s", filePath.c_str());
 
 		// Create the metadata table for WebKit
 		Session fileSession("SQLite", filePath);
@@ -147,11 +151,11 @@ namespace ti
 			Poco::File f(path);
 			f.remove(true);
 
-			logger->Debug("deleted database file: %s", path.c_str());
+			GetLogger()->Debug("deleted database file: %s", path.c_str());
 		}
 		else
 		{
-			logger->Debug("Delete called with origin:%s, name: %s - but this DB "
+			GetLogger()->Debug("Delete called with origin:%s, name: %s - but this DB "
 				"doesn't appear to exist", this->origin.c_str(), name.c_str());
 		}
 	}

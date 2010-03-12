@@ -27,7 +27,11 @@ using Poco::Data::now;
 
 namespace ti
 {
-	static Logger* logger = Logger::Get("Database.DB");
+	static Logger* GetLogger()
+	{
+		static Logger* logger = Logger::Get("Database.DB");
+		return logger;
+	}
 
 	/**
 	 * this is a class that manages Value to Data bindings
@@ -195,7 +199,7 @@ namespace ti
 			throw ValueException::FromString("Tried to call execute, but database was closed.");
 
 		std::string sql(args.GetString(0));
-		logger->Debug("Execute called with %s", sql.c_str());
+		GetLogger()->Debug("Execute called with %s", sql.c_str());
 		
 		Statement select(*this->session);
 		
@@ -228,7 +232,7 @@ namespace ti
 			}
 			Poco::UInt32 count = select.execute();
 
-			logger->Debug("sql returned: %d rows for result",count);
+			GetLogger()->Debug("sql returned: %d rows for result",count);
 
 			this->SetInt("rowsAffected",count);
 
@@ -256,7 +260,7 @@ namespace ti
 		}
 		catch (Poco::Data::DataException &e)
 		{
-			logger->Error("Exception executing: %s, Error was: %s", sql.c_str(),
+			GetLogger()->Error("Exception executing: %s, Error was: %s", sql.c_str(),
 				e.what());
 			throw ValueException::FromString(e.what());
 		}
@@ -264,7 +268,7 @@ namespace ti
 
 	void DatabaseBinding::Close(const ValueList& args, KValueRef result)
 	{
-		logger->Debug("Closing database: %s", name.c_str());
+		GetLogger()->Debug("Closing database: %s", name.c_str());
 		this->Close();
 	}
 
@@ -292,7 +296,7 @@ namespace ti
 		}
 		else
 		{
-			logger->Debug("Removing database file: %s", path.c_str());
+			GetLogger()->Debug("Removing database file: %s", path.c_str());
 			Poco::File file(path);
 			if (file.canWrite())
 				file.remove();
