@@ -2,6 +2,7 @@ import BaseHTTPServer
 from Cookie import SimpleCookie
 import base64
 import time
+import cgi
 
 reply = "I got it!"
 error = "bad data!"
@@ -102,6 +103,26 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		else:
 			self.error('Invalid data: \'%s\'' % data)
 
+	def recv_post_parameters(self):
+		print 'Receiving post data...'
+		if self.command != 'POST':
+			self.error('Not a POST request')
+		if self.headers.has_key('content-length') is False:
+			self.error('Missing content length')
+		length = int( self.headers['content-length'] )
+
+		ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+		query = cgi.parse_multipart(self.rfile, pdict)
+
+		if queiry.get('one') != 'flippityflop':
+			self.error('Invalid data for "one": \'%s\'' % form['one'])
+		elif queiry.get('two') != 'bloopityblop':
+			self.error('Invalid data for "two": \'%s\'' % form['two'])
+		elif queiry.get('three') != '':
+			self.error('Invalid data for "three": \'%s\'' % form['three'])
+
+		self.send_text('I got it!');
+
 	def recv_file(self):
 		correct_text = """Just some test text that will be sent
 to the http server to verify file sending works
@@ -131,6 +152,7 @@ with the http client.
 		'/recvcookie': recv_cookie,
 		'/basicauth': basic_auth,
 		'/recvpostdata': recv_post_data,
+		'/recvpostparams': recv_post_parameters,
 		'/recvfile': recv_file,
 		'/requestheaders': recv_headers,
 		'/responseheaders': send_headers,

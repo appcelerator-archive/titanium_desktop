@@ -28,12 +28,13 @@ namespace ti
 		maxRedirects(-1),
 		curlHandle(0),
 		thread(0),
-		requestStream(0),
 		requestBytes(0),
 		responseStream(0),
 		requestContentLength(0),
 		requestDataSent(0),
-		responseDataReceived(0)
+		responseDataReceived(0),
+		postData(0),
+		sendData(0)
 	{
 		/**
 		 * @tiapi(method=True, name=Network.HTTPClient.abort, since=0.3)
@@ -542,41 +543,80 @@ namespace ti
 		END_KROLL_THREAD;
 	}
 
-	void HTTPClientBinding::BeginWithFileLikeObject(KObjectRef dataObject)
+	static BytesRef ObjectToBytes(KObjectRef dataObject)
 	{
-		KMethodRef nativePathMethod(dataObject->GetMethod("nativePath"));
-		KMethodRef sizeMethod(dataObject->GetMethod("size"));
+		// If this object is a Bytes object, just do the cast and return.
+		BytesRef bytes(dataObject.cast<Bytes>());
+		if (!bytes.isNull())
+			return bytes;
 
-		if (nativePathMethod.isNull() || sizeMethod.isNull())
-		{
-			std::string err("Unsupported File-like object: did not have"
-				"nativePath and size methods");
-			GetLogger()->Error(err);
-			throw ValueException::FromString(err);
-		}
+		// Now try to treat this object like as a file-like object with
+		// a .read() method which returns a Bytes. If this fails we'll
+		// return NULL.
+		KMethodRef nativeReadMethod(dataObject->GetMethod("read", 0));
+		if (nativeReadMethod.isNull())
+			return 0;
 
-		KValueRef filenameValue(nativePathMethod->Call());
-		if (!filenameValue->IsString())
-		{
-			std::string err("Unsupported File-like object: nativePath method"
-				"did not return a String");
-			GetLogger()->Error(err);
-			throw ValueException::FromString(err);
-		}
+		KValueRef readValue(nativeReadMethod->Call());
+		if (!readValue->IsObject())
+			return 0;
 
-		std::string filename(filenameValue->ToString());
-		this->requestStream = new std::ifstream(
-			filename.c_str(), std::ios::in | std::ios::binary);
-		if (this->requestStream->fail())
-		{
-			std::string err("Failed to open file: ");
-			err.append(filename);
-			GetLogger()->Error(err);
-			throw ValueException::FromString(err);
-		}
-
-		this->requestContentLength = sizeMethod->Call()->ToInt();
+		// If this cast fails, it will return NULL, as we expect.
+		return readValue->ToObject().cast<Bytes>();
 	}
+
+
+	void HTTPClientBinding::BeginWithPostDataObject(KObjectRef object)
+	{
+		struct curl_httppost* last = 0;
+
+		SharedStringList properties = object->GetPropertyNames();
+		for (unsigned int i = 0; i < properties->size(); i++)
+		{
+			SharedString propertyName(properties->at(i));
+			KValueRef value(object->Get(propertyName->c_str()));
+			if (value->IsString())
+			{
+				curl_formadd(&this->postData, &last,
+					CURLFORM_COPYNAME, propertyName->c_str(),
+					CURLFORM_COPYCONTENTS, value->ToString(),
+					CURLFORM_END);
+				continue;
+			}
+
+			if (value->IsObject())
+			{
+				BytesRef bytes(ObjectToBytes(value->ToObject()));
+				if (!bytes.isNull())
+				{
+					// TODO(mrobinson): The CURLFORM_BUFFER parameter should eventually
+					// be pulled from the file-like object if we can get it.
+					curl_formadd(&this->postData, &last,
+						CURLFORM_COPYNAME, propertyName->c_str(),
+						CURLFORM_BUFFER, "data",
+						CURLFORM_BUFFERPTR, bytes->Get(),
+						CURLFORM_BUFFERLENGTH, bytes->Length(),
+						CURLFORM_END);
+
+					// We need to preserve the Bytes data until the end of this
+					// request. This prevents us from having to copy the data with
+					// something like CURLFROM_COPYCONTENTS above.
+					preservedPostData.push_back(bytes);
+					continue;
+				}
+			}
+
+			// TODO(mrobinson): Intelligently handle lists of data here as CURLFORM_ARRAY
+			// If we've gotten here we have not been able to convert this object
+			// through any normal means, so we just use the DisplayString of the value.
+			SharedString ss(value->DisplayString());
+			curl_formadd(&this->postData, &last,
+				CURLFORM_COPYNAME, propertyName->c_str(),
+				CURLFORM_COPYCONTENTS, ss->c_str(),
+				CURLFORM_END);
+		}
+	}
+
 
 	bool HTTPClientBinding::BeginRequest(KValueRef sendData)
 	{
@@ -584,13 +624,13 @@ namespace ti
 			throw ValueException::FromString("Tried to use an HTTPClient while "
 				"another transfer was in progress");
 
+		this->sendData = sendData;
 		this->sawHTTPStatus = false;
 		this->requestDataSent = 0;
 		this->responseDataReceived = 0;
 		this->responseCookies.clear();
 		this->aborted = false;
 		this->requestBytes = 0;
-		this->requestStream = 0;
 		this->responseData.clear();
 
 		this->SetInt("dataSent", 0);
@@ -601,32 +641,6 @@ namespace ti
 		this->SetNull("responseData");
 		this->SetNull("status");
 		this->SetNull("statusText");
-
-		if (sendData->IsObject())
-		{
-			KObjectRef dataObject(sendData->ToObject());
-			BytesRef bytes(dataObject.cast<Bytes>());
-			if (bytes.isNull())
-			{
-				this->BeginWithFileLikeObject(dataObject);
-			}
-			else
-			{
-				this->requestBytes = bytes;
-			}
-		}
-		else if (sendData->IsString())
-		{
-			const char* sendChars = sendData->ToString();
-			this->requestContentLength = strlen(sendChars);
-			this->requestBytes = new Bytes(sendChars, this->requestContentLength);
-		}
-		else // Sending no data
-		{
-			this->requestStream = 0;
-			this->requestBytes = 0;
-			this->requestContentLength = 0;
-		}
 
 		if (this->async)
 		{
@@ -741,33 +755,38 @@ namespace ti
 
 	size_t HTTPClientBinding::WriteRequestDataToBuffer(char* buffer, size_t bufferSize)
 	{
+		if (requestBytes.isNull())
+			return 0;
+
 		size_t bytesSent = 0;
-		if (!requestStream.isNull() && !requestStream->eof())
+		size_t toSend = bufferSize;
+		if (requestBytes->Length() - requestDataSent < bufferSize)
+			toSend = requestBytes->Length() - requestDataSent;
+
+		if (toSend > 0)
 		{
-			requestStream->read(buffer, bufferSize);
-			bytesSent = requestStream->gcount();
-
-			if (requestStream->eof())
-				requestStream->close();
+			memcpy(buffer, requestBytes->Get() + requestDataSent, toSend);
+			bytesSent = toSend;
 		}
-		else if (!requestBytes.isNull())
-		{
-			size_t toSend = bufferSize;
-			if (requestBytes->Length() - requestDataSent < bufferSize)
-				toSend = requestBytes->Length() - requestDataSent;
-
-			if (toSend > 0)
-			{
-				memcpy(buffer, requestBytes->Get() + requestDataSent, toSend);
-				bytesSent = toSend;
-			}
-		}
-
-		this->requestDataSent += bytesSent;
-		this->SetInt("dataSent", requestDataSent);
-		this->FireEvent(Event::HTTP_DATA_SENT);
+		
 
 		return bytesSent;
+	}
+
+	void HTTPClientBinding::RequestDataSent(size_t sent, size_t total)
+	{
+		// Firing an event is a fairly expensive operation, so only fire
+		// an HTTP_DATA_SENT event if we've transferred at least 250KB of data.
+		// or we have completed the transfer.
+		if (total == requestDataSent)
+			return;
+
+		if (sent == total || sent > this->requestDataSent + (250 * 1024))
+		{
+			this->requestDataSent = sent;
+			this->SetInt("dataSent", sent);
+			this->FireEvent(Event::HTTP_DATA_SENT);
+		}
 	}
 
 	// This callback is invoked when cURL needs to send data to the server.
@@ -808,7 +827,6 @@ namespace ti
 			this->responseHeaders = this->nextResponseHeaders;
 			this->nextResponseHeaders.clear();
 
-			// TODO(mrobinson): We need to parse the status text eventually.
 			long httpStatus = 0;
 			curl_easy_getinfo(this->curlHandle, CURLINFO_RESPONSE_CODE, &httpStatus);
 			this->SetInt("status", httpStatus);
@@ -887,38 +905,21 @@ namespace ti
 		return dataLength;
 	}
 
-	int CurlProgressCallback(HTTPClientBinding *client, double , double , double , double)
+	int CurlProgressCallback(HTTPClientBinding* client, double dltotal, double dlnow, double ultotal, double ulnow)
 	{
 		if (client->IsAborted())
 			return CURLE_ABORTED_BY_CALLBACK;
 		else
 			return 0;
+
+		client->RequestDataSent(ulnow, ultotal);
 	}
 
 	void HTTPClientBinding::SetupCurlMethodType()
 	{
-		// Modify the HTTP method based on the method variable. The default
-		// in cURL is to use GET.
-		if (this->httpMethod == "POST")
-		{
-			SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
-		}
-		else if (this->httpMethod == "PUT")
-		{
-			SET_CURL_OPTION(curlHandle, CURLOPT_UPLOAD, 1);
-		}
-		else if (this->httpMethod == "HEAD")
-		{
-			SET_CURL_OPTION(curlHandle, CURLOPT_NOBODY, 1);
-		}
-		else if (this->httpMethod != "GET")
-		{
-			// This may work and it may not depending on the method type.
-			// DELETE should work, in particular.
-			SET_CURL_OPTION(curlHandle, CURLOPT_CUSTOMREQUEST, this->httpMethod.c_str());
-		}
-
-		// Only set up the read handler if there is data to send to the server.
+		// Only set up the read handler if there is data to send to the server
+		// and we aren't using the POST fields (i.e. we were just given a blob
+		// of data).
 		if (this->requestContentLength > 0)
 		{
 			SET_CURL_OPTION(curlHandle, CURLOPT_READDATA, this);
@@ -930,7 +931,35 @@ namespace ti
 			}
 			else if (this->httpMethod == "POST")
 			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
 				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, requestContentLength);
+			}
+		}
+		else
+		{
+			// Modify the HTTP method based on the method variable. The default
+			// for cURL is to use GET, so do nothing in that case.
+			if (this->httpMethod == "POST" && this->postData)
+			{
+				curl_easy_setopt(this->curlHandle, CURLOPT_HTTPPOST, this->postData);
+			}
+			else if (this->httpMethod == "POST")
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
+			}
+			else if (this->httpMethod == "PUT")
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_UPLOAD, 1);
+			}
+			else if (this->httpMethod == "HEAD")
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_NOBODY, 1);
+			}
+			else if (this->httpMethod != "GET")
+			{
+				// This may work and it may not depending on the method type.
+				// DELETE should work, in particular.
+				SET_CURL_OPTION(curlHandle, CURLOPT_CUSTOMREQUEST, this->httpMethod.c_str());
 			}
 		}
 	}
@@ -964,6 +993,13 @@ namespace ti
 
 	void HTTPClientBinding::CleanupCurl(curl_slist* headers)
 	{
+		if (this->postData)
+		{
+			curl_formfree(this->postData);
+			this->postData = 0;
+			preservedPostData.clear();
+		}
+
 		if (this->curlHandle)
 		{
 			curl_easy_cleanup(this->curlHandle);
@@ -972,6 +1008,38 @@ namespace ti
 
 		if (headers)
 			curl_slist_free_all(headers);
+	}
+
+	void HTTPClientBinding::SetRequestData()
+	{
+		if (this->sendData->IsObject())
+		{
+			BytesRef bytes(ObjectToBytes(this->sendData->ToObject()));
+			if (!bytes.isNull())
+			{
+				this->requestBytes = bytes;
+				this->requestContentLength = bytes->Length();
+			}
+			else
+			{
+				// Well this is just a plain-ole object, so treat it as
+				// a key-value store of POST parameters.
+				this->BeginWithPostDataObject(this->sendData->ToObject());
+				this->requestBytes = 0;
+				this->requestContentLength = 0;
+			}
+		}
+		else if (this->sendData->IsString())
+		{
+			const char* sendChars = this->sendData->ToString();
+			this->requestContentLength = strlen(sendChars); // Include NUL character.
+			this->requestBytes = new Bytes(sendChars, this->requestContentLength);
+		}
+		else // Sending no data
+		{
+			this->requestBytes = 0;
+			this->requestContentLength = 0;
+		}
 	}
 
 	void HTTPClientBinding::ExecuteRequest()
@@ -998,6 +1066,7 @@ namespace ti
 			// Progress must be turned on for CURLOPT_PROGRESSFUNCTION to be called.
 			SET_CURL_OPTION(curlHandle, CURLOPT_NOPROGRESS, 0);
 
+			this->SetRequestData();
 			this->SetupCurlMethodType();
 
 			SET_CURL_OPTION(curlHandle, CURLOPT_MAXREDIRS, this->maxRedirects);
