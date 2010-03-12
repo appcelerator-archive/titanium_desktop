@@ -73,7 +73,10 @@ namespace ti
 	{
 		static std::string path;
 		if (path.empty())
-			path = FileUtils::Join(modulePath.c_str(), "rootcert.pem", 0);
+		{
+			SharedApplication app(Host::GetInstance()->GetApplication());
+			path = FileUtils::Join(app->runtime->path.c_str(), "rootcert.pem", 0);
+		}
 		return path;
 	}
 

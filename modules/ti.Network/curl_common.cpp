@@ -48,7 +48,8 @@ void SetCurlProxySettings(CURL* curlHandle, SharedProxy proxy)
 void SetStandardCurlHandleOptions(CURL* handle)
 {
 	SET_CURL_OPTION(handle, CURLOPT_SSL_VERIFYPEER, false);
-	SET_CURL_OPTION(handle, CURLOPT_CAINFO, ti::NetworkModule::GetRootCertPath().c_str());
+	SET_CURL_OPTION(handle, CURLOPT_CAINFO,
+		::UTF8ToSystem(ti::NetworkModule::GetRootCertPath()).c_str());
 
 	// If a timeout happens, this normally causes cURL to fire a signal.
 	// Since we're running multiple threads and possibily have multiple HTTP

@@ -32,9 +32,10 @@ namespace ti
 		
 		// Set the cert path for Curl so that HTTPS works properly.
 		// We are using _puetenv here since WebKit uses getenv internally 
-		// which is incompatible with the  Win32 envvar API.
+		// which is incompatible with the Win32 envvar API.
 		std::wstring pemPath = ::UTF8ToWide(FileUtils::Join(
-			uiModule->GetPath().c_str(), "cacert.pem", NULL));
+			Host::GetInstance()->GetApplication()..c_str(),
+			"rootcert.pem", 0));
 		std::wstring var = L"CURL_CA_BUNDLE_PATH=" + pemPath;
 		_wputenv(var.c_str());
 
