@@ -114,12 +114,12 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
 		query = cgi.parse_multipart(self.rfile, pdict)
 
-		if queiry.get('one') != 'flippityflop':
-			self.error('Invalid data for "one": \'%s\'' % form['one'])
-		elif queiry.get('two') != 'bloopityblop':
-			self.error('Invalid data for "two": \'%s\'' % form['two'])
-		elif queiry.get('three') != '':
-			self.error('Invalid data for "three": \'%s\'' % form['three'])
+		if query.get('one')[0] != 'flippityflop':
+			self.error('Invalid data for "one": \'%s\'' % query.get['one'])
+		elif query.get('two')[0] != 'bloopityblop':
+			self.error('Invalid data for "two": \'%s\'' % query.get['two'])
+		elif query.get('three')[0] != '':
+			self.error('Invalid data for "three": \'%s\'' % query.get['three'])
 
 		self.send_text('I got it!');
 
