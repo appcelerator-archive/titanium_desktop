@@ -34,7 +34,7 @@ namespace ti
 		// We are using _puetenv here since WebKit uses getenv internally 
 		// which is incompatible with the Win32 envvar API.
 		std::wstring pemPath = ::UTF8ToWide(FileUtils::Join(
-			Host::GetInstance()->GetApplication()..c_str(),
+			Host::GetInstance()->GetApplication()->runtime->path.c_str(),
 			"rootcert.pem", 0));
 		std::wstring var = L"CURL_CA_BUNDLE_PATH=" + pemPath;
 		_wputenv(var.c_str());
