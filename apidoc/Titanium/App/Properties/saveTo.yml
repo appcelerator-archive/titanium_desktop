@@ -1,5 +1,5 @@
 ---
-namespace: Titanium.App.Properties.listProperties
+namespace: Titanium.App.Properties.saveTo
 type: method
 description: Save this App.Properties object to file at the given path.
 since: 0.2.0
