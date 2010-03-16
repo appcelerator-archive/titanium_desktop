@@ -12,8 +12,9 @@ returns: Database.DB
 parameters: 
     - [String, path, Path to an SQLite file to store the database in. If the file does not exist, it will be created.]
 examples:
-    - |
-        <pre><code>
-            var db = Titanium.Database.open('database-name');
-            db.execute("select * from table");
-        </code></pre>
+    - description: Using Database.openFile
+      code: |
+            <pre><code>
+                var db = Titanium.Database.openFile(Titanium.API.application.dataPath, "data.db");
+                db.execute("select * from table");
+            </code></pre>

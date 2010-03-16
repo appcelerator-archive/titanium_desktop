@@ -12,23 +12,24 @@ parameters:
     - [Filesystem.File|String, base, The base to this file. This may be a file or directory.]
     - [Filesystem.File|String, ..., (optional) A variable length argument list of Files or paths that are joined to the base in an platform-specific way.]
 examples:
-    - |
-        <pre><code>
-            var sampleContents = "This is the contents of a sample file called sample.txt";
+    - description: Building a path
+      code: |
+            <pre><code>
+                var sampleContents = "This is the contents of a sample file called sample.txt";
 
-            // Instead of building paths manually like so and making sure we use the proper
-            // Separator, we can pass multiple arguments to getFile and allow Titanium to do
-            // the work
-            // var sep = Titanium.Filesystem.getSeparator();
-            // var mySampleFile = Titanium.Filesystem.getFile(homeDir + sep + 'sample.txt');
-            var homeDir = Titanium.Filesystem.getUserDirectory();
-            var mySampleFile = Titanium.Filesystem.getFile(homeDir, 'sample.txt');
+                // Instead of building paths manually like so and making sure we use the proper
+                // Separator, we can pass multiple arguments to getFile and allow Titanium to do
+                // the work
+                // var sep = Titanium.Filesystem.getSeparator();
+                // var mySampleFile = Titanium.Filesystem.getFile(homeDir + sep + 'sample.txt');
+                var homeDir = Titanium.Filesystem.getUserDirectory();
+                var mySampleFile = Titanium.Filesystem.getFile(homeDir, 'sample.txt');
 
-            if (mySampleFile.exists()) {
-                alert('A file called sample.txt already exists in your home directory.');
-                alert(mySampleFile.read());
-            } else {
-                mySampleFile.write("These is the contents of a sample file called sample.txt");
-                alert("Created sample.txt");
-            }
-        </code></pre>
+                if (mySampleFile.exists()) {
+                    alert('A file called sample.txt already exists in your home directory.');
+                    alert(mySampleFile.read());
+                } else {
+                    mySampleFile.write("These is the contents of a sample file called sample.txt");
+                    alert("Created sample.txt");
+                }
+            </code></pre>

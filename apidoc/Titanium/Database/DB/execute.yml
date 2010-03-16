@@ -11,18 +11,19 @@ parameters:
     - [String, query, The SQL query to execute on this Database.DB.]
     - [Any, ..., (optional) A variable-length argument list of values to use with the given query]
 examples:
-    - |
-        <pre><code>
-            // This code should open a database called mydb and raise an alert.
-            // It should then create an "images" table if it is not present.
-            // It should insert a row into the database.
-            // Then it should select all rows of the database and alert the values of the first.
-            DB.db = Titanium.Database.open("mydb");
-            alert('db is: ' + DB.db);
-            var rc = DB.db.execute('CREATE TABLE IF NOT EXISTS images (file_number INTEGER, title TEXT, description TEXT)');
-            rc = DB.db.execute(
-                "INSERT INTO images (title, description) VALUES (?, ?)",
-                'test', 'a nice description');
-            var rows = DB.db.execute("select * from images");
-            alert('result set is: ' + rows.fieldByName('title') + ' : ' + rows.fieldByName('description'));
-        </code></pre>
+    - description: Using DB.execute
+      code: |
+            <pre><code>
+                // This code should open a database called mydb and raise an alert.
+                // It should then create an "images" table if it is not present.
+                // It should insert a row into the database.
+                // Then it should select all rows of the database and alert the values of the first.
+                DB.db = Titanium.Database.open("mydb");
+                alert('db is: ' + DB.db);
+                var rc = DB.db.execute('CREATE TABLE IF NOT EXISTS images (file_number INTEGER, title TEXT, description TEXT)');
+                rc = DB.db.execute(
+                    "INSERT INTO images (title, description) VALUES (?, ?)",
+                    'test', 'a nice description');
+                var rows = DB.db.execute("select * from images");
+                alert('result set is: ' + rows.fieldByName('title') + ' : ' + rows.fieldByName('description'));
+            </code></pre>

@@ -9,12 +9,13 @@ platforms: ['osx', 'linux', 'win32']
 returns: Array<String>
 parameters: []
 examples:
-    - |
-        <pre><code>
-            var args = Titanium.App.getArguments();
-            for (var i = 0; i < args.length; i++)
-            {
-                alert(args[i]);
-            }
-        </code></pre>
+    - description: Using App.getArguments()
+      code: |
+            <pre><code>
+                var args = Titanium.App.getArguments();
+                for (var i = 0; i < args.length; i++)
+                {
+                    alert(args[i]);
+                }
+            </code></pre>
 

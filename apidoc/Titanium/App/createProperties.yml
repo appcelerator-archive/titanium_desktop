@@ -8,11 +8,12 @@ returns: App.Properties
 parameters: 
     - [Object, properties, (optional) Initial properties for the new App.Properties object.]
 examples:
-    - |
-        <pre><code>
-            var properties = Titanium.App.createProperties({
-                'name': 'McDuck',
-                'position': 'Fisherman',
-                'age': 3
-            });
-        </code></pre>
+    - description: Using App.createProperties
+      code: |
+            <pre><code>
+                var properties = Titanium.App.createProperties({
+                    'name': 'McDuck',
+                    'position': 'Fisherman',
+                    'age': 3
+                });
+            </code></pre>

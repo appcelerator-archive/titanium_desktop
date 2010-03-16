@@ -8,8 +8,9 @@ platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: []
 examples:
-    - |
-        <pre><code>
-            document.write("The application copyright is: " +
-                Titanium.App.getCopyright());
-        </code></pre>
+    - description: Using App.getCopyright
+      code: |
+            <pre><code>
+                document.write("The application copyright is: " +
+                    Titanium.App.getCopyright());
+            </code></pre>

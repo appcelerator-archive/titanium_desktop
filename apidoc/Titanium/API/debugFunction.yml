@@ -20,7 +20,8 @@ returns: void
 parameters: 
     - [String, statement, The String to send to the logger.]
 examples:
-    - |
-        <pre><code>
-            Titanium.API.debug("This is a debug message");
-        </code></pre>
+    - description: Using API.debug
+      code: |
+            <pre><code>
+                Titanium.API.debug("This is a debug message");
+            </code></pre>

@@ -14,21 +14,22 @@ parameters:
     - [Number, startIndex, The starting index]
     - [Number, endIndex, (optional) The ending index]
 examples:
-    - |
-        <pre><code>
-            // Originally from: https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/Substring
-            function replaceString(oldS, newS, fullS)
-            {
-                // Replaces oldS with newS in the string fullS
-                for (var i = 0; i < fullS.length; i++)
+    - description: Using Bytes.substring
+      code: |
+            <pre><code>
+                // Originally from: https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference/Objects/String/Substring
+                function replaceString(oldS, newS, fullS)
                 {
-                    if (fullS.substring(i, i + oldS.length) == oldS)
+                    // Replaces oldS with newS in the string fullS
+                    for (var i = 0; i < fullS.length; i++)
                     {
-                        fullS = fullS.substring(0, i) + newS + fullS.substring(i + oldS.length, fullS.length);
+                        if (fullS.substring(i, i + oldS.length) == oldS)
+                        {
+                            fullS = fullS.substring(0, i) + newS + fullS.substring(i + oldS.length, fullS.length);
+                        }
                     }
+                    return fullS;
                 }
-                return fullS;
-            }
 
-            replaceString("World", "Web", API.createBytes("Brave New World"));
-        </code></pre>
+                replaceString("World", "Web", API.createBytes("Brave New World"));
+            </code></pre>

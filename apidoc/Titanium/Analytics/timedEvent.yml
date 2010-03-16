@@ -12,20 +12,21 @@ parameters:
     - [Number, duration, Duration in seconds (optional if both start and stop are specified)]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples:
-    - |
-        <pre><code>
-            // This may be used with Date() objects
-            Titanium.Analytics.timedEvent('mile.run',
-                startTime, // A Date object.
-                new Date(), // The finishing time.
-                null, // Not used if dates are present.
-                {'location':'park.grounds'}
-            });
+    - description: Using Analytics.timedEvent
+      code: |
+            <pre><code>
+                // This may be used with Date() objects
+                Titanium.Analytics.timedEvent('mile.run',
+                    startTime, // A Date object.
+                    new Date(), // The finishing time.
+                    null, // Not used if dates are present.
+                    {'location':'park.grounds'}
+                });
 
-            // ...or just my specifying a number of seconds.
-            Titanium.Analytics.timedEvent('mile.run',
-                null, null, // Dates are null.
-                356, // Number of seconds.
-                {'location':'park.grounds'}
-            });
-        </code></pre>
+                // ...or just my specifying a number of seconds.
+                Titanium.Analytics.timedEvent('mile.run',
+                    null, null, // Dates are null.
+                    356, // Number of seconds.
+                    {'location':'park.grounds'}
+                });
+            </code></pre>

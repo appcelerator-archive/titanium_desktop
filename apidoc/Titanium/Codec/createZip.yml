@@ -10,12 +10,13 @@ parameters:
     - [Filesystem.File|String, zipFile, The path or File object of the destination zip file.]
     - [Function, onComplete, A function callback that receives the zip file when writing is finished]
 examples:
-    - |
-        <pre><code>
-            var root = Titanium.Filesystem.getFile(Titanium.App.getHome());
-            var dest = Titanium.Filesystem.getFile(
-                Titanium.Filesystem.getApplicationDataDirectory(), "app.zip");
-            Titanium.Codec.createZip(root, dest, function(destFile) {
-                alert("Wrote zip file: " + destFile);
-            });
-        </code></pre>
+    - description: Write the contents of a directory to a zip file.
+      code: |
+                <pre><code>
+                    var root = Titanium.Filesystem.getFile(Titanium.App.getHome());
+                    var dest = Titanium.Filesystem.getFile(
+                        Titanium.Filesystem.getApplicationDataDirectory(), "app.zip");
+                    Titanium.Codec.createZip(root, dest, function(destFile) {
+                        alert("Wrote zip file: " + destFile);
+                    });
+                </code></pre>

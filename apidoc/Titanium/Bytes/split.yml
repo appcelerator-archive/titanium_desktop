@@ -12,10 +12,11 @@ parameters:
     - [String, delimiter, The index to look for a character at]
     - [Number, limit, (optional) The maximum number of matches to return]
 examples:
-    - |
-        <pre><code>
-            // Bytes.split returns empty matches. For example:
-            // list should be ['abc', 'def', '', '']
-            var bytes = API.createBytes("abc,def,,");
-            var list = bytes.split(",");
-        </code></pre>
+    - description: Using Bytes.split
+      code: |
+            <pre><code>
+                // Bytes.split returns empty matches. For example:
+                // list should be ['abc', 'def', '', '']
+                var bytes = API.createBytes("abc,def,,");
+                var list = bytes.split(",");
+            </code></pre>

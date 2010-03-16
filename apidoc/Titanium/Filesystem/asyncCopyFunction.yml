@@ -16,24 +16,25 @@ parameters:
             in the original list of source arguments, the second will be the total
             number of files in the list.
 examples:
-    - |
-        <pre><code>
-            var parent = Titanium.Filesystem.getApplicationDataDirectory();
+    - description: Copying files asynchronously
+      code: |
+            <pre><code>
+                var parent = Titanium.Filesystem.getApplicationDataDirectory();
 
-            var target = Titanium.Filesystem.getFile(parent, "subdir");
-            if (!target.exists())
-                target.createDirectory();
+                var target = Titanium.Filesystem.getFile(parent, "subdir");
+                if (!target.exists())
+                    target.createDirectory();
 
-            Titanium.Filesystem.asyncCopy([
-                Titanium.Filesystem.getFile(parent, "one.txt"),
-                Titanium.Filesystem.getFile(parent, "two.txt"),
-                Titanium.Filesystem.getFile(parent, "three.txt")],
-            target,
-            function(index, total)
-            {
-                // Even if one of the original array was a directory,
-                // the index will only advance for every member of the
-                // original array.
-                alert("Copied " + index + "of " + total + "files.");
-            });
-        </code></pre>
+                Titanium.Filesystem.asyncCopy([
+                    Titanium.Filesystem.getFile(parent, "one.txt"),
+                    Titanium.Filesystem.getFile(parent, "two.txt"),
+                    Titanium.Filesystem.getFile(parent, "three.txt")],
+                target,
+                function(index, total)
+                {
+                    // Even if one of the original array was a directory,
+                    // the index will only advance for every member of the
+                    // original array.
+                    alert("Copied " + index + "of " + total + "files.");
+                });
+            </code></pre>

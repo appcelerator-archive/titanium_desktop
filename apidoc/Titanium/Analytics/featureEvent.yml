@@ -9,10 +9,11 @@ parameters:
     - [String, name, Feature name.]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples:
-    - |
-        <pre><code>
-            Titanium.Analytics.featureEvent('user.login', {
-                'username': username,
-                'time':(new Date()).toString()
-            });
-        </code></pre>
+    - description: Using Analytics.featureEvent
+      code: |
+            <pre><code>
+                Titanium.Analytics.featureEvent('user.login', {
+                    'username': username,
+                    'time':(new Date()).toString()
+                });
+            </code></pre>

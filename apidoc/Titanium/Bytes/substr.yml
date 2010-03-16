@@ -14,14 +14,15 @@ parameters:
     - [Number, startIndex, The starting index]
     - [Number, length, (optional) The length of the substring]
 examples:
-    - |
-        <pre><code>
-            // Originally from: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/String/substr
-            var bytes = API.createBytes("abcdefghij");
-            print("(1,2): "    + str.substr(1,2)); // bc
-            print("(-3,2): "   + str.substr(-3,2)); // hi
-            print("(-3): "     + str.substr(-3)); // hij
-            print("(1): "      + str.substr(1)); // bcdefghij
-            print("(-20, 2): " + str.substr(-20,2)); // ab
-            print("(20, 2): "  + str.substr(20,2)); // ''
-        </code></pre>
+    - description: Using Bytes.substr
+      code: |
+            <pre><code>
+                // Originally from: https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/String/substr
+                var bytes = API.createBytes("abcdefghij");
+                print("(1,2): "    + str.substr(1,2)); // bc
+                print("(-3,2): "   + str.substr(-3,2)); // hi
+                print("(-3): "     + str.substr(-3)); // hij
+                print("(1): "      + str.substr(1)); // bcdefghij
+                print("(-20, 2): " + str.substr(-20,2)); // ab
+                print("(20, 2): "  + str.substr(20,2)); // ''
+            </code></pre>

@@ -11,8 +11,9 @@ parameters:
     - [String, name, Event name.]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples:
-    - |
-        <pre><code>
-            Titanium.Analytics.featureEvent('tab.places', 'tab.settings');
-        </code></pre>
+    - description: Using Analytics.navEvent
+      code: |
+            <pre><code>
+                Titanium.Analytics.navEvent('tab.places', 'tab.settings');
+            </code></pre>
 

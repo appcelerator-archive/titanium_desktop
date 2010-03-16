@@ -11,10 +11,11 @@ parameters:
     - [String, eventName, The event name to listen for.]
     - [Function, callback, The callback to invoke when this message occurs.]
 examples:
-    - |
-        <pre><code>
-            Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
-            {
-                    alert("Got page initialized event!");
-            });
-        </code></pre>
+    - description: Using API.addEventListener
+      code: |
+            <pre><code>
+                Titanium.API.addEventListener(Titanium.PAGE_INITIALIZED, function(event)
+                {
+                        alert("Got page initialized event!");
+                });
+            </code></pre>

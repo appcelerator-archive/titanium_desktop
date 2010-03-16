@@ -9,11 +9,12 @@ platforms: ['osx', 'linux', 'win32']
 returns: API.Environment
 parameters: []
 examples:
-    - |
-        <pre><code>
-            var environment = Titanium.API.getEnvironment();
-            if (environment['PATH'] !== undefined)
-            {
-                environment['PATH'] += ":/opt/local/bin";
-            }
-        </code></pre>
+    - description: Using API.getEnvironment
+      code: |
+            <pre><code>
+                var environment = Titanium.API.getEnvironment();
+                if (environment['PATH'] !== undefined)
+                {
+                    environment['PATH'] += ":/opt/local/bin";
+                }
+            </code></pre>

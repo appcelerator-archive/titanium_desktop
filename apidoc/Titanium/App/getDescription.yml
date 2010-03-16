@@ -8,7 +8,8 @@ platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: []
 examples:
-    - |
-        <pre><code>
-            document.write(Titanium.App.getDescription());
-        </code></pre>
+    - description: Using App.getDescription
+      code: |
+            <pre><code>
+                document.write(Titanium.App.getDescription());
+            </code></pre>

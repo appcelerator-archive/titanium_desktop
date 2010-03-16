@@ -9,10 +9,11 @@ parameters:
     - [String, name, Setting name.]
     - [Object, data, Extra event data to pass along. This will be converted to JSON.]
 examples:
-    - |
-        <pre><code>
-            Titanium.Analytics.settingsEvent('profile', {
-                'nickname': nickname,
-                'location': location,
-            });
-        </code></pre>
+    - description: Using Analytics.settingsEvent
+      code: |
+            <pre><code>
+                Titanium.Analytics.settingsEvent('profile', {
+                    'nickname': nickname,
+                    'location': location,
+                });
+            </code></pre>
