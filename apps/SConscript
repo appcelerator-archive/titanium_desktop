@@ -20,8 +20,29 @@ def package_app_builder(target, source, env):
 	app = pkg_env.App(pkg_env, env['PATH'])
 	app.stage(path.join(build.dir, app.name), bundle=True)
 
+def package_sdkinstaller(target, source, env):
+	print "Packaging Titanium SDK Installer..."
+
+	# Create a staged application, but don't bundle it, because we
+	# want to force the installer to run and install the new SDK.
+	import sdk.env
+	pkg_env = sdk.env.PackagingEnvironment(build.version, build.os, 'titanium')
+	app = pkg_env.App(pkg_env, env['PATH'])
+	app.stage(path.join(build.dir, app.name), bundle=False)
+
+	# Copy the zip files from the dist directory to developer.contents/dist
+	print "    -> Copying sdk zip from %s to %s" % \
+		(build.dist_dir, path.join(app.contents, 'dist'))
+	effess.copy_to_dir(
+		path.join(build.dist_dir, "sdk-" + build.version + ".zip"),
+		path.join(app.contents, 'dist'))
+
 build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 	action=package_app_builder,
+	target_factory=SCons.Node.FS.default_fs.Entry,
+	multi=0)
+build.env['BUILDERS']['PackageSDKInstaller'] = build.env.Builder(
+	action=package_sdkinstaller,
 	target_factory=SCons.Node.FS.default_fs.Entry,
 	multi=0)
 
@@ -35,3 +56,7 @@ make_app_target('testapp', path.join(build.cwd(), 'testapp'))
 make_app_target('drillbit', path.join(build.cwd(), 'drillbit'))
 make_app_target('alloy', path.join(build.cwd(), 'alloy'))
 
+t = build.env.PackageSDKInstaller('#titanium-app-sdk-installer', [],
+	PATH=path.join(build.cwd(), 'sdkinstaller'))
+Depends(t, build.build_targets + build.staging_targets + build.dist_targets)
+Alias('sdkinstaller', t)
