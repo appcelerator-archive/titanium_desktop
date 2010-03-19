@@ -186,7 +186,7 @@ def spit_json(options):
 
 	# Create the JSON search index.
 	search_json = []
-	top_level_modules = []
+	top_level_modules = ['Titanium']
 	for api_name in API.apis:
 		api = API.apis[api_name]
 		if options.verbose == 1:
@@ -210,7 +210,7 @@ def spit_json(options):
 			f.close()
 
 			if api.namespace.count('.') == 1:
-				top_level_modules.append(api.name())
+				top_level_modules.append(api.namespace)
 
 	out = open(os.path.join(outdir, 'search.json'), 'w')
 	out.write(json.dumps(search_json, indent=4))
