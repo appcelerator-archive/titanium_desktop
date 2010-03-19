@@ -30,7 +30,8 @@ parameters: []
     - [Process.Pipe|pipeOut|(optional) A Process.Pipe object which the new process should use for sending output.]
     - [Process.Pipe|pipeErr|(optional) A Process.Pipe object which the new process should use for sending error output.]
 examples:
-    - |
+    - description: Collect the output of a process using the READ event.
+    - code: |
         <pre><code>
             // Reading the output of a process using the read event.
             // Win32 needs to run echo and more via cmd.exe
@@ -45,7 +46,8 @@ examples:
             });
             echoCmd.launch();
         </pre></code>
-    - |
+    - description: Collect the output of a process using the onReadLine callback.
+    - code: |
         <pre><code>
             // Reading the output of a process using the setOnReadLine.
             // Win32 needs to run echo and more via cmd.exe
@@ -58,7 +60,8 @@ examples:
             });
             echoCmd.launch();
         </pre></code>
-    - |
+    - description: Piping the output of a process to another.
+    - code: |
         <pre><code>
             // This is an example of piping the output of one process to another.
 
