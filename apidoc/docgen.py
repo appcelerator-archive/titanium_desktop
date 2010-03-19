@@ -173,7 +173,7 @@ def spit_html(options):
 			output = Template(template).render(data=api)
 		except:
 			print exceptions.html_error_template().render()
-			return
+			sys.exit()
 
 		f = open(path.join(outdir, '%s.html' % api.namespace), 'w+')
 		f.write(output)

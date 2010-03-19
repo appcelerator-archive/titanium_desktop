@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.HTTP_REDIRECT
 type: property
-description: The HTTP redirect complete event constant.
+description: The HTTP redirect event constant.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

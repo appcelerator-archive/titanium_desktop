@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.HTTP_ABORT
 type: property
-description: The HTTP request event constant.
+description: The HTTP request aborted event constant.
 since: 0.7.0
 platforms: ['osx', 'linux', 'win32']
 returns: String

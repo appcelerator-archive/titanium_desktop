@@ -18,67 +18,67 @@ description: |
 since: 0.5.0
 platforms: ['osx', 'linux', 'win32']
 returns: Process.Process
-parameters: []
+parameters:
     - - Array<String>|Object
       - args
       - |
-            Either a list of command-line arguments to use for this process
-            invocation (including the executable path) or an object describing
-            all parameters of this Process object (see above).
-    - [Object|envionment|(optional) An object representing the environment to pass to this process.]
-    - [Process.Pipe|pipeIn|(optional) A Process.Pipe object which the new process should use for receiving input.]
-    - [Process.Pipe|pipeOut|(optional) A Process.Pipe object which the new process should use for sending output.]
-    - [Process.Pipe|pipeErr|(optional) A Process.Pipe object which the new process should use for sending error output.]
+          Either a list of command-line arguments to use for this process invocation
+          (including the executable path) or an object describing all parameters of
+          this Process object (see above).]
+    - [Object, envionment, (optional) An object representing the environment to pass to this process.]
+    - [Process.Pipe, pipeIn, (optional) A Process.Pipe object which the new process should use for receiving input.]
+    - [Process.Pipe, pipeOut, (optional) A Process.Pipe object which the new process should use for sending output.]
+    - [Process.Pipe, pipeErr, (optional) A Process.Pipe object which the new process should use for sending error output.]
 examples:
     - description: Collect the output of a process using the READ event.
-    - code: |
-        <pre><code>
-            // Reading the output of a process using the read event.
-            // Win32 needs to run echo and more via cmd.exe
-            var echoCmd = Titanium.platform == "win32" ? 
-                ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
-            echoCmd.push("Data_for_echo!"
+      code: |
+            <pre><code>
+                // Reading the output of a process using the read event.
+                // Win32 needs to run echo and more via cmd.exe
+                var echoCmd = Titanium.platform == "win32" ? 
+                    ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
+                echoCmd.push("Data_for_echo!"
 
-            echoCmd.addEventListener(Titanium.READ, function(event)
-            {
-                // event.data will be a Bytes object with the output data.
-                alert(event.data.toString());
-            });
-            echoCmd.launch();
-        </pre></code>
+                echoCmd.addEventListener(Titanium.READ, function(event)
+                {
+                    // event.data will be a Bytes object with the output data.
+                    alert(event.data.toString());
+                });
+                echoCmd.launch();
+            </pre></code>
     - description: Collect the output of a process using the onReadLine callback.
-    - code: |
-        <pre><code>
-            // Reading the output of a process using the setOnReadLine.
-            // Win32 needs to run echo and more via cmd.exe
-            var echoCmd = Titanium.platform == "win32" ? 
-                ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
-            echoCmd.push("Data_for_echo!"
-            echoCmd.setOnReadLine(function(data)
-            {
-                alert(data.toString());
-            });
-            echoCmd.launch();
-        </pre></code>
+      code: |
+            <pre><code>
+                // Reading the output of a process using the setOnReadLine.
+                // Win32 needs to run echo and more via cmd.exe
+                var echoCmd = Titanium.platform == "win32" ? 
+                    ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
+                echoCmd.push("Data_for_echo!"
+                echoCmd.setOnReadLine(function(data)
+                {
+                    alert(data.toString());
+                });
+                echoCmd.launch();
+            </pre></code>
     - description: Piping the output of a process to another.
-    - code: |
-        <pre><code>
-            // This is an example of piping the output of one process to another.
+      code: |
+            <pre><code>
+                // This is an example of piping the output of one process to another.
 
-            // Win32 needs to run echo and more via cmd.exe
-            var echoCmd = Titanium.platform == "win32" ? 
-                ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
-            echoCmd.push("Data_for_echo!"
+                // Win32 needs to run echo and more via cmd.exe
+                var echoCmd = Titanium.platform == "win32" ? 
+                    ["C:\\Windows\\System32\\cmd.exe", "/C", "echo"] : ["/bin/echo"];
+                echoCmd.push("Data_for_echo!"
 
-            var moreCmd = Titanium.platform == "win32" ? 
-                ["C:\\Windows\\System32\\more.com"]: ["cat"];
+                var moreCmd = Titanium.platform == "win32" ? 
+                    ["C:\\Windows\\System32\\more.com"]: ["cat"];
 
-            // Create the processes.
-            var echo = Titanium.Process.createProcess(echoCmd);
-            var more = Titanium.Process.createProcess(this.moreCmd);
+                // Create the processes.
+                var echo = Titanium.Process.createProcess(echoCmd);
+                var more = Titanium.Process.createProcess(this.moreCmd);
 
-            // This is one way to attach the pipes of the two processes.
-            echo.stdout.attach(more.stdin);
-            echo.launch()
-            more.launch()
-        </code></pre>
+                // This is one way to attach the pipes of the two processes.
+                echo.stdout.attach(more.stdin);
+                echo.launch()
+                more.launch()
+            </code></pre>
