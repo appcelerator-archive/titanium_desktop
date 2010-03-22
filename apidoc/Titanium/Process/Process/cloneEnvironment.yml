@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Process.Process.cloneEnvironment
 type: method
-description: 
+description: Return a clone of this process' environment.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: Object, environment

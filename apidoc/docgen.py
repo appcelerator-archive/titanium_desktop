@@ -110,12 +110,16 @@ class API(object):
 	def add_child(self, child):
 		if child.type == 'method':
 			self.methods.append(child)
+			self.methods.sort()
 		elif child.type == 'property':
 			self.properties.append(child)
+			self.properties.sort()
 		elif child.type == 'object':
 			self.objects.append(child)
+			self.objects.sort()
 		elif child.type == 'module':
 			self.modules.append(child)
+			self.modules.sort()
 
 	def name(self):
 		loc = self.namespace.rfind('.')

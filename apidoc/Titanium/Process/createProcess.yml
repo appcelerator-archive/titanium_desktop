@@ -12,7 +12,7 @@ description: |
              stderr: pipeErr
         });
     </code></pre>
-    <code><pre>
+    <pre><code>
         Titanium.Process.createProcess(args, environment, stdin, stdout, stderr);
     </code></pre>
 since: 0.5.0
@@ -45,7 +45,7 @@ examples:
                     alert(event.data.toString());
                 });
                 echoCmd.launch();
-            </pre></code>
+            </code></pre>
     - description: Collect the output of a process using the onReadLine callback.
       code: |
             <pre><code>
@@ -59,7 +59,7 @@ examples:
                     alert(data.toString());
                 });
                 echoCmd.launch();
-            </pre></code>
+            </code></pre>
     - description: Piping the output of a process to another.
       code: |
             <pre><code>
