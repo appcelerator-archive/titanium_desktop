@@ -791,6 +791,7 @@ namespace ti
 			throw ValueException::FromString("Cannot determine diskspace on filename '" + this->filename + "' with error message " +error);
 		}
 	}
+
 	void File::CreateShortcut(const ValueList& args, KValueRef result)
 	{
 		if (args.size()<1)
@@ -800,98 +801,46 @@ namespace ti
 		std::string from = this->filename;
 		std::string to(FilesystemUtils::FilenameFromValue(args.at(0)));
 
-#ifdef OS_OSX	//TODO: My spidey sense tells me that Cocoa might have a better way for this. --BTH
-		NSMutableString* originalPath = [NSMutableString stringWithCString:from.c_str() encoding:NSUTF8StringEncoding];
-		NSString* destPath = [NSString stringWithCString:to.c_str() encoding:NSUTF8StringEncoding];
-		NSString* cwd = nil;
-		NSFileManager* fm = [NSFileManager defaultManager];
-
-		// support 2nd argument as a relative path to symlink for
-		if (args.size()>1)
-		{
-			cwd = [fm currentDirectoryPath];
-			NSString *p = [NSString stringWithCString:FilesystemUtils::FilenameFromValue(args.at(1)).c_str() encoding:NSUTF8StringEncoding];
-			BOOL isDirectory = NO;
-			if ([fm fileExistsAtPath:p isDirectory:&isDirectory])
-			{
-				if (!isDirectory)
-				{
-					// trim it off to see if it's a directory
-					p = [p stringByDeletingLastPathComponent];
-				}
-				[fm changeCurrentDirectoryPath:p];
-				
-				NSString * doomedString = [p stringByAppendingString: @"/"];
-				[originalPath replaceOccurrencesOfString:doomedString withString: @"" options: NSLiteralSearch range:NSMakeRange(0,[originalPath length])];
-//				originalPath = [originalPath stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@/",p] withString:@""];
-			}
-		}
-
-		int rc = symlink([originalPath UTF8String],[destPath UTF8String]);
-		BOOL worked = rc >= 0;
-#ifdef DEBUG
-		NSLog(@"++++ SYMLINK:%@=>%@ (%d)",originalPath,destPath,worked);
-#endif
-		result->SetBool(worked);
-		if (cwd)
-		{
-			[[NSFileManager defaultManager] changeCurrentDirectoryPath:cwd];
-		}
-#elif defined(OS_WIN32)
+#if defined(OS_WIN32)
 		HRESULT hResult;
-		IShellLinkW* psl;
+		IShellLinkW* shellLink;
+		result->SetBool(false);
 
 		if(from.length() == 0 || to.length() == 0) {
 			std::string ex = "Invalid arguments given to createShortcut()";
 			throw ValueException::FromString(ex);
 		}
 
-		hResult = CoCreateInstance(CLSID_ShellLink, NULL,
-			CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
+		if (!SUCCEEDED(CoCreateInstance(CLSID_ShellLink, NULL,
+			CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*) &shellLink)))
+			throw ValueException::FromString(
+				"Could not create shortcut: failed to create ShellLink instance");
 
-		if(SUCCEEDED(hResult))
+		// set path to the shortcut target and add description
+		shellLink->SetPath(::UTF8ToWide(from).c_str());
+		shellLink->SetDescription(L"File shortcut");
+
+		IPersistFile* persistFile;
+		if (!SUCCEEDED(shellLink->QueryInterface(IID_IPersistFile, (LPVOID*) &persistFile)))
 		{
-			IPersistFile* ppf;
-
-			// set path to the shortcut target and add description
-			std::wstring wideFrom(::UTF8ToWide(from));
-			psl->SetPath(wideFrom.c_str());
-			psl->SetDescription(L"File shortcut");
-
-			hResult = psl->QueryInterface(IID_IPersistFile, (LPVOID*) &ppf);
-
-			if(SUCCEEDED(hResult))
-			{
-				// ensure to ends with .lnk
-				if (to.substr(to.size()-4) != ".lnk") {
-					to.append(".lnk");
-				}
-				
-				WCHAR wsz[MAX_PATH];
-
-				// ensure string is unicode
-				if(MultiByteToWideChar(CP_ACP, 0, to.c_str(), -1, wsz, MAX_PATH))
-				{
-					// save the link
-					hResult = ppf->Save(wsz, TRUE);
-					ppf->Release();
-
-					if(SUCCEEDED(hResult))
-					{
-						result->SetBool(true);
-						return ;
-					}
-				}
-			}
+			shellLink->Release();
+			throw ValueException::FromString(
+				"Could not create shortcut: failed to query PersistFile interface");
 		}
-		result->SetBool(false);
-#elif defined(OS_LINUX)
-		result->SetBool(link(this->filename.c_str(), to.c_str()) == 0);
-#else
-		result->SetBool(false);
-#endif
 
+		// ensure to ends with .lnk
+		if (to.substr(to.size() - 4) != ".lnk")
+			to.append(".lnk");
+		std::wstring wideTo(::UTF8ToWide(to.c_str()));
+		if (SUCCEEDED(persistFile->Save(wideTo.c_str(), TRUE)))
+			result->SetBool(true);
+
+		shellLink->Release();
+#else
+		result->SetBool(symlink(this->filename.c_str(), to.c_str()) == 0);
+#endif
 	}
+
 	void File::SetExecutable(const ValueList& args, KValueRef result)
 	{
 		try
