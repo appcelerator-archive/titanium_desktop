@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Process.Process.getExitCode
 type: method
-description: 
+description: Return the exit code for this process. Before the process exits, this value will be null.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: Number

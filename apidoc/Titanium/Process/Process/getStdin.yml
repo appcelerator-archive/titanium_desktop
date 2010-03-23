@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Process.Process.getStdin
 type: method
-description: 
+description: Return the stdin pipe for this process.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: Process.Pipe

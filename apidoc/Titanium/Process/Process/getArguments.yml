@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Process.Process.getArguments
 type: method
-description: 
+description: Return the list of arguments associated with this Process.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: Array<String>
