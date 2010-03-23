@@ -2,6 +2,7 @@
 import os, sys, string, shutil
 import uuid, re, tempfile, subprocess
 import PyRTF
+from xml.sax.saxutils import quoteattr
 
 support_dir = os.path.abspath(os.path.dirname(__file__))
 
@@ -15,11 +16,12 @@ def read_template(sdk_path, name):
 def gen_guid():
 	return str(uuid.uuid4()).upper()
 
-file_id = 1
-def get_file_id():
-	global file_id
-	file_id += 1
-	return "_" + str(file_id)
+def id_generator():
+	file_id = 1
+	while True:
+		yield "_" + str(file_id)
+		file_id += 1
+unique_ids = id_generator()
 
 def write_rtf(text, filename):
 	doc = PyRTF.Document()
@@ -30,21 +32,6 @@ def write_rtf(text, filename):
 	
 	renderer = PyRTF.Renderer()
 	renderer.Write(doc, open(filename, "w"))
-	
-langs = {
-	"cs-cz": ["Czech", "1029", "1250"],
-	"nl-nl": ["Dutch", "1043", "1252"],
-	"en-us": ["English", "1033", "1252"],
-	"fr-fr": ["French", "1036", "1252"],
-	"de-de": ["German", "1031", "1252"],
-	"hu-hu": ["Hungarian", "1038", "1250"],
-	"it-it": ["Italian", "1040", "1252"],
-	"ja-jp": ["Japanese", "1041", "932"],
-	"pl-pl": ["Polish", "1045", "1250"],
-	"ru-ru": ["Russian", "1049", "1251"],
-	"es-es": ["Spanish", "3082", "1252"],
-	"uk-ua": ["Ukrainian", "1058", "1251"]
-}
 
 def invalid_language(lang):
 	message = "Error: %s is an invalid language. "+\
@@ -55,67 +42,78 @@ def invalid_language(lang):
 	sys.exit(-1)
 	
 def get_app_language(lang):
+	langs = {
+		"cs-cz": ("1029", "1250"),
+		"nl-nl": ("1043", "1252"),
+		"en-us": ("1033", "1252"),
+		"fr-fr": ("1036", "1252"),
+		"de-de": ("1031", "1252"),
+		"hu-hu": ("1038", "1250"),
+		"it-it": ("1040", "1252"),
+		"ja-jp": ("1041", "932" ),
+		"pl-pl": ("1045", "1250"),
+		"ru-ru": ("1049", "1251"),
+		"es-es": ("3082", "1252"),
+		"uk-ua": ("1058", "1251")
+	}
 	if lang in langs:
-		return langs[lang][1]
-	return None
-		
-def get_app_codepage(lang):
-	if lang in langs:
-		return langs[lang][2]
-	return None
+		return langs[lang]
+	else:
+		return langs['en-us']
 
 class Shortcut:
 	@classmethod
 	def create_start_menu_shortcut(cls, builder):
-		return Shortcut("startMenu." + builder.options.manifest["appid"],
-			"ProgramMenuDir", builder.appname, "INSTALLDIR")
+		return Shortcut("ProgramMenuDir", builder.appname, "INSTALLDIR")
 	
 	@classmethod
 	def create_desktop_shortcut(cls, builder):
-		return Shortcut("desktop." + builder.options.manifest["appid"],
-			"DesktopFolder", builder.appname, "INSTALLDIR",)
+		return Shortcut("DesktopFolder", builder.appname, "INSTALLDIR")
 			
-	# TODO: allow custom shortcuts
-	def __init__(self, id, directory, name, working_dir, advertise=True):
-		self.id = id
+	def __init__(self, directory, name, working_dir):
 		self.directory = directory
 		self.name = name
 		self.working_dir = working_dir
-		self.advertise = advertise
 	
-	def to_xml(self, indent):
-		advertise = "yes"
-		if not self.advertise: advertise = "no"
-		
+	def to_xml(self):
 		return shortcut_template % {
-			"indent": ("\t" * indent),
-			"id": self.id,
+			"id": unique_ids.next(),
 			"directory": self.directory,
 			"name": self.name,
-			"working_dir": self.working_dir,
-			"advertise": advertise}
+			"working_dir": self.working_dir}
 	
 class Directory:
-	def __init__(self, relative_path, is_root=False):
+	component_ids = []
+	
+	def __init__(self, builder, relative_path, is_root=False):
+		self.builder = builder
 		self.relative_path = relative_path
 		self.name = os.path.basename(relative_path)
-		self.id = get_file_id()
 		self.files = []
 		self.dirs = []
 		self.is_root = is_root
-
-	def escape_path(self, path):
-		return path.replace('&', '&amp;')
 			
 	def add_file(self, relative_path, full_path, shortcuts=None):
-		self.files.append({
+		file = {
 			"guid": gen_guid(),
-			"name": os.path.basename(relative_path),
+			"filename": quoteattr(os.path.basename(relative_path)),
 			"relative_path": relative_path,
-			"id": get_file_id(),
-			"full_path": full_path,
-			"shortcuts": shortcuts})
+			"id": unique_ids.next(),
+			"full_path": quoteattr(full_path)
+		}
+		
+		# Each file is a component which will be referenced later
+		# in the list of component references.
+		Directory.component_ids.append(file['id'])
 
+		shortcuts_xml = ''
+		if relative_path == self.builder.appname + ".exe":
+			shortcuts_xml += Shortcut.create_start_menu_shortcut(self.builder).to_xml()
+			shortcuts_xml += Shortcut.create_desktop_shortcut(self.builder).to_xml()
+		file['shortcuts'] = shortcuts_xml
+		
+		self.files.append(file)
+		
 	def add_dir(self, dir):
 		self.dirs.append(dir)
 
@@ -123,22 +121,12 @@ class Directory:
 		xml = ""
 		if not self.is_root:
 			xml += ("\t" * indent) + "<Directory Id=\"%s\" Name=\"%s\">\n" % \
-				(self.id, self.name)
+				(unique_ids.next(), self.name)
 
 		for file in self.files:
-			shortcuts_xml = ""
-			if file["shortcuts"] is not None:
-				for shortcut in file["shortcuts"]:
-					shortcuts_xml += shortcut.to_xml(indent+1)
+			file['indent'] = "\t" * indent
+			xml += component_template % file
 			
-			xml += component_template % {
-					"indent": ("\t" * indent),
-					"id": file["id"],
-					"filename": self.escape_path(file["name"]),
-					"guid": file["guid"],
-					"full_path": self.escape_path(file["full_path"]),
-					"shortcuts": shortcuts_xml}
-		
 		for dir in self.dirs:
 			xml += dir.to_xml(indent+1)
 		
@@ -146,18 +134,6 @@ class Directory:
 			xml += ("\t" * indent) + "</Directory>\n"
 		return xml
 	
-	def to_components_xml(self, indent=4):
-		xml = ""
-		for file in self.files:
-			xml += component_ref_template % {
-					"indent": ("\t" * indent),
-					"id": file["id"] }
-		
-		for dir in self.dirs:
-			xml += dir.to_components_xml(indent)
-		
-		return xml
-
 def run_command(args):
 	subprocess.call(args)
 	
@@ -168,20 +144,17 @@ def get_from_tiapp(tiapp, name, default_value):
 	return el.text
 	
 component_template = """
-%(indent)s<Component Id="%(id)s" Guid="%(guid)s">
-%(indent)s	<File Id="%(id)s" Source="%(full_path)s" KeyPath="yes">
+%(indent)s<Component Id="%(id)s_component" Guid="%(guid)s">
+%(indent)s	<File Id="%(id)s_file" Source=%(full_path)s KeyPath="yes">
 %(shortcuts)s
 %(indent)s	</File>
 %(indent)s</Component>
 """
 
-component_ref_template = """
-%(indent)s<ComponentRef Id="%(id)s"/>
-"""
 shortcut_template = """
-%(indent)s<Shortcut Id="%(id)s" Directory="%(directory)s" Name="%(name)s"
-%(indent)s	WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon.exe"
-%(indent)s	IconIndex="0" Advertise="%(advertise)s" />
+		<Shortcut Id="%(id)s" Directory="%(directory)s" Name="%(name)s"
+			WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon.exe"
+			IconIndex="0" Advertise="yes" />
 """
 
 bundled_template = """
@@ -210,26 +183,20 @@ module_dir_template = """
 %(indent)s	</Directory>
 %(indent)s</Directory>
 """
-def walk_dir(builder, path, current_dir, relative_path=""):
+def walk_dir(builder, path, current_dir, relative_path=""):	
 	for file in os.listdir(path):
 		if file == "*" or file == "*.*" or file == "." or file == "..":
 			continue
 		
 		file_relative_path = os.path.join(relative_path, file)
 		file_full_path = os.path.join(path, file)
-		if relative_path == "": file_relative_path = file
+		if relative_path == "":
+			file_relative_path = file
 		
 		if os.path.isfile(file_full_path):
-			if file_relative_path == builder.appname + ".exe":
-				shortcuts = []
-				shortcuts.append(Shortcut.create_start_menu_shortcut(builder))
-				shortcuts.append(Shortcut.create_desktop_shortcut(builder))
-				current_dir.add_file(file_relative_path,
-					file_full_path, shortcuts)
-			else:
-				current_dir.add_file(file_relative_path, file_full_path)
+			current_dir.add_file(file_relative_path, file_full_path)
 		else:
-			newdir = Directory(file_relative_path)
+			newdir = Directory(builder, file_relative_path)
 			current_dir.add_dir(newdir)
 			walk_dir(builder, file_full_path, newdir, file_relative_path)
 
@@ -242,6 +209,7 @@ def build_msi(template, args, basename, destdir):
 	tmpfile = open(wxsname, "w+")
 	tmpfile.write(wxs)
 	tmpfile.close()
+	print wxs
 	
 	wix_dir = os.path.join("C:\\", "Program Files", "Windows Installer XML v3", "bin")
 	if not os.path.exists(wix_dir):
@@ -264,9 +232,8 @@ def create_installer(builder):
 	installer_sdk_path = os.path.join(sdk_path, 'installer')
 	app_installer_template = read_template(sdk_path, 'app_installer_template.wxs')
 
-	lang = get_from_tiapp(builder.options.tiapp, 'language', 'en-us')
-	app_language = get_app_language(lang)
-	app_codepage = get_app_codepage(lang)
+	(app_language, app_codepage) = get_app_language(
+		get_from_tiapp(builder.options.tiapp, 'language', 'en-us'))
 	if app_language is None or app_codepage is None:
 		invalid_language(lang)
 	
@@ -306,22 +273,19 @@ def create_installer(builder):
 	if version_parts < 3:
 		app_version += ('.0' * (version_parts-1))
 
-	app_guid = builder.options.manifest['guid'].upper()
-	upgrade_guid = str(uuid.uuid5(uuid.UUID(app_guid), "upgrade")).upper()
-	
+	app_guid = builder.options.manifest['guid'].upper()	
 	common_args = {
-		"app_name": builder.appname,
-		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
-		"app_id": builder.options.manifest['appid'],
-		"app_guid": app_guid,
-		"app_publisher": builder.options.manifest['publisher'],
-		"app_description": builder.options.manifest['desc'],
-		"app_version": app_version,
-		"upgrade_guid": upgrade_guid,
-		"program_menu_guid": gen_guid(),
+		"app_name": quoteattr(builder.appname),
+		"app_exe": quoteattr(os.path.join(builder.base_dir, builder.appname + ".exe")),
+		"app_id": quoteattr(builder.options.manifest['appid']),
+		"app_guid": quoteattr(app_guid),
+		"app_publisher": quoteattr(builder.options.manifest['publisher']),
+		"app_description": quoteattr(builder.options.manifest['desc']),
+		"app_version": quoteattr(app_version),
+		"program_menu_guid": quoteattr(gen_guid()),
 		"app_language": app_language,
 		"app_codepage": app_codepage,
-		"license_rtf": license_rtf,
+		"license_rtf": quoteattr(license_rtf),
 		"dialog_bmp": dialog_bmp,
 		"banner_bmp": banner_bmp,
 		"titanium_installer_dll": titanium_installer_dll,
@@ -330,37 +294,15 @@ def create_installer(builder):
 	installed_file = os.path.join(builder.base_dir, ".installed")
 	open(installed_file, "a").close() #touch
 	
-	root_dir = Directory(".", is_root=True)
+	root_dir = Directory(builder, ".", is_root=True)
 	walk_dir(builder, builder.base_dir, root_dir)
 	
-	app_dirs_xml = root_dir.to_xml()
-	components_xml = root_dir.to_components_xml()
+	component_ref_xml = "\n"
+	for id in Directory.component_ids:
+		component_ref_xml += \
+			'\t\t<ComponentRef Id="' + id + '_component"/>\n'
+		
 	bundled_xml = ""
-	#if builder.options.type != 'network':
-	#	runtime_root_dir = Directory(".", is_root=True)
-	#	walk_dir(builder, builder.options.runtime_dir, runtime_root_dir)
-		
-	#	runtime_files_xml = runtime_root_dir.to_xml()
-	#	components_xml += runtime_root_dir.to_components_xml()
-		
-	#	module_dirs_xml = ""
-	#	for module in builder.options.module_paths:
-	#		module_root_dir = Directory(".", is_root=True)
-	#		walk_dir(builder, module["path"], module_root_dir)
-	#		module_files_xml = module_root_dir.to_xml()
-	#		components_xml += module_root_dir.to_components_xml()
-	#		module_dirs_xml += module_dir_template % {
-	#			"module_id": module["name"],
-	#			"module_version": module["version"],
-	#			"module_files": module_files_xml,
-	#			"indent": "\t\t"}
-		
-	#	bundled_xml = bundled_template % {
-	#		"module_dirs": module_dirs_xml,
-	#		"runtime_version": builder.options.runtime,
-	#		"runtime_files": runtime_files_xml,
-	#		"indent": "\t\t"}
-	
 	modules = builder.options.manifest['modules']
 	dependencies = []
 	bundled_modules = []
@@ -388,8 +330,8 @@ def create_installer(builder):
 		bundled_runtime_xml = '<Property Id="AppBundledRuntime" Value="runtime"/>'
 	
 	app_template_args = common_args.copy()
-	app_template_args["app_dirs"] = app_dirs_xml
-	app_template_args["app_components"] = components_xml
+	app_template_args["app_dirs"] = root_dir.to_xml()
+	app_template_args["component_refs"] = component_ref_xml
 	app_template_args["bundled_xml"] = bundled_xml
 	app_template_args["dependencies"] = "&amp;".join(dependencies)
 	app_template_args["bundled_modules"] = bundled_modules_xml

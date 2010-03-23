@@ -1,30 +1,26 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Name="${app_name}" Id="${app_guid}" UpgradeCode="${upgrade_guid}"
-		Language="${app_language}" Codepage="${app_codepage}" Version="${app_version}" Manufacturer="${app_publisher}">
+	<Product Name=${app_name} Id="*" Version=${app_version} Manufacturer=${app_publisher}
+		Language="${app_language}" Codepage="${app_codepage}" >
 
 	<Package Id="*" Keywords="Installer"
-		Description="${app_name}"
-		Comments="${app_description}" Manufacturer="${app_publisher}"
+		Description=${app_name}
+		Comments=${app_description} Manufacturer=${app_publisher}
 		InstallerVersion="300" Languages="${app_language}" Compressed="yes" SummaryCodepage="${app_codepage}" />
-	
-	<Upgrade Id="${upgrade_guid}">
-		<UpgradeVersion OnlyDetect="yes" Property="NEWERFOUND" Minimum="${app_version}" IncludeMinimum="no" />
-	</Upgrade>
   
-    <Media Id="1" Cabinet="${app_id}.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
-    <Property Id="DiskPrompt" Value="${app_name}" />
+    <Media Id="1" Cabinet="Application.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
+    <Property Id="DiskPrompt" Value=${app_name} />
 
 	<Directory Id="TARGETDIR" Name="SourceDir">
 		<Directory Id="ProgramFilesFolder" Name="PFiles">
-			<Directory Id="INSTALLDIR" Name="${app_name}">
+			<Directory Id="INSTALLDIR" Name=${app_name}>
 				${app_dirs}
 			</Directory>
 		</Directory>
 	
 		<Directory Id="ProgramMenuFolder" Name="Programs">
-			<Directory Id="ProgramMenuDir" Name="${app_name}">
-				<Component Id="ProgramMenuDir" Guid="${program_menu_guid}">
+			<Directory Id="ProgramMenuDir" Name=${app_name}>
+				<Component Id="ProgramMenuDir" Guid="">
 					<RemoveFolder Id="ProgramMenuDir" On="uninstall" />
 					<RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value="" KeyPath="yes" />
 				</Component>
@@ -39,21 +35,20 @@
     </Directory>
 	
 	
-	<Feature Id="Application" Title="${app_name}" Description="${app_description}" Level="1"
+	<Feature Id="Application" Title=${app_name} Description=${app_description} Level="1"
 		ConfigurableDirectory="INSTALLDIR">
 		<ComponentRef Id="ProgramMenuDir" />
 		<MergeRef Id="CRT80" />
-		
-		${app_components}
+		${component_refs}
 	</Feature>
 
 	<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
 	
 	<WixVariable Id="WixUIDialogBmp" Value="${dialog_bmp}"/>
 	<WixVariable Id="WixUIBannerBmp" Value="${banner_bmp}"/>
-	<WixVariable Id="WixUILicenseRtf" Value="${license_rtf}"/>
+	<WixVariable Id="WixUILicenseRtf" Value=${license_rtf}/>
 
-	<Icon Id="ApplicationIcon.exe" SourceFile="${app_exe}" />
+	<Icon Id="ApplicationIcon.exe" SourceFile=${app_exe} />
 	<Property Id="ARPPRODUCTICON" Value="ApplicationIcon.exe" />
 	
 	<Property Id="AppDependencies" Value="${dependencies}"/>
