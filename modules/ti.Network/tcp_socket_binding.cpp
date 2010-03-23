@@ -294,6 +294,7 @@ namespace ti
 
 			Poco::Mutex::ScopedLock lock(sendDataMutex);
 			sendData.pop();
+			currentSendDataOffset = 0;
 
 			// Uninstall the ReadyForWrite reactor handler, because it will push
 			// the CPU to 100% usage if there is nothing to write.
