@@ -64,30 +64,23 @@ def get_app_codepage(lang):
 		return langs[lang][2]
 	return None
 
-def get_app_icon(builder):
-	return (builder.appname+".exe").replace(" ", "_").replace("'", "").replace("?","").replace("-","_")
-
 class Shortcut:
 	@classmethod
 	def create_start_menu_shortcut(cls, builder):
 		return Shortcut("startMenu." + builder.options.manifest["appid"],
-			"ProgramMenuDir", builder.appname, "INSTALLDIR",
-			get_app_icon(builder), 0, True)
+			"ProgramMenuDir", builder.appname, "INSTALLDIR")
 	
 	@classmethod
 	def create_desktop_shortcut(cls, builder):
 		return Shortcut("desktop." + builder.options.manifest["appid"],
-			"DesktopFolder", builder.appname, "INSTALLDIR",
-			get_app_icon(builder), 0, True)
+			"DesktopFolder", builder.appname, "INSTALLDIR",)
 			
 	# TODO: allow custom shortcuts
-	def __init__(self, id, directory, name, working_dir, icon, icon_index=0, advertise=True):
+	def __init__(self, id, directory, name, working_dir, advertise=True):
 		self.id = id
 		self.directory = directory
 		self.name = name
 		self.working_dir = working_dir
-		self.icon = icon
-		self.icon_index = icon_index
 		self.advertise = advertise
 	
 	def to_xml(self, indent):
@@ -100,8 +93,6 @@ class Shortcut:
 			"directory": self.directory,
 			"name": self.name,
 			"working_dir": self.working_dir,
-			"icon": self.icon,
-			"icon_index": self.icon_index,
 			"advertise": advertise}
 	
 class Directory:
@@ -189,8 +180,8 @@ component_ref_template = """
 """
 shortcut_template = """
 %(indent)s<Shortcut Id="%(id)s" Directory="%(directory)s" Name="%(name)s"
-%(indent)s	WorkingDirectory="%(working_dir)s" Icon="%(icon)s"
-%(indent)s	IconIndex="%(icon_index)s" Advertise="%(advertise)s" />
+%(indent)s	WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon.exe"
+%(indent)s	IconIndex="0" Advertise="%(advertise)s" />
 """
 
 bundled_template = """
@@ -321,7 +312,6 @@ def create_installer(builder):
 	common_args = {
 		"app_name": builder.appname,
 		"app_exe": os.path.join(builder.base_dir, builder.appname + ".exe"),
-		"app_icon": get_app_icon(builder),
 		"app_id": builder.options.manifest['appid'],
 		"app_guid": app_guid,
 		"app_publisher": builder.options.manifest['publisher'],

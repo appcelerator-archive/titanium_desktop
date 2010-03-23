@@ -52,9 +52,9 @@
 	<WixVariable Id="WixUIDialogBmp" Value="${dialog_bmp}"/>
 	<WixVariable Id="WixUIBannerBmp" Value="${banner_bmp}"/>
 	<WixVariable Id="WixUILicenseRtf" Value="${license_rtf}"/>
-	
-    <Icon Id="${app_icon}" SourceFile="${app_exe}" />
-	<Property Id="ARPPRODUCTICON" Value="${app_icon}" />
+
+	<Icon Id="ApplicationIcon.exe" SourceFile="${app_exe}" />
+	<Property Id="ARPPRODUCTICON" Value="ApplicationIcon.exe" />
 	
 	<Property Id="AppDependencies" Value="${dependencies}"/>
 	${bundled_modules}

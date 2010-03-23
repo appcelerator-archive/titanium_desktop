@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Process.Process.setOnReadLine
 type: method
-description: 
+description: Set the callback to invoke every time a line of input is received from the process. This callback will take one argument, which will be the line of output.
 since: 0.5.0
 platforms: [osx, linux, win32]
 returns: String
