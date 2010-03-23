@@ -6,108 +6,12 @@ For details on Titanium, please see <http://www.appcelerator.com>.  Titanium sou
 is licensed under the terms of the Apache Public License, version 2. Please see the 
 LICENSE file for more information.
 
----------------------
- Build Prerequisites
----------------------
+-------------------
+ Building Titanium
+-------------------
 
-To build Titanium from source, you will need the following prerequisites:
-
-  - Python (see platform specific notes below)
-  - Scons package - <http://www.scons.org/>
-  - Platform compiler (see below for each platform)
-
-Python and SCons are used to build Titanium but not required for end-development
-or runtime.
-
-To build Titanium, you will need to first checkout the Titanium source code
-from <http://github.com/appcelerator/titanium_desktop/tree/master>. 
-
-Currently, we are building Titanium for 32-bit architectures but intend to support 64-bit
-very soon. If you have patches or would like to assist, please contact us (see below for
-IRC or email information).
-
--------
- Setup
--------
-
-You will first need to update the kroll submodule that is checked in to Titanium before
-you can successfully build.  You can run the following command from the root source 
-directory to update the submodule:
-
-> git submodule update --init
-> cd kroll && git checkout master && cd ..
-
-This will pull the contents of the submodule into your local kroll folder.
-
-----------
- Building
-----------
-
-Titanium uses SCons for building.  You can build and install the SDK by running:
-
-> scons debug=1 sdkinstaller run=1
-
-Titanium uses the Drillbit application under apps/ to perform tests. You can build
-and run Drillbit:
-
-> scons debug=1 drillbit run=1
-
-To build the distribution packages run:
-
-> scons debug=1 dist
-
-The output of the build will be in a folder named build\<osname> such as 
-build/osx for OSX.
-
----------------
- Platform Info 
----------------
-
-Titanium requires platform-specific builds.  Currently, Titanium builds on Win32, Linux 
-and Mac OSX 10.5.4+.
-
-Win32
-------
-
-You will need Microsoft Visual Studio 2005 + Service Packs to build Titanium. We have
-not tested building Titanium on Visual Studio 2008.  You will need to obtain the 
-Microsoft Visual Studio Service Pack 1 to compile Titanium.
-
-Needed service packs from Microsoft:
-
-- VS 2005 Team Suite SP1 <http://www.microsoft.com/downloads/details.aspx?familyid=BB4A75AB-E2D4-4C96-B39D-37BAF6B5B1DC&displaylang=en>
-- MS Visual Studio 2005 SP1
-- Windows Server 2003 SDK R2 <http://www.microsoft.com/downloads/details.aspx?familyid=0baf2b35-c656-4969-ace8-e4c0c0716adb&displaylang=en>
-
-OSX
-----
-
-You will need XCode 3.0+ to build Titanium and it must be built on Leopard. Titanium
-is only supported on Leopard (or later).
-
-If you have xcode installed, you should be able to build Titanium with no additional
-dependencies.
-
-Linux
-------
-
-Each distribution varies slightly for building Titanium on a Linux distribution.
-
-Ubuntu 8.10 32bit
-=================
-
-1. Install the required libraries:
-
-sudo apt-get install build-essential ruby rubygems libzip-ruby scons libxml2-dev libgtk2.0-dev python-dev ruby-dev libdbus-glib-1-dev libnotify-dev libgstreamer0.10-dev libxss-dev libcurl4-openssl-dev libnotify-dev libgstreamer0.10-dev libcurl4-openssl-dev python2.5-dev libxss-dev
-
-
-2. Install Git:
-
-sudo apt-get install git-core
-
-
-You may need a later version of Scons for Linux if you get build errors.  (>=1.2.0)
-
+Please refer to http://developer.appcelerator.com/doc/desktop/building
+for up to date instructions on how to build this project.
 
 --------------------
  Getting Assistance
@@ -118,11 +22,11 @@ For more details on Titanium, please see the website at <http://www.appcelerator
 We invite you to visit us on IRC at #titanium_app on irc.freenode.net. For core 
 developer conversation, please visit #titanium_dev.
 
-If you need more assistance, please go to the Appcelerator Developer Community
-at <http://www.appcelerator.com/community>.
+If you need more assistance, please go to the Appcelerator Developer Center
+<http://developer.appcelerator.com/>.
 
-To report a bug or make a feature request, please visit our Issue Tracking portal
-at <http://support.appcelerator.net>.
+To report a bug or make a feature request, please visit our bug tracker at 
+<https://appcelerator.lighthouseapp.com/projects/25719-titanium-desktop/tickets/bins/35046>
 
 We'd also encourage you to follow us on Twitter at <http://twitter.com/appcelerator> or
 @appcelerator.
