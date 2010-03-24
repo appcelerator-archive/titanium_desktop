@@ -58,7 +58,6 @@ describe("ti.Media tests", {
 			{
 				callback.failed(exception);
 			}
-			callback.passed();
 		}, 1000);
 
 		setTimeout(function(){
@@ -89,7 +88,6 @@ describe("ti.Media tests", {
 			{
 				callback.failed(exception);
 			}
-			callback.passed();
 		}, 1000);
 
 		setTimeout(function(){
