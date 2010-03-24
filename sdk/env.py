@@ -1,8 +1,7 @@
 import app
 import osx_app
 import linux_app
-import os
-import platform
+import os import platform
 import sys
 import os.path as p
 
@@ -110,3 +109,9 @@ class PackagingEnvironment(object):
 	def run(self, command):
 		self.log(u'Launching: %s' % command)
 		os.system(command)
+
+	def ignore_errors(self, function):
+		try:
+			function()
+		except Exception, e:
+			self.log("Ignoring error: %s" % e)

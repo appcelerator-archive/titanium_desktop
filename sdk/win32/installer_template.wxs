@@ -29,9 +29,7 @@
 
 		<Directory Id="DesktopFolder" Name="Desktop" />
 		
-		<Merge Id="CRT80" Language="${app_language}" SourceFile="${crt_msm}" DiskId="1" />
-		
-		${bundled_xml}
+		<Merge Id="CRT80" Language="${app_language}" SourceFile=${crt_msm} DiskId="1" />
     </Directory>
 	
 	
@@ -44,9 +42,9 @@
 
 	<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
 	
-	<WixVariable Id="WixUIDialogBmp" Value="${dialog_bmp}"/>
-	<WixVariable Id="WixUIBannerBmp" Value="${banner_bmp}"/>
-	<WixVariable Id="WixUILicenseRtf" Value=${license_rtf}/>
+	<WixVariable Id="WixUIDialogBmp" Value=${dialog_bmp}/>
+	<WixVariable Id="WixUIBannerBmp" Value=${banner_bmp}/>
+	<WixVariable Id="WixUILicenseRtf" Value=${license_file}/>
 
 	<Icon Id="ApplicationIcon.exe" SourceFile=${app_exe} />
 	<Property Id="ARPPRODUCTICON" Value="ApplicationIcon.exe" />
@@ -70,8 +68,8 @@
 		<Custom Action="NetInstall" After="NetInstall.Setup">NOT Installed</Custom>
 	</InstallExecuteSequence>
 		
-	<Binary Id="TitaniumInstallerDll" SourceFile="${titanium_installer_dll}"/>
-	<Binary Id="BannerBmp" SourceFile="${banner_bmp}"/>
+	<Binary Id="TitaniumInstallerDll" SourceFile=${titanium_installer_dll}/>
+	<Binary Id="BannerBmp" SourceFile=${banner_bmp}/>
 	
 	<UIRef Id="WixUI_Common" />
 	<UIRef Id="WixUI_InstallDir" />

@@ -5,12 +5,6 @@ import shutil
 from app import App
 import os.path as p
 
-def ignore_errors(function):
-	try:
-		function()
-	except Exception, e:
-		print "Ignoring error: %s" % e
-
 class OSXApp(App):
 	def get_contents_dir(self):
 		return p.join(self.stage_dir, 'Contents')
@@ -55,26 +49,14 @@ class OSXApp(App):
 			p.join(self.contents, 'installer',' Installer App.app', 'Contents',
 				'Resources', 'English.lproj'))
 
-	def get_dmg_background(self):
-		background_file = p.join(self.sdk_dir, 'background.jpg')
-		elem = self.tiapp.findtext('dmg_background')
-		if not elem:
-			return background_file
-
-		# Try to find the DMG background relative to the Contents directory
-		# or the Resources directory.
-		background = unicode(elem)
-		if p.exists(p.join(self.contents, background)):
-			return p.join(self.contents, background)
-
-		if p.exists(p.join(self.contents, 'Resources', background)):
-			return p.join(self.contents, 'Resources', background)
-
 	def package(self, package_dir):
 		target = p.join(package_dir, self.name + ".dmg")
 		self.env.log("Running pkg-dmg %s => %s" % (self.stage_dir, target))
 		if p.exists(target): # Just in case.
-			ignore_errors(lambda: os.unlink(target))
+			self.env.ignore_errors(lambda: os.unlink(target))
+
+		dmg_background = self.get_installer_image('dmg_background',
+			p.join(self.sdk_dir, 'background.jpg'))
 		self.env.run('"%s"' % p.join(self.sdk_dir, 'pkg-dmg') +
 			' --source "%s"' % self.stage_dir +
 			' --target "%s"' % target + # Target DMG
@@ -83,6 +65,6 @@ class OSXApp(App):
 			' --sourcefile ' # This --source argument should be a child of the root
 			' --copy "%s/ds_store:/.DS_Store"' % self.sdk_dir + # Copy in .DS_Store
 			' --mkdir /.background' # Create a .background folder
-			' --copy "%s/background.jpg:/.background/background.jpg"' % self.sdk_dir +
+			' --copy "%s:/.background/background.jpg"' % dmg_background +
 			' --symlink /Applications:/Applications')
 
