@@ -4,6 +4,8 @@ type: function
 description: |
     Return the path to this application's resources directory. This diretory
     is the 'Resources' subdirectory of the application contents directory.
+    The application directory may not be writable and applications should
+    not attempt to write to it.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Filesystem.File
