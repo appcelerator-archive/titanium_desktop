@@ -32,7 +32,7 @@ namespace ti
 		private:
 		NSSound* sound;
 		id delegate;
-		NSURL* nsurl;
+		NSURL* fileURL;
 	};
 }
 

@@ -19,7 +19,7 @@ namespace ti
 
 	class GstSound : public Sound
 	{
-		public:
+	public:
 		GstSound(std::string& url);
 		virtual void LoadImpl();
 		virtual void UnloadImpl();
@@ -29,9 +29,10 @@ namespace ti
 		virtual void SetVolumeImpl(double volume);
 		virtual double GetVolumeImpl();
 
-		private:
+	private:
 		GstElement* pipeline;
 		guint watchEventSourceId;
+		std::string fileURL;
 	};
 }
 

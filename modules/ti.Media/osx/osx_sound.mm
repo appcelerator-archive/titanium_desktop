@@ -17,12 +17,16 @@
 
 namespace ti
 {
-	OSXSound::OSXSound(std::string &url) :
+	OSXSound::OSXSound(std::string& url) :
 		Sound(url),
 		sound(nil),
 		delegate([[SoundDelegate alloc] init]),
-		nsurl([[NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]] retain])
+		fileURL(nil)
 	{
+		// Convert the path back into a file:// URL. We don't use the
+		// original URL here because it may be an app:// or ti:// URL.
+		this->fileURL = [[NSURL URLWithString:[NSString stringWithUTF8String:
+			URLUtils::PathToFileURL(this->path).c_str()]] retain];
 		[delegate setOSXSound:this];
 		this->Load();
 	}
@@ -32,25 +36,25 @@ namespace ti
 		[delegate setOSXSound:nil];
 		[sound setDelegate:nil];
 		[delegate release];
-		[nsurl release];
+		[fileURL release];
 	}
 
 	void OSXSound::LoadImpl()
 	{
 		@try
 		{
-			sound = [[NSSound alloc] initWithContentsOfURL:nsurl byReference:NO];
+			sound = [[NSSound alloc] initWithContentsOfURL:fileURL byReference:NO];
 			[sound setDelegate:delegate];
 		}
 		@catch(NSException *ex)
 		{
 			throw ValueException::FromFormat("Error loading (%s): %s",
-				[[nsurl absoluteString] UTF8String], [[ex reason] UTF8String]);
+				[[fileURL absoluteString] UTF8String], [[ex reason] UTF8String]);
 		}
 		@catch(...)
 		{
 			throw ValueException::FromFormat("Unknown error loading (%s): %s",
-				[[nsurl absoluteString] UTF8String]);
+				[[fileURL absoluteString] UTF8String]);
 		}
 	}
 

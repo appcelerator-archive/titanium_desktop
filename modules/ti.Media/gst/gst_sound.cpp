@@ -8,19 +8,22 @@
 
 namespace ti
 {
-	static gboolean GSTBusCallback(GstBus *bus, GstMessage *message, gpointer data);
-	GstSound::GstSound(std::string &path) :
+	static gboolean GSTBusCallback(GstBus* bus, GstMessage* message, gpointer data);
+	GstSound::GstSound(std::string& path) :
 		Sound(path),
 		pipeline(0)
 	{
+		// Convert the path back into a file:// URL. We don't use the
+		// original URL here because it may be an app:// or ti:// URL.
+		this->fileURL = URLUtils::PathToFileURL(this->path);
 		this->Load();
 	}
 
 	void GstSound::LoadImpl()
 	{
 		// The superclass will be responsible for unloading before calling load.
-		this->pipeline = gst_element_factory_make("playbin", NULL);
-		g_object_set(G_OBJECT(pipeline), "uri", url.c_str(), NULL);
+		this->pipeline = gst_element_factory_make("playbin", 0);
+		g_object_set(G_OBJECT(pipeline), "uri", url.c_str(), 0);
 
 		// Add a callback to listen for GST bus messages
 		this->duplicate();
@@ -40,7 +43,7 @@ namespace ti
 
 		gst_element_set_state(this->pipeline, GST_STATE_NULL);
 		gst_object_unref(GST_OBJECT(this->pipeline));
-		this->pipeline = NULL;
+		this->pipeline = 0;
 	}
 
 	void GstSound::PlayImpl()
@@ -75,7 +78,7 @@ namespace ti
 			return;
 
 		volume = volume * 10;
-		g_object_set(G_OBJECT(this->pipeline), "volume", volume, NULL);
+		g_object_set(G_OBJECT(this->pipeline), "volume", volume, 0);
 	}
 
 	double GstSound::GetVolumeImpl()
@@ -84,7 +87,7 @@ namespace ti
 			return 0.0;
 
 		gdouble gvolume;
-		g_object_get(this->pipeline, "volume", &gvolume, NULL);
+		g_object_get(this->pipeline, "volume", &gvolume, 0);
 		return gvolume / 10;
 	}
 
@@ -102,6 +105,4 @@ namespace ti
 
 		return TRUE;
 	}
-
-
 }

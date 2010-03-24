@@ -16,15 +16,15 @@ namespace ti
 
 	Win32Sound::Win32Sound(std::string &url) :
 		Sound(url),
-		path(::UTF8ToWide(URLUtils::URLToPath(url))),
-		graphBuilder(NULL),
-		mediaControl(NULL),
-		mediaEventEx(NULL),
-		mediaSeeking(NULL)
+		widePath(::UTF8ToWide(this->path)),
+		graphBuilder(0),
+		mediaControl(0),
+		mediaEventEx(0),
+		mediaSeeking(0)
 	{
 		HRESULT hr;
 
-		hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
+		hr = CoCreateInstance(CLSID_FilterGraph, 0, CLSCTX_INPROC_SERVER,
 			IID_IGraphBuilder, (void **) &graphBuilder);
 		if (FAILED(hr))
 			throw ValueException::FromString("Failed creating Graph Builder for sound");
@@ -70,8 +70,8 @@ namespace ti
 		if (!graphBuilder)
 			return;
 
-		BSTR pathBstr = SysAllocString(this->path.c_str());
-		graphBuilder->RenderFile(pathBstr, NULL);
+		BSTR pathBstr = SysAllocString(this->widePath.c_str());
+		graphBuilder->RenderFile(pathBstr, 0);
 	}
 
 	void Win32Sound::UnloadImpl()
@@ -103,11 +103,11 @@ namespace ti
 			mediaControl->Stop();
 
 		// Set the stream location to start at 0 (absolute beginning)
-		// and have it end at NoPosition. I.E. keep playing.
+		// and have it end at NoPosition i.e. keep playing.
 		LONGLONG newStartPosition = 0;
 		mediaSeeking->SetPositions(
 			&newStartPosition, AM_SEEKING_AbsolutePositioning, 
-			NULL, AM_SEEKING_NoPositioning);
+			0, AM_SEEKING_NoPositioning);
 	}
 
 	void Win32Sound::SetVolumeImpl(double volume)
@@ -139,8 +139,8 @@ namespace ti
 	bool Win32Sound::GraphCallback(HWND hwnd, UINT message,
 		WPARAM wParam, LPARAM lParam)
 	{
-		// Get the next event on the queue and wait 
-		// 0 milliseconds when the queue is empty.
+		// Get the next event on the queue and wait 0 milliseconds
+		// for other events if the queue is empty (3rd parameter).
 		long code, param1, param2;
 		HRESULT hr = mediaEventEx->GetEvent(&code, &param1, &param2, 0);
 		while (hr == S_OK)

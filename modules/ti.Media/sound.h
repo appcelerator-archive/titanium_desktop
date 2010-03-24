@@ -57,6 +57,7 @@ namespace ti
 		enum SoundState { PLAYING, PAUSED, STOPPED, END_OF_ITERATION };
 		SoundState state;
 		std::string url;
+		std::string path;
 		KMethodRef callback;
 		bool looping;
 	};
