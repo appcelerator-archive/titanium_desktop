@@ -3,19 +3,6 @@ import os
 import os.path as p
 from app import App
 
-import effess
-import os
-import os.path as p
-import PyRTF
-import re
-import shutil
-import string
-import sys
-import tempfile
-import types
-from app import App
-from xml.sax.saxutils import quoteattr
-
 class LinuxApp(App):
 	def stage(self, stage_dir, bundle):
 		App.stage(self, stage_dir, bundle=bundle)

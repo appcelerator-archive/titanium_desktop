@@ -181,12 +181,3 @@ class App(object):
 			self.env.log("Could not find %s: %s. Using default." % \
 				(tag_name, default))
 			return default
-
-class Win32App(App):
-	def stage(self, stage_dir, bundle):
-		App.stage(self, stage_dir, bundle=bundle)
-
-		contents = self.get_contents_dir()
-		self.env.log(u'Copying kboot.exe to %s' % contents);
-		effess.copy(p.join(self.sdk_dir, 'kboot.exe'),
-			p.join(contents, '%s.exe' % self.name))

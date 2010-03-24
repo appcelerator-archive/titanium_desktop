@@ -2,7 +2,6 @@
 import effess
 import os
 import os.path as p
-import PyRTF
 import re
 import shutil
 import string
@@ -11,6 +10,11 @@ import tempfile
 import types
 from app import App
 from xml.sax.saxutils import quoteattr
+
+win32_dir = p.join(p.dirname(__file__), 'win32')
+if p.exists(win32_dir):
+	sys.path.append(win32_dir)
+import PyRTF
 
 class Win32App(App):
 	def stage(self, stage_dir, bundle):
@@ -24,6 +28,96 @@ class Win32App(App):
 		# The .installed file for Windows should always exist,
 		# since we only ever install via the MSI installer.
 		open(p.join(contents, '.installed'), 'a').close()
+
+	def blah(self):
+		pass
+
+	def package(self, package_dir, bundle):
+		contents = self.get_contents_dir()
+		target = p.join(package_dir, self.name + '.msi')
+		wxs_path = p.join(package_dir, 'installer.wxs')
+		template_args = {}
+
+		try:
+			template_args['app_name'] = quoteattr(self.name)
+			app_version = self.version
+			version_parts = len(app_version.split("."))
+			if version_parts < 3:
+				app_version += ('.0' * (version_parts-1))
+			template_args['app_version'] = quoteattr(app_version)
+			template_args['app_guid'] = quoteattr(self.guid)
+			template_args['app_id'] = quoteattr(self.id)
+	
+			template_args['app_publisher'] = quoteattr('')
+			if hasattr(self, 'publisher'):
+				template_args['app_publishe'] = quoteattr(self.publisher)
+			template_args['description'] = quoteattr('')
+			if hasattr(self, 'description'):
+				template_args['description'] = quoteattr(self.description)
+	
+			template_args['app_exe'] = quoteattr(p.join(contents, self.name + '.exe'))
+	
+			license_rtf_path = p.join(contents, 'LICENSE.rtf')
+			self.write_license_rtf(license_rtf_path)
+			template_args['license_file'] = quoteattr(license_rtf_path)
+			template_args['crt_msm'] = quoteattr(p.join(self.sdk_dir, 'installer',
+				'Microsoft_VC80_CRT_x86.msm'))
+			template_args['titanium_installer_dll'] = quoteattr(p.join(
+				self.sdk_dir, 'installer', 'titanium_installer.dll'))
+			template_args['dialog_bmp'] = quoteattr(self.get_installer_image(
+				'dialog-bmp', p.join(self.sdk_dir, 'default_dialog.bmp')))
+			template_args['banner_bmp'] = quoteattr(self.get_installer_image(
+				'banner-bmp', p.join(self.sdk_dir, 'default_banner.bmp')))
+	
+			(app_language, app_codepage) = self.get_app_language()
+			template_args['app_language'] = quoteattr(app_language)
+			template_args['app_codepage'] = quoteattr(app_codepage)
+
+			root_dir = Directory(self, '.', is_root=True)
+			walk_dir(contents, root_dir)
+			template_args["app_dirs"] = root_dir.to_xml()
+
+			template_args['component_refs'] = "\n"
+			for id in Directory.component_ids:
+				template_args['component_refs'] += \
+					'\t\t<ComponentRef Id="' + id + '_component"/>\n'
+
+			template_args['dependencies'] = "&amp;".join(self.encode_manifest())
+			template_args['bundled_modules_xml'] = ''
+			template_args['bundled_runtime_xml'] = ''
+			if bundle:
+				template_args['bundled_modules'] =  \
+					'<Property Id="AppBundledModules" Value="%s"/>' % \
+						','.join([m[0] for m in self.modules])
+				template_args['bundled_runtime'] =  \
+					'<Property Id="AppBundledRuntime" Value="runtime"/>'
+
+			# Render the WXS template and write it to the WXS file
+			# after converting all template arguments to UTF-8
+			for (key, value) in template_args.iteritems():
+				if type(template_args[key]) == types.UnicodeType:
+					template_args[key] = template_args[key].encode('utf8')
+
+			template = string.Template(open(
+				p.join(self.sdk_dir, 'installer_template.wxs')).read())
+
+			wxs_file = open(wxs_path, 'w+')
+			wxs_text = template.safe_substitute(template_args)
+			wxs_file.write(wxs_text)
+			wxs_file.close()
+			self.env.log(wxs_text.decode('utf8'))
+
+			wix_bin_dir = self.get_wix_bin_directory()
+			self.env.run(p.join(wix_bin_dir, 'candle.exe') + 
+				' -out "%s.wixobj"' % wxs_path)
+			self.env.run(p.join(wix_bin_dir, 'light.exe') + 
+				' "%s.wixobj"' % wxs_path +
+				' -ext WixUIExtension' +
+				' -out "%s"' % target)
+
+		finally:
+			self.env.ignore_errors(lambda: os.unlink(wxs_path))
+			self.env.ignore_errors(lambda: os.unlink(wxs_path + '.wixobj'))
 
 	def get_wix_bin_directory(self):
 		path = p.join("C:\\", "Program Files", "Windows Installer XML v3", "bin")
@@ -107,93 +201,6 @@ class Win32App(App):
 		return output
 
 
-	def package(self, package_dir, bundle=True):
-		contents = self.get_contents_dir()
-		target = p.join(package_dir, self.name + '.msi')
-		wxs_path = p.join(package_dir, 'installer.wxs')
-
-		template_args = {}
-
-		try:
-			template_args['app_name'] = quoteattr(self.name)
-			app_version = self.version
-			version_parts = len(app_version.split("."))
-			if version_parts < 3:
-				app_version += ('.0' * (version_parts-1))
-			template_args['app_version'] = quoteattr(app_version)
-			template_args['app_guid'] = quoteattr(self.guid)
-			template_args['app_id'] = quoteattr(self.id)
-	
-			template_args['app_publisher'] = quoteattr('')
-			if hasattr(self, 'publisher'):
-				template_args['app_publishe'] = quoteattr(self.publisher)
-			template_args['description'] = quoteattr('')
-			if hasattr(self, 'description'):
-				template_args['description'] = quoteattr(self.description)
-	
-			template_args['app_exe'] = quoteattr(p.join(contents, self.name + '.exe'))
-	
-			license_rtf_path = p.join(contents, 'LICENSE.rtf')
-			self.write_license_rtf(license_rtf_path)
-			template_args['license_file'] = quoteattr(license_rtf_path)
-			template_args['crt_msm'] = quoteattr(p.join(self.sdk_dir, 'installer',
-				'Microsoft_VC80_CRT_x86.msm'))
-			template_args['titanium_installer_dll'] = quoteattr(p.join(
-				self.sdk_dir, 'installer', 'titanium_installer.dll'))
-			template_args['dialog_bmp'] = quoteattr(self.get_installer_image(
-				'dialog-bmp', p.join(self.sdk_dir, 'default_dialog.bmp')))
-			template_args['banner_bmp'] = quoteattr(self.get_installer_image(
-				'banner-bmp', p.join(self.sdk_dir, 'default_banner.bmp')))
-	
-			(app_language, app_codepage) = self.get_app_language()
-			template_args['app_language'] = quoteattr(app_language)
-			template_args['app_codepage'] = quoteattr(app_codepage)
-
-			root_dir = Directory(self, '.', is_root=True)
-			walk_dir(contents, root_dir)
-			template_args["app_dirs"] = root_dir.to_xml()
-
-			template_args['component_refs'] = "\n"
-			for id in Directory.component_ids:
-				template_args['component_refs'] += \
-					'\t\t<ComponentRef Id="' + id + '_component"/>\n'
-
-			template_args['dependencies'] = "&amp;".join(self.encode_manifest())
-			template_args['bundled_modules_xml'] = ''
-			template_args['bundled_runtime_xml'] = ''
-			if bundle:
-				template_args['bundled_modules'] =  \
-					'<Property Id="AppBundledModules" Value="%s"/>' % \
-						','.join([m[0] for m in self.modules])
-				template_args['bundled_runtime'] =  \
-					'<Property Id="AppBundledRuntime" Value="runtime"/>'
-
-			# Render the WXS template and write it to the WXS file
-			# after converting all template arguments to UTF-8
-			for (key, value) in template_args.iteritems():
-				if type(template_args[key]) == types.UnicodeType:
-					template_args[key] = template_args[key].encode('utf8')
-
-			template = string.Template(open(
-				p.join(self.sdk_dir, 'installer_template.wxs')).read())
-
-			wxs_file = open(wxs_path, 'w+')
-			wxs_text = template.safe_substitute(template_args)
-			wxs_file.write(wxs_text)
-			wxs_file.close()
-			self.env.log(wxs_text)
-
-			wix_bin_dir = self.get_wix_bin_directory()
-			self.env.run(p.join(wix_bin_dir, 'candle.exe') + 
-				' -out "%s.wixobj"' % wxs_path)
-			self.env.run(p.join(wix_bin_dir, 'light.exe') + 
-				' "%s.wixobj"' % wxs_path +
-				' -ext WixUIExtension' +
-				' -out "%s"' % target)
-
-		finally:
-			self.env.ignore_errors(lambda: os.unlink(wxs_path))
-			self.env.ignore_errors(lambda: os.unlink(wxs_path + '.wixobj'))
 
 component_template = """
 %(indent)s<Component Id="%(id)s_component" Guid="">

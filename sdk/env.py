@@ -1,7 +1,9 @@
 import app
 import osx_app
 import linux_app
-import os import platform
+import win32_app
+import os
+import platform
 import sys
 import os.path as p
 
@@ -13,7 +15,7 @@ class PackagingEnvironment(object):
 		if target_os is 'osx':
 			self.App = osx_app.OSXApp
 		if target_os is 'win32':
-			self.App = app.Win32App
+			self.App = win32_app.Win32App
 
 		self.version = version
 
