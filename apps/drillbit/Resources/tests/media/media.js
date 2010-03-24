@@ -30,13 +30,45 @@ describe("ti.Media tests", {
 		sound = null;
 	},
 	
-	test_beep: function() {
+	test_beep: function()
+	{
 		Titanium.Media.beep();
 	},
 	
 	test_play_sound_as_async: function(callback)
 	{
 		var sound = Titanium.Media.createSound("app://sound.wav");
+		sound.onComplete(function(){
+			value_of(sound.isPlaying()).should_be_false();
+			callback.passed();
+		});
+
+		sound.play();
+		setTimeout(function(){
+			try
+			{
+				value_of(sound.isPlaying()).should_be_true();
+				sound.pause();
+				value_of(sound.isPlaying()).should_be_false();
+				value_of(sound.isPaused()).should_be_true();
+				value_of(sound.isLooping()).should_be_false();
+				sound.stop();
+			}
+			catch (exception)
+			{
+				callback.failed(exception);
+			}
+			callback.passed();
+		}, 1000);
+
+		setTimeout(function(){
+			callback.failed("sound onComplete timed out");
+		}, 10000);
+	},
+	test_play_sound_via_path_as_async: function(callback)
+	{
+		var soundPath = Titanium.App.appURLToPath("app://sound.wav");
+		var sound = Titanium.Media.createSound(soundPath);
 		sound.onComplete(function(){
 			value_of(sound.isPlaying()).should_be_false();
 			callback.passed();
