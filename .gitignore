@@ -2,6 +2,8 @@
 *.swp
 *.swo
 *.pyc
+*.pbxuser
+*.model1v3
 apidoc/docout
 build/osx
 build/linux
