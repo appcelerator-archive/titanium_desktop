@@ -23,7 +23,7 @@ namespace ti
 	{
 		// The superclass will be responsible for unloading before calling load.
 		this->pipeline = gst_element_factory_make("playbin", 0);
-		g_object_set(G_OBJECT(pipeline), "uri", url.c_str(), 0);
+		g_object_set(G_OBJECT(pipeline), "uri", url.c_str(), NULL);
 
 		// Add a callback to listen for GST bus messages
 		this->duplicate();
@@ -78,7 +78,7 @@ namespace ti
 			return;
 
 		volume = volume * 10;
-		g_object_set(G_OBJECT(this->pipeline), "volume", volume, 0);
+		g_object_set(G_OBJECT(this->pipeline), "volume", volume, NULL);
 	}
 
 	double GstSound::GetVolumeImpl()
@@ -87,7 +87,7 @@ namespace ti
 			return 0.0;
 
 		gdouble gvolume;
-		g_object_get(this->pipeline, "volume", &gvolume, 0);
+		g_object_get(this->pipeline, "volume", &gvolume, NULL);
 		return gvolume / 10;
 	}
 
