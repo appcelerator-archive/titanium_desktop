@@ -482,6 +482,23 @@ describe("Network.HTTPClient",
 		this.client.send();
 	},
 
+	test_onload_as_async: function(callback)
+	{
+		// Test onload handler when an onreadystatechange handler is not installed
+		// See bug #335
+		this.client.onload = function()
+		{
+			callback.passed()
+		}
+
+		this.client.open("GET", this.url, false);
+		this.client.send();
+		timer = setTimeout(function()
+		{
+			callback.failed('Test timed out');
+		}, 10000);
+	},
+
 	test_request_headers: function()
 	{
 		this.client.setRequestHeader("Foo", "Bar");
