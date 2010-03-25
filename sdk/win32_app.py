@@ -8,6 +8,7 @@ import string
 import sys
 import tempfile
 import types
+import uuid
 from app import App
 from xml.sax.saxutils import quoteattr
 
@@ -48,12 +49,12 @@ class Win32App(App):
 			template_args['app_guid'] = quoteattr(self.guid)
 			template_args['app_id'] = quoteattr(self.id)
 	
-			template_args['app_publisher'] = quoteattr('')
+			template_args['app_publisher'] = quoteattr('None provided')
 			if hasattr(self, 'publisher'):
 				template_args['app_publishe'] = quoteattr(self.publisher)
-			template_args['description'] = quoteattr('')
+			template_args['app_description'] = quoteattr('None provided')
 			if hasattr(self, 'description'):
-				template_args['description'] = quoteattr(self.description)
+				template_args['app_description'] = quoteattr(self.description)
 	
 			template_args['app_exe'] = quoteattr(p.join(contents, self.name + '.exe'))
 	
@@ -80,17 +81,11 @@ class Win32App(App):
 			template_args['component_refs'] = "\n"
 			for id in Directory.component_ids:
 				template_args['component_refs'] += \
-					'\t\t<ComponentRef Id="' + id + '_component"/>\n'
+					'\t\t<ComponentRef Id="' + id + '"/>\n'
 
-			template_args['dependencies'] = "&amp;".join(self.encode_manifest())
-			template_args['bundled_modules_xml'] = ''
-			template_args['bundled_runtime_xml'] = ''
-			if bundle:
-				template_args['bundled_modules'] =  \
-					'<Property Id="AppBundledModules" Value="%s"/>' % \
-						','.join([m[0] for m in self.modules])
-				template_args['bundled_runtime'] =  \
-					'<Property Id="AppBundledRuntime" Value="runtime"/>'
+			template_args['dependencies'] = ''
+			if not bundle:
+				template_args['dependencies'] = ";".join(self.encode_manifest())
 
 			# Render the WXS template and write it to the WXS file
 			# after converting all template arguments to UTF-8
@@ -108,15 +103,21 @@ class Win32App(App):
 			self.env.log(wxs_text.decode('utf8'))
 
 			wix_bin_dir = self.get_wix_bin_directory()
-			self.env.run(p.join(wix_bin_dir, 'candle.exe') + 
-				' -out "%s.wixobj"' % wxs_path)
-			self.env.run(p.join(wix_bin_dir, 'light.exe') + 
-				' "%s.wixobj"' % wxs_path +
-				' -ext WixUIExtension' +
-				' -out "%s"' % target)
+			self.env.run([
+				p.join(wix_bin_dir, 'candle.exe'),
+				'-out',
+				'%s.wixobj' % wxs_path,
+				 wxs_path,
+			])
+			self.env.run([
+				p.join(wix_bin_dir, 'light.exe'),
+				'-ext', ' WixUIExtension',
+				'-out', '%s' % target,
+				'%s.wixobj' % wxs_path
+			])
 
 		finally:
-			self.env.ignore_errors(lambda: os.unlink(wxs_path))
+			#self.env.ignore_errors(lambda: os.unlink(wxs_path))
 			self.env.ignore_errors(lambda: os.unlink(wxs_path + '.wixobj'))
 
 	def get_wix_bin_directory(self):
@@ -173,55 +174,44 @@ class Win32App(App):
 		def write_line(str):
 			output.append(str.encode('utf8'))
 
-		write_line(u'#appname=' + self.name)
-		write_line(u'#appid=' + self.id)
-		write_line(u'#guid=' + self.guid)
-		write_line(u'#version=' + self.version)
+		write_line(u'#appname:' + self.name)
+		write_line(u'#appid:' + self.id)
+		write_line(u'#guid:' + self.guid)
+		write_line(u'#version:' + self.version)
 		if hasattr(self, 'image'):
-			write_line(u'#image=' + self.image)
+			write_line(u'#image:' + self.image)
 		if hasattr(self, 'publisher'):
-			write_line(u'#publisher=' + self.publisher)
+			write_line(u'#publisher:' + self.publisher)
 		if hasattr(self, 'description'):
-			write_line(u'#description=' + self.description)
+			write_line(u'#description:' + self.description)
 		if hasattr(self, 'url'):
-			write_line(u'#url=' + self.url)
+			write_line(u'#url:' + self.url)
 		if hasattr(self, 'loglevel'):
-			write_line(u'#loglevel=' + self.url)
+			write_line(u'#loglevel:' + self.url)
 		if hasattr(self, 'stream'):
-			write_line(u'#stream=' + self.url)
+			write_line(u'#stream:' + self.url)
 
-		write_line(u'runtime=' + self.runtime_version)
+		write_line(u'runtime:' + self.runtime_version)
 		if hasattr(self, 'sdk_version'):
-			write_line(u'sdk=' + self.sdk_version)
+			write_line(u'sdk:' + self.sdk_version)
 		if hasattr(self, 'mobilesdk_version'):
-			write_line(u'mobilesdk=' + self.mobilesdk_version)
+			write_line(u'mobilesdk:' + self.mobilesdk_version)
 		for module in self.modules:
-			write_line(module[0] + '=' + module[1])
+			write_line(module[0] + ':' + module[1])
 
 		return output
 
 
-
-component_template = """
-%(indent)s<Component Id="%(id)s_component" Guid="">
-%(indent)s	<File Id="%(id)s_file" Source=%(full_path)s KeyPath="yes">
+file_template = """
+%(indent)s	<File Id="%(id)s_file" Source=%(full_path)s KeyPath="%(keypath)s">
 %(shortcuts)s
 %(indent)s	</File>
-%(indent)s</Component>
 """
 
 shortcut_template = """
 		<Shortcut Id="%(id)s" Directory="%(directory)s" Name="%(name)s"
 			WorkingDirectory="%(working_dir)s" Icon="ApplicationIcon.exe"
 			IconIndex="0" Advertise="yes" />
-"""
-
-module_dir_template = """
-%(indent)s<Directory Id="module_%(module_id)s" Name="%(module_id)s">
-%(indent)s	<Directory Id="module_%(module_id)s_%(module_version)s" Name="%(module_version)s">
-%(indent)s		%(module_files)s
-%(indent)s	</Directory>
-%(indent)s</Directory>
 """
 
 def id_generator():
@@ -270,16 +260,15 @@ class Directory(object):
 			"id": unique_ids.next(),
 			"full_path": quoteattr(full_path)
 		}
-		
-		# Each file is a component which will be referenced later
-		# in the list of component references.
-		Directory.component_ids.append(file['id'])
 
-		shortcuts_xml = ''
+		# The File attribute containing these shortcuts must be the KeyPath
+		# of it's containing component for shortcut advertising to work properly.
+		file['shortcuts'] = ''
+		file['keypath'] = 'no'
 		if relative_path == self.app.name + ".exe":
-			shortcuts_xml += Shortcut.create_start_menu_shortcut(self.app).to_xml()
-			shortcuts_xml += Shortcut.create_desktop_shortcut(self.app).to_xml()
-		file['shortcuts'] = shortcuts_xml
+			file['shortcuts'] += Shortcut.create_start_menu_shortcut(self.app).to_xml()
+			file['shortcuts'] += Shortcut.create_desktop_shortcut(self.app).to_xml()
+			file['keypath'] = 'yes'
 		self.files.append(file)
 
 	def add_dir(self, dir):
@@ -288,12 +277,20 @@ class Directory(object):
 	def to_xml(self, indent=4):
 		xml = ""
 		if not self.is_root:
-			xml += ("\t" * indent) + "<Directory Id=\"%s\" Name=\"%s\">\n" % \
+			xml += ("\t" * indent) + '<Directory Id="%s" Name="%s">\n' % \
 				(unique_ids.next(), self.name)
 
-		for file in self.files:
-			file['indent'] = "\t" * indent
-			xml += component_template % file
+		if len(self.files) > 0:
+			component_id = unique_ids.next()
+			Directory.component_ids.append(component_id)
+			xml += '<Component Id="%s" Guid="%s">' % \
+				(component_id, str(uuid.uuid4()).upper())
+
+			for file in self.files:
+				file['indent'] = "\t" * indent
+				xml += file_template % file
+
+			xml += '</Component>'
 			
 		for dir in self.dirs:
 			xml += dir.to_xml(indent+1)

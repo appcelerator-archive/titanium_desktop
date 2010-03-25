@@ -4,6 +4,7 @@ import linux_app
 import win32_app
 import os
 import platform
+import subprocess
 import sys
 import os.path as p
 
@@ -108,9 +109,9 @@ class PackagingEnvironment(object):
 			raise Exception(u'Could not find module %s-%s' % module)
 		return c
 
-	def run(self, command):
-		self.log(u'Launching: %s' % command)
-		os.system(command)
+	def run(self, args):
+		self.log(u'Launching: %s' % args)
+		subprocess.call(args)
 
 	def ignore_errors(self, function):
 		try:

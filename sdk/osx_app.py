@@ -37,10 +37,11 @@ class OSXApp(App):
 
 		# If there is an icon defined, create a custom titanium.icns file
 		if hasattr(self, 'image'):
-			self.env.run('"%s" -in "%s" -out "%s"' % (
+			self.env.run([
 				p.join(self.sdk_dir, 'makeicns'),
-				p.join(self.contents, 'Resources', self.image),
-				p.join(lproj_dir, 'titanium.icns')))
+				'-in', p.join(self.contents, 'Resources', self.image),
+				'-out', p.join(lproj_dir, 'titanium.icns')
+			])
 		else:
 			effess.copy_to_dir(p.join(self.sdk_dir, 'titanium.icns'), lproj_dir)
 
@@ -57,14 +58,15 @@ class OSXApp(App):
 
 		dmg_background = self.get_installer_image('dmg_background',
 			p.join(self.sdk_dir, 'background.jpg'))
-		self.env.run('"%s"' % p.join(self.sdk_dir, 'pkg-dmg') +
-			' --source "%s"' % self.stage_dir +
-			' --target "%s"' % target + # Target DMG
-			' --volname "%s"' % self.name + # Volume name
-			' --format UDBZ'
-			' --sourcefile ' # This --source argument should be a child of the root
-			' --copy "%s/ds_store:/.DS_Store"' % self.sdk_dir + # Copy in .DS_Store
-			' --mkdir /.background' # Create a .background folder
-			' --copy "%s:/.background/background.jpg"' % dmg_background +
-			' --symlink /Applications:/Applications')
+		self.env.run([p.join(self.sdk_dir, 'pkg-dmg'),
+			'--source', '%s' % self.stage_dir,
+			'--target', '%s' % target, # Target DMG
+			'--volname', '%s' % self.name, # Volume name
+			'--format', 'UDBZ',
+			'--sourcefile', # This --source argument should be a child of the root
+			'--copy', '%s/ds_store:/.DS_Store' % self.sdk_dir, # Copy in .DS_Store
+			'--mkdir', '/.background', # Create a .background folder
+			'--copy', '%s:/.background/background.jpg' % dmg_background,
+			'--symlink', '/Applications:/Applications'
+		])
 

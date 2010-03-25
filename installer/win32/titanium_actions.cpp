@@ -52,18 +52,22 @@ HWND GetInstallerHWND()
 
 SharedApplication CreateApplication(MSIHANDLE hInstall)
 {
-	wstring params = MsiProperty(hInstall, L"CustomActionData");
-	vector<wstring> tokens;
-	Split(params, L';', tokens);
+	wstring manifestString(MsiProperty(hInstall, L"CustomActionData"));
 
+	// An empty manifest here means a bundled installation. Don't
+	// ever attempt to resolve dependencies in this case.
+	if (manifestString.empty())
+		return 0;
+
+	vector<wstring> tokens;
 	wstring dependencies(tokens[0]);
 	vector<pair<string, string> > manifest;
-	Split(dependencies, L'&', tokens);
+	Split(manifestString, L';', tokens);
 	for (size_t i = 0; i < tokens.size(); i++)
 	{
-		wstring token = tokens[i];
-		wstring key = token.substr(0, token.find(L"="));
-		wstring value = token.substr(token.find(L"=")+1);
+		const wstring& token = tokens[i];
+		wstring key = token.substr(0, token.find(L":"));
+		wstring value = token.substr(token.find(L":")+1);
 
 		manifest.push_back(pair<string,string>(
 			WideToUTF8(key), WideToUTF8(value)));
@@ -72,80 +76,21 @@ SharedApplication CreateApplication(MSIHANDLE hInstall)
 	return Application::NewApplication(manifest);
 }
 
-vector<SharedDependency> FindUnresolvedDependencies(MSIHANDLE hInstall)
+vector<SharedDependency> FindUnresolvedDependencies(SharedApplication app)
 {
-	// Tell the installer to check the installation state and execute
-	// the code needed during the rollback, acquisition, or
-	// execution phases of the installation.
+	// We cannot resolve dependencies in the normal way, since we aren't
+	// installed yet. Instead, go through the dependencies and try to
+	// resolve them manuallly.
 	vector<SharedDependency> unresolved;
-	vector<SharedComponent> components;
-	vector<SharedComponent>& installedComponents =
-		BootUtils::GetInstalledComponents(true);
-	for (size_t i = 0; i < installedComponents.size(); i++)
+	vector<SharedComponent>& components = BootUtils::GetInstalledComponents(true);
+	for (size_t i = 0; i < app->dependencies.size(); i++)
 	{
-		components.push_back(installedComponents.at(i));
-	}
-
-	wstring dependencies, bundledModules, bundledRuntime, installDir;
-	vector<wstring> tokens;
-	// deferred / async mode, get from the hacked "CustomActionData" property
-	if (MsiGetMode(hInstall, MSIRUNMODE_SCHEDULED) == TRUE)
-	{
-		wstring params = MsiProperty(hInstall, L"CustomActionData");
-		Split(params, L';', tokens);
-
-		dependencies.assign(tokens[0]);
-		if (tokens.size() > 1) bundledModules.assign(tokens[1]);
-		if (tokens.size() > 2) bundledRuntime.assign(tokens[2]);
-		
-	}
-	else // immediate mode, get from actual properties.. god this sucks
-	{
-		dependencies.assign(MsiProperty(hInstall, L"AppDependencies"));
-		bundledModules.assign(MsiProperty(hInstall, L"AppBundledModules"));
-		bundledRuntime.assign(MsiProperty(hInstall, L"AppBundledRuntime"));
-	}
-
-	Split(bundledModules, L',', tokens);
-	for (size_t i = 0; i < tokens.size(); i++)
-	{
-		components.push_back(KComponent::NewComponent(
-			MODULE, WideToUTF8(tokens[i]), "", "", true));
-	}
-
-	if (bundledRuntime.size() > 0)
-	{
-		components.push_back(KComponent::NewComponent(
-			RUNTIME, "runtime", "", "", true));
-	}
-
-
-	// We cannot resolve dependencies in the normal way, since bundled modules
-	// are still packed into the MSI and won't be found. Instead, go through
-	// the unbundled modules line-by-line and try to resolve them like that.
-	tokens.clear();
-	Split(dependencies, L'&', tokens);
-	for (size_t i = 0; i < tokens.size(); i++)
-	{
-		wstring token = tokens[i];
-		wstring key = token.substr(0, token.find(L"="));
-		wstring value = token.substr(token.find(L"=")+1);
-		if (key.at(0) == L'#')
-		{
-			continue;
-		}
-
-		SharedDependency dependency = Dependency::NewDependencyFromManifestLine(
-			WideToUTF8(key), WideToUTF8(value));
+		SharedDependency dependency(app->dependencies[i]);
 		if (BootUtils::ResolveDependency(dependency, components).isNull())
-		{
 			unresolved.push_back(dependency);
-		}
 	}
-
 	return unresolved;
 }
-
 
 // A helper function that sends a progress message to the installer, returns
 // false if the user has cancelled the action.
@@ -239,6 +184,16 @@ bool ProcessDependency(MSIHANDLE hInstall, SharedApplication app, SharedDependen
 
 extern "C" UINT __stdcall NetInstall(MSIHANDLE hInstall)
 {
+	SharedApplication app(CreateApplication(hInstall));
+
+	// A NULL application means that this is a bundled installation
+	// and we don't need to resolve module dependencies.
+	if (app.isNull())
+	{
+		ShutdownNetConnection();
+		return ERROR_SUCCESS;
+	}
+
 	// Wow, this is convoluted and easy to get wrong. It feels like a
 	// scene out of Fear and Loathing in Las Vegas. Essentially we've been
 	// consuming mind-altering substances for the better part of a day
@@ -281,8 +236,7 @@ extern "C" UINT __stdcall NetInstall(MSIHANDLE hInstall)
 	}
 
 	// If the SDK is listed, we need to ignore other non-SDK components below.
-	SharedApplication app(CreateApplication(hInstall));
-	vector<SharedDependency> unresolved = FindUnresolvedDependencies(hInstall);
+	vector<SharedDependency> unresolved = FindUnresolvedDependencies(app);
 	bool sdkInstalled = false;
 	for (size_t i = 0; i < unresolved.size(); i++)
 	{

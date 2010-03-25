@@ -1,14 +1,21 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Name=${app_name} Id="*" Version=${app_version} Manufacturer=${app_publisher}
-		Language="${app_language}" Codepage="${app_codepage}" >
+		Language=${app_language} Codepage=${app_codepage}
+		UpgradeCode=${app_guid}>
 
 	<Package Id="*" Keywords="Installer"
 		Description=${app_name}
 		Comments=${app_description} Manufacturer=${app_publisher}
-		InstallerVersion="300" Languages="${app_language}" Compressed="yes" SummaryCodepage="${app_codepage}" />
+		InstallerVersion="300" Languages=${app_language} Compressed="yes" SummaryCodepage=${app_codepage} />
 	<Media Id="1" Cabinet="Application.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1" />
 	<Property Id="DiskPrompt" Value=${app_name} />
+
+	<Upgrade Id=${app_guid}>
+		<UpgradeVersion OnlyDetect='no' Property='PREVIOUSFOUND'
+			Minimum='0.0.1' IncludeMinimum='yes'
+			Maximum=${app_version} IncludeMaximum='yes' />
+	</Upgrade>
 
 	<Directory Id="TARGETDIR" Name="SourceDir">
 		<Directory Id="ProgramFilesFolder" Name="PFiles">
@@ -26,7 +33,7 @@
 		</Directory>
 
 		<Directory Id="DesktopFolder" Name="Desktop" />
-			<Merge Id="CRT80" Language="${app_language}" SourceFile=${crt_msm} DiskId="1" />
+			<Merge Id="CRT80" Language=${app_language} SourceFile=${crt_msm} DiskId="1" />
 		</Directory>
 
 	<Feature Id="Application" Title=${app_name} Description=${app_description} Level="1"
@@ -43,20 +50,15 @@ ${component_refs}
 
 	<Icon Id="ApplicationIcon.exe" SourceFile=${app_exe} />
 	<Property Id="ARPPRODUCTICON" Value="ApplicationIcon.exe" />
-	<Property Id="AppDependencies" Value="${dependencies}"/>
 
-${bundled_modules}
-${bundled_runtime}
-
-	<CustomAction Id="NoDowngrade" Error="A later version of [ProductName] is already installed." />
 	<!-- the "immediate" setup action exists to initialize the progress bar with our job count -->
 	<!-- ugly hack to pass in our dependenices and bundled modules/runtime into the deferred/async action -->
-	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="[AppDependencies];[AppBundledModules];[AppBundledRuntime]"/>
+	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="${dependencies}"/>
 	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="immediate"/>
 	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="deferred"/>
 
 	<InstallExecuteSequence>
-		<Custom Action="NoDowngrade" After="FindRelatedProducts">NEWERFOUND</Custom>
+		<RemoveExistingProducts After="InstallInitialize"/>
 		<Custom Action="NetInstall.Params" After="InstallFiles">NOT Installed</Custom>
 		<Custom Action="NetInstall.Setup" After="NetInstall.Params">NOT Installed</Custom>
 		<Custom Action="NetInstall" After="NetInstall.Setup">NOT Installed</Custom>
