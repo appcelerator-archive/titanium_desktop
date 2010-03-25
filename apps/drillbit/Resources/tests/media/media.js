@@ -52,7 +52,7 @@ describe("ti.Media tests", {
 				value_of(sound.isPlaying()).should_be_false();
 				value_of(sound.isPaused()).should_be_true();
 				value_of(sound.isLooping()).should_be_false();
-				sound.stop();
+				sound.play();
 			}
 			catch (exception)
 			{
@@ -82,7 +82,7 @@ describe("ti.Media tests", {
 				value_of(sound.isPlaying()).should_be_false();
 				value_of(sound.isPaused()).should_be_true();
 				value_of(sound.isLooping()).should_be_false();
-				sound.stop();
+				sound.play();
 			}
 			catch (exception)
 			{
@@ -93,6 +93,31 @@ describe("ti.Media tests", {
 		setTimeout(function(){
 			callback.failed("sound onComplete timed out");
 		}, 10000);
+	},
+	test_stop_does_not_call_oncomplete_as_async: function(callback)
+	{
+		var sound = Titanium.Media.createSound("app://sound.wav");
+		sound.onComplete(function()
+		{
+			value_of(sound.isPlaying()).should_be_false();
+			callback.failed("On complete was called");
+		});
+		sound.play();
+
+		setTimeout(function()
+		{
+			try
+			{
+				sound.stop();
+			}
+			catch (exception)
+			{
+				callback.failed(exception);
+			}
+		}, 1000);
+
+		// If three seconds finished and we didn't get an onComplete call, pass.
+		setTimeout(function(){ callback.passed(); }, 3000);
 	},
 	test_play_sound_looping_as_async: function(callback)
 	{
