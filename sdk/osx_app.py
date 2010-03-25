@@ -50,7 +50,7 @@ class OSXApp(App):
 			p.join(self.contents, 'installer',' Installer App.app', 'Contents',
 				'Resources', 'English.lproj'))
 
-	def package(self, package_dir):
+	def package(self, package_dir, bundle=False):
 		target = p.join(package_dir, self.name + ".dmg")
 		self.env.log("Running pkg-dmg %s => %s" % (self.stage_dir, target))
 		if p.exists(target): # Just in case.

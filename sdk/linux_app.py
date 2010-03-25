@@ -12,7 +12,7 @@ class LinuxApp(App):
 		effess.copy(p.join(self.sdk_dir, 'kboot'),
 			p.join(contents, self.name))
 
-	def package(self, package_dir):
+	def package(self, package_dir, bundle=False):
 		longname = self.name + "-" + self.version
 		def tar_callback(f, tar_file):
 			print f
