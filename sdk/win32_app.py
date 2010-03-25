@@ -117,7 +117,7 @@ class Win32App(App):
 			])
 
 		finally:
-			#self.env.ignore_errors(lambda: os.unlink(wxs_path))
+			self.env.ignore_errors(lambda: os.unlink(wxs_path))
 			self.env.ignore_errors(lambda: os.unlink(wxs_path + '.wixobj'))
 
 	def get_wix_bin_directory(self):
