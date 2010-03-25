@@ -28,8 +28,11 @@
 
 -(void)sound:(NSSound*)s didFinishPlaying:(BOOL)finished
 {
-	[self performSelectorOnMainThread:@selector(completed:)
-		withObject:nil waitUntilDone:NO];
+	if (finished)
+	{
+		[self performSelectorOnMainThread:@selector(completed:)
+			withObject:nil waitUntilDone:NO];
+	}
 }
 
 @end
