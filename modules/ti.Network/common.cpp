@@ -5,7 +5,7 @@
  */
 
 #include "network_module.h"
-#include "curl_common.h"
+#include "common.h"
 
 static Logger* GetLogger()
 {
@@ -75,4 +75,26 @@ void SetStandardCurlHandleOptions(CURL* handle)
 	SET_CURL_OPTION(handle, CURLOPT_SHARE, ti::NetworkModule::GetCurlShareHandle());
 	SET_CURL_OPTION(handle, CURLOPT_COOKIEFILE, cookieJarFilename.c_str());
 	SET_CURL_OPTION(handle, CURLOPT_COOKIEJAR, cookieJarFilename.c_str());
+}
+
+BytesRef ObjectToBytes(KObjectRef dataObject)
+{
+	// If this object is a Bytes object, just do the cast and return.
+	BytesRef bytes(dataObject.cast<Bytes>());
+	if (!bytes.isNull())
+		return bytes;
+
+	// Now try to treat this object like as a file-like object with
+	// a .read() method which returns a Bytes. If this fails we'll
+	// return NULL.
+	KMethodRef nativeReadMethod(dataObject->GetMethod("read", 0));
+	if (nativeReadMethod.isNull())
+		return 0;
+
+	KValueRef readValue(nativeReadMethod->Call());
+	if (!readValue->IsObject())
+		return 0;
+
+	// If this cast fails, it will return NULL, as we expect.
+	return readValue->ToObject().cast<Bytes>();
 }
