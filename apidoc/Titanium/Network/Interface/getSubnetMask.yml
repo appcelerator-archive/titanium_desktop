@@ -1,8 +1,8 @@
 ---
 namespace: Titanium.Network.Interface.getSubnetMask
 type: method
-description: 
+description: Return the subnet mask of this interface as a Network.IPAddress object.
 since: 0.9.0
 platforms: [osx, linux, win32]
-returns: Network.IPAddress, mask
+returns: Network.IPAddress
 parameters: []

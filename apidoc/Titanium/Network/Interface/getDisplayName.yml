@@ -1,8 +1,8 @@
 ---
 namespace: Titanium.Network.Interface.getDisplayName
 type: method
-description: 
+description: Return the display name of this interface.
 since: 0.9.0
 platforms: [osx, linux, win32]
-returns: String, displayName
+returns: String
 parameters: []

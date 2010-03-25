@@ -1,8 +1,8 @@
 ---
 namespace: Titanium.Network.Interface.supportsIPv6
 type: method
-description: 
+description: Return true if this interface supports IPv6 and false otherwise.
 since: 0.9.0
 platforms: [osx, linux, win32]
-returns: Boolean, mask
+returns: Boolean
 parameters: []

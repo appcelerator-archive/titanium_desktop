@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.UI.UserWindow.setContents
 type: method
-description: 
+description: |
+    Set the contents of the UserWindow, given an HTML string
+    and a base URL. Relative links in the HTML will be resolved
+    relatively to the base URL.
 since: 0.9.0
 platforms: [osx, linux, win32]
 returns: String
