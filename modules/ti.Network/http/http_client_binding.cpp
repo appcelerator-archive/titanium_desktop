@@ -510,9 +510,10 @@ namespace ti
 		ValueList args(Value::NewObject(GetAutoPtr()));
 
 		// Must invoke the on*** handler functions
-		if (eventName == Event::HTTP_STATE_CHANGED && !this->onreadystate.isNull())
+		if (eventName == Event::HTTP_STATE_CHANGED)
 		{
-			RunOnMainThread(this->onreadystate, GetAutoPtr(), args, true);
+			if (!this->onreadystate.isNull())
+				RunOnMainThread(this->onreadystate, GetAutoPtr(), args, true);
 
 			if (this->Get("readyState")->ToInt() == 4 && !this->onload.isNull())
 			{
