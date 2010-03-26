@@ -1177,7 +1177,7 @@ namespace ti
 	
 		// Only do this if the menu is actually changing.
 		if (menu.get() == this->activeMenu.get())
-			return
+			return;
 
 		this->RemoveOldMenu();
 		if (!menu.isNull() && this->gtkWindow)

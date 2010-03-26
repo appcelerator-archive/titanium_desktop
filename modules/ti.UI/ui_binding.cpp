@@ -345,13 +345,7 @@ namespace ti
 	void UIBinding::_SetMenu(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setMenu", "o|0");
-		KObjectRef argObj = args.GetObject(0, NULL);
-		AutoMenu menu = NULL;
-
-		if (!argObj.isNull())
-		{
-			menu = argObj.cast<Menu>();
-		}
+		AutoMenu menu(args.GetObject(0, 0).cast<Menu>());
 
 		this->SetMenu(menu); // platform-specific impl
 
@@ -378,13 +372,7 @@ namespace ti
 	void UIBinding::_SetContextMenu(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setContextMenu", "o|0");
-		KObjectRef argObj = args.GetObject(0, NULL);
-		AutoMenu menu = NULL;
-
-		if (!argObj.isNull())
-		{
-			menu = argObj.cast<Menu>();
-		}
+		AutoMenu menu(args.GetObject(0, 0).cast<Menu>());
 		this->SetContextMenu(menu);
 	}
 
@@ -475,11 +463,7 @@ namespace ti
 
 	void UIBinding::_SetDockMenu(const ValueList& args, KValueRef result)
 	{
-		AutoPtr<Menu> menu = NULL; // A NULL value is an unset
-		if (args.size() > 0 && args.at(0)->IsObject())
-		{
-			menu = args.at(0)->ToObject().cast<Menu>();
-		}
+		AutoMenu menu(args.GetObject(0, 0).cast<Menu>());
 		this->SetDockMenu(menu);
 	}
 

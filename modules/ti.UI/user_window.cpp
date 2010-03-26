@@ -1438,16 +1438,11 @@ void UserWindow::_SetTransparency(const kroll::ValueList& args, kroll::KValueRef
 
 void UserWindow::_SetMenu(const kroll::ValueList& args, kroll::KValueRef result)
 {
-	args.VerifyException("setMenu", "?o");
-	AutoMenu menu = NULL;
-	if (args.size() > 0) {
-		menu = args.at(0)->ToObject().cast<Menu>();
-	}
+	args.VerifyException("setMenu", "o|0");
+	AutoMenu menu(args.GetObject(0, 0).cast<Menu>());
 
 	if (this->active)
-	{
 		this->SetMenu(menu);
-	}
 }
 
 void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::KValueRef result)
@@ -1465,16 +1460,11 @@ void UserWindow::_GetMenu(const kroll::ValueList& args, kroll::KValueRef result)
 
 void UserWindow::_SetContextMenu(const kroll::ValueList& args, kroll::KValueRef result)
 {
-	args.VerifyException("setContextMenu", "?o");
-	AutoMenu menu = NULL;
-	if (args.size() > 0) {
-		menu = args.at(0)->ToObject().cast<Menu>();
-	}
+	args.VerifyException("setMenu", "o|0");
+	AutoMenu menu(args.GetObject(0, 0).cast<Menu>());
 
 	if (this->active)
-	{
 		this->SetContextMenu(menu);
-	}
 }
 
 void UserWindow::_GetContextMenu(const kroll::ValueList& args, kroll::KValueRef result)
