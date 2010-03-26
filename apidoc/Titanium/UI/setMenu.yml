@@ -6,4 +6,4 @@ since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
 parameters: 
-    - [UI.Menu|null, menu, A Menu object to use as the menu or null to unset the menu]
+    - [UI.Menu|null, menu, A Menu object to use as the menu or null to unset the menu.]
