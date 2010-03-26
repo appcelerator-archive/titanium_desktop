@@ -18,9 +18,8 @@ namespace ti
 	public:
 		typedef enum { Bool, Double, Int, String, List } Type;
 
-		PropertiesBinding(std::string& file_path);
-		PropertiesBinding();
-		virtual ~PropertiesBinding();
+		PropertiesBinding(const std::string& file_path = "");
+		virtual ~PropertiesBinding() {}
 
 		void GetBool(const ValueList& args, KValueRef result);
 		void GetDouble(const ValueList& args, KValueRef result);
@@ -36,23 +35,20 @@ namespace ti
 		void RemoveProperty(const ValueList& args, KValueRef result);
 		void ListProperties(const ValueList& args, KValueRef result);
 		void SaveTo(const ValueList& args, KValueRef result);
-
 		void Getter(const ValueList& args, KValueRef result, Type type);
 		void Setter(const ValueList& args, Type type);
+		void SaveConfig();
 
 		Poco::AutoPtr<Poco::Util::TitaniumPropertyFileConfiguration> GetConfig()
 		{
 			return config;
 		}
 
-		protected:
+	protected:
 		Logger* logger;
-
-		std::string file_path;
-		void Init();
-
+		std::string filePath;
 		Poco::AutoPtr<Poco::Util::TitaniumPropertyFileConfiguration> config;
 	};
 }
 
-#endif /* PROPERTIES_BINDING_H_ */
+#endif
