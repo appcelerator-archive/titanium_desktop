@@ -337,14 +337,13 @@ namespace ti
 
 	void MenuItem::HandleClickEvent(KObjectRef source)
 	{
-		if (this->IsCheck() && this->autoCheck)
+		if (this->FireEvent(Event::CLICKED)
+			&& this->IsCheck() && this->autoCheck)
 		{
 			// Execute this later on the main thread
 			RunOnMainThread(this->Get("setState")->ToMethod(),
 				ValueList(Value::NewBool(!this->GetState())), false);
 		}
-
-		this->FireEvent(Event::CLICKED);
 	}
 
 	void MenuItem::SetState(bool newState)
