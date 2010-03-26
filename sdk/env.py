@@ -7,39 +7,32 @@ import platform
 import subprocess
 import sys
 import os.path as p
+import __init__
 
 class PackagingEnvironment(object):
-	def __init__(self, version, target_os, product_name="kroll"):
+	def __init__(self, target_os):
+		self.version = __init__.get_titanium_version()
+		self.excludes = ['.pdb', '.exp', '.ilk', '.lib', '.svn',
+			'.git', '.gitignore', '.cvsignore']
+
 		self.target_os = target_os
-		if target_os is 'linux':
-			self.App = linux_app.LinuxApp
-		if target_os is 'osx':
-			self.App = osx_app.OSXApp
-		if target_os is 'win32':
-			self.App = win32_app.Win32App
-
-		self.version = version
-
 		if (target_os is 'linux'):
-			pname = product_name.lower()
 			self.install_dirs = [
-				p.expanduser('~/.' + pname),
-				"/opt/" + pname,
-				"/usr/local/lib/" + pname,
-				"/usr/lib/" + pname
+				p.expanduser('~/.titanium'),
+				"/opt/titanium",
+				"/usr/local/lib/titanium",
+				"/usr/lib/titanium"
 			]
 		elif (target_os is 'osx'):
-			pname = product_name.capitalize()
 			self.install_dirs = [
-				p.expanduser('~/Library/Application Support/' + pname),
-				'/Library/Application Support/' + pname
+				p.expanduser('~/Library/Application Support/Titanium'),
+				'/Library/Application Support/Titanium'
 			]
 		elif (target_os is 'win32'):
-			pname = product_name.capitalize()
 			self.install_dirs = [
-				p.join(os.environ['APPDATA'], pname),
+				p.join(os.environ['APPDATA'], 'Titanium'),
 				# TODO: Is there a better way to determine this directory?
-				'C:\\ProgramData\\' + pname
+				'C:\\ProgramData\\Titanium'
 			]
 		else:
 			raise Exception("Unknown environment!")
@@ -65,12 +58,20 @@ class PackagingEnvironment(object):
 		elif p.exists(p.join(script_dir, 'runtime')):
 			self.components_dir = cwd
 
+	def create_app(self, path):
+		if self.target_os is 'linux':
+			return linux_app.LinuxApp(self, path)
+		if self.target_os is 'osx':
+			return osx_app.OSXApp(self, path)
+		if self.target_os is 'win32':
+			return win32_app.Win32App(self, path)
+
 	def log(self, text):
 		print u'    -> %s' % text
+		sys.stdout.flush()
 
 	def get_excludes(self):
-		return ['.pdb', '.exp', '.ilk', '.lib', '.svn',
-			'.git', '.gitignore', '.cvsignore']
+		return self.excludes
 
 	def get_component(self, type, name, version):
 		# First try the build directory.

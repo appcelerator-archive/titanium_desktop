@@ -23,8 +23,8 @@ class Win32App(App):
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot.exe to %s' % contents);
-		effess.copy(p.join(self.sdk_dir, 'kboot.exe'),
-			p.join(contents, '%s.exe' % self.name))
+		self.executable_path = p.join(contents, '%s.exe' % self.name)
+		effess.copy(p.join(self.sdk_dir, 'kboot.exe'), self.executable_path)
 
 		# The .installed file for Windows should always exist,
 		# since we only ever install via the MSI installer.

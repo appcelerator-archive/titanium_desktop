@@ -9,8 +9,8 @@ class LinuxApp(App):
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot to %s' % contents)
-		effess.copy(p.join(self.sdk_dir, 'kboot'),
-			p.join(contents, self.name))
+		self.executable_path = p.join(self.contents, self.name)
+		effess.copy(p.join(self.sdk_dir, 'kboot'), self.executable_path)
 
 	def package(self, package_dir, bundle=False):
 		longname = self.name + "-" + self.version

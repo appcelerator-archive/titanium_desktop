@@ -16,8 +16,8 @@ def package_app_builder(target, source, env):
 	# Wait until the initial build is finished to do this import.
 	import sdk.env
 
-	pkg_env = sdk.env.PackagingEnvironment(build.version, build.os, 'titanium')
-	app = pkg_env.App(pkg_env, env['PATH'])
+	pkg_env = sdk.env.PackagingEnvironment(build.os)
+	app = pkg_env.create_app(env['PATH'])
 	app.stage(path.join(build.dir, app.name), bundle=True)
 
 def package_sdkinstaller(target, source, env):
@@ -26,8 +26,8 @@ def package_sdkinstaller(target, source, env):
 	# Create a staged application, but don't bundle it, because we
 	# want to force the installer to run and install the new SDK.
 	import sdk.env
-	pkg_env = sdk.env.PackagingEnvironment(build.version, build.os, 'titanium')
-	app = pkg_env.App(pkg_env, env['PATH'])
+	pkg_env = sdk.env.PackagingEnvironment(build.os)
+	app = pkg_env.create_app(env['PATH'])
 	app.stage(path.join(build.dir, app.name), bundle=False)
 
 	# Copy the zip files from the dist directory to developer.contents/dist
