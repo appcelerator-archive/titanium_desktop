@@ -49,7 +49,7 @@ namespace Poco {
 namespace Util {
 
 
-class Util_API TitaniumMapConfiguration: public AbstractConfiguration
+class TitaniumMapConfiguration: public AbstractConfiguration
 	/// An implementation of AbstractConfiguration that stores configuration data in a map.
 {
 public:

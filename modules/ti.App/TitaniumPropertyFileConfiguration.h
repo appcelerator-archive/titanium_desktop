@@ -50,7 +50,7 @@ namespace Poco {
 namespace Util {
 
 
-class Util_API TitaniumPropertyFileConfiguration: public TitaniumMapConfiguration
+class TitaniumPropertyFileConfiguration: public TitaniumMapConfiguration
 	/// This implementation of a Configuration reads properties
 	/// from a Java-style properties file.
 	///
