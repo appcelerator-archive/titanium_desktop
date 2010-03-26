@@ -6,11 +6,9 @@
 #url:http://titaniumapp.com
 #guid:be69fe4c-966b-483c-b57c-7ba4a34fbf10
 #desc:Alloy shell
-runtime:0.x
-api:0.x
-javascript:0.x
-python:0.x
-ruby:0.x
-#php:0.x
-alloy:0.x
-tiapp:0.x
+runtime:
+python:
+ruby:
+alloy:
+tiapp:
+#php:
