@@ -22,7 +22,7 @@ namespace ti
 			file.createFile();
 		}
 
-		config = new Poco::Util::PropertyFileConfiguration(file_path);
+		config = new Poco::Util::TitaniumPropertyFileConfiguration(file_path);
 		this->file_path = file_path.c_str();
 		
 		this->Init();
@@ -32,7 +32,7 @@ namespace ti
 		StaticBoundObject("Properties")
 	{
 		this->file_path = "";
-		this->config = new Poco::Util::PropertyFileConfiguration();
+		this->config = new Poco::Util::TitaniumPropertyFileConfiguration();
 		
 		this->Init();
 	}
@@ -110,6 +110,7 @@ namespace ti
 		 * @tiresult(for=App.Properties.hasProperty,type=Boolean) returns true if the property exists
 		 */
 		SetMethod("hasProperty", &PropertiesBinding::HasProperty);
+		SetMethod("removeProperty", &PropertiesBinding::RemoveProperty);
 		/**
 		 * @tiapi(method=True,name=App.Properties.listProperties,since=0.2) Returns a list of property values
 		 * @tiresult(for=App.Properties.listProperties,type=Array<String>) returns a list of property values
@@ -332,6 +333,12 @@ namespace ti
 			std::string property = args.at(0)->ToString();
 			result->SetBool(config->hasProperty(property));
 		}
+	}
+
+	void PropertiesBinding::RemoveProperty(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("hasProperty", "s");
+		result->SetBool(config->removeProperty(args.GetString(0)));
 	}
 
 	void PropertiesBinding::ListProperties(const ValueList& args, KValueRef result)

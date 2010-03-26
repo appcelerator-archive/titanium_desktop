@@ -101,7 +101,24 @@ describe("ti.App tests",
 		props2.saveTo(path);
 		value_of(TFS.getFile(path).exists()).should_be_true();
 	},
-	
+
+	test_remove_properties: function()
+	{
+		var props = Titanium.App.createProperties({
+			"val1": true,
+			"val2": 1.1,
+			"val3": ['a', 'b', 'c'],
+			"val4": "123"
+		});
+
+		value_of(props.hasProperty('val1')).should_be_true();
+		props.removeProperty('val1');
+		value_of(props.hasProperty('val1')).should_be_false();
+		props.setInt('val1', 42);
+		value_of(props.hasProperty('val1')).should_be_true();
+		value_of(props.getInt('val1')).should_be(42);
+	},
+
 	test_app_URLToPath: function ()
 	{
 	    // get the fully qualified absolute path to the properties.

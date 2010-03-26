@@ -9,13 +9,15 @@
 
 #include <kroll/kroll.h>
 #include <Poco/AutoPtr.h>
-#include <Poco/Util/PropertyFileConfiguration.h>
+#include "TitaniumPropertyFileConfiguration.h"
 
 namespace ti
 {
 	class PropertiesBinding : public kroll::StaticBoundObject
 	{
-		public:
+	public:
+		typedef enum { Bool, Double, Int, String, List } Type;
+
 		PropertiesBinding(std::string& file_path);
 		PropertiesBinding();
 		virtual ~PropertiesBinding();
@@ -31,17 +33,14 @@ namespace ti
 		void SetString(const ValueList& args, KValueRef result);
 		void SetList(const ValueList& args, KValueRef result);
 		void HasProperty(const ValueList& args, KValueRef result);
+		void RemoveProperty(const ValueList& args, KValueRef result);
 		void ListProperties(const ValueList& args, KValueRef result);
 		void SaveTo(const ValueList& args, KValueRef result);
 
-		typedef enum
-		{
-			Bool, Double, Int, String, List
-		} Type;
 		void Getter(const ValueList& args, KValueRef result, Type type);
 		void Setter(const ValueList& args, Type type);
-		
-		Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> GetConfig()
+
+		Poco::AutoPtr<Poco::Util::TitaniumPropertyFileConfiguration> GetConfig()
 		{
 			return config;
 		}
@@ -49,10 +48,10 @@ namespace ti
 		protected:
 		Logger* logger;
 
+		std::string file_path;
 		void Init();
 
-		Poco::AutoPtr<Poco::Util::PropertyFileConfiguration> config;
-		std::string file_path;
+		Poco::AutoPtr<Poco::Util::TitaniumPropertyFileConfiguration> config;
 	};
 }
 
