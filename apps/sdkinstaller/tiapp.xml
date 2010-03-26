@@ -14,6 +14,6 @@
  		<minimizable>true</minimizable>
  		<closeable>true</closeable>
  		<resizable>true</resizable>
- 		<visible>true</visible>
+ 		<visible>false</visible>
 	</window>
 </ti:app>
