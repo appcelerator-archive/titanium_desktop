@@ -116,5 +116,60 @@ describe("Network.HTTPServer",
 		};
 		xhr.open("GET","http://127.0.0.1:8082/foo");
 		xhr.send(null);
+	},
+	get_request_blob_response_as_async: function(callback)
+	{
+		var blob = Titanium.Filesystem.getFile(
+			Titanium.API.application.resourcesPath, "test.bin").read();
+
+		var server = Titanium.Network.createHTTPServer();
+		server.bind(8082,function(request,response)
+		{
+			try
+			{
+				value_of(request.getMethod()).should_be('GET');
+				value_of(request.getURI()).should_be('/foo');
+				value_of(request.getHeaders()).should_be_object();
+				value_of(request.getHeaders()['Host']).should_not_be_undefined();
+				response.setContentType('text/plain');
+				response.setContentLength(blob.length);
+				response.setStatusAndReason('200','OK');
+				response.write(blob);
+			}
+			catch(e)
+			{
+				callback.failed(e);
+			}
+		});
+		
+		var xhr = Titanium.Network.createHTTPClient();
+		xhr.onreadystatechange = function()
+		{
+			if (this.readyState == 4)
+			{
+				try
+				{
+					value_of(this.status).should_be(200);
+					value_of(this.statusText).should_be('OK');
+					var response = this.responseData;
+					value_of(this.getResponseHeader('Content-Type')).should_be('text/plain');
+					value_of(response.length).should_be(blob.length);
+
+					for (var i = 0; i < response.length; i++)
+					{
+						value_of(response.byteAt(i)).should_be(blob.byteAt(i));
+					}
+					server.close();
+					callback.passed();
+				}
+				catch(e)
+				{
+					server.close();
+					callback.failed(e);
+				}
+			}
+		};
+		xhr.open("GET","http://127.0.0.1:8082/foo");
+		xhr.send(null);
 	}
 });

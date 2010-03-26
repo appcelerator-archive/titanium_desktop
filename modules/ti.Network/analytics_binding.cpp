@@ -11,7 +11,7 @@
 #include "network_module.h"
 #include "network_binding.h"
 #include "analytics_binding.h"
-#include "curl_common.h"
+#include "common.h"
 
 #define SPEC_VERSION "2"
 namespace ti

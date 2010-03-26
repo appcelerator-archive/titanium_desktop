@@ -46,6 +46,15 @@ describe("Ruby Tests",
 		value_of(test_type_string()).should_be_string();
 		value_of(test_type_string()).should_be('i am string');
 	},
+	test_type_symbol: function()
+	{
+		value_of(test_type_symbol('blahblah')).should_be_string()
+		value_of(test_type_symbol('blahblah')).should_be('blahblah');
+		value_of(test_type_symbol('blahblah=')).should_be_string()
+		value_of(test_type_symbol('blahblah=')).should_be('blahblah=');
+		value_of(test_type_symbol('blahblah?')).should_be_string()
+		value_of(test_type_symbol('blahblah?')).should_be('blahblah?');
+	},
 	test_type_int: function()
 	{
 		value_of(test_type_int()).should_be_number();
@@ -272,6 +281,26 @@ describe("Ruby Tests",
 	{
 		// This test makes sure that the Ruby standard library  is around.
 		value_of(api_is_there()).should_be_true();
+	},
+	test_krubyhash_with_symbols: function()
+	{
+		var hash = test_get_symbolly_hash();
+		value_of(hash['symbol']).should_be("bully");
+		value_of(hash['another_symbol']).should_be("wooly");
+		value_of(hash['not_a_symbol']).should_be("foo");
+		hash['fromjs'] = 'another';
+		value_of(test_symbolly_hash(hash)).should_be_true();
+	},
+	test_krubyhash_with_less_symbols: function()
+	{
+		// A hash with less than keys/2 symbolic keys should
+		// treat new keys as strings instead of symbols
+		var hash = test_get_less_symbolly_hash();
+		value_of(hash['symbol']).should_be("bully");
+		value_of(hash['another_not_symbol']).should_be("wooly");
+		value_of(hash['not_a_symbol']).should_be("foo");
+		hash['fromjs'] = 'another';
+		value_of(test_less_symbolly_hash(hash)).should_be_true();
 	},
 	//test_krubyobject_iterate_properties: function()
 	//{

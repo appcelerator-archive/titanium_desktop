@@ -6,6 +6,8 @@
 
 #include "http_server_response.h"
 #include <Poco/Net/HTTPCookie.h>
+#include <curl/curl.h>
+#include "../common.h"
 
 namespace ti
 {
@@ -131,22 +133,21 @@ namespace ti
 		
 		if (args.at(0)->IsString())
 		{
-			const char *data = args.at(0)->ToString();
-			ostr << data;
+			ostr << args.at(0)->ToString();
 			ostr.flush();
 			return;
 		}
 		else if (args.at(0)->IsObject())
 		{
-			AutoPtr<Bytes> bytes = args.at(0)->ToObject().cast<Bytes>();
-			if (!bytes.isNull())
-			{
-				const char *data = bytes->Get();
-				ostr << data;
-				ostr.flush();
-				return;
-			}
+			BytesRef bytes(ObjectToBytes(args.at(0)->ToObject()));
+			if (bytes.isNull())
+				throw ValueException::FromString("Don't know how to write that kind of data.");
+
+			ostr.write(bytes->Get(), bytes->Length());
 		}
-		throw ValueException::FromString("unknown type");
+		else
+		{
+			throw ValueException::FromString("Don't know how to write that kind of data.");
+		}
 	}
 }

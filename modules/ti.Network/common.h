@@ -19,5 +19,6 @@
 
 void SetCurlProxySettings(CURL* curlHandle, SharedProxy proxy);
 void SetStandardCurlHandleOptions(CURL* handle);
+BytesRef ObjectToBytes(KObjectRef dataObject);
 
 #endif

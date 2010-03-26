@@ -43,7 +43,11 @@ def test_gem
 end
 
 def test_type_string
-	return 'i am string'	
+	return 'i am string'
+end
+
+def test_type_symbol(stringbol)
+	return stringbol.to_sym
 end
 
 def test_type_float
@@ -77,7 +81,57 @@ end
 def test_type_map
 	{'a'=>'b'}
 end
-	
+
+def test_get_symbolly_hash
+	# We want more than 1/2 of the keys to be symbols
+	# for new keys to be treated like symbols.
+	return {
+		:a => 'a',
+		:one => 'b',
+		:two => 'c',
+		:three => 'd',
+		:symbol => 'bully',
+		:another_symbol => 'wooly',
+		'not_a_symbol' => 'foo'
+	}
+end
+
+def test_get_less_symbolly_hash
+	# We want more than 1/2 of the keys to be symbols
+	# for new keys to be treated like symbols.
+	return {
+		'a' => 'a',
+		'one' => 'b',
+		'two' => 'c',
+		'three' => 'd',
+		'four' => 'd',
+		'five' => 'd',
+		:symbol => 'bully',
+		:another_not_symbol => 'wooly',
+		'not_a_symbol' => 'foo'
+	}
+end
+
+def test_symbolly_hash(hash)
+	if hash.has_key?('fromjs')
+		return false
+	elsif hash.has_key?(:fromjs)
+		return true
+	else
+		return false
+	end
+end
+
+def test_less_symbolly_hash(hash)
+	if hash.has_key?(:fromjs)
+		return false
+	elsif hash.has_key?('fromjs')
+		return true
+	else
+		return false
+	end
+end
+
 def test_type_tuple
 	OpenStruct.new(:one=>2,:two=>3)
 end
