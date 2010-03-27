@@ -85,6 +85,8 @@ effess.lightweight_copy_tree(path.join(build.titanium_sdk_dir, build.os),
 	sdk_dir, exclude=excludes)
 effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "*.py")),
 	sdk_dir, exclude=excludes)
+effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "PyRTF")),
+	sdk_dir, exclude=excludes)
 effess.copy_to_dir(glob(path.join(build.kroll_source_dir, 'tools', "effess.py")),
 	sdk_dir, exclude=excludes)
 
