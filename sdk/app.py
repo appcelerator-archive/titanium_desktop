@@ -5,10 +5,13 @@ import effess
 import xml.etree.ElementTree
 from xml.etree.ElementTree import ElementTree
 
+def fix_path(path):
+	return p.abspath(p.expanduser(p.normpath(path)))
+
 class App(object):
 	def __init__(self, env, source_dir):
 		self.env = env
-		self.source_dir = source_dir # The directory for the source contents
+		self.source_dir = fix_path(source_dir)
 		self.modules = []
 		self.read_manifest()
 		self.read_tiapp()
@@ -21,7 +24,7 @@ class App(object):
 
 		# Cache the SDK directory for the runtime here, because we'll
 		# need it quite a bit if we do staging and packaging.
-		self.sdk_dir = p.normpath(p.abspath(self.env.get_sdk_dir(self.runtime_version)))
+		self.sdk_dir = fix_path((self.env.get_sdk_dir(self.runtime_version)))
 
 	def read_manifest(self):
 		manifest_path = p.join(self.source_dir, "manifest")
@@ -121,10 +124,24 @@ class App(object):
 
 	def stage(self, stage_dir, bundle=False):
 		print('Staging %s' % self.name)
-		self.stage_dir = stage_dir
+		self.stage_dir = fix_path(stage_dir)
 		contents = self.contents = self.get_contents_dir()
 
 		self.env.log(u'Copying contents from %s to %s' % (self.source_dir, contents))
+		# If we are staging into a subdirectory of the original
+		# application directory (like Titanium Developer), then
+		# ignore the immediate child of the original app directory
+		# on the way to the stagin directory. Example:
+		# App directory: /tmp/MyProject
+		# Staging directory: /tmp/MyProject/dist/linux/MyProject
+		# then we ignore: /tmp/MyProject/dist
+		excludes = self.env.get_excludes()
+		if contents.find(self.source_dir) != -1 and \
+				contents != self.source_dir:
+			(current, child) = p.split(contents)
+			while current != self.source_dir:
+				(current, child) = p.split(current)
+			excludes.append(p.join(current, child))
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
 
 		installer_source = p.join(self.sdk_dir, 'installer')

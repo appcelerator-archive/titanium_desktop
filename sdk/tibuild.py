@@ -9,13 +9,14 @@
 #
 # Original author: Jeff Haynie 04/02/09
 
-import os.path as path
+import os
 import platform
 import re
 import env
 import signal
 import subprocess
 import sys
+import os.path as path
 from optparse import OptionParser
 from desktop_builder import DesktopBuilder
 from desktop_packager import DesktopPackager
@@ -38,7 +39,7 @@ def run(executable_path):
 
 	def handler(signum, frame):
 		print "signal caught: %d" % signum
-		if not p == None:
+		if not process == None:
 			if platform != 'win32':
 				print "kill app with pid %d" % process.pid
 				os.system("kill -9 %d" % process.pid)
