@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.getWindows
 type: function
-description: Returns the list of currently open windows
+description: Return a list of currently open windows.
 since: 0.8.0
 platforms: ['osx', 'linux', 'win32']
 returns: Array<UI.UserWindow>

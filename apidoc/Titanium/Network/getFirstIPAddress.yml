@@ -5,4 +5,4 @@ description: Return the first IPv4 address in this system's list of interfaces.
 since: 0.9.0
 platforms: ['osx', 'linux', 'win32']
 returns: String
-parameters: 
+parameters: []

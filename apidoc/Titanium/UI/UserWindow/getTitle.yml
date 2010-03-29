@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getTitle
 type: method
-description: Returns the title of a window
+description: Return the title of this window.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

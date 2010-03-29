@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getMaxHeight
 type: method
-description: "Returns a window's max height"
+description: "Return this window's maximum height."
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number

@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getURL
 type: method
-description: Returns the url for a window
+description: Return this window's current URL."
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

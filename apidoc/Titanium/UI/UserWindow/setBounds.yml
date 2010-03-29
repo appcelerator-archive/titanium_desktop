@@ -1,7 +1,10 @@
 ---
 namespace: Titanium.UI.UserWindow.setBounds
 type: method
-description: Sets the window bounds
+description: |
+    Set this window's bounds object. A bounds object is a simple JavaScript object
+    containing four properties <tt>x</tt>, <tt>y</tt>, <tt>width<tt>, and <tt>height</tt>
+    which correspond to the window geometry on the screen in pixels.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

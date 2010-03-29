@@ -1,8 +1,8 @@
 ---
 namespace: Titanium.UI.UserWindow.getIcon
 type: method
-description: "Returns a window's icon"
+description: "Return this window's icon, if one is set or null"
 since: 0.2.0
 platforms: [osx, linux, win32]
-returns: String
+returns: String|Null
 parameters: []

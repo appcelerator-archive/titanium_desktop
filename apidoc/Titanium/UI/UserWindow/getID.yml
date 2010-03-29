@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getID
 type: method
-description: Returns the id of a window
+description: Return this window's configuration id.
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

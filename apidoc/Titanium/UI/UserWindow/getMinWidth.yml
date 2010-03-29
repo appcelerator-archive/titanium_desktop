@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getMinWidth
 type: method
-description: "Returns a window's min-width"
+description: "Return this window's minimum width."
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number

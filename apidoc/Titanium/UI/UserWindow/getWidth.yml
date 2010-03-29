@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.UI.UserWindow.getWidth
 type: method
-description: "Returns a window's width"
+description: "Return this window's width in pixels."
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Number
