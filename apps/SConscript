@@ -5,7 +5,6 @@ import SCons.Environment
 import os.path as path
 import sys
 from SCons.Script import *
-from app import App
 from subprocess import Popen
 
 Import('build')
