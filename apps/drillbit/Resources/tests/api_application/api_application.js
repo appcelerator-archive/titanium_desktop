@@ -57,7 +57,6 @@ describe("ti.API.Application tests",
 			// do we have a component?
 			value_of(item).should_not_be_null();
 			value_of(item).should_be_object();
-			value_of(item.getManifest).should_be_function();
 			value_of(item.getName).should_be_function();
 			value_of(item.getPath).should_be_function();
 			value_of(item.getType).should_be_function();
@@ -92,7 +91,6 @@ describe("ti.API.Application tests",
 			var  item = installedComponents[i];
 			// do we have a component?
 			value_of(item).should_be_object();
-			value_of(item.getManifest).should_be_function();
 			value_of(item.getName).should_be_function();
 			value_of(item.getPath).should_be_function();
 			value_of(item.getType).should_be_function();
@@ -132,7 +130,6 @@ describe("ti.API.Application tests",
 			// do we have a component?
 			value_of(item).should_not_be_null();
 			value_of(item).should_be_object();
-			value_of(item.getManifest).should_be_function();
 			value_of(item.getName).should_be_function();
 			value_of(item.getPath).should_be_function();
 			value_of(item.getType).should_be_function();
@@ -148,7 +145,6 @@ describe("ti.API.Application tests",
 							  "' version: '"+item.getVersion()+
 							  "' path '" + item.getPath() + "'");
 
-			var manifest = item.getManifest();
 			var name = item.getName();
 			var path = item.getPath();
 			var type = item.getType();
@@ -192,7 +188,6 @@ describe("ti.API.Application tests",
 			// do we have a component?
 			value_of(item).should_be_object();
 
-			value_of(item.getManifest).should_be_function();
 			value_of(item.getName).should_be_function();
 			value_of(item.getPath).should_be_function();
 			value_of(item.getType).should_be_function();
@@ -216,7 +211,6 @@ describe("ti.API.Application tests",
 			// do we have a component?
 			value_of(item).should_not_be_null();
 			value_of(item).should_be_object();
-			value_of(item.getManifest).should_be_function();
 			value_of(item.getName).should_be_function();
 			value_of(item.getPath).should_be_function();
 			value_of(item.getType).should_be_function();
@@ -232,7 +226,6 @@ describe("ti.API.Application tests",
 							  "' version: '"+item.getVersion()+
 							  "' path '" + item.getPath() + "'");
 
-			var manifest = item.getManifest();
 			var name = item.getName();
 			var path = item.getPath();
 			var type = item.getType();
