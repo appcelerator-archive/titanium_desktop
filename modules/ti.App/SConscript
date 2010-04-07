@@ -7,7 +7,6 @@ env.Append(CPPDEFINES = ('TITANIUM_APP_API_EXPORT', 1))
 
 build.add_thirdparty(env, 'poco')
 if build.is_osx():
-	env.Append(LIBS=['kroll'])
 	env.Append(LIBS=['xml2'])
 	env.Append(CPPPATH=['/usr/include/libxml2'])
 
