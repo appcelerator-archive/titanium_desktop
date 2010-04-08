@@ -73,6 +73,16 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.send_header('Head', 'Tail')
 		self.end_headers()
 
+	def send_continue_headers(self):
+		print 'Sending headers...'
+		# Work-around for http://bugs.python.org/issue1491
+		# Just send the raw header directly.
+		self.wfile.write("HTTP/1.1 100 Continue\r\n\r\n")
+		self.send_response(200)
+		self.send_header('Foo', 'Bar')
+		self.send_header('Head', 'Tail')
+		self.end_headers()
+
 	# Verify basic auth credentials
 	def basic_auth(self):
 		print "Basic auth..."
@@ -156,6 +166,7 @@ with the http client.
 		'/recvfile': recv_file,
 		'/requestheaders': recv_headers,
 		'/responseheaders': send_headers,
+		'/continue': send_continue_headers,
 	}
 
 if __name__ == '__main__':

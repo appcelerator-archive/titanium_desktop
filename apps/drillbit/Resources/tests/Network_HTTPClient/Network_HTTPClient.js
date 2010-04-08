@@ -548,4 +548,24 @@ describe("Network.HTTPClient",
 		//value_of(sawFoo).should_be_true();
 		//value_of(sawHead).should_be_true();
 	},
+	test_http_continue_as_async: function(callback)
+	{
+		// Test onload handler when an onreadystatechange handler is not installed
+		// See bug #335
+		this.client.onload = function()
+		{
+			if (this.status != 200)
+				callback.failed("status should be 200, but was: " + this.status);
+
+			callback.passed()
+		}
+
+		this.client.open("GET", this.url + "continue", false);
+		this.client.send();
+		timer = setTimeout(function()
+		{
+			callback.failed('Test timed out');
+		}, 10000);
+	},
+
 });
