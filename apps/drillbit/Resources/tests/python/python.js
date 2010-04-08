@@ -99,6 +99,13 @@ describe("Python Tests",
 		value_of(test_type_dict()['two']).should_be_exactly(3);
 		value_of(test_type_dict().two).should_be_exactly(3);
 	},
+	test_type_dict_missing: function()
+	{
+		value_of(test_type_dict()).should_be_object();
+		value_of(test_type_dict()['one']).should_be_exactly(2);
+		value_of(test_type_dict()['missing']).should_be_undefined();
+		value_of(test_type_dict()['another_missing']).should_be_undefined();
+	},
 	test_type_function: function()
 	{
 		value_of(test_type_function()).should_be_function();
