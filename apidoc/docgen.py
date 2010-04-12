@@ -61,6 +61,7 @@ class API(object):
 
 	def __init__(self, namespace):
 		self.namespace = namespace
+		self.filename = namespace
 		self.methods = []
 		self.modules = []
 		self.objects = []
@@ -99,6 +100,7 @@ class API(object):
 		self.description = data['description']
 		self.since = data['since']
 		self.deprecated = 'deprecated' in data and data['deprecated']
+		self.filename = '%s-%s' % (self.namespace, self.type)
 		if 'examples' in data:
 			self.examples = data['examples']
 		if 'events' in data:
@@ -179,7 +181,7 @@ def spit_html(options):
 			print exceptions.html_error_template().render()
 			sys.exit()
 
-		f = open(path.join(outdir, '%s.html' % api.namespace), 'w+')
+		f = open(path.join(outdir, '%s.html' % api.filename), 'w+')
 		f.write(output)
 		f.close()
 

@@ -31,7 +31,7 @@ ${data.description}
 <table>
 % for module in data.modules:
 <tr>
-	<td class="name"><a href="${module.namespace}.html">${module.name()}</a></td>
+	<td class="name"><a href="${module.filename}.html">${module.name()}</a></td>
 	<td class="description">${module.description}</td>
 </tr>
 % endfor
@@ -43,7 +43,7 @@ ${data.description}
 <table>
 % for object in data.objects:
 <tr>
-	<td class="name"><a href="${object.namespace}.html">${object.name()}</a></td>
+	<td class="name"><a href="${object.filename}.html">${object.name()}</a></td>
 	<td class="description">${object.description}</td>
 </tr>
 % endfor
@@ -56,7 +56,7 @@ ${data.description}
 % for method in data.methods:
 	<tr>
 		<td class="name">
-			<a href="${method.namespace}.html">${method.name()}</a>
+			<a href="${method.filename}.html">${method.name()}</a>
 		</td>
 		<td class="description">${method.description}</td>
 	</tr>
@@ -75,7 +75,7 @@ ${data.description}
 % for prop in data.properties:
 <tr>
 	<td class="type">${prop.returns}</td>
-	<td class="name"><a href="${prop.namespace}.html">${prop.name()}</a></td>
+	<td class="name"><a href="${prop.filename}.html">${prop.name()}</a></td>
 	<td class="description">${prop.description}</td>
 </tr>
 % endfor

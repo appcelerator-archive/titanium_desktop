@@ -31,7 +31,7 @@ ${data.description}
 % for method in data.methods:
 	<tr>
 		<td class="name">
-			<a href="${method.namespace}.html">${method.name()}</a>
+			<a href="${method.filename}.html">${method.name()}</a>
 		</td>
 		<td class="description">${method.description}</td>
 	</tr>
@@ -49,7 +49,7 @@ ${data.description}
 </tr> 
 % for prop in data.properties:
 <tr>
-	<td class="name"><a href="${prop.namespace}.html">${prop.name()}</a></td>
+	<td class="name"><a href="${prop.filename}.html">${prop.name()}</a></td>
 	<td class="type">${prop.returns}</td>
 	<td class="description">${prop.description}</td>
 </tr>
