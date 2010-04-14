@@ -567,5 +567,26 @@ describe("Network.HTTPClient",
 			callback.failed('Test timed out');
 		}, 10000);
 	},
+	test_default_user_agent_as_async: function(callback)
+	{
+		// google.fr will not send utf8 data unless we give it a reasonable
+		// user agent (event accept-charset has no affect), so just make sure
+		// that the output properly converted to UTF8. Bug #353.
+		this.client.onload = function()
+		{
+			if (this.responseText.length < 10) {
+				callback.failed("responseText wasn't large enough");
+			} else {
+				callback.passed()
+			}
+		}
+
+		this.client.open("GET", "http://www.google.fr");
+		this.client.send();
+		timer = setTimeout(function()
+		{
+			callback.failed('Test timed out');
+		}, 10000);
+	},
 
 });

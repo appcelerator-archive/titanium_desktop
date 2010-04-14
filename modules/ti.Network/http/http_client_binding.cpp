@@ -36,267 +36,45 @@ namespace ti
 		postData(0),
 		sendData(0)
 	{
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.abort, since=0.3)
-		 * @tiapi Aborts an in progress connection
-		 */
 		this->SetMethod("abort", &HTTPClientBinding::Abort);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.open, since=0.3)
-		 * @tiapi Opens an HTTP connection
-		 * @tiarg[String, method] The HTTP method to use e.g. POST
-		 * @tiarg[String, url] The url to connect to
-		 * @tiarg[Boolean, asynchronous, optional=True] Whether or not the request should be asynchronous (default: True)
-		 * @tiarg[String, username, optional=True] The HTTP username to use
-		 * @tiarg[String, password, optional=True] The HTTP password to use
-		 * @tiresult[Boolean] return true if supplied arguments are valid
-		 */
 		this->SetMethod("open", &HTTPClientBinding::Open);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setCredentials, since=0.8)
-		 * @tiapi Set the authentication credentials for the HTTPClient.
-		 * @tiarg[String, username] The username to use or an empty String to use none.
-		 * @tiarg[String, password] The password to use or an empty String to use none.
-		 *
-		 * @tiapi(method=True, name=Network.HTTPClient.setBasicCredentials, since=0.7, deprecated=True)
-		 * @tiapi Set the basic authentication credentials
-		 * @tiarg[String, username] The username to use or an empty String to use none.
-		 * @tiarg[String, password] The password to use or an empty String to use none.
-		 */
 		this->SetMethod("setCredentials", &HTTPClientBinding::SetCredentials);
 		this->SetMethod("setBasicCredentials", &HTTPClientBinding::SetCredentials);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setRequestHeader, since=0.3)
-		 * @tiapi Sets a request header for the connection
-		 * @tiarg[String, header] request header name
-		 * @tiarg[String, value] request header value
-		 */
 		this->SetMethod("setRequestHeader", &HTTPClientBinding::SetRequestHeader);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.send, since=0.3)
-		 * @tiapi Sends data through the HTTP connection
-		 * @tiarg[Object|String|null, data, optional=True] Data to send to the server.
-		 * @tiresult[Boolean] returns true if request dispatched successfully
-		 */
 		this->SetMethod("send", &HTTPClientBinding::Send);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.sendFile, since=0.3)
-		 * @tiapi Sends the contents of a file as body content
-		 * @tiarg[Titanium.Filesystem.File, file] the File object to send
-		 */
 		this->SetMethod("sendFile", &HTTPClientBinding::Send);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.receive, since=0.7)
-		 * @tiapi Sends a request to the server and receive data with the provided handler.
-		 * @tiarg[Object|Function, handler] A handler to receive the response data. handler can
-		 * @tiarg either be Titanium.Filesystem.File or a Function.
-		 * @tiarg[Object|String|null, data, optional=True] Data to send to the server.
-		 * @tiresult[Boolean] returns true if request dispatched successfully
-		 */
 		this->SetMethod("receive", &HTTPClientBinding::Receive);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.getResponseHeader, since=0.3)
-		 * @tiapi Return the value of a response header, given it's name. If the given
-		 * @tiapi name occurs multiple times, this method will only return one occurence.
-		 * @tiarg[String, name] The response header name.
-		 * @tiresult[String] The value of the response header.
-		 */
 		this->SetMethod("getResponseHeader", &HTTPClientBinding::GetResponseHeader);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.getResponseHeaders, since=0.8)
-		 * @tiapi Return all response headers as an array of two element arrays.
-		 * @tiresult[Array<Array<String, String>>] The array of response headers.
-		 */
 		this->SetMethod("getResponseHeaders", &HTTPClientBinding::GetResponseHeaders);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setCookie, since=0.7)
-		 * @tiapi Set a HTTP cookie in the request.
-		 * @tiarg[String, name] the cookie name
-		 * @tiarg[String, value] the cookie value
-		 */
 		this->SetMethod("setCookie", &HTTPClientBinding::SetCookie);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.clearCookies, since=0.7)
-		 * @tiapi Clear any cookies set on the request
-		 */
 		this->SetMethod("clearCookies", &HTTPClientBinding::ClearCookies);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.getCookie, since=0.7)
-		 * @tiapi Get a HTTP cookie from the response.
-		 * @tiarg[String, name] name of the cookie to get
-		 * @tiresult[Network.HTTPCookie] a cookie or null if not found
-		 */
 		this->SetMethod("getCookie", &HTTPClientBinding::GetCookie);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setTimeout, since=0.4)
-		 * Sets the timeout for the request. The default timeout value is five
-		 * minutes.
-		 * @tiarg[Number, timeout] The new timeout value in milliseconds.
-		 */
 		this->SetMethod("setTimeout", &HTTPClientBinding::SetTimeout);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.getTimeout, since=0.8)
-		 * Gets the timeout for the request.
-		 * @tiresult[Number] timeout value in milliseconds
-		 */
 		this->SetMethod("getTimeout", &HTTPClientBinding::GetTimeout);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.getMaxRedirects, since=0.8)
-		 * @tiapi Get the maximum number of redirects to follow. The default is -1, which means
-		 * @tiapi that there is no maximum limit to the number of redirects to follow.
-		 * @tiresult[Number] the maximum number of redirects to follow.
-		 */
 		this->SetMethod("getMaxRedirects", &HTTPClientBinding::GetMaxRedirects);
-
-		/**
-		 * @tiapi(method=True, name=Network.HTTPClient.setMaxRedirects, since=0.8)
-		 * @tiapi Set the maximum number of redirects to follow. The default is -1, which means
-		 * @tiapi that there is no maximum limit to the number of redirects to follow.
-		 * @tiarg[Number, amount] the number of redirects to follow.
-		 */
 		this->SetMethod("setMaxRedirects", &HTTPClientBinding::SetMaxRedirects);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.readyState, since=0.3)
-		 * @tiapi The ready-state status for the connection
-		 */
 		this->SetInt("readyState", 0);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.UNSENT, since=0.3)
-		 * @tiai The UNSENT readyState property
-		 */
 		this->SetInt("UNSENT", 0);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.OPENED, since=0.3)
-		 * @tiapi The OPENED readyState property
-		 */
 		this->SetInt("OPENED", 1);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.HEADERS_RECEIVED, since=0.3)
-		 * @tiapi The HEADERS_RECEIVED readyState property
-		 */
 		this->SetInt("HEADERS_RECEIVED", 2);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.LOADING, since=0.3)
-		 * @tiapi The LOADING readyState property
-		 */
 		this->SetInt("LOADING", 3);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.DONE, since=0.3)
-		 * @tiapi The DONE readyState property
-		 */
 		this->SetInt("DONE", 4);
-
-		/**
-		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseText, since=0.3)
-		 * @tiapi The response of an HTTP request as text
-		 */
 		this->SetNull("responseText");
-
-		/**
-		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseXML, since=0.3)
-		 * @tiapi The response of an HTTP request as parsable XML
-		 */
 		this->SetNull("responseXML");
-
-		/**
-		 * @tiapi(property=True, type=String, name=Network.HTTPClient.responseData, since=0.8)
-		 * @tiapi The response of an HTTP request as a Bytes. Currently this property
-		 * @tiapi is only valid after the request has been completed.
-		 */
 		this->SetNull("responseData");
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.status, since=0.3)
-		 * @tiapi The response status code of an HTTP request
-		 */
 		this->SetNull("status");
-
-		/**
-		 * @tiapi(property=True, type=String, name=Network.HTTPClient.statusText, since=0.3)
-		 * @tiapi The response status text of an HTTP Request
-		 */
 		this->SetNull("statusText");
-
-		/**
-		 * @tiapi(property=True, type=Boolean, name=Network.HTTPClient.timedOut, since=0.7)
-		 * @tiapi True if HTTP request timed out
-		 */
 		this->SetBool("timedOut", false);
-
-		/**
-		 * @tiapi(property=True, type=String, name=Network.HTTPClient.url, since=0.7)
-		 * @tiapi The request URL. This value will be updated on redirect events.
-		 */
 		this->SetNull("url");
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataSent, since=0.7)
-		 * @tiapi Amount of data sent to server so far. Updated on HTTP_DATA_SENT event.
-		 */
 		this->SetInt("dataSent", 0);
-
-		/**
-		 * @tiapi(property=True, type=Number, name=Network.HTTPClient.dataReceived, since=0.7)
-		 * @tiapi Amount of data received from server so far. Updated on HTTP_DATA_RECEIVED event.
-		 */
 		this->SetInt("dataReceived", 0);
-
-		/**
-		 * @tiapi(property=True, type=Boolean, name=Network.HTTPClient.connected, since=0.3)
-		 * @tiapi Whether an HTTPClient object is connected or not
-		 */
 		this->SetBool("connected", false);
-
-		/**
-		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onreadystatechange, since=0.3)
-		 * @tiapi The handler function that will be fired when the readyState code of
-		 * @tiapi an HTTPClient object changes.
-		 */
 		this->SetNull("onreadystatechange");
-
-		/**
-		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.ondatastream, since=0.3)
-		 * @tiapi The handler function that will be fired as stream data is received from an HTTP request
-		 */
 		this->SetNull("ondatastream");
-
-		/**
-		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onsendstream, since=0.3)
-		 * @tiapi The handler function that will be fired as the stream data is sent.
-		 */
 		this->SetNull("onsendstream");
-
-		/**
-		 * @tiapi(property=True, type=Function, name=Network.HTTPClient.onload, since=0.7)
-		 * @tiapi The handler function that will be fired when request is completed
-		*/
 		this->SetNull("onload");
+		this->SetString("userAgent", GlobalObject::GetInstance()->GetString("userAgent"));
 
-		/**
-		 * @tiapi(property=True, name=Network.HTTPClient.userAgent, since=0.7)
-		 * @tiapi User agent string to use for requests. (Default: PRODUCTNAME/PRODUCT_VERSION)
-		 */
-		this->SetString("userAgent", PRODUCT_NAME"/"PRODUCT_VERSION);
 	}
 
 	HTTPClientBinding::~HTTPClientBinding()
