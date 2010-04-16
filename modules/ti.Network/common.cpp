@@ -67,7 +67,7 @@ void SetStandardCurlHandleOptions(CURL* handle)
 	{
 		cookieJarFilename = FileUtils::Join(
 			Host::GetInstance()->GetApplication()->GetDataPath().c_str(),
-			"network_httpclient_cookies.dat", 0);
+			"cookies.dat", 0);
 	}
 
 	// cURL doesn't have built in thread support, so we must handle thread-safety

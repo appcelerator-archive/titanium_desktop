@@ -45,6 +45,11 @@ namespace ti
 		setCanPreprocessCallback(CanPreprocessURLCallback);
 		setPreprocessCallback(PreprocessURLCallback);
 		setProxyCallback(ProxyForURLCallback);
+
+		std::string cookieJarFilename(FileUtils::Join(
+			Host::GetInstance()->GetApplication()->GetDataPath().c_str(),
+			"cookies.dat", 0));
+		setCookieJarFilename(cookieJarFilename.c_str());
 	}
 	
 	Win32UIBinding::~Win32UIBinding()
