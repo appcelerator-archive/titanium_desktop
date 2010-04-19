@@ -2,7 +2,7 @@ describe("HTML 5 Databases",{
 	
 	before:function()
 	{
-		this.db = openDatabase('unittest', '1.0');
+		this.db = openDatabase('unittest', '1.0', "Unit test database", 1024*1024*5);
 		
 		// test the return object to make sure we got the correct object.
 		value_of(this.db).should_be_object();
