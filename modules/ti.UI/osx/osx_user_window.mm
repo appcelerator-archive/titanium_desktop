@@ -105,7 +105,8 @@ namespace ti
 
 	OSXUserWindow::~OSXUserWindow()
 	{
-		this->Close();
+		if (this->active)
+			this->Close();
 		[nativeWindow dealloc];
 	}
 
