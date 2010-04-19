@@ -55,8 +55,6 @@
 		setObject:datadir
 		forKey:@"WebDatabaseDirectory"];
 	[standardUserDefaults synchronize];
-
-
 }
 
 -(id)initWithWindow:(NativeWindow*)inWindow
@@ -562,19 +560,32 @@
 	return WebDragSourceActionAny;
 }
 
+-(void)showInspector
+{
+	[window userWindow]->ShowInspector();
+}
+
 - (NSArray *)webView:(WebView *)sender contextMenuItemsForElement:(NSDictionary *)element defaultMenuItems:(NSArray *)defaultMenuItems
 {
-	NSMutableArray *menuItems = [[[NSMutableArray alloc] init] autorelease];
-
 	UserWindow* uw = [window userWindow];
 	AutoPtr<OSXMenu> menu = uw->GetContextMenu().cast<OSXMenu>();
-	if (menu.isNull()) {
+	if (menu.isNull())
 		menu = UIBinding::GetInstance()->GetContextMenu().cast<OSXMenu>();
+
+	NSMutableArray* menuItems = [[[NSMutableArray alloc] init] autorelease];
+	if (!menu.isNull())
+		menu->AddChildrenToNSArray(menuItems);
+
+	if (Host::GetInstance()->DebugModeEnabled())
+	{
+		[menuItems addObject:[NSMenuItem separatorItem]];
+		NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:@"Show inspector"
+			 action:@selector(showInspector) keyEquivalent:@""];
+		[newItem setTarget:self];
+		[menuItems addObject:newItem];
+		[newItem release];
 	}
 
-	if (!menu.isNull()) {
-		menu->AddChildrenToNSArray(menuItems);
-	}
 	return menuItems;
 }
 
