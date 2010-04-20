@@ -348,9 +348,9 @@ namespace ti
 	void OSXMenu::SetupInspectorItem(NSMenu* menu)
 	{
 		NSMenu *windowMenu = OSXMenu::GetWindowMenu(menu);
-		NSMenuItem *showInspector = [windowMenu
+		NSMenuItem* showInspector = [windowMenu
 			itemWithTitle:NSLocalizedString(@"Show Inspector", @"")];
-		NSMenuItem *showInspectorSeparator = [windowMenu
+		NSMenuItem* showInspectorSeparator = [windowMenu
 			itemWithTitle:NSLocalizedString(@"Show Inspector Separator", @"")];
 
 		if (!Host::GetInstance()->DebugModeEnabled())
