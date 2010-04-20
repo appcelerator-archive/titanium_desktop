@@ -175,10 +175,12 @@ namespace ti
 		 */
 		this->SetMethod("getIcon", &AppBinding::GetIcon);
 
-		// Don't document this temporary API point. This will be replaced by
+		// Don't document these temporary API points. This will be replaced by
 		// a generic method of reading arbitrary property values from tiapp.xml.
 		this->SetBool("analyticsEnabled",
 			AppConfig::Instance()->IsAnalyticsEnabled());
+		this->SetBool("updateMonitorEnabled",
+			AppConfig::Instance()->IsUpdateMonitorEnabled());
 	}
 
 	AppBinding::~AppBinding()

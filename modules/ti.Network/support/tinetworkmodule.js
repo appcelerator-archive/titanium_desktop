@@ -1,6 +1,3 @@
-//
-// application analytics module
-//
 (function()
 {
 	Titanium.Analytics.sendEvent = function(data)
@@ -189,7 +186,7 @@
 				{
 					if (success)
 					{
-						var list = Titanium.API.getInstalledComponents(refresh_components);
+						var list = Titanium.API.getInstalledComponents(refreshComponents);
 						var matches = [];
 						for (var x=0;x<list.length;x++)
 						{
@@ -213,7 +210,7 @@
 						callback(details);
 						
 						// once we've refreshed we'll only refresh on updates
-						refresh_components=false;
+						refreshComponents = false;
 					}
 				});	
 			}
@@ -521,16 +518,19 @@
 
 	Titanium.Analytics.sendEvent({'event': 'ti.start', 'type': 'ti.start'});
 
-	// How often to actually check for updates on the network in seconds.
-	// 900 seconds == every 15 minutes.
-	var UPDATE_CHECK_INTERVAL = 900;
-	// How many milliseconds before the update check timer fires. The update
-	// check timer will only launch an update check if the time passed since
-	// the last update check is greater than UPDATE_CHECK_INTERVAL.
-	var UPDATE_CHECK_TIMER_INTERVAL = 30000;
-	var refresh_components = true;
+	if (Titanium.App.updateMonitorEnabled)
+	{
+		// How often to actually check for updates on the network in seconds.
+		// 900 seconds == every 15 minutes.
+		var UPDATE_CHECK_INTERVAL = 900;
 
-	var updateCheckTimer = updateCheckTimer = 
-		Titanium.setTimeout(function() { checkForUpdate(); }, UPDATE_CHECK_TIMER_INTERVAL);
+		// How many milliseconds before the update check timer fires. The update
+		// check timer will only launch an update check if the time passed since
+		// the last update check is greater than UPDATE_CHECK_INTERVAL.
+		var UPDATE_CHECK_TIMER_INTERVAL = 30000;
 
+		var refreshComponents = true;
+		var updateCheckTimer = updateCheckTimer = 
+			Titanium.setTimeout(function() { checkForUpdate(); }, UPDATE_CHECK_TIMER_INTERVAL);
+	}
 })();
