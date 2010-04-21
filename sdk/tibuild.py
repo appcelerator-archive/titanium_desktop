@@ -9,17 +9,15 @@
 #
 # Original author: Jeff Haynie 04/02/09
 
+import env
 import os
 import platform
 import re
-import env
 import signal
 import subprocess
 import sys
 import os.path as path
 from optparse import OptionParser
-from desktop_builder import DesktopBuilder
-from desktop_packager import DesktopPackager
 from xml.etree.ElementTree import ElementTree
 
 VERSION = '0.2'
@@ -80,7 +78,6 @@ if __name__ == '__main__':
 	parser.add_option("-a", "--assets",dest="assets_dir",default=None,help="location of platform assets",metavar="FILE")
 
 	(options, args) = parser.parse_args()
-	options.packager = False
 	if len(args) == 0:
 		parser.print_help()
 		print 
@@ -107,15 +104,14 @@ if __name__ == '__main__':
 
 	# Eventually we should detect if we are a packager
 	# and not use any installed components.
-	# magicmarker = path.join(cwd, '.packager')
-	# if path.exists(magicmarker):
-	# 	options.source = cwd
-	# 	options.assets = cwd
-	# 	options.packager = True
+	script_dir = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
+	packager = os.path.exists(path.join(script_dir, '.packager'))
 
-	environment = env.PackagingEnvironment(options.platform)
+	environment = env.PackagingEnvironment(options.platform, packager)
 	app = environment.create_app(appdir)
 	app.stage(path.join(options.destination, app.name), bundle=bundle)
+	if options.no_install:
+		app.install()
 
 	if options.package:
 		app.package(options.destination, bundle=bundle)
