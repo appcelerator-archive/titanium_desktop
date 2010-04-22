@@ -71,7 +71,7 @@ if __name__ == '__main__':
 	parser.add_option("-l", "--license",dest="license_file",default=None,help="location of application license",metavar="FILE")
 	parser.add_option("-n", "--noinstall",action="store_true",dest="no_install",default=False,help="don't include installer dialog in packaged app")
 	parser.add_option("-r","--run",action="store_true",dest="run",default=False,help="run the packaged app after building")
-	parser.add_option("-p","--package",dest="package",default=True,help="build the installation package")
+	parser.add_option("-p","--package",dest="package",default=False,help="build the installation package")
 	parser.add_option("-i","--ignore",dest="ignore_patterns",default="",help="patterns to ignore when packaging, seperated by comma (default: .git,.svn,.gitignore,.cvsignore)")
 
 	parser.add_option("-s", "--src",dest="source",help="source folder which contains dist files",metavar="FILE")
@@ -113,7 +113,8 @@ if __name__ == '__main__':
 	if options.no_install:
 		app.install()
 
-	if options.package:
+	# Always create the package on the packaging server.
+	if options.package or packager:
 		app.package(options.destination, bundle=bundle)
 
 	if options.run:
