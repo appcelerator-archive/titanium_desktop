@@ -114,6 +114,11 @@ class App(object):
 			write_line(module[0] + ': ' + module[1])
 		f.close()
 
+	def install(self):
+		f = open(p.join(self.get_contents_dir(), '.installed'), 'w')
+		f.write("installed")
+		f.close()
+
 	def write_tiapp(self, path):
 		xml.etree.ElementTree._namespace_map['http://ti.appcelerator.org'] = 'ti'
 		xml.etree.ElementTree._namespace_map['http://www.appcelerator.org'] = 'appc'

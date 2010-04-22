@@ -10,25 +10,36 @@ import os.path as p
 import __init__
 
 class PackagingEnvironment(object):
-	def __init__(self, target_os):
+	def __init__(self, target_os, packaging_server=False):
 		self.version = __init__.get_titanium_version()
 		self.excludes = ['.pdb', '.exp', '.ilk', '.lib', '.svn',
 			'.git', '.gitignore', '.cvsignore']
 
 		self.target_os = target_os
-		if (target_os is 'linux'):
+
+		script_dir = p.abspath(p.dirname(sys._getframe(0).f_code.co_filename))
+		if packaging_server:
+			self.init_packaging_server_dirs(script_dir)
+		else:
+			self.init_normal_dirs(script_dir)
+
+	def init_packaging_server_dirs(self, script_dir):
+		self.install_dirs = [p.join(script_dir, '..', '..', '..')]
+
+	def init_normal_dirs(self, script_dir):
+		if (self.target_os is 'linux'):
 			self.install_dirs = [
 				p.expanduser('~/.titanium'),
 				"/opt/titanium",
 				"/usr/local/lib/titanium",
 				"/usr/lib/titanium"
 			]
-		elif (target_os is 'osx'):
+		elif (self.target_os is 'osx'):
 			self.install_dirs = [
 				p.expanduser('~/Library/Application Support/Titanium'),
 				'/Library/Application Support/Titanium'
 			]
-		elif (target_os is 'win32'):
+		elif (self.target_os is 'win32'):
 			self.install_dirs = [
 				p.join(os.environ['APPDATA'], 'Titanium'),
 				# TODO: Is there a better way to determine this directory?
@@ -36,10 +47,6 @@ class PackagingEnvironment(object):
 			]
 		else:
 			raise Exception("Unknown environment!")
-
-		# If we are a packaging server, everything we need will
-		# be in the same directory as this script file.
-		script_dir = p.abspath(p.dirname(sys._getframe(0).f_code.co_filename))
 
 		# If we are in the build hierarchy, try to find runtimes and modules
 		# relative to this file's location.
@@ -51,12 +58,6 @@ class PackagingEnvironment(object):
 			self.components_dir = p.join(script_dir, '..', 'build', self.target_os)
 		elif p.exists(p.join(script_dir, '..', 'runtime')) and p.exists(p.join(script_dir, '..', 'sdk')):
 			self.components_dir = p.join(script_dir, '..')
-
-		# Couldn't find any build assets, so assume that we could be a
-		# packaging server, which has assets in the same directory as the
-		# script.
-		elif p.exists(p.join(script_dir, 'runtime')):
-			self.components_dir = cwd
 
 	def create_app(self, path):
 		if self.target_os is 'linux':

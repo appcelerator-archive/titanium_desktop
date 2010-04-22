@@ -1,5 +1,5 @@
 ---
-namespace: Titanium.Database.openFile
+namespace: Titanium.Database.open
 type: method
 description: |
     Open a WebKit HTML5 compatible-database, given the name of the database
@@ -10,11 +10,11 @@ since: 0.4.0
 platforms: [osx, linux, win32]
 returns: Database.DB
 parameters: 
-    - [String, path, Path to an SQLite file to store the database in. If the file does not exist, it will be created.]
+    - [String, name, Name of the database. The call will create the database if it does not exist.]
 examples:
-    - description: Using Database.openFile
+    - description: Using Database.open
       code: |
             <pre><code>
-                var db = Titanium.Database.openFile(Titanium.API.application.dataPath, "data.db");
+                var db = Titanium.Database.open("Users");
                 db.execute("select * from table");
             </code></pre>
