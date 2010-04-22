@@ -16,13 +16,14 @@ if build.is_linux():
 	env.ParseConfig('pkg-config --cflags --libs libnotify gtk+-2.0 gdk-2.0 x11 xext')
 
 elif build.is_win32():
+	build.add_thirdparty(env, 'cairo')
 	sources = sources + Glob('win32/*.cpp')
 	sources += Glob('binding/kjs*.cpp')
 	env.Append(CPPPATH=[build.tp('icu', 'include')])
 	env.Append(LIBS=[
 		'kernel32', 'shell32', 'user32', 'ole32', 'comdlg32', 'comctl32',
 		'gdi32', 'shlwapi', 'oleaut32', 'icuuc', 'pthreadVC2', 'libcurl_imp',
-		'comsuppw', 'cairo', 'advapi32'])
+		'comsuppw', 'advapi32'])
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO', '/OPT:REF'])
 

@@ -3,10 +3,10 @@ from os import path
 Import('build env module')
 
 env.Append(CPPDEFINES = ('TITANIUM_PLATFORM_API_EXPORT', 1))
-env.Append(CPPPATH = ['#kroll'])
 build.add_thirdparty(env, 'poco')
 
 if build.is_win32():
+	build.add_thirdparty(env, 'cairo')
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LIBS=['Advapi32', 'Iphlpapi', 'user32', 'shell32', 'gdi32'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
