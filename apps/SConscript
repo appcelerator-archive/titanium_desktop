@@ -8,8 +8,6 @@ from SCons.Script import *
 from subprocess import Popen
 
 Import('build')
-Import('run')
-Import('run_with')
 
 def package_app_builder(target, source, env):
 	# Wait until the initial build is finished to do this import.
@@ -18,6 +16,9 @@ def package_app_builder(target, source, env):
 	pkg_env = sdk.env.PackagingEnvironment(build.os)
 	app = pkg_env.create_app(env['PATH'])
 	app.stage(path.join(build.dir, app.name), bundle=True)
+
+	if ARGUMENTS.get('run', False):
+		app.run()
 
 def package_sdkinstaller(target, source, env):
 	print "Packaging Titanium SDK Installer..."
@@ -35,6 +36,9 @@ def package_sdkinstaller(target, source, env):
 	effess.copy_to_dir(
 		path.join(build.dist_dir, "sdk-" + build.version + ".zip"),
 		path.join(app.contents, 'dist'))
+
+	if ARGUMENTS.get('run', False):
+		app.run()
 
 build.env['BUILDERS']['PackageApp'] = build.env.Builder(
 	action=package_app_builder,

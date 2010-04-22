@@ -30,9 +30,6 @@ class Win32App(App):
 		# since we only ever install via the MSI installer.
 		open(p.join(contents, '.installed'), 'a').close()
 
-	def blah(self):
-		pass
-
 	def package(self, package_dir, bundle):
 		contents = self.get_contents_dir()
 		target = p.join(package_dir, self.name + '.msi')

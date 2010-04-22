@@ -69,4 +69,3 @@ class OSXApp(App):
 			'--copy', '%s:/.background/background.jpg' % dmg_background,
 			'--symlink', '/Applications:/Applications'
 		])
-

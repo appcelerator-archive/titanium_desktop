@@ -185,6 +185,9 @@ class App(object):
 				effess.lightweight_copy_tree(source, target,
 					exclude=self.env.get_excludes())
 
+	def run(self):
+		self.env.run(self.executable_path)
+
 	def get_installer_image(self, tag_name, default=None):
 		# Try to find 'tag_name' and also 'tag-name' (typical XML style)
 		elem = self.tiapp.findtext(tag_name)
