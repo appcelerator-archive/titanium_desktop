@@ -14,6 +14,9 @@ if build.is_win32():
 elif build.is_osx():
 	env.Append(FRAMEWORKS = ['AppKit', 'Cocoa'])
 
+elif build.is_linux():
+	env.ParseConfig('pkg-config --cflags --libs gdk-2.0 x11')
+
 sources = [File('platform_module.cpp'), File('platform_binding.cpp')]
 if build.is_osx():
 	sources.append(File('platform_binding_%s.mm' % build.os))

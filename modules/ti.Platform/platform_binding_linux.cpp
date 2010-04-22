@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <gdk/gdk.h>
 #include "platform_binding.h"
 
 namespace ti
@@ -36,6 +37,14 @@ bool PlatformBinding::OpenURLImpl(const std::string& url)
 
 void PlatformBinding::TakeScreenshotImpl(const std::string& targetFile)
 {
+	GdkWindow* rootWindow = gdk_get_default_root_window();
+
+	int width, height;
+	gdk_drawable_get_size(rootWindow, &width, &height);
+
+	GdkPixbuf* pixbuf = gdk_pixbuf_get_from_drawable(0, GDK_DRAWABLE(rootWindow),
+		0, 0, 0, 0, 0, width, height);
+	gdk_pixbuf_save(pixbuf, targetFile.c_str(), "png", 0, "compression", "9", NULL);
 }
 
 }
