@@ -776,6 +776,10 @@ Bounds Win32UserWindow::GetBoundsImpl()
 		windowRect.left, windowRect.top,
 		clientRect.right - clientRect.left, clientRect.bottom - clientRect.top
 	};
+
+	if (!activeMenu.isNull())
+		bounds.height += GetSystemMetrics(SM_CYMENU);
+
 	return bounds;
 }
 
