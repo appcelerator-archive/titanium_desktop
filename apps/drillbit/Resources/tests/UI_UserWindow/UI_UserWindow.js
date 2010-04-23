@@ -199,5 +199,45 @@ describe("Window specific stuff",
 			callback.failed("Test timed out");
 			w.close();
 		}, 5000);
-	}
+	},
+	test_set_window_height_with_menu_as_async: function(callback)
+	{
+
+		var w = Titanium.UI.createWindow();
+
+		var checkHeight = function()
+		{
+			if (w.height != 500)
+				callback.failed("Height was supposed to be 500, but was " + w.height);
+			else
+				callback.passed();
+		};
+
+		var changeHeight = function()
+		{
+			w.setHeight(500);
+			setTimeout(checkHeight, 200);
+		};
+
+		Titanium.WindowCallback = function()
+		{
+			var menu = Titanium.UI.createMenu();
+			menu.addItem("Foo1");
+			menu.getItemAt(0).addItem("Foo");
+			w.setMenu(menu);
+			setTimeout(changeHeight, 200);
+		};
+
+		var contents = '<html><body><div id="content">Hello.</div>' +
+			'<script>\nTitanium.WindowCallback();\n' +
+			'</script></body></html>';
+		w.setContents(contents);
+		w.open();
+
+		setTimeout(function()
+		{
+			callback.failed("Test timed out");
+			w.close();
+		}, 5000);
+	},
 });
