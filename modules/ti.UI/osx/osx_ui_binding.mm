@@ -48,6 +48,7 @@ namespace ti
 		NSString* appName = [NSString
 			stringWithUTF8String:host->GetApplication()->name.c_str()];
 		OSXMenu::ReplaceAppNameStandinInMenu(this->defaultMenu, appName);
+		OSXMenu::SetupInspectorItem(this->defaultMenu);
 		this->SetupMainMenu(true);
 
 		// Register our custom URL handler
