@@ -32,6 +32,7 @@ namespace ti
 		responseStream(0),
 		requestContentLength(0),
 		requestDataSent(0),
+		requestDataWritten(0),
 		responseDataReceived(0),
 		postData(0),
 		sendData(0)
@@ -383,6 +384,7 @@ namespace ti
 		this->sendData = sendData;
 		this->sawHTTPStatus = false;
 		this->requestDataSent = 0;
+		this->requestDataWritten = 0;
 		this->responseDataReceived = 0;
 		this->responseCookies.clear();
 		this->aborted = false;
@@ -516,16 +518,17 @@ namespace ti
 
 		size_t bytesSent = 0;
 		size_t toSend = bufferSize;
-		if (requestBytes->Length() - requestDataSent < bufferSize)
-			toSend = requestBytes->Length() - requestDataSent;
+		if (requestBytes->Length() - requestDataWritten < bufferSize)
+			toSend = requestBytes->Length() - requestDataWritten;
 
 		if (toSend > 0)
 		{
-			memcpy(buffer, requestBytes->Get() + requestDataSent, toSend);
+			memcpy(buffer, requestBytes->Get() + requestDataWritten, toSend);
 			bytesSent = toSend;
 		}
 		
 
+		requestDataWritten += bytesSent;
 		return bytesSent;
 	}
 
@@ -676,19 +679,21 @@ namespace ti
 		// Only set up the read handler if there is data to send to the server
 		// and we aren't using the POST fields (i.e. we were just given a blob
 		// of data).
-		if (this->httpMethod == "POST" && !this->postData)
-		{
-			SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
-			SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, 0);
-		}
-
 		if (this->requestContentLength > 0)
 		{
-			SET_CURL_OPTION(curlHandle, CURLOPT_READDATA, this);
-			SET_CURL_OPTION(curlHandle, CURLOPT_READFUNCTION, &CurlReadCallback);
-
-			if (this->httpMethod == "PUT")
+			if (this->httpMethod == "POST")
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, requestContentLength);
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDS, this->requestBytes->Get());
+			}
+			else
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_CUSTOMREQUEST, this->httpMethod.c_str());
+				SET_CURL_OPTION(curlHandle, CURLOPT_READDATA, this);
+				SET_CURL_OPTION(curlHandle, CURLOPT_READFUNCTION, &CurlReadCallback);
 				SET_CURL_OPTION(curlHandle, CURLOPT_INFILESIZE, requestContentLength);
+			}
 		}
 		else
 		{
@@ -697,6 +702,11 @@ namespace ti
 			if (this->httpMethod == "POST" && this->postData)
 			{
 				curl_easy_setopt(this->curlHandle, CURLOPT_HTTPPOST, this->postData);
+			}
+			else if (this->httpMethod == "POST")
+			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, 0);
 			}
 			else if (this->httpMethod == "PUT")
 			{
