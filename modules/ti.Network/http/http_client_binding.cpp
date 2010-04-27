@@ -702,6 +702,7 @@ namespace ti
 			else if (this->httpMethod == "POST")
 			{
 				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, 0);
 			}
 			else if (this->httpMethod == "PUT")
 			{
