@@ -1,0 +1,22 @@
+---
+namespace: Titanium.Codec.extractZip
+type: function
+description: Asynchronously extract the contents of a zip file.
+since: 1.1.0
+platforms: ['osx', 'linux', 'win32']
+returns: String
+parameters: 
+    - [Filesystem.File|String, zipFile, The path or File object of the zip file being extracted.]
+    - [Filesystem.File|String, dest, A directory into which the files will be extracted.]
+    - [Function, onComplete, A function callback that receives destination directory when completed.]
+examples:
+    - description: Extract a zip file into a directory
+      code: |
+                <pre><code>
+                    var zip = Titanium.Filesystem.getFile(
+                        Titanium.Filesystem.getApplicationDataDirectory(), "stuff.zip");
+                    var dest = Titanium.Filesystem.getFile(Titanium.App.getHome());
+                    Titanium.Codec.extractZip(root, dest, function(dest) {
+                        alert("Extracted zip file to: " + dest);
+                    });
+                </code></pre>

@@ -11,6 +11,7 @@
 
 #include <Poco/Zip/Zip.h>
 #include <Poco/Zip/Compress.h>
+#include <Poco/Zip/Decompress.h>
 #include <Poco/Path.h>
 
 namespace ti
@@ -32,8 +33,10 @@ namespace ti
 		void DecodeHexBinary(const ValueList& args, KValueRef result);
 		void Checksum(const ValueList& args, KValueRef result);
 		void CreateZip(const ValueList& args, KValueRef result);
+		void ExtractZip(const ValueList& args, KValueRef result);
 		
 		static KValueRef CreateZipAsync(const ValueList& args);
+		static KValueRef ExtractZipAsync(const ValueList& args);
 	};
 }
 

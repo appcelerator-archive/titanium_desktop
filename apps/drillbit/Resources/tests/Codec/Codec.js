@@ -131,7 +131,62 @@ describe("Codec Tests",{
 		
 		timer = setTimeout(function()
 		{
-			callback.failed("timed out waiting for zip callback");
+			callback.failed("timed out waiting for create zip callback");
+		}, 5000);
+	},
+
+	test_extractZip_as_async: function(callback)
+	{
+		function appFile(url)
+		{
+			return Titanium.Filesystem.getFile(Titanium.App.appURLToPath(url));
+		}
+		function getFileSHA1(file)
+		{
+			var blob = file.read();
+			return Titanium.Codec.digestToHex(Titanium.Codec.SHA1, blob);
+		}
+
+		var zipFile = Titanium.App.appURLToPath("app://stuff.zip");
+		var destDir = Titanium.Filesystem.createTempDirectory();
+		var png = appFile("app://zipdir/default_app_logo.png");
+		var file1 = appFile("app://zipdir/file1.txt");
+		var file2 = appFile("app://zipdir/file2.txt");
+
+		var timer = 0;
+		Titanium.Codec.extractZip(zipFile, destDir, function(dest) {
+			clearTimeout(timer);
+
+			// Verify extracted directory contents
+			try
+			{
+				var zipPNG = Titanium.Filesystem.getFile(destDir, "default_app_logo.png");
+				var zipFile1 = Titanium.Filesystem.getFile(destDir, "file1.txt");
+				var zipFile2 = Titanium.Filesystem.getFile(destDir, "file2.txt");
+				
+				value_of(zipPNG.isFile()).should_be_true();
+				value_of(zipPNG.size()).should_be(png.size());
+				value_of(getFileSHA1(zipPNG)).should_be("d4f3cdccba5cc918150ad0d99ea2d395361d35b9");
+				
+				value_of(zipFile1.isFile()).should_be_true();
+				value_of(zipFile1.size()).should_be(file1.size());
+				value_of(getFileSHA1(zipFile1)).should_be("51c79e08a7986b23085fddd9c6d284a3a591efda");
+				
+				value_of(zipFile2.isFile()).should_be_true();
+				value_of(zipFile2.size()).should_be(file2.size());
+				value_of(getFileSHA1(zipFile2)).should_be("8538a15f340202ec8052e9cc44adce70df475ac7");
+
+				callback.passed();
+			}
+			catch (e)
+			{
+				callback.failed(e)
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed("timed out waiting for extract zip callback");
 		}, 5000);
 	}
 });

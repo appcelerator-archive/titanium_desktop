@@ -96,6 +96,8 @@ namespace ti
 		 * @tiarg[Function, onComplete] A function callback that receives the zip file when writing is finished: function onComplete(destFile) {}
 		 */
 		this->SetMethod("createZip", &CodecBinding::CreateZip);
+
+		this->SetMethod("extractZip", &CodecBinding::ExtractZip);
 		
 		/**
 		 * @tiapi(property=True,name=Codec.MD2,since=0.7) MD2 property
@@ -417,6 +419,39 @@ namespace ti
 		result->SetObject(zipJob);
 	}
 
+	void CodecBinding::ExtractZip(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("extractZip", "s|o s|o ?m");
+
+		std::string zipFile = GetPathFromValue(args.at(0));
+		std::string directory = GetPathFromValue(args.at(1));
+
+		if (zipFile.size() <= 0)
+		{
+			throw ValueException::FromString("Error: Zip file name in extractZip is empty");
+		}
+		if (zipFile.size() <= 0)
+		{
+			throw ValueException::FromString("Error: Destination directory name in extractZip is empty");
+		}
+
+		KMethodRef extractAsyncMethod = new KFunctionPtrMethod(&CodecBinding::ExtractZipAsync);
+		ValueList extractArgs;
+		extractArgs.push_back(Value::NewString(zipFile));
+		extractArgs.push_back(Value::NewString(directory));
+
+		AutoPtr<AsyncJob> extractJob = new AsyncJob(extractAsyncMethod);
+		extractArgs.push_back(Value::NewObject(extractJob));
+		if (args.size() > 2)
+		{
+			extractArgs.push_back(args.at(2));
+		}
+
+		extractJob->SetArguments(extractArgs);
+		extractJob->RunAsynchronously();
+		result->SetObject(extractJob);
+	}
+
 	/*static*/
 	KValueRef CodecBinding::CreateZipAsync(const ValueList& args)
 	{
@@ -455,6 +490,42 @@ namespace ti
 			RunOnMainThread(callback, args, true);
 		}
 		
+		return Value::Undefined;
+	}
+
+	/*static*/
+	KValueRef CodecBinding::ExtractZipAsync(const ValueList& args)
+	{
+		std::string zipFile = args.GetString(0);
+		std::string directory = args.GetString(1);
+		AutoPtr<AsyncJob> job = args.GetObject(2).cast<AsyncJob>();
+		KMethodRef callback = 0;
+		if (args.size() > 3)
+		{
+			callback = args.GetMethod(3);
+		}
+
+		std::ifstream stream(UTF8ToSystem(zipFile).c_str(), std::ios::binary);
+		Poco::Zip::Decompress decompressor(stream, directory);
+		try
+		{
+			decompressor.decompressAllFiles();
+		}
+		catch (std::exception& e)
+		{
+			Logger::Get("Codec")->Error("exception decompressing: %s", e.what());
+			throw ValueException::FromFormat("Exception during extraction: %s", e.what());
+		}
+
+		stream.close();
+
+		if (!callback.isNull())
+		{
+			ValueList args;
+			args.push_back(Value::NewString(directory));
+			RunOnMainThread(callback, args, true);
+		}
+
 		return Value::Undefined;
 	}
 }
