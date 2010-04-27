@@ -63,6 +63,7 @@ namespace ti
 		bool aborted;
 		bool dirty;
 		size_t requestDataSent;
+		size_t requestDataWritten;
 		size_t responseDataReceived;;
 		bool sawHTTPStatus;
 		std::vector<BytesRef> responseData;
