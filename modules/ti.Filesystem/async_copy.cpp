@@ -27,13 +27,11 @@ namespace ti
 			callback(callback),
 			stopped(false)
 	{
-		/**
-		 * @tiapi(property=True,type=Boolean,name=Filesystem.AsyncCopy.running,since=0.3) Indicates if the copy operation is running
-		 */
 		this->Set("running",Value::NewBool(true));
 		this->thread = new Poco::Thread();
 		this->thread->start(&AsyncCopy::Run,this);
 	}
+
 	AsyncCopy::~AsyncCopy()
 	{
 		if (this->thread!=NULL)
@@ -43,6 +41,7 @@ namespace ti
 			this->thread = NULL;
 		}
 	}
+
 	void AsyncCopy::Copy(Poco::Path &src, Poco::Path &dest)
 	{
 		Logger* logger = Logger::Get("Filesystem.AsyncCopy");
@@ -101,6 +100,7 @@ namespace ti
 			s.copyTo(dest.toString().c_str());
 		}
 	}
+
 	void AsyncCopy::Run(void* data)
 	{
 		START_KROLL_THREAD;
@@ -173,10 +173,12 @@ namespace ti
 
 		END_KROLL_THREAD;
 	}
+
 	void AsyncCopy::ToString(const ValueList& args, KValueRef result)
 	{
 		result->SetString("[Async Copy]");
 	}
+
 	void AsyncCopy::Cancel(const ValueList& args, KValueRef result)
 	{
 		KR_DUMP_LOCATION

@@ -35,104 +35,26 @@ namespace ti
 		global(global),
 		timer(0)
 	{
-		/**
-		 * @tiapi(method=True,name=Filesystem.createTempFile) Creates a temporary file
-		 * @tiresult(for=Filesystem.createTempFile,type=Filesystem.File) a File object referencing the temporary file
-		 */
-		this->SetMethod("createTempFile",&FilesystemBinding::CreateTempFile);
-		/**
-		 * @tiapi(method=True,name=Filesystem.createTempDirectory) Creates a temporary directory
-		 * @tiresult(for=Filesystem.createTempDirectory,type=Filesystem.File) a File object referencing the temporary directory
-		 */
-		this->SetMethod("createTempDirectory",&FilesystemBinding::CreateTempDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getFile) Returns a file path, optionally joining multiple arguments together in an OS specific way
-		 * @tiarg(for=Filesystem.getFile,name=pathname) a string that is used to form a path
-		 * @tiarg(for=Filesystem.getFile,optional=true,name=...) a variable length argument list of Strings that are concatinated with pathname to form a path
-		 * @tiresult(for=Filesystem.getFile,type=Filesystem.File) a File object referencing the file
-		 */
-		this->SetMethod("getFile",&FilesystemBinding::GetFile);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getFileStream) Returns a Filestream object
-		 * @tiresult(for=Filesystem.getFileStream,type=Filesystem.Filestream) a Filestream object referencing the file
-		 */
-		this->SetMethod("getFileStream",&FilesystemBinding::GetFileStream);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getProgramsDirectory) Returns the programs directory of the current system
-		 * @tiresult(for=Filesystem.getProgramsDirectory,type=Filesystem.File) a File object referencing the system programs directory
-		 */
-		this->SetMethod("getProgramsDirectory",&FilesystemBinding::GetProgramsDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getApplicationDirectory) Returns the directory where the application resides
-		 * @tiresult(for=Filesystem.getApplicationDirectory,type=Filesystem.File) a File object referencing the directory where the application resides
-		 */
-		this->SetMethod("getApplicationDirectory",&FilesystemBinding::GetApplicationDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getApplicationDataDirectory) Returns the data directory of the application
-		 * @tiresult(for=Filesystem.getApplicationDataDirectory,type=Filesystem.File) a File object referencing the data directory of the application
-		 */
-		this->SetMethod("getApplicationDataDirectory",&FilesystemBinding::GetApplicationDataDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getRuntimeHomeDirectory) Returns the directory of where the Titanium runtime files are stored
-		 * @tiresult(for=Filesystem.getRuntimeHomeDirectory,type=Filesystem.File) a File object referencing the directory where the Titanium runtime files are stored.
-		 */
-		this->SetMethod("getRuntimeHomeDirectory",&FilesystemBinding::GetRuntimeHomeDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getResourcesDirectory) Returns the resources directory of the application
-		 * @tiresult(for=Filesystem.getResourcesDirectory,type=Filesystem.File) a File object referencing the resources directory of the application
-		 */
-		this->SetMethod("getResourcesDirectory",&FilesystemBinding::GetResourcesDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getDesktopDirectory) Returns the system desktop directory
-		 * @tiresult(for=Filesystem.getDesktopDirectory,type=Filesystem.File) a File object referencing the system desktop directory
-		 */
-		this->SetMethod("getDesktopDirectory",&FilesystemBinding::GetDesktopDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getDocumentsDirectory) Returns the system documents directory
-		 * @tiresult(for=Filesystem.getDocumentsDirectory,type=Filesystem.File) a File object referencing the system documents directory
-		 */
-		this->SetMethod("getDocumentsDirectory",&FilesystemBinding::GetDocumentsDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getUserDirectory) Returns the home directory of the current user
-		 * @tiresult(for=Filesystem.getUserDirectory,type=Filesystem.File) a File object referencing the home directory of the current user
-		 */
-		this->SetMethod("getUserDirectory",&FilesystemBinding::GetUserDirectory);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getLineEnding) Returns the line ending used by the operating system
-		 * @tiresult(for=Filesystem.getLineEnding,type=String) the line ending used by the operating system
-		 */
-		this->SetMethod("getLineEnding",&FilesystemBinding::GetLineEnding);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getSeparator) Returns the path separator used by the operating system
-		 * @tiresult(for=Filesystem.getSeparator,type=String) the path separator used by the operating system
-		 */
-		this->SetMethod("getSeparator",&FilesystemBinding::GetSeparator);
-		/**
-		 * @tiapi(method=True,name=Filesystem.getRootDirectories) Returns the system root directory
-		 * @tiresult(for=Filesystem.getRootDirectories,type=Array<Filesystem.File>) a File object referencing the system root directory
-		 */
-		this->SetMethod("getRootDirectories",&FilesystemBinding::GetRootDirectories);
-		/**
-		 * @tiapi(method=True,name=Filesystem.asyncCopy) Executes an async copy operation
-		 * @tiarg(for=Filesystem.asyncCopy,name=paths,type=Array<String|Filesystem.File>|Filesystem.File)
-		 * @tiarg Either a path or array of paths to copy from
-		 * @tiarg(for=Filesystem.asyncCopy,name=destination,type=Filesystem.File|String) either a string or file object to copy to
-		 * @tiarg(for=Filesystem.asyncCopy,name=callback,type=Function) callback to invoke on each copy completion operation
-		 * @tiresult(for=Filesystem.asyncCopy,type=Filesystem.AsyncCopy) async copy object
-		 */
-		this->SetMethod("asyncCopy",&FilesystemBinding::ExecuteAsyncCopy);
 
-		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_READ, since=0.3, type=Number) File read constant
-		 */
+		this->SetMethod("createTempFile", &FilesystemBinding::CreateTempFile);
+		this->SetMethod("createTempDirectory", &FilesystemBinding::CreateTempDirectory);
+		this->SetMethod("getFile", &FilesystemBinding::GetFile);
+		this->SetMethod("getFileStream", &FilesystemBinding::GetFileStream);
+		this->SetMethod("getProgramsDirectory", &FilesystemBinding::GetProgramsDirectory);
+		this->SetMethod("getApplicationDirectory", &FilesystemBinding::GetApplicationDirectory);
+		this->SetMethod("getApplicationDataDirectory", &FilesystemBinding::GetApplicationDataDirectory);
+		this->SetMethod("getRuntimeHomeDirectory", &FilesystemBinding::GetRuntimeHomeDirectory);
+		this->SetMethod("getResourcesDirectory", &FilesystemBinding::GetResourcesDirectory);
+		this->SetMethod("getDesktopDirectory", &FilesystemBinding::GetDesktopDirectory);
+		this->SetMethod("getDocumentsDirectory", &FilesystemBinding::GetDocumentsDirectory);
+		this->SetMethod("getUserDirectory", &FilesystemBinding::GetUserDirectory);
+		this->SetMethod("getLineEnding", &FilesystemBinding::GetLineEnding);
+		this->SetMethod("getSeparator", &FilesystemBinding::GetSeparator);
+		this->SetMethod("getRootDirectories", &FilesystemBinding::GetRootDirectories);
+		this->SetMethod("asyncCopy", &FilesystemBinding::ExecuteAsyncCopy);
+
 		this->Set("MODE_READ", Value::NewInt(MODE_READ));
-		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_WRITE, since=0.3, type=Number) File write constant
-		 */
 		this->Set("MODE_WRITE", Value::NewInt(MODE_WRITE));
-		/**
-		 * @tiapi(property=True,immutable=True,name=Filesystem.MODE_APPEND, since=0.3, type=Number) File append constant
-		 */
 		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
 	}
 
@@ -319,6 +241,7 @@ namespace ti
 		ti::File* file = new ti::File(dir);
 		result->SetObject(file);
 	}
+
 	void FilesystemBinding::GetLineEnding(const ValueList& args, KValueRef result)
 	{
 		try
@@ -330,6 +253,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::GetSeparator(const ValueList& args, KValueRef result)
 	{
 		try
@@ -343,6 +267,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::GetRootDirectories(const ValueList& args, KValueRef result)
 	{
 		try
@@ -367,6 +292,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FilesystemBinding::ExecuteAsyncCopy(const ValueList& args, KValueRef result)
 	{
 		if (args.size()!=3)
@@ -409,6 +335,7 @@ namespace ti
 			this->timer->restart(100);
 		}
 	}
+
 	void FilesystemBinding::DeletePendingOperations(const ValueList& args, KValueRef result)
 	{
 		KR_DUMP_LOCATION
@@ -435,6 +362,7 @@ namespace ti
 		// return true to pause the timer
 		result->SetBool(asyncOperations.size()==0);
 	}
+
 	void FilesystemBinding::OnAsyncOperationTimer(Poco::Timer &timer)
 	{
 		START_KROLL_THREAD;

@@ -10,3 +10,16 @@ since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Bytes|null
 parameters: []
+examples:
+    - description: Reading a file line by line in a loop
+      code: |
+                <pre><code>
+                    var fileStream = Titanium.Filesystem.getFileStream(filename);
+                    fileStream.open(Titanium.Filesystem.MODE_READ);
+                    var line = file.readLine();
+                    while(line != null) {
+                        // do something with the line
+                        line = file.readLine();
+                    }
+                    fileStream.close();
+                </code></pre>

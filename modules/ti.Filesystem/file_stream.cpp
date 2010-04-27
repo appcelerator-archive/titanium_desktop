@@ -24,61 +24,18 @@ namespace ti
 		this->filename = filenameIn;
 #endif
 
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.open,since=0.2) Opens the file
-		 * @tiresult(for=Filesystem.Filestream.open,type=Boolean) returns true if successful
-		 */
-		this->SetMethod("open",&FileStream::Open);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.close,since=0.2) Closes the file
-		 * @tiresult(for=Filesystem.Filestream.close,type=Boolean) returns true if successful
-		 */
-		this->SetMethod("close",&FileStream::Close);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.read,since=0.2) Reads from the file
-		 * @tiresult(for=Filesystem.Filestream.read,type=String) returns data as string
-		 */
-		this->SetMethod("read",&FileStream::Read);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.readLine,since=0.2) Reads one line from the file
-		 * @tiresult(for=Filesystem.Filestream.readLine,type=String) returns data as string
-		 */
-		this->SetMethod("readLine",&FileStream::ReadLine);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.write,since=0.2) Writes data into the file
-		 * @tiarg(for=Filesystem.Filestream.write,type=String,name=data) data to write
-		 * @tiresult(for=Filesystem.Filestream.write,type=Boolean) returns true if successful
-		 */
-		this->SetMethod("write",&FileStream::Write);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.writeLine,since=0.4) Writes a line into the file
-		 * @tiarg(for=Filesystem.Filestream.writeLine,type=String,name=data) data to write
-		 * @tiresult(for=Filesystem.Filestream.writeLine,type=Boolean) returns true if successful
-		 */
-		this->SetMethod("writeLine",&FileStream::WriteLine);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.ready,since=0.4) Checks to see if file is ready for IO operations
-		 * @tiresult(for=Filesystem.Filestream.ready,type=Boolean) returns true if the file open and valid for IO operations
-		 */
-		this->SetMethod("ready",&FileStream::Ready);
-		/**
-		 * @tiapi(method=True,name=Filesystem.Filestream.isOpen,since=0.4) Checks to see if file has been opened
-		 * @tiresult(for=Filesystem.Filestream.isOpen,type=Boolean) returns true if file has been opened
-		 */
-		this->SetMethod("isOpen",&FileStream::IsOpen);
+		this->SetMethod("open", &FileStream::Open);
+		this->SetMethod("close", &FileStream::Close);
+		this->SetMethod("read", &FileStream::Read);
+		this->SetMethod("readLine", &FileStream::ReadLine);
+		this->SetMethod("write", &FileStream::Write);
+		this->SetMethod("writeLine", &FileStream::WriteLine);
+		this->SetMethod("ready", &FileStream::Ready);
+		this->SetMethod("isOpen", &FileStream::IsOpen);
 		
-		/**
-		 * @tiapi(property=True,name=Filesystem.Filestream.MODE_READ,since=0.4,type=Number) Mode to indicate read
-		 */
-		this->Set("MODE_READ",Value::NewInt(MODE_READ));
-		/**
-		 * @tiapi(property=True,name=Filesystem.Filestream.MODE_APPEND,since=0.4,type=Number) Mode to indicate appending
-		 */
-		this->Set("MODE_APPEND",Value::NewInt(MODE_APPEND));
-		/**
-		 * @tiapi(property=True,name=Filesystem.Filestream.MODE_WRITE,since=0.4,type=Number) Mode to indicate writing
-		 */
-		this->Set("MODE_WRITE",Value::NewInt(MODE_WRITE));
+		this->Set("MODE_READ", Value::NewInt(MODE_READ));
+		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
+		this->Set("MODE_WRITE", Value::NewInt(MODE_WRITE));
 	}
 
 	FileStream::~FileStream()
@@ -104,6 +61,7 @@ namespace ti
 		bool opened = this->Open(mode, binary, append);
 		result->SetBool(opened);
 	}
+
 	bool FileStream::Open(FileStreamMode mode, bool binary, bool append)
 	{
 		// close the prev stream if needed
@@ -151,11 +109,13 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FileStream::Close(const ValueList& args, KValueRef result)
 	{
 		bool closed = this->Close();
 		result->SetBool(closed);
 	}
+
 	bool FileStream::Close()
 	{
 		try
@@ -182,6 +142,7 @@ namespace ti
 
 		return false;
 	}
+
 	void FileStream::Write(const ValueList& args, KValueRef result)
 	{
 		char *text = NULL;
@@ -237,6 +198,7 @@ namespace ti
 		Write(text,size);
 		result->SetBool(true);
 	}
+
 	void FileStream::Write(char *text, int size)
 	{
 		try
@@ -256,6 +218,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FileStream::Read(const ValueList& args, KValueRef result)
 	{
 		if (!this->stream)
@@ -298,6 +261,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FileStream::ReadLine(const ValueList& args, KValueRef result)
 	{
 		if (!this->stream)
@@ -362,6 +326,7 @@ namespace ti
 			throw ValueException::FromString(exc.displayText());
 		}
 	}
+
 	void FileStream::WriteLine(const ValueList& args, KValueRef result)
 	{
 		if(! this->stream)

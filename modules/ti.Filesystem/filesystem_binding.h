@@ -16,11 +16,11 @@ namespace ti
 {
 	class FilesystemBinding : public StaticBoundObject
 	{
-		public:
+	public:
 		FilesystemBinding(Host*, KObjectRef);
 		virtual ~FilesystemBinding();
 
-		private:
+	private:
 		Host *host;
 		KObjectRef global;
 		std::vector<KObjectRef> asyncOperations;

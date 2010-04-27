@@ -27,9 +27,8 @@ namespace ti
 	{
 		KROLL_MODULE_CLASS(FilesystemModule)
 		
-
-		private:
-			KObjectRef binding;
+	private:
+		KObjectRef binding;
 	};
 
 }

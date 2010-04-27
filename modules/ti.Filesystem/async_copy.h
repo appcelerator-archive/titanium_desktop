@@ -27,43 +27,24 @@ namespace ti
 {
 	class AsyncCopy : public StaticBoundObject
 	{
-		public:
-			AsyncCopy(FilesystemBinding* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, KMethodRef callback);
-			virtual ~AsyncCopy();
+	public:
+		AsyncCopy(FilesystemBinding* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, KMethodRef callback);
+		virtual ~AsyncCopy();
 
-		private:
-			FilesystemBinding* parent;
-			Host *host;
-			std::vector<std::string> files;
-			std::string destination;
-			KMethodRef callback;
-			Poco::Thread *thread;
-			bool stopped;
-			
-			static void Run(void*);
+	private:
+		FilesystemBinding* parent;
+		Host *host;
+		std::vector<std::string> files;
+		std::string destination;
+		KMethodRef callback;
+		Poco::Thread *thread;
+		bool stopped;
 
-			/**
-			 * Function: ToString
-			 *   Returns the File name
-			 *
-			 * Parameters:
-			 *
-			 * Returns:
-			 *   the file name
-			 */
-			void ToString(const ValueList& args, KValueRef result);
-			/**
-			 * Function: IsFile
-			 *   Determines if this File represents a file
-			 *
-			 * Parameters:
-			 *
-			 * Returns:
-			 *   true if this File repesents a file; false otherwise
-			 */
-			void Cancel(const ValueList& args, KValueRef result);
-			
-			void Copy(Poco::Path &src, Poco::Path &dest);
+		static void Run(void*);
+
+		void ToString(const ValueList& args, KValueRef result);
+		void Cancel(const ValueList& args, KValueRef result);
+		void Copy(Poco::Path &src, Poco::Path &dest);
 	};
 }
 
