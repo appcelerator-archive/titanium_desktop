@@ -1,0 +1,10 @@
+---
+namespace: Titanium.Filesystem.File.touch
+type: method
+description: |
+    Creates a new, empty file in an atomic operation.
+    Returns true if the file was created or false if it already exists.
+since: 1.1.0
+platforms: [osx, linux, win32]
+returns: Boolean
+parameters: []

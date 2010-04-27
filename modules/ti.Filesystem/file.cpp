@@ -131,6 +131,7 @@ namespace ti
 		 * @tiresult(for=Filesystem.File.rename,type=Boolean) true if the file was successfully renamed, false if otherwise
 		 */
 		this->SetMethod("rename",&File::Rename);
+		this->SetMethod("touch",&File::Touch);
 		/**
 		 * @tiapi(method=True,name=Filesystem.File.createDirectory,since=0.2) Creates a new directory
 		 * @tiresult(for=Filesystem.File.createDirectory,type=Boolean) true if the directory was succesfully created, false if otherwise
@@ -519,6 +520,19 @@ namespace ti
 		}
 		catch (Poco::Exception& exc)
 		{
+			throw ValueException::FromString(exc.displayText());
+		}
+	}
+	void File::Touch(const ValueList& args, KValueRef result)
+	{
+		try
+		{
+			Poco::File f(this->filename);
+			result->SetBool(f.createFile());
+		}
+		catch (Poco::Exception& exc)
+		{
+			Logger::Get("File")->Error("exception while creating file: %s", exc.what());
 			throw ValueException::FromString(exc.displayText());
 		}
 	}

@@ -146,6 +146,13 @@ describe("Ti.Filesystem File tests",
 		
 		r = renamedF.deleteFile();
 		value_of(r).should_be_true();
+
+		// touch to create a new file
+		var t = Titanium.Filesystem.getFile(this.base, "touched.txt");
+		value_of(t.exists()).should_be_false();
+		value_of(t.touch()).should_be_true();
+		value_of(t.exists()).should_be_true();
+		value_of(t.touch()).should_be_false();
 	},
 	
 	directory_operations:function()
