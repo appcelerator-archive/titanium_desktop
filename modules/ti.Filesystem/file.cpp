@@ -618,16 +618,7 @@ namespace ti
 
 	void File::GetNativePath(const ValueList& args, KValueRef result)
 	{
-		try
-		{
-			Poco::Path path(this->filename);
-
-			result->SetString(path.makeAbsolute().toString().c_str());
-		}
-		catch (Poco::Exception& exc)
-		{
-			throw ValueException::FromString(exc.displayText());
-		}
+		result->SetString(this->filename);
 	}
 
 	void File::GetSize(const ValueList& args, KValueRef result)
