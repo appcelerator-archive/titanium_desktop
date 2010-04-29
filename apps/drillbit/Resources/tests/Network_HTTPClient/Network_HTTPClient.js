@@ -309,6 +309,40 @@ describe("Network.HTTPClient",
 		})
 	},
 
+	test_multiple_post_paramters_as_async: function(callback)
+	{
+		var timer = 0;
+		var reply = this.reply;
+
+		this.client.addEventListener(Titanium.HTTP_DONE, function(e)
+		{
+			try
+			{
+				value_of(this.status).should_be(200);
+				value_of(this.responseText).should_be(reply);
+				clearTimeout(timer);
+				callback.passed();
+			}
+			catch(e)
+			{
+				clearTimeout(timer);
+				callback.failed(e);
+			}
+		});
+
+		timer = setTimeout(function()
+		{
+			callback.failed('POST test timed out');
+		},10000);
+
+		this.client.open("POST", this.url + "recvpostparams");
+		this.client.send({
+			'one': ['flippityflop', 'flippityflop2'],
+			'two': 'bloopityblop',
+			'three': ''
+		})
+	},
+
 
 	test_redirect_as_async: function(callback)
 	{

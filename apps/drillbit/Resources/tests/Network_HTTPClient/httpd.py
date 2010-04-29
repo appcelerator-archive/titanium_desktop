@@ -133,6 +133,28 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 		self.send_text('I got it!');
 
+	def recv_multiple_post_parameters(self):
+		print 'Receiving post data...'
+		if self.command != 'POST':
+			self.error('Not a POST request')
+		if self.headers.has_key('content-length') is False:
+			self.error('Missing content length')
+		length = int( self.headers['content-length'] )
+
+		ctype, pdict = cgi.parse_header(self.headers.getheader('content-type'))
+		query = cgi.parse_multipart(self.rfile, pdict)
+
+		if query.get('one')[0] != 'flippityflop':
+			self.error('Invalid data for "one[0]": \'%s\'' % query.get['one'][0])
+		if query.get('one')[1] != 'flippityflop2':
+			self.error('Invalid data for "one[1]": \'%s\'' % query.get['one'][1])
+		elif query.get('two')[0] != 'bloopityblop':
+			self.error('Invalid data for "two": \'%s\'' % query.get['two'][0])
+		elif query.get('three')[0] != '':
+			self.error('Invalid data for "three": \'%s\'' % query.get['three'][0])
+
+		self.send_text('I got it!');
+
 	def recv_file(self):
 		correct_text = """Just some test text that will be sent
 to the http server to verify file sending works

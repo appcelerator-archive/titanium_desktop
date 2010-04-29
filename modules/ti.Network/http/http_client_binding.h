@@ -83,6 +83,7 @@ namespace ti
 		void HandleCurlResult(CURLcode result);
 		void SetupCurlMethodType();
 		void CleanupCurl(curl_slist* headers);
+		void AddScalarValueToCurlForm(SharedString propertyName, KValueRef value, curl_httppost** last);
 
 		void Abort(const ValueList& args, KValueRef result);
 		void Open(const ValueList& args, KValueRef result);

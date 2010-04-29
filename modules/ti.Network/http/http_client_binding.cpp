@@ -323,6 +323,48 @@ namespace ti
 		END_KROLL_THREAD;
 	}
 
+	void HTTPClientBinding::AddScalarValueToCurlForm(SharedString propertyName,
+		KValueRef value, curl_httppost** last)
+	{
+		if (value->IsString())
+		{
+			curl_formadd(&this->postData, last,
+				CURLFORM_COPYNAME, propertyName->c_str(),
+				CURLFORM_COPYCONTENTS, value->ToString(),
+				CURLFORM_END);
+		}
+		else if (value->IsObject())
+		{
+			BytesRef bytes(ObjectToBytes(value->ToObject()));
+			if (!bytes.isNull())
+			{
+				// TODO(mrobinson): The CURLFORM_BUFFER parameter should eventually
+				// be pulled from the file-like object if we can get it.
+				curl_formadd(&this->postData, last,
+					CURLFORM_COPYNAME, propertyName->c_str(),
+					CURLFORM_BUFFER, "data",
+					CURLFORM_BUFFERPTR, bytes->Get(),
+					CURLFORM_BUFFERLENGTH, bytes->Length(),
+					CURLFORM_END);
+
+				// We need to preserve the Bytes data until the end of this
+				// request. This prevents us from having to copy the data with
+				// something like CURLFROM_COPYCONTENTS above.
+				preservedPostData.push_back(bytes);
+			}
+		}
+		else
+		{
+			// If we've gotten here we have not been able to convert this object
+			// through any normal means, so we just use the DisplayString of the value.
+			SharedString ss(value->DisplayString());
+			curl_formadd(&this->postData, last,
+				CURLFORM_COPYNAME, propertyName->c_str(),
+				CURLFORM_COPYCONTENTS, ss->c_str(),
+				CURLFORM_END);
+		}
+	}
+
 	void HTTPClientBinding::BeginWithPostDataObject(KObjectRef object)
 	{
 		struct curl_httppost* last = 0;
@@ -332,45 +374,16 @@ namespace ti
 		{
 			SharedString propertyName(properties->at(i));
 			KValueRef value(object->Get(propertyName->c_str()));
-			if (value->IsString())
+			if (value->IsList())
 			{
-				curl_formadd(&this->postData, &last,
-					CURLFORM_COPYNAME, propertyName->c_str(),
-					CURLFORM_COPYCONTENTS, value->ToString(),
-					CURLFORM_END);
-				continue;
+				KListRef list(value->ToList());
+				for (unsigned int i = 0; i < list->Size(); i++)
+					this->AddScalarValueToCurlForm(propertyName, list->At(i), &last);
 			}
-
-			if (value->IsObject())
+			else
 			{
-				BytesRef bytes(ObjectToBytes(value->ToObject()));
-				if (!bytes.isNull())
-				{
-					// TODO(mrobinson): The CURLFORM_BUFFER parameter should eventually
-					// be pulled from the file-like object if we can get it.
-					curl_formadd(&this->postData, &last,
-						CURLFORM_COPYNAME, propertyName->c_str(),
-						CURLFORM_BUFFER, "data",
-						CURLFORM_BUFFERPTR, bytes->Get(),
-						CURLFORM_BUFFERLENGTH, bytes->Length(),
-						CURLFORM_END);
-
-					// We need to preserve the Bytes data until the end of this
-					// request. This prevents us from having to copy the data with
-					// something like CURLFROM_COPYCONTENTS above.
-					preservedPostData.push_back(bytes);
-					continue;
-				}
+				this->AddScalarValueToCurlForm(propertyName, value, &last);
 			}
-
-			// TODO(mrobinson): Intelligently handle lists of data here as CURLFORM_ARRAY
-			// If we've gotten here we have not been able to convert this object
-			// through any normal means, so we just use the DisplayString of the value.
-			SharedString ss(value->DisplayString());
-			curl_formadd(&this->postData, &last,
-				CURLFORM_COPYNAME, propertyName->c_str(),
-				CURLFORM_COPYCONTENTS, ss->c_str(),
-				CURLFORM_END);
 		}
 	}
 
