@@ -357,7 +357,7 @@ namespace ti
 			{
 				curl_formadd(&this->postData, last,
 					CURLFORM_COPYNAME, propertyName->c_str(),
-					CURLFORM_BUFFER, ObjectToFilename(bytes).c_str(),
+					CURLFORM_BUFFER, ObjectToFilename(value->ToObject()).c_str(),
 					CURLFORM_BUFFERPTR, bytes->Get(),
 					CURLFORM_BUFFERLENGTH, bytes->Length(),
 					CURLFORM_END);
