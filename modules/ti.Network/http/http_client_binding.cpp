@@ -323,6 +323,23 @@ namespace ti
 		END_KROLL_THREAD;
 	}
 
+	static std::string ObjectToFilename(KObjectRef dataObject)
+	{
+		// Now try to treat this object like as a file-like object with
+		// a .read() method which returns a Bytes. If this fails we'll
+		// return NULL.
+		KMethodRef nativePathMethod(dataObject->GetMethod("nativePath", 0));
+		if (nativePathMethod.isNull())
+			return "data";
+
+		KValueRef pathValue(nativePathMethod->Call());
+		if (!pathValue->IsString())
+			return "data";
+
+		// If this cast fails, it will return NULL, as we expect.
+		return FileUtils::Basename(pathValue->ToString());
+	}
+
 	void HTTPClientBinding::AddScalarValueToCurlForm(SharedString propertyName,
 		KValueRef value, curl_httppost** last)
 	{
@@ -338,11 +355,9 @@ namespace ti
 			BytesRef bytes(ObjectToBytes(value->ToObject()));
 			if (!bytes.isNull())
 			{
-				// TODO(mrobinson): The CURLFORM_BUFFER parameter should eventually
-				// be pulled from the file-like object if we can get it.
 				curl_formadd(&this->postData, last,
 					CURLFORM_COPYNAME, propertyName->c_str(),
-					CURLFORM_BUFFER, "data",
+					CURLFORM_BUFFER, ObjectToFilename(bytes).c_str(),
 					CURLFORM_BUFFERPTR, bytes->Get(),
 					CURLFORM_BUFFERLENGTH, bytes->Length(),
 					CURLFORM_END);
@@ -386,7 +401,6 @@ namespace ti
 			}
 		}
 	}
-
 
 	bool HTTPClientBinding::BeginRequest(KValueRef sendData)
 	{
