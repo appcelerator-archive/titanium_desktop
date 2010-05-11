@@ -9,3 +9,16 @@ parameters:
     - [Number, port, port to bind on]
     - [String, address, (optional) address to bind to]
     - [Method, callback, callback for server logic (in seperate thread)]
+examples:
+    - description: Simple HTTP server
+      code: |
+            <pre><code>
+                // Create a HTTP server that listens on port 8080
+                var httpServer = Titanium.Network.createHTTPServer();
+                httpServer.bind(8080, function(request, response)
+                {
+                    Titanium.API.debug("Got request for URI: " + request.getURI());
+                    response.setContentType("text/html");
+                    response.write("<h1>Hello!</h1>");
+                });
+            </code></pre>
