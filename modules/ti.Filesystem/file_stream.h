@@ -32,8 +32,10 @@ namespace ti
 		FileStream(std::string filename_);
 		virtual ~FileStream();
 
-		// TODO - these functions are public for now, but need to be made private when the corresponding functions
-		//        in File are deleted
+	private:
+		std::string filename;
+		Poco::FileIOS* stream;
+
 		void Open(const ValueList& args, KValueRef result);
 		bool Open(FileStreamMode mode, bool binary = false, bool append = false);
 		void Close(const ValueList& args, KValueRef result);
@@ -45,10 +47,6 @@ namespace ti
 		void WriteLine(const ValueList& args, KValueRef result);
 		void Ready(const ValueList& args, KValueRef result);
 		void IsOpen(const ValueList& args, KValueRef result);
-
-	private:
-		std::string filename;
-		Poco::FileIOS* stream;
 	};
 
 }

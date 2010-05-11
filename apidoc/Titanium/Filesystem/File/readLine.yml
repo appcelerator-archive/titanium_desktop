@@ -8,6 +8,9 @@ description: |
     the entire file has been read via Filestream.File.readLine. It is recommended
     that new applications use Filesystem.Filestream to read files instead, which
     allow for explicit control over the native file handles.
+deprecated:
+    reason: The method has been superseded by Filestream.readLine()
+    version: 1.1.0
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: String

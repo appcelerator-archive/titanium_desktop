@@ -3,6 +3,9 @@ namespace: Titanium.Filesystem.File.read
 type: method
 description: |
     Return the entire contents of a file as a Bytes object.
+deprecated:
+    reason: The method has been superseded by Filestream.read()
+    version: 1.1.0
 since: 0.2.0
 platforms: [osx, linux, win32]
 returns: Bytes

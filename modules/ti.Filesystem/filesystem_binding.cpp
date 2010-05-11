@@ -7,6 +7,7 @@
 #include <kroll/thread_manager.h>
 #include "filesystem_binding.h"
 #include "file.h"
+#include "file_stream.h"
 #include "async_copy.h"
 #include "filesystem_utils.h"
 

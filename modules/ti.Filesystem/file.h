@@ -16,7 +16,6 @@
 #import <Foundation/Foundation.h>
 #endif
 
-#include "file_stream.h" // TODO remove this include when read/write methods are removed from File class
 #include <string>
 
 namespace ti
@@ -35,7 +34,6 @@ namespace ti
 
 	private:
 		std::string filename;
-		ti::FileStream* readLineFS;
 
 		void ToString(const ValueList& args, KValueRef result);
 		void ToURL(const ValueList& args, KValueRef result);
@@ -47,9 +45,6 @@ namespace ti
 		void IsReadonly(const ValueList& args, KValueRef result);
 		void IsWritable(const ValueList& args, KValueRef result);
 		void Resolve(const ValueList& args, KValueRef result);
-		void Write(const ValueList& args, KValueRef result);
-		void Read(const ValueList& args, KValueRef result);
-		void ReadLine(const ValueList& args, KValueRef result);
 		void Copy(const ValueList& args, KValueRef result);
 		void Move(const ValueList& args, KValueRef result);
 		void Rename(const ValueList& args, KValueRef result);

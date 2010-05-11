@@ -8,7 +8,6 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/FileStream.h>
 #include <Poco/Exception.h>
 
 #ifndef OS_WIN32
@@ -30,8 +29,7 @@
 namespace ti
 {
 	File::File(std::string filename) :
-		StaticBoundObject("Filesystem.File"),
-		readLineFS(0)
+		StaticBoundObject("Filesystem.File")
 	{
 
 		Poco::Path pocoPath(Poco::Path::expand(filename));
@@ -56,9 +54,6 @@ namespace ti
 		this->SetMethod("isWriteable", &File::IsWritable);
 		this->SetMethod("isWritable", &File::IsWritable);
 		this->SetMethod("resolve", &File::Resolve);
-		this->SetMethod("write", &File::Write);
-		this->SetMethod("read", &File::Read);
-		this->SetMethod("readLine", &File::ReadLine);
 		this->SetMethod("copy", &File::Copy);
 		this->SetMethod("move", &File::Move);
 		this->SetMethod("rename", &File::Rename);
@@ -86,8 +81,6 @@ namespace ti
 
 	File::~File()
 	{
-		if (this->readLineFS)
-			delete this->readLineFS;
 	}
 
 	void File::ToURL(const ValueList& args, KValueRef result)
@@ -282,66 +275,6 @@ namespace ti
 		catch (Poco::Exception& exc)
 		{
 			throw ValueException::FromString(exc.displayText());
-		}
-	}
-
-	void File::Write(const ValueList& args, KValueRef result)
-	{
-		FileStreamMode mode = MODE_WRITE;
-
-		if(args.size() > 1)
-		{
-			if(args.at(1)->ToBool())
-			{
-				mode = MODE_APPEND;
-			}
-		}
-
-		Logger* logger = Logger::Get("Filesystem.File");
-		logger->Trace("write called for %s",this->filename.c_str());
-
-		ti::FileStream fs(this->filename);
-		fs.Open(mode);
-		fs.Write(args, result);
-		fs.Close();
-#ifndef OS_WIN32
-		chmod(this->filename.c_str(),S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-#endif		
-	}
-
-	void File::Read(const ValueList& args, KValueRef result)
-	{
-		Logger* logger = Logger::Get("Filesystem.File");
-		logger->Trace("read called for %s",this->filename.c_str());
-
-		FileStream fs(this->filename);
-		fs.Open(MODE_READ);
-		fs.Read(args, result);
-		fs.Close();
-	}
-
-	void File::ReadLine(const ValueList& args, KValueRef result)
-	{
-		bool forceOpen = args.GetBool(0, false);
-
-		if (!readLineFS || forceOpen)
-		{
-			// Close file if it's already open
-			if (this->readLineFS)
-				delete this->readLineFS;
-
-			this->readLineFS = new ti::FileStream(this->filename);
-			this->readLineFS->Open(MODE_READ);
-		}
-
-		this->readLineFS->ReadLine(args, result);
-
-		// We've read the end of the file or errored out, so clean
-		// up the Filestream object.
-		if (result->IsNull())
-		{
-			delete this->readLineFS;
-			this->readLineFS = 0;
 		}
 	}
 
