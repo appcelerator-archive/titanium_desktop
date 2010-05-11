@@ -45,18 +45,11 @@ namespace ti
 
 	void FileStream::Open(const ValueList& args, KValueRef result)
 	{
-		FileStreamMode mode = MODE_READ;
-		bool binary = false;
-		bool append = false;
+		args.VerifyException("open", "?ibb");
 
-		if (args.size() >= 1)
-			mode = (FileStreamMode) args.at(0)->ToInt();
-
-		if (args.size() >= 2)
-				binary = args.at(1)->ToBool();
-
-		if (args.size() >= 3)
-			append = args.at(2)->ToBool();
+		FileStreamMode mode = (FileStreamMode) args.GetInt(0, MODE_READ);
+		bool binary = args.GetBool(1, false);
+		bool append = args.GetBool(2, false);
 
 		bool opened = this->Open(mode, binary, append);
 		result->SetBool(opened);
@@ -145,6 +138,8 @@ namespace ti
 
 	void FileStream::Write(const ValueList& args, KValueRef result)
 	{
+		args.VerifyException("write", "s|o|n");
+
 		char *text = NULL;
 		int size = 0;
 		if (args.at(0)->IsObject())
@@ -185,16 +180,12 @@ namespace ti
 			size = strlen(text);
 		}
 
-		if (text == NULL)
+		if (text == NULL || size <= 0)
 		{
 			result->SetBool(false);
 			return;
 		}
-		if (size <= 0)
-		{
-			result->SetBool(false);
-			return;
-		}
+
 		Write(text,size);
 		result->SetBool(true);
 	}
@@ -329,10 +320,13 @@ namespace ti
 
 	void FileStream::WriteLine(const ValueList& args, KValueRef result)
 	{
+		args.VerifyException("writeLine", "s|o|n");
+
 		if(! this->stream)
 		{
 			throw ValueException::FromString("FileStream must be opened before calling readLine");
 		}
+
 		char *text = NULL;
 		int size = 0;
 		if (args.at(0)->IsObject())
@@ -373,16 +367,12 @@ namespace ti
 			size = strlen(text);
 		}
 
-		if (text == NULL)
+		if (text == NULL || size <= 0)
 		{
 			result->SetBool(false);
 			return;
 		}
-		if (size <= 0)
-		{
-			result->SetBool(false);
-			return;
-		}
+
 		std::string astr = text;
 #ifdef OS_WIN32
 		astr += "\r\n";
