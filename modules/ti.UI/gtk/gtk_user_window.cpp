@@ -289,18 +289,20 @@ namespace ti
 		{
 			GdkWindow* gdk_window = GTK_WIDGET(this->gtkWindow)->window;
 			int d = 0;
-	
+
 			if (this->config->IsUsingChrome())
-				d = d | GDK_DECOR_BORDER | GDK_DECOR_TITLE | GDK_DECOR_MENU;
+			{
+				d = GDK_DECOR_BORDER | GDK_DECOR_TITLE | GDK_DECOR_MENU;
 	
-			if (this->config->IsResizable())
-				d = d | GDK_DECOR_RESIZEH;
+				if (this->config->IsResizable())
+					d = d | GDK_DECOR_RESIZEH;
 	
-			if (this->config->IsMinimizable())
-				d = d | GDK_DECOR_MINIMIZE;
+				if (this->config->IsMinimizable())
+					d = d | GDK_DECOR_MINIMIZE;
 	
-			if (this->config->IsMaximizable())
-				d = d | GDK_DECOR_MAXIMIZE;
+				if (this->config->IsMaximizable())
+					d = d | GDK_DECOR_MAXIMIZE;
+			}
 	
 			this->SetTransparency(config->GetTransparency());
 	
