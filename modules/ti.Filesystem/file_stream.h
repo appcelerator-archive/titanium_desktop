@@ -34,6 +34,9 @@ namespace ti
 
 	private:
 		std::string filename;
+
+		Poco::FileInputStream* istream;
+		Poco::FileOutputStream* ostream;
 		Poco::FileIOS* stream;
 
 		void Open(const ValueList& args, KValueRef result);
@@ -47,6 +50,7 @@ namespace ti
 		void WriteLine(const ValueList& args, KValueRef result);
 		void Ready(const ValueList& args, KValueRef result);
 		void IsOpen(const ValueList& args, KValueRef result);
+		void Seek(const ValueList& args, KValueRef result);
 	};
 
 }

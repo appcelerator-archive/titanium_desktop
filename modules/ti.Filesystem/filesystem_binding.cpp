@@ -54,9 +54,12 @@ namespace ti
 		this->SetMethod("getRootDirectories", &FilesystemBinding::GetRootDirectories);
 		this->SetMethod("asyncCopy", &FilesystemBinding::ExecuteAsyncCopy);
 
-		this->Set("MODE_READ", Value::NewInt(MODE_READ));
-		this->Set("MODE_WRITE", Value::NewInt(MODE_WRITE));
-		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
+		this->SetInt("MODE_READ", MODE_READ);
+		this->SetInt("MODE_WRITE", MODE_WRITE);
+		this->SetInt("MODE_APPEND", MODE_APPEND);
+		this->SetInt("SEEK_START", std::ios::beg);
+		this->SetInt("SEEK_CURRENT", std::ios::cur);
+		this->SetInt("SEEK_END", std::ios::end);
 	}
 
 	FilesystemBinding::~FilesystemBinding()

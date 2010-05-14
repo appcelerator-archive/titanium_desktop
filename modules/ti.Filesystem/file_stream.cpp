@@ -13,7 +13,7 @@ namespace ti
 {
 	FileStream::FileStream(std::string filenameIn) :
 		StaticBoundObject("Filesystem.FileStream"),
-		stream(0)
+		istream(0), ostream(0), stream(0)
 	{
 #ifdef OS_OSX
 		// in OSX, we need to expand ~ in paths to their absolute path value
@@ -32,7 +32,10 @@ namespace ti
 		this->SetMethod("writeLine", &FileStream::WriteLine);
 		this->SetMethod("ready", &FileStream::Ready);
 		this->SetMethod("isOpen", &FileStream::IsOpen);
-		
+		this->SetMethod("seek", &FileStream::Seek);
+
+		// These should be depricated and no longer used.
+		// All constants should be kept on Ti.Filesystem object.
 		this->Set("MODE_READ", Value::NewInt(MODE_READ));
 		this->Set("MODE_APPEND", Value::NewInt(MODE_APPEND));
 		this->Set("MODE_WRITE", Value::NewInt(MODE_WRITE));
@@ -64,10 +67,12 @@ namespace ti
 		{
 			std::ios::openmode flags = (std::ios::openmode) 0;
 			bool output = false;
+
 			if (binary)
 			{
 				flags|=std::ios::binary;
 			}
+
 			if (mode == MODE_APPEND)
 			{
 				flags|=std::ios::out|std::ios::app;
@@ -82,17 +87,21 @@ namespace ti
 			{
 				flags |= std::ios::in;
 			}
+
 			if (output)
 			{
-				this->stream = new Poco::FileOutputStream(this->filename,flags);
+				this->ostream = new Poco::FileOutputStream(this->filename,flags);
+				this->stream = this->ostream;
 #ifndef OS_WIN32
 				chmod(this->filename.c_str(),S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
 #endif		
 			}
 			else
 			{
-				this->stream = new Poco::FileInputStream(this->filename,flags);
+				this->istream = new Poco::FileInputStream(this->filename,flags);
+				this->stream = this->istream;
 			}
+
 			return true;
 		}
 		catch (Poco::Exception& exc)
@@ -115,14 +124,17 @@ namespace ti
 		{
 			if (this->stream)
 			{
-				Poco::FileOutputStream* fos = dynamic_cast<Poco::FileOutputStream*>(this->stream);
-				if (fos)
+				if (this->ostream)
 				{
-					fos->flush();
+					this->ostream->flush();
 				}
+
 				this->stream->close();
 				delete this->stream;
 				this->stream = NULL;
+				this->istream = NULL;
+				this->ostream = NULL;
+
 				return true;
 			}
 		}
@@ -194,13 +206,12 @@ namespace ti
 	{
 		try
 		{
-			Poco::FileOutputStream* fos = dynamic_cast<Poco::FileOutputStream*>(this->stream);
-			if(!fos)
+			if(!this->ostream)
 			{
 				throw ValueException::FromString("FileStream must be opened for writing before calling write");
 			}
 
-			fos->write(text, size);
+			this->ostream->write(text, size);
 		}
 		catch (Poco::Exception& exc)
 		{
@@ -214,17 +225,9 @@ namespace ti
 	{
 		args.VerifyException("read", "?i");
 
-		if (!this->stream)
-		{
-			Logger* logger = Logger::Get("Filesystem.FileStream");
-			logger->Error("Error in read. FileStream must be opened before calling read");
-			throw ValueException::FromString("FileStream must be opened before calling read");
-		}
-
 		try
 		{
-			Poco::FileInputStream* fileStream = dynamic_cast<Poco::FileInputStream*>(this->stream);
-			if (!fileStream)
+			if (!this->istream)
 			{
 				Logger* logger = Logger::Get("Filesystem.FileStream");
 				logger->Error("Error in read. FileInputStream is null");
@@ -238,9 +241,9 @@ namespace ti
 					throw ValueException::FromString("File.read() size must be greater than zero");
 
 				char* buffer = new char[size + 1];
-				fileStream->read(buffer, size);
+				this->istream->read(buffer, size);
 
-				int readCount = fileStream->gcount();
+				int readCount = this->istream->gcount();
 				if (readCount > 0)
 				{
 					// Store read data into a byte blob
@@ -261,10 +264,10 @@ namespace ti
 				std::vector<char> buffer;
 				char data[4096];
 
-				while (!fileStream->eof())
+				while (!this->istream->eof())
 				{
-					fileStream->read((char*)&data, 4095);
-					int length = fileStream->gcount();
+					this->istream->read((char*)&data, 4095);
+					int length = this->istream->gcount();
 					if (length > 0)
 					{
 						buffer.insert(buffer.end(), data, data+length);
@@ -285,24 +288,16 @@ namespace ti
 
 	void FileStream::ReadLine(const ValueList& args, KValueRef result)
 	{
-		if (!this->stream)
-		{
-			Logger* logger = Logger::Get("Filesystem.FileStream");
-			logger->Error("Error in readLine. FileStream must be opened before calling read");
-			throw ValueException::FromString("FileStream must be opened before calling readLine");
-		}
-
 		try
 		{
-			Poco::FileInputStream* fis = dynamic_cast<Poco::FileInputStream*>(this->stream);
-			if (!fis)
+			if (!this->istream)
 			{
 				Logger* logger = Logger::Get("Filesystem.FileStream");
 				logger->Error("Error in readLine. FileInputStream is null");
 				throw ValueException::FromString("FileStream must be opened for reading before calling readLine");
 			}
 
-			if (fis->eof())
+			if (this->istream->eof())
 			{
 				// close the file
 				result->SetNull();
@@ -310,7 +305,7 @@ namespace ti
 			else
 			{
 				std::string line;
-				std::getline(*fis, line);
+				std::getline(*this->istream, line);
 #ifdef OS_WIN32
 				// In some cases std::getline leaves a CR on the end of the line in win32 -- why God, why?
 				if (!line.empty())
@@ -323,7 +318,7 @@ namespace ti
 #endif
 				if (line.empty() || line.size()==0)
 				{
-					if (fis->eof())
+					if (this->istream->eof())
 					{
 						// if this is EOF, return null
 						result->SetNull();
@@ -415,21 +410,40 @@ namespace ti
 
 	void FileStream::Ready(const ValueList& args, KValueRef result)
 	{
-		Poco::FileIOS* fis = this->stream;
-		if(!fis)
+		if(!this->stream)
 		{
 			result->SetBool(false);
 		}
 		else
 		{
-			result->SetBool(fis->eof()==false);
+			result->SetBool(this->stream->eof()==false);
 		}
 	}
 
 	void FileStream::IsOpen(const ValueList& args, KValueRef result)
 	{
-		Poco::FileIOS* fis = this->stream;
-		result->SetBool(fis!=NULL);
+		result->SetBool(this->stream != NULL);
+	}
+
+	void FileStream::Seek(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("seek", "i?i");
+
+		int offset = args.GetInt(0);
+		std::ios::seekdir dir = (std::ios::seekdir)args.GetInt(1, std::ios::beg);
+
+		if (this->istream)
+		{
+			this->istream->seekg(offset, dir);
+		}
+		else if (this->ostream)
+		{
+			this->ostream->seekp(offset, dir);
+		}
+		else
+		{
+			throw ValueException::FromString("FileStream must be opened before seeking");
+		}
 	}
 
 }
