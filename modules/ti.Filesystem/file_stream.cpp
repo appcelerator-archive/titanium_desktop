@@ -212,6 +212,8 @@ namespace ti
 
 	void FileStream::Read(const ValueList& args, KValueRef result)
 	{
+		args.VerifyException("read", "?i");
+
 		if (!this->stream)
 		{
 			Logger* logger = Logger::Get("Filesystem.FileStream");
@@ -228,22 +230,50 @@ namespace ti
 				logger->Error("Error in read. FileInputStream is null");
 				throw ValueException::FromString("FileStream must be opened for reading before calling read");
 			}
-			
-			std::vector<char> buffer;
-			char data[4096];
 
-			while (!fileStream->eof())
+			if (args.size() >= 1)
 			{
-				fileStream->read((char*)&data, 4095);
-				int length = fileStream->gcount();
-				if (length > 0)
-				{
-					buffer.insert(buffer.end(), data, data+length);
-				}
-				else break;
-			}
+				int size = args.GetInt(0);
+				if (size <= 0)
+					throw ValueException::FromString("File.read() size must be greater than zero");
 
-			result->SetObject(new Bytes(&(buffer[0]), buffer.size()));
+				char* buffer = new char[size + 1];
+				fileStream->read(buffer, size);
+
+				int readCount = fileStream->gcount();
+				if (readCount > 0)
+				{
+					// Store read data into a byte blob
+					buffer[readCount] = '\0';
+					result->SetObject(new Bytes(buffer, readCount, false));
+				}
+				else
+				{
+					// No data read, must be at EOF
+					result->SetNull();
+				}
+			}
+			else
+			{
+				// If no read size is provided, read the entire file.
+				// TODO: this is not a very efficent method and should be deprecated
+				// and replaced by buffered stream transports
+				std::vector<char> buffer;
+				char data[4096];
+
+				while (!fileStream->eof())
+				{
+					fileStream->read((char*)&data, 4095);
+					int length = fileStream->gcount();
+					if (length > 0)
+					{
+						buffer.insert(buffer.end(), data, data+length);
+					}
+					else break;
+				}
+
+				result->SetObject(new Bytes(&(buffer[0]), buffer.size()));
+			}
 		}
 		catch (Poco::Exception& exc)
 		{
