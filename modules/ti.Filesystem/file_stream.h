@@ -51,6 +51,7 @@ namespace ti
 		void Ready(const ValueList& args, KValueRef result);
 		void IsOpen(const ValueList& args, KValueRef result);
 		void Seek(const ValueList& args, KValueRef result);
+		void Tell(const ValueList& args, KValueRef result);
 	};
 
 }

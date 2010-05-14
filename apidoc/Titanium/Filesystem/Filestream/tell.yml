@@ -1,0 +1,18 @@
+---
+namespace: Titanium.Filesystem.Filestream.tell
+type: method
+description: |
+    Returns current position in file relative to the beginning
+since: 1.1.0
+platforms: [osx, linux, win32]
+returns: Integer
+parameters: []
+examples:
+    - description: Get current position in file
+      code: |
+                <pre><code>
+					var file = Titanium.Filesystem.getFile(...);
+					var istream = file.open(Titanium.Filesystem.MODE_READ);
+
+					var currentPosition = istream.tell();
+                </code></pre>

@@ -172,18 +172,20 @@ describe("Ti.Filesystem FileStream tests",{
 		s.close();
 	},
 
-	test_seek: function()
+	test_seek_tell: function()
 	{
 		var f = Titanium.Filesystem.getFile(Titanium.Filesystem.getResourcesDirectory(), "test.txt");
 		var s = f.open(Titanium.Filesystem.MODE_READ);
 
 		// Seek from start
 		s.seek(11);
+		value_of(s.tell()).should_be(11);
 		var four = s.read(4);
 		value_of(four.toString()).should_be("four");
 
 		// Seek from current position
 		s.seek(-12, Titanium.Filesystem.SEEK_CURRENT);
+		value_of(s.tell()).should_be(3);
 		var two = s.read(3);
 		value_of(two.toString()).should_be("two");
 

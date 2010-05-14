@@ -33,6 +33,7 @@ namespace ti
 		this->SetMethod("ready", &FileStream::Ready);
 		this->SetMethod("isOpen", &FileStream::IsOpen);
 		this->SetMethod("seek", &FileStream::Seek);
+		this->SetMethod("tell", &FileStream::Tell);
 
 		// These should be depricated and no longer used.
 		// All constants should be kept on Ti.Filesystem object.
@@ -443,6 +444,22 @@ namespace ti
 		else
 		{
 			throw ValueException::FromString("FileStream must be opened before seeking");
+		}
+	}
+
+	void FileStream::Tell(const ValueList& args, KValueRef result)
+	{
+		if (this->istream)
+		{
+			result->SetInt(this->istream->tellg());
+		}
+		else if (this->ostream)
+		{
+			result->SetInt(this->ostream->tellp());
+		}
+		else
+		{
+			throw ValueException::FromString("FileStream must be opend before using tell");
 		}
 	}
 
