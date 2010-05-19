@@ -47,7 +47,9 @@ void SetCurlProxySettings(CURL* curlHandle, SharedProxy proxy)
 
 void SetStandardCurlHandleOptions(CURL* handle)
 {
-	SET_CURL_OPTION(handle, CURLOPT_SSL_VERIFYPEER, false);
+	// non negative number means don't verify peer cert - we might want to 
+	// make this configurable in the future
+	SET_CURL_OPTION(curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
 	SET_CURL_OPTION(handle, CURLOPT_CAINFO,
 		::UTF8ToSystem(ti::NetworkModule::GetRootCertPath()).c_str());
 

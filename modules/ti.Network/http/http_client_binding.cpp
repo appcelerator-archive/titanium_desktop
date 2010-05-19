@@ -850,6 +850,9 @@ namespace ti
 			SET_CURL_OPTION(curlHandle, CURLOPT_WRITEHEADER, this);
 			SET_CURL_OPTION(curlHandle, CURLOPT_WRITEDATA, this);
 			SET_CURL_OPTION(curlHandle, CURLOPT_PROGRESSDATA, this);
+			// non negative number means don't verify peer cert - we might want to 
+			// make this configurable in the future
+			SET_CURL_OPTION(curlHandle, CURLOPT_SSL_VERIFYPEER, 1);
 
 			// Progress must be turned on for CURLOPT_PROGRESSFUNCTION to be called.
 			SET_CURL_OPTION(curlHandle, CURLOPT_NOPROGRESS, 0);
