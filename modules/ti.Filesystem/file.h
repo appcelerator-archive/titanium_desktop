@@ -5,7 +5,9 @@
  */
 #ifndef _TI_FILE_H_
 #define _TI_FILE_H_
+
 #include <kroll/kroll.h>
+#include "file_stream.h"
 
 #ifdef OS_WIN32
 #include <windows.h>
@@ -35,6 +37,7 @@ namespace ti
 	private:
 		std::string filename;
 
+		void Open(const ValueList& args, KValueRef result);
 		void ToString(const ValueList& args, KValueRef result);
 		void ToURL(const ValueList& args, KValueRef result);
 		void IsFile(const ValueList& args, KValueRef result);

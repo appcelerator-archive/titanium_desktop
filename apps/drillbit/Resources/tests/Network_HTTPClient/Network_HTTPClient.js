@@ -3,13 +3,13 @@ describe("Network.HTTPClient",
 	before_all: function()
 	{
 		// Launch test http server
-		this.httpd = Titanium.Process.createProcess(
+		/*this.httpd = Titanium.Process.createProcess(
 		{
 			args: [
 				'python', Titanium.API.application.resourcesPath + "/httpd.py"
 			],
 		});
-		this.httpd.launch();
+		this.httpd.launch();*/
 
 		this.text = "here is some text for you!";
 		this.reply = "I got it!";
@@ -455,7 +455,7 @@ describe("Network.HTTPClient",
 		var file = Titanium.Filesystem.getFile(this.filepath);
 		value_of(file).should_be_object();
 		this.client.open("POST", this.url + "recvfile", false);
-		this.client.send(file);
+		this.client.send(file.read());
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("Got the file!");
 	},

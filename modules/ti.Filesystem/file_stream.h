@@ -32,6 +32,9 @@ namespace ti
 		FileStream(std::string filename_);
 		virtual ~FileStream();
 
+		// Used by File.open()
+		void Open(const ValueList& args, KValueRef result);
+
 	private:
 		std::string filename;
 
@@ -39,7 +42,6 @@ namespace ti
 		Poco::FileOutputStream* ostream;
 		Poco::FileIOS* stream;
 
-		void Open(const ValueList& args, KValueRef result);
 		bool Open(FileStreamMode mode, bool binary = false, bool append = false);
 		void Close(const ValueList& args, KValueRef result);
 		bool Close();

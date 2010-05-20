@@ -88,8 +88,16 @@ BytesRef ObjectToBytes(KObjectRef dataObject)
 
 	// Now try to treat this object like as a file-like object with
 	// a .read() method which returns a Bytes. If this fails we'll
-	// return NULL.
-	KMethodRef nativeReadMethod(dataObject->GetMethod("read", 0));
+	// return NULL. First open file stream then try reading.
+	KMethodRef nativeOpenMethod(dataObject->GetMethod("open", 0));
+	if (nativeOpenMethod.isNull())
+		return 0;
+
+	KValueRef streamValue(nativeOpenMethod->Call());
+	if (streamValue.isNull() || !streamValue->IsObject())
+		return 0;
+
+	KMethodRef nativeReadMethod(streamValue->ToObject()->GetMethod("read", 0));
 	if (nativeReadMethod.isNull())
 		return 0;
 

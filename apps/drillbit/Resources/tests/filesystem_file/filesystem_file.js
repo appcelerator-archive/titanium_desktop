@@ -355,7 +355,11 @@ describe("Ti.Filesystem File tests",
 	{
 		var data = make_large_file();
 		var file = Titanium.Filesystem.getFile(data[0]);
-		var contents = file.read();
+
+		var fileStream = file.open();
+		var contents = fileStream.read();
+		fileStream.close();
+
 		file.deleteFile();
 		value_of(contents.length).should_be(data[1].length);
 		value_of(String(contents)).should_be(data[1]);

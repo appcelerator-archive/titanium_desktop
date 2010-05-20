@@ -43,6 +43,7 @@ namespace ti
 			this->filename.resize(length - 1);
 		}
 
+		this->SetMethod("open", &File::Open);
 		this->SetMethod("toString", &File::ToString);
 		this->SetMethod("toURL", &File::ToURL);
 		this->SetMethod("isFile", &File::IsFile);
@@ -81,6 +82,23 @@ namespace ti
 
 	File::~File()
 	{
+	}
+
+	void File::Open(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("open", "?ibb");
+
+		FileStream* stream = new FileStream(this->filename);
+		result->SetObject(stream);
+
+		// Perform open operation before returning stream object
+		KValueRef openResult(Value::NewUndefined());
+		stream->Open(args, openResult);
+		if (openResult->ToBool() == false)
+		{
+			// Failed to open stream, return null
+			result->SetNull();
+		}
 	}
 
 	void File::ToURL(const ValueList& args, KValueRef result)
