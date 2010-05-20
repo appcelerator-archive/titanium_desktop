@@ -3,13 +3,13 @@ describe("Network.HTTPClient",
 	before_all: function()
 	{
 		// Launch test http server
-		/*this.httpd = Titanium.Process.createProcess(
+		this.httpd = Titanium.Process.createProcess(
 		{
 			args: [
 				'python', Titanium.API.application.resourcesPath + "/httpd.py"
 			],
 		});
-		this.httpd.launch();*/
+		this.httpd.launch();
 
 		this.text = "here is some text for you!";
 		this.reply = "I got it!";
