@@ -76,7 +76,7 @@ namespace ti
 		this->SetMethod("setExecutable", &File::SetExecutable);
 		this->SetMethod("setReadonly", &File::SetReadonly);
 		this->SetMethod("setWriteable", &File::SetWritable);
-		this->SetMethod("setWrieable", &File::SetWritable);
+		this->SetMethod("setWritable", &File::SetWritable);
 		this->SetMethod("unzip", &File::Unzip);
 	}
 
@@ -705,7 +705,6 @@ namespace ti
 	{
 		try
 		{
-			bool readonly = args.at(0)->ToBool();
 #ifndef OS_WIN32
 			mode_t mode = S_IRUSR|S_IWUSR;
 			Poco::File f(this->filename);
@@ -721,8 +720,8 @@ namespace ti
 			result->SetBool(true);
 #else
 			Poco::File file(this->filename);
-			file.setReadOnly(readonly);
-			result->SetBool(!file.canRead());
+			file.setReadOnly(true);
+			result->SetBool(file.canRead() && !file.canWrite());
 #endif		
 		}
 		catch (Poco::FileNotFoundException&)
@@ -744,7 +743,7 @@ namespace ti
 		try
 		{
 			Poco::File file(this->filename);
-			file.setWriteable(args.at(0)->ToBool());
+			file.setWriteable(true);
 			result->SetBool(file.canWrite());
 		}
 		catch (Poco::FileNotFoundException&)
