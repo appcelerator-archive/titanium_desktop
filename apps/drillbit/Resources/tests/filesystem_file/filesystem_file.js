@@ -241,17 +241,13 @@ describe("Ti.Filesystem File tests",
 			value_of(f.isExecutable()).should_be_false();
 		}
 
-		f.setReadonly(false);
-		value_of(f.isReadonly()).should_be_false();
-
-		f.setReadonly(true);
+		value_of(f.setReadonly()).should_be_true();
 		value_of(f.isReadonly()).should_be_true();
-		
-		f.setWriteable(false);
-		value_of(f.isWriteable()).should_be_false();
+		value_of(f.isWritable()).should_be_false();
 
-		f.setWriteable(true);
+		value_of(f.setWriteable()).should_be_true();
 		value_of(f.isWriteable()).should_be_true();
+		value_of(f.isReadonly()).should_be_false();
 	},
 	
 	test_file_readLine_isEmpty:function()

@@ -301,8 +301,7 @@
 						case 'xml':
 						{
 							tiapp_found=true;
-							var srcIn = TFS.getFileStream(src);
-							srcIn.open();
+							var srcIn = src.open();
 							tiapp.write(srcIn.read());
 							srcIn.close();
 							break;
