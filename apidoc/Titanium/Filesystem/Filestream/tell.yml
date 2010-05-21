@@ -11,8 +11,8 @@ examples:
     - description: Get current position in file
       code: |
                 <pre><code>
-					var file = Titanium.Filesystem.getFile(...);
-					var istream = file.open(Titanium.Filesystem.MODE_READ);
+                    var file = Titanium.Filesystem.getFile(...);
+                    var istream = file.open(Titanium.Filesystem.MODE_READ);
 
-					var currentPosition = istream.tell();
+                    var currentPosition = istream.tell();
                 </code></pre>

@@ -13,9 +13,9 @@ examples:
     - description: Seek to new position from current position in file
       code: |
                 <pre><code>
-					var file = Titanium.Filesystem.getFile(...);
-					var istream = file.open(Titanium.Filesystem.MODE_READ);
+                    var file = Titanium.Filesystem.getFile(...);
+                    var istream = file.open(Titanium.Filesystem.MODE_READ);
 
-					// Seek 10 bytes forward from current position
-					istream.seek(10, Titanium.Filesystem.SEEK_CURRENT);
+                    // Seek 10 bytes forward from current position
+                    istream.seek(10, Titanium.Filesystem.SEEK_CURRENT);
                 </code></pre>
