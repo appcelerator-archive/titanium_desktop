@@ -455,7 +455,7 @@ describe("Network.HTTPClient",
 		var file = Titanium.Filesystem.getFile(this.filepath);
 		value_of(file).should_be_object();
 		this.client.open("POST", this.url + "recvfile", false);
-		this.client.send(file);
+		this.client.send(file.read());
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("Got the file!");
 	},

@@ -97,6 +97,11 @@ namespace ti
 		if (message->type == GST_MESSAGE_ERROR)
 		{
 			sound->Stop();
+
+			GError* err;
+			gst_message_parse_error(message, &err, NULL);
+			Logger::Get("Media.Sound")->Error("Error while playing sound: %s", err->message);
+			g_error_free(err);
 		}
 		else if (message->type == GST_MESSAGE_EOS)
 		{

@@ -2,19 +2,6 @@
 {
     function patchFile(file)
     {
-		/**
-			Add open() method which returns a file stream for this file.
-		 */
-		file.open = function()
-		{
-			var fs = Titanium.Filesystem.getFileStream(this);
-			if (arguments.length > 0)
-			{
-				fs.open.apply(fs, arguments);
-			}
-			return fs;
-		}
-
         /**
             Append the read, readLine, and write methods for
             backward compatibility.
