@@ -43,7 +43,8 @@ class PackagingEnvironment(object):
 			self.install_dirs = [
 				p.join(os.environ['APPDATA'], 'Titanium'),
 				# TODO: Is there a better way to determine this directory?
-				'C:\\ProgramData\\Titanium'
+				'C:\\ProgramData\\Titanium',
+				'C:\\Documents and Settings\All Users\Application Data\Titanium'
 			]
 		else:
 			raise Exception("Unknown environment!")
