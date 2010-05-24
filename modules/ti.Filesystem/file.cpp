@@ -226,22 +226,8 @@ namespace ti
 	{
 		try
 		{
-#ifdef OS_WIN32
 			Poco::File file(this->filename);
 			result->SetBool(file.canRead() && !file.canWrite());
-#else
-			struct stat sb;
-			stat(this->filename.c_str(),&sb);
-			// can others read it?
-			if ((sb.st_mode & S_IROTH)==S_IROTH)
-			{
-				result->SetBool(false);
-			}
-			else
-			{
-				result->SetBool(true);
-			}
-#endif
 		}
 		catch (Poco::FileNotFoundException&)
 		{
@@ -705,20 +691,9 @@ namespace ti
 	{
 		try
 		{
-#ifndef OS_WIN32
-			mode_t mode = S_IRUSR|S_IWUSR;
-			Poco::File f(this->filename);
-			if (f.canExecute())
-			{
-				mode |= S_IXUSR|S_IXGRP|S_IXOTH;
-			}
-			chmod(this->filename.c_str(),mode);
-			result->SetBool(true);
-#else
 			Poco::File file(this->filename);
 			file.setReadOnly(true);
-			result->SetBool(file.canRead() && !file.canWrite());
-#endif		
+			result->SetBool(file.canRead() && !file.canWrite());	
 		}
 		catch (Poco::FileNotFoundException&)
 		{
