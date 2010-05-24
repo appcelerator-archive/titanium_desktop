@@ -712,10 +712,6 @@ namespace ti
 			{
 				mode |= S_IXUSR|S_IXGRP|S_IXOTH;
 			}
-			/*if (!readonly)
-			{
-				mode |= S_IRGRP | S_IROTH;
-			}*/
 			chmod(this->filename.c_str(),mode);
 			result->SetBool(true);
 #else
