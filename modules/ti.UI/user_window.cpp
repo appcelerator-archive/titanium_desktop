@@ -582,7 +582,10 @@ void UserWindow::Closed()
 	if (!this->parent.isNull())
 	{
 		this->parent->RemoveChild(AutoUserWindow(this, true));
-		this->parent->Focus(); // Focus the parent
+		if (this->parent->IsVisible())
+		{
+			this->parent->Focus(); // Focus the parent (if visible)
+		}
 	}
 
 	// Tell the UIBinding that we are closed
