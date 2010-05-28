@@ -590,10 +590,22 @@ void UserWindow::Closed()
 
 	// When we have no more open windows, we exit...
 	std::vector<AutoUserWindow> windows = this->binding->GetOpenWindows();
-	if (windows.size() == 0) {
+	if (windows.size() == 0) 
+	{
 		this->host->Exit(0);
-	} else {
-		windows.at(0)->Focus();
+	} 
+	else 
+	{
+		// attempt to focus the next visible window on the stack
+		for (size_t c = 0; c < windows.size(); c++)
+		{
+			AutoUserWindow window = windows.at(c);
+			if (window->IsVisible())
+			{
+				window->Focus();
+				break;
+			}
+		}
 	}
 }
 
