@@ -181,11 +181,14 @@ namespace ti
 			AppConfig::Instance()->IsAnalyticsEnabled());
 		this->SetBool("updateMonitorEnabled",
 			AppConfig::Instance()->IsUpdateMonitorEnabled());
+			
+		this->Setup();	
 	}
-
+	
 	AppBinding::~AppBinding()
 	{
 	}
+
 	void AppBinding::GetID(const ValueList& args, KValueRef result)
 	{
 		result->SetString(AppConfig::Instance()->GetAppID().c_str());

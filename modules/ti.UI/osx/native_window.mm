@@ -16,6 +16,11 @@
 	return YES;
 }
 
+- (BOOL)acceptsFirstResponder
+{
+	return YES;
+}
+
 - (void)setUserWindow:(AutoPtr<OSXUserWindow>*)inUserWindow
 {
 	userWindow = inUserWindow;
@@ -113,11 +118,6 @@
 	{
 		[inspector show:webView];
 	}
-}
-
-- (void)titaniumQuit:(id)sender
-{
-	Host::GetInstance()->Exit(0);
 }
 
 - (void)windowWillClose:(NSNotification *)notification

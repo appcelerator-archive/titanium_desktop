@@ -8,6 +8,19 @@
 #include "../app_binding.h"
 #include <Foundation/Foundation.h>
 
+@interface KrollExitNotificationListener : NSObject
+@end
+
+@implementation KrollExitNotificationListener
+
+-(void)krollExitNotification:(id)event
+{
+	Host* host = Host::GetInstance();
+	host->Exit(0);
+}
+
+@end
+
 namespace ti
 {
 
@@ -29,6 +42,16 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 	[restartTask waitUntilExit]; //wait for killArg1AndOpenArg2Script to finish
 
 	host->Exit(0);
+}
+
+void AppBinding::Setup() 
+{
+	// We register a generic notification listener for listening for KrollExit events
+	// which come from the boot when we have no active windows in the responder chain
+	// and the NSApplication delegate receives the terminate.  
+	KrollExitNotificationListener *listener = [[KrollExitNotificationListener alloc] init];
+	[[NSNotificationCenter defaultCenter] addObserver:listener selector:@selector(krollExitNotification:) name:@"KrollExit" object:nil];
+	[listener release];
 }
 
 }

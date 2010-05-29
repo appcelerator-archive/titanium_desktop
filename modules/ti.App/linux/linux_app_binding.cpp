@@ -30,4 +30,8 @@ void AppBinding::Restart(const ValueList& args, KValueRef result)
 	host->Exit(0);
 }
 
+void AppBinding::Setup() 
+{
+}
+
 }

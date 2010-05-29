@@ -121,7 +121,7 @@ namespace ti
 			this->FireEvent(Event::HIDDEN);
 		}
 	}
-
+	
 	void OSXUserWindow::Focus()
 	{
 		if (nativeWindow && ![nativeWindow isKeyWindow])
