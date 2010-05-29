@@ -21,16 +21,15 @@ std::string PlatformBinding::GetVersionImpl()
 	// Do not use /System/Library/CoreServices/SystemVersion.plist.
 	// See http://www.cocoadev.com/index.pl?DeterminingOSVersion
 	SInt32 major, minor, bugfix;
-	if (Gestalt(gestaltSystemVersionMajor, &major) &&
-		Gestalt(gestaltSystemVersionMinor, &minor) &&
-		Gestalt(gestaltSystemVersionBugFix, &bugfix))
+	if (Gestalt(gestaltSystemVersionMajor, &major) != noErr ||
+		Gestalt(gestaltSystemVersionMinor, &minor) != noErr ||
+		Gestalt(gestaltSystemVersionBugFix, &bugfix) != noErr)
 	{
-		return [[NSString stringWithFormat:@"%d.%d.%d", major, minor, bugfix] UTF8String];
+		logger()->Error("Failed to get OS version");
+		return "Unknown";
 	}
-	else
-	{
-		return Poco::Environment::osVersion();
-	}
+
+	return [[NSString stringWithFormat:@"%d.%d.%d", major, minor, bugfix] UTF8String];
 }
 
 bool PlatformBinding::OpenApplicationImpl(const std::string& name)
