@@ -179,6 +179,11 @@ namespace ti
 		this->mainWindow->Open();
 	}
 
+	AutoUserWindow UIBinding::GetMainWindow()
+	{
+		return this->mainWindow;
+	}
+
 	void UIBinding::_CreateWindow(const ValueList& args, KValueRef result)
 	{
 		AutoPtr<WindowConfig> config(0);

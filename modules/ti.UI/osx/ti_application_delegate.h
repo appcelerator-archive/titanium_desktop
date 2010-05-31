@@ -16,6 +16,7 @@
 	openFile:(NSString*)filename;
 -(BOOL)application:(NSApplication*)theApplication
 	openFiles:(NSArray*)filenames;
+-(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender;
 @end
 
 #endif

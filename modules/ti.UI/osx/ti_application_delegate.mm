@@ -64,5 +64,16 @@
 	return YES;
 }
 
+-(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender
+{
+	// Attempt to close the main window when we should terminate
+	binding->GetMainWindow()->Close();
+
+	// By closing the main window, it should trigger the app to terminate.
+	// Do not allow termination to occur now since some cleanup in kroll
+	// needs to take place.
+	return NO;
+}
+
 @end
 

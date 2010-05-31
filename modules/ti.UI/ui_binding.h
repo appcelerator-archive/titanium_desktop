@@ -22,6 +22,7 @@ namespace ti
 		Host* GetHost();
 
 		void CreateMainWindow(AutoPtr<WindowConfig> config);
+		AutoUserWindow GetMainWindow();
 		std::vector<AutoUserWindow>& GetOpenWindows();
 		void AddToOpenWindows(AutoUserWindow);
 		void RemoveFromOpenWindows(AutoUserWindow);
