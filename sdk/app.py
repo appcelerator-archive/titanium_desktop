@@ -133,6 +133,12 @@ class App(object):
 		contents = self.contents = self.get_contents_dir()
 
 		self.env.log(u'Copying contents from %s to %s' % (self.source_dir, contents))
+		
+		excludes = self.env.get_excludes()
+		
+		# Don't prematurely copy custom modules (we only want them if they're in the manifest)
+		excludes.append(p.join(self.source_dir, 'modules'))
+		
 		# If we are staging into a subdirectory of the original
 		# application directory (like Titanium Developer), then
 		# ignore the immediate child of the original app directory
@@ -140,13 +146,13 @@ class App(object):
 		# App directory: /tmp/MyProject
 		# Staging directory: /tmp/MyProject/dist/linux/MyProject
 		# then we ignore: /tmp/MyProject/dist
-		excludes = self.env.get_excludes()
 		if contents.find(self.source_dir) != -1 and \
 				contents != self.source_dir:
 			(current, child) = p.split(contents)
 			while current != self.source_dir:
 				(current, child) = p.split(current)
 			excludes.append(p.join(current, child))
+			
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
 
 		installer_source = p.join(self.sdk_dir, 'installer')
@@ -171,20 +177,19 @@ class App(object):
 			#	self.env.log(u'Copying MobileSDK to %s' % contents)
 			#	effess.copy_to_dir(self.env.get_mobilesdk_dir(self.sdk_version),
 			#		contents, exclude=self.env.get_excludes())
-
-			for module in self.modules:
-				try:
+		
+		# Always bundle custom modules
+		for module in self.modules:
+			source = p.join(self.source_dir, 'modules', module[0], module[1])
+			target = p.join(contents, 'modules', module[0])
+			if not p.exists(source):
+				source = None
+				if bundle:
 					source = self.env.get_module_dir(module)
-				except Exception, e: # Couldn't find module directory.
-
-					# If the module exists in the source directory, the app likely
-					# ships with a custom module. In this case, eat the error.
-					if not(p.exists(p.join(self.source_dir, 'modules', module[0]))):
-						raise e
-				target = p.join(contents, 'modules', module[0])
+			if source:
 				effess.lightweight_copy_tree(source, target,
 					exclude=self.env.get_excludes())
-
+					
 	def run(self):
 		self.env.run(self.executable_path)
 
