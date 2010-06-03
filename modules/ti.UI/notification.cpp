@@ -12,54 +12,13 @@ namespace ti
 Notification::Notification() : KAccessorObject("Notification"),
 	timeout(-1)
 {
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.setTitle,since=0.9)
-	 * @tiapi Set the notification title
-	 * @tiarg[String, title] notification title text
-	 */
 	SetMethod("setTitle", &Notification::_SetTitle);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.SetMessage,since=0.9)
-	 * @tiapi Set the notification message
-	 * @tiarg[String, message] notification message text
-	 */
 	SetMethod("setMessage", &Notification::_SetMessage);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.setIcon,since=0.9)
-	 * @tiapi Set the notification icon image
-	 * @tiarg[String, icon] path to the icon image
-	 */
 	SetMethod("setIcon", &Notification::_SetIcon);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.setTimeout,platforms=win32|linux,since=0.9)
-	 * @tiapi Set the timeout before the notification expires.
-	 * @tiarg[Integer, timeout] Timeout in seconds. (-1 = use system default, 0 = never expire)
-	 */
 	SetMethod("setTimeout", &Notification::_SetTimeout);
 	SetMethod("setDelay", &Notification::_SetTimeout);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.setCallback,since=0.9)
-	 * @tiapi Set a callback function fired when notification is clicked. NOTE: not all platforms support this feature
-	 * @tiarg[Function,callback] function to execute when notification is clicked
-	 */
 	SetMethod("setCallback", &Notification::_SetCallback);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.show,since=0.9)
-	 * @tiapi Display the notification
-	 * @tiresult[Boolean] True if successfully displayed notification
-	 */
 	SetMethod("show", &Notification::_Show);
-
-	/**
-	 * @tiapi(method=True,name=Notification.Notification.hide,since=0.9)
-	 * @tiapi Hide the notification
-	 * @tiresult[Boolean] True if successfully hidden the notification
-	 */
 	SetMethod("hide", &Notification::_Hide);
 
 	SetBool("nativeNotifications", Notification::InitializeImpl());

@@ -14,75 +14,14 @@ namespace ti
 	Menu::Menu() :
 		KAccessorObject("UI.Menu")
 	{
-		/**
-		 * @tiapi(method=True,name=UI.Menu.appendItem,since=0.6)
-		 * @tiapi Append a MenuItem object to a menu.
-		 * @tiarg[UI.MenuItem, item] Append an item to this menu
-		 */
 		this->SetMethod("appendItem", &Menu::_AppendItem);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.getItemAt,since=0.6)
-		* @tiapi Get an item from this menu at the given index. This method 
-		* @tiapi will throw an exception if the index is out of range.
-		* @tiarg[Number, index] The index of the item to get
-		* @tiresult[UI.MenuItem] the item at the given index
-		*/
 		this->SetMethod("getItemAt", &Menu::_GetItemAt);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.insertItemAt,since=0.6) 
-		* @tiapi Insert a menu item before the given index. This method
-		* @tiapi will throw an exception if the index of out of range.
-		* @tiarg[Number, index] The index for this menu item
-		*/
 		this->SetMethod("insertItemAt", &Menu::_InsertItemAt);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.removeItemAt,since=0.6) 
-		* @tiapi Remove the item in this menu at the given index. This method
-		* @tiapi will throw an exception if the index is out of range.
-		* @tiarg[Number, index] The index of the item to remove
-		*/
 		this->SetMethod("removeItemAt", &Menu::_RemoveItemAt);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.getLength,since=0.6) 
-		* @tiapi Get the length of this menu.
-		* @tiresult[Number] The number of items in this menu
-		*/
 		this->SetMethod("getLength", &Menu::_GetLength);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.clear,since=0.6)
-		* @tiapi Remove all items from this menu.
-		*/
 		this->SetMethod("clear", &Menu::_Clear);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.addItem,since=0.6)
-		* @tiapi Add an item to this menu with the given attributes.
-		* @tiarg[String, label] The label for the new item
-		* @tiarg[Function, listener, optional=True] An event listener callback for the item
-		* @tiarg[String, iconURL] The URL for this item's icon
-		* @tiresult[UI.MenuItem] The newly added item
-		*/
 		this->SetMethod("addItem", &Menu::_AddItem);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.addSeparatorItem,since=0.6)
-		* @tiapi Add a separator item to this menu.
-		* @tiresult[UI.MenuItem] The newly added separator item
-		*/
 		this->SetMethod("addSeparatorItem", &Menu::_AddSeparatorItem);
-
-		/**
-		* @tiapi(method=True,name=UI.Menu.addCheckItem,since=0.6)
-		* @tiapi Add a check item to this menu with the given attributes.
-		* @tiarg[String, label] The label for the new item
-		* @tiarg[Function, listener, optional=True] An event listener callback for the item
-		* @tiresult[UI.MenuItem] The newly added check item
-		*/
 		this->SetMethod("addCheckItem", &Menu::_AddCheckItem);
 	}
 

@@ -16,154 +16,28 @@ namespace ti
 	{
 		instance = this;
 
-		// @tiproperty[Number, UI.CENTERED, since=0.6] The CENTERED event constant
 		this->Set("CENTERED", Value::NewInt(DEFAULT_POSITION));
 
-		/**
-		 * @tiapi(method=True,name=UI.createNotification,since=0.9)
-		 * @tiapi Create a new Notification object
-		 * @tiresult[UI.Notification] A new notification
-		 */
 		this->SetMethod("createNotification", &UIBinding::_CreateNotification);
-
-		/**
-		 * @tiapi(method=True,name=UI.createMenu,since=0.6)
-		 * @tiapi Create a new menu
-		 * @tiresult[UI.Menu] A new menu
-		 */
 		this->SetMethod("createMenu", &UIBinding::_CreateMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.createMenuItem,since=0.6)
-		 * @tiapi Create a new menu item.
-		 * @tiarg[String, label] The label for this menu item
-		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
-		 * @tiarg[String, iconURL, optional=True] A URL to an icon to use for this menu item
-		 * @tiresult[UI.MenuItem] A new menu item
-		 */
 		this->SetMethod("createMenuItem", &UIBinding::_CreateMenuItem);
-
-		/**
-		 * @tiapi(method=True,name=UI.createCheckMenuItem,since=0.6)
-		 * @tiapi Create a new CheckMenuItem object.
-		 * @tiarg[String, label] The label for this menu item
-		 * @tiarg[Function, eventListener, optional=True] An event listener for this menu item
-		 * @tiresult[UI.CheckMenuItem] The new CheckMenuItem object
-		 */
 		this->SetMethod("createCheckMenuItem", &UIBinding::_CreateCheckMenuItem);
-
-		/**
-		 * @tiapi(method=True,name=UI.createSeperatorMenuItem,since=0.6)
-		 * @tiapi Create a new separator menu item.
-		 * @tiresult[UI.SeparatorMenuItem] A new separator menu item
-		 */
 		this->SetMethod("createSeparatorMenuItem", &UIBinding::_CreateSeparatorMenuItem);
-
-		/**
-		 * @tiapi(method=True,name=UI.setMenu,since=0.2) Set a menu for the application
-		 * @tiarg[UI.Menu|null, menu] A Menu object to use as the menu or null to unset the menu
-		 */
 		this->SetMethod("setMenu", &UIBinding::_SetMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.getMenu,since=0.2) Returns the application's main MenuItem
-		 * @tiresult[UI.Menu|null] The application's main menu
-		 */
 		this->SetMethod("getMenu", &UIBinding::_GetMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.setContextMenu,since=0.2) Set the application's context menu
-		 * @tiarg(for=UI.setContextMenu,type=UI.Menu|null,name=menu) a MenuItem object or null to unset
-		 */
 		this->SetMethod("setContextMenu", &UIBinding::_SetContextMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.getContextMenu,since=0.2) Returns the application context menu
-		 * @tiresult(for=UI.getContextMenu,type=UI.Menu|null) the application's context MenuItem object
-		 */
 		this->SetMethod("getContextMenu", &UIBinding::_GetContextMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.setIcon,since=0.2) Set the application's icon
-		 * @tiarg(for=UI.setIcon,type=String,name=menu) path to the icon
-		 */
 		this->SetMethod("setIcon", &UIBinding::_SetIcon);
-
-		/**
-		 * @tiapi(method=True,name=UI.addTray,since=0.2)
-		 * @tiapi Create and add a tray icon
-		 * @tiarg[String, iconURL] URL to the icon to use for this tray item
-		 * @tiarg[Function, eventListener, optional=True] Event listener to add for this item
-		 * @tiresult(for=UI.addTray,type=UI.Tray|null) the application's Tray icon object
-		 */
 		this->SetMethod("addTray", &UIBinding::_AddTray);
-
-		/**
-		 * @tiapi(method=True,name=UI.clearTray,since=0.2)
-		 * @tiapi Empty the tray of all this application's tray items
-		 */
 		this->SetMethod("clearTray", &UIBinding::_ClearTray);
-
-		/**
-		 * @tiapi(method=True,name=UI.setDockIcon,since=0.2) Set the dock icon
-		 * @tiarg(for=UI.setDockIcon,type=String,name=icon) path to the icon
-		 */
 		this->SetMethod("setDockIcon", &UIBinding::_SetDockIcon);
-
-		/**
-		 * @tiapi(method=True,name=UI.setDockMenu,since=0.2) Set the dock menu
-		 * @tiarg(for=UI.setDockMenu,type=UI.Menu,name=menu) The new menu for the dock
-		 */
 		this->SetMethod("setDockMenu", &UIBinding::_SetDockMenu);
-
-		/**
-		 * @tiapi(method=True,name=UI.setBadge,since=0.2,platforms=osx)
-		 * @tiapi Set the application icon's badge text.
-		 * @tiarg[String, text] The new badge text.
-		 */
 		this->SetMethod("setBadge", &UIBinding::_SetBadge);
-
-		/**
-		 * @tiapi(method=True,name=UI.setBadgeImage,since=0.2,platforms=osx)
-		 * @tiapi Set the application icon's badge image.
-		 * @tiarg[String, imageURL] URL to the new badge image.
-		 */
 		this->SetMethod("setBadgeImage", &UIBinding::_SetBadgeImage);
-
-		/**
-		 * @tiapi(method=True,name=UI.getIdleTime,since=0.2)
-		 * @tiapi Returns the user's idle time (for the desktop, not just the application)
-		 * @tiresult(for=UI.getIdleTime,type=Number) Number of milliseconds of idle time.
-		 */
 		this->SetMethod("getIdleTime", &UIBinding::_GetIdleTime);
-
-		/**
-		 * @tiapi(method=True,name=UI.getOpenWindows,version=0.4) Returns the list of currently open windows
-		 * @tiresult(for=UI.getOpenWindows,type=Array<UI.UserWindow>) the list of open windows
-		 */
-		/**
-		 * @tiapi(method=True,name=UI.getWindows,version=0.4) Returns the list of currently open windows
-		 * @tiresult(for=UI.getWindows,type=Array<UI.UserWindow>) the list of open windows
-		 */
 		this->SetMethod("getOpenWindows", &UIBinding::_GetOpenWindows);
 		this->SetMethod("getWindows", &UIBinding::_GetOpenWindows);
-
-		/**
-		 * @tiapi(method=True,name=UI.getMainWindow,since=0.6)
-		 * @tiapi Return the application's main window
-		 * @tiresult[UI.UserWindow] The main window for this application
-		 */
 		this->SetMethod("getMainWindow", &UIBinding::_GetMainWindow);
-
-		/**
-		 * @tiapi(method=True,name=UI.createWindow,since=0.8.1)
-		 * @tiapi Create a new top-level window or a child of the current window if called
-		 * @tiapi from the context of an existing window.
-		 * @tiarg[type=String|Object,options,optional=True]
-		 * @tiarg A string containing a url of the new window or an object
-		 * @tiarg containing properties for the new window
-		 * @tiresult[UI.UserWindow] The new UserWindow object.
-		 */
 		this->SetMethod("createWindow", &UIBinding::_CreateWindow);
 
 		// Initialize notifications
