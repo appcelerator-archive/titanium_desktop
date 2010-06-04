@@ -716,10 +716,11 @@ namespace ti
 			}
 			else
 			{
+				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
 				SET_CURL_OPTION(curlHandle, CURLOPT_CUSTOMREQUEST, this->httpMethod.c_str());
 				SET_CURL_OPTION(curlHandle, CURLOPT_READDATA, this);
 				SET_CURL_OPTION(curlHandle, CURLOPT_READFUNCTION, &CurlReadCallback);
-				SET_CURL_OPTION(curlHandle, CURLOPT_INFILESIZE, requestContentLength);
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, requestContentLength);
 			}
 		}
 		else
