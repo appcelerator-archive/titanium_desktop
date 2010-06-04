@@ -11,7 +11,7 @@ description: |
         defaultFile: default name to be used for saving
 since: 0.4.0
 platforms: [osx, linux, win32]
-returns: String
+returns: null
 parameters: 
     - [method, callback, a callback function to fire after the user closes the dialog]
     - [object, options, (optional) additional options for the dialog]
@@ -19,8 +19,7 @@ examples:
     - description: Opening a save as dialog
       code: |
             <pre><code>
-                var window = Titanium.UI.getCurrentWindow();
-                var selectedFile = window.openSaveAsDialog(callback, {
+                Titanium.UI.currentWindow.openSaveAsDialog(callback, {
                     title: "Save document...",
                     path: "/home/user/Documents",
                     types: ['txt', 'doc'],
