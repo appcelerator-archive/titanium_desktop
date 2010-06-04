@@ -41,6 +41,7 @@ namespace ti
 		void SetX(double x);
 		double GetY();
 		void SetY(double y);
+		void MoveTo(double x, double y);
 		double GetWidth();
 		void SetWidth(double width);
 		double GetMaxWidth();
