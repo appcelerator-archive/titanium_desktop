@@ -934,6 +934,11 @@ namespace ti
 		this->SetupPosition();
 	}
 
+	void GtkUserWindow::MoveTo(double x, double y)
+	{
+		this->SetupPosition();
+	}
+
 	double GtkUserWindow::GetWidth()
 	{
 		return this->targetWidth;
