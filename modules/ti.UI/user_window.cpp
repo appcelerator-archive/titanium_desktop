@@ -549,7 +549,14 @@ void UserWindow::_MoveTo(const kroll::ValueList& args, kroll::KValueRef result)
 
 	double x = args.GetDouble(0);
 	double y = args.GetDouble(1);
-	this->MoveTo(x, y);
+
+	this->config->SetX(x);
+	this->config->SetY(y);
+
+	if (this->active)
+	{
+		this->MoveTo(x, y);
+	}
 }
 
 void UserWindow::_GetWidth(const kroll::ValueList& args, kroll::KValueRef result)
