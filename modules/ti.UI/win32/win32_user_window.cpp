@@ -702,6 +702,11 @@ void Win32UserWindow::SetY(double y)
 	this->SetupFrame();
 }
 
+void Win32UserWindow::MoveTo(double x, double y)
+{
+	this->SetupFrame();
+}
+
 double Win32UserWindow::GetWidth()
 {
 	return GetBounds().width;
