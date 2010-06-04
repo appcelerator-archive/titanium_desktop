@@ -81,6 +81,7 @@ namespace ti
 			double _GetY();
 			void _SetY(const kroll::ValueList&, kroll::KValueRef);
 			void _SetY(double y);
+			void _MoveTo(const kroll::ValueList&, kroll::KValueRef);
 			void _GetWidth(const kroll::ValueList&, kroll::KValueRef);
 			double _GetWidth();
 			void _SetWidth(const kroll::ValueList&, kroll::KValueRef);
@@ -143,6 +144,7 @@ namespace ti
 				std::string& path, std::string& defaultName,
 				std::vector<std::string>& types, std::string& typesDescription) = 0;
 
+			// TODO: make these methods non-virtual
 			virtual void Hide() = 0;
 			virtual void Show() = 0;
 			virtual void Minimize() = 0;
@@ -163,6 +165,8 @@ namespace ti
 			virtual void SetX(double x) = 0;
 			virtual double GetY() = 0;
 			virtual void SetY(double y) = 0;
+			virtual void MoveTo(double x, double y) = 0;
+
 			virtual double GetWidth() = 0;
 			virtual void SetWidth(double width) = 0;
 			virtual double GetMaxWidth() = 0;

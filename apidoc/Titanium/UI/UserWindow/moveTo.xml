@@ -1,0 +1,12 @@
+---
+namespace: Titanium.UI.UserWindow.moveTo
+type: method
+description: |
+    Set a UI.UserWindow's position on the screen. The
+    origin of the screen is considered to be the top-left on all platforms.
+since: 1.1.0
+platforms: [osx, linux, win32]
+returns: null
+parameters: 
+    - [Number, x, the horizontal position]
+    - [Number, y, the vertical position]
