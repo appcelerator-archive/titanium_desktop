@@ -22,4 +22,4 @@ tiprocess:
 tidatabase:
 tiworker:
 ticodec:
-drillbit:
+drillbit:0.1.0

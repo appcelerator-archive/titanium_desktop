@@ -164,30 +164,30 @@ class App(object):
 
 		if bundle:
 			self.env.log(u'Copying runtime to %s' % self.stage_dir)
-			effess.copy_to_dir(self.env.get_runtime_dir(self.runtime_version),
-				contents, exclude=self.env.get_excludes())
+			effess.copy_tree(self.env.get_runtime_dir(self.runtime_version),
+				p.join(contents, "runtime", self.runtime_version),
+				exclude=self.env.get_excludes())
 
 			if hasattr(self, 'sdk_version'):
 				self.env.log(u'Copying SDK to %s' % contents)
-				effess.copy_to_dir(self.sdk_dir, contents,
+				effess.copy_tree(self.sdk_dir,
+					p.join(contents, "sdk", self.sdk_version),
 					exclude=self.env.get_excludes())
 
 			# We don't bundle the MobileSDK currently.
 			#if hasattr(self, 'mobilesdk_version'):
 			#	self.env.log(u'Copying MobileSDK to %s' % contents)
-			#	effess.copy_to_dir(self.env.get_mobilesdk_dir(self.sdk_version),
-			#		contents, exclude=self.env.get_excludes())
-		
-		# Always bundle custom modules
-		for module in self.modules:
-			source = p.join(self.source_dir, 'modules', module[0], module[1])
-			target = p.join(contents, 'modules', module[0])
-			if not p.exists(source):
-				source = None
-				if bundle:
+			#	effess.copy_tree(self.sdk_dir,
+			#		p.join(contents, "mobilesdk", self.mobilesdk_version),
+			#		exclude=self.env.get_excludes())
+
+			for module in self.modules:
+				# If this module already exists in the source directory as a bundled
+				# module than don't overwrite it with an installed module
+				source = p.join(self.source_dir, 'modules', module[0], module[1])
+				if not(p.exists(source)):
 					source = self.env.get_module_dir(module)
-			if source:
-				effess.lightweight_copy_tree(source, target,
+				effess.lightweight_copy_tree(source, p.join(contents, 'modules', module[0], module[1]),
 					exclude=self.env.get_excludes())
 					
 	def run(self):

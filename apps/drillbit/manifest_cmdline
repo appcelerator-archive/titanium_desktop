@@ -14,5 +14,5 @@ tiplatform:0.x
 tiprocess:0.x
 timonkey:0.x
 tidatabase:0.x
-drillbit:0.x
-drillbit_cmd:0.x
+drillbit:0.1.0
+drillbit_cmd:0.1.0
