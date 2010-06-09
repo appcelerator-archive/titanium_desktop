@@ -40,7 +40,7 @@ namespace ti
 		catch(ValueException& e)
 		{
 			SharedString ss = e.GetValue()->DisplayString();
-			log->Error("onAccept callback failed: %s", ss->c_str());
+			logger->Error("onAccept callback failed: %s", ss->c_str());
 		}
 	}
 	
@@ -96,8 +96,6 @@ namespace ti
 	void TCPServerSocketBinding::Listen(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("listen", "n");
-		
-		kroll::Logger *logger = kroll::Logger::Get("Network.TCPServerSocket");
 
 		if (this->listening || listenThread.isRunning())
 		{
