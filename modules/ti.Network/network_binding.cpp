@@ -9,6 +9,7 @@
 #include "network_status.h"
 #include "network_binding.h"
 #include "tcp_socket_binding.h"
+#include "tcp_server_socket_binding.h"
 #include "interface_binding.h"
 #include "ipaddress_binding.h"
 #include "host_binding.h"
@@ -66,6 +67,12 @@ namespace ti
 		 * @tiresult(for=Network.createTCPSocket,type=Network.TCPSocket) a TCPSocket object
 		 */
 		this->SetMethod("createTCPSocket",&NetworkBinding::_CreateTCPSocket);
+		/**
+		 * @tiapi(method=True,name=Network.createTCPServerSocket,since=1.2) Creates a TCPServerSocket object
+		 * @tiarg(for=Network.createTCPServerSocket,name=callback,type=Function) the callback to receive a new connection
+		 * @tiresult(for=Network.createTCPServerSocket,type=Network.TCPServerSocket) a TCPServerSocket object
+		 */
+		this->SetMethod("createTCPServerSocket",&NetworkBinding::_CreateTCPServerSocket);
 		/**
 		 * @tiapi(method=True,name=Network.createIRCClient,since=0.2) Creates an IRCClient object
 		 * @tiresult(for=Network.createIRCClient,type=Network.IRCClient) an IRCClient object
@@ -265,6 +272,13 @@ namespace ti
 		args.VerifyException("createTCPSocket", "sn");
 		result->SetObject(new TCPSocketBinding(host,
 			args.GetString(0), args.GetInt(1)));
+	}
+
+	void NetworkBinding::_CreateTCPServerSocket(const ValueList& args, KValueRef result)
+	{
+		args.VerifyException("createTCPServerSocket", "m");
+		KMethodRef target = args.at(0)->ToMethod();
+		result->SetObject(new TCPServerSocketBinding(host,target));
 	}
 
 	void NetworkBinding::_CreateIRCClient(const ValueList& args, KValueRef result)

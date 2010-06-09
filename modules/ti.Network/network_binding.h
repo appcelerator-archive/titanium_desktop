@@ -49,6 +49,7 @@ namespace ti
 		void _GetInterfaces(const ValueList& args, KValueRef result);
 		void _CreateIPAddress(const ValueList& args, KValueRef result);
 		void _CreateTCPSocket(const ValueList& args, KValueRef result);
+		void _CreateTCPServerSocket(const ValueList& args, KValueRef result);
 		void _CreateIRCClient(const ValueList& args, KValueRef result);
 		void _CreateHTTPClient(const ValueList& args, KValueRef result);
 		void _CreateHTTPServer(const ValueList& args, KValueRef result);

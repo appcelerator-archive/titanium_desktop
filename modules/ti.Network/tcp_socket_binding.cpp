@@ -329,7 +329,7 @@ namespace ti
 
 	void TCPSocketBinding::Write(const ValueList& args, KValueRef result)
 	{
-		args.VerifyException("Send", "o|s");
+		args.VerifyException("Write", "o|s");
 
 		static std::string eprefix("TCPSocketBinding::Write: ");
 		if (!this->opened && !this->connectThread.isRunning())
