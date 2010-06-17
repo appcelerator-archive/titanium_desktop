@@ -30,6 +30,36 @@ class Win32App(App):
 		# since we only ever install via the MSI installer.
 		open(p.join(contents, '.installed'), 'a').close()
 
+		self.set_executable_icon()
+
+	def set_executable_icon(self):
+		if not hasattr(self, 'image'):
+			return
+
+		icon_path = p.join(self.contents, 'Resources', self.image)
+		if not p.exists(icon_path):
+			return
+
+		if not(icon_path.lower().endswith('.ico')):
+			# Assume that GraphicsMagick is on the path for now. This will change
+			# once the packaging server setup has been improved (running on drive C:\)
+			convert = "convert.exe"
+			temp_dir = tempfile.mkdtemp()
+			new_ico_file = os.path.abspath(os.path.join(self.resources_dir, "_converted_icon.ico"))
+			self.env.run(convert + ' -resize 128x128^ -gravity center -background transparent -extent 128x128 "%s" "%s\\128.png"' %
+				(image_file, temp_dir))
+			self.env.run(convert + ' -resize 64x64^ -gravity center -background transparent -extent 64x64 "%s" "%s\\64.png"' %
+				(image_file, temp_dir))
+			self.env.run(convert + ' -resize 32x32^ -gravity center -background transparent -extent 32x32 "%s" "%s\\32.png"' %
+				(image_file, temp_dir))
+			self.env.run(convert + ' -resize 16x16^ -gravity center -background transparent -extent 16x16 "%s" "%s\\16.png"' %
+				(image_file, temp_dir))
+			self.env.run('%s "%s\\128.png" "%s\\64.png" "%s\\32.png" "%s\\16.png" "%s" ' %
+				(convert, temp_dir, temp_dir, temp_dir, temp_dir, new_ico_file))
+			icon_path = new_ico_file
+
+		self.env.run('%s "%s" "%s"' % (p.join(self.sdk_dir, 'ReplaceVistaIcon.exe'), self.executable_path, icon_path))
+
 	def package(self, package_dir, bundle):
 		contents = self.get_contents_dir()
 		target = p.join(package_dir, self.name + '.msi')
