@@ -37,7 +37,7 @@ class Win32App(App):
 		if not hasattr(self, 'image'):
 			return
 
-		icon_path = p.join(self.contents, 'Resources', self.image)
+		icon_path = str(p.join(self.contents, 'Resources', self.image))
 		if not p.exists(icon_path):
 			return
 
@@ -53,14 +53,12 @@ class Win32App(App):
 				args = [convert, icon_path, '-resize', resolution + "^",
 					"-gravity", "center", "-background", "transparent",
 					"-extent", resolution, "%s\\%d.png" % (temp_dir, size)]
-				process = subprocess.Popen(args)
-				os.waitpid(process.pid, 0)
+				subprocess.check_call(args, shell=True)
 
 				ico_command.append('%s\\%d.png' % (temp_dir, size))
 
 			ico_command.append(new_ico_file)
-			process = subprocess.Popen(ico_command)
-			os.waitpid(process.pid)
+			subprocess.check_call(ico_command, shell=True)
 
 			icon_path = new_ico_file
 
