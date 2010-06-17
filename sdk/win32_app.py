@@ -43,9 +43,9 @@ class Win32App(App):
 		if not(icon_path.lower().endswith('.ico')):
 			# Assume that GraphicsMagick is on the path for now. This will change
 			# once the packaging server setup has been improved (running on drive C:\)
-			convert = "convert.exe"
+			convert = 'convert.exe'
 			temp_dir = tempfile.mkdtemp()
-			new_ico_file = os.path.abspath(os.path.join(self.resources_dir, "_converted_icon.ico"))
+			new_ico_file = p.join(self.contents, 'Resources', '_converted_icon.ico')
 			self.env.run(convert + ' -resize 128x128^ -gravity center -background transparent -extent 128x128 "%s" "%s\\128.png"' %
 				(image_file, temp_dir))
 			self.env.run(convert + ' -resize 64x64^ -gravity center -background transparent -extent 64x64 "%s" "%s\\64.png"' %
