@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os.path as p
+import os, os.path as p
 import codecs
 import effess
 import xml.etree.ElementTree
@@ -12,6 +12,7 @@ class App(object):
 	def __init__(self, env, source_dir):
 		self.env = env
 		self.source_dir = fix_path(source_dir)
+		self.resources_dir = os.path.join(self.source_dir, 'Resources')
 		self.modules = []
 		self.read_manifest()
 		self.read_tiapp()

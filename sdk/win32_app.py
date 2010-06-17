@@ -9,6 +9,7 @@ import sys
 import tempfile
 import types
 import uuid
+import subprocess
 from app import App
 from xml.sax.saxutils import quoteattr
 
@@ -46,16 +47,21 @@ class Win32App(App):
 			convert = 'convert.exe'
 			temp_dir = tempfile.mkdtemp()
 			new_ico_file = p.join(self.contents, 'Resources', '_converted_icon.ico')
-			self.env.run(convert + ' -resize 128x128^ -gravity center -background transparent -extent 128x128 "%s" "%s\\128.png"' %
-				(image_file, temp_dir))
-			self.env.run(convert + ' -resize 64x64^ -gravity center -background transparent -extent 64x64 "%s" "%s\\64.png"' %
-				(image_file, temp_dir))
-			self.env.run(convert + ' -resize 32x32^ -gravity center -background transparent -extent 32x32 "%s" "%s\\32.png"' %
-				(image_file, temp_dir))
-			self.env.run(convert + ' -resize 16x16^ -gravity center -background transparent -extent 16x16 "%s" "%s\\16.png"' %
-				(image_file, temp_dir))
-			self.env.run('%s "%s\\128.png" "%s\\64.png" "%s\\32.png" "%s\\16.png" "%s" ' %
-				(convert, temp_dir, temp_dir, temp_dir, temp_dir, new_ico_file))
+			ico_command = [convert]
+			for size in [16, 32, 64, 128]:
+				resolution = "%dx%d" % (size, size)
+				args = [convert, icon_path, '-resize', resolution + "^",
+					"-gravity", "center", "-background", "transparent",
+					"-extent", resolution, "%s\\%d.png" % (temp_dir, size)]
+				process = subprocess.Popen(args)
+				os.waitpid(process.pid, 0)
+
+				ico_command.append('%s\\%d.png' % (temp_dir, size))
+
+			ico_command.append(new_ico_file)
+			process = subprocess.Popen(ico_command)
+			os.waitpid(process.pid)
+
 			icon_path = new_ico_file
 
 		self.env.run('%s "%s" "%s"' % (p.join(self.sdk_dir, 'ReplaceVistaIcon.exe'), self.executable_path, icon_path))
