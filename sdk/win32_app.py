@@ -45,6 +45,12 @@ class Win32App(App):
 			# Assume that GraphicsMagick is on the path for now. This will change
 			# once the packaging server setup has been improved (running on drive C:\)
 			convert = 'convert.exe'
+			try:
+				subprocess.check_call([convert, '-version'], shell=True)
+			except subprocess.CalledProcessError:
+				# If Magick is not installed, skip icon conversion
+				print 'ImageMagick not installed, aborting icon conversion.'
+				return
 			temp_dir = tempfile.mkdtemp()
 			new_ico_file = p.join(self.contents, 'Resources', '_converted_icon.ico')
 			ico_command = [convert]
