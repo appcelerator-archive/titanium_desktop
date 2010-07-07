@@ -1,0 +1,24 @@
+#appname:Sandbox
+#version:1.0
+#appid:com.titaniumapp.sandbox
+#publisher:Appcelerator
+#image:default_app_logo.png
+#url:http://titaniumapp.com
+#guid:C33218F4-A11B-4909-9FEE-116EDB34750B
+#desc:Titanium Sandbox
+sdk:
+runtime:
+tiapp:
+tifilesystem:
+tiplatform:
+tiui:
+python:
+ruby:
+php:
+timedia:
+timonkey:
+tinetwork:
+tiprocess:
+tidatabase:
+tiworker:
+ticodec:
