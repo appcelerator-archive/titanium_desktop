@@ -9,7 +9,7 @@ describe("Network.TCPSocket",{
 		
 		// create a socket to the localhost web server.
 		// this test assumes you have a webserver running locally (apache, IIS, whatever)
-		this.socket = Titanium.Network.createTCPSocket("127.0.0.1", 80);
+		this.socket = Titanium.Network.createTCPSocket("127.0.0.1", 8080);
 		
 		// to test the socket read and write functionality we setup a 
 		// temporary HTTP_SERVER object to open a connection to.
