@@ -8,8 +8,8 @@
 
 #include "network_status.h"
 #include "network_binding.h"
-#include "tcp_socket_binding.h"
-#include "tcp_server_socket_binding.h"
+#include "tcp/tcp_socket_binding.h"
+#include "tcp/tcp_server_socket_binding.h"
 #include "interface_binding.h"
 #include "ipaddress_binding.h"
 #include "host_binding.h"
