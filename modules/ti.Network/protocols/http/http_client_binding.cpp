@@ -4,10 +4,10 @@
  * Copyright (c) 2009-2010 Appcelerator, Inc. All Rights Reserved.
  */
 
-#include "../network_module.h"
+#include "../../network_module.h"
 #include "http_client_binding.h"
 #include <kroll/thread_manager.h>
-#include "../common.h"
+#include "../../common.h"
 #include <sstream>
 
 using Poco::Net::NameValueCollection;

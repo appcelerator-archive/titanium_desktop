@@ -8,14 +8,14 @@
 
 #include "network_status.h"
 #include "network_binding.h"
-#include "tcp/tcp_socket_binding.h"
-#include "tcp/tcp_server_socket_binding.h"
+#include "protocols/tcp/tcp_socket_binding.h"
+#include "protocols/tcp/tcp_server_socket_binding.h"
 #include "interface_binding.h"
 #include "ipaddress_binding.h"
 #include "host_binding.h"
-#include "irc/irc_client_binding.h"
-#include "http/http_client_binding.h"
-#include "http/http_server_binding.h"
+#include "protocols/irc/irc_client_binding.h"
+#include "protocols/http/http_client_binding.h"
+#include "protocols/http/http_server_binding.h"
 
 #include <Poco/Mutex.h>
 #include <Poco/Net/NetworkInterface.h>

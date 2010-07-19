@@ -2,8 +2,8 @@
 from os import path
 Import('build env module')
 
-sources = Glob('*.cpp') + Glob('irc/*.cpp') + \
-	Glob('http/*.cpp') + Glob('proxy/*.cpp') + Glob('tcp/*.cpp')
+sources = Glob('*.cpp') + Glob('protocols/irc/*.cpp') + \
+	Glob('protocols/http/*.cpp') + Glob('proxy/*.cpp') + Glob('protocols/tcp/*.cpp')
 
 env.Append(CPPDEFINES = ('TITANIUM_NETWORK_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
