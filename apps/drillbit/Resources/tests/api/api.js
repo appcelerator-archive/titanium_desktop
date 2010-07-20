@@ -425,8 +425,8 @@ describe("ti.API tests",
 		{
 			callback.passed();
 		});
-		// make sure we have an id for it
-		value_of(w).should_be_number();
+		// make sure we have a callback for it
+		value_of(w).should_be_function();
 
 		// fire it off
 		Titanium.API.fireEvent("foo");
