@@ -8,7 +8,7 @@
 
 #include "network_status.h"
 #include "network_binding.h"
-#include "protocols/tcp/tcp_socket_binding.h"
+#include "protocols/tcp/tcp_socket.h"
 #include "protocols/tcp/tcp_server_socket_binding.h"
 #include "interface_binding.h"
 #include "ipaddress_binding.h"
@@ -270,8 +270,9 @@ namespace ti
 	void NetworkBinding::_CreateTCPSocket(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("createTCPSocket", "sn");
-		result->SetObject(new TCPSocketBinding(host,
-			args.GetString(0), args.GetInt(1)));
+		std::string host(args.GetString(0));
+		int port = args.GetInt(1);
+		result->SetObject(new TCPSocket(host, port));
 	}
 
 	void NetworkBinding::_CreateTCPServerSocket(const ValueList& args, KValueRef result)

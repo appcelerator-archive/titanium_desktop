@@ -141,7 +141,7 @@ namespace ti
 			AutoPtr<Bytes> bytes(value->ToObject().cast<Bytes>());
 			if (!bytes.isNull())
 			{
-				data = std::string(bytes->Get(), bytes->Length());
+				data = std::string(bytes->Pointer(), bytes->Length());
 			}
 			else
 			{
@@ -223,7 +223,7 @@ namespace ti
 			AutoPtr<Bytes> bytes(args.GetObject(1).cast<Bytes>());
 			if (!bytes.isNull())
 			{
-				engine->update(bytes->Get(), bytes->Length());
+				engine->update(bytes->Pointer(), bytes->Length());
 			}
 		}
 		std::string data = Poco::DigestEngine::digestToHex(engine->digest()); 
@@ -355,7 +355,7 @@ namespace ti
 				delete checksum;
 				throw ValueException::FromString("unsupported data type passed as argument 1");
 			}
-			checksum->update(bytes->Get(),bytes->Length());
+			checksum->update(bytes->Pointer(),bytes->Length());
 			result->SetInt(checksum->checksum());
 		}
 		else

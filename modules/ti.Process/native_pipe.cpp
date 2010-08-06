@@ -155,7 +155,7 @@ namespace ti
 	{
 		try
 		{
-			this->RawWrite((char*) bytes->Get(), bytes->Length());
+			this->RawWrite((char*) bytes->Pointer(), bytes->Length());
 		}
 		catch (Poco::Exception& e)
 		{

@@ -113,7 +113,7 @@ static NSString* GetRegisteredMimeTypeFromExtension(NSString* ext)
 		AutoPtr<PreprocessData> result = 
 			Script::GetInstance()->Preprocess(url, scope);
 		NSData* data = [NSData 
-			dataWithBytes:(void *) result->data->Get()
+			dataWithBytes:(void *) result->data->Pointer()
 			length:result->data->Length()];
 		*mimeType = [NSString stringWithUTF8String:result->mimeType.c_str()];
 

@@ -358,7 +358,7 @@ namespace ti
 				curl_formadd(&this->postData, last,
 					CURLFORM_COPYNAME, propertyName->c_str(),
 					CURLFORM_BUFFER, ObjectToFilename(value->ToObject()).c_str(),
-					CURLFORM_BUFFERPTR, bytes->Get(),
+					CURLFORM_BUFFERPTR, bytes->Pointer(),
 					CURLFORM_BUFFERLENGTH, bytes->Length(),
 					CURLFORM_END);
 
@@ -550,7 +550,7 @@ namespace ti
 
 		if (toSend > 0)
 		{
-			memcpy(buffer, requestBytes->Get() + requestDataWritten, toSend);
+			memcpy(buffer, requestBytes->Pointer() + requestDataWritten, toSend);
 			bytesSent = toSend;
 		}
 		
@@ -660,7 +660,8 @@ namespace ti
 	void HTTPClientBinding::DataReceived(char* buffer, size_t bufferSize)
 	{
 		// Pass data to handler on main thread
-		BytesRef bytes(new Bytes(buffer, bufferSize, true));
+		BytesRef bytes(new Bytes(bufferSize));
+		bytes->Write(buffer, bufferSize);
 		responseData.push_back(bytes);
 
 		if (this->responseStream)
@@ -712,7 +713,7 @@ namespace ti
 			{
 				SET_CURL_OPTION(curlHandle, CURLOPT_POST, 1);
 				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDSIZE, requestContentLength);
-				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDS, this->requestBytes->Get());
+				SET_CURL_OPTION(curlHandle, CURLOPT_POSTFIELDS, this->requestBytes->Pointer());
 			}
 			else
 			{
@@ -889,7 +890,7 @@ namespace ti
 			this->Set("connected", Value::NewBool(false));
 
 			if (!responseData.empty())
-				this->SetObject("responseData", Bytes::GlobBytes(this->responseData));
+				this->SetObject("responseData", Bytes::Concat(this->responseData));
 
 			this->ChangeState(4); // Done
 		}

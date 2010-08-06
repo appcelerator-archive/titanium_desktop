@@ -161,7 +161,7 @@ namespace ti
 			AutoPtr<Bytes> bytes = b.cast<Bytes>();
 			if (!bytes.isNull())
 			{
-				text = (char*)bytes->Get();
+				text = (char*)bytes->Pointer();
 				size = (int)bytes->Length();
 			}
 		}
@@ -241,15 +241,14 @@ namespace ti
 				if (size <= 0)
 					throw ValueException::FromString("File.read() size must be greater than zero");
 
-				char* buffer = new char[size + 1];
-				this->istream->read(buffer, size);
+				BytesRef buffer = new Bytes(size + 1);
+				this->istream->read(buffer->Pointer(), size);
 
 				int readCount = this->istream->gcount();
 				if (readCount > 0)
 				{
-					// Store read data into a byte blob
-					buffer[readCount] = '\0';
-					result->SetObject(new Bytes(buffer, readCount, false));
+					buffer->Write("\0", 1, readCount);
+					result->SetObject(buffer);
 				}
 				else
 				{
@@ -332,7 +331,7 @@ namespace ti
 				}
 				else
 				{
-					result->SetObject(new Bytes((std::string)line));
+					result->SetObject(new Bytes(line));
 				}
 			}
 		}
@@ -361,7 +360,7 @@ namespace ti
 			AutoPtr<Bytes> bytes = b.cast<Bytes>();
 			if (!bytes.isNull())
 			{
-				text = (char*)bytes->Get();
+				text = (char*)bytes->Pointer();
 				size = (int)bytes->Length();
 			}
 		}

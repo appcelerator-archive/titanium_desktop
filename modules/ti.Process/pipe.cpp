@@ -333,7 +333,7 @@ namespace ti
 
 					if (pipe->readData.size() > 0)
 					{
-						BytesRef glob(Bytes::GlobBytes(pipe->readData));
+						BytesRef glob(Bytes::Concat(pipe->readData));
 						AutoPtr<Event> event = new ReadEvent(pipe, glob);
 						readEvents.push(event);
 						pipe->readData.clear();

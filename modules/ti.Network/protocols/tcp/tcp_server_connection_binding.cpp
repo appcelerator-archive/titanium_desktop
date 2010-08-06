@@ -182,7 +182,7 @@ namespace ti
 			buffer = sendData.front();
 		}
 
-		const char* data = buffer->Get() + currentSendDataOffset;
+		const char* data = buffer->Pointer() + currentSendDataOffset;
 		size_t length = buffer->Length() - currentSendDataOffset;
 		size_t count = this->socket.sendBytes(data, length);
 		currentSendDataOffset += count;

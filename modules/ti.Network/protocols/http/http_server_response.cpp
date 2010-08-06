@@ -143,7 +143,7 @@ namespace ti
 			if (bytes.isNull())
 				throw ValueException::FromString("Don't know how to write that kind of data.");
 
-			ostr.write(bytes->Get(), bytes->Length());
+			ostr.write(bytes->Pointer(), bytes->Length());
 		}
 		else
 		{

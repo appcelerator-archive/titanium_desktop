@@ -596,17 +596,5 @@ describe("Bytes, KObject, KList, etc",{
 		value_of(blob.concat("illa")).should_be("Mozilla");
 		value_of(blob.concat("illa", " 123", "456")).should_be("Mozilla 123456");
 		value_of(blob.concat(blob2)).should_be("Mozilla");
-		
-		value_of(Titanium.API.createBytes("Moz",blob2)).should_be("Mozilla");
-	},
-	test_blob_from_binary: function()
-	{
-		var blob = Titanium.API.createBytes(0xDE, 0xAD, 0xBE, 0xEF);
-		value_of(blob.length).should_be(4);
-		
-		value_of(blob.byteAt(0)).should_be(0xDE);
-		value_of(blob.byteAt(1)).should_be(0xAD);
-		value_of(blob.byteAt(2)).should_be(0xBE);
-		value_of(blob.byteAt(3)).should_be(0xEF);
 	}
 });

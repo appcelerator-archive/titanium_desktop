@@ -86,7 +86,7 @@ namespace ti
 			AutoPtr<PreprocessData> result = 
 				Script::GetInstance()->Preprocess(url, scope);
 			*mimeType = strdup(result->mimeType.c_str());
-			return strdup(result->data->Get());
+			return strdup(result->data->Pointer());
 		}
 		catch (ValueException& e)
 		{

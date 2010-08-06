@@ -147,7 +147,7 @@ namespace ti
 		BytesRef output = 0;
 		{
 			Poco::Mutex::ScopedLock lock(processOutputMutex);
-			output = Bytes::GlobBytes(processOutput);
+			output = Bytes::Concat(processOutput);
 		}
 		return output;
 	}
