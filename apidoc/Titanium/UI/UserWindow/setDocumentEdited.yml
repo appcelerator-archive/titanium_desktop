@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setDocumentEdited
+type: method
+description: Set a window to the edited (a dot in the close button) or unedited state. OS X only.
+since: 1.1.0
+platforms: [osx]
+returns: null
+parameters: 
+    - [Boolean, edited, true if the window is edited, false if not]
