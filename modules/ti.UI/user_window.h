@@ -143,6 +143,8 @@ namespace ti
 			virtual void OpenSaveAsDialog(KMethodRef callback, std::string& title,
 				std::string& path, std::string& defaultName,
 				std::vector<std::string>& types, std::string& typesDescription) = 0;
+			void _SetDocumentEdited(const ValueList &args, KValueRef result);
+			void _IsDocumentEdited(const ValueList &args, KValueRef result);
 
 			// TODO: make these methods non-virtual
 			virtual void Hide() = 0;
@@ -214,6 +216,10 @@ namespace ti
 			virtual void AppIconChanged() {};
 			virtual void AppMenuChanged() {};
 			virtual void SetContentsImpl(const std::string& content,  const std::string& baseURL) = 0;
+			
+			// OS X only
+			virtual void SetDocumentEdited(bool edited) {}
+			virtual bool IsDocumentEdited() { return false; }
 
 		protected:
 			Logger* logger;

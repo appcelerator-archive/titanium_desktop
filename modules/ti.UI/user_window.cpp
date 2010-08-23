@@ -100,6 +100,8 @@ UserWindow::UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent) :
 	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
 	this->SetMethod("setContents", &UserWindow::_SetContents);
+	this->SetMethod("setDocumentEdited", &UserWindow::_SetDocumentEdited);
+	this->SetMethod("isDocumentEdited", &UserWindow::_IsDocumentEdited);
 
 	this->FireEvent(Event::CREATED);
 }
@@ -1591,6 +1593,17 @@ void UserWindow::PageLoaded(
 	event->SetObject("scope", globalObject);
 	event->SetString("url", url);
 	this->FireEvent(event);
+}
+
+void UserWindow::_SetDocumentEdited(const ValueList& args, KValueRef result)
+{
+	args.VerifyException("setDocumentEdited", "b");
+	this->SetDocumentEdited(args.GetBool(0));
+}
+
+void UserWindow::_IsDocumentEdited(const ValueList& args, KValueRef result)
+{
+	result->SetBool(this->IsDocumentEdited());
 }
 
 }

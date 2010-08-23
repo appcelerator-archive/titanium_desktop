@@ -829,4 +829,16 @@ namespace ti
 			baseURL: [NSURL URLWithString:
 				[NSString stringWithUTF8String:baseURL.c_str()]]];
 	}
+	
+	
+	/* =============== Document Edited (OSX-specific feature) =============== */
+	bool OSXUserWindow::IsDocumentEdited()
+	{
+		return [nativeWindow isDocumentEdited];
+	}
+	
+	void OSXUserWindow::SetDocumentEdited(bool edited)
+	{
+		[nativeWindow setDocumentEdited:edited];
+	}
 }
