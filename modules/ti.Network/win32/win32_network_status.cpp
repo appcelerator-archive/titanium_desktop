@@ -110,8 +110,7 @@ static bool TryAddress(const std::string& ipAddress)
 
 	if (FAILED(result))
 	{
-		HandleHResultError("Failed to get lauch query", result);
-		enumerator->Release();
+		HandleHResultError("Failed to execute address query", result);
 		return true;
 	}
 
