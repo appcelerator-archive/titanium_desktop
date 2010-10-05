@@ -111,7 +111,7 @@ static bool TryAddress(const std::string& ipAddress)
 	if (FAILED(result))
 	{
 		HandleHResultError("Failed to execute address query", result);
-		return true;
+		return false;
 	}
 
 	ULONG count;
@@ -121,7 +121,7 @@ static bool TryAddress(const std::string& ipAddress)
 	{
 		HandleHResultError("Failed to get ping data", result);
 		enumerator->Release();
-		return true;
+		return false;
 	}
 
 	if (count < 1)
@@ -129,7 +129,7 @@ static bool TryAddress(const std::string& ipAddress)
 		LogError("Did not find ping result");
 		enumerator->Release();
 		ping->Release();
-		return true;
+		return false;
 	}
 
 	variant_t pingValue;
@@ -139,11 +139,11 @@ static bool TryAddress(const std::string& ipAddress)
 		HandleHResultError("Could not get ping StatusCode value", result);
 		enumerator->Release();
 		ping->Release();
-		return true;
+		return false;
 	}
 
 	ping->Release();
-	return static_cast<int>(pingValue) == 0;;
+	return static_cast<int>(pingValue) == 0;
 }
 
 static bool TryHost(const std::string& host)
