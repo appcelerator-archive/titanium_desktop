@@ -1455,5 +1455,8 @@ void Win32UserWindow::SetContentsImpl(const std::string& content, const std::str
 
 void Win32UserWindow::SetPluginsEnabled(bool enabled)
 {
-	// TODO: implement
+	IWebPreferences *prefs = NULL;
+	webView->preferences(&prefs);
+	prefs->setPlugInsEnabled(enabled);
+	prefs->Release();
 }
