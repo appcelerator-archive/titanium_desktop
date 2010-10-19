@@ -100,6 +100,7 @@ UserWindow::UserWindow(AutoPtr<WindowConfig> config, AutoUserWindow parent) :
 	this->SetMethod("getWindow", &UserWindow::_GetDOMWindow);
 	this->SetMethod("showInspector", &UserWindow::_ShowInspector);
 	this->SetMethod("setContents", &UserWindow::_SetContents);
+	this->SetMethod("setPluginsEnabled", &UserWindow::_SetPluginsEnabled);
 	this->SetMethod("setDocumentEdited", &UserWindow::_SetDocumentEdited);
 	this->SetMethod("isDocumentEdited", &UserWindow::_IsDocumentEdited);
 
@@ -1398,6 +1399,12 @@ void UserWindow::SetContents(const std::string& content, const std::string& base
 		return;
 
 	this->SetContentsImpl(content, normalizedURL);
+}
+
+void UserWindow::_SetPluginsEnabled(const ValueList& args, KValueRef result)
+{
+	args.VerifyException("setPluginsEnabled", "b");
+	this->SetPluginsEnabled(args.GetBool(0));
 }
 
 AutoUserWindow UserWindow::GetParent()

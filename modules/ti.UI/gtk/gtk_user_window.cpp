@@ -1482,5 +1482,10 @@ namespace ti
 		webkit_web_view_load_string(this->webView, content.c_str(),
 			"text/html", "utf-8", baseURL.c_str());
 	}
+
+	void GtkUserWindow::SetPluginsEnabled(bool enabled)
+	{
+		// TODO: implement
+	}
 }
 

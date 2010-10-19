@@ -105,6 +105,7 @@ namespace ti
 		GtkWidget *GetInspectorWindow();
 		virtual void ShowInspector(bool console);
 		void SetContentsImpl(const std::string&, const std::string&);
+		void SetPluginsEnabled(bool enabled);
 
 		// These values contain the most-recently-set dimension
 		// information for this UserWindow. GDK is asynchronous,

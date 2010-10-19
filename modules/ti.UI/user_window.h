@@ -134,6 +134,7 @@ namespace ti
 			virtual void _ShowInspector(const ValueList& args, KValueRef result);
 			void _SetContents(const ValueList& args, KValueRef result);
 			void SetContents(const std::string& content, const std::string& baseURL);
+			void _SetPluginsEnabled(const ValueList& args, KValueRef result);
 			virtual void OpenFileChooserDialog(KMethodRef callback, bool multiple,
 				std::string& title, std::string& path, std::string& defaultName,
 				std::vector<std::string>& types, std::string& typesDescription) = 0;
@@ -216,6 +217,7 @@ namespace ti
 			virtual void AppIconChanged() {};
 			virtual void AppMenuChanged() {};
 			virtual void SetContentsImpl(const std::string& content,  const std::string& baseURL) = 0;
+			virtual void SetPluginsEnabled(bool enabled) = 0;
 			
 			// OS X only
 			virtual void SetDocumentEdited(bool edited) {}

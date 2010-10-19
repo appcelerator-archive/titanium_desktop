@@ -1452,3 +1452,8 @@ void Win32UserWindow::SetContentsImpl(const std::string& content, const std::str
 	_bstr_t bBaseURL(::UTF8ToWide(baseURL).c_str());
 	mainFrame->loadHTMLString(bContent, bBaseURL);
 }
+
+void Win32UserWindow::SetPluginsEnabled(bool enabled)
+{
+	// TODO: implement
+}

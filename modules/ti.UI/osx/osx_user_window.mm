@@ -829,6 +829,11 @@ namespace ti
 			baseURL: [NSURL URLWithString:
 				[NSString stringWithUTF8String:baseURL.c_str()]]];
 	}
+
+	void OSXUserWindow::SetPluginsEnabled(bool enabled)
+	{
+		[[[nativeWindow webView] preferences] setPlugInsEnabled:enabled];
+	}
 	
 	
 	/* =============== Document Edited (OSX-specific feature) =============== */

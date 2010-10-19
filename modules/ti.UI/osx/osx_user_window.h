@@ -94,6 +94,7 @@ namespace ti
 			void Unfocused();
 			virtual void ShowInspector(bool console=false);
 			void SetContentsImpl(const std::string&, const std::string&);
+			void SetPluginsEnabled(bool enabled);
 			
 			// Dirty/edited windows are an OSX-specific feature.
 			// Corresponds to NSWindow -isDocumentEdited/-setDocumentEdited

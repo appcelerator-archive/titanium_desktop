@@ -1,0 +1,9 @@
+---
+namespace: Titanium.UI.UserWindow.setPluginsEnabled
+type: method
+description: Set if plugins are enabled
+since: 1.1.0
+platforms: [osx, linux, win32]
+returns: undefined
+parameters: 
+    - [bool, enabled, true if plugins should be enabled]
