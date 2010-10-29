@@ -1,17 +1,20 @@
 #appname:Drillbit
-#version:1.0
-#appid:com.titaniumapp.drillbit
+#version:0.5.0
+#appid:com.titaniumapp.unittest.driver
 #publisher:Appcelerator
 #image:default_app_logo.png
 #url:http://titaniumapp.com
-#guid:5FDFCB8A-CD45-423F-BF0C-01B025A07D34
-#desc:Testing tool for Titanium
+#guid:D83B08F4-B43B-4909-9FEE-336CDB44750B
+#desc:Unit Test Driver
 sdk:
 runtime:
 tiapp:
 tifilesystem:
 tiplatform:
 tiui:
+python:
+ruby:
+php:
 timedia:
 timonkey:
 tinetwork:
@@ -19,3 +22,4 @@ tiprocess:
 tidatabase:
 tiworker:
 ticodec:
+drillbit:0.1.0

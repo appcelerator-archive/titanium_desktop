@@ -81,4 +81,4 @@ run = ARGUMENTS.get('run', 0)
 run_with = ARGUMENTS.get('run_with', 0)
 
 Export('run','run_with')
-SConscript('apps/SConscript')
+SConscript('tools/SConscript')
