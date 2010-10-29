@@ -29,8 +29,9 @@ DrillbitReporter.prototype.reportSpecResults = function (spec) {
         expectations = [];
 
     items.forEach(function (item) {
-         if (item.type != 'expect') continue;
+         if (item.type != 'expect') return;
          expectations.push({
+             message: item.message,
              matcher: item.matcherName,
              expected: item.expected,
              actual: item.actual,
