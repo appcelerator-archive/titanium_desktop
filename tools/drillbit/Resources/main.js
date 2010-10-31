@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+Drillbit = {};
+
 var arguments = Titanium.App.getArguments();
 if (arguments.length < 2) {
     Titanium.API.error("Missing required commandline arguments!");
@@ -41,6 +43,8 @@ function loadTest() {
         Titanium.API.error("Invalid test file extension! Must be js or html.");
         Titanium.App.exit();
     }
+
+    Drillbit.testDirectory = testFile.parent();
 }
 
 function getOutputWriter() {
