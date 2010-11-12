@@ -454,8 +454,8 @@ GdkPixbuf* Installer::GetApplicationPixbuf(int maxDimension)
 
 	if (scale != 1.0)
 	{
-		width = scale * width;
-		height = scale * height;
+		width = (int) scale * width;
+		height = (int) scale * height;
 		iconPixbuf = gdk_pixbuf_scale_simple(
 			iconPixbuf, width, height, GDK_INTERP_BILINEAR);
 	}

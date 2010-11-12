@@ -502,7 +502,7 @@ void UserWindow::_SetX(const kroll::ValueList& args, kroll::KValueRef result)
 
 void UserWindow::_SetX(double x)
 {
-	this->config->SetX(x);
+	this->config->SetX((int)x);
 	if (this->active)
 	{
 		this->SetX(x);
@@ -538,7 +538,7 @@ void UserWindow::_SetY(const kroll::ValueList& args, kroll::KValueRef result)
 
 void UserWindow::_SetY(double y)
 {
-	this->config->SetY(y);
+	this->config->SetY((int)y);
 	if (this->active)
 	{
 		this->SetY(y);
@@ -553,8 +553,8 @@ void UserWindow::_MoveTo(const kroll::ValueList& args, kroll::KValueRef result)
 	double x = args.GetDouble(0);
 	double y = args.GetDouble(1);
 
-	this->config->SetX(x);
-	this->config->SetY(y);
+	this->config->SetX((int)x);
+	this->config->SetY((int)y);
 
 	if (this->active)
 	{
@@ -594,7 +594,7 @@ void UserWindow::_SetWidth(double w)
 	if (w > 0)
 	{
 		w = Constrain(w, config->GetMinWidth(), config->GetMaxWidth());
-		this->config->SetWidth(w);
+		this->config->SetWidth((int)w);
 		if (this->active)
 		{
 			this->SetWidth(w);
@@ -624,10 +624,10 @@ void UserWindow::_SetMinWidth(const kroll::ValueList& args, kroll::KValueRef res
 		mw = -1;
 	}
 
-	this->config->SetMinWidth(mw);
+	this->config->SetMinWidth((int)mw);
 	if (mw != -1 && this->config->GetWidth() < mw)
 	{
-		this->config->SetWidth(mw);
+		this->config->SetWidth((int)mw);
 	}
 
 	if (this->active)
@@ -662,10 +662,10 @@ void UserWindow::_SetMaxWidth(const kroll::ValueList& args, kroll::KValueRef res
 		mw = -1;
 	}
 
-	this->config->SetMaxWidth(mw);
+	this->config->SetMaxWidth((int)mw);
 	if (mw != -1 && this->config->GetWidth() > mw)
 	{
-		this->config->SetWidth(mw);
+		this->config->SetWidth((int)mw);
 	}
 
 	if (this->active)
@@ -710,7 +710,7 @@ void UserWindow::_SetHeight(double h)
 	if (h > 0)
 	{
 		h = Constrain(h, config->GetMinHeight(), config->GetMaxHeight());
-		this->config->SetHeight(h);
+		this->config->SetHeight((int)h);
 		if (this->active)
 		{
 			this->SetHeight(h);
@@ -739,10 +739,10 @@ void UserWindow::_SetMinHeight(const kroll::ValueList& args, kroll::KValueRef re
 		mh = -1;
 	}
 
-	this->config->SetMinHeight(mh);
+	this->config->SetMinHeight((int)mh);
 	if (mh != -1 && this->config->GetHeight() < mh)
 	{
-		this->config->SetHeight(mh);
+		this->config->SetHeight((int)mh);
 	}
 
 	if (this->active)
@@ -776,10 +776,10 @@ void UserWindow::_SetMaxHeight(const kroll::ValueList& args, kroll::KValueRef re
 		mh = -1;
 	}
 
-	this->config->SetMaxHeight(mh);
+	this->config->SetMaxHeight((int)mh);
 	if (mh != -1 && this->config->GetHeight() > mh)
 	{
-		this->config->SetHeight(mh);
+		this->config->SetHeight((int)mh);
 	}
 
 	if (this->active)
@@ -796,10 +796,10 @@ void UserWindow::_GetBounds(const kroll::ValueList& args, kroll::KValueRef resul
 {
 	Bounds bounds = this->GetBounds();
 	KObjectRef b(new StaticBoundObject());
-	b->SetInt("x", bounds.x);
-	b->SetInt("y", bounds.y);
-	b->SetInt("width", bounds.width);
-	b->SetInt("height", bounds.height);
+	b->SetDouble("x", bounds.x);
+	b->SetDouble("y", bounds.y);
+	b->SetDouble("width", bounds.width);
+	b->SetDouble("height", bounds.height);
 	result->SetObject(b);
 }
 
@@ -852,10 +852,10 @@ void UserWindow::SetBounds(Bounds b)
 {
 	double w = Constrain(b.width, config->GetMinWidth(), config->GetMaxWidth());
 	double h = Constrain(b.height, config->GetMinHeight(), config->GetMaxHeight());
-	this->config->SetX(b.x);
-	this->config->SetY(b.y);
-	this->config->SetWidth(w);
-	this->config->SetHeight(h);
+	this->config->SetX((int)b.x);
+	this->config->SetY((int)b.y);
+	this->config->SetWidth((int)w);
+	this->config->SetHeight((int)h);
 
 	if (this->active)
 	{

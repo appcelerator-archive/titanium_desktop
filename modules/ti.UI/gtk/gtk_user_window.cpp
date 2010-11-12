@@ -381,12 +381,12 @@ namespace ti
 		GdkScreen* screen = gdk_screen_get_default();
 		if (x == DEFAULT_POSITION)
 		{
-			x = (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
+			x = (int) (gdk_screen_get_width(screen) - this->GetWidth()) / 2;
 			this->config->SetX(x);
 		}
 		if (y == DEFAULT_POSITION)
 		{
-			y = (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
+			y = (int) (gdk_screen_get_height(screen) - this->GetHeight()) / 2;
 			this->config->SetY(y);
 		}
 

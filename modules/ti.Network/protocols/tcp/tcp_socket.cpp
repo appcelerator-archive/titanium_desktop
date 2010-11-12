@@ -229,7 +229,7 @@ namespace ti
 	void TCPSocket::_SetTimeout(const ValueList& args, KValueRef result)
 	{
 		args.VerifyException("setTimeout", "n");
-		SetTimeout(args.GetNumber(0));
+		SetTimeout((long)args.GetNumber(0));
 	}
 
 	void TCPSocket::_Close(const ValueList& args, KValueRef result)

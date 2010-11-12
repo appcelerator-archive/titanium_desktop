@@ -699,7 +699,7 @@ namespace ti
 		else
 			return 0;
 
-		client->RequestDataSent(ulnow, ultotal);
+		client->RequestDataSent((size_t)ulnow, (size_t)ultotal);
 	}
 
 	void HTTPClientBinding::SetupCurlMethodType()
