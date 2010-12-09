@@ -55,9 +55,7 @@ def make_app_target(name, path):
 	Alias(name, t)
 
 make_app_target('developer', path.normpath("%s/../../titanium_developer" % build.cwd()))
-make_app_target('testapp', path.join(build.cwd(), 'testapp'))
-make_app_target('drillbit', path.join(build.cwd(), 'drillbit_old'))
-make_app_target('alloy', path.join(build.cwd(), 'alloy'))
+make_app_target('drillbit', path.join(build.cwd(), 'drillbit'))
 make_app_target('sandbox', path.join(build.cwd(), 'sandbox'))
 
 t = build.env.PackageSDKInstaller('#titanium-app-sdk-installer', [],
