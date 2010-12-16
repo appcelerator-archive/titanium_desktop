@@ -86,7 +86,7 @@ static bool HandleAllJobs(SharedApplication app, vector<SharedDependency>& jobs)
 		SharedDependency dep(jobs.at(i));
 		wstring description(GetDependencyDescription(dep));
 
-		wstring text(L"Downloading the");
+		wstring text(L"Downloading the ");
 		text.append(description);
 		dialog->SetLineText(2, text, false);
 		if (!DownloadDependency(app, dep))
