@@ -63,10 +63,6 @@ namespace ti
 
 		try
 		{
-			// Lock the mutex here, so that the Sleep method is ready for use.
-			// Only one thread will ever be waiting on this condition, so we
-			// don't have to worry too much about locking and unlocking it.
-			wakeupConditionMutex.lock();
 			KJSUtil::Evaluate(jsContext, code.c_str());
 		}
 		catch (ValueException& e)
@@ -88,9 +84,7 @@ namespace ti
 	{
 		while (this->running)
 		{
-			// Handle messages first, because we are about to go to sleep
-			// until more messages arrive.
-			while (this->Get("onmessage")->IsMethod() && !inbox.empty())
+			while (!inbox.empty())
 			{
 				KValueRef message(0);
 				{
@@ -104,9 +98,7 @@ namespace ti
 
 			// Wait until the main thread signals us into action. This means there
 			// are messages to process or this worker has been killed from the outside.
-			messageCondition.wait(wakeupConditionMutex);
-			if (!this->running)
-				break;
+			messageEvent.wait();
 		}
 	}
 
@@ -115,14 +107,14 @@ namespace ti
 		AutoPtr<Event> event(this->CreateEvent("worker.message"));
 		event->Set("message", message);
 
-		try
+		KValueRef callback = this->Get("onmessage");
+		if (callback->IsMethod())
 		{
-			this->Get("onmessage")->ToMethod()->Call(Value::NewObject(event));
-		}
-		catch (ValueException& e)
-		{
-			GetLogger()->Error("Exception while during onMessage callback: %s",
-				e.ToString().c_str());
+			Host::GetInstance()->RunOnMainThread(
+				callback->ToMethod(),
+				ValueList(Value::NewObject(event)),
+				false
+			);
 		}
 	}
 
@@ -130,8 +122,8 @@ namespace ti
 	{
 		// Wake up the worker no matter if it's in the message loop or sleeping.
 		this->running = false;
-		messageCondition.signal();
-		terminateCondition.signal();
+		messageEvent.set();
+		terminateEvent.set();
 	}
 
 	void WorkerContext::SendMessageToWorker(KValueRef message)
@@ -142,7 +134,7 @@ namespace ti
 		}
 
 		// Wake up the worker thread, if it's waiting in the message queue.
-		messageCondition.signal();
+		messageEvent.set();
 	}
 
 	void WorkerContext::_PostMessage(const ValueList &args, KValueRef result)
@@ -156,7 +148,7 @@ namespace ti
 
 		long time = args.GetInt(0);
 		GetLogger()->Debug("Worker will sleep for up to %ld milliseconds", time);
-		terminateCondition.tryWait(wakeupConditionMutex, time);
+		terminateEvent.tryWait(time);
 
 		if (!this->running)
 		{

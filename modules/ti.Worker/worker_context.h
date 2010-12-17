@@ -10,7 +10,7 @@
 #include <kroll/kroll.h>
 #include <Poco/Thread.h>
 #include <Poco/RunnableAdapter.h>
-#include <Poco/Condition.h>
+#include <Poco/Event.h>
 #include <Poco/Mutex.h>
 #include <JavaScriptCore/JSBase.h>
 #include <queue>
@@ -38,9 +38,8 @@ namespace ti
 		bool running;
 		std::queue<KValueRef> inbox;
 		Poco::Mutex inboxLock;
-		Poco::Condition messageCondition;
-		Poco::Condition terminateCondition;
-		Poco::Mutex wakeupConditionMutex;
+		Poco::Event messageEvent;
+		Poco::Event terminateEvent;
 
 		void DeliverMessage(KValueRef message);
 		void MessageLoop();
