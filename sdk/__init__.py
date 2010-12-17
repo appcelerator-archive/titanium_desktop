@@ -1,2 +1,2 @@
 def get_titanium_version():
-	return '1.1.0rc1'
+	return '1.1.0'
