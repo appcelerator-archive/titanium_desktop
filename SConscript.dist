@@ -6,6 +6,7 @@ import tarfile
 import zipfile
 import sys
 from glob import glob
+from StringIO import StringIO
 
 sdk_dir = path.join(build.dir, 'sdk')
 excludes = ['.pdb', '.exp', '.ilk', '.db', '.gitignore','.psd', '.xib'
@@ -80,6 +81,9 @@ def build_packaging_tools(target, source, env):
 	print "Packing packaging tools (%s) " % tgz_file_path
 	tgz_file = tarfile.open(tgz_file_path, 'w:gz')
 	add_files_to_archive(tgz_file, effess.add_to_tgz)
+	tgz_file.addfile(tarfile.TarInfo(
+		'/'.join(['sdk', build.os, build.version, '.packager'])),
+		StringIO('#'))
 	tgz_file.close()
 
 # Builder for all module and runtime component zip files

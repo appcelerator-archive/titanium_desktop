@@ -16,7 +16,11 @@ class LinuxApp(App):
 		longname = self.name + "-" + self.version
 		def tar_callback(f, tar_file):
 			print f
-			tar_file.add(f, longname + "/" + f.replace(self.stage_dir + os.sep, ""))
+			# tar paths in <= 2.5 must be non unicode
+			f = f.encode('ascii', 'ignore')
+			tarname = longname + "/" + f.replace(self.stage_dir + os.sep, "")
+			tarname = tarname.encode('ascii', 'ignore')
+			tar_file.add(f, tarname)
 
 		effess.make_tgz(self.stage_dir, p.join(package_dir, longname + '.tgz'),
 			callback=tar_callback)

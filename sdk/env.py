@@ -11,6 +11,7 @@ import __init__
 
 class PackagingEnvironment(object):
 	def __init__(self, target_os, packaging_server=False):
+		self.components_dir = None
 		self.version = __init__.get_titanium_version()
 		self.excludes = ['.pdb', '.exp', '.ilk', '.lib', '.svn',
 			'.git', '.gitignore', '.cvsignore']
@@ -27,19 +28,19 @@ class PackagingEnvironment(object):
 		self.install_dirs = [p.join(script_dir, '..', '..', '..')]
 
 	def init_normal_dirs(self, script_dir):
-		if (self.target_os is 'linux'):
+		if (self.target_os == 'linux'):
 			self.install_dirs = [
 				p.expanduser('~/.titanium'),
 				"/opt/titanium",
 				"/usr/local/lib/titanium",
 				"/usr/lib/titanium"
 			]
-		elif (self.target_os is 'osx'):
+		elif (self.target_os == 'osx'):
 			self.install_dirs = [
 				p.expanduser('~/Library/Application Support/Titanium'),
 				'/Library/Application Support/Titanium'
 			]
-		elif (self.target_os is 'win32'):
+		elif (self.target_os == 'win32'):
 			self.install_dirs = [
 				p.join(os.environ['APPDATA'], 'Titanium'),
 				# TODO: Is there a better way to determine this directory?
@@ -61,11 +62,11 @@ class PackagingEnvironment(object):
 			self.components_dir = p.join(script_dir, '..')
 
 	def create_app(self, path):
-		if self.target_os is 'linux':
+		if self.target_os == 'linux':
 			return linux_app.LinuxApp(self, path)
-		if self.target_os is 'osx':
+		if self.target_os == 'osx':
 			return osx_app.OSXApp(self, path)
-		if self.target_os is 'win32':
+		if self.target_os == 'win32':
 			return win32_app.Win32App(self, path)
 
 	def log(self, text):
