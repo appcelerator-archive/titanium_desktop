@@ -9,7 +9,7 @@ build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'webkit')
 env.Append(LIBS=['tiappmodule'])
 
-sources = Glob('*.cpp') + ['url/url.cpp']
+sources = Glob('*.cpp') + ['url/URLUtils.cpp']
 if build.is_linux():
 	sources = sources + Glob('gtk/*.cpp')
 	env.Append(LIBS=['Xss', 'libsoup-2.4', 'libsoup-gnome-2.4'])
@@ -17,7 +17,7 @@ if build.is_linux():
 
 elif build.is_win32():
 	build.add_thirdparty(env, 'cairo')
-	sources = sources + Glob('win32/*.cpp')
+	sources = sources + Glob('win/*.cpp')
 	sources += Glob('binding/kjs*.cpp')
 	env.Append(CPPPATH=[build.tp('icu', 'include')])
 	env.Append(LIBS=[
@@ -30,7 +30,7 @@ elif build.is_win32():
 elif build.is_osx():
 	env.Append(FRAMEWORKPATH=[build.tp('growl')])
 	env.Append(FRAMEWORKS=['Cocoa','Carbon', 'IOKit', 'Growl'])
-	sources = sources + Glob('osx/*.mm') + Glob('osx/*.cpp')
+	sources = sources + Glob('mac/*.mm') + Glob('mac/*.cpp')
 	env.Append(CCFLAGS=['-x', 'objective-c++'])
 
 # Copy the support files the module build directory

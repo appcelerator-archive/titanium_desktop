@@ -8,7 +8,7 @@ build.add_thirdparty(env, 'poco')
 sources = Glob('*.cpp')
 if build.is_win32():
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
-	sources += Glob('win32/*.cpp')
+	sources += Glob('win/*.cpp')
 else:
 	sources += Glob('posix/*.cpp')
 

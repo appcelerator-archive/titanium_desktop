@@ -8,15 +8,15 @@ build.add_thirdparty(env, 'poco')
 sources = Glob('*.cpp')
 if build.is_osx():
 	env.Append(FRAMEWORKS = ['Cocoa'])
-	sources.extend(Glob('osx/*.cpp'))
-	sources.extend(Glob('osx/*.mm'))
+	sources.extend(Glob('mac/*.cpp'))
+	sources.extend(Glob('mac/*.mm'))
 
 if build.is_linux():
-	sources.extend(Glob('gst/*.cpp'))
+	sources.extend(Glob('gstreamer/*.cpp'))
 	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10 gdk-2.0')
 
 elif build.is_win32():
-	sources.extend(Glob('win32/*.cpp'))
+	sources.extend(Glob('win/*.cpp'))
 	libs = [
 		'user32', 'shell32', 'kernel32', 'shlwapi',
 		'strmiids','ole32', 'comdlg32', 'comctl32',

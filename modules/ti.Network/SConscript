@@ -2,8 +2,7 @@
 from os import path
 Import('build env module')
 
-sources = Glob('*.cpp') + Glob('protocols/irc/*.cpp') + \
-	Glob('protocols/http/*.cpp') + Glob('proxy/*.cpp') + Glob('protocols/tcp/*.cpp')
+sources = Glob('*.cpp')
 
 env.Append(CPPDEFINES = ('TITANIUM_NETWORK_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
@@ -11,7 +10,7 @@ build.add_thirdparty(env, 'curl')
 
 if build.is_osx():
 	env.Append(FRAMEWORKS=['SystemConfiguration'])
-	sources+=Glob('osx/*.cpp')
+	sources+=Glob('mac/*.cpp')
 
 if build.is_linux():
 	sources+=Glob('linux/*.cpp')
@@ -21,7 +20,7 @@ if build.is_win32():
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LIBS=['wsock32','ws2_32', 'ole32', 'comsuppw', 'wbemuuid'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
-	sources += Glob("win32/*.cpp")
+	sources += Glob("win/*.cpp")
 
 # Copy the support files the module build directory
 build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), module.dir)

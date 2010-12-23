@@ -33,19 +33,15 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 #include "TitaniumPropertyFileConfiguration.h"
-#include "Poco/Exception.h"
-#include "Poco/String.h"
-#include "Poco/Path.h"
-#include "Poco/FileStream.h"
-#include "Poco/LineEndingConverter.h"
+
 #include <cctype>
 
-
-using Poco::trim;
-using Poco::Path;
-
+#include <Poco/Exception.h>
+#include <Poco/String.h>
+#include <Poco/Path.h>
+#include <Poco/FileStream.h>
+#include <Poco/LineEndingConverter.h>
 
 namespace Poco {
 namespace Util {

@@ -39,12 +39,12 @@
 #ifndef Util_TitaniumPropertyFileConfiguration_INCLUDED
 #define Util_TitaniumPropertyFileConfiguration_INCLUDED
 
-
-#include "Poco/Util/Util.h"
-#include "TitaniumMapConfiguration.h"
 #include <istream>
 #include <ostream>
 
+#include <Poco/Util/Util.h>
+
+#include "TitaniumMapConfiguration.h"
 
 namespace Poco {
 namespace Util {

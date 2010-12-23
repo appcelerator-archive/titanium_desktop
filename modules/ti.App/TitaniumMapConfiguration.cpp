@@ -33,10 +33,9 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-
 #include "TitaniumMapConfiguration.h"
-#include <set>
 
+#include <set>
 
 namespace Poco {
 namespace Util {

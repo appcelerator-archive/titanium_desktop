@@ -39,11 +39,10 @@
 #ifndef Util_TitaniumMapConfiguration_INCLUDED
 #define Util_TitaniumMapConfiguration_INCLUDED
 
+#include <map>
 
 #include "Poco/Util/Util.h"
 #include "Poco/Util/AbstractConfiguration.h"
-#include <map>
-
 
 namespace Poco {
 namespace Util {

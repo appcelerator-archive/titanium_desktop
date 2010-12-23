@@ -3,8 +3,6 @@ from os import path
 import os
 Import('build env module')
 
-env.Append(CPPDEFINES = ('TITANIUM_APP_API_EXPORT', 1))
-
 build.add_thirdparty(env, 'poco')
 if build.is_osx():
 	env.Append(LIBS=['xml2'])
@@ -26,11 +24,11 @@ else:
 
 sources = Glob('*.cpp')
 if build.is_win32():
-	sources += Glob('win32/*.cpp')
+	sources += Glob('win/*.cpp')
 elif build.is_linux():
 	sources += Glob('linux/*.cpp')
 elif build.is_osx():
-	sources += Glob('osx/*.mm')
+	sources += Glob('mac/*.mm')
 
 build.mark_build_target(env.SharedLibrary(
 	path.join(module.dir, 'tiappmodule'), sources))

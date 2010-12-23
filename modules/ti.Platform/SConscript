@@ -5,23 +5,22 @@ Import('build env module')
 env.Append(CPPDEFINES = ('TITANIUM_PLATFORM_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
 
+sources = [File('Platform.cpp'), File('PlatformModule.cpp')]
+
 if build.is_win32():
 	build.add_thirdparty(env, 'cairo')
 	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 	env.Append(LIBS=['Advapi32', 'Iphlpapi', 'user32', 'shell32', 'gdi32'])
 	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+	sources.append(File('PlatformWin.cpp'))
 
 elif build.is_osx():
 	env.Append(FRAMEWORKS = ['AppKit', 'Cocoa'])
+	sources.append(File('PlatformMac.mm'))
 
 elif build.is_linux():
 	env.ParseConfig('pkg-config --cflags --libs gdk-2.0 x11')
-
-sources = [File('platform_module.cpp'), File('platform_binding.cpp')]
-if build.is_osx():
-	sources.append(File('platform_binding_%s.mm' % build.os))
-else:
-	sources.append(File('platform_binding_%s.cpp' % build.os))
+	sources.append(File('PlatformLinux.cpp'))
 
 build.mark_build_target(env.SharedLibrary(
 	path.join(module.dir, 'tiplatformmodule'), sources))
