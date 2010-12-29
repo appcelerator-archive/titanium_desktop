@@ -10,43 +10,43 @@
 
 class Job
 {
-	public:
-	Job(std::string url, int type = COMPONENT_JOB);
-	void Fetch();
-	void Unzip();
-	std::string GetFilename();
-	int GetIndex();
-	void SetProgress(double progress);
-	double GetProgress();
-	void ParseURL(std::string url);
-	void ParseFile(std::string url);
-	Installer* GetInstaller();
+    public:
+    Job(std::string url, int type = COMPONENT_JOB);
+    void Fetch();
+    void Unzip();
+    std::string GetFilename();
+    int GetIndex();
+    void SetProgress(double progress);
+    double GetProgress();
+    void ParseURL(std::string url);
+    void ParseFile(std::string url);
+    Installer* GetInstaller();
 
-	static int total;
-	static void InitDownloader();
-	static void ShutdownDownloader();
+    static int total;
+    static void InitDownloader();
+    static void ShutdownDownloader();
 
-	static std::string temporaryDirectory;
-	static std::string installDirectory;
+    static std::string temporaryDirectory;
+    static std::string installDirectory;
 
-	int Index()
-	{
-		return this->index;
-	}
+    int Index()
+    {
+        return this->index;
+    }
 
-	private:
-	std::string url;
-	int type;
-	int index;
-	std::string out_filename;
-	double progress;
-	KComponentType componentType;
-	std::string name;
-	std::string version;
-	bool download;
+    private:
+    std::string url;
+    int type;
+    int index;
+    std::string out_filename;
+    double progress;
+    KComponentType componentType;
+    std::string name;
+    std::string version;
+    bool download;
 
-	static CURL *curl;
-	static char* curl_error;
-	void UnzipComponent();
-	void UnzipApplication();
+    static CURL *curl;
+    static char* curl_error;
+    void UnzipComponent();
+    void UnzipApplication();
 };

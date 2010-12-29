@@ -18,11 +18,11 @@ sources.extend(build.get_kroll_utils(p.join(build.dir, 'objs', 'netinstaller')))
 
 # We want to build this directly into the runtime dist directory to avoid copying
 # In the end we want something that looks like this inside of build.runtime_build_dir
-#	installer/Installer App.app/Contents/MacOS/Installer App
-#	installer/Installer App.app/Contents/Resources/English.lproj/MainMenu.nib
-#	installer/Installer App.app/Contents/Resources/English.lproj/titanium.icns
-#	installer/Installer App.app/Contents/Info.plist
-#	see installation/distribution_guide.txt
+#   installer/Installer App.app/Contents/MacOS/Installer App
+#   installer/Installer App.app/Contents/Resources/English.lproj/MainMenu.nib
+#   installer/Installer App.app/Contents/Resources/English.lproj/titanium.icns
+#   installer/Installer App.app/Contents/Info.plist
+#   see installation/distribution_guide.txt
 contents = p.join(build.dir, 'sdk', 'installer', 'Installer App.app', 'Contents')
 inst = Env.Program(p.join(contents, 'MacOS', 'Installer App'), sources)
 Env.AddPostAction(inst, 'strip -u -r "%s"' % str(inst[0]))
@@ -31,11 +31,11 @@ build.mark_build_target(inst)
 lproj_dir = p.join(contents, 'Resources', 'English.lproj')
 build.mark_build_target(build.utils.CopyToDir(Glob('*.plist'), contents))
 build.mark_build_target(build.utils.CopyToDir([
-		p.join(build.titanium_sdk_dir, 'osx', 'titanium.icns'),
-		p.join(build.cwd(), 'dialog-warning.png')], lproj_dir))
+        p.join(build.titanium_sdk_dir, 'osx', 'titanium.icns'),
+        p.join(build.cwd(), 'dialog-warning.png')], lproj_dir))
 
 for f in Glob('English.lproj/*.xib'):
-	f = str(f)
-	out = p.join(lproj_dir, p.splitext(p.basename(f))[0] + '.nib')
-	Env.AddPostAction(inst, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile "%s" "%s"' % (out, f))
+    f = str(f)
+    out = p.join(lproj_dir, p.splitext(p.basename(f))[0] + '.nib')
+    Env.AddPostAction(inst, 'ibtool --errors --warnings --notices --output-format human-readable-text --compile "%s" "%s"' % (out, f))
 

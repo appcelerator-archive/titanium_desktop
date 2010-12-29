@@ -29,41 +29,41 @@ namespace Titanium {
 
 class PopupDialog {
 public:
-	PopupDialog(HWND windowHandle);
-	virtual ~PopupDialog();
+    PopupDialog(HWND windowHandle);
+    virtual ~PopupDialog();
 
-	void SetShowInputText(bool showInputText)
-	{
-		this->showInputText = showInputText;
-	}
-	void SetTitle(std::string title) { this->title = title; }
-	void SetMessage(std::string message) { this->message = message; }
-	void SetInputText(std::string inputText) { this->inputText = inputText; }
-	std::string GetInputText() { return this->inputText; }
-	void SetShowCancelButton(bool showCancelButton)
-	{
-		this->showCancelButton = showCancelButton;
-	}
-	
-	int CountMatches(std::string& message, const char *token);
+    void SetShowInputText(bool showInputText)
+    {
+        this->showInputText = showInputText;
+    }
+    void SetTitle(std::string title) { this->title = title; }
+    void SetMessage(std::string message) { this->message = message; }
+    void SetInputText(std::string inputText) { this->inputText = inputText; }
+    std::string GetInputText() { return this->inputText; }
+    void SetShowCancelButton(bool showCancelButton)
+    {
+        this->showCancelButton = showCancelButton;
+    }
+    
+    int CountMatches(std::string& message, const char *token);
 
-	int Show();
+    int Show();
 private:
-	HWND windowHandle;
+    HWND windowHandle;
 
-	bool showInputText;
-	std::string title;
-	std::string message;
-	std::string inputText;
-	bool showCancelButton;
-	int result;
+    bool showInputText;
+    std::string title;
+    std::string message;
+    std::string inputText;
+    bool showCancelButton;
+    int result;
 
-	BOOL ShowMessageBox(HWND hwnd);
+    BOOL ShowMessageBox(HWND hwnd);
 
-	static std::map<DWORD, PopupDialog*> popups;
+    static std::map<DWORD, PopupDialog*> popups;
 
-	static void HandleOKClick(HWND hDlg);
-	static INT_PTR CALLBACK CALLBACK Callback(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
+    static void HandleOKClick(HWND hDlg);
+    static INT_PTR CALLBACK CALLBACK Callback(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam);
 };
 
 } // namespace Titanium

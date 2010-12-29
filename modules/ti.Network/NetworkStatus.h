@@ -27,24 +27,24 @@ class Network;
 
 class NetworkStatus : public StaticBoundObject {
 public:
-	NetworkStatus(Network* binding);
-	virtual ~NetworkStatus();
+    NetworkStatus(Network* binding);
+    virtual ~NetworkStatus();
 
-	void Start();
-	void Shutdown(bool async=false);
-	void CheckStatus();
-	void StatusLoop();
+    void Start();
+    void Shutdown(bool async=false);
+    void CheckStatus();
+    void StatusLoop();
 
 protected:
-	void InitializeLoop();
-	bool GetStatus();
-	void CleanupLoop();
+    void InitializeLoop();
+    bool GetStatus();
+    void CleanupLoop();
 
-	Network* binding;
-	bool running;
+    Network* binding;
+    bool running;
 
-	Poco::RunnableAdapter<NetworkStatus>* adapter;
-	Poco::Thread* thread;
+    Poco::RunnableAdapter<NetworkStatus>* adapter;
+    Poco::Thread* thread;
 };
 
 } // namespace Titanium

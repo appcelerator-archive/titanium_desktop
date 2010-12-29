@@ -20,7 +20,7 @@
 
 @interface MenuItemDelegate : NSObject
 {
-	Titanium::MenuItemMac *menuItem;
+    Titanium::MenuItemMac *menuItem;
 }
 
 -(id)initWithMenuItem:(Titanium::MenuItemMac*)item;

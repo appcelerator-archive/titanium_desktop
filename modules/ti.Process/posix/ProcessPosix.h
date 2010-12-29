@@ -27,37 +27,37 @@ namespace Titanium {
 
 class PosixProcess : public Process {
 public:
-	PosixProcess();
-	virtual ~PosixProcess();
+    PosixProcess();
+    virtual ~PosixProcess();
 
-	virtual void Terminate();
-	virtual void Kill();
-	virtual void SendSignal(int signal);
-	static AutoPtr<PosixProcess> GetCurrentProcess();
+    virtual void Terminate();
+    virtual void Kill();
+    virtual void SendSignal(int signal);
+    static AutoPtr<PosixProcess> GetCurrentProcess();
 
-	virtual void ForkAndExec();
-	virtual void MonitorAsync();
-	virtual BytesRef MonitorSync();
-	virtual int Wait();
-	virtual void RecreateNativePipes();
-	virtual void SetArguments(KListRef args);
-	void ReadCallback(const ValueList& args, KValueRef result);
-	inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
-	inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
-	inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
+    virtual void ForkAndExec();
+    virtual void MonitorAsync();
+    virtual BytesRef MonitorSync();
+    virtual int Wait();
+    virtual void RecreateNativePipes();
+    virtual void SetArguments(KListRef args);
+    void ReadCallback(const ValueList& args, KValueRef result);
+    inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+    inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
+    inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
 protected:
-	Logger* logger;
-	int pid;
-	AutoPtr<PosixPipe> nativeIn;
-	AutoPtr<PosixPipe> nativeOut;
-	AutoPtr<PosixPipe> nativeErr;
+    Logger* logger;
+    int pid;
+    AutoPtr<PosixPipe> nativeIn;
+    AutoPtr<PosixPipe> nativeOut;
+    AutoPtr<PosixPipe> nativeErr;
 
-	// For synchronous process execution store
-	// process output as a vector of Bytes for speed.
-	Poco::Mutex processOutputMutex;
-	std::vector<BytesRef> processOutput;
-	void StartProcess();
+    // For synchronous process execution store
+    // process output as a vector of Bytes for speed.
+    Poco::Mutex processOutputMutex;
+    std::vector<BytesRef> processOutput;
+    void StartProcess();
 };
 
 } // namespace Titanium

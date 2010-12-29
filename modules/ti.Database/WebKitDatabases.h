@@ -27,33 +27,33 @@ namespace Titanium {
  */
 class WebKitDatabases {
 public:
-	WebKitDatabases();
-	virtual ~WebKitDatabases();
+    WebKitDatabases();
+    virtual ~WebKitDatabases();
 
-	/**
-	 * returns true if database for origin exists, false if not found
-	 */
-	bool Exists(std::string name);
+    /**
+     * returns true if database for origin exists, false if not found
+     */
+    bool Exists(std::string name);
 
-	/**
-	 * return the path to an existing database with origin and name
-	 */
-	std::string Path(std::string name);
+    /**
+     * return the path to an existing database with origin and name
+     */
+    std::string Path(std::string name);
 
-	/**
-	 * create a new database with name for origin
-	 */
-	std::string Create(std::string name);
+    /**
+     * create a new database with name for origin
+     */
+    std::string Create(std::string name);
 
-	/**
-	 * delete an existing database for name and origin
-	 */
-	void Delete(std::string name);
+    /**
+     * delete an existing database for name and origin
+     */
+    void Delete(std::string name);
 
 private:
-	std::string origin;
-	std::string originPath;
-	Poco::Data::Session* session;
+    std::string origin;
+    std::string originPath;
+    Poco::Data::Session* session;
 };
 
 } // namespace Titanium

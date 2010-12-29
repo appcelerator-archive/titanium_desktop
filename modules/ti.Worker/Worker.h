@@ -32,26 +32,26 @@ class WorkerContext;
 
 class Worker : public KEventObject {
 public:
-	Worker(std::string& code);
-	~Worker();
-	void Error(KValueRef value);
-	void SendMessageToMainThread(KValueRef message);
-	virtual void Set(const char* name, KValueRef value);
+    Worker(std::string& code);
+    ~Worker();
+    void Error(KValueRef value);
+    void SendMessageToMainThread(KValueRef message);
+    virtual void Set(const char* name, KValueRef value);
 
 private:
-	std::string code;
-	AutoPtr<WorkerContext> workerContext;
-	Poco::Thread thread;
-	Poco::RunnableAdapter<Worker>* adapter;
-	std::queue<KValueRef> inbox;
-	Poco::Mutex inboxLock;
+    std::string code;
+    AutoPtr<WorkerContext> workerContext;
+    Poco::Thread thread;
+    Poco::RunnableAdapter<Worker>* adapter;
+    std::queue<KValueRef> inbox;
+    Poco::Mutex inboxLock;
 
-	void Run();
-	void HandleInbox();
-	void DeliverMessage(KValueRef message);
-	void _Start(const ValueList& args, KValueRef result);
-	void _Terminate(const ValueList& args, KValueRef result);
-	void _PostMessage(const ValueList& args, KValueRef result);
+    void Run();
+    void HandleInbox();
+    void DeliverMessage(KValueRef message);
+    void _Start(const ValueList& args, KValueRef result);
+    void _Terminate(const ValueList& args, KValueRef result);
+    void _PostMessage(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

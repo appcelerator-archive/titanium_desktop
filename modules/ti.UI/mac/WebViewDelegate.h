@@ -29,11 +29,11 @@
 @class NativeWindow;
 @interface WebViewDelegate : NSObject
 {
-	Titanium::NativeWindow* window;
-	WebInspector* inspector;
-	BOOL initialDisplay;
-	std::map<WebFrame*, KObjectRef>* frameToGlobalObject;
-	Logger* logger;
+    Titanium::NativeWindow* window;
+    WebInspector* inspector;
+    BOOL initialDisplay;
+    std::map<WebFrame*, KObjectRef>* frameToGlobalObject;
+    Logger* logger;
 }
 
 -(id)initWithWindow:(Titanium::NativeWindow*)window;

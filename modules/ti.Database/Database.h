@@ -25,21 +25,21 @@ namespace Titanium {
 
 class Database : public KAccessorObject {
 public:
-	Database(std::string& name, bool isWebKitDatabase);
-	virtual ~Database();
+    Database(std::string& name, bool isWebKitDatabase);
+    virtual ~Database();
 
 protected:
-	void Open(const ValueList& args, KValueRef result);
-	void Execute(const ValueList& args, KValueRef result);
-	void Close(const ValueList& args, KValueRef result);
-	void Remove(const ValueList& args, KValueRef result);
-	void GetPath(const ValueList& args, KValueRef result);
-	void Close();
+    void Open(const ValueList& args, KValueRef result);
+    void Execute(const ValueList& args, KValueRef result);
+    void Close(const ValueList& args, KValueRef result);
+    void Remove(const ValueList& args, KValueRef result);
+    void GetPath(const ValueList& args, KValueRef result);
+    void Close();
 
-	Poco::Data::Session *session;
-	std::string name;
-	std::string path;
-	bool isWebKitDatabase;
+    Poco::Data::Session *session;
+    std::string name;
+    std::string path;
+    bool isWebKitDatabase;
 };
 
 } // namespace Titanium

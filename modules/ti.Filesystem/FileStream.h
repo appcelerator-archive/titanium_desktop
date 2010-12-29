@@ -29,39 +29,39 @@
 namespace Titanium {
 
 enum FileStreamMode {
-	MODE_READ = 1,
-	MODE_APPEND = 2,
-	MODE_WRITE = 3
+    MODE_READ = 1,
+    MODE_APPEND = 2,
+    MODE_WRITE = 3
 };
 
 
 class FileStream : public StaticBoundObject {
 public:
-	FileStream(std::string filename_);
-	virtual ~FileStream();
+    FileStream(std::string filename_);
+    virtual ~FileStream();
 
-	// Used by File.open()
-	void Open(const ValueList& args, KValueRef result);
+    // Used by File.open()
+    void Open(const ValueList& args, KValueRef result);
 
 private:
-	std::string filename;
+    std::string filename;
 
-	Poco::FileInputStream* istream;
-	Poco::FileOutputStream* ostream;
-	Poco::FileIOS* stream;
+    Poco::FileInputStream* istream;
+    Poco::FileOutputStream* ostream;
+    Poco::FileIOS* stream;
 
-	bool Open(FileStreamMode mode, bool binary = false, bool append = false);
-	void Close(const ValueList& args, KValueRef result);
-	bool Close();
-	void Write(const ValueList& args, KValueRef result);
-	void Write(char *,int);
-	void Read(const ValueList& args, KValueRef result);
-	void ReadLine(const ValueList& args, KValueRef result);
-	void WriteLine(const ValueList& args, KValueRef result);
-	void Ready(const ValueList& args, KValueRef result);
-	void IsOpen(const ValueList& args, KValueRef result);
-	void Seek(const ValueList& args, KValueRef result);
-	void Tell(const ValueList& args, KValueRef result);
+    bool Open(FileStreamMode mode, bool binary = false, bool append = false);
+    void Close(const ValueList& args, KValueRef result);
+    bool Close();
+    void Write(const ValueList& args, KValueRef result);
+    void Write(char *,int);
+    void Read(const ValueList& args, KValueRef result);
+    void ReadLine(const ValueList& args, KValueRef result);
+    void WriteLine(const ValueList& args, KValueRef result);
+    void Ready(const ValueList& args, KValueRef result);
+    void IsOpen(const ValueList& args, KValueRef result);
+    void Seek(const ValueList& args, KValueRef result);
+    void Tell(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

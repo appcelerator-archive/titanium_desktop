@@ -29,96 +29,96 @@
 namespace Titanium {
 
 SoundMac::SoundMac(std::string& url) :
-	Sound(url),
-	sound(nil),
-	delegate([[SoundDelegate alloc] init]),
-	fileURL(nil)
+    Sound(url),
+    sound(nil),
+    delegate([[SoundDelegate alloc] init]),
+    fileURL(nil)
 {
-	// Convert the path back into a file:// URL. We don't use the
-	// original URL here because it may be an app:// or ti:// URL.
-	this->fileURL = [[NSURL URLWithString:[NSString stringWithUTF8String:
-		URLUtils::PathToFileURL(this->path).c_str()]] retain];
-	[delegate setOSXSound:this];
-	this->Load();
+    // Convert the path back into a file:// URL. We don't use the
+    // original URL here because it may be an app:// or ti:// URL.
+    this->fileURL = [[NSURL URLWithString:[NSString stringWithUTF8String:
+        URLUtils::PathToFileURL(this->path).c_str()]] retain];
+    [delegate setOSXSound:this];
+    this->Load();
 }
 
 SoundMac::~SoundMac()
 {
-	[delegate setOSXSound:nil];
-	[sound setDelegate:nil];
-	[delegate release];
-	[fileURL release];
+    [delegate setOSXSound:nil];
+    [sound setDelegate:nil];
+    [delegate release];
+    [fileURL release];
 }
 
 void SoundMac::LoadImpl()
 {
-	@try
-	{
-		sound = [[NSSound alloc] initWithContentsOfURL:fileURL byReference:NO];
-		[sound setDelegate:delegate];
-	}
-	@catch(NSException *ex)
-	{
-		throw ValueException::FromFormat("Error loading (%s): %s",
-			[[fileURL absoluteString] UTF8String], [[ex reason] UTF8String]);
-	}
-	@catch(...)
-	{
-		throw ValueException::FromFormat("Unknown error loading (%s): %s",
-			[[fileURL absoluteString] UTF8String]);
-	}
+    @try
+    {
+        sound = [[NSSound alloc] initWithContentsOfURL:fileURL byReference:NO];
+        [sound setDelegate:delegate];
+    }
+    @catch(NSException *ex)
+    {
+        throw ValueException::FromFormat("Error loading (%s): %s",
+            [[fileURL absoluteString] UTF8String], [[ex reason] UTF8String]);
+    }
+    @catch(...)
+    {
+        throw ValueException::FromFormat("Unknown error loading (%s): %s",
+            [[fileURL absoluteString] UTF8String]);
+    }
 }
 
 void SoundMac::UnloadImpl()
 {
-	if (!sound)
-		return;
+    if (!sound)
+        return;
 
-	[sound release];
-	sound = nil;
+    [sound release];
+    sound = nil;
 }
 
 void SoundMac::PlayImpl()
 {
-	if (!sound)
-		return;
+    if (!sound)
+        return;
 
-	if (this->state == PAUSED)
-		[sound resume];
-	else
-		[sound play];
+    if (this->state == PAUSED)
+        [sound resume];
+    else
+        [sound play];
 }
 
 void SoundMac::PauseImpl()
 {
-	[sound pause];
+    [sound pause];
 }
 
 void SoundMac::StopImpl()
 {
-	if (!sound)
-		return;
+    if (!sound)
+        return;
 
-	[sound stop];
+    [sound stop];
 }
 
 void SoundMac::SetVolumeImpl(double volume)
 {
-	if (!sound)
-		return;
+    if (!sound)
+        return;
 
-	// TODO: 10.4 doesn't have setVolume on NSSound.
-	if ([sound respondsToSelector:@selector(setVolume:)])
-		[sound setVolume:volume];
+    // TODO: 10.4 doesn't have setVolume on NSSound.
+    if ([sound respondsToSelector:@selector(setVolume:)])
+        [sound setVolume:volume];
 }
 
 double SoundMac::GetVolumeImpl()
 {
-	// Initialize the sound volume apropriately.
-	if ([sound respondsToSelector:@selector(volume)])
-		return [sound volume];
-	else
-		return 0;
+    // Initialize the sound volume apropriately.
+    if ([sound respondsToSelector:@selector(volume)])
+        return [sound volume];
+    else
+        return 0;
 }
 
 } // namespace Titanium

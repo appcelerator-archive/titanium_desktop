@@ -27,31 +27,31 @@ class Menu;
 
 class MenuItemMac : public MenuItem {
 public:
-	MenuItemMac(MenuItemType type);
-	virtual ~MenuItemMac();
+    MenuItemMac(MenuItemType type);
+    virtual ~MenuItemMac();
 
-	void SetLabelImpl(std::string newLabel);
-	void SetIconImpl(std::string newIconPath);
-	void SetStateImpl(bool newState);
-	void SetCallbackImpl(KMethodRef callback);
-	void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
-	void SetEnabledImpl(bool enabled);
+    void SetLabelImpl(std::string newLabel);
+    void SetIconImpl(std::string newIconPath);
+    void SetStateImpl(bool newState);
+    void SetCallbackImpl(KMethodRef callback);
+    void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
+    void SetEnabledImpl(bool enabled);
 
-	NSMenuItem* CreateNative(bool registerNative=true);
-	void DestroyNative(NSMenuItem* realization);
-	void UpdateNativeMenuItems();
-	virtual void HandleClickEvent(KObjectRef source);
+    NSMenuItem* CreateNative(bool registerNative=true);
+    void DestroyNative(NSMenuItem* realization);
+    void UpdateNativeMenuItems();
+    virtual void HandleClickEvent(KObjectRef source);
 
 private:
-	static void SetNSMenuItemTitle(NSMenuItem* item, std::string& title);
-	static void SetNSMenuItemState(NSMenuItem* item, bool state);
-	static void SetNSMenuItemIconPath(
-		NSMenuItem* item, std::string& iconPath, NSImage* image = nil);
-	static void SetNSMenuItemSubmenu(
-		NSMenuItem* item, AutoPtr<Menu> submenu, bool registerNative=true);
-	static void SetNSMenuItemEnabled(NSMenuItem* item, bool enabled);
+    static void SetNSMenuItemTitle(NSMenuItem* item, std::string& title);
+    static void SetNSMenuItemState(NSMenuItem* item, bool state);
+    static void SetNSMenuItemIconPath(
+        NSMenuItem* item, std::string& iconPath, NSImage* image = nil);
+    static void SetNSMenuItemSubmenu(
+        NSMenuItem* item, AutoPtr<Menu> submenu, bool registerNative=true);
+    static void SetNSMenuItemEnabled(NSMenuItem* item, bool enabled);
 
-	std::vector<NSMenuItem*> nativeItems;
+    std::vector<NSMenuItem*> nativeItems;
 };
 
 } // namespace Titanium

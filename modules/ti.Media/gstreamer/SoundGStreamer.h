@@ -26,20 +26,20 @@ namespace Titanium {
 
 class SoundGStreamer : public Sound {
 public:
-	SoundGStreamer(std::string& url);
+    SoundGStreamer(std::string& url);
 
-	virtual void LoadImpl();
-	virtual void UnloadImpl();
-	virtual void PlayImpl();
-	virtual void PauseImpl();
-	virtual void StopImpl();
-	virtual void SetVolumeImpl(double volume);
-	virtual double GetVolumeImpl();
+    virtual void LoadImpl();
+    virtual void UnloadImpl();
+    virtual void PlayImpl();
+    virtual void PauseImpl();
+    virtual void StopImpl();
+    virtual void SetVolumeImpl(double volume);
+    virtual double GetVolumeImpl();
 
 private:
-	GstElement* pipeline;
-	guint watchEventSourceId;
-	std::string fileURL;
+    GstElement* pipeline;
+    guint watchEventSourceId;
+    std::string fileURL;
 };
 
 } // namespace Titanium

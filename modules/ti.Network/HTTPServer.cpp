@@ -37,91 +37,91 @@
 namespace Titanium {
 
 HTTPServer::HTTPServer()
-	: StaticBoundObject("Network.HTTPServer")
-	, global(kroll::Host::GetInstance()->GetGlobalObject())
-	, callback(0)
-	, socket(0)
-	, connection(0)
+    : StaticBoundObject("Network.HTTPServer")
+    , global(kroll::Host::GetInstance()->GetGlobalObject())
+    , callback(0)
+    , socket(0)
+    , connection(0)
 {
-	/**
-	 * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
-	 * @tiarg(for=Network.HTTPServer.bind,name=port,type=Number) port to bind on
-	 * @tiarg(for=Network.HTTPServer.bind,name=address,type=String,optional=True) address to bind to
-	 * @tiarg(for=Network.HTTPServer.bind,name=callback,type=Method) callback for server logic (in seperate thread)
-	 */
-	SetMethod("bind",&HTTPServer::Bind);
-	
-	/**
-	 * @tiapi(method=True,name=Network.HTTPServer.close,since=0.3) close this server
-	 */
-	SetMethod("close",&HTTPServer::Close);
-	
-	/**
-	 * @tiapi(method=True,name=Network.HTTPServer.isClosed,since=0.3) check to see if this server socket is closed
-	 * @tiresult(for=Network.HTTPServer.isClosed,type=Boolean) return whether or not this server socket is closed
-	 */
-	SetMethod("isClosed",&HTTPServer::IsClosed);
+    /**
+     * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
+     * @tiarg(for=Network.HTTPServer.bind,name=port,type=Number) port to bind on
+     * @tiarg(for=Network.HTTPServer.bind,name=address,type=String,optional=True) address to bind to
+     * @tiarg(for=Network.HTTPServer.bind,name=callback,type=Method) callback for server logic (in seperate thread)
+     */
+    SetMethod("bind",&HTTPServer::Bind);
+    
+    /**
+     * @tiapi(method=True,name=Network.HTTPServer.close,since=0.3) close this server
+     */
+    SetMethod("close",&HTTPServer::Close);
+    
+    /**
+     * @tiapi(method=True,name=Network.HTTPServer.isClosed,since=0.3) check to see if this server socket is closed
+     * @tiresult(for=Network.HTTPServer.isClosed,type=Boolean) return whether or not this server socket is closed
+     */
+    SetMethod("isClosed",&HTTPServer::IsClosed);
 }
 
 HTTPServer::~HTTPServer()
 {
-	KR_DUMP_LOCATION
-	Close();
+    KR_DUMP_LOCATION
+    Close();
 }
 
 void HTTPServer::Bind(const ValueList& args, KValueRef result)
 {
-	Close();
-	
-	// port, callback
-	// port, ipaddress, callback
-	int port = args.at(0)->ToInt();
-	std::string ipaddress = "127.0.0.1";
-	
-	if (args.at(1)->IsString())
-	{
-		ipaddress = args.at(1)->ToString();
-	}
-	else if (args.at(1)->IsMethod())
-	{
-		callback = args.at(1)->ToMethod();
-	}
-	if (args.size()==3)
-	{
-		callback = args.at(2)->ToMethod();
-	}
-	
-	Poco::Net::SocketAddress addr(ipaddress,port);
-	this->socket = new Poco::Net::ServerSocket(addr);		
-	
-	connection = new Poco::Net::HTTPServer(new HttpServerRequestFactory(callback), *socket, new Poco::Net::HTTPServerParams);
-	connection->start();
+    Close();
+    
+    // port, callback
+    // port, ipaddress, callback
+    int port = args.at(0)->ToInt();
+    std::string ipaddress = "127.0.0.1";
+    
+    if (args.at(1)->IsString())
+    {
+        ipaddress = args.at(1)->ToString();
+    }
+    else if (args.at(1)->IsMethod())
+    {
+        callback = args.at(1)->ToMethod();
+    }
+    if (args.size()==3)
+    {
+        callback = args.at(2)->ToMethod();
+    }
+    
+    Poco::Net::SocketAddress addr(ipaddress,port);
+    this->socket = new Poco::Net::ServerSocket(addr);       
+    
+    connection = new Poco::Net::HTTPServer(new HttpServerRequestFactory(callback), *socket, new Poco::Net::HTTPServerParams);
+    connection->start();
 }
 
 void HTTPServer::Close()
 {
-	if (this->connection!=NULL)
-	{
-		this->connection->stop();
-		delete this->connection;
-		connection = NULL;
-	}
-	if (this->socket!=NULL)
-	{
-		delete this->socket;
-		this->socket = NULL;
-	}
-	this->callback = NULL;
+    if (this->connection!=NULL)
+    {
+        this->connection->stop();
+        delete this->connection;
+        connection = NULL;
+    }
+    if (this->socket!=NULL)
+    {
+        delete this->socket;
+        this->socket = NULL;
+    }
+    this->callback = NULL;
 }
 
 void HTTPServer::Close(const ValueList& args, KValueRef result)
 {
-	Close();
+    Close();
 }
 
 void HTTPServer::IsClosed(const ValueList& args, KValueRef result)
 {
-	result->SetBool(this->connection==NULL);
+    result->SetBool(this->connection==NULL);
 }
 
 } // namespace Titanium

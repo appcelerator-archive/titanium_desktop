@@ -24,30 +24,30 @@
 
 namespace Titanium {
 
-class TrayItemWin : public TrayItem {		
+class TrayItemWin : public TrayItem {       
 public:
-	TrayItemWin(std::string& iconURL, KMethodRef cbSingleClick);
-	virtual ~TrayItemWin();
+    TrayItemWin(std::string& iconURL, KMethodRef cbSingleClick);
+    virtual ~TrayItemWin();
 
-	void SetIcon(std::string& iconPath);
-	void SetMenu(AutoPtr<Menu> menu);
-	void SetHint(std::string& hint);
-	void Remove();
-	void ShowTrayMenu();
-	void HandleRightClick();
-	void HandleLeftClick();
-	void HandleDoubleLeftClick();
-	UINT GetId();
-	static bool MessageHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	
-	static LRESULT CALLBACK DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    void SetIcon(std::string& iconPath);
+    void SetMenu(AutoPtr<Menu> menu);
+    void SetHint(std::string& hint);
+    void Remove();
+    void ShowTrayMenu();
+    void HandleRightClick();
+    void HandleLeftClick();
+    void HandleDoubleLeftClick();
+    UINT GetId();
+    static bool MessageHandler(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+    
+    static LRESULT CALLBACK DoubleClickTimerProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-	private:
-	HMENU oldNativeMenu;
-	NOTIFYICONDATA* trayIconData;
-	static std::vector<AutoPtr<TrayItemWin> > trayItems;
-	static UINT trayClickedMessage;
-	bool is_double_clicked;
+    private:
+    HMENU oldNativeMenu;
+    NOTIFYICONDATA* trayIconData;
+    static std::vector<AutoPtr<TrayItemWin> > trayItems;
+    static UINT trayClickedMessage;
+    bool is_double_clicked;
 };
 
 } // namespace Titanium

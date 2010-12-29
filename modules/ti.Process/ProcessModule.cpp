@@ -26,22 +26,22 @@ KROLL_MODULE(ProcessModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 void ProcessModule::Initialize()
 {
-	// load our variables
-	this->binding = new ProcessBinding();
+    // load our variables
+    this->binding = new ProcessBinding();
 
-	// set our ti.Process
-	KValueRef value = Value::NewObject(this->binding);
-	host->GetGlobalObject()->Set("Process", value);
+    // set our ti.Process
+    KValueRef value = Value::NewObject(this->binding);
+    host->GetGlobalObject()->Set("Process", value);
 
-	// simple test to make the app crash
-#ifdef TEST_CRASH_DETECTION		
-	char *s = NULL;
-	(*s)++;
+    // simple test to make the app crash
+#ifdef TEST_CRASH_DETECTION     
+    char *s = NULL;
+    (*s)++;
 #endif
 }
 
 void ProcessModule::Stop()
 {
 }
-	
+    
 } // namespace Titanium

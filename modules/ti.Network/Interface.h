@@ -26,19 +26,19 @@ namespace Titanium {
 
 class Interface : public KAccessorObject {
 public:
-	Interface(const Poco::Net::NetworkInterface& interface);
-	virtual ~Interface();
+    Interface(const Poco::Net::NetworkInterface& interface);
+    virtual ~Interface();
 
 private:
-	void _GetAddress(const ValueList& args, KValueRef result);
-	void _GetIPAddress(const ValueList& args, KValueRef result);
-	void _GetName(const ValueList& args, KValueRef result);
-	void _GetDisplayName(const ValueList& args, KValueRef result);
-	void _GetSubnetMask(const ValueList& args, KValueRef result);
-	void _SupportsIPv4(const ValueList& args, KValueRef result);
-	void _SupportsIPv6(const ValueList& args, KValueRef result);
+    void _GetAddress(const ValueList& args, KValueRef result);
+    void _GetIPAddress(const ValueList& args, KValueRef result);
+    void _GetName(const ValueList& args, KValueRef result);
+    void _GetDisplayName(const ValueList& args, KValueRef result);
+    void _GetSubnetMask(const ValueList& args, KValueRef result);
+    void _SupportsIPv4(const ValueList& args, KValueRef result);
+    void _SupportsIPv6(const ValueList& args, KValueRef result);
 
-	Poco::Net::NetworkInterface interface;
+    Poco::Net::NetworkInterface interface;
 };
 
 } // namespace Titanium

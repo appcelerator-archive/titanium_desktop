@@ -26,94 +26,94 @@
 namespace Titanium {
 
 WebKitFrameLoadDelegate::WebKitFrameLoadDelegate(UserWindowWin *window)
-	: window(window)
-	, ref_count(1)
+    : window(window)
+    , ref_count(1)
 {
 }
 
 HRESULT STDMETHODCALLTYPE WebKitFrameLoadDelegate::didFinishLoadForFrame(
-	IWebView *webView, IWebFrame *frame)
+    IWebView *webView, IWebFrame *frame)
 {
-	JSGlobalContextRef context = frame->globalContext();
-	JSObjectRef global_object = JSContextGetGlobalObject(context);
-	KObjectRef frame_global = new KKJSObject(context, global_object);
+    JSGlobalContextRef context = frame->globalContext();
+    JSObjectRef global_object = JSContextGetGlobalObject(context);
+    KObjectRef frame_global = new KKJSObject(context, global_object);
 
-	IWebDataSource *webDataSource;
-	frame->dataSource(&webDataSource);
-	IWebMutableURLRequest *urlRequest;
-	webDataSource->request(&urlRequest);
+    IWebDataSource *webDataSource;
+    frame->dataSource(&webDataSource);
+    IWebMutableURLRequest *urlRequest;
+    webDataSource->request(&urlRequest);
 
-	BSTR u;
-	urlRequest->URL(&u);
-	std::wstring wideURL(u);
-	std::string url(::WideToUTF8(wideURL));
+    BSTR u;
+    urlRequest->URL(&u);
+    std::wstring wideURL(u);
+    std::string url(::WideToUTF8(wideURL));
 
-	window->FrameLoaded();
-	window->PageLoaded(frame_global, url, context);
-	
-	return S_OK;
+    window->FrameLoaded();
+    window->PageLoaded(frame_global, url, context);
+    
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitFrameLoadDelegate::didClearWindowObject(
-	IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject,
-	IWebFrame *frame)
+    IWebView *webView, JSContextRef context, JSObjectRef windowScriptObject,
+    IWebFrame *frame)
 {
-	this->window->RegisterJSContext((JSGlobalContextRef) context);
-	return S_OK;
+    this->window->RegisterJSContext((JSGlobalContextRef) context);
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitFrameLoadDelegate::QueryInterface(
-	REFIID riid, void **ppvObject)
+    REFIID riid, void **ppvObject)
 {
-	*ppvObject = 0;
-	if (IsEqualGUID(riid, IID_IUnknown))
-		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate))
-		*ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
-	else
-		return E_NOINTERFACE;
+    *ppvObject = 0;
+    if (IsEqualGUID(riid, IID_IUnknown))
+        *ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
+    else if (IsEqualGUID(riid, IID_IWebFrameLoadDelegate))
+        *ppvObject = static_cast<IWebFrameLoadDelegate*>(this);
+    else
+        return E_NOINTERFACE;
 
-	AddRef();
-	return S_OK;
+    AddRef();
+    return S_OK;
 }
 
 ULONG STDMETHODCALLTYPE WebKitFrameLoadDelegate::AddRef()
 {
-	return ++ref_count;
+    return ++ref_count;
 }
 
 ULONG STDMETHODCALLTYPE WebKitFrameLoadDelegate::Release()
 {
-	ULONG new_count = --ref_count;
-	if (!new_count) delete(this);
+    ULONG new_count = --ref_count;
+    if (!new_count) delete(this);
 
-	return new_count;
+    return new_count;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitFrameLoadDelegate::didReceiveTitle(
-	/* [in] */ IWebView* webView,
-	/* [in] */ BSTR title,
-	/* [in] */ IWebFrame* frame)
+    /* [in] */ IWebView* webView,
+    /* [in] */ BSTR title,
+    /* [in] */ IWebFrame* frame)
 {
-	// Only change the title if the new title was received for the main frame.
-	IWebFrame* mainFrame;
-	HRESULT hr = webView->mainFrame(&mainFrame);
-	if (FAILED(hr))
-	{
-		Logger::Get("FrameLoadDelegate")->Error("Could not fetch main "
-			"frame in didReceiveTitle delegate method");
-		return S_OK;
-	}
-	if (frame != mainFrame)
-		return S_OK;
+    // Only change the title if the new title was received for the main frame.
+    IWebFrame* mainFrame;
+    HRESULT hr = webView->mainFrame(&mainFrame);
+    if (FAILED(hr))
+    {
+        Logger::Get("FrameLoadDelegate")->Error("Could not fetch main "
+            "frame in didReceiveTitle delegate method");
+        return S_OK;
+    }
+    if (frame != mainFrame)
+        return S_OK;
 
-	if (title)
-	{
-		std::string newTitle;
-		newTitle.append(bstr_t(title));
-		this->window->SetTitle(newTitle);
-	}
-	return S_OK;
+    if (title)
+    {
+        std::string newTitle;
+        newTitle.append(bstr_t(title));
+        this->window->SetTitle(newTitle);
+    }
+    return S_OK;
 }
 
 } // namespace Titanium

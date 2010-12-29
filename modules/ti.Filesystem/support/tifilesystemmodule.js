@@ -35,7 +35,7 @@
             return result;
         }
 
-		return file;
+        return file;
     }
 
     var getFile = Titanium.Filesystem.getFile; 

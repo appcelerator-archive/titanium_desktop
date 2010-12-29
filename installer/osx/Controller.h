@@ -13,9 +13,9 @@ using KrollUtils::KComponentType;
 SharedApplication app;
 
 @interface Job : NSObject {
-	NSURL* url; 
-	NSString* path; 
-	BOOL isUpdate; 
+    NSURL* url; 
+    NSString* path; 
+    BOOL isUpdate; 
 }
 -(Job*)init:(NSString*)pathOrURL;
 -(Job*)initUpdate:(NSString*)pathOrURL;
@@ -29,32 +29,32 @@ SharedApplication app;
 @end
 
 @interface Controller : NSObject {
-	IBOutlet NSWindow* progressWindow;
-	IBOutlet NSProgressIndicator* progressBar;
-	IBOutlet NSButton* progressCancelButton;
-	IBOutlet NSTextField* progressText;
-	IBOutlet NSImageView* progressImage;
-	IBOutlet NSTextField* progressAppName;
-	IBOutlet NSTextField* progressAppVersion;
-	IBOutlet NSTextField* progressAppPublisher;
-	IBOutlet NSTextField* progressAppURL;
+    IBOutlet NSWindow* progressWindow;
+    IBOutlet NSProgressIndicator* progressBar;
+    IBOutlet NSButton* progressCancelButton;
+    IBOutlet NSTextField* progressText;
+    IBOutlet NSImageView* progressImage;
+    IBOutlet NSTextField* progressAppName;
+    IBOutlet NSTextField* progressAppVersion;
+    IBOutlet NSTextField* progressAppPublisher;
+    IBOutlet NSTextField* progressAppURL;
 
-	IBOutlet NSWindow* introWindow;
-	IBOutlet NSTextField* introLicenseLabel;
-	IBOutlet NSBox* introLicenseBox;
-	IBOutlet NSTextView* introLicenseText;
+    IBOutlet NSWindow* introWindow;
+    IBOutlet NSTextField* introLicenseLabel;
+    IBOutlet NSBox* introLicenseBox;
+    IBOutlet NSTextView* introLicenseText;
 
-	IBOutlet NSImageView* introImage;
-	IBOutlet NSTextField* introAppName;
-	IBOutlet NSTextField* introAppVersion;
-	IBOutlet NSTextField* introAppPublisher;
-	IBOutlet NSTextField* introAppURL;
+    IBOutlet NSImageView* introImage;
+    IBOutlet NSTextField* introAppName;
+    IBOutlet NSTextField* introAppVersion;
+    IBOutlet NSTextField* introAppPublisher;
+    IBOutlet NSTextField* introAppURL;
 
-	NSMutableArray *jobs;
-	NSString *temporaryDirectory;
-	NSString *installDirectory;
-	NSString *updateFile;
-	BOOL skipIntroDialog;
+    NSMutableArray *jobs;
+    NSString *temporaryDirectory;
+    NSString *installDirectory;
+    NSString *updateFile;
+    BOOL skipIntroDialog;
 }
 
 -(IBAction)cancelProgress:(id)sender;

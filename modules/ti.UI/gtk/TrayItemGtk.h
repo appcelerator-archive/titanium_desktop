@@ -27,23 +27,23 @@ class MenuGtk;
 
 class TrayItemGtk : public TrayItem {
 public:
-	TrayItemGtk(std::string& iconURL, KMethodRef cb);
-	~TrayItemGtk();
+    TrayItemGtk(std::string& iconURL, KMethodRef cb);
+    ~TrayItemGtk();
 
-	void SetIcon(std::string& iconPath);
-	void SetMenu(AutoPtr<Menu> menu);
-	void SetHint(std::string& hint);
-	void Remove();
+    void SetIcon(std::string& iconPath);
+    void SetMenu(AutoPtr<Menu> menu);
+    void SetHint(std::string& hint);
+    void Remove();
 
-	GtkStatusIcon* GetWidget();
-	AutoPtr<MenuGtk> GetMenu();
-	KMethodRef GetCallback();
+    GtkStatusIcon* GetWidget();
+    AutoPtr<MenuGtk> GetMenu();
+    KMethodRef GetCallback();
 
 protected:
-	GtkStatusIcon* item;
-	AutoPtr<MenuGtk> menu;
-	KMethodRef callback;
-	bool active;
+    GtkStatusIcon* item;
+    AutoPtr<MenuGtk> menu;
+    KMethodRef callback;
+    bool active;
 };
 
 } // namespace Titanium

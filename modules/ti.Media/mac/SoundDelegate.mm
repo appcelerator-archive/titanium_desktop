@@ -20,28 +20,28 @@
 
 -(void)setOSXSound:(SoundMac*)newSound
 {
-	sound = newSound;
+    sound = newSound;
 }
 
 -(void)dealloc
 {
-	sound = nil;
-	[super dealloc];
+    sound = nil;
+    [super dealloc];
 }
 
 -(void)completed:(id) unused
 {
-	if (sound)
-		sound->SoundCompletedIteration();
+    if (sound)
+        sound->SoundCompletedIteration();
 }
 
 -(void)sound:(NSSound*)s didFinishPlaying:(BOOL)finished
 {
-	if (finished)
-	{
-		[self performSelectorOnMainThread:@selector(completed:)
-			withObject:nil waitUntilDone:NO];
-	}
+    if (finished)
+    {
+        [self performSelectorOnMainThread:@selector(completed:)
+            withObject:nil waitUntilDone:NO];
+    }
 }
 
 @end

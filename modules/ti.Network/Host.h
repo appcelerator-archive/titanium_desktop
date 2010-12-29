@@ -25,26 +25,26 @@ namespace Titanium {
 
 class Host : public StaticBoundObject {
 public:
-	Host(const Poco::Net::IPAddress& address);
-	Host(const std::string& name);
-	virtual ~Host();
+    Host(const Poco::Net::IPAddress& address);
+    Host(const std::string& name);
+    virtual ~Host();
 
-	bool IsInvalid() const { return invalid; }
+    bool IsInvalid() const { return invalid; }
 
 protected:
-	void Init();
+    void Init();
 
 private:
-	Poco::Net::HostEntry host;
-	std::string name;
-	bool invalid;
+    Poco::Net::HostEntry host;
+    std::string name;
+    bool invalid;
 
 private:
-	void ToString(const ValueList& args, KValueRef result);
-	void IsInvalid(const ValueList& args, KValueRef result);
-	void GetName(const ValueList& args, KValueRef result);
-	void GetAliases(const ValueList& args, KValueRef result);
-	void GetAddresses(const ValueList& args, KValueRef result);
+    void ToString(const ValueList& args, KValueRef result);
+    void IsInvalid(const ValueList& args, KValueRef result);
+    void GetName(const ValueList& args, KValueRef result);
+    void GetAliases(const ValueList& args, KValueRef result);
+    void GetAddresses(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

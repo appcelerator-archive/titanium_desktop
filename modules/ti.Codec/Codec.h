@@ -29,24 +29,24 @@ namespace Titanium {
 class Codec : public StaticBoundObject
 {
 public:
-	Codec(KObjectRef);
-	virtual ~Codec();
+    Codec(KObjectRef);
+    virtual ~Codec();
 
 private:
-	void EncodeBase64(const ValueList& args, KValueRef result);
-	void DecodeBase64(const ValueList& args, KValueRef result);
-	void DigestToHex(const ValueList& args, KValueRef result);
-	void DigestHMACToHex(const ValueList& args, KValueRef result);
-	void EncodeHexBinary(const ValueList& args, KValueRef result);
-	void DecodeHexBinary(const ValueList& args, KValueRef result);
-	void Checksum(const ValueList& args, KValueRef result);
-	void CreateZip(const ValueList& args, KValueRef result);
-	void ExtractZip(const ValueList& args, KValueRef result);
-	
-	static KValueRef CreateZipAsync(const ValueList& args);
-	static KValueRef ExtractZipAsync(const ValueList& args);
+    void EncodeBase64(const ValueList& args, KValueRef result);
+    void DecodeBase64(const ValueList& args, KValueRef result);
+    void DigestToHex(const ValueList& args, KValueRef result);
+    void DigestHMACToHex(const ValueList& args, KValueRef result);
+    void EncodeHexBinary(const ValueList& args, KValueRef result);
+    void DecodeHexBinary(const ValueList& args, KValueRef result);
+    void Checksum(const ValueList& args, KValueRef result);
+    void CreateZip(const ValueList& args, KValueRef result);
+    void ExtractZip(const ValueList& args, KValueRef result);
+    
+    static KValueRef CreateZipAsync(const ValueList& args);
+    static KValueRef ExtractZipAsync(const ValueList& args);
 
-	KObjectRef global;
+    KObjectRef global;
 };
 
 } // namespace Titanium

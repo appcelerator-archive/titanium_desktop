@@ -7,7 +7,7 @@
       padding:0;
       overflow:hidden;
       color:white;
-	  opacity:.99;
+      opacity:.99;
       background-color:transparent;
       border:none;
       font-family:arial,sans-serif;
@@ -55,12 +55,12 @@
     }
   </style>
   <script>
-	function runCallback ()
-	{
-		if (Titanium.UI.currentWindow.callback) {
-			Titanium.UI.currentWindow.callback();
-		}
-	}
+    function runCallback ()
+    {
+        if (Titanium.UI.currentWindow.callback) {
+            Titanium.UI.currentWindow.callback();
+        }
+    }
   </script>
 </head>
 <body onclick="runCallback()">
@@ -114,7 +114,7 @@
           // when retrieving it from the query string, just chop that sucker off
           // (it's causing the icon not to load correctly)
           if (qs.icon.substring(qs.icon.length-1) == "/") {
-				qs.icon = qs.icon.substring(0, qs.icon.length-1);
+                qs.icon = qs.icon.substring(0, qs.icon.length-1);
           }
 
           img.src = qs.icon;

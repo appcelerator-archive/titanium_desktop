@@ -24,20 +24,20 @@ namespace Titanium {
 
 class HttpServerResponse : public StaticBoundObject {
 public:
-	HttpServerResponse(Poco::Net::HTTPServerResponse &response);
-	virtual ~HttpServerResponse();
-	
+    HttpServerResponse(Poco::Net::HTTPServerResponse &response);
+    virtual ~HttpServerResponse();
+    
 private:
-	void SetStatus(const ValueList& args, KValueRef result);
-	void SetReason(const ValueList& args, KValueRef result);
-	void SetStatusAndReason(const ValueList& args, KValueRef result);
-	void SetContentType(const ValueList& args, KValueRef result);
-	void SetContentLength(const ValueList& args, KValueRef result);
-	void AddCookie(const ValueList& args, KValueRef result);
-	void SetHeader(const ValueList& args, KValueRef result);
-	void Write(const ValueList& args, KValueRef result);
+    void SetStatus(const ValueList& args, KValueRef result);
+    void SetReason(const ValueList& args, KValueRef result);
+    void SetStatusAndReason(const ValueList& args, KValueRef result);
+    void SetContentType(const ValueList& args, KValueRef result);
+    void SetContentLength(const ValueList& args, KValueRef result);
+    void AddCookie(const ValueList& args, KValueRef result);
+    void SetHeader(const ValueList& args, KValueRef result);
+    void Write(const ValueList& args, KValueRef result);
 
-	Poco::Net::HTTPServerResponse& response;
+    Poco::Net::HTTPServerResponse& response;
 };
 
 } // namespace Titanium

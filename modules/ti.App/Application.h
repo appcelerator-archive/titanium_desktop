@@ -23,40 +23,40 @@ namespace Titanium {
 
 class Application : public KAccessorObject {
 public:
-	Application(Host *host,KObjectRef);
-	virtual ~Application();
+    Application(Host *host,KObjectRef);
+    virtual ~Application();
 
 private:
-	void GetID(const ValueList& args, KValueRef result);
-	void GetName(const ValueList& args, KValueRef result);
-	void GetVersion(const ValueList& args, KValueRef result);
-	void GetPublisher(const ValueList& args, KValueRef result);
-	void GetCopyright(const ValueList& args, KValueRef result);
-	void GetDescription(const ValueList& args, KValueRef result);
-	void GetURL(const ValueList& args, KValueRef result);
-	void GetGUID(const ValueList& args, KValueRef result);
-	void GetIcon(const ValueList& args, KValueRef result);
-	void GetStreamURL(const ValueList& args, KValueRef result);
-	void GetPath(const ValueList& args, KValueRef result);
-	void GetHome(const ValueList& args, KValueRef result);
-	void GetArguments(const ValueList& args, KValueRef result);
-	void AppURLToPath(const ValueList& args, KValueRef result);
-	void SetMenu(const ValueList& args, KValueRef result);
-	void Exit(const ValueList& args, KValueRef result);
-	void Restart(const ValueList& args, KValueRef result);
-	void StdOut(const ValueList& args, KValueRef result);
-	void StdErr(const ValueList& args, KValueRef result);
-	void StdIn(const ValueList& args, KValueRef result);
+    void GetID(const ValueList& args, KValueRef result);
+    void GetName(const ValueList& args, KValueRef result);
+    void GetVersion(const ValueList& args, KValueRef result);
+    void GetPublisher(const ValueList& args, KValueRef result);
+    void GetCopyright(const ValueList& args, KValueRef result);
+    void GetDescription(const ValueList& args, KValueRef result);
+    void GetURL(const ValueList& args, KValueRef result);
+    void GetGUID(const ValueList& args, KValueRef result);
+    void GetIcon(const ValueList& args, KValueRef result);
+    void GetStreamURL(const ValueList& args, KValueRef result);
+    void GetPath(const ValueList& args, KValueRef result);
+    void GetHome(const ValueList& args, KValueRef result);
+    void GetArguments(const ValueList& args, KValueRef result);
+    void AppURLToPath(const ValueList& args, KValueRef result);
+    void SetMenu(const ValueList& args, KValueRef result);
+    void Exit(const ValueList& args, KValueRef result);
+    void Restart(const ValueList& args, KValueRef result);
+    void StdOut(const ValueList& args, KValueRef result);
+    void StdErr(const ValueList& args, KValueRef result);
+    void StdIn(const ValueList& args, KValueRef result);
 
-	void CreateProperties(const ValueList& args, KValueRef result);
-	void LoadProperties(const ValueList& args, KValueRef result);
-	void GetSystemProperties(const ValueList& args, KValueRef result);
+    void CreateProperties(const ValueList& args, KValueRef result);
+    void LoadProperties(const ValueList& args, KValueRef result);
+    void GetSystemProperties(const ValueList& args, KValueRef result);
 
-	Host* host;
-	KObjectRef global;
+    Host* host;
+    KObjectRef global;
 
 protected:
-	void Setup();
+    void Setup();
 };
 
 } // namespace Titanium

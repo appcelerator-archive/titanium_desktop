@@ -6,34 +6,34 @@ env = build.env.Clone()
 env.Append(CPPDEFINES=['USE_NO_EXPORT=1', 'UNICODE=1', '_UNICODE=1'])
 
 env.Append(LIBS=[
-	'msi',
-	'user32',
-	'shell32',
-	'iphlpapi',
-	'advapi32',
-	'wininet',
-	'urlmon',
-	'ole32',
-	'gdi32'
+    'msi',
+    'user32',
+    'shell32',
+    'iphlpapi',
+    'advapi32',
+    'wininet',
+    'urlmon',
+    'ole32',
+    'gdi32'
 ])
 
 # Common sources for both the MSI DLL and the update installer.
 env.Append(CPPPATH=[build.kroll_utils_dir])
 sources = ["common.cpp"] + build.get_kroll_utils(
-	path.join(build.dir, 'objs', 'netinstaller'))
+    path.join(build.dir, 'objs', 'netinstaller'))
 
 build.mark_build_target(env.Program(
-	path.join(build.dir, 'sdk', 'installer', 'installer.exe'),
-	sources + ['progress_dialog.cpp', 'update_installer.cpp']))
+    path.join(build.dir, 'sdk', 'installer', 'installer.exe'),
+    sources + ['progress_dialog.cpp', 'update_installer.cpp']))
 
 # Statically-link the MSI DLL.
 ccf = env['CCFLAGS'][:]
 if '/MD' in ccf:
-	ccf.remove('/MD')
+    ccf.remove('/MD')
 ccf.append('/MT')
 env['CCFLAGS'] = ccf
 
 env.Append(LIBS=['msi']); # Add the MSI lib.
 build.mark_build_target(env.SharedLibrary(
-	path.join(build.dir, 'sdk', 'installer', 'titanium_installer'),
-	sources + ['titanium_actions.cpp']))
+    path.join(build.dir, 'sdk', 'installer', 'titanium_installer'),
+    sources + ['titanium_actions.cpp']))

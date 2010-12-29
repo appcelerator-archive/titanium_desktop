@@ -23,19 +23,19 @@
 namespace Titanium {
 
 Media::Media(KObjectRef global) :
-	StaticBoundObject("Media"),
-	global(global)
+    StaticBoundObject("Media"),
+    global(global)
 {
-	/**
-	 * @tiapi(method=True,name=Media.createSound,since=0.2) Creates a sound object
-	 * @tiarg(for=Media.createSound,name=path,type=String) path or url to the sound file
-	 * @tiresult(for=Media.createSound,type=Media.Sound) a Sound object
-	 */
-	this->SetMethod("createSound", &Media::_CreateSound);
-	/**
-	 * @tiapi(method=True,name=Media.beep,since=0.2) Causes the system to beep
-	 */
-	this->SetMethod("beep", &Media::_Beep);
+    /**
+     * @tiapi(method=True,name=Media.createSound,since=0.2) Creates a sound object
+     * @tiarg(for=Media.createSound,name=path,type=String) path or url to the sound file
+     * @tiresult(for=Media.createSound,type=Media.Sound) a Sound object
+     */
+    this->SetMethod("createSound", &Media::_CreateSound);
+    /**
+     * @tiapi(method=True,name=Media.beep,since=0.2) Causes the system to beep
+     */
+    this->SetMethod("beep", &Media::_Beep);
 }
 
 Media::~Media()
@@ -44,16 +44,16 @@ Media::~Media()
 
 void Media::_CreateSound(const ValueList& args, KValueRef result)
 {
-	if (args.size()!=1)
-		throw ValueException::FromString("createSound takes 1 parameter");
+    if (args.size()!=1)
+        throw ValueException::FromString("createSound takes 1 parameter");
 
-	std::string path(args.at(0)->ToString());
-	result->SetObject(this->CreateSound(path));
+    std::string path(args.at(0)->ToString());
+    result->SetObject(this->CreateSound(path));
 }
 
 void Media::_Beep(const ValueList& args, KValueRef result)
 {
-	this->Beep();
+    this->Beep();
 }
 
 } // namespace Titanium

@@ -35,15 +35,15 @@ class UserWindowMac;
 
 @interface NativeWindow : NSWindow
 {
-	BOOL canReceiveFocus;
-	WebView* webView;
-	WebViewDelegate* delegate;
-	BOOL requiresDisplay;
-	AutoPtr<Titanium::UserWindowMac>* userWindow;
-	WebInspector* inspector;
-	BOOL fullscreen;
-	BOOL focused;
-	NSRect savedFrame;
+    BOOL canReceiveFocus;
+    WebView* webView;
+    WebViewDelegate* delegate;
+    BOOL requiresDisplay;
+    AutoPtr<Titanium::UserWindowMac>* userWindow;
+    WebInspector* inspector;
+    BOOL fullscreen;
+    BOOL focused;
+    NSRect savedFrame;
 }
 - (void)setUserWindow:(AutoPtr<Titanium::UserWindowMac>*)inUserWindow;
 - (void)setupDecorations:(AutoPtr<Titanium::WindowConfig>)config;

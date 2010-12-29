@@ -30,25 +30,25 @@ class MenuGtk;
 
 class MenuItemGtk : public MenuItem {
 public:
-	MenuItemGtk(MenuItemType type);
-	virtual ~MenuItemGtk();
+    MenuItemGtk(MenuItemType type);
+    virtual ~MenuItemGtk();
 
-	void SetLabelImpl(std::string newLabel);
-	void SetIconImpl(std::string newIconPath);
-	void SetStateImpl(bool newState);
-	void SetCallbackImpl(KMethodRef callback);
-	void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
-	void SetEnabledImpl(bool enabled);
+    void SetLabelImpl(std::string newLabel);
+    void SetIconImpl(std::string newIconPath);
+    void SetStateImpl(bool newState);
+    void SetCallbackImpl(KMethodRef callback);
+    void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
+    void SetEnabledImpl(bool enabled);
 
-	void ReplaceNativeItem(GtkMenuItem* nativeItem, GtkMenuItem* newNativeItem);
-	void SetNativeItemIcon(GtkMenuItem* nativeItem, std::string& newIconPath);
-	void SetNativeItemSubmenu(GtkMenuItem* nativeItem, AutoPtr<Menu> newSubmenu);
-		GtkMenuItem* CreateNative(bool registerNative);
-	void DestroyNative(GtkMenuItem* nativeItem);
+    void ReplaceNativeItem(GtkMenuItem* nativeItem, GtkMenuItem* newNativeItem);
+    void SetNativeItemIcon(GtkMenuItem* nativeItem, std::string& newIconPath);
+    void SetNativeItemSubmenu(GtkMenuItem* nativeItem, AutoPtr<Menu> newSubmenu);
+        GtkMenuItem* CreateNative(bool registerNative);
+    void DestroyNative(GtkMenuItem* nativeItem);
 
 private:
-	std::vector<GtkMenuItem*> nativeItems;
-	AutoPtr<MenuGtk> oldSubmenu;
+    std::vector<GtkMenuItem*> nativeItems;
+    AutoPtr<MenuGtk> oldSubmenu;
 };
 
 } // namespace Titanium

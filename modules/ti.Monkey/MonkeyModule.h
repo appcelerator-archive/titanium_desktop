@@ -22,10 +22,10 @@
 namespace Titanium {
 
 class EXPORT MonkeyModule : public kroll::Module {
-	KROLL_MODULE_CLASS(MonkeyModule)
+    KROLL_MODULE_CLASS(MonkeyModule)
 
 private:
-	kroll::KObjectRef binding;
+    kroll::KObjectRef binding;
 };
 
 } // namespace Titanium

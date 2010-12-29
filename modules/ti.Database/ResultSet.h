@@ -24,26 +24,26 @@ namespace Titanium {
 
 class ResultSet : public StaticBoundObject {
 public:
-	ResultSet();
-	ResultSet(Poco::Data::RecordSet& rs);
-	virtual ~ResultSet();
+    ResultSet();
+    ResultSet(Poco::Data::RecordSet& rs);
+    virtual ~ResultSet();
 
-private:	
-	void Bind();
-	void TransformValue(size_t index, KValueRef result);
-	
+private:    
+    void Bind();
+    void TransformValue(size_t index, KValueRef result);
+    
 
-	void IsValidRow(const ValueList& args, KValueRef result);
-	void Next(const ValueList& args, KValueRef result);
-	void Close(const ValueList& args, KValueRef result);
-	void RowCount(const ValueList& args, KValueRef result);
-	void FieldCount(const ValueList& args, KValueRef result);
-	void FieldName(const ValueList& args, KValueRef result);
-	void Field(const ValueList& args, KValueRef result);
-	void FieldByName(const ValueList& args, KValueRef result);
+    void IsValidRow(const ValueList& args, KValueRef result);
+    void Next(const ValueList& args, KValueRef result);
+    void Close(const ValueList& args, KValueRef result);
+    void RowCount(const ValueList& args, KValueRef result);
+    void FieldCount(const ValueList& args, KValueRef result);
+    void FieldName(const ValueList& args, KValueRef result);
+    void Field(const ValueList& args, KValueRef result);
+    void FieldByName(const ValueList& args, KValueRef result);
 
-	SharedPtr<Poco::Data::RecordSet> rs;
-	bool eof;
+    SharedPtr<Poco::Data::RecordSet> rs;
+    bool eof;
 };
 
 } // namespace Titanium

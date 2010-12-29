@@ -22,14 +22,14 @@
 typedef void CURL;
 
 #define SET_CURL_OPTION(handle, option, value) \
-	{\
-		CURLcode result = curl_easy_setopt(handle, option, value); \
-		if (CURLE_OK != result) \
-		{ \
-			GetLogger()->Error("Failed to set cURL handle option ("#option"): %s", \
-				curl_easy_strerror(result)); \
-		} \
-	}
+    {\
+        CURLcode result = curl_easy_setopt(handle, option, value); \
+        if (CURLE_OK != result) \
+        { \
+            GetLogger()->Error("Failed to set cURL handle option ("#option"): %s", \
+                curl_easy_strerror(result)); \
+        } \
+    }
 
 void SetCurlProxySettings(CURL* curlHandle, SharedProxy proxy);
 void SetStandardCurlHandleOptions(CURL* handle);

@@ -22,10 +22,10 @@
 namespace Titanium {
 
 class EXPORT FilesystemModule : public kroll::Module {
-	KROLL_MODULE_CLASS(FilesystemModule)
-	
+    KROLL_MODULE_CLASS(FilesystemModule)
+    
 private:
-	KObjectRef binding;
+    KObjectRef binding;
 };
 
 } // namespace Titanium

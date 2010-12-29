@@ -23,111 +23,111 @@
 namespace Titanium {
 
 WebKitPolicyDelegate::WebKitPolicyDelegate(UserWindowWin *window_)
-	: window(window_)
-	, m_refCount(1)
-	, m_permissiveDelegate(false)
+    : window(window_)
+    , m_refCount(1)
+    , m_permissiveDelegate(false)
 {
 }
 
 // IUnknown
 HRESULT STDMETHODCALLTYPE WebKitPolicyDelegate::QueryInterface(REFIID riid, void** ppvObject)
 {
-	*ppvObject = 0;
-	if (IsEqualGUID(riid, IID_IUnknown))
-		*ppvObject = static_cast<IWebPolicyDelegate*>(this);
-	else if (IsEqualGUID(riid, IID_IWebPolicyDelegate))
-		*ppvObject = static_cast<IWebPolicyDelegate*>(this);
-	else
-		return E_NOINTERFACE;
+    *ppvObject = 0;
+    if (IsEqualGUID(riid, IID_IUnknown))
+        *ppvObject = static_cast<IWebPolicyDelegate*>(this);
+    else if (IsEqualGUID(riid, IID_IWebPolicyDelegate))
+        *ppvObject = static_cast<IWebPolicyDelegate*>(this);
+    else
+        return E_NOINTERFACE;
 
-	AddRef();
-	return S_OK;
+    AddRef();
+    return S_OK;
 }
 
 ULONG STDMETHODCALLTYPE WebKitPolicyDelegate::AddRef(void)
 {
-	return ++m_refCount;
+    return ++m_refCount;
 }
 
 ULONG STDMETHODCALLTYPE WebKitPolicyDelegate::Release(void)
 {
-	ULONG newRef = --m_refCount;
-	if (!newRef)
-		delete this;
+    ULONG newRef = --m_refCount;
+    if (!newRef)
+        delete this;
 
-	return newRef;
+    return newRef;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitPolicyDelegate::decidePolicyForNavigationAction(
-	/*[in]*/ IWebView* /*webView*/,
-	/*[in]*/ IPropertyBag* actionInformation,
-	/*[in]*/ IWebURLRequest* request,
-	/*[in]*/ IWebFrame* frame,
-	/*[in]*/ IWebPolicyDecisionListener* listener)
+    /*[in]*/ IWebView* /*webView*/,
+    /*[in]*/ IPropertyBag* actionInformation,
+    /*[in]*/ IWebURLRequest* request,
+    /*[in]*/ IWebFrame* frame,
+    /*[in]*/ IWebPolicyDecisionListener* listener)
 {
-	BSTR u;
-	request->URL(&u);
-	std::wstring u2(u);
-	std::string url;
-	url.assign(u2.begin(), u2.end());
+    BSTR u;
+    request->URL(&u);
+    std::wstring u2(u);
+    std::string url;
+    url.assign(u2.begin(), u2.end());
 
-	// if url matches a window config, then modify window as needed
-	this->window->UpdateWindowForURL(url);
+    // if url matches a window config, then modify window as needed
+    this->window->UpdateWindowForURL(url);
 
-	SysFreeString(u);
+    SysFreeString(u);
 
-	listener->use();
+    listener->use();
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitPolicyDelegate::decidePolicyForNewWindowAction(
-	/* [in] */ IWebView *webView,
-	/* [in] */ IPropertyBag *actionInformation,
-	/* [in] */ IWebURLRequest *request,
-	/* [in] */ BSTR frameName,
-	/* [in] */ IWebPolicyDecisionListener *listener)
+    /* [in] */ IWebView *webView,
+    /* [in] */ IPropertyBag *actionInformation,
+    /* [in] */ IWebURLRequest *request,
+    /* [in] */ BSTR frameName,
+    /* [in] */ IWebPolicyDecisionListener *listener)
 {
-	std::wstring frame(frameName);
-	transform(frame.begin(), frame.end(), frame.begin(), tolower);
+    std::wstring frame(frameName);
+    transform(frame.begin(), frame.end(), frame.begin(), tolower);
 
-	if (frame == L"ti:systembrowser" || frame == L"_blank")
-	{
-		BSTR u;
-		request->URL(&u);
-		std::wstring url(u);
+    if (frame == L"ti:systembrowser" || frame == L"_blank")
+    {
+        BSTR u;
+        request->URL(&u);
+        std::wstring url(u);
 
-		ShellExecuteW(NULL, L"open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
-		listener->ignore();
+        ShellExecuteW(NULL, L"open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        listener->ignore();
 
-		SysFreeString(u);
-	}
-	else
-	{
-		listener->use();
-	}
+        SysFreeString(u);
+    }
+    else
+    {
+        listener->use();
+    }
 
-	return S_OK;
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitPolicyDelegate::decidePolicyForMIMEType(
-	/* [in] */ IWebView *webView,
-	/* [in] */ BSTR type,
-	/* [in] */ IWebURLRequest *request,
-	/* [in] */ IWebFrame *frame,
-	/* [in] */ IWebPolicyDecisionListener *listener)
+    /* [in] */ IWebView *webView,
+    /* [in] */ BSTR type,
+    /* [in] */ IWebURLRequest *request,
+    /* [in] */ IWebFrame *frame,
+    /* [in] */ IWebPolicyDecisionListener *listener)
 {
-	Logger::Get("UI.WebKitPolicyDelegate")->Debug("decidePolicyForMIMEType() not implemented");
-	return E_NOTIMPL;
+    Logger::Get("UI.WebKitPolicyDelegate")->Debug("decidePolicyForMIMEType() not implemented");
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitPolicyDelegate::unableToImplementPolicyWithError(
-	/* [in] */ IWebView *webView,
-	/* [in] */ IWebError *error,
-	/* [in] */ IWebFrame *frame)
+    /* [in] */ IWebView *webView,
+    /* [in] */ IWebError *error,
+    /* [in] */ IWebFrame *frame)
 {
-	Logger::Get("UI.WebKitPolicyDelegate")->Debug("unableToImplementPolicyWithError() not implemented");
-	return E_NOTIMPL;
+    Logger::Get("UI.WebKitPolicyDelegate")->Debug("unableToImplementPolicyWithError() not implemented");
+    return E_NOTIMPL;
 }
 
 } // namespace Titanium

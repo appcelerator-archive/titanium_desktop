@@ -26,12 +26,12 @@ KROLL_MODULE(WorkerModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 void WorkerModule::Initialize()
 {
-	GlobalObject::GetInstance()->SetObject("Worker", new WorkerBinding());
+    GlobalObject::GetInstance()->SetObject("Worker", new WorkerBinding());
 }
 
 void WorkerModule::Stop()
 {
-	GlobalObject::GetInstance()->SetNull("Worker");
+    GlobalObject::GetInstance()->SetNull("Worker");
 }
 
 } // namespace Titanium

@@ -25,26 +25,26 @@ namespace Titanium {
 
 class MenuGtk : public Menu {
 public:
-	MenuGtk();
-	~MenuGtk();
+    MenuGtk();
+    ~MenuGtk();
 
-	void AppendItemImpl(AutoPtr<MenuItem> item);
-	void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index);
-	void RemoveItemAtImpl(unsigned int index);
-	void ClearImpl();
+    void AppendItemImpl(AutoPtr<MenuItem> item);
+    void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index);
+    void RemoveItemAtImpl(unsigned int index);
+    void ClearImpl();
 
-	void ClearNativeMenu(GtkMenuShell* nativeMenu);
-	void RemoveItemAtFromNativeMenu(GtkMenuShell* nativeMenu, unsigned int index);
-	void DestroyNative(GtkMenuShell* nativeMenu);
-	GtkMenuShell* CreateNativeBar(bool registerNative);
-	GtkMenuShell* CreateNative(bool registerNative);
-	void AddChildrenToNativeMenu(GtkMenuShell* nativeMenu, bool registerNative);
-	void RegisterNativeMenuItem(AutoPtr<MenuItem> item, GtkMenuItem* nativeItem);
-	void DestroyNativeMenuItem(GtkMenuItem* nativeItem);
+    void ClearNativeMenu(GtkMenuShell* nativeMenu);
+    void RemoveItemAtFromNativeMenu(GtkMenuShell* nativeMenu, unsigned int index);
+    void DestroyNative(GtkMenuShell* nativeMenu);
+    GtkMenuShell* CreateNativeBar(bool registerNative);
+    GtkMenuShell* CreateNative(bool registerNative);
+    void AddChildrenToNativeMenu(GtkMenuShell* nativeMenu, bool registerNative);
+    void RegisterNativeMenuItem(AutoPtr<MenuItem> item, GtkMenuItem* nativeItem);
+    void DestroyNativeMenuItem(GtkMenuItem* nativeItem);
 
 private:
-	std::vector<AutoPtr<MenuItem> > oldChildren;
-	std::vector<GtkMenuShell*> nativeMenus;
+    std::vector<AutoPtr<MenuItem> > oldChildren;
+    std::vector<GtkMenuShell*> nativeMenus;
 };
 
 } // namespace Titanium

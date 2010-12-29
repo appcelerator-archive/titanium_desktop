@@ -36,62 +36,62 @@ UIModule* UIModule::instance_ = 0;
 
 void UIModule::Initialize()
 {
-	// We are keeping this object in a static variable, which means
-	// that we should only ever have one copy of the UI module.
-	UIModule::instance_ = this;
+    // We are keeping this object in a static variable, which means
+    // that we should only ever have one copy of the UI module.
+    UIModule::instance_ = this;
 }
 
 void UIModule::Start()
 {
 #ifdef OS_WIN32
-	this->uiBinding = new UIWin();
+    this->uiBinding = new UIWin();
 #elif OS_OSX
-	this->uiBinding = new UIMac();
+    this->uiBinding = new UIMac();
 #elif OS_LINUX
-	this->uiBinding = new UIGtk();
+    this->uiBinding = new UIGtk();
 #endif
-	host->GetGlobalObject()->SetObject("UI", this->uiBinding);
-	host->GetGlobalObject()->SetObject("Notification", this->uiBinding);
+    host->GetGlobalObject()->SetObject("UI", this->uiBinding);
+    host->GetGlobalObject()->SetObject("Notification", this->uiBinding);
 
-	ScriptEvaluator::Initialize();
-	ApplicationConfig* config = ApplicationConfig::Instance();
-	if (!config)
-	{
-		std::string msg = "Error loading tiapp.xml. Your application "
-			"is not properly configured or packaged.";
-		this->uiBinding->ErrorDialog(msg);
-		throw ValueException::FromString(msg.c_str());
-		return;
-	}
+    ScriptEvaluator::Initialize();
+    ApplicationConfig* config = ApplicationConfig::Instance();
+    if (!config)
+    {
+        std::string msg = "Error loading tiapp.xml. Your application "
+            "is not properly configured or packaged.";
+        this->uiBinding->ErrorDialog(msg);
+        throw ValueException::FromString(msg.c_str());
+        return;
+    }
 
-	// If there is no main window configuration, this just
-	// ApplicationConfig::GetMainWindow returns a default configuration.
-	this->uiBinding->CreateMainWindow(config->GetMainWindow());
+    // If there is no main window configuration, this just
+    // ApplicationConfig::GetMainWindow returns a default configuration.
+    this->uiBinding->CreateMainWindow(config->GetMainWindow());
 
-	try
-	{
-		std::string& appIcon = host->GetApplication()->image;
-		if (!appIcon.empty())
-			this->uiBinding->_SetIcon(appIcon);
-	}
-	catch (ValueException& e)
-	{
-		SharedString ss = e.DisplayString();
-		Logger::Get("UI")->Error("Could not set default icon: %s", ss->c_str());
-	}
+    try
+    {
+        std::string& appIcon = host->GetApplication()->image;
+        if (!appIcon.empty())
+            this->uiBinding->_SetIcon(appIcon);
+    }
+    catch (ValueException& e)
+    {
+        SharedString ss = e.DisplayString();
+        Logger::Get("UI")->Error("Could not set default icon: %s", ss->c_str());
+    }
 }
 
 void UIModule::Stop()
 {
-	// Remove app tray icons
-	uiBinding->ClearTray();
+    // Remove app tray icons
+    uiBinding->ClearTray();
 }
 
 bool UIModule::IsResourceLocalFile(std::string string)
 {
-	Poco::URI uri(string.c_str());
-	std::string scheme = uri.getScheme();
-	return (scheme == "app" || scheme == "ti" || scheme == "file");
+    Poco::URI uri(string.c_str());
+    std::string scheme = uri.getScheme();
+    return (scheme == "app" || scheme == "ti" || scheme == "file");
 }
 
 } // namespace Titanium

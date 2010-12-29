@@ -25,28 +25,28 @@ namespace Titanium {
 
 class SoundWin : public Sound {
 public:
-	SoundWin(std::string& url);
-	virtual ~SoundWin();
+    SoundWin(std::string& url);
+    virtual ~SoundWin();
 
-	virtual void LoadImpl();
-	virtual void UnloadImpl();
-	virtual void PlayImpl();
-	virtual void PauseImpl();
-	virtual void StopImpl();
-	virtual void SetVolumeImpl(double volume);
-	virtual double GetVolumeImpl();
+    virtual void LoadImpl();
+    virtual void UnloadImpl();
+    virtual void PlayImpl();
+    virtual void PauseImpl();
+    virtual void StopImpl();
+    virtual void SetVolumeImpl(double volume);
+    virtual double GetVolumeImpl();
 
-	static UINT graphNotifyMessage;
-	bool GraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
-	static bool StaticGraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+    static UINT graphNotifyMessage;
+    bool GraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+    static bool StaticGraphCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-	std::wstring widePath;
-	IGraphBuilder* graphBuilder;
-	IMediaControl* mediaControl;
-	IMediaEventEx* mediaEventEx;
-	IMediaSeeking* mediaSeeking;
-	IBasicAudio* basicAudio;
+    std::wstring widePath;
+    IGraphBuilder* graphBuilder;
+    IMediaControl* mediaControl;
+    IMediaEventEx* mediaEventEx;
+    IMediaSeeking* mediaSeeking;
+    IBasicAudio* basicAudio;
 };
 
 } // namespace Titanium

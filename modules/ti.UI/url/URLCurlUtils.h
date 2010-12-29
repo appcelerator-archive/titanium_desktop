@@ -24,8 +24,8 @@ extern struct Curl_local_handler CurlAppURLHandler;
 
 namespace Titanium {
 
-	const char* TiURLToPathCurl(const char *url);
-	const char* AppURLToPathCurl(const char *url);
+    const char* TiURLToPathCurl(const char *url);
+    const char* AppURLToPathCurl(const char *url);
 
 } // namespace Titanium
 

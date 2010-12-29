@@ -25,24 +25,24 @@ namespace Titanium {
 
 class PipeWin : public NativePipe {
 public:
-	PipeWin(bool isReader);
+    PipeWin(bool isReader);
 
-	virtual void CreateHandles();
-	virtual void Close();
-	virtual void CloseNativeRead();
-	virtual void CloseNativeWrite();
-	void DuplicateWrite(HANDLE process, LPHANDLE handle);
-	void DuplicateRead(HANDLE process, LPHANDLE handle);
-	HANDLE GetReadHandle() { return readHandle; }
-	HANDLE GetWriteHandle() { return writeHandle; }
-	
+    virtual void CreateHandles();
+    virtual void Close();
+    virtual void CloseNativeRead();
+    virtual void CloseNativeWrite();
+    void DuplicateWrite(HANDLE process, LPHANDLE handle);
+    void DuplicateRead(HANDLE process, LPHANDLE handle);
+    HANDLE GetReadHandle() { return readHandle; }
+    HANDLE GetWriteHandle() { return writeHandle; }
+    
 protected:
-	virtual int RawRead(char *buffer, int size);
-	virtual int RawWrite(const char *buffer, int size);
-	
-	Poco::Mutex mutex;
-	HANDLE readHandle, writeHandle;
-	Logger *logger;
+    virtual int RawRead(char *buffer, int size);
+    virtual int RawWrite(const char *buffer, int size);
+    
+    Poco::Mutex mutex;
+    HANDLE readHandle, writeHandle;
+    Logger *logger;
 };
 
 } // namespace Titanium

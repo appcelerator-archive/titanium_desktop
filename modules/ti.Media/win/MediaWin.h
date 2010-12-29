@@ -25,12 +25,12 @@ namespace Titanium {
 
 class MediaWin : public Media {
 public:
-	MediaWin(KObjectRef);
-	~MediaWin();
+    MediaWin(KObjectRef);
+    ~MediaWin();
 
 protected:
-	void Beep();
-	KObjectRef CreateSound(std::string&);
+    void Beep();
+    KObjectRef CreateSound(std::string&);
 };
 
 } // namespace Titanium

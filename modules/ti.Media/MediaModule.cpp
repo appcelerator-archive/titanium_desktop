@@ -33,14 +33,14 @@ KROLL_MODULE(MediaModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 void MediaModule::Initialize()
 {
 #ifdef OS_LINUX
-	this->binding = new MediaGStreamer(host->GetGlobalObject());
+    this->binding = new MediaGStreamer(host->GetGlobalObject());
 #elif OS_WIN32
-	this->binding = new MediaWin(host->GetGlobalObject());
+    this->binding = new MediaWin(host->GetGlobalObject());
 #elif OS_OSX
-	this->binding = new MediaMac(host->GetGlobalObject());
+    this->binding = new MediaMac(host->GetGlobalObject());
 #endif
-	KValueRef value = Value::NewObject(this->binding);
-	host->GetGlobalObject()->Set("Media", value);
+    KValueRef value = Value::NewObject(this->binding);
+    host->GetGlobalObject()->Set("Media", value);
 }
 
 void MediaModule::Stop()

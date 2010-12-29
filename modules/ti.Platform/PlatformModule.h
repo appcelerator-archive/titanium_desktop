@@ -23,11 +23,11 @@ namespace Titanium {
 
 class EXPORT PlatformModule : public kroll::Module {
 public:
-	KROLL_MODULE_CLASS(PlatformModule)
-	virtual void Start();
+    KROLL_MODULE_CLASS(PlatformModule)
+    virtual void Start();
 
 private:
-	KObjectRef binding;
+    KObjectRef binding;
 };
 
 } // namespace Titanium

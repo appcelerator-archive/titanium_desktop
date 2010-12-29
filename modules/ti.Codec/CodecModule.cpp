@@ -24,12 +24,12 @@ KROLL_MODULE(CodecModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 void CodecModule::Initialize()
 {
-	// load our variables
-	this->binding = new Codec(host->GetGlobalObject());
+    // load our variables
+    this->binding = new Codec(host->GetGlobalObject());
 
-	// set our ti.Codec
-	KValueRef value = Value::NewObject(this->binding);
-	host->GetGlobalObject()->Set("Codec", value);
+    // set our ti.Codec
+    KValueRef value = Value::NewObject(this->binding);
+    host->GetGlobalObject()->Set("Codec", value);
 }
 
 void CodecModule::Stop()

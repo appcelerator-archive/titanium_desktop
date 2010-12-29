@@ -29,52 +29,52 @@ class UserWindowMac;
 
 class UIMac : public UI {
 public:
-	UIMac();
-	~UIMac();
+    UIMac();
+    ~UIMac();
 
-	AutoPtr<Menu> CreateMenu();
-	AutoPtr<MenuItem> CreateMenuItem();
-	AutoPtr<MenuItem> CreateCheckMenuItem();
-	AutoPtr<MenuItem> CreateSeparatorMenuItem();
-	AutoPtr<Menu> GetMenu();
-	AutoPtr<Menu> GetContextMenu();
-	AutoPtr<Menu> GetDockMenu();
-	NSMenu* GetNativeDockMenu();
-	void SetMenu(AutoPtr<Menu>);
-	void SetContextMenu(AutoPtr<Menu>);
-	void SetDockMenu(AutoPtr<Menu>);
+    AutoPtr<Menu> CreateMenu();
+    AutoPtr<MenuItem> CreateMenuItem();
+    AutoPtr<MenuItem> CreateCheckMenuItem();
+    AutoPtr<MenuItem> CreateSeparatorMenuItem();
+    AutoPtr<Menu> GetMenu();
+    AutoPtr<Menu> GetContextMenu();
+    AutoPtr<Menu> GetDockMenu();
+    NSMenu* GetNativeDockMenu();
+    void SetMenu(AutoPtr<Menu>);
+    void SetContextMenu(AutoPtr<Menu>);
+    void SetDockMenu(AutoPtr<Menu>);
 
-	AutoPtr<TrayItem> AddTray(std::string& icon_path, KMethodRef cb);
-	void SetIcon(std::string& iconPath);
-	virtual void SetDockIcon(std::string& iconPath);
-	virtual void SetBadge(std::string& badgeLabel);
-	virtual void SetBadgeImage(std::string& badgeImage);
+    AutoPtr<TrayItem> AddTray(std::string& icon_path, KMethodRef cb);
+    void SetIcon(std::string& iconPath);
+    virtual void SetDockIcon(std::string& iconPath);
+    virtual void SetBadge(std::string& badgeLabel);
+    virtual void SetBadgeImage(std::string& badgeImage);
 
-	AutoPtr<MenuMac> GetActiveMenu();
-	void WindowFocused(AutoPtr<UserWindowMac> window);
-	void WindowUnfocused(AutoPtr<UserWindowMac> window);
-	void SetupMainMenu(bool force = false);
-	void SetupAppMenuParts(NSMenu* mainMenu);
-	void ReplaceMainMenu();
-	NSMenu* GetDefaultMenu();
-	long GetIdleTime();
+    AutoPtr<MenuMac> GetActiveMenu();
+    void WindowFocused(AutoPtr<UserWindowMac> window);
+    void WindowUnfocused(AutoPtr<UserWindowMac> window);
+    void SetupMainMenu(bool force = false);
+    void SetupAppMenuParts(NSMenu* mainMenu);
+    void ReplaceMainMenu();
+    NSMenu* GetDefaultMenu();
+    long GetIdleTime();
 
-	static NSImage* MakeImage(std::string&);
-	static void ErrorDialog(std::string);
+    static NSImage* MakeImage(std::string&);
+    static void ErrorDialog(std::string);
 
 protected:
-	NSMenu* defaultMenu;
-	AutoPtr<MenuMac> menu;
-	NSMenu* nativeMenu;
-	AutoPtr<MenuMac> contextMenu;
-	AutoPtr<MenuMac> dockMenu;
-	NSMenu* nativeDockMenu;
-	NSView *savedDockView;
-	NSObject* application;
-	AutoPtr<MenuMac> activeMenu;
-	AutoPtr<UserWindowMac> activeWindow;
+    NSMenu* defaultMenu;
+    AutoPtr<MenuMac> menu;
+    NSMenu* nativeMenu;
+    AutoPtr<MenuMac> contextMenu;
+    AutoPtr<MenuMac> dockMenu;
+    NSMenu* nativeDockMenu;
+    NSView *savedDockView;
+    NSObject* application;
+    AutoPtr<MenuMac> activeMenu;
+    AutoPtr<UserWindowMac> activeWindow;
 
-	void InstallMenu (MenuItemMac*);
+    void InstallMenu (MenuItemMac*);
 };
 
 } // namespace Titanium

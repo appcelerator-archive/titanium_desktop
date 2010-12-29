@@ -28,28 +28,28 @@ class MenuItemGtk;
 
 class UIGtk : public UI {
 public:
-	UIGtk();
+    UIGtk();
 
-	AutoPtr<Menu> CreateMenu();
-	AutoPtr<MenuItem> CreateMenuItem();
-	AutoPtr<MenuItem> CreateSeparatorMenuItem();
-	AutoPtr<MenuItem> CreateCheckMenuItem();
-	void SetMenu(AutoPtr<Menu> newMenu);
-	void SetContextMenu(AutoPtr<Menu>);
-	void SetIcon(std::string&);
-	AutoPtr<TrayItem> AddTray(std::string&, KMethodRef cb);
-	long GetIdleTime();
-	AutoPtr<Menu> GetMenu();
-	AutoPtr<Menu> GetContextMenu();
-	std::string& GetIcon();
+    AutoPtr<Menu> CreateMenu();
+    AutoPtr<MenuItem> CreateMenuItem();
+    AutoPtr<MenuItem> CreateSeparatorMenuItem();
+    AutoPtr<MenuItem> CreateCheckMenuItem();
+    void SetMenu(AutoPtr<Menu> newMenu);
+    void SetContextMenu(AutoPtr<Menu>);
+    void SetIcon(std::string&);
+    AutoPtr<TrayItem> AddTray(std::string&, KMethodRef cb);
+    long GetIdleTime();
+    AutoPtr<Menu> GetMenu();
+    AutoPtr<Menu> GetContextMenu();
+    std::string& GetIcon();
 
-	static void ErrorDialog(std::string);
+    static void ErrorDialog(std::string);
 
 protected:
-	SharedPtr<ScriptEvaluator> evaluator;
-	AutoPtr<MenuGtk> menu;
-	AutoPtr<MenuGtk> contextMenu;
-	std::string iconPath;
+    SharedPtr<ScriptEvaluator> evaluator;
+    AutoPtr<MenuGtk> menu;
+    AutoPtr<MenuGtk> contextMenu;
+    std::string iconPath;
 };
 
 } // namespace Titanium

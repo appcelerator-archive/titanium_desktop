@@ -22,10 +22,10 @@
 namespace Titanium {
 
 class EXPORT WorkerModule : public kroll::Module {
-	KROLL_MODULE_CLASS(WorkerModule)
-	
+    KROLL_MODULE_CLASS(WorkerModule)
+    
 private:
-	kroll::KObjectRef binding;
+    kroll::KObjectRef binding;
 };
 
 } // namespace Titanium

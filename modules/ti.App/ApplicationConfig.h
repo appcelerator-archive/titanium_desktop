@@ -29,39 +29,39 @@ namespace Titanium {
 
 class EXPORT ApplicationConfig {
 public:
-	virtual ~ApplicationConfig() {}
+    virtual ~ApplicationConfig() {}
 
-	AutoPtr<WindowConfig> GetWindowByURL(const std::string& url);
-	AutoPtr<WindowConfig> GetMainWindow();
-	std::string& GetAppName() { return appName; }
-	std::string& GetAppID() { return appID; }
-	std::string& GetDescription() { return description; }
-	std::string& GetCopyright() { return copyright; }
-	std::string& GetURL() { return url; }
-	std::string& GetVersion() { return version; }
-	std::string& GetPublisher() { return publisher; }
-	AutoPtr<Properties> GetSystemProperties() { return systemProperties; }
-	std::string& GetIcon() { return icon; }
-	bool IsAnalyticsEnabled() { return analyticsEnabled; }
-	bool IsUpdateMonitorEnabled() { return updateMonitorEnabled; }
-	static ApplicationConfig* Instance();
+    AutoPtr<WindowConfig> GetWindowByURL(const std::string& url);
+    AutoPtr<WindowConfig> GetMainWindow();
+    std::string& GetAppName() { return appName; }
+    std::string& GetAppID() { return appID; }
+    std::string& GetDescription() { return description; }
+    std::string& GetCopyright() { return copyright; }
+    std::string& GetURL() { return url; }
+    std::string& GetVersion() { return version; }
+    std::string& GetPublisher() { return publisher; }
+    AutoPtr<Properties> GetSystemProperties() { return systemProperties; }
+    std::string& GetIcon() { return icon; }
+    bool IsAnalyticsEnabled() { return analyticsEnabled; }
+    bool IsUpdateMonitorEnabled() { return updateMonitorEnabled; }
+    static ApplicationConfig* Instance();
 
 private:
-	ApplicationConfig(std::string& xmlfile);
+    ApplicationConfig(std::string& xmlfile);
 
-	AutoPtr<Properties> systemProperties;
-	std::vector<AutoPtr<WindowConfig> > windows;
-	std::string appName;
-	std::string appID;
-	std::string description;
-	std::string copyright;
-	std::string url;
-	std::string version;
-	std::string publisher;
-	std::string icon;
-	bool analyticsEnabled;
-	bool updateMonitorEnabled;
-	static ApplicationConfig* instance_;
+    AutoPtr<Properties> systemProperties;
+    std::vector<AutoPtr<WindowConfig> > windows;
+    std::string appName;
+    std::string appID;
+    std::string description;
+    std::string copyright;
+    std::string url;
+    std::string version;
+    std::string publisher;
+    std::string icon;
+    bool analyticsEnabled;
+    bool updateMonitorEnabled;
+    static ApplicationConfig* instance_;
 };
 
 } // namespace Titanium

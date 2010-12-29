@@ -36,111 +36,111 @@
 namespace Titanium {
 
 UIGtk::UIGtk()
-	: menu(0)
-	, contextMenu(0)
-	, iconPath("")
+    : menu(0)
+    , contextMenu(0)
+    , iconPath("")
 {
-	// Prepare the custom URL handlers
-	webkit_titanium_set_normalize_url_cb(NormalizeURLCallback);
-	webkit_titanium_set_url_to_file_url_cb(URLToFileURLCallback);
-	webkit_titanium_set_can_preprocess_cb(CanPreprocessURLCallback);
-	webkit_titanium_set_preprocess_cb(PreprocessURLCallback);
+    // Prepare the custom URL handlers
+    webkit_titanium_set_normalize_url_cb(NormalizeURLCallback);
+    webkit_titanium_set_url_to_file_url_cb(URLToFileURLCallback);
+    webkit_titanium_set_can_preprocess_cb(CanPreprocessURLCallback);
+    webkit_titanium_set_preprocess_cb(PreprocessURLCallback);
 
-	// Setup libsoup proxy support
-	SoupSession* session = webkit_get_default_session();
-	soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
+    // Setup libsoup proxy support
+    SoupSession* session = webkit_get_default_session();
+    soup_session_add_feature_by_type(session, SOUP_TYPE_PROXY_RESOLVER_GNOME);
 
-	std::string webInspectorPath(Host::GetInstance()->GetApplication()->runtime->path);
-	webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
-	webkit_titanium_set_inspector_url(webInspectorPath.c_str());
+    std::string webInspectorPath(Host::GetInstance()->GetApplication()->runtime->path);
+    webInspectorPath = FileUtils::Join(webInspectorPath.c_str(), "webinspector", NULL);
+    webkit_titanium_set_inspector_url(webInspectorPath.c_str());
 
-	//webkit_set_cache_model(WEBKIT_CACHE_MODEL_DOCUMENT_VIEWER);
+    //webkit_set_cache_model(WEBKIT_CACHE_MODEL_DOCUMENT_VIEWER);
 }
 
 AutoPtr<Menu> UIGtk::CreateMenu()
 {
-	return new MenuGtk();
+    return new MenuGtk();
 }
 
 AutoPtr<MenuItem> UIGtk::CreateMenuItem()
 {
-	return new MenuItemGtk(MenuItem::NORMAL);
+    return new MenuItemGtk(MenuItem::NORMAL);
 }
 
 AutoPtr<MenuItem> UIGtk::CreateSeparatorMenuItem()
 {
-	return new MenuItemGtk(MenuItem::SEPARATOR);
+    return new MenuItemGtk(MenuItem::SEPARATOR);
 }
 
 AutoPtr<MenuItem> UIGtk::CreateCheckMenuItem()
 {
-	return new MenuItemGtk(MenuItem::CHECK);
+    return new MenuItemGtk(MenuItem::CHECK);
 }
 
 void UIGtk::SetMenu(AutoPtr<Menu> newMenu)
 {
-	this->menu = newMenu.cast<MenuGtk>();
+    this->menu = newMenu.cast<MenuGtk>();
 }
 
 void UIGtk::SetContextMenu(AutoPtr<Menu> newMenu)
 {
-	this->contextMenu = newMenu.cast<MenuGtk>();
+    this->contextMenu = newMenu.cast<MenuGtk>();
 }
 
 void UIGtk::SetIcon(std::string& iconPath)
 {
-	this->iconPath = iconPath;
+    this->iconPath = iconPath;
 }
 
 AutoPtr<TrayItem> UIGtk::AddTray(std::string& iconPath, KMethodRef cb)
 {
-	AutoPtr<TrayItem> item = new TrayItemGtk(iconPath, cb);
-	return item;
+    AutoPtr<TrayItem> item = new TrayItemGtk(iconPath, cb);
+    return item;
 }
 
 long UIGtk::GetIdleTime()
 {
-	Display *display = gdk_x11_get_default_xdisplay();
-	if (display == NULL)
-		return -1;
-	int screen = gdk_x11_get_default_screen();
+    Display *display = gdk_x11_get_default_xdisplay();
+    if (display == NULL)
+        return -1;
+    int screen = gdk_x11_get_default_screen();
 
-	XScreenSaverInfo *mit_info = XScreenSaverAllocInfo();
-	XScreenSaverQueryInfo(display, RootWindow(display, screen), mit_info);
-	long idle_time = mit_info->idle;
-	XFree(mit_info);
+    XScreenSaverInfo *mit_info = XScreenSaverAllocInfo();
+    XScreenSaverQueryInfo(display, RootWindow(display, screen), mit_info);
+    long idle_time = mit_info->idle;
+    XFree(mit_info);
 
-	return idle_time;
+    return idle_time;
 }
 
 AutoPtr<Menu> UIGtk::GetMenu()
 {
-	return this->menu;
+    return this->menu;
 }
 
 AutoPtr<Menu> UIGtk::GetContextMenu()
 {
-	return this->contextMenu;
+    return this->contextMenu;
 }
 
 std::string& UIGtk::GetIcon()
 {
-	return this->iconPath;
+    return this->iconPath;
 }
 
 /*static*/
 void UIGtk::ErrorDialog(std::string msg)
 {
-	GtkWidget* dialog = gtk_message_dialog_new(
-		NULL,
-		GTK_DIALOG_MODAL,
-		GTK_MESSAGE_ERROR,
-		GTK_BUTTONS_OK,
-		"%s",
-		msg.c_str());
-	gtk_dialog_run(GTK_DIALOG (dialog));
-	gtk_widget_destroy(dialog);
-	UI::ErrorDialog(msg);
+    GtkWidget* dialog = gtk_message_dialog_new(
+        NULL,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_ERROR,
+        GTK_BUTTONS_OK,
+        "%s",
+        msg.c_str());
+    gtk_dialog_run(GTK_DIALOG (dialog));
+    gtk_widget_destroy(dialog);
+    UI::ErrorDialog(msg);
 }
 
 } // namespace Titanium

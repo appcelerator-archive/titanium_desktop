@@ -25,35 +25,35 @@ class MenuItem;
 
 class Menu : public KAccessorObject {
 public:
-	Menu();
-	~Menu();
+    Menu();
+    ~Menu();
 
-	void _AppendItem(const ValueList& args, KValueRef result);
-	void _GetItemAt(const ValueList& args, KValueRef result);
-	void _InsertItemAt(const ValueList& args, KValueRef result);
-	void _RemoveItemAt(const ValueList& args, KValueRef result);
-	void _GetLength(const ValueList& args, KValueRef result);
-	void _Clear(const ValueList& args, KValueRef result);
+    void _AppendItem(const ValueList& args, KValueRef result);
+    void _GetItemAt(const ValueList& args, KValueRef result);
+    void _InsertItemAt(const ValueList& args, KValueRef result);
+    void _RemoveItemAt(const ValueList& args, KValueRef result);
+    void _GetLength(const ValueList& args, KValueRef result);
+    void _Clear(const ValueList& args, KValueRef result);
 
-	void _AddItem(const ValueList& args, KValueRef result);
-	void _AddSeparatorItem(const ValueList& args, KValueRef result);
-	void _AddCheckItem(const ValueList& args, KValueRef result);
+    void _AddItem(const ValueList& args, KValueRef result);
+    void _AddSeparatorItem(const ValueList& args, KValueRef result);
+    void _AddCheckItem(const ValueList& args, KValueRef result);
 
-	void AppendItem(AutoPtr<MenuItem> item);
-	AutoPtr<MenuItem> GetItemAt(int index);
-	void InsertItemAt(AutoPtr<MenuItem> item, size_t index);
-	void RemoveItemAt(size_t index);
-	bool ContainsItem(MenuItem* item);
-	bool ContainsSubmenu(Menu* submenu);
+    void AppendItem(AutoPtr<MenuItem> item);
+    AutoPtr<MenuItem> GetItemAt(int index);
+    void InsertItemAt(AutoPtr<MenuItem> item, size_t index);
+    void RemoveItemAt(size_t index);
+    bool ContainsItem(MenuItem* item);
+    bool ContainsSubmenu(Menu* submenu);
 
-	// Platform-specific implementation
-	virtual void AppendItemImpl(AutoPtr<MenuItem> item) = 0;
-	virtual void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index) = 0;
-	virtual void RemoveItemAtImpl(unsigned int index) = 0;
-	virtual void ClearImpl() = 0;
+    // Platform-specific implementation
+    virtual void AppendItemImpl(AutoPtr<MenuItem> item) = 0;
+    virtual void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index) = 0;
+    virtual void RemoveItemAtImpl(unsigned int index) = 0;
+    virtual void ClearImpl() = 0;
 
 protected:
-	std::vector<AutoPtr<MenuItem> > children;
+    std::vector<AutoPtr<MenuItem> > children;
 };
 
 } // namespace Titanium

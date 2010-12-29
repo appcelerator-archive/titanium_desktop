@@ -19,123 +19,123 @@
 namespace Titanium {
 
 WebKitResourceLoadDelegate::WebKitResourceLoadDelegate(UserWindowWin* userWindow)
-	: userWindow(userWindow)
-	, refCount(1)
+    : userWindow(userWindow)
+    , refCount(1)
 {
 
 }
 
 ULONG STDMETHODCALLTYPE WebKitResourceLoadDelegate::AddRef()
 {
-	return ++refCount;
+    return ++refCount;
 }
 
 ULONG STDMETHODCALLTYPE WebKitResourceLoadDelegate::Release()
 {
-	ULONG newCount = --refCount;
-	if (!newCount)
-		delete(this);
-	return newCount;
+    ULONG newCount = --refCount;
+    if (!newCount)
+        delete(this);
+    return newCount;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::QueryInterface(
-	REFIID riid, void **ppvObject)
+    REFIID riid, void **ppvObject)
 {
-	*ppvObject = 0;
-	if (IsEqualGUID(riid, IID_IUnknown))
-		*ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
-	else if (IsEqualGUID(riid, IID_IWebResourceLoadDelegate))
-		*ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
-	else
-		return E_NOINTERFACE;
+    *ppvObject = 0;
+    if (IsEqualGUID(riid, IID_IUnknown))
+        *ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
+    else if (IsEqualGUID(riid, IID_IWebResourceLoadDelegate))
+        *ppvObject = static_cast<IWebResourceLoadDelegate*>(this);
+    else
+        return E_NOINTERFACE;
 
-	AddRef();
-	return S_OK;
+    AddRef();
+    return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::identifierForInitialRequest(
-	/* [in] */ IWebView *webView,
-	/* [in] */ IWebURLRequest *request,
-	/* [in] */ IWebDataSource *dataSource,
-	/* [in] */ unsigned long identifier)
+    /* [in] */ IWebView *webView,
+    /* [in] */ IWebURLRequest *request,
+    /* [in] */ IWebDataSource *dataSource,
+    /* [in] */ unsigned long identifier)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::willSendRequest(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebURLRequest *request,
-	/* [in] */ IWebURLResponse *redirectResponse,
-	/* [in] */ IWebDataSource *dataSource,
-	/* [retval][out] */ IWebURLRequest **newRequest)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebURLRequest *request,
+    /* [in] */ IWebURLResponse *redirectResponse,
+    /* [in] */ IWebDataSource *dataSource,
+    /* [retval][out] */ IWebURLRequest **newRequest)
 {
-	BSTR u;
-	request->URL(&u);
-	std::wstring u2(u);
-	std::string url(::WideToUTF8(u2));
-	return E_NOTIMPL;
+    BSTR u;
+    request->URL(&u);
+    std::wstring u2(u);
+    std::string url(::WideToUTF8(u2));
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didReceiveAuthenticationChallenge(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebURLAuthenticationChallenge *challenge,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebURLAuthenticationChallenge *challenge,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didCancelAuthenticationChallenge(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebURLAuthenticationChallenge *challenge,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebURLAuthenticationChallenge *challenge,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didReceiveResponse(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebURLResponse *response,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebURLResponse *response,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didReceiveContentLength(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ UINT length,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ UINT length,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didFinishLoadingFromDataSource(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::didFailLoadingWithError(
-	/* [in] */ IWebView *webView,
-	/* [in] */ unsigned long identifier,
-	/* [in] */ IWebError *error,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ unsigned long identifier,
+    /* [in] */ IWebError *error,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE WebKitResourceLoadDelegate::plugInFailedWithError(
-	/* [in] */ IWebView *webView,
-	/* [in] */ IWebError *error,
-	/* [in] */ IWebDataSource *dataSource)
+    /* [in] */ IWebView *webView,
+    /* [in] */ IWebError *error,
+    /* [in] */ IWebDataSource *dataSource)
 {
-	return E_NOTIMPL;
+    return E_NOTIMPL;
 }
 
 } // namespace Titanium

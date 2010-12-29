@@ -7,25 +7,25 @@ env.Append(CPPDEFINES = ('TITANIUM_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
 sources = Glob('*.cpp')
 if build.is_osx():
-	env.Append(FRAMEWORKS = ['Cocoa'])
-	sources.extend(Glob('mac/*.cpp'))
-	sources.extend(Glob('mac/*.mm'))
+    env.Append(FRAMEWORKS = ['Cocoa'])
+    sources.extend(Glob('mac/*.cpp'))
+    sources.extend(Glob('mac/*.mm'))
 
 if build.is_linux():
-	sources.extend(Glob('gstreamer/*.cpp'))
-	env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10 gdk-2.0')
+    sources.extend(Glob('gstreamer/*.cpp'))
+    env.ParseConfig('pkg-config --cflags --libs gstreamer-0.10 gdk-2.0')
 
 elif build.is_win32():
-	sources.extend(Glob('win/*.cpp'))
-	libs = [
-		'user32', 'shell32', 'kernel32', 'shlwapi',
-		'strmiids','ole32', 'comdlg32', 'comctl32',
-		'oleaut32', 'comsuppw']
-	env.Append(LIBS = libs)
-	env.Append(CPPPATH=[build.tp('microsoft', 'include')])
-	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
-	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
+    sources.extend(Glob('win/*.cpp'))
+    libs = [
+        'user32', 'shell32', 'kernel32', 'shlwapi',
+        'strmiids','ole32', 'comdlg32', 'comctl32',
+        'oleaut32', 'comsuppw']
+    env.Append(LIBS = libs)
+    env.Append(CPPPATH=[build.tp('microsoft', 'include')])
+    env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN', 1))
+    env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
 
 build.mark_build_target(env.SharedLibrary(
-	path.join(module.dir, 'timediamodule'), sources))
+    path.join(module.dir, 'timediamodule'), sources))
 

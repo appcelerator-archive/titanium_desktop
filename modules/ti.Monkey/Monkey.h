@@ -25,30 +25,30 @@ namespace Titanium {
 
 class Script {
 public:
-	bool Matches(std::string& url);
-	static bool Matches(std::vector<std::string>&, std::string& url);
-	static bool Matches(const char* pattern, const char* target);
+    bool Matches(std::string& url);
+    static bool Matches(std::vector<std::string>&, std::string& url);
+    static bool Matches(const char* pattern, const char* target);
 
-	std::vector<std::string> includes;
-	std::vector<std::string> excludes;
-	std::string source;
+    std::vector<std::string> includes;
+    std::vector<std::string> excludes;
+    std::string source;
 };
 
 class Monkey : public kroll::StaticBoundObject {
 public:
-	Monkey(Host*, KObjectRef);
+    Monkey(Host*, KObjectRef);
 
 protected:
-	virtual ~Monkey();
-	void ParseFile(string filePath);
-	void Callback(const ValueList &args, KValueRef result);
-	void EvaluateUserScript(
-		KObjectRef, std::string&,KObjectRef, std::string&);
+    virtual ~Monkey();
+    void ParseFile(string filePath);
+    void Callback(const ValueList &args, KValueRef result);
+    void EvaluateUserScript(
+        KObjectRef, std::string&,KObjectRef, std::string&);
 
-	KObjectRef global;
-	Logger* logger;
-	KMethodRef callback;
-	std::vector<Script*> scripts;
+    KObjectRef global;
+    Logger* logger;
+    KMethodRef callback;
+    std::vector<Script*> scripts;
 };
 
 } // namespace Titanium

@@ -20,22 +20,22 @@ namespace Titanium {
 
 void Application::Restart(const ValueList& args, KValueRef result)
 {
-	Host* host = Host::GetInstance();
-	std::string cmdline(host->GetApplication()->arguments.at(0));
+    Host* host = Host::GetInstance();
+    std::string cmdline(host->GetApplication()->arguments.at(0));
 
-	// Remove all quotes.
-	size_t i = cmdline.find('\"');
-	while (i != std::string::npos)
-	{
-		cmdline.replace(i, 1, "");
-		i = cmdline.find('\"');
-	}
+    // Remove all quotes.
+    size_t i = cmdline.find('\"');
+    while (i != std::string::npos)
+    {
+        cmdline.replace(i, 1, "");
+        i = cmdline.find('\"');
+    }
 
-	std::string script = "\"" + cmdline + "\" &";
-	if (system(script.c_str()) == -1)
-		throw ValueException::FromString("Failed to start new process.");
+    std::string script = "\"" + cmdline + "\" &";
+    if (system(script.c_str()) == -1)
+        throw ValueException::FromString("Failed to start new process.");
 
-	host->Exit(0);
+    host->Exit(0);
 }
 
 void Application::Setup() 

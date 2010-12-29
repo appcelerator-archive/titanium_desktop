@@ -27,40 +27,40 @@ namespace Titanium {
 
 class ProcessWin : public Process {
 public:
-	ProcessWin();
-	virtual ~ProcessWin();
+    ProcessWin();
+    virtual ~ProcessWin();
 
-	inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
-	inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
-	inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
+    inline virtual AutoPtr<NativePipe> GetNativeStdin() { return nativeIn; }
+    inline virtual AutoPtr<NativePipe> GetNativeStdout() { return nativeOut; }
+    inline virtual AutoPtr<NativePipe> GetNativeStderr() { return nativeErr; }
 
-	virtual int GetPID();
-	virtual void Terminate();
-	virtual void Kill();
-	virtual void SendSignal(int signal);
-	virtual void ForkAndExec();
-	virtual void MonitorAsync();
-	virtual BytesRef MonitorSync();
-	virtual int Wait();
-	virtual std::string ArgumentsToString();
-	void ReadCallback(const ValueList& args, KValueRef result);
-	virtual void RecreateNativePipes();
-	
+    virtual int GetPID();
+    virtual void Terminate();
+    virtual void Kill();
+    virtual void SendSignal(int signal);
+    virtual void ForkAndExec();
+    virtual void MonitorAsync();
+    virtual BytesRef MonitorSync();
+    virtual int Wait();
+    virtual std::string ArgumentsToString();
+    void ReadCallback(const ValueList& args, KValueRef result);
+    virtual void RecreateNativePipes();
+    
 protected:
-	std::string ArgListToString(KListRef argList);
-	
-	Poco::Thread exitMonitorThread;
-	Poco::RunnableAdapter<ProcessWin>* exitMonitorAdapter;
-	AutoPtr<PipeWin> nativeIn, nativeOut, nativeErr;
-	Poco::Mutex mutex;
-	
-	Poco::Mutex processOutputMutex;
-	std::vector<BytesRef> processOutput;
-	
-	int pid;
-	HANDLE process;
-	
-	Logger* logger;
+    std::string ArgListToString(KListRef argList);
+    
+    Poco::Thread exitMonitorThread;
+    Poco::RunnableAdapter<ProcessWin>* exitMonitorAdapter;
+    AutoPtr<PipeWin> nativeIn, nativeOut, nativeErr;
+    Poco::Mutex mutex;
+    
+    Poco::Mutex processOutputMutex;
+    std::vector<BytesRef> processOutput;
+    
+    int pid;
+    HANDLE process;
+    
+    Logger* logger;
 };
 
 } // namespace Titanium

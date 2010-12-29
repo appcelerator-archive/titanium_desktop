@@ -20,9 +20,9 @@
 
 @interface MenuDelegate : NSObject
 {
-	Titanium::MenuMac* menu;
-	BOOL dirty;
-	BOOL registerNative;
+    Titanium::MenuMac* menu;
+    BOOL dirty;
+    BOOL registerNative;
 }
 - (id)initWithMenu:(Titanium::MenuMac*)menu willRegister:(BOOL)willRegister;
 - (void)menuNeedsUpdate:(NSMenu *)menu;

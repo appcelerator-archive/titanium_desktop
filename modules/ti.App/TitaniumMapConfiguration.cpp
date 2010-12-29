@@ -53,75 +53,75 @@ TitaniumMapConfiguration::~TitaniumMapConfiguration()
 
 void TitaniumMapConfiguration::clear()
 {
-	_map.clear();
+    _map.clear();
 }
 
 
 bool TitaniumMapConfiguration::getRaw(const std::string& key, std::string& value) const
 {
-	StringMap::const_iterator it = _map.find(key);
-	if (it != _map.end())
-	{
-		value = it->second;
-		return true;
-	}
-	else return false;
+    StringMap::const_iterator it = _map.find(key);
+    if (it != _map.end())
+    {
+        value = it->second;
+        return true;
+    }
+    else return false;
 }
 
 
 void TitaniumMapConfiguration::setRaw(const std::string& key, const std::string& value)
 {
-	_map[key] = value;
+    _map[key] = value;
 }
 
 
 bool TitaniumMapConfiguration::removeProperty(const std::string& key)
 {
-	StringMap::iterator it = _map.find(key);
-	if (it != _map.end())
-	{
-		_map.erase(it);
-		return true;
-	}
-	else return false;
+    StringMap::iterator it = _map.find(key);
+    if (it != _map.end())
+    {
+        _map.erase(it);
+        return true;
+    }
+    else return false;
 }
 
 
 void TitaniumMapConfiguration::enumerate(const std::string& key, Keys& range) const
 {
-	std::set<std::string> keys;
-	std::string prefix = key;
-	if (!prefix.empty()) prefix += '.';
-	std::string::size_type psize = prefix.size();
-	for (StringMap::const_iterator it = _map.begin(); it != _map.end(); ++it)
-	{
-		if (it->first.compare(0, psize, prefix) == 0)
-		{
-			std::string subKey;
-			std::string::size_type end = it->first.find('.', psize);
-			if (end == std::string::npos)
-				subKey = it->first.substr(psize);
-			else
-				subKey = it->first.substr(psize, end - psize);
-			if (keys.find(subKey) == keys.end())
-			{
-				range.push_back(subKey);
-				keys.insert(subKey);
-			}
-		}
-	}
+    std::set<std::string> keys;
+    std::string prefix = key;
+    if (!prefix.empty()) prefix += '.';
+    std::string::size_type psize = prefix.size();
+    for (StringMap::const_iterator it = _map.begin(); it != _map.end(); ++it)
+    {
+        if (it->first.compare(0, psize, prefix) == 0)
+        {
+            std::string subKey;
+            std::string::size_type end = it->first.find('.', psize);
+            if (end == std::string::npos)
+                subKey = it->first.substr(psize);
+            else
+                subKey = it->first.substr(psize, end - psize);
+            if (keys.find(subKey) == keys.end())
+            {
+                range.push_back(subKey);
+                keys.insert(subKey);
+            }
+        }
+    }
 }
 
 
 TitaniumMapConfiguration::iterator TitaniumMapConfiguration::begin() const
 {
-	return _map.begin();
+    return _map.begin();
 }
 
 
 TitaniumMapConfiguration::iterator TitaniumMapConfiguration::end() const
 {
-	return _map.end();
+    return _map.end();
 }
 
 

@@ -30,11 +30,11 @@ MediaMac::~MediaMac()
 }
 void MediaMac::Beep()
 {
-	NSBeep();
+    NSBeep();
 }
 KObjectRef MediaMac::CreateSound(std::string& url)
 {
-	return new SoundMac(url);
+    return new SoundMac(url);
 }
 
 } // namespace Titanium

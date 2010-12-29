@@ -22,29 +22,29 @@ namespace Titanium {
 
 void Application::Restart(const ValueList& args, KValueRef result)
 {
-	Host* host = Host::GetInstance();
-	std::wstring cmdline(::UTF8ToWide(host->GetApplication()->arguments.at(0)));
+    Host* host = Host::GetInstance();
+    std::wstring cmdline(::UTF8ToWide(host->GetApplication()->arguments.at(0)));
 
-	STARTUPINFO si;
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	PROCESS_INFORMATION pi;
-	ZeroMemory(&pi, sizeof(pi));
+    STARTUPINFO si;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&pi, sizeof(pi));
 
-	::CreateProcessW(NULL,
-		(LPWSTR) cmdline.c_str(),
-		NULL, /*lpProcessAttributes*/
-		NULL, /*lpThreadAttributes*/
-		FALSE, /*bInheritHandles*/
-		NORMAL_PRIORITY_CLASS,
-		NULL,
-		NULL,
-		&si,
-		&pi);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+    ::CreateProcessW(NULL,
+        (LPWSTR) cmdline.c_str(),
+        NULL, /*lpProcessAttributes*/
+        NULL, /*lpThreadAttributes*/
+        FALSE, /*bInheritHandles*/
+        NORMAL_PRIORITY_CLASS,
+        NULL,
+        NULL,
+        &si,
+        &pi);
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
 
-	host->Exit(0);
+    host->Exit(0);
 }
 
 void Application::Setup() 

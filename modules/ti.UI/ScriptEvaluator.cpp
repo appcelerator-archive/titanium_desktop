@@ -26,14 +26,14 @@ namespace Titanium {
 /*static*/
 void ScriptEvaluator::Initialize()
 {
-	static AutoPtr<ScriptEvaluator> instance(new ScriptEvaluator());
+    static AutoPtr<ScriptEvaluator> instance(new ScriptEvaluator());
 #if defined(OS_OSX)
-	[WebScriptElement addScriptEvaluator:[[OSXScriptEvaluator alloc]
-		initWithEvaluator:instance.get()]];
+    [WebScriptElement addScriptEvaluator:[[OSXScriptEvaluator alloc]
+        initWithEvaluator:instance.get()]];
 #elif defined(OS_WIN32)
-	addScriptEvaluator(instance.get());
+    addScriptEvaluator(instance.get());
 #elif defined(OS_LINUX)
-	webkit_titanium_add_script_evaluator(instance.get());
+    webkit_titanium_add_script_evaluator(instance.get());
 #endif
 }
 
@@ -43,29 +43,29 @@ void ScriptEvaluator::Initialize()
 @implementation OSXScriptEvaluator
 -(OSXScriptEvaluator*) initWithEvaluator:(Titanium::ScriptEvaluator*)evaluator
 {
-	self = [self init];
-	delegate = evaluator;
-	return self;
+    self = [self init];
+    delegate = evaluator;
+    return self;
 }
 
 -(BOOL) matchesMimeType:(NSString*)mimeType
 {
-	return kroll::Script::GetInstance()->CanEvaluate([mimeType UTF8String]);
+    return kroll::Script::GetInstance()->CanEvaluate([mimeType UTF8String]);
 }
 
 -(void) evaluate:(NSString *)mimeType sourceCode:(NSString*)sourceCode context:(void *)context
 {
-	// TODO get source name from webkit
-	try
-	{
-		Script::GetInstance()->Evaluate([mimeType UTF8String], "<script>",
-			[sourceCode UTF8String], JSContextToKrollContext(context));
-	}
-	catch (ValueException& exception)
-	{
-		Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
-			exception.ToString().c_str());
-	}
+    // TODO get source name from webkit
+    try
+    {
+        Script::GetInstance()->Evaluate([mimeType UTF8String], "<script>",
+            [sourceCode UTF8String], JSContextToKrollContext(context));
+    }
+    catch (ValueException& exception)
+    {
+        Logger::Get("UI.ScriptEvaluator")->Error("Script evaluation failed: %s",
+            exception.ToString().c_str());
+    }
 }
 @end
 #endif

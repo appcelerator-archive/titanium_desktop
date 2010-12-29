@@ -23,7 +23,7 @@ namespace Titanium {
 
 class AppModule : public kroll::Module
 {
-	KROLL_MODULE_CLASS(AppModule)
+    KROLL_MODULE_CLASS(AppModule)
 };
 
 } // namespace Titanium

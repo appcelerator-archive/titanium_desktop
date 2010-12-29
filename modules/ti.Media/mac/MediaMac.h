@@ -27,12 +27,12 @@ namespace Titanium {
 
 class MediaMac : public Media {
 public:
-	MediaMac(KObjectRef);
-	~MediaMac();
+    MediaMac(KObjectRef);
+    ~MediaMac();
 
 protected:
-	void Beep();
-	KObjectRef CreateSound(std::string&);
+    void Beep();
+    KObjectRef CreateSound(std::string&);
 };
 
 } // namespace Titanium

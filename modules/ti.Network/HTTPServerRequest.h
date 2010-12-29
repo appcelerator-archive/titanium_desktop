@@ -26,24 +26,24 @@ namespace Titanium {
 
 class HttpServerRequest : public Poco::Net::HTTPRequestHandler, public StaticBoundObject {
 public:
-	HttpServerRequest(KMethodRef callback, Poco::Net::HTTPServerRequest& request);
-	virtual ~HttpServerRequest();
+    HttpServerRequest(KMethodRef callback, Poco::Net::HTTPServerRequest& request);
+    virtual ~HttpServerRequest();
 
-	void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse& response);
+    void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse& response);
 
 private:
-	void GetMethod(const ValueList& args, KValueRef result);
-	void GetVersion(const ValueList& args, KValueRef result);
-	void GetURI(const ValueList& args, KValueRef result);
-	void GetContentType(const ValueList& args, KValueRef result);
-	void GetContentLength(const ValueList& args, KValueRef result);
-	void GetHeader(const ValueList& args, KValueRef result);
-	void GetHeaders(const ValueList& args, KValueRef result);
-	void HasHeader(const ValueList& args, KValueRef result);
-	void Read(const ValueList& args, KValueRef result);
+    void GetMethod(const ValueList& args, KValueRef result);
+    void GetVersion(const ValueList& args, KValueRef result);
+    void GetURI(const ValueList& args, KValueRef result);
+    void GetContentType(const ValueList& args, KValueRef result);
+    void GetContentLength(const ValueList& args, KValueRef result);
+    void GetHeader(const ValueList& args, KValueRef result);
+    void GetHeaders(const ValueList& args, KValueRef result);
+    void HasHeader(const ValueList& args, KValueRef result);
+    void Read(const ValueList& args, KValueRef result);
 
-	KMethodRef callback;
-	Poco::Net::HTTPServerRequest& request;
+    KMethodRef callback;
+    Poco::Net::HTTPServerRequest& request;
 };
 
 } // namespace Titanium

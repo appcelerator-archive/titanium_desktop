@@ -27,15 +27,15 @@ namespace Titanium {
 
 class Media : public StaticBoundObject {
 public:
-	Media(KObjectRef);
-	virtual ~Media();
+    Media(KObjectRef);
+    virtual ~Media();
 
 private:
-	void _CreateSound(const ValueList& args, KValueRef result);
-	void _Beep(const ValueList& args, KValueRef result);
+    void _CreateSound(const ValueList& args, KValueRef result);
+    void _Beep(const ValueList& args, KValueRef result);
 
-	virtual KObjectRef CreateSound(std::string& url) = 0;
-	virtual void Beep() = 0;
+    virtual KObjectRef CreateSound(std::string& url) = 0;
+    virtual void Beep() = 0;
 
     KObjectRef global;
 };

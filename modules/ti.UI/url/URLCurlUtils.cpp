@@ -27,26 +27,26 @@ namespace Titanium {
  * unless curl frees the result of these calls */
 const char* TiURLToPathCurl(const char *url)
 {
-	string stURL = url;
-	if (stURL.find("ti://") != 0)
-	{
-		stURL = string("ti://") + stURL;
-	}
+    string stURL = url;
+    if (stURL.find("ti://") != 0)
+    {
+        stURL = string("ti://") + stURL;
+    }
 
-	std::string path = URLUtils::TiURLToPath(stURL);
-	return strdup(path.c_str());
+    std::string path = URLUtils::TiURLToPath(stURL);
+    return strdup(path.c_str());
 }
 
 const char* AppURLToPathCurl(const char *url)
 {
-	string stURL = url;
-	if (stURL.find("app://") != 0)
-	{
-		stURL = string("app://") + stURL;
-	}
+    string stURL = url;
+    if (stURL.find("app://") != 0)
+    {
+        stURL = string("app://") + stURL;
+    }
 
-	std::string path = URLUtils::AppURLToPath(stURL);
-	return strdup(path.c_str());
+    std::string path = URLUtils::AppURLToPath(stURL);
+    return strdup(path.c_str());
 }
 
 } // namespace Titanium

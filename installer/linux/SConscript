@@ -8,5 +8,5 @@ Env.Append(CPPPATH=[build.kroll_utils_dir])
 Env.Append(LIBS='libz')
 Env.ParseConfig('pkg-config --cflags --libs gtk+-2.0 gdk-2.0 gthread-2.0 libcurl')
 build.mark_build_target(Env.Program(
-	path.join(build.dir, 'sdk', 'installer', 'installer'),
-	Glob('*.cpp') + build.get_kroll_utils(path.join(build.dir, 'objs', 'installer'))))
+    path.join(build.dir, 'sdk', 'installer', 'installer'),
+    Glob('*.cpp') + build.get_kroll_utils(path.join(build.dir, 'objs', 'installer'))))

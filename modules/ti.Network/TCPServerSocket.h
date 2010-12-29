@@ -30,40 +30,40 @@ namespace Titanium {
 
 class TCPServerSocketConnector {
 public:
-	TCPServerSocketConnector(KMethodRef callback,Poco::Net::ServerSocket& socket,Poco::Net::SocketReactor& reactor);
-	virtual ~TCPServerSocketConnector();
+    TCPServerSocketConnector(KMethodRef callback,Poco::Net::ServerSocket& socket,Poco::Net::SocketReactor& reactor);
+    virtual ~TCPServerSocketConnector();
 
-	void onAccept(Poco::Net::ReadableNotification* pNotification);
+    void onAccept(Poco::Net::ReadableNotification* pNotification);
 
 private:
-	KMethodRef callback;
-	Poco::Net::ServerSocket& socket;
-	Poco::Net::SocketReactor& reactor;
+    KMethodRef callback;
+    Poco::Net::ServerSocket& socket;
+    Poco::Net::SocketReactor& reactor;
 };
 
 class TCPServerSocket : public StaticBoundObject {
 public:
-	TCPServerSocket(KMethodRef callback);
-	virtual ~TCPServerSocket();
+    TCPServerSocket(KMethodRef callback);
+    virtual ~TCPServerSocket();
 
 private:
-	enum {
-		BUFFER_SIZE = 1024
-	};
-	
-	void ListenThread();
-	void Listen(const ValueList& args, KValueRef result);
-	void Close(const ValueList& args, KValueRef result);
+    enum {
+        BUFFER_SIZE = 1024
+    };
+    
+    void ListenThread();
+    void Listen(const ValueList& args, KValueRef result);
+    void Close(const ValueList& args, KValueRef result);
 
-	KMethodRef onCreate;
-	Poco::Net::ServerSocket* socket;
-	Poco::Net::SocketReactor reactor;
-	TCPServerSocketConnector* acceptor;
-	Poco::Thread listenThread;
-	Poco::RunnableAdapter<TCPServerSocket>* listenAdapter;
-	bool listening;
+    KMethodRef onCreate;
+    Poco::Net::ServerSocket* socket;
+    Poco::Net::SocketReactor reactor;
+    TCPServerSocketConnector* acceptor;
+    Poco::Thread listenThread;
+    Poco::RunnableAdapter<TCPServerSocket>* listenAdapter;
+    bool listening;
 };
-	
+    
 } // namespace Titanium
 
 #endif

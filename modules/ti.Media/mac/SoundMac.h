@@ -27,21 +27,21 @@ namespace Titanium {
 
 class SoundMac : public Sound {
 public:
-	SoundMac(std::string& url);
-	virtual ~SoundMac();
+    SoundMac(std::string& url);
+    virtual ~SoundMac();
 
-	virtual void LoadImpl();
-	virtual void UnloadImpl();
-	virtual void PlayImpl();
-	virtual void PauseImpl();
-	virtual void StopImpl();
-	virtual void SetVolumeImpl(double volume);
-	virtual double GetVolumeImpl();
+    virtual void LoadImpl();
+    virtual void UnloadImpl();
+    virtual void PlayImpl();
+    virtual void PauseImpl();
+    virtual void StopImpl();
+    virtual void SetVolumeImpl(double volume);
+    virtual double GetVolumeImpl();
 
 private:
-	NSSound* sound;
-	id delegate;
-	NSURL* fileURL;
+    NSSound* sound;
+    id delegate;
+    NSURL* fileURL;
 };
 
 } // namespace Titanium

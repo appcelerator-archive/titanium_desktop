@@ -23,72 +23,72 @@
 namespace Titanium {
 
 NetworkStatus::NetworkStatus(Network* binding)
-	: StaticBoundObject("Network.NetworkStatus")
-	, binding(binding)
-	, running(true)
+    : StaticBoundObject("Network.NetworkStatus")
+    , binding(binding)
+    , running(true)
 {
 }
 
 NetworkStatus::~NetworkStatus()
 {
-	this->Shutdown();
+    this->Shutdown();
 }
 
 void NetworkStatus::Start()
 {
-	this->adapter = new Poco::RunnableAdapter<NetworkStatus>(
-		*this, &NetworkStatus::StatusLoop);
-	this->thread = new Poco::Thread();
-	this->thread->start(*this->adapter);
+    this->adapter = new Poco::RunnableAdapter<NetworkStatus>(
+        *this, &NetworkStatus::StatusLoop);
+    this->thread = new Poco::Thread();
+    this->thread->start(*this->adapter);
 }
 
 void NetworkStatus::Shutdown(bool async)
 {
-	if (!this->running)
-		return;
+    if (!this->running)
+        return;
 
-	this->running = false;
+    this->running = false;
 
-	if (!async)
-		this->thread->join();
+    if (!async)
+        this->thread->join();
 }
 
 void NetworkStatus::StatusLoop()
 {
-	START_KROLL_THREAD;
+    START_KROLL_THREAD;
 
-	this->InitializeLoop();
+    this->InitializeLoop();
 
-	// We want to wake up and detect if we are running more
-	// often than we want to test reachability, so we only
-	// test reachability every 25 * .2s
-	int count = 0;
-	bool firedAtAll = false;
-	bool previousStatus = false;
-	while (this->running)
-	{
-		if (count == 0)
-		{
-			bool online = this->GetStatus();
-			if (!firedAtAll || online != previousStatus)
-			{
-				firedAtAll = true;
-				previousStatus = online;
-				binding->NetworkStatusChange(online);
-			}
-		}
+    // We want to wake up and detect if we are running more
+    // often than we want to test reachability, so we only
+    // test reachability every 25 * .2s
+    int count = 0;
+    bool firedAtAll = false;
+    bool previousStatus = false;
+    while (this->running)
+    {
+        if (count == 0)
+        {
+            bool online = this->GetStatus();
+            if (!firedAtAll || online != previousStatus)
+            {
+                firedAtAll = true;
+                previousStatus = online;
+                binding->NetworkStatusChange(online);
+            }
+        }
 
-		if (count == 25)
-			count = 0;
-		else
-			count++;
+        if (count == 25)
+            count = 0;
+        else
+            count++;
 
-		Poco::Thread::sleep(200);
-	}
+        Poco::Thread::sleep(200);
+    }
 
-	this->CleanupLoop();
+    this->CleanupLoop();
 
-	END_KROLL_THREAD;
+    END_KROLL_THREAD;
 }
 
 } // namespace Titanium

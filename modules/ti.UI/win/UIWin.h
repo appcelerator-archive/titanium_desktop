@@ -30,41 +30,41 @@ class MenuWin;
 
 class UIWin : public UI {
 public:
-	UIWin();
-	~UIWin();
+    UIWin();
+    ~UIWin();
 
-	AutoPtr<Menu> CreateMenu();
-	AutoPtr<MenuItem> CreateMenuItem();
-	AutoPtr<MenuItem> CreateSeparatorMenuItem();
-	AutoPtr<MenuItem> CreateCheckMenuItem();
-	void SetMenu(AutoPtr<Menu>);
-	AutoPtr<TrayItem> AddTray(std::string& icon_path, KMethodRef cbSingleClick);
-	void SetContextMenu(AutoPtr<Menu>);
-	void SetIcon(std::string& iconPath);
-	long GetIdleTime();
+    AutoPtr<Menu> CreateMenu();
+    AutoPtr<MenuItem> CreateMenuItem();
+    AutoPtr<MenuItem> CreateSeparatorMenuItem();
+    AutoPtr<MenuItem> CreateCheckMenuItem();
+    void SetMenu(AutoPtr<Menu>);
+    AutoPtr<TrayItem> AddTray(std::string& icon_path, KMethodRef cbSingleClick);
+    void SetContextMenu(AutoPtr<Menu>);
+    void SetIcon(std::string& iconPath);
+    long GetIdleTime();
 
-	AutoPtr<Menu> GetMenu();
-	AutoPtr<Menu> GetContextMenu();
-	std::string& GetIcon();
-	static UINT nextItemId;
+    AutoPtr<Menu> GetMenu();
+    AutoPtr<Menu> GetContextMenu();
+    std::string& GetIcon();
+    static UINT nextItemId;
 
-	static HICON LoadImageAsIcon(std::string& path, int sizeX, int sizeY);
-	static HBITMAP LoadImageAsBitmap(std::string& path, int sizeX, int sizeY);
-	static HICON BitmapToIcon(HBITMAP bitmap, int sizeX, int sizeY);
-	static HBITMAP IconToBitmap(HICON icon, int sizeX, int sizeY);
-	static HBITMAP LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY);
-	static cairo_surface_t* ScaleCairoSurface(
-		cairo_surface_t *oldSurface, int newWidth, int newHeight);
-	static void ReleaseImage(HANDLE);
-	static void SetProxyForURL(std::string& url);
-	static void ErrorDialog(std::string);
+    static HICON LoadImageAsIcon(std::string& path, int sizeX, int sizeY);
+    static HBITMAP LoadImageAsBitmap(std::string& path, int sizeX, int sizeY);
+    static HICON BitmapToIcon(HBITMAP bitmap, int sizeX, int sizeY);
+    static HBITMAP IconToBitmap(HICON icon, int sizeX, int sizeY);
+    static HBITMAP LoadPNGAsBitmap(std::string& path, int sizeX, int sizeY);
+    static cairo_surface_t* ScaleCairoSurface(
+        cairo_surface_t *oldSurface, int newWidth, int newHeight);
+    static void ReleaseImage(HANDLE);
+    static void SetProxyForURL(std::string& url);
+    static void ErrorDialog(std::string);
 
 private:
-	AutoPtr<MenuWin> menu;
-	AutoPtr<MenuWin> contextMenu;
-	std::string iconPath;
-	static std::vector<HICON> loadedICOs;
-	static std::vector<HBITMAP> loadedBMPs;
+    AutoPtr<MenuWin> menu;
+    AutoPtr<MenuWin> contextMenu;
+    std::string iconPath;
+    static std::vector<HICON> loadedICOs;
+    static std::vector<HBITMAP> loadedBMPs;
 };
 
 } // namespace Titanium

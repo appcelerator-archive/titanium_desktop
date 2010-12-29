@@ -22,17 +22,17 @@
 
 -(id)initWithTray:(Titanium::TrayItemMac*)inTrayItem
 {
-	trayItem = inTrayItem;
-	self = [super init];
-	return self;
+    trayItem = inTrayItem;
+    self = [super init];
+    return self;
 }
 -(void)dealloc
 {
-	[super dealloc];
+    [super dealloc];
 }
 -(void)invoke:(id)sender
 {
-	trayItem->InvokeCallback();
+    trayItem->InvokeCallback();
 }
 
 @end

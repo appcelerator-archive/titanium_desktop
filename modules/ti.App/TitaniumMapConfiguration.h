@@ -49,32 +49,32 @@ namespace Util {
 
 
 class TitaniumMapConfiguration: public AbstractConfiguration
-	/// An implementation of AbstractConfiguration that stores configuration data in a map.
+    /// An implementation of AbstractConfiguration that stores configuration data in a map.
 {
 public:
-	TitaniumMapConfiguration();
-		/// Creates an empty TitaniumMapConfiguration.
+    TitaniumMapConfiguration();
+        /// Creates an empty TitaniumMapConfiguration.
 
-	void clear();
-		/// Clears the configuration.
+    void clear();
+        /// Clears the configuration.
 
-	bool removeProperty(const std::string& key);
-		/// Removes a property from the configuration.
+    bool removeProperty(const std::string& key);
+        /// Removes a property from the configuration.
 
 protected:
-	typedef std::map<std::string, std::string> StringMap;
-	typedef StringMap::const_iterator iterator;
+    typedef std::map<std::string, std::string> StringMap;
+    typedef StringMap::const_iterator iterator;
 
-	bool getRaw(const std::string& key, std::string& value) const;
-	void setRaw(const std::string& key, const std::string& value);
-	void enumerate(const std::string& key, Keys& range) const;
-	~TitaniumMapConfiguration();
+    bool getRaw(const std::string& key, std::string& value) const;
+    void setRaw(const std::string& key, const std::string& value);
+    void enumerate(const std::string& key, Keys& range) const;
+    ~TitaniumMapConfiguration();
 
-	iterator begin() const;
-	iterator end() const;
+    iterator begin() const;
+    iterator end() const;
 
-private:	
-	StringMap _map;
+private:    
+    StringMap _map;
 };
 
 

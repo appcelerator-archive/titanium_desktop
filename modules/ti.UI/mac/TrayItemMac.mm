@@ -26,89 +26,89 @@
 namespace Titanium {
 
 TrayItemMac::TrayItemMac(std::string& iconURL, KMethodRef cb) :
-	TrayItem(iconURL),
-	nativeMenu(0),
-	menu(0),
-	callback(cb),
-	nativeItem(0)
+    TrayItem(iconURL),
+    nativeMenu(0),
+    menu(0),
+    callback(cb),
+    nativeItem(0)
 {
-	TrayItemDelegate* delegate = [[TrayItemDelegate alloc] initWithTray:this];
-	NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
-	nativeItem = [statusBar statusItemWithLength:NSVariableStatusItemLength];
-	[nativeItem retain];
-	[nativeItem setTarget:delegate];
-	[nativeItem setAction:@selector(invoke:)];
-	[nativeItem setHighlightMode:YES];
+    TrayItemDelegate* delegate = [[TrayItemDelegate alloc] initWithTray:this];
+    NSStatusBar *statusBar = [NSStatusBar systemStatusBar];
+    nativeItem = [statusBar statusItemWithLength:NSVariableStatusItemLength];
+    [nativeItem retain];
+    [nativeItem setTarget:delegate];
+    [nativeItem setAction:@selector(invoke:)];
+    [nativeItem setHighlightMode:YES];
 
-	this->SetIcon(this->iconPath);
+    this->SetIcon(this->iconPath);
 }
 
 TrayItemMac::~TrayItemMac()
 {
-	if (!this->menu.isNull() && this->nativeMenu) {
-		this->menu->DestroyNative(this->nativeMenu);
-	}
+    if (!this->menu.isNull() && this->nativeMenu) {
+        this->menu->DestroyNative(this->nativeMenu);
+    }
 }
 
 void TrayItemMac::SetIcon(std::string& iconPath)
 {
-	NSImage* image = UIMac::MakeImage(iconPath);
-	[nativeItem setImage:image];
+    NSImage* image = UIMac::MakeImage(iconPath);
+    [nativeItem setImage:image];
 }
 
 void TrayItemMac::SetMenu(AutoPtr<Menu> menu)
 {
-	if (menu.get() == this->menu.get()) {
-		return;
-	}
+    if (menu.get() == this->menu.get()) {
+        return;
+    }
 
-	AutoPtr<MenuMac> newMenu = menu.cast<MenuMac>();
-	NSMenu* newNativeMenu = nil;
-	if (!newMenu.isNull()) {
-		newNativeMenu = newMenu->CreateNativeNow(true);
-	}
+    AutoPtr<MenuMac> newMenu = menu.cast<MenuMac>();
+    NSMenu* newNativeMenu = nil;
+    if (!newMenu.isNull()) {
+        newNativeMenu = newMenu->CreateNativeNow(true);
+    }
 
-	if (!this->menu.isNull() && this->nativeMenu) {
-		this->menu->DestroyNative(this->nativeMenu);
-	}
+    if (!this->menu.isNull() && this->nativeMenu) {
+        this->menu->DestroyNative(this->nativeMenu);
+    }
 
-	this->menu = newMenu;
-	this->nativeMenu = newNativeMenu;
+    this->menu = newMenu;
+    this->nativeMenu = newNativeMenu;
 }
 
 void TrayItemMac::SetHint(std::string& hint)
 {
-	if (hint.empty()) {
-		[nativeItem setToolTip:@""];
-	} else {
-		[nativeItem setToolTip:[NSString stringWithUTF8String:hint.c_str()]];
-	}
+    if (hint.empty()) {
+        [nativeItem setToolTip:@""];
+    } else {
+        [nativeItem setToolTip:[NSString stringWithUTF8String:hint.c_str()]];
+    }
 }
 
 void TrayItemMac::Remove()
 {
-	[[NSStatusBar systemStatusBar] removeStatusItem:nativeItem];
-	[[nativeItem target] release];
-	[nativeItem release];
+    [[NSStatusBar systemStatusBar] removeStatusItem:nativeItem];
+    [[nativeItem target] release];
+    [nativeItem release];
 }
 
 void TrayItemMac::InvokeCallback()
 {
-	if (nativeMenu != nil)
-	{
-		[nativeItem popUpStatusItemMenu:nativeMenu];
-	}
+    if (nativeMenu != nil)
+    {
+        [nativeItem popUpStatusItemMenu:nativeMenu];
+    }
 
-	if (callback.isNull())
-		return;
+    if (callback.isNull())
+        return;
 
-	try {
-		callback->Call(ValueList());
-	} catch (ValueException& e) {
-		Logger* logger = Logger::Get("UI.TrayItemMac");
-		SharedString ss = e.DisplayString();
-		logger->Error("Tray icon callback failed: %s", ss->c_str());
-	}
+    try {
+        callback->Call(ValueList());
+    } catch (ValueException& e) {
+        Logger* logger = Logger::Get("UI.TrayItemMac");
+        SharedString ss = e.DisplayString();
+        logger->Error("Tray icon callback failed: %s", ss->c_str());
+    }
 }
 
 } // namespace Titanium

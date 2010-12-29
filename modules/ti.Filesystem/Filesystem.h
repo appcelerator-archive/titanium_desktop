@@ -27,35 +27,35 @@ namespace Titanium {
 
 class Filesystem : public StaticBoundObject {
 public:
-	Filesystem(Host*, KObjectRef);
-	virtual ~Filesystem();
+    Filesystem(Host*, KObjectRef);
+    virtual ~Filesystem();
 
 private:
-	void CreateTempFile(const ValueList& args, KValueRef result);
-	void CreateTempDirectory(const ValueList& args, KValueRef result);
-	void GetFile(const ValueList& args, KValueRef result);
-	void GetFileStream(const ValueList& args, KValueRef result);
-	void GetApplicationDirectory(const ValueList& args, KValueRef result);
-	void GetApplicationDataDirectory(const ValueList& args, KValueRef result);
-	void GetRuntimeHomeDirectory(const ValueList& args, KValueRef result);
-	void GetResourcesDirectory(const ValueList& args, KValueRef result);
-	void GetProgramsDirectory(const ValueList &args, KValueRef result);
-	void GetDesktopDirectory(const ValueList& args, KValueRef result);
-	void GetDocumentsDirectory(const ValueList& args, KValueRef result);
-	void GetUserDirectory(const ValueList& args, KValueRef result);
-	void GetLineEnding(const ValueList& args, KValueRef result);
-	void GetSeparator(const ValueList& args, KValueRef result);
-	void GetRootDirectories(const ValueList& args, KValueRef result);
-	void ExecuteAsyncCopy(const ValueList& args, KValueRef result);
+    void CreateTempFile(const ValueList& args, KValueRef result);
+    void CreateTempDirectory(const ValueList& args, KValueRef result);
+    void GetFile(const ValueList& args, KValueRef result);
+    void GetFileStream(const ValueList& args, KValueRef result);
+    void GetApplicationDirectory(const ValueList& args, KValueRef result);
+    void GetApplicationDataDirectory(const ValueList& args, KValueRef result);
+    void GetRuntimeHomeDirectory(const ValueList& args, KValueRef result);
+    void GetResourcesDirectory(const ValueList& args, KValueRef result);
+    void GetProgramsDirectory(const ValueList &args, KValueRef result);
+    void GetDesktopDirectory(const ValueList& args, KValueRef result);
+    void GetDocumentsDirectory(const ValueList& args, KValueRef result);
+    void GetUserDirectory(const ValueList& args, KValueRef result);
+    void GetLineEnding(const ValueList& args, KValueRef result);
+    void GetSeparator(const ValueList& args, KValueRef result);
+    void GetRootDirectories(const ValueList& args, KValueRef result);
+    void ExecuteAsyncCopy(const ValueList& args, KValueRef result);
 
-	//INTERNAL ONLY
-	void OnAsyncOperationTimer(Poco::Timer &timer);
-	void DeletePendingOperations(const ValueList& args, KValueRef result);
+    //INTERNAL ONLY
+    void OnAsyncOperationTimer(Poco::Timer &timer);
+    void DeletePendingOperations(const ValueList& args, KValueRef result);
 
-	Host *host;
-	KObjectRef global;
-	std::vector<KObjectRef> asyncOperations;
-	Poco::Timer *timer;
+    Host *host;
+    KObjectRef global;
+    std::vector<KObjectRef> asyncOperations;
+    Poco::Timer *timer;
 };
 
 } // namespace Titanium

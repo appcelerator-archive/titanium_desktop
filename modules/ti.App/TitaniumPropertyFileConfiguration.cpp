@@ -54,13 +54,13 @@ TitaniumPropertyFileConfiguration::TitaniumPropertyFileConfiguration()
 
 TitaniumPropertyFileConfiguration::TitaniumPropertyFileConfiguration(std::istream& istr)
 {
-	load(istr);
+    load(istr);
 }
 
-	
+    
 TitaniumPropertyFileConfiguration::TitaniumPropertyFileConfiguration(const std::string& path)
 {
-	load(path);
+    load(path);
 }
 
 
@@ -68,115 +68,115 @@ TitaniumPropertyFileConfiguration::~TitaniumPropertyFileConfiguration()
 {
 }
 
-	
+    
 void TitaniumPropertyFileConfiguration::load(std::istream& istr)
 {
-	clear();
-	while (!istr.eof())
-	{
-		parseLine(istr);
-	}
+    clear();
+    while (!istr.eof())
+    {
+        parseLine(istr);
+    }
 }
 
-	
+    
 void TitaniumPropertyFileConfiguration::load(const std::string& path)
 {
-	Poco::FileInputStream istr(path);
-	if (istr.good())
-		load(istr);
-	else
-		throw Poco::OpenFileException(path);
+    Poco::FileInputStream istr(path);
+    if (istr.good())
+        load(istr);
+    else
+        throw Poco::OpenFileException(path);
 }
 
 
 void TitaniumPropertyFileConfiguration::save(std::ostream& ostr) const
 {
-	TitaniumMapConfiguration::iterator it = begin();
-	TitaniumMapConfiguration::iterator ed = end();
-	while (it != ed)
-	{
-		ostr << it->first << ": " << it->second << "\n";
-		++it;
-	}
+    TitaniumMapConfiguration::iterator it = begin();
+    TitaniumMapConfiguration::iterator ed = end();
+    while (it != ed)
+    {
+        ostr << it->first << ": " << it->second << "\n";
+        ++it;
+    }
 }
 
 
 void TitaniumPropertyFileConfiguration::save(const std::string& path) const
 {
-	Poco::FileOutputStream ostr(path);
-	if (ostr.good())
-	{
-		Poco::OutputLineEndingConverter lec(ostr);
-		save(lec);
-		lec.flush();
-		ostr.flush();
-		if (!ostr.good()) throw Poco::WriteFileException(path);
-	}
-	else throw Poco::CreateFileException(path);
+    Poco::FileOutputStream ostr(path);
+    if (ostr.good())
+    {
+        Poco::OutputLineEndingConverter lec(ostr);
+        save(lec);
+        lec.flush();
+        ostr.flush();
+        if (!ostr.good()) throw Poco::WriteFileException(path);
+    }
+    else throw Poco::CreateFileException(path);
 }
 
 
 void TitaniumPropertyFileConfiguration::parseLine(std::istream& istr)
 {
-	static const int eof = std::char_traits<char>::eof(); 
+    static const int eof = std::char_traits<char>::eof(); 
 
-	int c = istr.get();
-	while (c != eof && std::isspace((char) c)) c = istr.get();
-	if (c != eof)
-	{
-		if (c == '#' || c == '!')
-		{
-			while (c != eof && c != '\n' && c != '\r') c = istr.get();
-		}
-		else
-		{
-			std::string key;
-			while (c != eof && c != '=' && c != ':' && c != '\r' && c != '\n') { key += (char) c; c = istr.get(); }
-			std::string value;
-			if (c == '=' || c == ':')
-			{
-				c = readChar(istr);
-				while (c != eof && c) { value += (char) c; c = readChar(istr); }
-			}
-			setRaw(trim(key), trim(value));
-		}
-	}
+    int c = istr.get();
+    while (c != eof && std::isspace((char) c)) c = istr.get();
+    if (c != eof)
+    {
+        if (c == '#' || c == '!')
+        {
+            while (c != eof && c != '\n' && c != '\r') c = istr.get();
+        }
+        else
+        {
+            std::string key;
+            while (c != eof && c != '=' && c != ':' && c != '\r' && c != '\n') { key += (char) c; c = istr.get(); }
+            std::string value;
+            if (c == '=' || c == ':')
+            {
+                c = readChar(istr);
+                while (c != eof && c) { value += (char) c; c = readChar(istr); }
+            }
+            setRaw(trim(key), trim(value));
+        }
+    }
 }
 
 
 int TitaniumPropertyFileConfiguration::readChar(std::istream& istr)
 {
-	for (;;)
-	{
-		int c = istr.get();
-		if (c == '\\')
-		{
-			c = istr.get();
-			switch (c)
-			{
-			case 't':
-				return '\t';
-			case 'r':
-				return '\r';
-			case 'n':
-				return '\n';
-			case 'f':
-				return '\f';
-			case '\r':
-				if (istr.peek() == '\n')
-					istr.get();
-				continue;
-			case '\n':
-				continue;
-			default:
-				return c;
-			}
-		}
-		else if (c == '\n' || c == '\r')
-			return 0;
-		else
-			return c;
-	}
+    for (;;)
+    {
+        int c = istr.get();
+        if (c == '\\')
+        {
+            c = istr.get();
+            switch (c)
+            {
+            case 't':
+                return '\t';
+            case 'r':
+                return '\r';
+            case 'n':
+                return '\n';
+            case 'f':
+                return '\f';
+            case '\r':
+                if (istr.peek() == '\n')
+                    istr.get();
+                continue;
+            case '\n':
+                continue;
+            default:
+                return c;
+            }
+        }
+        else if (c == '\n' || c == '\r')
+            return 0;
+        else
+            return c;
+    }
 }
 
 

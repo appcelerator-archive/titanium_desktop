@@ -24,21 +24,21 @@ void TrayClickedCallback(GtkStatusIcon*, gpointer);
 void TrayMenuCallback(GtkStatusIcon*, guint, guint, gpointer);
 
 TrayItemGtk::TrayItemGtk(std::string& iconURL, KMethodRef cb)
-	: TrayItem(iconURL)
-	, item(gtk_status_icon_new())
-	, menu(0)
-	, callback(cb)
-	, active(true)
+    : TrayItem(iconURL)
+    , item(gtk_status_icon_new())
+    , menu(0)
+    , callback(cb)
+    , active(true)
 {
-	g_signal_connect(
-		G_OBJECT(this->item), "activate",
-		G_CALLBACK(TrayClickedCallback), this);
-	g_signal_connect(
-		G_OBJECT(this->item), "popup-menu",
-		G_CALLBACK(TrayMenuCallback), this);
+    g_signal_connect(
+        G_OBJECT(this->item), "activate",
+        G_CALLBACK(TrayClickedCallback), this);
+    g_signal_connect(
+        G_OBJECT(this->item), "popup-menu",
+        G_CALLBACK(TrayMenuCallback), this);
 
-	this->SetIcon(this->iconPath);
-	gtk_status_icon_set_visible(this->item, TRUE);
+    this->SetIcon(this->iconPath);
+    gtk_status_icon_set_visible(this->item, TRUE);
 }
 
 TrayItemGtk::~TrayItemGtk()
@@ -47,91 +47,91 @@ TrayItemGtk::~TrayItemGtk()
 
 void TrayItemGtk::SetIcon(std::string& iconPath)
 {
-	if (active) {
-		if (iconPath.empty()) {
-			gtk_status_icon_set_from_file(this->item, NULL);
-		} else {
-			gtk_status_icon_set_from_file(this->item, iconPath.c_str());
-		}
-	}
+    if (active) {
+        if (iconPath.empty()) {
+            gtk_status_icon_set_from_file(this->item, NULL);
+        } else {
+            gtk_status_icon_set_from_file(this->item, iconPath.c_str());
+        }
+    }
 }
 
 void TrayItemGtk::SetMenu(AutoPtr<Menu> menu)
 {
-	this->menu = menu.cast<MenuGtk>();
+    this->menu = menu.cast<MenuGtk>();
 }
 
 void TrayItemGtk::SetHint(std::string& hint)
 {
-	if (active) {
-		if (hint.empty()) {
-			gtk_status_icon_set_tooltip(this->item, NULL);
-		} else {
-			gtk_status_icon_set_tooltip(this->item, hint.c_str());
-		}
-	}
+    if (active) {
+        if (hint.empty()) {
+            gtk_status_icon_set_tooltip(this->item, NULL);
+        } else {
+            gtk_status_icon_set_tooltip(this->item, hint.c_str());
+        }
+    }
 }
 
 void TrayItemGtk::Remove()
 {
-	if (active) {
-		this->active = false;
-		g_object_unref(this->item);
-	}
+    if (active) {
+        this->active = false;
+        g_object_unref(this->item);
+    }
 }
 
 GtkStatusIcon* TrayItemGtk::GetWidget()
 {
-	if (active)
-		return this->item;
-	else
-		return NULL;
+    if (active)
+        return this->item;
+    else
+        return NULL;
 }
 
 AutoPtr<MenuGtk> TrayItemGtk::GetMenu()
 {
-	return this->menu;
+    return this->menu;
 }
 
 KMethodRef TrayItemGtk::GetCallback()
 {
-	return this->callback;
+    return this->callback;
 }
 
 void TrayClickedCallback(GtkStatusIcon *status_icon, gpointer data)
 {
-	TrayItemGtk* item = static_cast<TrayItemGtk*>(data);
-	KMethodRef cb = item->GetCallback();
+    TrayItemGtk* item = static_cast<TrayItemGtk*>(data);
+    KMethodRef cb = item->GetCallback();
 
-	if (cb.isNull())
-		return;
+    if (cb.isNull())
+        return;
 
-	try {
-		ValueList args;
-		cb->Call(args);
+    try {
+        ValueList args;
+        cb->Call(args);
 
-	} catch (ValueException& e) {
-		Logger* logger = Logger::Get("UI.TrayItemGtk");
-		SharedString ss = e.DisplayString();
-		logger->Error("Tray icon callback failed: %s", ss->c_str());
-	}
+    } catch (ValueException& e) {
+        Logger* logger = Logger::Get("UI.TrayItemGtk");
+        SharedString ss = e.DisplayString();
+        logger->Error("Tray icon callback failed: %s", ss->c_str());
+    }
 }
 
 void TrayMenuCallback(
-	GtkStatusIcon *status_icon, guint button,
-	guint activate_time, gpointer data)
+    GtkStatusIcon *status_icon, guint button,
+    guint activate_time, gpointer data)
 {
-	TrayItemGtk* item = static_cast<TrayItemGtk*>(data);
-	GtkStatusIcon* trayWidget = item->GetWidget();
-	AutoPtr<MenuGtk> menu = item->GetMenu();
+    TrayItemGtk* item = static_cast<TrayItemGtk*>(data);
+    GtkStatusIcon* trayWidget = item->GetWidget();
+    AutoPtr<MenuGtk> menu = item->GetMenu();
 
-	if (!menu.isNull()) {
-		::GtkMenu* nativeMenu = (::GtkMenu*) menu->CreateNative(false);
-		gtk_menu_popup(
-			nativeMenu, NULL, NULL,
-			gtk_status_icon_position_menu,
-			trayWidget, button, activate_time);
-	}
+    if (!menu.isNull()) {
+        ::GtkMenu* nativeMenu = (::GtkMenu*) menu->CreateNative(false);
+        gtk_menu_popup(
+            nativeMenu, NULL, NULL,
+            gtk_status_icon_position_menu,
+            trayWidget, button, activate_time);
+    }
 }
 
 } // namespace Titanium

@@ -23,7 +23,7 @@
 namespace Titanium {
 
 MediaWin::MediaWin(KObjectRef global)
-	: Media(global)
+    : Media(global)
 {
 }
 
@@ -33,12 +33,12 @@ MediaWin::~MediaWin()
 
 void MediaWin::Beep()
 {
-	MessageBeep(MB_OK);
+    MessageBeep(MB_OK);
 }
 
 KObjectRef MediaWin::CreateSound(std::string& url)
 {
-	return new SoundWin(url);
+    return new SoundWin(url);
 }
 
 } // namespace Titanium

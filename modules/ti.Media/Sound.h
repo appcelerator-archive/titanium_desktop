@@ -23,51 +23,51 @@ namespace Titanium {
 
 class Sound : public StaticBoundObject {
 public:
-	Sound(std::string& url);
-	virtual ~Sound();
+    Sound(std::string& url);
+    virtual ~Sound();
 
-	void Play(const ValueList& args, KValueRef result);
-	void Pause(const ValueList& args, KValueRef result);
-	void Stop(const ValueList& args, KValueRef result);
-	void Reload(const ValueList& args, KValueRef result);
-	void SetVolume(const ValueList& args, KValueRef result);
-	void GetVolume(const ValueList& args, KValueRef result);
-	void SetLooping(const ValueList& args, KValueRef result);
-	void IsLooping(const ValueList& args, KValueRef result);
-	void IsPlaying(const ValueList& args, KValueRef result);
-	void IsPaused(const ValueList& args, KValueRef result);
-	void SetOnComplete(const ValueList& args, KValueRef result);
+    void Play(const ValueList& args, KValueRef result);
+    void Pause(const ValueList& args, KValueRef result);
+    void Stop(const ValueList& args, KValueRef result);
+    void Reload(const ValueList& args, KValueRef result);
+    void SetVolume(const ValueList& args, KValueRef result);
+    void GetVolume(const ValueList& args, KValueRef result);
+    void SetLooping(const ValueList& args, KValueRef result);
+    void IsLooping(const ValueList& args, KValueRef result);
+    void IsPlaying(const ValueList& args, KValueRef result);
+    void IsPaused(const ValueList& args, KValueRef result);
+    void SetOnComplete(const ValueList& args, KValueRef result);
 
-	void Play();
-	void Pause();
-	void Stop();
-	void Reload();
-	void SetVolume(double newVolume);
-	double GetVolume();
-	void SetLooping(bool newLooping);
-	bool IsLooping();
-	bool IsPlaying();
-	bool IsPaused();
-	void SetOnComplete(KMethodRef newCallback);
-	void Load();
-	void Unload();
-	void SoundCompletedIteration();
+    void Play();
+    void Pause();
+    void Stop();
+    void Reload();
+    void SetVolume(double newVolume);
+    double GetVolume();
+    void SetLooping(bool newLooping);
+    bool IsLooping();
+    bool IsPlaying();
+    bool IsPaused();
+    void SetOnComplete(KMethodRef newCallback);
+    void Load();
+    void Unload();
+    void SoundCompletedIteration();
 
-	virtual void LoadImpl() = 0;
-	virtual void UnloadImpl() = 0;
-	virtual void PlayImpl() = 0;
-	virtual void PauseImpl() = 0;
-	virtual void StopImpl() = 0;
-	virtual void SetVolumeImpl(double volume) = 0;
-	virtual double GetVolumeImpl() = 0;;
+    virtual void LoadImpl() = 0;
+    virtual void UnloadImpl() = 0;
+    virtual void PlayImpl() = 0;
+    virtual void PauseImpl() = 0;
+    virtual void StopImpl() = 0;
+    virtual void SetVolumeImpl(double volume) = 0;
+    virtual double GetVolumeImpl() = 0;;
 
 protected:
-	enum SoundState { PLAYING, PAUSED, STOPPED, END_OF_ITERATION };
-	SoundState state;
-	std::string url;
-	std::string path;
-	KMethodRef callback;
-	bool looping;
+    enum SoundState { PLAYING, PAUSED, STOPPED, END_OF_ITERATION };
+    SoundState state;
+    std::string url;
+    std::string path;
+    KMethodRef callback;
+    bool looping;
 };
 
 } // namespace Titanium

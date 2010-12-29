@@ -27,92 +27,92 @@ namespace Titanium {
 
 void NormalizeURLCallback(const char* url, char* buffer, int bufferLength)
 {
-	strncpy(buffer, url, bufferLength);
-	buffer[bufferLength - 1] = '\0';
+    strncpy(buffer, url, bufferLength);
+    buffer[bufferLength - 1] = '\0';
 
-	string urlString = url;
-	string normalized = URLUtils::NormalizeURL(urlString);
-	if (normalized != urlString)
-	{
-		strncpy(buffer, normalized.c_str(), bufferLength);
-		buffer[bufferLength - 1] = '\0';
-	}
+    string urlString = url;
+    string normalized = URLUtils::NormalizeURL(urlString);
+    if (normalized != urlString)
+    {
+        strncpy(buffer, normalized.c_str(), bufferLength);
+        buffer[bufferLength - 1] = '\0';
+    }
 }
 
 void URLToFileURLCallback(const char* url, char* buffer, int bufferLength)
 {
-	strncpy(buffer, url, bufferLength);
-	buffer[bufferLength - 1] = '\0';
+    strncpy(buffer, url, bufferLength);
+    buffer[bufferLength - 1] = '\0';
 
-	try
-	{
-		string newURL = url;
-		string path = URLUtils::URLToPath(newURL);
-		if (path != newURL)
-			newURL = URLUtils::PathToFileURL(path);
+    try
+    {
+        string newURL = url;
+        string path = URLUtils::URLToPath(newURL);
+        if (path != newURL)
+            newURL = URLUtils::PathToFileURL(path);
 
-		strncpy(buffer, newURL.c_str(), bufferLength);
-		buffer[bufferLength - 1] = '\0';
-	}
-	catch (ValueException& e)
-	{
-		SharedString ss = e.DisplayString();
-		kroll::Logger* log = kroll::Logger::Get("UI.URL");
-		log->Error("Could not convert %s to a path: %s", url, ss->c_str());
-	}
-	catch (...)
-	{
-		kroll::Logger* log = kroll::Logger::Get("UI.URL");
-		log->Error("Could not convert %s to a path", url);
-	}
+        strncpy(buffer, newURL.c_str(), bufferLength);
+        buffer[bufferLength - 1] = '\0';
+    }
+    catch (ValueException& e)
+    {
+        SharedString ss = e.DisplayString();
+        kroll::Logger* log = kroll::Logger::Get("UI.URL");
+        log->Error("Could not convert %s to a path: %s", url, ss->c_str());
+    }
+    catch (...)
+    {
+        kroll::Logger* log = kroll::Logger::Get("UI.URL");
+        log->Error("Could not convert %s to a path", url);
+    }
 }
 
 void ProxyForURLCallback(const char* url, char* buffer, int bufferLength)
 {
-	buffer[bufferLength - 1] = '\0';
+    buffer[bufferLength - 1] = '\0';
 
-	std::string urlString(url);
-	SharedProxy proxy(ProxyConfig::GetProxyForURL(urlString));
-	if (proxy.isNull())
-		strncpy(buffer, "direct://", bufferLength);
-	else
-		strncpy(buffer, proxy->ToString().c_str(), bufferLength);
+    std::string urlString(url);
+    SharedProxy proxy(ProxyConfig::GetProxyForURL(urlString));
+    if (proxy.isNull())
+        strncpy(buffer, "direct://", bufferLength);
+    else
+        strncpy(buffer, proxy->ToString().c_str(), bufferLength);
 }
 
 int CanPreprocessURLCallback(const char* url)
 {
-	return Script::GetInstance()->CanPreprocess(url);
+    return Script::GetInstance()->CanPreprocess(url);
 }
 
 char* PreprocessURLCallback(const char* url, KeyValuePair* headers, char** mimeType)
 {
-	kroll::Logger* logger = kroll::Logger::Get("UI.URL");
+    kroll::Logger* logger = kroll::Logger::Get("UI.URL");
 
-	KObjectRef scope = new StaticBoundObject();
-	KObjectRef kheaders = new StaticBoundObject();
-	while (headers->key)
-	{
-		kheaders->SetString(headers->key, headers->value);
-		headers++;
-	}
+    KObjectRef scope = new StaticBoundObject();
+    KObjectRef kheaders = new StaticBoundObject();
+    while (headers->key)
+    {
+        kheaders->SetString(headers->key, headers->value);
+        headers++;
+    }
 
-	try
-	{
-		AutoPtr<PreprocessData> result = 
-			Script::GetInstance()->Preprocess(url, scope);
-		*mimeType = strdup(result->mimeType.c_str());
-		return strdup(result->data->Pointer());
-	}
-	catch (ValueException& e)
-	{
-		logger->Error("Error in preprocessing: %s", e.ToString().c_str());
-	}
-	catch (...)
-	{
-		logger->Error("Unknown Error in preprocessing");
-	}
+    try
+    {
+        AutoPtr<PreprocessData> result = 
+            Script::GetInstance()->Preprocess(url, scope);
+        *mimeType = strdup(result->mimeType.c_str());
+        return strdup(result->data->Pointer());
+    }
+    catch (ValueException& e)
+    {
+        logger->Error("Error in preprocessing: %s", e.ToString().c_str());
+    }
+    catch (...)
+    {
+        logger->Error("Unknown Error in preprocessing");
+    }
 
-	return NULL;
+    return NULL;
 }
 
 } // namespace Titanium

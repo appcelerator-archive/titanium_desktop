@@ -22,26 +22,26 @@
 
 -(id)initWithMenuItem:(Titanium::MenuItemMac*)inMenuItem
 {
-	if ([super init]) {
-		menuItem = inMenuItem;
-	}
-	return self;
+    if ([super init]) {
+        menuItem = inMenuItem;
+    }
+    return self;
 }
 
 -(void)dealloc
 {
-	menuItem = nil;
-	[super dealloc];
+    menuItem = nil;
+    [super dealloc];
 }
 
 -(void)invoke:(id)sender
 {
-	menuItem->HandleClickEvent(NULL);
+    menuItem->HandleClickEvent(NULL);
 }
 
 -(Titanium::MenuItemMac*)getMenuItem
 {
-	return menuItem;
+    return menuItem;
 }
 
 @end

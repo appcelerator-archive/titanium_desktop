@@ -29,12 +29,12 @@ namespace Titanium {
 
 class MediaGStreamer : public Media {
 public:
-	MediaGStreamer(KObjectRef);
-	~MediaGStreamer();
+    MediaGStreamer(KObjectRef);
+    ~MediaGStreamer();
 
 protected:
-	void Beep();
-	KObjectRef CreateSound(std::string&);
+    void Beep();
+    KObjectRef CreateSound(std::string&);
 };
 
 } // namespace Titanium

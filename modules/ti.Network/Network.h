@@ -29,47 +29,47 @@ class Host;
 
 class Network : public KAccessorObject {
 public:
-	Network();
-	virtual ~Network();
+    Network();
+    virtual ~Network();
 
-	bool HasNetworkStatusListeners();
-	void NetworkStatusChange(bool online);
-	void Shutdown();
+    bool HasNetworkStatusListeners();
+    void NetworkStatusChange(bool online);
+    void Shutdown();
 
-	static const std::string& GetFirstIPAddress();
+    static const std::string& GetFirstIPAddress();
 
 private:
-	struct Listener {
-		KMethodRef callback;
-		long id;
-	};
+    struct Listener {
+        KMethodRef callback;
+        long id;
+    };
 
-	AutoPtr<Host> GetHostBinding(const std::string& host);
+    AutoPtr<Host> GetHostBinding(const std::string& host);
 
-	void _GetFirstMACAddress(const ValueList& args, KValueRef result);
-	void _GetFirstIPAddress(const ValueList& args, KValueRef result);
-	void _GetInterfaces(const ValueList& args, KValueRef result);
-	void _CreateIPAddress(const ValueList& args, KValueRef result);
-	void _CreateTCPSocket(const ValueList& args, KValueRef result);
-	void _CreateTCPServerSocket(const ValueList& args, KValueRef result);
-	void _CreateIRCClient(const ValueList& args, KValueRef result);
-	void _CreateHTTPClient(const ValueList& args, KValueRef result);
-	void _CreateHTTPServer(const ValueList& args, KValueRef result);
-	void _CreateHTTPCookie(const ValueList& args, KValueRef result);
-	void _EncodeURIComponent(const ValueList &args, KValueRef result);
-	void _DecodeURIComponent(const ValueList &args, KValueRef result);
-	void _GetHostByName(const ValueList& args, KValueRef result);
-	void _GetHostByAddress(const ValueList& args, KValueRef result);
-	void _AddConnectivityListener(const ValueList& args, KValueRef result);
-	void _RemoveConnectivityListener(const ValueList& args, KValueRef result);
-	void _SetHTTPProxy(const ValueList& args, KValueRef result);
-	void _SetHTTPSProxy(const ValueList& args, KValueRef result);
-	void _GetHTTPProxy(const ValueList& args, KValueRef result);
-	void _GetHTTPSProxy(const ValueList& args, KValueRef result);
+    void _GetFirstMACAddress(const ValueList& args, KValueRef result);
+    void _GetFirstIPAddress(const ValueList& args, KValueRef result);
+    void _GetInterfaces(const ValueList& args, KValueRef result);
+    void _CreateIPAddress(const ValueList& args, KValueRef result);
+    void _CreateTCPSocket(const ValueList& args, KValueRef result);
+    void _CreateTCPServerSocket(const ValueList& args, KValueRef result);
+    void _CreateIRCClient(const ValueList& args, KValueRef result);
+    void _CreateHTTPClient(const ValueList& args, KValueRef result);
+    void _CreateHTTPServer(const ValueList& args, KValueRef result);
+    void _CreateHTTPCookie(const ValueList& args, KValueRef result);
+    void _EncodeURIComponent(const ValueList &args, KValueRef result);
+    void _DecodeURIComponent(const ValueList &args, KValueRef result);
+    void _GetHostByName(const ValueList& args, KValueRef result);
+    void _GetHostByAddress(const ValueList& args, KValueRef result);
+    void _AddConnectivityListener(const ValueList& args, KValueRef result);
+    void _RemoveConnectivityListener(const ValueList& args, KValueRef result);
+    void _SetHTTPProxy(const ValueList& args, KValueRef result);
+    void _SetHTTPSProxy(const ValueList& args, KValueRef result);
+    void _GetHTTPProxy(const ValueList& args, KValueRef result);
+    void _GetHTTPSProxy(const ValueList& args, KValueRef result);
 
-	KObjectRef global;
-	std::vector<Listener> listeners;
-	NetworkStatus* netStatus;
+    KObjectRef global;
+    std::vector<Listener> listeners;
+    NetworkStatus* netStatus;
 };
 
 } // namespace Titanium

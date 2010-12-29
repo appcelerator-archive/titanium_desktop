@@ -23,10 +23,10 @@ namespace Titanium {
 
 class EXPORT CodecModule : public kroll::Module
 {
-	KROLL_MODULE_CLASS(CodecModule)
-	
+    KROLL_MODULE_CLASS(CodecModule)
+    
 private:
-	kroll::KObjectRef binding;
+    kroll::KObjectRef binding;
 };
 
 } // namespace Titanium

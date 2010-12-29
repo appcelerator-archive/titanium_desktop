@@ -31,25 +31,25 @@ namespace Titanium {
 
 class HTTPServer : public StaticBoundObject {
 public:
-	HTTPServer();
-	virtual ~HTTPServer();
+    HTTPServer();
+    virtual ~HTTPServer();
 
-private:	
-	static void Run(void*);
-	
-	void Bind(const ValueList& args, KValueRef result);
-	void Close(const ValueList& args, KValueRef result);
-	void IsClosed(const ValueList& args, KValueRef result);
-	
-	void Close();
+private:    
+    static void Run(void*);
+    
+    void Bind(const ValueList& args, KValueRef result);
+    void Close(const ValueList& args, KValueRef result);
+    void IsClosed(const ValueList& args, KValueRef result);
+    
+    void Close();
 
-	KObjectRef global;
-	KMethodRef callback;
-	std::string ipaddress;
-	int port;
-	Poco::Thread *thread;
-	Poco::Net::ServerSocket *socket;
-	Poco::Net::HTTPServer *connection;
+    KObjectRef global;
+    KMethodRef callback;
+    std::string ipaddress;
+    int port;
+    Poco::Thread *thread;
+    Poco::Net::ServerSocket *socket;
+    Poco::Net::HTTPServer *connection;
 };
 
 } // namespace Titanium

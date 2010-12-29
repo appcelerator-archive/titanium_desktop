@@ -33,33 +33,33 @@ namespace Titanium {
 
 class Notification : public KAccessorObject {
 public:
-	Notification();
-	~Notification();
+    Notification();
+    ~Notification();
 
-	void Configure(KObjectRef properties);
+    void Configure(KObjectRef properties);
 
-	static bool InitializeImpl();
-	static void ShutdownImpl();
-	void CreateImpl();
-	void DestroyImpl();
-	bool ShowImpl();
-	bool HideImpl();
+    static bool InitializeImpl();
+    static void ShutdownImpl();
+    void CreateImpl();
+    void DestroyImpl();
+    bool ShowImpl();
+    bool HideImpl();
 
 private:
-	void _SetTitle(const ValueList& args, KValueRef result);
-	void _SetMessage(const ValueList& args, KValueRef result);
-	void _SetIcon(const ValueList& args, KValueRef result);
-	void _SetTimeout(const ValueList& args, KValueRef result);
-	void _SetCallback(const ValueList& args, KValueRef result);
-	void _Show(const ValueList& args, KValueRef result);
-	void _Hide(const ValueList& args, KValueRef result);
+    void _SetTitle(const ValueList& args, KValueRef result);
+    void _SetMessage(const ValueList& args, KValueRef result);
+    void _SetIcon(const ValueList& args, KValueRef result);
+    void _SetTimeout(const ValueList& args, KValueRef result);
+    void _SetCallback(const ValueList& args, KValueRef result);
+    void _Show(const ValueList& args, KValueRef result);
+    void _Hide(const ValueList& args, KValueRef result);
 
-	std::string title;
-	std::string message;
-	std::string iconURL;
-	int timeout;
-	KMethodRef clickedCallback;
-	PlatformNotification notification;
+    std::string title;
+    std::string message;
+    std::string iconURL;
+    int timeout;
+    KMethodRef clickedCallback;
+    PlatformNotification notification;
 };
 
 typedef AutoPtr<Notification> AutoNotification;

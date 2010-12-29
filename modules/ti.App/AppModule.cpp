@@ -28,38 +28,38 @@ KROLL_MODULE(AppModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 static Logger* GetLogger()
 {
-	static Logger* logger = Logger::Get("App");
-	return logger;
+    static Logger* logger = Logger::Get("App");
+    return logger;
 }
 
 void AppModule::Initialize()
 {
-	// Nudge the creation of the first app config instance.
-	ApplicationConfig* config = ApplicationConfig::Instance();
-	if (config)
-		GetLogger()->Debug("Loaded config file successfully");
+    // Nudge the creation of the first app config instance.
+    ApplicationConfig* config = ApplicationConfig::Instance();
+    if (config)
+        GetLogger()->Debug("Loaded config file successfully");
 
-	KObjectRef global(host->GetGlobalObject());
-	KObjectRef binding = new Application(host, host->GetGlobalObject());
-	host->GetGlobalObject()->SetObject("App", binding);
+    KObjectRef global(host->GetGlobalObject());
+    KObjectRef binding = new Application(host, host->GetGlobalObject());
+    host->GetGlobalObject()->SetObject("App", binding);
 
-	// Create the data directory for the app, if it doesn't exist.
-	std::string dataPath(host->GetApplication()->GetDataPath());
-	Poco::File dataPathFile(dataPath);
-	if (!dataPathFile.exists())
-		dataPathFile.createDirectories();
+    // Create the data directory for the app, if it doesn't exist.
+    std::string dataPath(host->GetApplication()->GetDataPath());
+    Poco::File dataPathFile(dataPath);
+    if (!dataPathFile.exists())
+        dataPathFile.createDirectories();
 
-	std::string propFilename(FileUtils::Join(
-		dataPath.c_str(), "application.properties", 0));
+    std::string propFilename(FileUtils::Join(
+        dataPath.c_str(), "application.properties", 0));
 
-	// @tiapi(property=True,type=App.Properties,name=App.Properties,since=0.2)
-	// @tiapi The application's private Properties object
-	binding->SetObject("Properties", new Properties(propFilename));
+    // @tiapi(property=True,type=App.Properties,name=App.Properties,since=0.2)
+    // @tiapi The application's private Properties object
+    binding->SetObject("Properties", new Properties(propFilename));
 }
 
 void AppModule::Stop()
 {
-	host->GetGlobalObject()->SetNull("App");
+    host->GetGlobalObject()->SetNull("App");
 }
 
 } // namespace Titanium

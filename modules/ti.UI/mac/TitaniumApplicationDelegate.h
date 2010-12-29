@@ -20,14 +20,14 @@
 
 @interface TitaniumApplicationDelegate : NSObject
 {
-	Titanium::UIMac *binding;
+    Titanium::UIMac *binding;
 }
 
 -(id)initWithBinding:(Titanium::UIMac*)binding;
 -(BOOL)application:(NSApplication*)theApplication
-	openFile:(NSString*)filename;
+    openFile:(NSString*)filename;
 -(BOOL)application:(NSApplication*)theApplication
-	openFiles:(NSArray*)filenames;
+    openFiles:(NSArray*)filenames;
 -(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender;
 
 @end

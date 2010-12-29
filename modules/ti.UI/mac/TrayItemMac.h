@@ -28,20 +28,20 @@ class MenuMac;
 
 class TrayItemMac: public TrayItem {
 public:
-	TrayItemMac(std::string& iconURL, KMethodRef cb);
-	virtual ~TrayItemMac();
+    TrayItemMac(std::string& iconURL, KMethodRef cb);
+    virtual ~TrayItemMac();
 
-	void SetIcon(std::string& iconPath);
-	void SetMenu(AutoPtr<Menu> menu);
-	void SetHint(std::string& hint);
-	void Remove();
-	void InvokeCallback();
+    void SetIcon(std::string& iconPath);
+    void SetMenu(AutoPtr<Menu> menu);
+    void SetHint(std::string& hint);
+    void Remove();
+    void InvokeCallback();
 
 private:
-	NSMenu* nativeMenu;
-	AutoPtr<MenuMac> menu;
-	KMethodRef callback;
-	NSStatusItem* nativeItem;
+    NSMenu* nativeMenu;
+    AutoPtr<MenuMac> menu;
+    KMethodRef callback;
+    NSStatusItem* nativeItem;
 };
 
 } // namespace Titanium

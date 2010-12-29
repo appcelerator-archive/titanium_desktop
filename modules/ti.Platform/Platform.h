@@ -23,26 +23,26 @@ namespace Titanium {
 
 class Platform : public KAccessorObject {
 public:
-	Platform();
+    Platform();
 
 private:
-	virtual ~Platform();
-	std::string GetVersionImpl();
-	bool OpenApplicationImpl(const std::string& path);
-	bool OpenURLImpl(const std::string& url);
-	void TakeScreenshotImpl(const std::string& targetFile);
+    virtual ~Platform();
+    std::string GetVersionImpl();
+    bool OpenApplicationImpl(const std::string& path);
+    bool OpenURLImpl(const std::string& url);
+    void TakeScreenshotImpl(const std::string& targetFile);
 
-	void _GetType(const ValueList& args, KValueRef result);
-	void _GetName(const ValueList& args, KValueRef result);
-	void _GetProcessorCount(const ValueList& args, KValueRef result);
-	void _GetVersion(const ValueList& args, KValueRef result);
-	void _GetArchitecture(const ValueList& args, KValueRef result);
-	void _GetMachineId(const ValueList& args, KValueRef result);
-	void _GetUsername(const ValueList& args, KValueRef result);
-	void _CreateUUID(const ValueList& args, KValueRef result);
-	void _OpenURL(const ValueList& args, KValueRef result);
-	void _OpenApplication(const ValueList& args, KValueRef result);
-	void _TakeScreenshot(const ValueList& args, KValueRef result);
+    void _GetType(const ValueList& args, KValueRef result);
+    void _GetName(const ValueList& args, KValueRef result);
+    void _GetProcessorCount(const ValueList& args, KValueRef result);
+    void _GetVersion(const ValueList& args, KValueRef result);
+    void _GetArchitecture(const ValueList& args, KValueRef result);
+    void _GetMachineId(const ValueList& args, KValueRef result);
+    void _GetUsername(const ValueList& args, KValueRef result);
+    void _CreateUUID(const ValueList& args, KValueRef result);
+    void _OpenURL(const ValueList& args, KValueRef result);
+    void _OpenApplication(const ValueList& args, KValueRef result);
+    void _TakeScreenshot(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

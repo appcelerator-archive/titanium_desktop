@@ -26,12 +26,12 @@ namespace Titanium {
 
 class HttpServerRequestFactory : public Poco::Net::HTTPRequestHandlerFactory {
 public:
-	HttpServerRequestFactory(KMethodRef callback);
-	virtual ~HttpServerRequestFactory();
-	
-	Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest &request);
+    HttpServerRequestFactory(KMethodRef callback);
+    virtual ~HttpServerRequestFactory();
+    
+    Poco::Net::HTTPRequestHandler* createRequestHandler(const Poco::Net::HTTPServerRequest &request);
 private:
-	KMethodRef callback;
+    KMethodRef callback;
 };
 
 } // namespace Titanium

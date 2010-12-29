@@ -39,23 +39,23 @@ namespace Titanium {
 
 class AsyncCopy : public StaticBoundObject {
 public:
-	AsyncCopy(Filesystem* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, KMethodRef callback);
-	virtual ~AsyncCopy();
+    AsyncCopy(Filesystem* parent,kroll::Host *host,std::vector<std::string> files, std::string destination, KMethodRef callback);
+    virtual ~AsyncCopy();
 
 private:
-	static void Run(void*);
+    static void Run(void*);
 
-	void ToString(const ValueList& args, KValueRef result);
-	void Cancel(const ValueList& args, KValueRef result);
-	void Copy(Poco::Path &src, Poco::Path &dest);
+    void ToString(const ValueList& args, KValueRef result);
+    void Cancel(const ValueList& args, KValueRef result);
+    void Copy(Poco::Path &src, Poco::Path &dest);
 
-	Filesystem* parent;
-	Host *host;
-	std::vector<std::string> files;
-	std::string destination;
-	KMethodRef callback;
-	Poco::Thread *thread;
-	bool stopped;
+    Filesystem* parent;
+    Host *host;
+    std::vector<std::string> files;
+    std::string destination;
+    KMethodRef callback;
+    Poco::Thread *thread;
+    bool stopped;
 };
 
 } // namespace Titanium

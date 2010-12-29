@@ -23,7 +23,7 @@ using namespace Poco::Net;
 namespace Titanium {
 
 HttpServerRequestFactory::HttpServerRequestFactory(KMethodRef callback)
-	: callback(callback)
+    : callback(callback)
 {
 }
 
@@ -33,7 +33,7 @@ HttpServerRequestFactory::~HttpServerRequestFactory()
 
 HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-	return new HttpServerRequest(callback, const_cast<Poco::Net::HTTPServerRequest&>(request));
+    return new HttpServerRequest(callback, const_cast<Poco::Net::HTTPServerRequest&>(request));
 }
 
 } // namespace Titanium

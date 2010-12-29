@@ -22,7 +22,7 @@ using namespace Titanium;
 
 @interface SoundDelegate : NSObject
 {
-	SoundMac* sound;
+    SoundMac* sound;
 }
 -(void)setOSXSound:(SoundMac*)sound;
 -(void)dealloc;

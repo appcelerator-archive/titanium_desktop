@@ -27,30 +27,30 @@ class MenuItemWin;
 
 class MenuWin : public Menu {
 public:
-	MenuWin();
-	~MenuWin();
+    MenuWin();
+    ~MenuWin();
 
-	void AppendItemImpl(AutoPtr<MenuItem> item);
-	void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index);
-	void RemoveItemAtImpl(unsigned int index);
-	void ClearImpl();
+    void AppendItemImpl(AutoPtr<MenuItem> item);
+    void InsertItemAtImpl(AutoPtr<MenuItem> item, unsigned int index);
+    void RemoveItemAtImpl(unsigned int index);
+    void ClearImpl();
 
-	void ClearNativeMenu(HMENU nativeMenu);
-	void DestroyNative(HMENU nativeMenu);
-	HMENU CreateNative(bool registerNative);
-	HMENU CreateNativeTopLevel(bool registerNative);
-	void AddChildrenToNativeMenu(HMENU nativeMenu, bool registerNative);
+    void ClearNativeMenu(HMENU nativeMenu);
+    void DestroyNative(HMENU nativeMenu);
+    HMENU CreateNative(bool registerNative);
+    HMENU CreateNativeTopLevel(bool registerNative);
+    void AddChildrenToNativeMenu(HMENU nativeMenu, bool registerNative);
 
-	static void InsertItemIntoNativeMenu(
-		MenuItemWin* menuItem, HMENU nativeMenu,
-		bool registerNative, int position=-1);
-	static void RemoveItemAtFromNativeMenu(
-		MenuItemWin* item, HMENU nativeMenu, int position);
-	static void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
+    static void InsertItemIntoNativeMenu(
+        MenuItemWin* menuItem, HMENU nativeMenu,
+        bool registerNative, int position=-1);
+    static void RemoveItemAtFromNativeMenu(
+        MenuItemWin* item, HMENU nativeMenu, int position);
+    static void ApplyNotifyByPositionStyleToNativeMenu(HMENU nativeMenu);
 
 private:
-	std::vector<AutoPtr<MenuItem> > oldChildren;
-	std::vector<HMENU> nativeMenus;
+    std::vector<AutoPtr<MenuItem> > oldChildren;
+    std::vector<HMENU> nativeMenus;
 };
 
 } // namespace Titanium

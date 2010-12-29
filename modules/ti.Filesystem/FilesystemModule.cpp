@@ -24,12 +24,12 @@ KROLL_MODULE(FilesystemModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 void FilesystemModule::Initialize()
 {
-	// load our variables
-	this->binding= new Filesystem(host,host->GetGlobalObject());
+    // load our variables
+    this->binding= new Filesystem(host,host->GetGlobalObject());
 
-	// set our ti.Filesystem
-	KValueRef value = Value::NewObject(this->binding);
-	host->GetGlobalObject()->Set("Filesystem",value);
+    // set our ti.Filesystem
+    KValueRef value = Value::NewObject(this->binding);
+    host->GetGlobalObject()->Set("Filesystem",value);
 }
 
 void FilesystemModule::Stop()

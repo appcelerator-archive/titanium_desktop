@@ -1,359 +1,359 @@
 // !$*UTF8*$!
 {
-	archiveVersion = 1;
-	classes = {
-	};
-	objectVersion = 45;
-	objects = {
+    archiveVersion = 1;
+    classes = {
+    };
+    objectVersion = 45;
+    objects = {
 
 /* Begin PBXBuildFile section */
-		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
-		24291A370F318D7A00DCB70A /* titanium.icns in Resources */ = {isa = PBXBuildFile; fileRef = 24291A360F318D7A00DCB70A /* titanium.icns */; };
-		24BEA3820F312E6B00DFDA8B /* Controller.mm in Sources */ = {isa = PBXBuildFile; fileRef = 24BEA3810F312E6B00DFDA8B /* Controller.mm */; };
-		24BEA3A90F3140F200DFDA8B /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 24BEA3A80F3140F200DFDA8B /* Downloader.m */; };
-		24BEA3D80F3145E300DFDA8B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */; };
-		24BEA5690F316CFD00DFDA8B /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 24BEA5680F316CFD00DFDA8B /* libcurl.dylib */; };
-		5B40F3980F98FAF300CAEFD3 /* dialog-warning.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */; };
-		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
-		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
-		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		B4B060730F7743B200B2AB8B /* file_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4B0605E0F77431A00B2AB8B /* file_utils.cpp */; };
+        1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
+        24291A370F318D7A00DCB70A /* titanium.icns in Resources */ = {isa = PBXBuildFile; fileRef = 24291A360F318D7A00DCB70A /* titanium.icns */; };
+        24BEA3820F312E6B00DFDA8B /* Controller.mm in Sources */ = {isa = PBXBuildFile; fileRef = 24BEA3810F312E6B00DFDA8B /* Controller.mm */; };
+        24BEA3A90F3140F200DFDA8B /* Downloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 24BEA3A80F3140F200DFDA8B /* Downloader.m */; };
+        24BEA3D80F3145E300DFDA8B /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */; };
+        24BEA5690F316CFD00DFDA8B /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 24BEA5680F316CFD00DFDA8B /* libcurl.dylib */; };
+        5B40F3980F98FAF300CAEFD3 /* dialog-warning.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */; };
+        8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+        8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
+        8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+        B4B060730F7743B200B2AB8B /* file_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4B0605E0F77431A00B2AB8B /* file_utils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
-		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		24291A360F318D7A00DCB70A /* titanium.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = titanium.icns; sourceTree = "<group>"; };
-		24BEA3800F312E6B00DFDA8B /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
-		24BEA3810F312E6B00DFDA8B /* Controller.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Controller.mm; sourceTree = "<group>"; };
-		24BEA3A70F3140F200DFDA8B /* Downloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
-		24BEA3A80F3140F200DFDA8B /* Downloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
-		24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
-		24BEA5680F316CFD00DFDA8B /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
-		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
-		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		32CA4F630368D1EE00C91783 /* installer_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = installer_Prefix.pch; sourceTree = "<group>"; };
-		5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dialog-warning.png"; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Installer App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Installer App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		B4B0605E0F77431A00B2AB8B /* file_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_utils.cpp; path = ../../../kroll/api/file_utils.cpp; sourceTree = SOURCE_ROOT; };
+        089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+        1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+        13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+        1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
+        24291A360F318D7A00DCB70A /* titanium.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = titanium.icns; sourceTree = "<group>"; };
+        24BEA3800F312E6B00DFDA8B /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = "<group>"; };
+        24BEA3810F312E6B00DFDA8B /* Controller.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = Controller.mm; sourceTree = "<group>"; };
+        24BEA3A70F3140F200DFDA8B /* Downloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Downloader.h; sourceTree = "<group>"; };
+        24BEA3A80F3140F200DFDA8B /* Downloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Downloader.m; sourceTree = "<group>"; };
+        24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
+        24BEA5680F316CFD00DFDA8B /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = usr/lib/libcurl.dylib; sourceTree = SDKROOT; };
+        29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+        29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+        29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+        32CA4F630368D1EE00C91783 /* installer_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = installer_Prefix.pch; sourceTree = "<group>"; };
+        5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "dialog-warning.png"; sourceTree = "<group>"; };
+        8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+        8D1107320486CEB800E47090 /* Installer App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Installer App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+        B4B0605E0F77431A00B2AB8B /* file_utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_utils.cpp; path = ../../../kroll/api/file_utils.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8D11072E0486CEB800E47090 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				24BEA3D80F3145E300DFDA8B /* SystemConfiguration.framework in Frameworks */,
-				24BEA5690F316CFD00DFDA8B /* libcurl.dylib in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        8D11072E0486CEB800E47090 /* Frameworks */ = {
+            isa = PBXFrameworksBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+                24BEA3D80F3145E300DFDA8B /* SystemConfiguration.framework in Frameworks */,
+                24BEA5690F316CFD00DFDA8B /* libcurl.dylib in Frameworks */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				24BEA3800F312E6B00DFDA8B /* Controller.h */,
-				24BEA3810F312E6B00DFDA8B /* Controller.mm */,
-				24BEA3A70F3140F200DFDA8B /* Downloader.h */,
-				24BEA3A80F3140F200DFDA8B /* Downloader.m */,
-			);
-			name = Classes;
-			sourceTree = "<group>";
-		};
-		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				24BEA5680F316CFD00DFDA8B /* libcurl.dylib */,
-				24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */,
-				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-			);
-			name = "Linked Frameworks";
-			sourceTree = "<group>";
-		};
-		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
-				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
-				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
-			);
-			name = "Other Frameworks";
-			sourceTree = "<group>";
-		};
-		19C28FACFE9D520D11CA2CBB /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				8D1107320486CEB800E47090 /* Installer App.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		29B97314FDCFA39411CA2CEA /* Installer App */ = {
-			isa = PBXGroup;
-			children = (
-				080E96DDFE201D6D7F000001 /* Classes */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
-				29B97317FDCFA39411CA2CEA /* Resources */,
-				29B97323FDCFA39411CA2CEA /* Frameworks */,
-				19C28FACFE9D520D11CA2CBB /* Products */,
-			);
-			name = "Installer App";
-			sourceTree = "<group>";
-		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
-			isa = PBXGroup;
-			children = (
-				32CA4F630368D1EE00C91783 /* installer_Prefix.pch */,
-				29B97316FDCFA39411CA2CEA /* main.m */,
-				B4B0605E0F77431A00B2AB8B /* file_utils.cpp */,
-			);
-			name = "Other Sources";
-			sourceTree = "<group>";
-		};
-		29B97317FDCFA39411CA2CEA /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */,
-				24291A360F318D7A00DCB70A /* titanium.icns */,
-				8D1107310486CEB800E47090 /* Info.plist */,
-				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
-				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
-		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
-				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
+        080E96DDFE201D6D7F000001 /* Classes */ = {
+            isa = PBXGroup;
+            children = (
+                24BEA3800F312E6B00DFDA8B /* Controller.h */,
+                24BEA3810F312E6B00DFDA8B /* Controller.mm */,
+                24BEA3A70F3140F200DFDA8B /* Downloader.h */,
+                24BEA3A80F3140F200DFDA8B /* Downloader.m */,
+            );
+            name = Classes;
+            sourceTree = "<group>";
+        };
+        1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+            isa = PBXGroup;
+            children = (
+                24BEA5680F316CFD00DFDA8B /* libcurl.dylib */,
+                24BEA3D70F3145E300DFDA8B /* SystemConfiguration.framework */,
+                1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+            );
+            name = "Linked Frameworks";
+            sourceTree = "<group>";
+        };
+        1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+            isa = PBXGroup;
+            children = (
+                29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+                13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
+                29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+            );
+            name = "Other Frameworks";
+            sourceTree = "<group>";
+        };
+        19C28FACFE9D520D11CA2CBB /* Products */ = {
+            isa = PBXGroup;
+            children = (
+                8D1107320486CEB800E47090 /* Installer App.app */,
+            );
+            name = Products;
+            sourceTree = "<group>";
+        };
+        29B97314FDCFA39411CA2CEA /* Installer App */ = {
+            isa = PBXGroup;
+            children = (
+                080E96DDFE201D6D7F000001 /* Classes */,
+                29B97315FDCFA39411CA2CEA /* Other Sources */,
+                29B97317FDCFA39411CA2CEA /* Resources */,
+                29B97323FDCFA39411CA2CEA /* Frameworks */,
+                19C28FACFE9D520D11CA2CBB /* Products */,
+            );
+            name = "Installer App";
+            sourceTree = "<group>";
+        };
+        29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+            isa = PBXGroup;
+            children = (
+                32CA4F630368D1EE00C91783 /* installer_Prefix.pch */,
+                29B97316FDCFA39411CA2CEA /* main.m */,
+                B4B0605E0F77431A00B2AB8B /* file_utils.cpp */,
+            );
+            name = "Other Sources";
+            sourceTree = "<group>";
+        };
+        29B97317FDCFA39411CA2CEA /* Resources */ = {
+            isa = PBXGroup;
+            children = (
+                5B40F3970F98FAF300CAEFD3 /* dialog-warning.png */,
+                24291A360F318D7A00DCB70A /* titanium.icns */,
+                8D1107310486CEB800E47090 /* Info.plist */,
+                089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+                1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
+            );
+            name = Resources;
+            sourceTree = "<group>";
+        };
+        29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+            isa = PBXGroup;
+            children = (
+                1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+                1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+            );
+            name = Frameworks;
+            sourceTree = "<group>";
+        };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8D1107260486CEB800E47090 /* Installer App */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Installer App" */;
-			buildPhases = (
-				8D1107290486CEB800E47090 /* Resources */,
-				8D11072C0486CEB800E47090 /* Sources */,
-				8D11072E0486CEB800E47090 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "Installer App";
-			productInstallPath = "$(HOME)/Applications";
-			productName = "Installer App";
-			productReference = 8D1107320486CEB800E47090 /* Installer App.app */;
-			productType = "com.apple.product-type.application";
-		};
+        8D1107260486CEB800E47090 /* Installer App */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Installer App" */;
+            buildPhases = (
+                8D1107290486CEB800E47090 /* Resources */,
+                8D11072C0486CEB800E47090 /* Sources */,
+                8D11072E0486CEB800E47090 /* Frameworks */,
+            );
+            buildRules = (
+            );
+            dependencies = (
+            );
+            name = "Installer App";
+            productInstallPath = "$(HOME)/Applications";
+            productName = "Installer App";
+            productReference = 8D1107320486CEB800E47090 /* Installer App.app */;
+            productType = "com.apple.product-type.application";
+        };
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		29B97313FDCFA39411CA2CEA /* Project object */ = {
-			isa = PBXProject;
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "installer" */;
-			compatibilityVersion = "Xcode 3.1";
-			hasScannedForEncodings = 1;
-			mainGroup = 29B97314FDCFA39411CA2CEA /* Installer App */;
-			projectDirPath = "";
-			projectRoot = "";
-			targets = (
-				8D1107260486CEB800E47090 /* Installer App */,
-			);
-		};
+        29B97313FDCFA39411CA2CEA /* Project object */ = {
+            isa = PBXProject;
+            buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "installer" */;
+            compatibilityVersion = "Xcode 3.1";
+            hasScannedForEncodings = 1;
+            mainGroup = 29B97314FDCFA39411CA2CEA /* Installer App */;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (
+                8D1107260486CEB800E47090 /* Installer App */,
+            );
+        };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8D1107290486CEB800E47090 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
-				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				24291A370F318D7A00DCB70A /* titanium.icns in Resources */,
-				5B40F3980F98FAF300CAEFD3 /* dialog-warning.png in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        8D1107290486CEB800E47090 /* Resources */ = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+                1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+                24291A370F318D7A00DCB70A /* titanium.icns in Resources */,
+                5B40F3980F98FAF300CAEFD3 /* dialog-warning.png in Resources */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		8D11072C0486CEB800E47090 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				24BEA3820F312E6B00DFDA8B /* Controller.mm in Sources */,
-				24BEA3A90F3140F200DFDA8B /* Downloader.m in Sources */,
-				B4B060730F7743B200B2AB8B /* file_utils.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
+        8D11072C0486CEB800E47090 /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (
+                8D11072D0486CEB800E47090 /* main.m in Sources */,
+                24BEA3820F312E6B00DFDA8B /* Controller.mm in Sources */,
+                24BEA3A90F3140F200DFDA8B /* Downloader.m in Sources */,
+                B4B060730F7743B200B2AB8B /* file_utils.cpp in Sources */,
+            );
+            runOnlyForDeploymentPostprocessing = 0;
+        };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				089C165DFE840E0CC02AAC07 /* English */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		1DDD58140DA1D0A300B32029 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				1DDD58150DA1D0A300B32029 /* English */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
+        089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+            isa = PBXVariantGroup;
+            children = (
+                089C165DFE840E0CC02AAC07 /* English */,
+            );
+            name = InfoPlist.strings;
+            sourceTree = "<group>";
+        };
+        1DDD58140DA1D0A300B32029 /* MainMenu.xib */ = {
+            isa = PBXVariantGroup;
+            children = (
+                1DDD58150DA1D0A300B32029 /* English */,
+            );
+            name = MainMenu.xib;
+            sourceTree = "<group>";
+        };
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		C01FCF4B08A954540054247B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = installer_Prefix.pch;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../build/osx\"",
-					"\"$(SRCROOT)\"",
-				);
-				PRODUCT_NAME = "Installer App";
-			};
-			name = Debug;
-		};
-		C01FCF4C08A954540054247B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = installer_Prefix.pch;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../build/osx\"",
-					"\"$(SRCROOT)\"",
-				);
-				PRODUCT_NAME = "Installer App";
-			};
-			name = Release;
-		};
-		C01FCF4F08A954540054247B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "";
-				LIBRARY_SEARCH_PATHS = "";
-				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-DOS_OSX=1",
-					"-D_OS_NAME=osx",
-					"-D_INSTALL_PREFIX=/usr/local",
-					"-D_PRODUCT_VERSION=0.3",
-					"-D_PRODUCT_NAME=Titanium",
-					"-D_GLOBAL_NS_VARNAME=Titanium",
-					"-D_CONFIG_FILENAME=tiapp.xml",
-					"-D_BOOT_RUNTIME_FLAG=--runtime",
-					"-D_BOOT_HOME_FLAG=--start",
-					"-D_BOOT_UPDATESITE_ENVNAME=TI_UPDATESITE",
-					"-DOS_32=1",
-					"-DDEBUG=1",
-				);
-				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
-				SDKROOT = macosx10.5;
-				USER_HEADER_SEARCH_PATHS = "../../../kroll/api ../../../kroll/";
-			};
-			name = Debug;
-		};
-		C01FCF5008A954540054247B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
-				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
-					"-DOS_OSX=1",
-					"-D_OS_NAME=osx",
-					"-D_INSTALL_PREFIX=/usr/local",
-					"-D_PRODUCT_VERSION=0.3",
-					"-D_PRODUCT_NAME=Titanium",
-					"-D_GLOBAL_NS_VARNAME=Titanium",
-					"-D_CONFIG_FILENAME=tiapp.xml",
-					"-D_BOOT_RUNTIME_FLAG=--runtime",
-					"-D_BOOT_HOME_FLAG=--start",
-					"-D_BOOT_UPDATESITE_ENVNAME=TI_UPDATESITE",
-					"-DOS_32=1",
-					"-DDEBUG=1",
-				);
-				OTHER_LDFLAGS = "";
-				PREBINDING = NO;
-				SDKROOT = macosx10.5;
-				USER_HEADER_SEARCH_PATHS = "../../../kroll/api ../../../kroll/";
-			};
-			name = Release;
-		};
+        C01FCF4B08A954540054247B /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                COPY_PHASE_STRIP = NO;
+                GCC_DYNAMIC_NO_PIC = NO;
+                GCC_ENABLE_FIX_AND_CONTINUE = YES;
+                GCC_MODEL_TUNING = G5;
+                GCC_OPTIMIZATION_LEVEL = 0;
+                GCC_PRECOMPILE_PREFIX_HEADER = YES;
+                GCC_PREFIX_HEADER = installer_Prefix.pch;
+                INFOPLIST_FILE = Info.plist;
+                INSTALL_PATH = "$(HOME)/Applications";
+                LIBRARY_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "\"$(SRCROOT)/../../../build/osx\"",
+                    "\"$(SRCROOT)\"",
+                );
+                PRODUCT_NAME = "Installer App";
+            };
+            name = Debug;
+        };
+        C01FCF4C08A954540054247B /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ALWAYS_SEARCH_USER_PATHS = NO;
+                DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+                GCC_MODEL_TUNING = G5;
+                GCC_PRECOMPILE_PREFIX_HEADER = YES;
+                GCC_PREFIX_HEADER = installer_Prefix.pch;
+                INFOPLIST_FILE = Info.plist;
+                INSTALL_PATH = "$(HOME)/Applications";
+                LIBRARY_SEARCH_PATHS = (
+                    "$(inherited)",
+                    "\"$(SRCROOT)/../../../build/osx\"",
+                    "\"$(SRCROOT)\"",
+                );
+                PRODUCT_NAME = "Installer App";
+            };
+            name = Release;
+        };
+        C01FCF4F08A954540054247B /* Debug */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+                GCC_C_LANGUAGE_STANDARD = c99;
+                GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+                GCC_OPTIMIZATION_LEVEL = 0;
+                GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                HEADER_SEARCH_PATHS = "";
+                LIBRARY_SEARCH_PATHS = "";
+                ONLY_ACTIVE_ARCH = YES;
+                OTHER_CPLUSPLUSFLAGS = (
+                    "$(OTHER_CFLAGS)",
+                    "-DOS_OSX=1",
+                    "-D_OS_NAME=osx",
+                    "-D_INSTALL_PREFIX=/usr/local",
+                    "-D_PRODUCT_VERSION=0.3",
+                    "-D_PRODUCT_NAME=Titanium",
+                    "-D_GLOBAL_NS_VARNAME=Titanium",
+                    "-D_CONFIG_FILENAME=tiapp.xml",
+                    "-D_BOOT_RUNTIME_FLAG=--runtime",
+                    "-D_BOOT_HOME_FLAG=--start",
+                    "-D_BOOT_UPDATESITE_ENVNAME=TI_UPDATESITE",
+                    "-DOS_32=1",
+                    "-DDEBUG=1",
+                );
+                OTHER_LDFLAGS = "";
+                PREBINDING = NO;
+                SDKROOT = macosx10.5;
+                USER_HEADER_SEARCH_PATHS = "../../../kroll/api ../../../kroll/";
+            };
+            name = Debug;
+        };
+        C01FCF5008A954540054247B /* Release */ = {
+            isa = XCBuildConfiguration;
+            buildSettings = {
+                ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+                GCC_C_LANGUAGE_STANDARD = c99;
+                GCC_INPUT_FILETYPE = sourcecode.cpp.objcpp;
+                GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
+                GCC_WARN_ABOUT_RETURN_TYPE = YES;
+                GCC_WARN_UNUSED_VARIABLE = YES;
+                LIBRARY_SEARCH_PATHS = "";
+                OTHER_CPLUSPLUSFLAGS = (
+                    "$(OTHER_CFLAGS)",
+                    "-DOS_OSX=1",
+                    "-D_OS_NAME=osx",
+                    "-D_INSTALL_PREFIX=/usr/local",
+                    "-D_PRODUCT_VERSION=0.3",
+                    "-D_PRODUCT_NAME=Titanium",
+                    "-D_GLOBAL_NS_VARNAME=Titanium",
+                    "-D_CONFIG_FILENAME=tiapp.xml",
+                    "-D_BOOT_RUNTIME_FLAG=--runtime",
+                    "-D_BOOT_HOME_FLAG=--start",
+                    "-D_BOOT_UPDATESITE_ENVNAME=TI_UPDATESITE",
+                    "-DOS_32=1",
+                    "-DDEBUG=1",
+                );
+                OTHER_LDFLAGS = "";
+                PREBINDING = NO;
+                SDKROOT = macosx10.5;
+                USER_HEADER_SEARCH_PATHS = "../../../kroll/api ../../../kroll/";
+            };
+            name = Release;
+        };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Installer App" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C01FCF4B08A954540054247B /* Debug */,
-				C01FCF4C08A954540054247B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "installer" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C01FCF4F08A954540054247B /* Debug */,
-				C01FCF5008A954540054247B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
+        C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Installer App" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                C01FCF4B08A954540054247B /* Debug */,
+                C01FCF4C08A954540054247B /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        C01FCF4E08A954540054247B /* Build configuration list for PBXProject "installer" */ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (
+                C01FCF4F08A954540054247B /* Debug */,
+                C01FCF5008A954540054247B /* Release */,
+            );
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
 /* End XCConfigurationList section */
-	};
-	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+    };
+    rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
 }

@@ -25,61 +25,61 @@
 
 - (NSMenu *)applicationDockMenu:(NSApplication *)sender
 {
-	AutoPtr<Titanium::MenuMac> menu = binding->GetDockMenu().cast<Titanium::MenuMac>();
-	if (!menu.isNull()) {
-		NSMenu* nativeMenu = menu->CreateNativeNow(false);
-		return nativeMenu;
-	} else {
-		return nil;
-	}
+    AutoPtr<Titanium::MenuMac> menu = binding->GetDockMenu().cast<Titanium::MenuMac>();
+    if (!menu.isNull()) {
+        NSMenu* nativeMenu = menu->CreateNativeNow(false);
+        return nativeMenu;
+    } else {
+        return nil;
+    }
 }
 
 - (id)initWithBinding:(Titanium::UIMac*)b
 {
-	self = [super init];
-	if (self)
-	{
-		binding = b;
-	}
-	return self;
+    self = [super init];
+    if (self)
+    {
+        binding = b;
+    }
+    return self;
 }
 
 -(BOOL)application:(NSApplication*)theApplication openFile:(NSString*)filename
 {
-	AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
-	AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
+    AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
+    AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
 
-	KListRef files(new StaticBoundList());
-	files->Append(Value::NewString([filename UTF8String]));
-	event->SetList("files", files);
+    KListRef files(new StaticBoundList());
+    files->Append(Value::NewString([filename UTF8String]));
+    event->SetList("files", files);
 
-	globalObject->FireEvent(event);
-	return YES;
+    globalObject->FireEvent(event);
+    return YES;
 }
 
 -(BOOL)application:(NSApplication*)theApplication openFiles:(NSArray*)filenames
 {
-	AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
-	AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
+    AutoPtr<GlobalObject> globalObject(GlobalObject::GetInstance());
+    AutoPtr<Event> event(globalObject->CreateEvent(Event::OPEN_REQUEST));
 
-	KListRef files(new StaticBoundList());
+    KListRef files(new StaticBoundList());
 
-	int arrayCount = [filenames count];
-	for (int i = 0; i < arrayCount; i++)
-	{
-		files->Append(Value::NewString(
-			[[filenames objectAtIndex:i] UTF8String]));
-	}
-	event->SetList("files", files);
+    int arrayCount = [filenames count];
+    for (int i = 0; i < arrayCount; i++)
+    {
+        files->Append(Value::NewString(
+            [[filenames objectAtIndex:i] UTF8String]));
+    }
+    event->SetList("files", files);
 
-	globalObject->FireEvent(event);
-	return YES;
+    globalObject->FireEvent(event);
+    return YES;
 }
 
 -(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender
 {
-	kroll::Host::GetInstance()->Exit(0);
-	return NO;
+    kroll::Host::GetInstance()->Exit(0);
+    return NO;
 }
 
 @end

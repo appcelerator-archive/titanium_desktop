@@ -5,4 +5,4 @@ Import('build env module')
 env.Append(CPPDEFINES = ('TITANIUM_MONKEY_API_EXPORT', 1))
 build.add_thirdparty(env, 'poco')
 build.mark_build_target(env.SharedLibrary(
-	path.join(module.dir, 'timonkeymodule'), Glob('*.cpp')))
+    path.join(module.dir, 'timonkeymodule'), Glob('*.cpp')))

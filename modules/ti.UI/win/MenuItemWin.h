@@ -28,38 +28,38 @@ class MenuWin;
 
 class MenuItemWin : public MenuItem {
 public:
-	// Pieces of information we can use to do a reverse lookup
-	// on an item's position in a parent menu.
-	struct NativeItemBits {
-		UINT id;
-		HMENU parentMenu;
-		HMENU submenu;
-	};
+    // Pieces of information we can use to do a reverse lookup
+    // on an item's position in a parent menu.
+    struct NativeItemBits {
+        UINT id;
+        HMENU parentMenu;
+        HMENU submenu;
+    };
 
-	MenuItemWin(MenuItemType type);
-	virtual ~MenuItemWin();
+    MenuItemWin(MenuItemType type);
+    virtual ~MenuItemWin();
 
-	void SetLabelImpl(std::string newLabel);
-	void SetIconImpl(std::string newIconPath);
-	void SetStateImpl(bool newState);
-	void SetCallbackImpl(KMethodRef callback);
-	void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
-	void SetEnabledImpl(bool enabled);
+    void SetLabelImpl(std::string newLabel);
+    void SetIconImpl(std::string newIconPath);
+    void SetStateImpl(bool newState);
+    void SetCallbackImpl(KMethodRef callback);
+    void SetSubmenuImpl(AutoPtr<Menu> newSubmenu);
+    void SetEnabledImpl(bool enabled);
 
-	void RecreateAllNativeItems();
-	void RecreateMenuItem(NativeItemBits* bits);
-	void CreateNative(LPMENUITEMINFO itemInfo,
-		HMENU nativeParentMenu, bool registerNative);
-	void DestroyNative(NativeItemBits* bits);
-	void DestroyNative(HMENU nativeParent, int position);
-	static int GetNativeMenuItemPosition(NativeItemBits* bits);
-	static bool HandleClickEvent(HMENU nativeMenu, UINT position);
+    void RecreateAllNativeItems();
+    void RecreateMenuItem(NativeItemBits* bits);
+    void CreateNative(LPMENUITEMINFO itemInfo,
+        HMENU nativeParentMenu, bool registerNative);
+    void DestroyNative(NativeItemBits* bits);
+    void DestroyNative(HMENU nativeParent, int position);
+    static int GetNativeMenuItemPosition(NativeItemBits* bits);
+    static bool HandleClickEvent(HMENU nativeMenu, UINT position);
 
 private:
-	std::string iconPath;
-	AutoPtr<MenuWin> oldSubmenu;
-	std::wstring wideOldLabel;
-	std::vector<NativeItemBits*> nativeItems;
+    std::string iconPath;
+    AutoPtr<MenuWin> oldSubmenu;
+    std::wstring wideOldLabel;
+    std::vector<NativeItemBits*> nativeItems;
 
 };
 

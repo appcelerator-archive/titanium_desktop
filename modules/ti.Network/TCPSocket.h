@@ -30,47 +30,47 @@ namespace Titanium {
 
 class TCPSocket : public KEventObject {
 public:
-	TCPSocket(const std::string& host, int port);
-	virtual ~TCPSocket();
+    TCPSocket(const std::string& host, int port);
+    virtual ~TCPSocket();
 
-	void Connect();
-	bool Close();
-	void Write(BytesRef data);
-	void SetKeepAlive(bool enable);
-	void SetTimeout(long milliseconds);
+    void Connect();
+    bool Close();
+    void Write(BytesRef data);
+    void SetKeepAlive(bool enable);
+    void SetTimeout(long milliseconds);
 
-	void ReadThread();
-	void WriteThread();
+    void ReadThread();
+    void WriteThread();
 
 private:
     enum State {
-	    CONNECTING,
-	    READONLY,
-	    WRITEONLY,
-	    DUPLEX,
-	    CLOSING,
-	    CLOSED
-	};
+        CONNECTING,
+        READONLY,
+        WRITEONLY,
+        DUPLEX,
+        CLOSING,
+        CLOSED
+    };
 
-	void HandleError(Poco::Exception& e);
+    void HandleError(Poco::Exception& e);
 
-	void _Connect(const ValueList& args, KValueRef result);
-	void _SetTimeout(const ValueList& args, KValueRef result);
-	void _Close(const ValueList& args, KValueRef result);
-	void _IsClosed(const ValueList& args, KValueRef result);
-	void _Write(const ValueList& args, KValueRef result);
-	void _OnRead(const ValueList& args, KValueRef result);
-	void _OnReadComplete(const ValueList& args, KValueRef result);
-	void _OnError(const ValueList& args, KValueRef result);
-	void _OnTimeout(const ValueList& args, KValueRef result);
+    void _Connect(const ValueList& args, KValueRef result);
+    void _SetTimeout(const ValueList& args, KValueRef result);
+    void _Close(const ValueList& args, KValueRef result);
+    void _IsClosed(const ValueList& args, KValueRef result);
+    void _Write(const ValueList& args, KValueRef result);
+    void _OnRead(const ValueList& args, KValueRef result);
+    void _OnReadComplete(const ValueList& args, KValueRef result);
+    void _OnError(const ValueList& args, KValueRef result);
+    void _OnTimeout(const ValueList& args, KValueRef result);
 
     State state;
-	Poco::Net::SocketAddress address;
-	Poco::Net::StreamSocket socket;
-	Poco::Thread readThread;
-	Poco::RunnableAdapter<TCPSocket> reader, writer;
-	std::queue<BytesRef> writeQueue;
-	Poco::FastMutex mutex;
+    Poco::Net::SocketAddress address;
+    Poco::Net::StreamSocket socket;
+    Poco::Thread readThread;
+    Poco::RunnableAdapter<TCPSocket> reader, writer;
+    std::queue<BytesRef> writeQueue;
+    Poco::FastMutex mutex;
 };
 
 } // namespace Titanium

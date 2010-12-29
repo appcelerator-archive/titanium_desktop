@@ -6,15 +6,15 @@ env.Append(CPPDEFINES = ('TITANIUM_FILESYSTEM_API_EXPORT', 1))
 
 build.add_thirdparty(env, 'poco')
 if build.is_osx():
-	env.Append(FRAMEWORKS = ['Cocoa'])
+    env.Append(FRAMEWORKS = ['Cocoa'])
 
 if build.is_win32():
-	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
-	env.Append(LIBS=['shell32', 'user32', 'comdlg32', 'ole32'])
-	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+    env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
+    env.Append(LIBS=['shell32', 'user32', 'comdlg32', 'ole32'])
+    env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
 
 # Copy support files into module build directory
 build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), module.dir)
 
 build.mark_build_target(env.SharedLibrary(
-	path.join(module.dir, 'tifilesystemmodule'), Glob('*.cpp')))
+    path.join(module.dir, 'tifilesystemmodule'), Glob('*.cpp')))

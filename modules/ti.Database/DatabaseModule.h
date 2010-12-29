@@ -32,12 +32,12 @@ namespace Titanium {
  *
  */
 class EXPORT DatabaseModule : public kroll::Module, public StaticBoundObject {
-	KROLL_MODULE_CLASS(DatabaseModule)
+    KROLL_MODULE_CLASS(DatabaseModule)
 
 private:
-	kroll::KObjectRef binding;
-	void Open(const ValueList& args, KValueRef result);
-	void OpenFile(const ValueList& args, KValueRef result);
+    kroll::KObjectRef binding;
+    void Open(const ValueList& args, KValueRef result);
+    void OpenFile(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

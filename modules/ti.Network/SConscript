@@ -9,20 +9,20 @@ build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'curl')
 
 if build.is_osx():
-	env.Append(FRAMEWORKS=['SystemConfiguration'])
-	sources+=Glob('mac/*.cpp')
+    env.Append(FRAMEWORKS=['SystemConfiguration'])
+    sources+=Glob('mac/*.cpp')
 
 if build.is_linux():
-	sources+=Glob('linux/*.cpp')
-	env.ParseConfig('pkg-config --libs --cflags gdk-2.0 dbus-glib-1')
+    sources+=Glob('linux/*.cpp')
+    env.ParseConfig('pkg-config --libs --cflags gdk-2.0 dbus-glib-1')
 
 if build.is_win32():
-	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
-	env.Append(LIBS=['wsock32','ws2_32', 'ole32', 'comsuppw', 'wbemuuid'])
-	env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
-	sources += Glob("win/*.cpp")
+    env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
+    env.Append(LIBS=['wsock32','ws2_32', 'ole32', 'comsuppw', 'wbemuuid'])
+    env.Append(CPPDEFINES = ('WIN32_LEAN_AND_MEAN',1))
+    sources += Glob("win/*.cpp")
 
 # Copy the support files the module build directory
 build.utils.LightWeightCopy(path.join(build.cwd(), 'support'), module.dir)
 build.mark_build_target(env.SharedLibrary(
-	path.join(module.dir, 'tinetworkmodule'), sources))
+    path.join(module.dir, 'tinetworkmodule'), sources))

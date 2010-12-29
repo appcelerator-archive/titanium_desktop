@@ -32,41 +32,41 @@ namespace Titanium {
 
 class TCPServerConnection : public StaticBoundObject {
 public:
-	TCPServerConnection(Poco::Net::StreamSocket& s, Poco::Net::SocketReactor & reactor_);
-	virtual ~TCPServerConnection();
+    TCPServerConnection(Poco::Net::StreamSocket& s, Poco::Net::SocketReactor & reactor_);
+    virtual ~TCPServerConnection();
 
 private:
-	enum {
-		BUFFER_SIZE = 1024
-	};
+    enum {
+        BUFFER_SIZE = 1024
+    };
 
-	void onReadable (const Poco::AutoPtr<Poco::Net::ReadableNotification>&);
-	void onShutdown (const Poco::AutoPtr<Poco::Net::ShutdownNotification>&);
-	void onWritable (const Poco::AutoPtr<Poco::Net::WritableNotification>&);
-	void onErrored(const Poco::AutoPtr<Poco::Net::ErrorNotification>&);
+    void onReadable (const Poco::AutoPtr<Poco::Net::ReadableNotification>&);
+    void onShutdown (const Poco::AutoPtr<Poco::Net::ShutdownNotification>&);
+    void onWritable (const Poco::AutoPtr<Poco::Net::WritableNotification>&);
+    void onErrored(const Poco::AutoPtr<Poco::Net::ErrorNotification>&);
 
-	void Write(const ValueList& args, KValueRef result);
-	void Close(const ValueList& args, KValueRef result);
-	void IsClosed(const ValueList& args, KValueRef result);
-	void SetOnRead(const ValueList& args, KValueRef result);
-	void SetOnWrite(const ValueList& args, KValueRef result);
-	void SetOnError(const ValueList& args, KValueRef result);
-	void SetOnReadComplete(const ValueList& args, KValueRef result);
+    void Write(const ValueList& args, KValueRef result);
+    void Close(const ValueList& args, KValueRef result);
+    void IsClosed(const ValueList& args, KValueRef result);
+    void SetOnRead(const ValueList& args, KValueRef result);
+    void SetOnWrite(const ValueList& args, KValueRef result);
+    void SetOnError(const ValueList& args, KValueRef result);
+    void SetOnReadComplete(const ValueList& args, KValueRef result);
 
-	Poco::Net::StreamSocket socket;
-	Poco::Net::SocketReactor& reactor;
-	bool closed;
-	KMethodRef onRead;
-	KMethodRef onWrite;
-	KMethodRef onError;
-	KMethodRef onReadComplete;
-	std::queue<BytesRef> sendData;
-	Poco::Mutex sendDataMutex;
-	size_t currentSendDataOffset;
-	bool readStarted;
-	bool writeReadyHandlerInstalled;
+    Poco::Net::StreamSocket socket;
+    Poco::Net::SocketReactor& reactor;
+    bool closed;
+    KMethodRef onRead;
+    KMethodRef onWrite;
+    KMethodRef onError;
+    KMethodRef onReadComplete;
+    std::queue<BytesRef> sendData;
+    Poco::Mutex sendDataMutex;
+    size_t currentSendDataOffset;
+    bool readStarted;
+    bool writeReadyHandlerInstalled;
 };
-	
+    
 } // namespace Titanium
 
 #endif

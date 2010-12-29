@@ -24,19 +24,19 @@ namespace Titanium {
 class UI;
 
 class UIModule : public kroll::Module {
-	KROLL_MODULE_CLASS(UIModule)
+    KROLL_MODULE_CLASS(UIModule)
 
 public:
-	static UIModule* GetInstance() { return instance_; }
-	AutoPtr<UI> GetUIBinding() { return uiBinding; }
-	void Start();
-	static bool IsResourceLocalFile(std::string string);
+    static UIModule* GetInstance() { return instance_; }
+    AutoPtr<UI> GetUIBinding() { return uiBinding; }
+    void Start();
+    static bool IsResourceLocalFile(std::string string);
 
 protected:
-	static UIModule* instance_;
-	AutoPtr<UI> uiBinding;
+    static UIModule* instance_;
+    AutoPtr<UI> uiBinding;
 
-	DISALLOW_EVIL_CONSTRUCTORS(UIModule);
+    DISALLOW_EVIL_CONSTRUCTORS(UIModule);
 };
 
 } // namespace Titanium

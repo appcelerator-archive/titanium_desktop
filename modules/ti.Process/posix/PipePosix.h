@@ -25,21 +25,21 @@ namespace Titanium {
 
 class PosixPipe : public NativePipe {
 public:
-	PosixPipe(bool isReader);
+    PosixPipe(bool isReader);
 
-	virtual void CreateHandles();
-	virtual void Close();
-	virtual void CloseNativeRead();
-	virtual void CloseNativeWrite();
-	inline int GetReadHandle() { return readHandle; }
-	inline int GetWriteHandle() { return writeHandle; }
+    virtual void CreateHandles();
+    virtual void Close();
+    virtual void CloseNativeRead();
+    virtual void CloseNativeWrite();
+    inline int GetReadHandle() { return readHandle; }
+    inline int GetWriteHandle() { return writeHandle; }
 
 protected:
-	virtual int RawRead(char *buffer, int size);
-	virtual int RawWrite(const char *buffer, int size);
+    virtual int RawRead(char *buffer, int size);
+    virtual int RawWrite(const char *buffer, int size);
 
-	int readHandle;
-	int writeHandle;
+    int readHandle;
+    int writeHandle;
 };
 
 } // namespace Titanium

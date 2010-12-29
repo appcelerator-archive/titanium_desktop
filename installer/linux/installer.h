@@ -23,97 +23,97 @@ class Job;
 
 class Installer
 {
-	public:
-	static Installer* instance;
-	static string applicationPath;
-	static string systemRuntimeHome;
-	static string userRuntimeHome;
-	static string updateFilename;
+    public:
+    static Installer* instance;
+    static string applicationPath;
+    static string systemRuntimeHome;
+    static string userRuntimeHome;
+    static string updateFilename;
 
-	Installer(vector<Job*>, int);
-	~Installer();
-	void ResizeWindow(int width, int height);
-	void CreateIntroView();
-	void CreateProgressView();
-	void CreateInfoBox(GtkWidget*);
-	GdkPixbuf* GetApplicationPixbuf(int maxDimension);
-	GtkWidget* GetTitaniumIcon();
-	GtkWidget* GetApplicationIcon();
+    Installer(vector<Job*>, int);
+    ~Installer();
+    void ResizeWindow(int width, int height);
+    void CreateIntroView();
+    void CreateProgressView();
+    void CreateInfoBox(GtkWidget*);
+    GdkPixbuf* GetApplicationPixbuf(int maxDimension);
+    GtkWidget* GetTitaniumIcon();
+    GtkWidget* GetApplicationIcon();
 
-	void StartInstallProcess();
-	void StartDownloading();
-	void StartInstalling();
-	void UpdateProgress();
-	void ShowError();
-	void Finish();
+    void StartInstallProcess();
+    void StartDownloading();
+    void StartInstalling();
+    void UpdateProgress();
+    void ShowError();
+    void Finish();
 
-	GtkWidget* GetWindow() { return this->window; }
-	void SetWindow(GtkWidget* w) { this->window = w; }
-	void Cancel();
+    GtkWidget* GetWindow() { return this->window; }
+    void SetWindow(GtkWidget* w) { this->window = w; }
+    void Cancel();
 
-	enum Stage
-	{
-		SUCCESS = 0,
-		PREDOWNLOAD,
-		DOWNLOADING,
-		PREINSTALL,
-		INSTALLING,
-		CANCEL_REQUEST,
-		SUDO_REQUEST,
-		CANCELLED,
-		ERROR
-	};
+    enum Stage
+    {
+        SUCCESS = 0,
+        PREDOWNLOAD,
+        DOWNLOADING,
+        PREINSTALL,
+        INSTALLING,
+        CANCEL_REQUEST,
+        SUDO_REQUEST,
+        CANCELLED,
+        ERROR
+    };
 
-	Stage GetStage()
-	{
-		return this->stage;
-	}
+    Stage GetStage()
+    {
+        return this->stage;
+    }
 
-	void SetStage(Stage stage)
-	{
-		this->stage = stage;
-	}
+    void SetStage(Stage stage)
+    {
+        this->stage = stage;
+    }
 
-	void SetError(string error)
-	{
-		this->error = error;
-		this->stage = ERROR;
-	}
+    void SetError(string error)
+    {
+        this->error = error;
+        this->stage = ERROR;
+    }
 
-	Job* CurrentJob()
-	{
-		return this->currentJob;
-	}
+    Job* CurrentJob()
+    {
+        return this->currentJob;
+    }
 
-	void SetCurrentJob(Job* job)
-	{
-		this->currentJob = job;
-	}
+    void SetCurrentJob(Job* job)
+    {
+        this->currentJob = job;
+    }
 
-	vector<Job*>& GetJobs()
-	{
-		return this->jobs;
-	}
+    vector<Job*>& GetJobs()
+    {
+        return this->jobs;
+    }
 
-	int GetType()
-	{
-		return this->installType;
-	}
+    int GetType()
+    {
+        return this->installType;
+    }
 
 
-	private:
-	vector<Job*> jobs;
-	SharedApplication app;
-	int installType;
-	Stage stage;
+    private:
+    vector<Job*> jobs;
+    SharedApplication app;
+    int installType;
+    Stage stage;
 
-	Job* currentJob;
-	string error;
-	GtkWidget* window;
-	GtkWidget* progressBar;
-	GtkWidget* downloadingLabel;
-	GtkWidget* installCombo;
-	bool running;
-	GThread* download_thread;
+    Job* currentJob;
+    string error;
+    GtkWidget* window;
+    GtkWidget* progressBar;
+    GtkWidget* downloadingLabel;
+    GtkWidget* installCombo;
+    bool running;
+    GThread* download_thread;
 
 };

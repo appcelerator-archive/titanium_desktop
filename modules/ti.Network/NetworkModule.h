@@ -27,15 +27,15 @@ class Network;
 class Analytics;
 
 class EXPORT NetworkModule : public kroll::Module {
-	KROLL_MODULE_CLASS(NetworkModule)
+    KROLL_MODULE_CLASS(NetworkModule)
 
 public:
-	static std::string& GetRootCertPath();
-	static CURLSH* GetCurlShareHandle();
+    static std::string& GetRootCertPath();
+    static CURLSH* GetCurlShareHandle();
 
 private:
-	AutoPtr<Network> networkBinding;
-	AutoPtr<Analytics> analyticsBinding;
+    AutoPtr<Network> networkBinding;
+    AutoPtr<Analytics> analyticsBinding;
 };
 
 } // namespace Titanium

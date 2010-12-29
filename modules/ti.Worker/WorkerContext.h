@@ -32,28 +32,28 @@ class Worker;
 
 class WorkerContext : public KEventObject {
 public:
-	WorkerContext(Worker* worker);
-	~WorkerContext();
-	virtual KValueRef Get(const char*);
-	virtual void Set(const char*, KValueRef);
-	void StartWorker(const std::string& code);
-	void Terminate();
-	void SendMessageToWorker(KValueRef message);
-	void _PostMessage(const ValueList &args, KValueRef result);
-	void _ImportScripts(const ValueList &args, KValueRef result);
-	void _Sleep(const ValueList &args, KValueRef result);
+    WorkerContext(Worker* worker);
+    ~WorkerContext();
+    virtual KValueRef Get(const char*);
+    virtual void Set(const char*, KValueRef);
+    void StartWorker(const std::string& code);
+    void Terminate();
+    void SendMessageToWorker(KValueRef message);
+    void _PostMessage(const ValueList &args, KValueRef result);
+    void _ImportScripts(const ValueList &args, KValueRef result);
+    void _Sleep(const ValueList &args, KValueRef result);
 
 private:
-	Worker* worker;
-	JSGlobalContextRef jsContext;
-	bool running;
-	std::queue<KValueRef> inbox;
-	Poco::Mutex inboxLock;
-	Poco::Event messageEvent;
-	Poco::Event terminateEvent;
+    Worker* worker;
+    JSGlobalContextRef jsContext;
+    bool running;
+    std::queue<KValueRef> inbox;
+    Poco::Mutex inboxLock;
+    Poco::Event messageEvent;
+    Poco::Event terminateEvent;
 
-	void DeliverMessage(KValueRef message);
-	void MessageLoop();
+    void DeliverMessage(KValueRef message);
+    void MessageLoop();
 };
 
 } // namespace Titanium

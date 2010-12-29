@@ -7,9 +7,9 @@ build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'webkit')
 
 if build.is_win32():
-	env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
-	env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
+    env.Append(CCFLAGS=['/MD', '/DUNICODE', '/D_UNICODE'])
+    env.Append(LINKFLAGS=['/NODEFAULTLIB:LIBCMT.lib', '/LTCG', '/INCREMENTAL:NO'])
 
 build.mark_build_target(build.utils.CopyTree(Glob('*.js'), module.dir))
 build.mark_build_target(env.SharedLibrary(
-	path.join(module.dir, 'tiworkermodule'), Glob('*.cpp')))
+    path.join(module.dir, 'tiworkermodule'), Glob('*.cpp')))

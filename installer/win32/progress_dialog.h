@@ -12,19 +12,19 @@
 class ProgressDialog
 {
 public:
-	ProgressDialog();
-	~ProgressDialog();
+    ProgressDialog();
+    ~ProgressDialog();
 
-	void SetTitle(const std::wstring& title);
-	void SetCancelMessage(const std::wstring& message);
-	void SetLineText(DWORD line, const std::wstring& message, bool compact);
-	void Update(DWORD value, DWORD max);
-	void Show();
-	void Hide();
-	bool IsCancelled();
-	HWND GetWindowHandle() { return this->dialogWindow; }
+    void SetTitle(const std::wstring& title);
+    void SetCancelMessage(const std::wstring& message);
+    void SetLineText(DWORD line, const std::wstring& message, bool compact);
+    void Update(DWORD value, DWORD max);
+    void Show();
+    void Hide();
+    bool IsCancelled();
+    HWND GetWindowHandle() { return this->dialogWindow; }
 
 private:
-	IProgressDialog* dialog;
-	HWND dialogWindow;
+    IProgressDialog* dialog;
+    HWND dialogWindow;
 };

@@ -22,28 +22,28 @@
 
 - (id)initWithMenu:(Titanium::MenuMac*)inMenu willRegister:(BOOL)willRegister
 {
-	if ([super init]) {
-		dirty = YES;
-		menu = inMenu;
-		registerNative = willRegister;
-	}
-	return self;
+    if ([super init]) {
+        dirty = YES;
+        menu = inMenu;
+        registerNative = willRegister;
+    }
+    return self;
 }
 
 - (void)menuNeedsUpdate:(NSMenu *)nativeMenu
 {
-	if (!dirty) {
-		return;
-	}
+    if (!dirty) {
+        return;
+    }
 
-	dirty = NO;
-	Titanium::MenuMac::ClearNativeMenu(nativeMenu);
-	menu->AddChildrenToNativeMenu(nativeMenu, registerNative ? true : false);
+    dirty = NO;
+    Titanium::MenuMac::ClearNativeMenu(nativeMenu);
+    menu->AddChildrenToNativeMenu(nativeMenu, registerNative ? true : false);
 }
 
 - (void)markAsDirty
 {
-	dirty = YES;
+    dirty = YES;
 }
 
 @end

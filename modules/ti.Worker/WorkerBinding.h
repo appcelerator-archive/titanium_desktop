@@ -23,11 +23,11 @@ namespace Titanium {
 
 class WorkerBinding : public StaticBoundObject {
 public:
-	WorkerBinding();
-	~WorkerBinding();
+    WorkerBinding();
+    ~WorkerBinding();
 
 private:
-	void _CreateWorker(const ValueList& args, KValueRef result);
+    void _CreateWorker(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

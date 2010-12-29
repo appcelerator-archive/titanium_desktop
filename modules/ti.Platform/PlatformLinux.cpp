@@ -29,33 +29,33 @@ namespace Titanium {
 
 std::string Platform::GetVersionImpl()
 {
-	return Poco::Environment::osVersion();
+    return Poco::Environment::osVersion();
 }
 
 bool Platform::OpenApplicationImpl(const std::string& name)
 {
-	std::vector<std::string> args;
-	args.push_back(name);
-	std::string processName("xdg-open");
-	Poco::Process::launch(processName, args);
-	return true;
+    std::vector<std::string> args;
+    args.push_back(name);
+    std::string processName("xdg-open");
+    Poco::Process::launch(processName, args);
+    return true;
 }
 
 bool Platform::OpenURLImpl(const std::string& url)
 {
-	return this->OpenApplicationImpl(url);
+    return this->OpenApplicationImpl(url);
 }
 
 void Platform::TakeScreenshotImpl(const std::string& targetFile)
 {
-	GdkWindow* rootWindow = gdk_get_default_root_window();
+    GdkWindow* rootWindow = gdk_get_default_root_window();
 
-	int width, height;
-	gdk_drawable_get_size(rootWindow, &width, &height);
+    int width, height;
+    gdk_drawable_get_size(rootWindow, &width, &height);
 
-	GdkPixbuf* pixbuf = gdk_pixbuf_get_from_drawable(0, GDK_DRAWABLE(rootWindow),
-		0, 0, 0, 0, 0, width, height);
-	gdk_pixbuf_save(pixbuf, targetFile.c_str(), "png", 0, "compression", "9", NULL);
+    GdkPixbuf* pixbuf = gdk_pixbuf_get_from_drawable(0, GDK_DRAWABLE(rootWindow),
+        0, 0, 0, 0, 0, width, height);
+    gdk_pixbuf_save(pixbuf, targetFile.c_str(), "png", 0, "compression", "9", NULL);
 }
 
 } // namespace Titanium

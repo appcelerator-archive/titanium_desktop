@@ -21,11 +21,11 @@
 namespace Titanium {
 
 MediaGStreamer::MediaGStreamer(KObjectRef global)
-	: Media(global)
+    : Media(global)
 {
-	char **argv;
-	int argc = 0;
-	gst_init(&argc, &argv);
+    char **argv;
+    int argc = 0;
+    gst_init(&argc, &argv);
 }
 
 MediaGStreamer::~MediaGStreamer()
@@ -34,19 +34,19 @@ MediaGStreamer::~MediaGStreamer()
 
 void MediaGStreamer::Beep()
 {
-	gdk_beep();
+    gdk_beep();
 }
 
 KObjectRef MediaGStreamer::CreateSound(std::string& url)
 {
-	//This is a path so, turn it into a file:// URL
-	std::string myurl = url;
-	std::string path = URLUtils::URLToPath(url);
-	if (path.find("://") == std::string::npos)
-	{
-		myurl = URLUtils::PathToFileURL(path);
-	}
-	return new SoundGStreamer(myurl);
+    //This is a path so, turn it into a file:// URL
+    std::string myurl = url;
+    std::string path = URLUtils::URLToPath(url);
+    if (path.find("://") == std::string::npos)
+    {
+        myurl = URLUtils::PathToFileURL(path);
+    }
+    return new SoundGStreamer(myurl);
 }
 
 } // namespace Titanium

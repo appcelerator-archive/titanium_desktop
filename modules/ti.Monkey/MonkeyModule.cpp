@@ -24,12 +24,12 @@ KROLL_MODULE(MonkeyModule, STRING(MODULE_NAME), STRING(MODULE_VERSION));
 
 void MonkeyModule::Initialize()
 {
-	// load our variables
-	this->binding = new Monkey(host,host->GetGlobalObject());
+    // load our variables
+    this->binding = new Monkey(host,host->GetGlobalObject());
 
-	// set our ti.Monkey
-	KValueRef value = Value::NewObject(this->binding);
-	host->GetGlobalObject()->Set("Monkey", value);
+    // set our ti.Monkey
+    KValueRef value = Value::NewObject(this->binding);
+    host->GetGlobalObject()->Set("Monkey", value);
 }
 
 void MonkeyModule::Stop()

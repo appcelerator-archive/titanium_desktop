@@ -8,11 +8,11 @@
 int main(int argc, char *argv[])
 {
 #ifdef DEBUG
-	int i;
-	for (i = 0; i < argc; i++){
-		printf("Arg %d is: %s\n",i,argv[i]);
-	}
+    int i;
+    for (i = 0; i < argc; i++){
+        printf("Arg %d is: %s\n",i,argv[i]);
+    }
 #endif
 
-	return NSApplicationMain(argc,  (const char **) argv);
+    return NSApplicationMain(argc,  (const char **) argv);
 }

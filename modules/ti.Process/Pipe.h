@@ -25,36 +25,36 @@ namespace Titanium {
 
 class Pipe : public KEventObject {
 public:
-	Pipe(const char *type = "Process.Pipe");
-	virtual ~Pipe();
+    Pipe(const char *type = "Process.Pipe");
+    virtual ~Pipe();
 
-	virtual int Write(BytesRef data);
-	virtual void CallWrite(KObjectRef target, BytesRef data);
-	virtual void Close();
-	virtual void CallClose(KObjectRef target);
-	virtual void Flush();
-	void Attach(KObjectRef object);
-	void Detach(KObjectRef object);
-	bool IsAttached();
-	AutoPtr<Pipe> Clone();
+    virtual int Write(BytesRef data);
+    virtual void CallWrite(KObjectRef target, BytesRef data);
+    virtual void Close();
+    virtual void CallClose(KObjectRef target);
+    virtual void Flush();
+    void Attach(KObjectRef object);
+    void Detach(KObjectRef object);
+    bool IsAttached();
+    AutoPtr<Pipe> Clone();
 
-	static void FireEventAsynchronously(AutoPtr<Event> event);
+    static void FireEventAsynchronously(AutoPtr<Event> event);
 
-	std::vector<BytesRef> readData;
+    std::vector<BytesRef> readData;
 
 protected:
-	int FindFirstLineFeed(char *data, int length, int *charsToErase);
-	void _Close(const ValueList& args, KValueRef result);
-	void _SetOnClose(const ValueList& args, KValueRef result);
-	void _Attach(const ValueList& args, KValueRef result);
-	void _Detach(const ValueList& args, KValueRef result);
-	void _IsAttached(const ValueList& args, KValueRef result);
-	void _Write(const ValueList& args, KValueRef result);
-	void _Flush(const ValueList& args, KValueRef result);
+    int FindFirstLineFeed(char *data, int length, int *charsToErase);
+    void _Close(const ValueList& args, KValueRef result);
+    void _SetOnClose(const ValueList& args, KValueRef result);
+    void _Attach(const ValueList& args, KValueRef result);
+    void _Detach(const ValueList& args, KValueRef result);
+    void _IsAttached(const ValueList& args, KValueRef result);
+    void _Write(const ValueList& args, KValueRef result);
+    void _Flush(const ValueList& args, KValueRef result);
 
-	Poco::Mutex attachedMutex;
-	std::vector<KObjectRef> attachedObjects;
-	Logger *logger;
+    Poco::Mutex attachedMutex;
+    std::vector<KObjectRef> attachedObjects;
+    Logger *logger;
 };
 
 } // namespace Titanium

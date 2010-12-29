@@ -33,74 +33,74 @@ static CURLSH* curlShareHandle = 0;
 
 static Mutex* SharedResourceMutex(curl_lock_data data)
 {
-	static Mutex cookieMutex;
-	static Mutex dnsMutex;
-	static Mutex shareMutex;
+    static Mutex cookieMutex;
+    static Mutex dnsMutex;
+    static Mutex shareMutex;
 
-	switch (data) {
-		case CURL_LOCK_DATA_COOKIE:
-			return &cookieMutex;
-		case CURL_LOCK_DATA_DNS:
-			return &dnsMutex;
-		case CURL_LOCK_DATA_SHARE:
-			return &shareMutex;
-		default:
-			return NULL;
-	}
+    switch (data) {
+        case CURL_LOCK_DATA_COOKIE:
+            return &cookieMutex;
+        case CURL_LOCK_DATA_DNS:
+            return &dnsMutex;
+        case CURL_LOCK_DATA_SHARE:
+            return &shareMutex;
+        default:
+            return NULL;
+    }
 }
 
 static void CurlLockCallback(CURL* handle, curl_lock_data data, curl_lock_access, void*)
 {
-	if (Mutex* mutex = SharedResourceMutex(data))
-		mutex->lock();
+    if (Mutex* mutex = SharedResourceMutex(data))
+        mutex->lock();
 }
 
 static void CurlUnlockCallback(CURL* handle, curl_lock_data data, void* userPtr)
 {
-	if (Mutex* mutex = SharedResourceMutex(data))
-		mutex->unlock();
+    if (Mutex* mutex = SharedResourceMutex(data))
+        mutex->unlock();
 }
 
 void NetworkModule::Initialize()
 {
-	curl_global_init(CURL_GLOBAL_ALL);
+    curl_global_init(CURL_GLOBAL_ALL);
 
-	modulePath = GetPath();
+    modulePath = GetPath();
 
-	this->networkBinding = new Network();
-	this->analyticsBinding = new Analytics();
-	GlobalObject::GetInstance()->SetObject("Network", this->networkBinding);
-	GlobalObject::GetInstance()->SetObject("Analytics", this->analyticsBinding);
+    this->networkBinding = new Network();
+    this->analyticsBinding = new Analytics();
+    GlobalObject::GetInstance()->SetObject("Network", this->networkBinding);
+    GlobalObject::GetInstance()->SetObject("Analytics", this->analyticsBinding);
 
-	curlShareHandle = curl_share_init();
-	curl_share_setopt(curlShareHandle, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-	curl_share_setopt(curlShareHandle, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
-	curl_share_setopt(curlShareHandle, CURLSHOPT_LOCKFUNC, CurlLockCallback);
-	curl_share_setopt(curlShareHandle, CURLSHOPT_UNLOCKFUNC, CurlUnlockCallback);
+    curlShareHandle = curl_share_init();
+    curl_share_setopt(curlShareHandle, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+    curl_share_setopt(curlShareHandle, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+    curl_share_setopt(curlShareHandle, CURLSHOPT_LOCKFUNC, CurlLockCallback);
+    curl_share_setopt(curlShareHandle, CURLSHOPT_UNLOCKFUNC, CurlUnlockCallback);
 }
 
 void NetworkModule::Stop()
 {
-	networkBinding->Shutdown();
-	analyticsBinding->Shutdown();
+    networkBinding->Shutdown();
+    analyticsBinding->Shutdown();
 }
 
 /*static*/
 std::string& NetworkModule::GetRootCertPath()
 {
-	static std::string path;
-	if (path.empty())
-	{
-		SharedApplication app(kroll::Host::GetInstance()->GetApplication());
-		path = FileUtils::Join(app->runtime->path.c_str(), "rootcert.pem", 0);
-	}
-	return path;
+    static std::string path;
+    if (path.empty())
+    {
+        SharedApplication app(kroll::Host::GetInstance()->GetApplication());
+        path = FileUtils::Join(app->runtime->path.c_str(), "rootcert.pem", 0);
+    }
+    return path;
 }
 
 /*static*/
 CURLSH* NetworkModule::GetCurlShareHandle()
 {
-	return curlShareHandle;
+    return curlShareHandle;
 }
 
 } // namespace Titanium
