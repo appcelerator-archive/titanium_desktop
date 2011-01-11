@@ -903,6 +903,8 @@ void HTTPClient::ExecuteRequest()
         if (!responseData.empty())
             this->SetObject("responseData", Bytes::Concat(this->responseData));
 
+        CleanupCurl(curlHeaders);
+
         this->ChangeState(4); // Done
     }
     catch (ValueException& e)
@@ -914,8 +916,6 @@ void HTTPClient::ExecuteRequest()
         if (!async)
             throw e;
     }
-
-    CleanupCurl(curlHeaders);
 }
 
 } // namespace Titanium
