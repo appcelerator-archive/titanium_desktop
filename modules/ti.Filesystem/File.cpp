@@ -112,7 +112,7 @@ void File::Open(const ValueList& args, KValueRef result)
 
     // Perform open operation before returning stream object
     KValueRef openResult(Value::NewUndefined());
-    stream->Open(args, openResult);
+    stream->_Open(args, openResult);
     if (openResult->ToBool() == false)
     {
         // Failed to open stream, return null

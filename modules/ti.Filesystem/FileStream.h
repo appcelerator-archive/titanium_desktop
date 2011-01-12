@@ -28,40 +28,49 @@
 
 namespace Titanium {
 
-enum FileStreamMode {
-    MODE_READ = 1,
-    MODE_APPEND = 2,
-    MODE_WRITE = 3
-};
-
-
-class FileStream : public StaticBoundObject {
+class FileStream : public Stream {
 public:
-    FileStream(std::string filename_);
+    enum FileStreamMode {
+        MODE_READ = 1,
+        MODE_APPEND = 2,
+        MODE_WRITE = 3
+    };
+
+    FileStream(std::string filename);
     virtual ~FileStream();
 
-    // Used by File.open()
-    void Open(const ValueList& args, KValueRef result);
+    bool Open(FileStreamMode mode, bool binary = false, bool append = false);
+    bool IsOpen() const;
+    void Close();
+
+    void Seek(int offset, int direction);
+    int Tell();
+
+    virtual void Write(const char* buffer, size_t size);
+    virtual bool IsWritable() const;
+    virtual size_t Read(const char* buffer, size_t size);
+    virtual bool IsReadable() const;
+
+    // TODO: make this private once removed from File.
+    void _Open(const ValueList& args, KValueRef result);
 
 private:
+    void _IsOpen(const ValueList& args, KValueRef result);
+    void _Close(const ValueList& args, KValueRef result);
+    void _Seek(const ValueList& args, KValueRef result);
+    void _Tell(const ValueList& args, KValueRef result);
+    void _Write(const ValueList& args, KValueRef result);
+    void _Read(const ValueList& args, KValueRef result);
+
+    void _ReadLine(const ValueList& args, KValueRef result);
+    void _WriteLine(const ValueList& args, KValueRef result);
+    void _Ready(const ValueList& args, KValueRef result);
+
     std::string filename;
 
     Poco::FileInputStream* istream;
     Poco::FileOutputStream* ostream;
     Poco::FileIOS* stream;
-
-    bool Open(FileStreamMode mode, bool binary = false, bool append = false);
-    void Close(const ValueList& args, KValueRef result);
-    bool Close();
-    void Write(const ValueList& args, KValueRef result);
-    void Write(char *,int);
-    void Read(const ValueList& args, KValueRef result);
-    void ReadLine(const ValueList& args, KValueRef result);
-    void WriteLine(const ValueList& args, KValueRef result);
-    void Ready(const ValueList& args, KValueRef result);
-    void IsOpen(const ValueList& args, KValueRef result);
-    void Seek(const ValueList& args, KValueRef result);
-    void Tell(const ValueList& args, KValueRef result);
 };
 
 } // namespace Titanium

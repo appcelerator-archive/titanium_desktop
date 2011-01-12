@@ -66,9 +66,9 @@ Filesystem::Filesystem(Host *host, KObjectRef global) :
     this->SetMethod("getRootDirectories", &Filesystem::GetRootDirectories);
     this->SetMethod("asyncCopy", &Filesystem::ExecuteAsyncCopy);
 
-    this->SetInt("MODE_READ", MODE_READ);
-    this->SetInt("MODE_WRITE", MODE_WRITE);
-    this->SetInt("MODE_APPEND", MODE_APPEND);
+    this->SetInt("MODE_READ", FileStream::MODE_READ);
+    this->SetInt("MODE_WRITE", FileStream::MODE_WRITE);
+    this->SetInt("MODE_APPEND", FileStream::MODE_APPEND);
     this->SetInt("SEEK_START", std::ios::beg);
     this->SetInt("SEEK_CURRENT", std::ios::cur);
     this->SetInt("SEEK_END", std::ios::end);

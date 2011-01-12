@@ -23,29 +23,30 @@
 
 namespace Titanium {
 
-FileStream::FileStream(std::string filenameIn) :
-    StaticBoundObject("Filesystem.FileStream"),
+FileStream::FileStream(std::string filename) :
+    Stream("Filesystem.FileStream"),
     istream(0), ostream(0), stream(0)
 {
 #ifdef OS_OSX
     // in OSX, we need to expand ~ in paths to their absolute path value
     // we do that with a nifty helper method in NSString
-    this->filename = [[[NSString stringWithUTF8String:filenameIn.c_str()]
+    this->filename = [[[NSString stringWithUTF8String:filename.c_str()]
          stringByExpandingTildeInPath] fileSystemRepresentation];
 #else
-    this->filename = filenameIn;
+    this->filename = filename;
 #endif
 
-    this->SetMethod("open", &FileStream::Open);
-    this->SetMethod("close", &FileStream::Close);
-    this->SetMethod("read", &FileStream::Read);
-    this->SetMethod("readLine", &FileStream::ReadLine);
-    this->SetMethod("write", &FileStream::Write);
-    this->SetMethod("writeLine", &FileStream::WriteLine);
-    this->SetMethod("ready", &FileStream::Ready);
-    this->SetMethod("isOpen", &FileStream::IsOpen);
-    this->SetMethod("seek", &FileStream::Seek);
-    this->SetMethod("tell", &FileStream::Tell);
+    this->SetMethod("open", &FileStream::_Open);
+    this->SetMethod("isOpen", &FileStream::_IsOpen);
+    this->SetMethod("close", &FileStream::_Close);
+    this->SetMethod("seek", &FileStream::_Seek);
+    this->SetMethod("tell", &FileStream::_Tell);
+    this->SetMethod("write", &FileStream::_Write);
+    this->SetMethod("read", &FileStream::_Read);
+
+    this->SetMethod("readLine", &FileStream::_ReadLine);
+    this->SetMethod("writeLine", &FileStream::_WriteLine);
+    this->SetMethod("ready", &FileStream::_Ready);
 
     // These should be depricated and no longer used.
     // All constants should be kept on Ti.Filesystem object.
@@ -57,18 +58,6 @@ FileStream::FileStream(std::string filenameIn) :
 FileStream::~FileStream()
 {
     this->Close();
-}
-
-void FileStream::Open(const ValueList& args, KValueRef result)
-{
-    args.VerifyException("open", "?ibb");
-
-    FileStreamMode mode = (FileStreamMode) args.GetInt(0, MODE_READ);
-    bool binary = args.GetBool(1, false);
-    bool append = args.GetBool(2, false);
-
-    bool opened = this->Open(mode, binary, append);
-    result->SetBool(opened);
 }
 
 bool FileStream::Open(FileStreamMode mode, bool binary, bool append)
@@ -125,13 +114,12 @@ bool FileStream::Open(FileStreamMode mode, bool binary, bool append)
     }
 }
 
-void FileStream::Close(const ValueList& args, KValueRef result)
+bool FileStream::IsOpen() const
 {
-    bool closed = this->Close();
-    result->SetBool(closed);
+    return this->stream != NULL;
 }
 
-bool FileStream::Close()
+void FileStream::Close()
 {
     try
     {
@@ -147,8 +135,6 @@ bool FileStream::Close()
             this->stream = NULL;
             this->istream = NULL;
             this->ostream = NULL;
-
-            return true;
         }
     }
     catch (Poco::Exception& exc)
@@ -157,11 +143,106 @@ bool FileStream::Close()
         logger->Error("Error in close. Exception: %s",exc.displayText().c_str());
         throw ValueException::FromString(exc.displayText());
     }
-
-    return false;
 }
 
-void FileStream::Write(const ValueList& args, KValueRef result)
+void FileStream::Seek(int offset, int direction)
+{
+    if (this->istream)
+        this->istream->seekg(offset, (std::ios::seekdir)direction);
+    else if (this->ostream)
+        this->ostream->seekp(offset, (std::ios::seekdir)direction);
+    else
+        throw ValueException::FromString("FileStream must be opened before seeking");
+}
+
+int FileStream::Tell()
+{
+    if (this->istream)
+        return this->istream->tellg();
+    else if (this->ostream)
+        return this->ostream->tellp();
+
+    throw ValueException::FromString("FileStream must be opend before using tell");
+}
+
+void FileStream::Write(const char* buffer, size_t size)
+{
+    if(!this->ostream)
+        throw ValueException::FromString("FileStream must be opened for writing before calling write");
+
+    try {
+        this->ostream->write(buffer, size);
+    }
+    catch (Poco::Exception& ex) {
+        Logger* logger = Logger::Get("Filesystem.FileStream");
+        logger->Error("Error in write. Exception: %s",ex.displayText().c_str());
+        throw ValueException::FromString(ex.displayText());
+    }
+}
+
+bool FileStream::IsWritable() const
+{
+    return this->ostream != NULL;
+}
+
+size_t FileStream::Read(const char* buffer, size_t size)
+{
+    if(!this->istream)
+        throw ValueException::FromString("FileStream must be opened for writing before calling write");
+
+    try {
+        this->istream->read((char*)buffer, size);
+        return this->istream->gcount();
+    }
+    catch (Poco::Exception& ex) {
+        Logger* logger = Logger::Get("Filesystem.FileStream");
+        logger->Error("Error in read. Exception: %s",ex.displayText().c_str());
+        throw ValueException::FromString(ex.displayText());
+    }
+}
+
+bool FileStream::IsReadable() const
+{
+    return this->istream != NULL;
+}
+
+void FileStream::_Open(const ValueList& args, KValueRef result)
+{
+    args.VerifyException("open", "?ibb");
+
+    FileStreamMode mode = (FileStreamMode) args.GetInt(0, MODE_READ);
+    bool binary = args.GetBool(1, false);
+    bool append = args.GetBool(2, false);
+
+    bool opened = this->Open(mode, binary, append);
+    result->SetBool(opened);
+}
+
+void FileStream::_IsOpen(const ValueList& args, KValueRef result)
+{
+    result->SetBool(this->IsOpen());
+}
+
+void FileStream::_Close(const ValueList& args, KValueRef result)
+{
+    this->Close();
+}
+
+void FileStream::_Seek(const ValueList& args, KValueRef result)
+{
+    args.VerifyException("seek", "i?i");
+
+    int offset = args.GetInt(0);
+    int direction = args.GetInt(1, std::ios::beg);
+    this->Seek(offset, direction);
+}
+
+void FileStream::_Tell(const ValueList& args, KValueRef result)
+{
+    result->SetInt(this->Tell());
+}
+
+void FileStream::_Write(const ValueList& args, KValueRef result)
 {
     args.VerifyException("write", "s|o|n");
 
@@ -215,38 +296,12 @@ void FileStream::Write(const ValueList& args, KValueRef result)
     result->SetBool(true);
 }
 
-void FileStream::Write(char *text, int size)
-{
-    try
-    {
-        if(!this->ostream)
-        {
-            throw ValueException::FromString("FileStream must be opened for writing before calling write");
-        }
-
-        this->ostream->write(text, size);
-    }
-    catch (Poco::Exception& exc)
-    {
-        Logger* logger = Logger::Get("Filesystem.FileStream");
-        logger->Error("Error in write. Exception: %s",exc.displayText().c_str());
-        throw ValueException::FromString(exc.displayText());
-    }
-}
-
-void FileStream::Read(const ValueList& args, KValueRef result)
+void FileStream::_Read(const ValueList& args, KValueRef result)
 {
     args.VerifyException("read", "?i");
 
     try
     {
-        if (!this->istream)
-        {
-            Logger* logger = Logger::Get("Filesystem.FileStream");
-            logger->Error("Error in read. FileInputStream is null");
-            throw ValueException::FromString("FileStream must be opened for reading before calling read");
-        }
-
         if (args.size() >= 1)
         {
             int size = args.GetInt(0);
@@ -254,9 +309,8 @@ void FileStream::Read(const ValueList& args, KValueRef result)
                 throw ValueException::FromString("File.read() size must be greater than zero");
 
             BytesRef buffer = new Bytes(size + 1);
-            this->istream->read(buffer->Pointer(), size);
+            int readCount = this->Read(buffer->Pointer(), size);
 
-            int readCount = this->istream->gcount();
             if (readCount > 0)
             {
                 buffer->Write("\0", 1, readCount);
@@ -298,7 +352,7 @@ void FileStream::Read(const ValueList& args, KValueRef result)
     }
 }
 
-void FileStream::ReadLine(const ValueList& args, KValueRef result)
+void FileStream::_ReadLine(const ValueList& args, KValueRef result)
 {
     try
     {
@@ -355,7 +409,7 @@ void FileStream::ReadLine(const ValueList& args, KValueRef result)
     }
 }
 
-void FileStream::WriteLine(const ValueList& args, KValueRef result)
+void FileStream::_WriteLine(const ValueList& args, KValueRef result)
 {
     args.VerifyException("writeLine", "s|o|n");
 
@@ -420,7 +474,7 @@ void FileStream::WriteLine(const ValueList& args, KValueRef result)
     result->SetBool(true);
 }
 
-void FileStream::Ready(const ValueList& args, KValueRef result)
+void FileStream::_Ready(const ValueList& args, KValueRef result)
 {
     if(!this->stream)
     {
@@ -429,48 +483,6 @@ void FileStream::Ready(const ValueList& args, KValueRef result)
     else
     {
         result->SetBool(this->stream->eof()==false);
-    }
-}
-
-void FileStream::IsOpen(const ValueList& args, KValueRef result)
-{
-    result->SetBool(this->stream != NULL);
-}
-
-void FileStream::Seek(const ValueList& args, KValueRef result)
-{
-    args.VerifyException("seek", "i?i");
-
-    int offset = args.GetInt(0);
-    std::ios::seekdir dir = (std::ios::seekdir)args.GetInt(1, std::ios::beg);
-
-    if (this->istream)
-    {
-        this->istream->seekg(offset, dir);
-    }
-    else if (this->ostream)
-    {
-        this->ostream->seekp(offset, dir);
-    }
-    else
-    {
-        throw ValueException::FromString("FileStream must be opened before seeking");
-    }
-}
-
-void FileStream::Tell(const ValueList& args, KValueRef result)
-{
-    if (this->istream)
-    {
-        result->SetInt(this->istream->tellg());
-    }
-    else if (this->ostream)
-    {
-        result->SetInt(this->ostream->tellp());
-    }
-    else
-    {
-        throw ValueException::FromString("FileStream must be opend before using tell");
     }
 }
 
