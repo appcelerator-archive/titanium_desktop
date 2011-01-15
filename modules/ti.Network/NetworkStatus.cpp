@@ -69,7 +69,12 @@ void NetworkStatus::StatusLoop()
     {
         if (count == 0)
         {
-            bool online = this->GetStatus();
+			// this causes several problem, on windows there's a memory leak
+			// when GetStatus() is called, and on osx when a proxy is present,
+			// Titanium Developer crashes. This will need to be looked at later.
+
+            // bool online = this->GetStatus();
+            bool online = true;
             if (!firedAtAll || online != previousStatus)
             {
                 firedAtAll = true;
