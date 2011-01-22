@@ -6,5 +6,5 @@ since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: UI.Tray|null
 parameters: 
-    - [String, iconURL, URL to the icon to use for this tray item]
+    - [String, iconURL, Local URL on system which app is running on to the icon location]
     - [Function, eventListener, (optional) Event listener to add for this item]
