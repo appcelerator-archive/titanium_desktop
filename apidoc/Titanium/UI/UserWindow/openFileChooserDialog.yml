@@ -1,7 +1,21 @@
 ---
 namespace: Titanium.UI.UserWindow.openFileChooserDialog
 type: method
-description: Displays the file chooser dialog
+description: |
+    <p>
+    Displays a file chooser dialog. This is suitable for use cases where you
+    need the user to select what file(s) to open or be saved.
+    </p>
+    
+    <p>
+    Available Options:
+    <ul>
+        <li>multiple: true/false - allow user to select multple files [default: true]</li>
+        <li>title: string used as the title of the dialog box</li>
+        <li>path: location where browsing of files should begin when dialog opens</li>
+        <li>types: list of allowable file types that user can pick (ex: js, html, txt)</li>
+    </ul>
+    </p>
 since: 0.4.0
 platforms: [osx, linux, win32]
 returns: String
