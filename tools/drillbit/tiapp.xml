@@ -1,16 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <ti:app xmlns:ti='http://ti.appcelerator.org'>
-<id>com.titaniumapp.drillbit</id>
+<id>com.titaniumapp.unittest.driver</id>
 <name>Drillbit</name>
 <version>1.0</version>
 <publisher>Appcelerator</publisher>
-<url>appcelerator.com</url>
-<copyright>2010 by Appcelerator</copyright>
-<description>A testing harness for Titanium</description>
+<url>titaniumapp.com</url>
+<copyright>2009 by Appcelerator</copyright>
 <analytics>false</analytics>
 <window>
 <id>initial</id>
-<title>Drillbit</title>
+<title>Titanium Unit Test Driver (aka Drillbit)</title>
 <url>app://index.html</url>
 <width>800</width>
 <max-width>3000</max-width>

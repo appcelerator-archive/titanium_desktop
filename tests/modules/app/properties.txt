@@ -1,3 +1,0 @@
-string = abc def
-int = 123
-double = 1.123456
