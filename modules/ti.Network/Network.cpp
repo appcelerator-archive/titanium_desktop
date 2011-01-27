@@ -296,6 +296,7 @@ void Network::_CreateTCPServerSocket(const ValueList& args, KValueRef result)
 
 void Network::_CreateIRCClient(const ValueList& args, KValueRef result)
 {
+    Logger::Get("Network")->Warn("DEPRECATED: IRCClient will be removed.");
     AutoPtr<IRCClient> irc = new IRCClient();
     result->SetObject(irc);
 }

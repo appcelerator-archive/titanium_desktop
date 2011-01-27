@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Network.createIRCClient
 type: function
-description: Creates an IRCClient object
+description: Creates an IRCClient object [DEPRECATED]
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: Network.IRCClient
