@@ -4,4 +4,4 @@ Import('build')
 
 script = p.join(build.os, 'SConscript')
 build_dir = p.join(build.dir, 'objs', 'installer')
-SConscript(script, build_dir=build_dir, duplicate=0)
+SConscript(script, variant_dir=build_dir, duplicate=0)
