@@ -452,10 +452,10 @@ describe("Network.HTTPClient",
 
 	test_send_file: function()
 	{
-		var file = Titanium.Filesystem.getFile(this.filepath);
+		var file = Titanium.Filesystem.getFileStream(this.filepath);
 		value_of(file).should_be_object();
 		this.client.open("POST", this.url + "recvfile", false);
-		this.client.send(file.read());
+		this.client.send(file);
 		value_of(this.client.status).should_be("200");
 		value_of(this.client.responseText).should_be("Got the file!");
 	},
