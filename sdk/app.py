@@ -147,8 +147,7 @@ class App(object):
 		# App directory: /tmp/MyProject
 		# Staging directory: /tmp/MyProject/dist/linux/MyProject
 		# then we ignore: /tmp/MyProject/dist
-		if contents.find(self.source_dir) != -1 and \
-				contents != self.source_dir:
+		if contents.find(p.join(self.source_dir, '')) != -1:
 			(current, child) = p.split(contents)
 			while current != self.source_dir:
 				(current, child) = p.split(current)
