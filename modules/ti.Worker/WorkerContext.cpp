@@ -122,12 +122,7 @@ void WorkerContext::DeliverMessage(KValueRef message)
 
     KValueRef callback = this->Get("onmessage");
     if (callback->IsMethod())
-    {
-        Host::GetInstance()->RunOnMainThread(
-            callback->ToMethod(),
-            ValueList(Value::NewObject(event)),
-            false);
-    }
+        callback->ToMethod()->Call(Value::NewObject(event));
 }
 
 void WorkerContext::Terminate()
