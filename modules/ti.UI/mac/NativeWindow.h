@@ -21,8 +21,6 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
 
-#import <WebKit/WebInspector.h>
-
 #include "../../ti.App/WindowConfig.h"
 
 namespace Titanium {
@@ -33,14 +31,13 @@ class UserWindowMac;
 
 @class WebViewDelegate;
 
-@interface NativeWindow : NSWindow
+@interface NativeWindow : NSWindow <NSWindowDelegate>
 {
     BOOL canReceiveFocus;
     WebView* webView;
     WebViewDelegate* delegate;
     BOOL requiresDisplay;
     AutoPtr<Titanium::UserWindowMac>* userWindow;
-    WebInspector* inspector;
     BOOL fullscreen;
     BOOL focused;
     NSRect savedFrame;

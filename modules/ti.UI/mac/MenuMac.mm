@@ -198,7 +198,6 @@ void MenuMac::AddChildrenToNativeMenu(NSMenu* nativeMenu, bool registerNative, b
         int index = [nativeMenu numberOfItems] - rearOffset;
         [nativeMenu insertItem:nativeItem atIndex:index];
     }
-    [nativeMenu sizeToFit];
 }
 
 void MenuMac::AddChildrenToNSArray(NSMutableArray* array)

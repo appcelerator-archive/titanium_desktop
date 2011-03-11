@@ -63,7 +63,6 @@ using namespace Titanium;
         [self setOpaque:false];
         [self setBackgroundColor:[NSColor clearColor]];
         [webView setDrawsBackground:NO];
-        [webView setBackgroundColor:[NSColor clearColor]];
     }
     else if (config->HasTexturedBackground())
     {
@@ -77,12 +76,6 @@ using namespace Titanium;
         // *really* transparent here, make the alpha value less than
         // 1.0 to trick OS X into knowing that we are transparent.
         [webView setAlphaValue:0.99];
-    }
-    else
-    {
-        // This is to match the default Windows behavior of painting
-        // the background of the web view white.
-        [webView setBackgroundColor:[NSColor whiteColor]];
     }
 
     if (config->IsResizable() && config->IsUsingChrome())
@@ -109,7 +102,6 @@ using namespace Titanium;
     [delegate release];
     delegate = nil;
 
-    [inspector release];
     [webView release];
     webView = nil;
     [super dealloc];
@@ -121,30 +113,13 @@ using namespace Titanium;
 }
 - (void)showInspector:(BOOL)console
 {
-    if (inspector == nil)
-    {
-        inspector = [[WebInspector alloc] initWithWebView:webView];
-        [inspector detach:webView];
-    }
-    
-    if (console)
-    {
-        [inspector showConsole:webView];
-    }
-    else
-    {
-        [inspector show:webView];
-    }
+    // TODO(josh): we cannot programmatically control inspector
+    // using the public WebKit APIs. We should remove this method and any
+    // references to it else where in the code.
 }
 
 - (void)windowWillClose:(NSNotification *)notification
 {
-    if (inspector)
-    {
-        [inspector close:self];
-        [inspector release];
-        inspector = nil;
-    }
 }
 
 - (NSSize)windowWillResize:(NSWindow *) window toSize:(NSSize)newSize
