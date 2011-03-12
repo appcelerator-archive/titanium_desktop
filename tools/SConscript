@@ -15,7 +15,7 @@ def package_app_builder(target, source, env):
 
 	pkg_env = sdk.env.PackagingEnvironment(build.os)
 	app = pkg_env.create_app(env['PATH'])
-	app.stage(path.join(build.dir, app.name), bundle=True)
+	app.stage(path.join(build.dir, app.name), bundle=True, no_install=True)
 
 	if ARGUMENTS.get('run', False):
 		app.run()
@@ -28,7 +28,7 @@ def package_sdkinstaller(target, source, env):
 	import sdk.env
 	pkg_env = sdk.env.PackagingEnvironment(build.os)
 	app = pkg_env.create_app(env['PATH'])
-	app.stage(path.join(build.dir, app.name), bundle=False)
+	app.stage(path.join(build.dir, app.name), bundle=False, no_install=False)
 
 	# Copy the zip files from the dist directory to developer.contents/dist
 	print "    -> Copying sdk zip from %s to %s" % \
