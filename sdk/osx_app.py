@@ -9,11 +9,11 @@ class OSXApp(App):
 	def get_contents_dir(self):
 		return p.join(self.stage_dir, 'Contents')
 
-	def stage(self, stage_dir, bundle):
+	def stage(self, stage_dir, bundle, no_install):
 		if not stage_dir.endswith('.app'):
 			stage_dir += '.app'
 
-		App.stage(self, stage_dir, bundle=bundle)
+		App.stage(self, stage_dir, bundle=bundle, no_install=no_install)
 
 		self.env.log(u'Copying kboot to %s' % self.contents)
 		self.executable_path = p.join(self.contents, 'MacOS', self.name)
@@ -46,9 +46,10 @@ class OSXApp(App):
 			effess.copy_to_dir(p.join(self.sdk_dir, 'titanium.icns'), lproj_dir)
 
 		# The installer also needs to have the application icon as well.
-		effess.copy_to_dir(p.join(lproj_dir, 'titanium.icns'),
-			p.join(self.contents, 'installer',' Installer App.app', 'Contents',
-				'Resources', 'English.lproj'))
+		if no_install is False:
+			effess.copy_to_dir(p.join(lproj_dir, 'titanium.icns'),
+				p.join(self.contents, 'installer',' Installer App.app', 'Contents',
+					'Resources', 'English.lproj'))
 
 	def package(self, package_dir, bundle=False):
 		target = p.join(package_dir, self.name + ".dmg")
