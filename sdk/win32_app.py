@@ -19,8 +19,8 @@ if p.exists(win32_dir):
 import PyRTF
 
 class Win32App(App):
-	def stage(self, stage_dir, bundle):
-		App.stage(self, stage_dir, bundle=bundle)
+	def stage(self, stage_dir, bundle, no_install):
+		App.stage(self, stage_dir, bundle=bundle, no_install=no_install)
 
 		contents = self.get_contents_dir()
 		self.env.log(u'Copying kboot.exe to %s' % contents);

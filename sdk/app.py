@@ -115,11 +115,6 @@ class App(object):
 			write_line(module[0] + ': ' + module[1])
 		f.close()
 
-	def install(self):
-		f = open(p.join(self.get_contents_dir(), '.installed'), 'w')
-		f.write("installed")
-		f.close()
-
 	def write_tiapp(self, path):
 		xml.etree.ElementTree._namespace_map['http://ti.appcelerator.org'] = 'ti'
 		xml.etree.ElementTree._namespace_map['http://www.appcelerator.org'] = 'appc'
@@ -128,7 +123,7 @@ class App(object):
 	def get_contents_dir(self):
 		return self.stage_dir
 
-	def stage(self, stage_dir, bundle=False):
+	def stage(self, stage_dir, bundle=False, no_install=False):
 		print('Staging %s' % self.name)
 		self.stage_dir = fix_path(stage_dir)
 		contents = self.contents = self.get_contents_dir()
@@ -155,9 +150,16 @@ class App(object):
 			
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
 
-		installer_source = p.join(self.sdk_dir, 'installer')
-		self.env.log(u'Copying installer from %s to %s' % (installer_source, contents))
-		effess.copy_to_dir(installer_source, contents, exclude=self.env.get_excludes() + ['.dll', '.msm'])
+		# If we are not including the installer and this is bundled, do not copy
+		# the installer and make the app as installed.
+		if no_install and bundle:
+			f = open(p.join(self.get_contents_dir(), '.installed'), 'w')
+			f.write("installed")
+			f.close()
+		else:
+			installer_source = p.join(self.sdk_dir, 'installer')
+			self.env.log(u'Copying installer from %s to %s' % (installer_source, contents))
+			effess.copy_to_dir(installer_source, contents, exclude=self.env.get_excludes() + ['.dll', '.msm'])
 
 		self.write_manifest(contents)
 		self.write_tiapp(contents)

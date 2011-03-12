@@ -109,9 +109,7 @@ if __name__ == '__main__':
 
 	environment = env.PackagingEnvironment(options.platform, packager)
 	app = environment.create_app(appdir)
-	app.stage(path.join(options.destination, app.name), bundle=bundle)
-	if options.no_install:
-		app.install()
+	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=options.no_install)
 
 	# Always create the package on the packaging server.
 	if options.package or packager:
