@@ -20,6 +20,8 @@
 	<string>WRUN</string>
 	<key>CFBundleVersion</key>
 	<string>APPVER</string>
+	<key>CFBundleShortVersionString</key>
+	<string>APPVERSHORT</string>
 	<key>NSMainNibFile</key>
 	<string>APPNIB</string>
 	<key>NSPrincipalClass</key>
