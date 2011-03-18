@@ -29,7 +29,8 @@ class OSXApp(App):
 			'APPICON': 'titanium.icns',
 			'APPID': self.id,
 			'APPNIB': 'MainMenu',
-			'APPVER': self.version
+			'APPVER': self.version,
+			'APPVERSHORT': self.version
 		})
 
 		lproj_dir = p.join(self.contents, 'Resources', 'English.lproj')

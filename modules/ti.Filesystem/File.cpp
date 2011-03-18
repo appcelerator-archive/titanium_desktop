@@ -598,7 +598,7 @@ void File::GetSpaceAvailable(const ValueList& args, KValueRef result)
 
 #ifdef OS_OSX
     NSString *p = [NSString stringWithCString:this->filename.c_str() encoding:NSUTF8StringEncoding];
-    unsigned long avail = [[[[NSFileManager defaultManager] fileSystemAttributesAtPath:p] objectForKey:NSFileSystemFreeSize] longValue];
+    unsigned long avail = [[[[NSFileManager defaultManager] attributesOfFileSystemForPath:p error:nil] objectForKey:NSFileSystemFreeSize] longValue];
     diskSize = (double)avail;
 #elif defined(OS_WIN32)
     unsigned __int64 i64FreeBytesToCaller;

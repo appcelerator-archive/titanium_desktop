@@ -18,7 +18,6 @@
 
 #include <Poco/URI.h>
 
-#include "ScriptEvaluator.h"
 #include "../ti.App/ApplicationConfig.h"
 
 #if defined(OS_OSX)
@@ -53,7 +52,6 @@ void UIModule::Start()
     host->GetGlobalObject()->SetObject("UI", this->uiBinding);
     host->GetGlobalObject()->SetObject("Notification", this->uiBinding);
 
-    ScriptEvaluator::Initialize();
     ApplicationConfig* config = ApplicationConfig::Instance();
     if (!config)
     {

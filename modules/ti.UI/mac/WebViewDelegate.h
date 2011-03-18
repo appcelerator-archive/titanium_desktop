@@ -16,11 +16,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
-#import <WebKit/WebViewPrivate.h>
-#import <WebKit/WebInspector.h>
-#import <WebKit/WebScriptDebugDelegate.h>
 #import <WebKit/WebScriptObject.h>
-#import <WebKit/WebPreferencesPrivate.h>
 
 #include <kroll/kroll.h>
 
@@ -30,7 +26,6 @@
 @interface WebViewDelegate : NSObject
 {
     Titanium::NativeWindow* window;
-    WebInspector* inspector;
     BOOL initialDisplay;
     std::map<WebFrame*, KObjectRef>* frameToGlobalObject;
     Logger* logger;

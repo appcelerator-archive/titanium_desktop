@@ -55,7 +55,7 @@ UIMac::UIMac()
     , nativeDockMenu(nil)
     , activeWindow(0)
 {
-    application = [[TitaniumApplicationDelegate alloc] initWithBinding:this];
+    TitaniumApplicationDelegate* application = [[TitaniumApplicationDelegate alloc] initWithBinding:this];
     [application retain];
 
     NSApplication* nsapp = [NSApplication sharedApplication];

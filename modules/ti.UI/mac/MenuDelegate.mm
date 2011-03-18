@@ -30,6 +30,12 @@
     return self;
 }
 
+- (NSInteger)numberOfItemsInMenu:(NSMenu *)menu
+{
+    // We will setup the menu in menuNeedsUpdate.
+    return -1;
+}
+
 - (void)menuNeedsUpdate:(NSMenu *)nativeMenu
 {
     if (!dirty) {

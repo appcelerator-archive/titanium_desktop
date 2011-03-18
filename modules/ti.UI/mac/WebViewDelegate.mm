@@ -17,8 +17,6 @@
 #import "WebViewDelegate.h"
 
 #include <kroll/javascript/javascript_module.h>
-#include <WebKit/WebFramePrivate.h>
-#include <WebKit/WebPreferenceKeysPrivate.h>
 
 #include "MenuMac.h"
 #include "UserWindowMac.h"
@@ -44,30 +42,22 @@ using namespace Titanium;
     // significantly.
     [webPrefs setCacheModel:WebCacheModelDocumentBrowser];
 
-    [webPrefs setDeveloperExtrasEnabled:kroll::Host::GetInstance()->DebugModeEnabled()];
     [webPrefs setPlugInsEnabled:YES];
     [webPrefs setJavaEnabled:YES];
     [webPrefs setJavaScriptEnabled:YES];
     [webPrefs setJavaScriptCanOpenWindowsAutomatically:YES];
-    [webPrefs setAllowUniversalAccessFromFileURLs:YES];
-    [webPrefs setDatabasesEnabled:YES];
-    [webPrefs setLocalStorageEnabled:YES];
-    [webPrefs setDOMPasteAllowed:YES];
     [webPrefs setUserStyleSheetEnabled:NO];
     [webPrefs setShouldPrintBackgrounds:YES];
 
-    // Setup the DB to store it's DB under our data directory for the app
-    NSString* datadir = [NSString stringWithUTF8String:
-        Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
-    [webPrefs _setLocalStorageDatabasePath:[NSString stringWithUTF8String:
-        Host::GetInstance()->GetApplication()->GetDataPath().c_str()]];
     [[window webView] setPreferences:webPrefs];
     [webPrefs release];
 
+
+    // Store Web databases in our data directory.
+    // XXX(josh): does this work?
+    NSString* datadir = [NSString stringWithUTF8String:
+        Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
     NSUserDefaults* standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    [standardUserDefaults
-        setObject:[NSNumber numberWithInt:1]
-        forKey:WebKitEnableFullDocumentTeardownPreferenceKey];
     [standardUserDefaults
         setObject:datadir
         forKey:@"WebDatabaseDirectory"];
@@ -93,7 +83,6 @@ using namespace Titanium;
     else
         [[[webView mainFrame] frameView] setAllowsScrolling:NO];
 
-    [webView setBackgroundColor:[NSColor clearColor]];
     [webView setAutoresizingMask:NSViewHeightSizable | NSViewWidthSizable];
     [webView setShouldCloseWithWindow:NO];
 
@@ -591,16 +580,6 @@ using namespace Titanium;
     NSMutableArray* menuItems = [[[NSMutableArray alloc] init] autorelease];
     if (!menu.isNull())
         menu->AddChildrenToNSArray(menuItems);
-
-    if (Host::GetInstance()->DebugModeEnabled())
-    {
-        [menuItems addObject:[NSMenuItem separatorItem]];
-        NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:@"Show inspector"
-             action:@selector(showInspector) keyEquivalent:@""];
-        [newItem setTarget:self];
-        [menuItems addObject:newItem];
-        [newItem release];
-    }
 
     return menuItems;
 }
