@@ -81,7 +81,6 @@ void NetworkModule::Initialize()
 
 void NetworkModule::Stop()
 {
-    networkBinding->Shutdown();
     analyticsBinding->Shutdown();
 }
 

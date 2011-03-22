@@ -32,18 +32,9 @@ public:
     Network();
     virtual ~Network();
 
-    bool HasNetworkStatusListeners();
-    void NetworkStatusChange(bool online);
-    void Shutdown();
-
     static const std::string& GetFirstIPAddress();
 
 private:
-    struct Listener {
-        KMethodRef callback;
-        long id;
-    };
-
     AutoPtr<Host> GetHostBinding(const std::string& host);
 
     void _GetFirstMACAddress(const ValueList& args, KValueRef result);
@@ -68,8 +59,6 @@ private:
     void _GetHTTPSProxy(const ValueList& args, KValueRef result);
 
     KObjectRef global;
-    std::vector<Listener> listeners;
-    NetworkStatus* netStatus;
 };
 
 } // namespace Titanium

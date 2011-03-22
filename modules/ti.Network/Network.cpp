@@ -24,7 +24,6 @@
 #include "Interface.h"
 #include "IPAddress.h"
 #include "IRCClient.h"
-#include "NetworkStatus.h"
 #include "TCPServerSocket.h"
 #include "TCPSocket.h"
 
@@ -62,14 +61,9 @@ Network::Network()
     , global(kroll::Host::GetInstance()->GetGlobalObject())
 {
     GetInterfaceList();
-    KValueRef online = Value::NewBool(true);
 
-    /**
-     * @tiapi(property=True,name=Network.online,since=0.2)
-     * @tiapi Whether or not the system is connected to the internet
-     * @tiresult[Boolean] True if the system is connected to the internet, false if otherwise
-     */
-    this->Set("online", online);
+    // DEPRECATED: always returns true. Will be removed in future release.
+    this->SetBool("online", true);
 
     // methods that are available on Titanium.Network
     /**
@@ -203,19 +197,10 @@ Network::Network()
      */
     this->SetMethod("getFirstMACAddress", &Network::_GetFirstMACAddress);
     this->SetMethod("getMACAddress", &Network::_GetFirstMACAddress);
-
-    this->netStatus = new NetworkStatus(this);
-    this->netStatus->Start();
 }
 
 Network::~Network()
 {
-    delete this->netStatus;
-}
-
-void Network::Shutdown()
-{
-    listeners.clear();
 }
 
 AutoPtr<Host> Network::GetHostBinding(const std::string& hostname)
@@ -319,63 +304,16 @@ void Network::_CreateHTTPCookie(const ValueList& args, KValueRef result)
 void Network::_AddConnectivityListener(const ValueList& args, KValueRef result)
 {
     args.VerifyException("addConnectivityListener", "m");
-    KMethodRef target = args.at(0)->ToMethod();
+    KMethodRef callback = args.at(0)->ToMethod();
 
-    static long nextListenerId = 0;
-    Listener listener = Listener();
-    listener.id = nextListenerId++;
-    listener.callback = target;
-    this->listeners.push_back(listener);
-    result->SetInt(listener.id);
+    // DEPRECATED: invoke the callback and always alert we are online.
+    callback->Call(Value::NewBool(true));
 }
 
 void Network::_RemoveConnectivityListener(
     const ValueList& args, KValueRef result)
 {
-    args.VerifyException("removeConnectivityListener", "n");
-    int id = args.at(0)->ToInt();
-
-    std::vector<Listener>::iterator it = this->listeners.begin();
-    while (it != this->listeners.end())
-    {
-        if ((*it).id == id)
-        {
-            this->listeners.erase(it);
-            result->SetBool(true);
-            return;
-        }
-        it++;
-    }
-    result->SetBool(false);
-}
-
-bool Network::HasNetworkStatusListeners()
-{
-    return this->listeners.size() > 0;
-}
-
-void Network::NetworkStatusChange(bool online)
-{
-    static Logger* log = Logger::Get("NetworkStatus");
-    log->Debug("ti.Network: Online status changed ==> %i", online);
-    this->Set("online", Value::NewBool(online));
-
-    ValueList args = ValueList();
-    args.push_back(Value::NewBool(online));
-    std::vector<Listener>::iterator it = this->listeners.begin();
-    while (it != this->listeners.end())
-    {
-        KMethodRef callback = (*it++).callback;
-        try
-        {
-            RunOnMainThread(callback, args, false);
-        }
-        catch(ValueException& e)
-        {
-            SharedString ss = e.GetValue()->DisplayString();
-            log->Error("Network.NetworkStatus callback failed: %s", ss->c_str());
-        }
-    }
+    // DEPRECATED
 }
 
 void Network::_EncodeURIComponent(const ValueList &args, KValueRef result)
