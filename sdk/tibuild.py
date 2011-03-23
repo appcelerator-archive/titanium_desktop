@@ -73,6 +73,7 @@ if __name__ == '__main__':
 	parser.add_option("-r","--run",action="store_true",dest="run",default=False,help="run the packaged app after building")
 	parser.add_option("-p","--package",dest="package",default=False,help="build the installation package")
 	parser.add_option("-i","--ignore",dest="ignore_patterns",default="",help="patterns to ignore when packaging, seperated by comma (default: .git,.svn,.gitignore,.cvsignore)")
+	parser.add_option("-j", "--jsobfuscate",action="store_true",dest="js_obfuscate",default=False,help="obfuscate the javascript code within project")
 
 	parser.add_option("-s", "--src",dest="source",help="source folder which contains dist files",metavar="FILE")
 	parser.add_option("-a", "--assets",dest="assets_dir",default=None,help="location of platform assets",metavar="FILE")
@@ -109,7 +110,7 @@ if __name__ == '__main__':
 
 	environment = env.PackagingEnvironment(options.platform, packager)
 	app = environment.create_app(appdir)
-	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=options.no_install)
+	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=options.no_install, js_obfuscate=options.js_obfuscate)
 
 	# Always create the package on the packaging server.
 	if options.package or packager:
