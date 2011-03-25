@@ -156,6 +156,7 @@ public:
         std::vector<std::string>& types, std::string& typesDescription) = 0;
     void _SetDocumentEdited(const ValueList &args, KValueRef result);
     void _IsDocumentEdited(const ValueList &args, KValueRef result);
+    void _IncludeScript(const ValueList &args, KValueRef result);
 
     // TODO: make these methods non-virtual
     virtual void Hide() = 0;

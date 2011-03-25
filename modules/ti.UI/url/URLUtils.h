@@ -29,8 +29,6 @@ namespace Titanium {
 
 void NormalizeURLCallback(const char* url, char* buffer, int bufferLength);
 void URLToFileURLCallback(const char* url, char* buffer, int bufferLength);
-int CanPreprocessURLCallback(const char* url);
-char* PreprocessURLCallback(const char* url, KeyValuePair* headers, char** mimeType);
 void ProxyForURLCallback(const char* url, char* buffer, int bufferLength);
 
 } // namespace Titanium

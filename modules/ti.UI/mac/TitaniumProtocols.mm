@@ -109,42 +109,6 @@ static NSString* GetRegisteredMimeTypeFromExtension(NSString* ext)
         return @"application/octet-stream";
 }
 
--(NSData*)preprocessRequest:(const char*)url returningMimeType:(NSString**)mimeType
-{
-    static Logger* logger = Logger::Get("UI.TitaniumProtocols");
-    KObjectRef scope = new StaticBoundObject();
-    KObjectRef headers = new StaticBoundObject();
-    scope->Set("httpHeaders", Value::NewObject(headers));
-
-    NSDictionary *httpHeaders = [[self request] allHTTPHeaderFields];
-    for (NSString* header in [httpHeaders allKeys])
-    {
-        NSString* value = (NSString*) [httpHeaders valueForKey:header];
-        headers->SetString([header UTF8String], [value UTF8String]);
-    }
-
-    try
-    {
-        AutoPtr<PreprocessData> result = 
-            Script::GetInstance()->Preprocess(url, scope);
-        NSData* data = [NSData 
-            dataWithBytes:(void *) result->data->Pointer()
-            length:result->data->Length()];
-        *mimeType = [NSString stringWithUTF8String:result->mimeType.c_str()];
-
-        return data;
-    }
-    catch (ValueException& e)
-    {
-        logger->Error("Error in preprocessing: %s", e.ToString().c_str());
-    }
-    catch (...)
-    {
-        logger->Error("Unknown Error in preprocessing");
-    }
-    return nil;
-}
-
 -(void)startLoading
 {
     static Logger* logger = Logger::Get("UI.TitaniumProtocols");
@@ -177,24 +141,14 @@ static NSString* GetRegisteredMimeTypeFromExtension(NSString* ext)
     NSString* mimeType = nil;
     NSURLCacheStoragePolicy cachePolicy;
 
-    if (Script::GetInstance()->CanPreprocess(urlString.c_str()))
-    {
-        data = [self 
-            preprocessRequest:urlString.c_str()
-            returningMimeType:&mimeType];
-        cachePolicy = NSURLCacheStorageNotAllowed;
-    }
-    else
-    {
-        NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
-        data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
-        mimeType = [TitaniumProtocols mimeTypeFromExtension:
-            [nsPath pathExtension]];
-        cachePolicy = NSURLCacheStorageAllowed;
+    NSString* nsPath = [NSString stringWithUTF8String:path.c_str()];
+    data = [NSData dataWithContentsOfFile:nsPath options:0 error:&error];
+    mimeType = [TitaniumProtocols mimeTypeFromExtension:
+        [nsPath pathExtension]];
+    cachePolicy = NSURLCacheStorageAllowed;
 
-        if (data == nil)
-            logger->Error("Error finding %s", [nsPath UTF8String]);
-    }
+    if (data == nil)
+        logger->Error("Error finding %s", [nsPath UTF8String]);
 
     if (data == nil) // File doesn't exist
     { 
