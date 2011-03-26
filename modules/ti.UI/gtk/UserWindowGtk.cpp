@@ -17,7 +17,10 @@
 #include "UserWindowGtk.h"
 
 #include <iostream>
+
+#include <kroll/javascript/javascript_module.h>
 #include <Poco/Process.h>
+#include <Poco/URI.h>
 
 #include "MenuGtk.h"
 #include "UIGtk.h"
@@ -77,6 +80,9 @@ static bool MakeScriptDialog(DialogType type, GtkWindow* window,
     const gchar* message, const gchar* defaultPromptResponse,
     char** promptResponse);
 static gboolean CloseWebViewCallback(WebKitWebView*, gpointer);
+static void ResourceRequestCallback(WebKitWebView*, WebKitWebFrame*,
+    WebKitWebResource*, WebKitNetworkRequest*, WebKitNetworkResponse*,
+    gpointer);
 
 UserWindowGtk::UserWindowGtk(AutoPtr<WindowConfig> config, AutoPtr<UserWindow>& parent)
     : UserWindow(config, parent)
@@ -159,6 +165,7 @@ void UserWindowGtk::CreateWidgets()
         "signal::script-confirm", G_CALLBACK(ScriptConfirmCallback), this->gtkWindow,
         "signal::script-prompt", G_CALLBACK(ScriptPromptCallback), this->gtkWindow,
         "signal::close-web-view", G_CALLBACK(CloseWebViewCallback), this,
+        "signal::resource-request-starting", G_CALLBACK(ResourceRequestCallback), this,
         NULL);
 
     WebKitWebInspector* inspector = webkit_web_view_get_inspector(webView);
@@ -776,6 +783,29 @@ static gboolean CloseWebViewCallback(WebKitWebView*, gpointer data)
     return TRUE;
 }
 
+static void ResourceRequestCallback(WebKitWebView* view,
+    WebKitWebFrame* frame, WebKitWebResource* resource,
+    WebKitNetworkRequest* request, WebKitNetworkResponse* response, gpointer data)
+{
+    Poco::URI requestURI(webkit_network_request_get_uri(request));
+    std::string scheme = requestURI.getScheme();
+    if (scheme == "ti" || scheme == "app") {
+        std::string fileURI = "file://" + URLUtils::URLToPath(requestURI.toString());
+        webkit_network_request_set_uri(request, fileURI.c_str());
+    } else if (scheme == "file") {
+        // For file URIs we will treat the application's resources folder
+        // as the base path. This allows for example CSS url('/images/icon.png') to work.
+        std::string resourcesPath = Host::GetInstance()->GetApplication()->GetResourcesPath();
+        std::string requestPath = requestURI.getPath();
+        Poco::URI baseURI("file://" + resourcesPath);
+        std::string basePath = baseURI.getPath();
+        if (requestPath.compare(0, basePath.length(), basePath) != 0) {
+            std::string resolvedURI = baseURI.toString() + requestPath;
+            webkit_network_request_set_uri(request, resolvedURI.c_str());
+        }
+    }
+}
+
 void UserWindowGtk::SetInspectorWindow(GtkWidget* inspectorWindow)
 {
     this->inspectorWindow = inspectorWindow;
@@ -1050,7 +1080,7 @@ std::string UserWindowGtk::GetURL()
 void UserWindowGtk::SetURL(std::string& uri)
 {
     if (this->gtkWindow && this->webView)
-        webkit_web_view_open(this->webView, uri.c_str());
+        webkit_web_view_open(this->webView, URLUtils::URLToPath(uri).c_str());
 }
 
 bool UserWindowGtk::IsUsingChrome()

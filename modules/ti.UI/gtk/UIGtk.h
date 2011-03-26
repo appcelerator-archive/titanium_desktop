@@ -19,8 +19,6 @@
 
 #include "../UI.h"
 
-#include "../ScriptEvaluator.h"
-
 namespace Titanium {
 
 class MenuGtk;
@@ -46,7 +44,6 @@ public:
     static void ErrorDialog(std::string);
 
 protected:
-    SharedPtr<ScriptEvaluator> evaluator;
     AutoPtr<MenuGtk> menu;
     AutoPtr<MenuGtk> contextMenu;
     std::string iconPath;
