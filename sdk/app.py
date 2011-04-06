@@ -2,6 +2,7 @@
 import os, os.path as p
 import codecs
 import effess
+import fnmatch
 import xml.etree.ElementTree
 from xml.etree.ElementTree import ElementTree
 
@@ -129,12 +130,12 @@ class App(object):
 		contents = self.contents = self.get_contents_dir()
 
 		self.env.log(u'Copying contents from %s to %s' % (self.source_dir, contents))
-		
+
 		excludes = self.env.get_excludes()
-		
+
 		# Don't prematurely copy custom modules (we only want them if they're in the manifest)
 		excludes.append(p.join(self.source_dir, 'modules'))
-		
+
 		# If we are staging into a subdirectory of the original
 		# application directory (like Titanium Developer), then
 		# ignore the immediate child of the original app directory
@@ -147,8 +148,22 @@ class App(object):
 			while current != self.source_dir:
 				(current, child) = p.split(current)
 			excludes.append(p.join(current, child))
-			
+
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
+
+		file_paths = []
+		for dir_path, dir_names, file_names in os.walk (self.source_dir):
+			file_paths.extend (os.path.join(dir_path, f) for f in fnmatch.filter (file_names, "*.js"))
+
+		for file_name in file_paths:
+			if os.path.isfile(file_name):
+				head, tail = file_name.split("Resources/")
+				compiler_jar = os.path.join(self.sdk_dir, "compiler.jar")
+				output_file = os.path.join(contents, "Resources", tail)
+				source_file = os.path.join(self.source_dir, file_name)
+				exec_cmd = "java -jar " + '"' + compiler_jar + '"'  + " --js " + '"' + source_file + '"' + " --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file " + '"' + output_file + '"'
+				print "exec_cmd: " + exec_cmd
+				os.system(exec_cmd)
 
 		# If we are not including the installer and this is bundled, do not copy
 		# the installer and make the app as installed.
