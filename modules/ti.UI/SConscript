@@ -20,7 +20,7 @@ sources = Glob('*.cpp') + ['url/URLUtils.cpp']
 if build.is_linux():
     sources = sources + Glob('gtk/*.cpp')
     env.Append(LIBS=['Xss', 'libsoup-2.4', 'libsoup-gnome-2.4'])
-    env.ParseConfig('PKG_CONFIG_PATH=${PKG_CONFIG_PATH} pkg-config --cflags --libs libnotify gtk+-2.0 gdk-2.0 x11 xext')
+    env.ParseConfig('PKG_CONFIG_PATH=${PKG_CONFIG_PATH} pkg-config --cflags --libs libnotify gtk+-2.0 gdk-2.0 x11 xext libsoup-2.4 libsoup-gnome-2.4')
 
 elif build.is_win32():
     build.add_thirdparty(env, 'cairo')

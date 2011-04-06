@@ -18,9 +18,6 @@
 
 #include <kroll/kroll.h>
 #include <Poco/Environment.h>
-#include <Poco/Net/IPAddress.h>
-#include <Poco/Net/NetworkInterface.h>
-#include <Poco/UUIDGenerator.h>
 
 namespace Titanium {
 

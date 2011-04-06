@@ -79,40 +79,4 @@ void ProxyForURLCallback(const char* url, char* buffer, int bufferLength)
         strncpy(buffer, proxy->ToString().c_str(), bufferLength);
 }
 
-int CanPreprocessURLCallback(const char* url)
-{
-    return Script::GetInstance()->CanPreprocess(url);
-}
-
-char* PreprocessURLCallback(const char* url, KeyValuePair* headers, char** mimeType)
-{
-    kroll::Logger* logger = kroll::Logger::Get("UI.URL");
-
-    KObjectRef scope = new StaticBoundObject();
-    KObjectRef kheaders = new StaticBoundObject();
-    while (headers->key)
-    {
-        kheaders->SetString(headers->key, headers->value);
-        headers++;
-    }
-
-    try
-    {
-        AutoPtr<PreprocessData> result = 
-            Script::GetInstance()->Preprocess(url, scope);
-        *mimeType = strdup(result->mimeType.c_str());
-        return strdup(result->data->Pointer());
-    }
-    catch (ValueException& e)
-    {
-        logger->Error("Error in preprocessing: %s", e.ToString().c_str());
-    }
-    catch (...)
-    {
-        logger->Error("Unknown Error in preprocessing");
-    }
-
-    return NULL;
-}
-
 } // namespace Titanium
