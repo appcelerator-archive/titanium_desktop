@@ -3,6 +3,7 @@ import os, os.path as p
 import codecs
 import effess
 import fnmatch
+import platform
 import xml.etree.ElementTree
 from xml.etree.ElementTree import ElementTree
 
@@ -124,7 +125,7 @@ class App(object):
 	def get_contents_dir(self):
 		return self.stage_dir
 
-	def stage(self, stage_dir, bundle=False, no_install=False):
+	def stage(self, stage_dir, bundle=False, no_install=False, js_obfuscate=False):
 		print('Staging %s' % self.name)
 		self.stage_dir = fix_path(stage_dir)
 		contents = self.contents = self.get_contents_dir()
@@ -151,19 +152,22 @@ class App(object):
 
 		effess.copy_tree(self.source_dir, contents, exclude=self.env.get_excludes())
 
-		file_paths = []
-		for dir_path, dir_names, file_names in os.walk (self.source_dir):
-			file_paths.extend (os.path.join(dir_path, f) for f in fnmatch.filter (file_names, "*.js"))
-
-		for file_name in file_paths:
-			if os.path.isfile(file_name):
-				head, tail = file_name.split("Resources/")
-				compiler_jar = os.path.join(self.sdk_dir, "compiler.jar")
-				output_file = os.path.join(contents, "Resources", tail)
-				source_file = os.path.join(self.source_dir, file_name)
-				exec_cmd = "java -jar " + '"' + compiler_jar + '"'  + " --js " + '"' + source_file + '"' + " --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file " + '"' + output_file + '"'
-				print "exec_cmd: " + exec_cmd
-				os.system(exec_cmd)
+		if js_obfuscate:
+			file_paths = []
+			for dir_path, dir_names, file_names in os.walk (self.source_dir):
+				file_paths.extend (os.path.join(dir_path, f) for f in fnmatch.filter (file_names, "*.js"))
+			for file_name in file_paths:
+				if os.path.isfile(file_name):
+					if "Windows" in platform.platform():
+						head, tail = file_name.split("Resources\\")
+					else:
+						head, tail = file_name.split("Resources/")
+					compiler_jar = os.path.join(self.sdk_dir, "google_closure", "compiler.jar")
+					output_file = os.path.join(contents, "Resources")
+					output_file = os.path.join(output_file, tail)
+					source_file = os.path.join(self.source_dir, file_name)
+					exec_cmd = "java -jar " + '"' + compiler_jar + '"'  + " --js " + '"' + source_file + '"' + " --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file " + '"' + output_file + '"'
+					os.system(exec_cmd)
 
 		# If we are not including the installer and this is bundled, do not copy
 		# the installer and make the app as installed.
