@@ -18,6 +18,8 @@ if not(path.exists(sdk_dir)):
 	os.makedirs(sdk_dir)
 effess.lightweight_copy_tree(path.join(build.titanium_sdk_dir, build.os),
 	sdk_dir, exclude=excludes)
+effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "google_closure")),
+	sdk_dir, exclude=excludes)
 effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "*.py")),
 	sdk_dir, exclude=excludes)
 effess.copy_to_dir(glob(path.join(build.titanium_sdk_dir, "PyRTF")),
