@@ -18,7 +18,10 @@
 
 #include "UIMac.h"
 
-@interface TitaniumApplicationDelegate : NSObject <NSApplicationDelegate>
+@interface TitaniumApplicationDelegate : NSObject
+#ifdef APPSTORE
+<NSApplicationDelegate>
+#endif
 {
     Titanium::UIMac *binding;
 }

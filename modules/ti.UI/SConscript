@@ -9,13 +9,6 @@ build.add_thirdparty(env, 'poco')
 build.add_thirdparty(env, 'webkit')
 env.Append(LIBS=['tiappmodule'])
 
-# If we are on Mac use the system installed WebKit.
-# Otherwise use our build of WebKit on all other platforms.
-if build.is_osx():
-    env.Append(FRAMEWORKS=['WebKit', 'JavaScriptCore'])
-else:
-    build.add_thirdparty(env, 'webkit')
-
 sources = Glob('*.cpp') + ['url/URLUtils.cpp']
 if build.is_linux():
     sources = sources + Glob('gtk/*.cpp')

@@ -18,7 +18,10 @@
 
 #include "MenuMac.h"
 
-@interface MenuDelegate : NSObject <NSMenuDelegate>
+@interface MenuDelegate : NSObject
+#ifdef APPSTORE
+<NSMenuDelegate>
+#endif
 {
     Titanium::MenuMac* menu;
     BOOL dirty;
