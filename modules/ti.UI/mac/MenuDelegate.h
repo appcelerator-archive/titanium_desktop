@@ -18,7 +18,7 @@
 
 #include "MenuMac.h"
 
-@interface MenuDelegate : NSObject <NSMenuDelegate>
+@interface MenuDelegate : NSObject
 {
     Titanium::MenuMac* menu;
     BOOL dirty;

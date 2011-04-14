@@ -10,11 +10,18 @@ import os.path as p
 import __init__
 
 class PackagingEnvironment(object):
-	def __init__(self, target_os, packaging_server=False):
+	def __init__(self, target_os, packaging_server=False, appstore=False):
 		self.components_dir = None
 		self.version = __init__.get_titanium_version()
 		self.excludes = ['.pdb', '.exp', '.ilk', '.lib', '.svn',
 			'.git', '.gitignore', '.cvsignore']
+
+		# Do not include WebKit for app store builds.
+		if appstore:
+			self.excludes.extend([
+				'WebKit.framework',
+				'WebCore.framework',
+				'JavaScriptCore.framework'])
 
 		self.target_os = target_os
 

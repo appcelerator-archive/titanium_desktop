@@ -77,6 +77,7 @@ if __name__ == '__main__':
 
 	parser.add_option("-s", "--src",dest="source",help="source folder which contains dist files",metavar="FILE")
 	parser.add_option("-a", "--assets",dest="assets_dir",default=None,help="location of platform assets",metavar="FILE")
+	parser.add_option("--appstore", action="store_true", dest="appstore", default=False, help="Package for app store submission")
 
 	(options, args) = parser.parse_args()
 	if len(args) == 0:
@@ -101,16 +102,22 @@ if __name__ == '__main__':
 		print "Error: unsupported/unknown platform: %s" % options.platform
 		print "Must be one of: %s" % str(ALLOWED_PLATFORMS)
 		sys.exit(1)
-	bundle = options.type == 'bundle'
+
+	if options.appstore:
+		bundle = True
+		no_install = True
+	else:
+		bundle = options.type == 'bundle'
+		no_install = options.no_install
 
 	# Eventually we should detect if we are a packager
 	# and not use any installed components.
 	script_dir = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 	packager = os.path.exists(path.join(script_dir, '.packager'))
 
-	environment = env.PackagingEnvironment(options.platform, packager)
+	environment = env.PackagingEnvironment(options.platform, packager, options.appstore)
 	app = environment.create_app(appdir)
-	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=options.no_install, js_obfuscate=options.js_obfuscate)
+	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=no_install, js_obfuscate=options.js_obfuscate)
 
 	# Always create the package on the packaging server.
 	if options.package or packager:
