@@ -31,10 +31,7 @@ class UserWindowMac;
 
 @class WebViewDelegate;
 
-@interface NativeWindow : NSWindow
-#ifdef APPSTORE
-<NSWindowDelegate>
-#endif
+@interface NativeWindow : NSWindow <NSWindowDelegate>
 {
     BOOL canReceiveFocus;
     WebView* webView;
