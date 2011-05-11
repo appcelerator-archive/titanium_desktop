@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
 	environment = env.PackagingEnvironment(options.platform, packager, options.appstore)
 	app = environment.create_app(appdir)
-	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=no_install, js_obfuscate=options.js_obfuscate)
+	app.stage(path.join(options.destination, app.name), bundle=bundle, no_install=no_install, js_obfuscate=options.js_obfuscate, package=options.package)
 
 	# Always create the package on the packaging server.
 	if options.package or packager:

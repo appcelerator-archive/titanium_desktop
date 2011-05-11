@@ -125,7 +125,7 @@ class App(object):
 	def get_contents_dir(self):
 		return self.stage_dir
 
-	def stage(self, stage_dir, bundle=False, no_install=False, js_obfuscate=False):
+	def stage(self, stage_dir, bundle=False, no_install=False, js_obfuscate=False, package=False):
 		print('Staging %s' % self.name)
 		self.stage_dir = fix_path(stage_dir)
 		contents = self.contents = self.get_contents_dir()
@@ -168,6 +168,12 @@ class App(object):
 					source_file = os.path.join(self.source_dir, file_name)
 					exec_cmd = "java -jar " + '"' + compiler_jar + '"'  + " --js " + '"' + source_file + '"' + " --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file " + '"' + output_file + '"'
 					os.system(exec_cmd)
+
+		if 'Darwin' in platform.platform() and package:
+			defaults_exec = "defaults write " + self.id + " WebKitDeveloperExtras -bool false";
+		elif 'Darwin' in platform.platform() and not package:
+			defaults_exec = "defaults write " + self.id + " WebKitDeveloperExtras -bool true";
+		os.system(defaults_exec);
 
 		# If we are not including the installer and this is bundled, do not copy
 		# the installer and make the app as installed.
