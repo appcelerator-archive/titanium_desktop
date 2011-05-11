@@ -9,11 +9,11 @@ class OSXApp(App):
 	def get_contents_dir(self):
 		return p.join(self.stage_dir, 'Contents')
 
-	def stage(self, stage_dir, bundle, no_install, js_obfuscate, package):
+	def stage(self, stage_dir, bundle, no_install, js_obfuscate):
 		if not stage_dir.endswith('.app'):
 			stage_dir += '.app'
 
-		App.stage(self, stage_dir, bundle=bundle, no_install=no_install, js_obfuscate=js_obfuscate, package=package)
+		App.stage(self, stage_dir, bundle=bundle, no_install=no_install, js_obfuscate=js_obfuscate)
 
 		self.env.log(u'Copying kboot to %s' % self.contents)
 		self.executable_path = p.join(self.contents, 'MacOS', self.name)
