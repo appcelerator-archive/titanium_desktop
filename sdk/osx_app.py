@@ -15,6 +15,9 @@ class OSXApp(App):
 
 		App.stage(self, stage_dir, bundle=bundle, no_install=no_install, js_obfuscate=js_obfuscate)
 
+		defaults_exec = "defaults write " + self.id + " WebKitDeveloperExtras -bool true";
+		os.system(defaults_exec);
+
 		self.env.log(u'Copying kboot to %s' % self.contents)
 		self.executable_path = p.join(self.contents, 'MacOS', self.name)
 		effess.copy(p.join(self.sdk_dir, 'kboot'), self.executable_path)
