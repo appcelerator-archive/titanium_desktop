@@ -2,4 +2,18 @@
 namespace: Titanium.Network.TCPSocket
 type: object
 description: An object representing a TCP client socket connection.
+events:
+  - name: connect
+    description: The socket is now connected to the remote host.
+  - name: close
+    description: Connection has been closed.
+  - name: data
+    description: "Data has arrived to the socket and is provided within a buffer.
+                 Example: socket.on('data', function (data) { })"
+  - name: end
+    description: Signals the remote host will be sending no more data.
+  - name: timeout
+    description: An operation on the socket has timed out.
+  - name: drain
+    description: All pending data has been written to the socket.
 since: 0.2.0
