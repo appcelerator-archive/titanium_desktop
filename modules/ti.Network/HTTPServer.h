@@ -18,14 +18,8 @@
 #define HTTPServer_h
 
 #include <kroll/kroll.h>
-#include <Poco/Exception.h>
-#include <Poco/FileStream.h>
-#include <Poco/Net/HTTPServer.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPResponse.h>
-#include <Poco/Path.h>
 #include <Poco/Thread.h>
-#include <Poco/URI.h>
+#include <Poco/Net/HTTPServer.h>
 
 namespace Titanium {
 
@@ -47,9 +41,9 @@ private:
     KMethodRef callback;
     std::string ipaddress;
     int port;
-    Poco::Thread *thread;
-    Poco::Net::ServerSocket *socket;
-    Poco::Net::HTTPServer *connection;
+    Poco::Thread* thread;
+    Poco::Net::ServerSocket* socket;
+    Poco::Net::HTTPServer* connection;
 };
 
 } // namespace Titanium

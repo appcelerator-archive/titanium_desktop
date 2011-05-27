@@ -18,18 +18,13 @@
 #define HTTPServerRequest_h
 
 #include <kroll/kroll.h>
-#include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
-#include <Poco/Net/HTTPServerResponse.h>
 
 namespace Titanium {
 
-class HttpServerRequest : public Poco::Net::HTTPRequestHandler, public StaticBoundObject {
+class HTTPServerRequest : public StaticBoundObject {
 public:
-    HttpServerRequest(KMethodRef callback, Poco::Net::HTTPServerRequest& request);
-    virtual ~HttpServerRequest();
-
-    void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse& response);
+    HTTPServerRequest(Poco::Net::HTTPServerRequest& request);
 
 private:
     void GetMethod(const ValueList& args, KValueRef result);
@@ -42,7 +37,6 @@ private:
     void HasHeader(const ValueList& args, KValueRef result);
     void Read(const ValueList& args, KValueRef result);
 
-    KMethodRef callback;
     Poco::Net::HTTPServerRequest& request;
 };
 

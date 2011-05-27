@@ -22,10 +22,9 @@
 
 namespace Titanium {
 
-class HttpServerResponse : public StaticBoundObject {
+class HTTPServerResponse : public StaticBoundObject {
 public:
-    HttpServerResponse(Poco::Net::HTTPServerResponse &response);
-    virtual ~HttpServerResponse();
+    HTTPServerResponse(Poco::Net::HTTPServerResponse &response);
     
 private:
     void SetStatus(const ValueList& args, KValueRef result);
