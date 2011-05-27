@@ -16,89 +16,40 @@
 
 #include "HTTPServerResponse.h"
 
-#include <curl/curl.h>
 #include <Poco/Net/HTTPCookie.h>
+#include <Poco/Net/HTTPServerResponse.h>
 
 #include "NetworkUtils.h"
 
 namespace Titanium {
 
-HttpServerResponse::HttpServerResponse(Poco::Net::HTTPServerResponse &response)
+HTTPServerResponse::HTTPServerResponse(Poco::Net::HTTPServerResponse &response)
     : StaticBoundObject("Network.HTTPServerResponse")
     , response(response)
 {
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setStatus,since=0.3) set the status of this response
-     * @tiarg(for=Network.HTTPServerResponse.setStatus,type=String,name=status) the status, i.e "200"
-     */
-    SetMethod("setStatus",&HttpServerResponse::SetStatus);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setReason,since=0.3) set the reason of this response
-     * @tiarg(for=Network.HTTPServerResponse.setReason,type=String,name=reason) the reason, i.e "OK"
-     */
-    SetMethod("setReason",&HttpServerResponse::SetReason);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setStatusAndReason,since=0.3) set the status and reason of this response
-     * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=String,name=status) the status, i.e "200"
-     * @tiarg(for=Network.HTTPServerResponse.setStatusAndReason,type=String,name=reason) the reason, i.e "OK"
-     */
-    SetMethod("setStatusAndReason",&HttpServerResponse::SetStatusAndReason);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setContentType,since=0.3) set the content type of this response
-     * @tiarg(for=Network.HTTPServerResponse.setContentType,type=String,name=type) the content type, i.e "text/plain"
-     */
-    SetMethod("setContentType",&HttpServerResponse::SetContentType);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setContentLength,since=0.3) set the content length of this response
-     * @tiarg(for=Network.HTTPServerResponse.setContentLength,type=Number,name=length) the content length, i.e 100
-     */
-    SetMethod("setContentLength",&HttpServerResponse::SetContentLength);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.addCookie,since=0.3) add a cookie to this response
-     * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=name) the cookie name
-     * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=value) the cookie value
-     * @tiarg(for=Network.HTTPServerResponse.addCookie,type=Number,name=maxAge,optional=True) the cookie's maximum age
-     * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=domain,optional=True) the cookie's domain
-     * @tiarg(for=Network.HTTPServerResponse.addCookie,type=String,name=path,optional=True) the cookie's path
-     */
-    SetMethod("addCookie",&HttpServerResponse::AddCookie);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.setHeader,since=0.3) set an HTTP header of this response
-     * @tiarg(for=Network.HTTPServerResponse.setHeader,type=String,name=name) the header name
-     * @tiarg(for=Network.HTTPServerResponse.setHeader,type=String,name=value) the header value
-     */
-    SetMethod("setHeader",&HttpServerResponse::SetHeader);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServerResponse.write,since=0.3) write content into this response
-     * @tiarg(for=Network.HTTPServerResponse.write,type=String,name=data) content to write (can be string or bytes content)
-     */
-    SetMethod("write",&HttpServerResponse::Write);
+    SetMethod("setStatus",&HTTPServerResponse::SetStatus);
+    SetMethod("setReason",&HTTPServerResponse::SetReason);
+    SetMethod("setStatusAndReason",&HTTPServerResponse::SetStatusAndReason);
+    SetMethod("setContentType",&HTTPServerResponse::SetContentType);
+    SetMethod("setContentLength",&HTTPServerResponse::SetContentLength);
+    SetMethod("addCookie",&HTTPServerResponse::AddCookie);
+    SetMethod("setHeader",&HTTPServerResponse::SetHeader);
+    SetMethod("write",&HTTPServerResponse::Write);
 }
 
-HttpServerResponse::~HttpServerResponse()
-{
-}
-
-void HttpServerResponse::SetStatus(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetStatus(const ValueList& args, KValueRef result)
 {
     std::string status = args.at(0)->ToString();
     response.setStatus(status);
 }
 
-void HttpServerResponse::SetReason(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetReason(const ValueList& args, KValueRef result)
 {
     std::string reason = args.at(0)->ToString();
     response.setReason(reason);
 }
 
-void HttpServerResponse::SetStatusAndReason(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetStatusAndReason(const ValueList& args, KValueRef result)
 {
     std::string status = args.at(0)->ToString();
     std::string reason = args.at(1)->ToString();
@@ -106,19 +57,19 @@ void HttpServerResponse::SetStatusAndReason(const ValueList& args, KValueRef res
     response.setReason(reason);
 }
 
-void HttpServerResponse::SetContentType(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetContentType(const ValueList& args, KValueRef result)
 {
     std::string ct = args.at(0)->ToString();
     response.setContentType(ct);
 }
 
-void HttpServerResponse::SetContentLength(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetContentLength(const ValueList& args, KValueRef result)
 {
     int len = args.at(0)->ToInt();
     response.setContentLength(len);
 }
 
-void HttpServerResponse::AddCookie(const ValueList& args, KValueRef result)
+void HTTPServerResponse::AddCookie(const ValueList& args, KValueRef result)
 {
     //name,value,[max_age,domain,path]
     std::string name = args.at(0)->ToString();
@@ -141,14 +92,14 @@ void HttpServerResponse::AddCookie(const ValueList& args, KValueRef result)
     }
 }
 
-void HttpServerResponse::SetHeader(const ValueList& args, KValueRef result)
+void HTTPServerResponse::SetHeader(const ValueList& args, KValueRef result)
 {
     std::string name = args.at(0)->ToString();
     std::string value = args.at(1)->ToString();
     response.set(name,value);
 }
 
-void HttpServerResponse::Write(const ValueList& args, KValueRef result)
+void HTTPServerResponse::Write(const ValueList& args, KValueRef result)
 {
     std::ostream& ostr = response.send();
     

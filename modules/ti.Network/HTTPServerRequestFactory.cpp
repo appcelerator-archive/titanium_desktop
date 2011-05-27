@@ -16,24 +16,44 @@
 
 #include "HTTPServerRequestFactory.h"
 
-#include "HTTPServerRequest.h"
+#include <Poco/Net/HTTPRequestHandler.h>
 
-using namespace Poco::Net;
+#include "HTTPServerRequest.h"
+#include "HTTPServerResponse.h"
 
 namespace Titanium {
 
-HttpServerRequestFactory::HttpServerRequestFactory(KMethodRef callback)
-    : callback(callback)
+class HTTPRequestHandler : public Poco::Net::HTTPRequestHandler {
+public:
+    HTTPRequestHandler(KMethodRef callback)
+        : m_callback(callback)
+    {
+    }
+
+    virtual void handleRequest(Poco::Net::HTTPServerRequest&, Poco::Net::HTTPServerResponse&);
+
+private:
+    KMethodRef m_callback;
+};
+
+void HTTPRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response) {
+    // XXX(Josh): The request and response object's lifetime is limited to this functions call.
+    // If the developer should keep a reference to these around past the callback lifetime and then
+    // attempts to access it may result in a crash!
+    ValueList args;
+    args.push_back(Value::NewObject(new HTTPServerRequest(request)));
+    args.push_back(Value::NewObject(new HTTPServerResponse(response)));
+    RunOnMainThread(m_callback, args);
+}
+
+HTTPServerRequestFactory::HTTPServerRequestFactory(KMethodRef callback)
+    : m_callback(callback)
 {
 }
 
-HttpServerRequestFactory::~HttpServerRequestFactory()
+Poco::Net::HTTPRequestHandler* HTTPServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
 {
-}
-
-HTTPRequestHandler* HttpServerRequestFactory::createRequestHandler(const Poco::Net::HTTPServerRequest& request)
-{
-    return new HttpServerRequest(callback, const_cast<Poco::Net::HTTPServerRequest&>(request));
+    return new HTTPRequestHandler(m_callback);
 }
 
 } // namespace Titanium

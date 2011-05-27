@@ -16,18 +16,7 @@
 
 #include "HTTPServer.h"
 
-#include <cstring>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-
-// For some reason, 10.5 was fine with Cocoa headers being last, but 10.4 balks.
-#ifdef OS_OSX
-#import <Cocoa/Cocoa.h>
-#endif
-
 #include <kroll/kroll.h>
-#include <Poco/Net/HTTPServer.h>
 #include <Poco/Net/HTTPServerParams.h>
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/SocketAddress.h>
@@ -43,29 +32,13 @@ HTTPServer::HTTPServer()
     , socket(0)
     , connection(0)
 {
-    /**
-     * @tiapi(method=True,name=Network.HTTPServer.bind,since=0.3) bind this server to a port on a specific interface
-     * @tiarg(for=Network.HTTPServer.bind,name=port,type=Number) port to bind on
-     * @tiarg(for=Network.HTTPServer.bind,name=address,type=String,optional=True) address to bind to
-     * @tiarg(for=Network.HTTPServer.bind,name=callback,type=Method) callback for server logic (in seperate thread)
-     */
     SetMethod("bind",&HTTPServer::Bind);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServer.close,since=0.3) close this server
-     */
     SetMethod("close",&HTTPServer::Close);
-    
-    /**
-     * @tiapi(method=True,name=Network.HTTPServer.isClosed,since=0.3) check to see if this server socket is closed
-     * @tiresult(for=Network.HTTPServer.isClosed,type=Boolean) return whether or not this server socket is closed
-     */
     SetMethod("isClosed",&HTTPServer::IsClosed);
 }
 
 HTTPServer::~HTTPServer()
 {
-    KR_DUMP_LOCATION
     Close();
 }
 
@@ -94,7 +67,7 @@ void HTTPServer::Bind(const ValueList& args, KValueRef result)
     Poco::Net::SocketAddress addr(ipaddress,port);
     this->socket = new Poco::Net::ServerSocket(addr);       
     
-    connection = new Poco::Net::HTTPServer(new HttpServerRequestFactory(callback), *socket, new Poco::Net::HTTPServerParams);
+    connection = new Poco::Net::HTTPServer(new HTTPServerRequestFactory(callback), *socket, new Poco::Net::HTTPServerParams);
     connection->start();
 }
 
