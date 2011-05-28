@@ -79,6 +79,7 @@ public:
     void ReconfigureWindowConstraints();
     double GetMinHeight();
     void SetMinHeight(double height);
+    void SetSize(double width, double height);
     Bounds GetBoundsImpl();
     void SetBoundsImpl(Bounds bounds);
     std::string GetTitle();

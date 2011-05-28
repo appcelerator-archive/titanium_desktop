@@ -92,6 +92,7 @@ public:
     void _SetY(const kroll::ValueList&, kroll::KValueRef);
     void _SetY(double y);
     void _MoveTo(const kroll::ValueList&, kroll::KValueRef);
+    void _SetSize(const kroll::ValueList&, kroll::KValueRef);
     void _GetWidth(const kroll::ValueList&, kroll::KValueRef);
     double _GetWidth();
     void _SetWidth(const kroll::ValueList&, kroll::KValueRef);
@@ -193,6 +194,7 @@ public:
     virtual void SetMaxHeight(double height) = 0;
     virtual double GetMinHeight() = 0;
     virtual void SetMinHeight(double height) = 0;
+    virtual void SetSize(double width, double height) = 0;
     virtual Bounds GetBounds();
     virtual Bounds GetBoundsImpl() = 0;
     void SetBounds(Bounds bounds);

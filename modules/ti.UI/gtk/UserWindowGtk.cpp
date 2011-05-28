@@ -1046,6 +1046,11 @@ void UserWindowGtk::SetMinHeight(double height)
     this->SetupSizeLimits();
 }
 
+void UserWindowGtk::SetSize(double width, double height)
+{
+    this->SetupSize();
+}
+
 Bounds UserWindowGtk::GetBoundsImpl()
 {
     Bounds b = {targetX, targetY, targetWidth, targetHeight };
