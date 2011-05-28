@@ -512,6 +512,23 @@ void UserWindowMac::SetMinHeight(double height)
     this->ReconfigureWindowConstraints();
 }
 
+void UserWindowMac::SetSize(double width, double height)
+{
+    if (!nativeWindow)
+        return;
+
+    NSRect newFrame = CalculateWindowFrame(
+        this->GetX(), this->GetY(), width, height);
+
+    if (!config->IsResizable())
+    {
+        [nativeWindow setMinSize: newFrame.size];
+        [nativeWindow setMaxSize: newFrame.size];
+    }
+
+    [nativeWindow setFrame:newFrame display:config->IsVisible() animate:NO];
+}
+
 Bounds UserWindowMac::GetBoundsImpl()
 {
     Bounds b = {this->GetX(), this->GetY(), this->GetWidth(), this->GetHeight() };
