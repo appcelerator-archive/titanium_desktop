@@ -149,7 +149,7 @@ AutoPtr<WindowConfig> WindowConfig::FromProperties(KObjectRef properties)
     c->SetURL(properties->GetString("url", c->GetURL()));
     c->SetURLRegex(properties->GetString("urlRegex", c->GetURLRegex()));
     c->SetTitle(properties->GetString("title", c->GetTitle()));
-    c->SetTitle(properties->GetString("contents", c->GetContents()));
+    c->SetContents(properties->GetString("contents", c->GetContents()));
     c->SetURLRegex(properties->GetString("baseURL", c->GetBaseURL()));
     c->SetX(properties->GetInt("x", c->GetX()));
     c->SetY(properties->GetInt("y", c->GetY()));
