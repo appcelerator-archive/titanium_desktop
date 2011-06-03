@@ -132,7 +132,6 @@
      */
     Titanium.UI.showDialog = function(params)
     {
-        Titanium.API.debug("creating dialog with url: "+params.url);
         var dialogWindow = Titanium.UI.createWindow(params);
 
         dialogWindow._dialogResult = null;
