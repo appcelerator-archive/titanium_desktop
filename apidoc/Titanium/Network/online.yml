@@ -1,7 +1,7 @@
 ---
 namespace: Titanium.Network.online
 type: property
-description: Whether or not the system is connected to the internet
+description: Note: this is deprecated and only returns true starting in 1.2. 
 since: 0.2.0
 platforms: ['osx', 'linux', 'win32']
 returns: Boolean
