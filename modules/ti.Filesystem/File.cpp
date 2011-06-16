@@ -285,20 +285,11 @@ void File::IsWritable(const ValueList& args, KValueRef result)
 
 void File::Resolve(const ValueList& args, KValueRef result)
 {
-    try
-    {
-        std::string pathToResolve = args.at(0)->ToString();
+    args.VerifyException("resolve", "s");
 
-        Poco::Path path(this->filename);
-        path.resolve(pathToResolve);
-
-        File* file = new File(path.toString());
-        result->SetObject(file);
-    }
-    catch (Poco::Exception& exc)
-    {
-        throw ValueException::FromString(exc.displayText());
-    }
+    const char* subPath = args.at(0)->ToString();
+    std::string resolvedPath = FileUtils::Join(this->filename.c_str(), subPath, NULL);
+    result->SetObject(new File(resolvedPath));
 }
 
 void File::Copy(const ValueList& args, KValueRef result)
