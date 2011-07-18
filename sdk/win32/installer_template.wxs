@@ -51,20 +51,10 @@ ${component_refs}
 	<Icon Id="ApplicationIcon.exe" SourceFile=${app_exe} />
 	<Property Id="ARPPRODUCTICON" Value="ApplicationIcon.exe" />
 
-	<!-- the "immediate" setup action exists to initialize the progress bar with our job count -->
-	<!-- ugly hack to pass in our dependenices and bundled modules/runtime into the deferred/async action -->
-	<CustomAction Id="NetInstall.Params" Return="check" Property="NetInstall" Value="${dependencies}"/>
-	<CustomAction Id="NetInstall.Setup" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="immediate"/>
-	<CustomAction Id="NetInstall" BinaryKey="TitaniumInstallerDll" DllEntry="NetInstall" Execute="deferred"/>
-
 	<InstallExecuteSequence>
 		<RemoveExistingProducts After="InstallInitialize"/>
-		<Custom Action="NetInstall.Params" After="InstallFiles">NOT Installed</Custom>
-		<Custom Action="NetInstall.Setup" After="NetInstall.Params">NOT Installed</Custom>
-		<Custom Action="NetInstall" After="NetInstall.Setup">NOT Installed</Custom>
 	</InstallExecuteSequence>
 
-	<Binary Id="TitaniumInstallerDll" SourceFile=${titanium_installer_dll}/>
 	<Binary Id="BannerBmp" SourceFile=${banner_bmp}/>
 
 	<UIRef Id="WixUI_Common" />
