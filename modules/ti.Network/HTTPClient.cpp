@@ -415,39 +415,64 @@ void HTTPClient::BeginWithPostDataObject(KObjectRef object)
 
 bool HTTPClient::BeginRequest(KValueRef sendData)
 {
+    int currentState = 0;
+
     if (this->curlHandle)
         throw ValueException::FromString("Tried to use an HTTPClient while "
             "another transfer was in progress");
 
-    this->sendData = sendData;
-    this->sawHTTPStatus = false;
-    this->requestDataSent = 0;
-    this->requestDataWritten = 0;
-    this->responseDataReceived = 0;
-    this->responseCookies.clear();
-    this->aborted = false;
-    this->requestBytes = 0;
-    this->responseData.clear();
+    currentState = this->GetInt("readyState", 0);
 
-    this->SetInt("dataSent", 0);
-    this->SetInt("dataReceived", 0);
+    if (this->async && currentState <= 1) // ajd this should work, as Open() changes the readyState to 1
+    {                                // and the readyState is set to 0 when CurlCleanup() is called
+        this->sendData = sendData;
+        this->sawHTTPStatus = false;
+        this->requestDataSent = 0;
+        this->requestDataWritten = 0;
+        this->responseDataReceived = 0;
+        this->responseCookies.clear();
+        this->aborted = false;
+        this->requestBytes = 0;
+        this->responseData.clear();
 
-    this->SetBool("timedOut", false);
-    this->SetNull("responseText");
-    this->SetNull("responseData");
-    this->SetNull("status");
-    this->SetNull("statusText");
+        this->SetInt("dataSent", 0);
+        this->SetInt("dataReceived", 0);
 
-    if (this->async)
-    {
+        this->SetBool("timedOut", false);
+        this->SetNull("responseText");
+        this->SetNull("responseData");
+        this->SetNull("status");
+        this->SetNull("statusText");
+
         this->thread = new Poco::Thread();
         this->thread->start(*this);
     }
-    else
+    else if (currentState == 1)
+    {
+        this->sendData = sendData;
+        this->sawHTTPStatus = false;
+        this->requestDataSent = 0;
+        this->requestDataWritten = 0;
+        this->responseDataReceived = 0;
+        this->responseCookies.clear();
+        this->aborted = false;
+        this->requestBytes = 0;
+        this->responseData.clear();
+
+        this->SetInt("dataSent", 0);
+        this->SetInt("dataReceived", 0);
+
+        this->SetBool("timedOut", false);
+        this->SetNull("responseText");
+        this->SetNull("responseData");
+        this->SetNull("status");
+        this->SetNull("statusText");
+        
+        this->ExecuteRequest();
+    } else
     {
         this->ExecuteRequest();
     }
-
     return true;
 }
 
