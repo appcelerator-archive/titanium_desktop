@@ -54,14 +54,13 @@ using namespace Titanium;
 
 
     // Store Web databases in our data directory.
-    // XXX(josh): does this work?
     NSString* datadir = [NSString stringWithUTF8String:
         Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
-    NSUserDefaults* standardUserDefaults = [NSUserDefaults standardUserDefaults];
-    [standardUserDefaults
-        setObject:datadir
-        forKey:@"WebDatabaseDirectory"];
-    [standardUserDefaults synchronize];
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:datadir forKey:@"WebDatabaseDirectory"];
+    [defaults setObject:datadir forKey:@"WebKitLocalStorageDatabasePathPreferenceKey"];
+    [defaults setObject:datadir forKey:@"WebKitLocalCache"];
+    [defaults synchronize];
 }
 
 -(id)initWithWindow:(NativeWindow*)inWindow
