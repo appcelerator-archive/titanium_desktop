@@ -51,16 +51,6 @@ using namespace Titanium;
 
     [[window webView] setPreferences:webPrefs];
     [webPrefs release];
-
-
-    // Store Web databases in our data directory.
-    NSString* datadir = [NSString stringWithUTF8String:
-        Host::GetInstance()->GetApplication()->GetDataPath().c_str()];
-    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:datadir forKey:@"WebDatabaseDirectory"];
-    [defaults setObject:datadir forKey:@"WebKitLocalStorageDatabasePathPreferenceKey"];
-    [defaults setObject:datadir forKey:@"WebKitLocalCache"];
-    [defaults synchronize];
 }
 
 -(id)initWithWindow:(NativeWindow*)inWindow
