@@ -87,8 +87,11 @@
 
 -(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender
 {
-    kroll::Host::GetInstance()->Exit(0);
-    return NO;
+    // If the exit is aborted, prevent the application from exiting.
+    if (!kroll::Host::GetInstance()->Exit(0))
+        return NSTerminateCancel;
+
+    return NSTerminateNow;
 }
 
 @end
