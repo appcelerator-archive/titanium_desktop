@@ -261,6 +261,9 @@ void Properties::RemoveProperty(const ValueList& args, KValueRef result)
 {
     args.VerifyException("removeProperty", "s");
     result->SetBool(config->removeProperty(args.GetString(0)));
+    if (result) {
+        this->SaveConfig();
+    }
 }
 
 void Properties::ListProperties(const ValueList& args, KValueRef result)
