@@ -733,9 +733,10 @@ int CurlProgressCallback(HTTPClient* client, double dltotal, double dlnow, doubl
     if (client->IsAborted())
         return CURLE_ABORTED_BY_CALLBACK;
     else
-        return 0;
-
-    client->RequestDataSent((size_t)ulnow, (size_t)ultotal);
+    {
+        client->RequestDataSent((size_t)ulnow, (size_t)ultotal);
+        return CURLE_OK;
+    }
 }
 
 void HTTPClient::SetupCurlMethodType()
