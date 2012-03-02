@@ -35,6 +35,7 @@ HTTPServerResponse::HTTPServerResponse(Poco::Net::HTTPServerResponse &response)
     SetMethod("addCookie",&HTTPServerResponse::AddCookie);
     SetMethod("setHeader",&HTTPServerResponse::SetHeader);
     SetMethod("write",&HTTPServerResponse::Write);
+    SetMethod("enableAsync",&HTTPServerResponse::EnableAsync);
 }
 
 void HTTPServerResponse::SetStatus(const ValueList& args, KValueRef result)
@@ -102,6 +103,7 @@ void HTTPServerResponse::SetHeader(const ValueList& args, KValueRef result)
 void HTTPServerResponse::Write(const ValueList& args, KValueRef result)
 {
     std::ostream& ostr = response.send();
+    asyncState = -1;
     
     if (args.at(0)->IsString())
     {
@@ -120,6 +122,16 @@ void HTTPServerResponse::Write(const ValueList& args, KValueRef result)
     else
     {
         throw ValueException::FromString("Don't know how to write that kind of data.");
+    }
+}
+
+void HTTPServerResponse::EnableAsync(const ValueList& args, KValueRef result)
+{
+    if (asyncState >= 0) {
+        //int v = args.at(0)->ToInt();
+        asyncState = 1;
+    } else {
+        throw ValueException::FromString("response already written, no async allowed.");
     }
 }
 

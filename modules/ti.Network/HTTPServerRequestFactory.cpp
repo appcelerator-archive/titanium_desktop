@@ -37,13 +37,15 @@ private:
 };
 
 void HTTPRequestHandler::handleRequest(Poco::Net::HTTPServerRequest& request, Poco::Net::HTTPServerResponse& response) {
-    // XXX(Josh): The request and response object's lifetime is limited to this functions call.
-    // If the developer should keep a reference to these around past the callback lifetime and then
-    // attempts to access it may result in a crash!
     ValueList args;
     args.push_back(Value::NewObject(new HTTPServerRequest(request)));
-    args.push_back(Value::NewObject(new HTTPServerResponse(response)));
+    HTTPServerResponse * resp = new HTTPServerResponse(response);
+    args.push_back(Value::NewObject(resp));
+    resp->asyncState = 0;
     RunOnMainThread(m_callback, args);
+    while (resp->asyncState > 0) {
+        Poco::Thread::sleep(5);
+    }
 }
 
 HTTPServerRequestFactory::HTTPServerRequestFactory(KMethodRef callback)
