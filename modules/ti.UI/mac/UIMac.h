@@ -73,6 +73,7 @@ protected:
     NSObject* application;
     AutoPtr<MenuMac> activeMenu;
     AutoPtr<UserWindowMac> activeWindow;
+    DASessionRef session;
 
     void InstallMenu (MenuItemMac*);
 };

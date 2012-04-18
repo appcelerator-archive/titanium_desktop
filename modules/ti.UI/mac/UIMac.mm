@@ -27,6 +27,71 @@
 #include "TrayItemMac.h"
 #include "UserWindowMac.h"
 
+#include <stdio.h>
+#include <DiskArbitration/DiskArbitration.h>
+
+#define DBG if(0)
+void printPair(const void* key, const void* value, void* context)
+{
+	printf("{\n");
+	CFShow(key);
+	CFShow(value);
+	printf("}\n");
+}
+inline bool TestBool(const void *v)
+{
+	return v && CFBooleanGetValue((CFBooleanRef)v);
+}
+inline bool TestStr(const void *v, CFStringRef s)
+{
+	return v && !CFStringCompare((CFStringRef)v, s, 0);
+}
+
+void report_disk(DADiskRef disk, void *context, const char *event, CFDictionaryRef desc = NULL)
+{
+	if (!desc)
+		desc = DADiskCopyDescription(disk);
+	if (desc) {
+		DBG CFDictionaryApplyFunction(desc, printPair, context);
+		DBG printf("disk %s %s\n", DADiskGetBSDName(disk), event);
+		if (TestBool(CFDictionaryGetValue(desc, kDADiskDescriptionMediaLeafKey))) {
+			DBG DBG printf("disk %s is leafy\n", DADiskGetBSDName(disk));
+			if (TestBool(CFDictionaryGetValue(desc, kDADiskDescriptionMediaRemovableKey))) {
+				DBG printf("disk %s is removable\n", DADiskGetBSDName(disk));
+				if (TestBool(CFDictionaryGetValue(desc, kDADiskDescriptionMediaWritableKey))) {
+					DBG printf("disk %s is writable\n", DADiskGetBSDName(disk));
+					if (!TestBool(CFDictionaryGetValue(desc, kDADiskDescriptionVolumeNetworkKey))) {
+						DBG printf("disk %s is not networked\n", DADiskGetBSDName(disk));
+						if (TestStr(CFDictionaryGetValue(desc, kDADiskDescriptionMediaKindKey), CFSTR("IOMedia"))) {
+							DBG printf("disk %s is not optical\n", DADiskGetBSDName(disk));
+							DBG printf("disk %s %s\n", DADiskGetBSDName(disk), event);
+							GlobalObject::GetInstance()->FireEvent(event);
+						}
+					}
+				}
+			}
+		}
+		CFRelease(desc);
+	}
+}
+
+void hello_disk(DADiskRef disk, void *context)
+{
+	report_disk(disk, context, "volume.added");
+}
+
+void goodbye_disk(DADiskRef disk, void *context)
+{
+	report_disk(disk, context, "volume.removed");
+}
+
+void follow_disk(DADiskRef disk, CFArrayRef keys, void *context)
+{
+	CFDictionaryRef desc = DADiskCopyDescription(disk);
+	if (desc && CFDictionaryGetValue(desc, kDADiskDescriptionVolumePathKey))
+		report_disk(disk, context, "volume.added", desc);
+}
+
 @interface NSApplication (LegacyWarningSurpression)
 - (id) dockTile;
 @end
@@ -79,12 +144,22 @@ UIMac::UIMac()
     // make sure this is part of the upcoming security work
     [WebView registerURLSchemeAsLocal:@"app"];
     [WebView registerURLSchemeAsLocal:@"ti"];
+
+    session = DASessionCreate(kCFAllocatorDefault);
+
+    DBG DARegisterDiskAppearedCallback(session, NULL, hello_disk, NULL);
+    DARegisterDiskDisappearedCallback(session, NULL, goodbye_disk, NULL);
+    DARegisterDiskDescriptionChangedCallback(session, NULL, kDADiskDescriptionWatchVolumePath, follow_disk, NULL);
+
+    DASessionScheduleWithRunLoop(session,
+        CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 }
 
 UIMac::~UIMac()
 {
     [application release];
     [savedDockView release];
+    CFRelease(session);
 }
 
 AutoPtr<Menu> UIMac::CreateMenu()
