@@ -23,6 +23,7 @@
 #include <comutil.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <dbt.h>
 
 #include "MenuItemWin.h"
 #include "MenuWin.h"
@@ -194,6 +195,20 @@ static LRESULT CALLBACK UserWindowWndProc(HWND hWnd, UINT message, WPARAM wParam
             else
             {
                 handled = MenuItemWin::HandleClickEvent(nativeMenu, position);
+            }
+        }
+        break;
+        case WM_DEVICECHANGE:
+        {
+            const char *evt = "volume.added";
+            switch(wParam)
+            {
+              case DBT_DEVICEREMOVECOMPLETE:
+                evt = "volume.removed";
+              case DBT_DEVICEARRIVAL:
+                PDEV_BROADCAST_HDR dev = (PDEV_BROADCAST_HDR)lParam;
+                if (dev->dbch_devicetype == DBT_DEVTYP_VOLUME)
+                    GlobalObject::GetInstance()->FireEvent(evt);
             }
         }
         break;
