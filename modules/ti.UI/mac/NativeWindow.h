@@ -31,7 +31,7 @@ class UserWindowMac;
 
 @class WebViewDelegate;
 
-@interface NativeWindow : NSWindow
+@interface NativeWindow : NSWindow<NSWindowDelegate>
 {
     BOOL canReceiveFocus;
     WebView* webView;

@@ -18,7 +18,7 @@
 
 #include "UIMac.h"
 
-@interface TitaniumApplicationDelegate : NSObject
+@interface TitaniumApplicationDelegate : NSObject<NSApplicationDelegate>
 {
     Titanium::UIMac *binding;
 }

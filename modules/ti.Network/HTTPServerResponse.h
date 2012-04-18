@@ -25,7 +25,7 @@ namespace Titanium {
 class HTTPServerResponse : public StaticBoundObject {
 public:
     HTTPServerResponse(Poco::Net::HTTPServerResponse &response);
-    
+    int asyncState; //0:sync & waiting for response; 1:async & waiting for response; -1: got response
 private:
     void SetStatus(const ValueList& args, KValueRef result);
     void SetReason(const ValueList& args, KValueRef result);
@@ -35,6 +35,7 @@ private:
     void AddCookie(const ValueList& args, KValueRef result);
     void SetHeader(const ValueList& args, KValueRef result);
     void Write(const ValueList& args, KValueRef result);
+    void EnableAsync(const ValueList& args, KValueRef result);
 
     Poco::Net::HTTPServerResponse& response;
 };
